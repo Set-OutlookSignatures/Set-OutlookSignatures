@@ -39,17 +39,13 @@ Examples:
 - 'ITSV extern [deutsch].[defaultNew] [ITSV-SVS Alle Mitarbeiter].htm' ' -> 'ITSV extern [deutsch].htm', tag(s) is/are removed, because they are separated from base filename
 ### Allowed filename tags
 - [defaultNew]
-
-Set signature as default signature for new messages
+    - Set signature as default signature for new messages
 - [defaultReplyFwd]
-
-Set signature as default signature für reply for forwarded mails
+    - Set signature as default signature für reply for forwarded mails
 - [NETBIOS-Domain Group-SamAccountName]
-
-Make this signature specific to any member (direct or indirect) of this group
+    - Make this signature specific to any member (direct or indirect) of this group
 - [SMTP address]
-
-Make this signature specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)
+    - Make this signature specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)
 Filename tags can be combined, so a signature may be assigned to several groups and several mail addresses at the samt time.
 ## Signature application order
 Signatures are applied in a specific order: Common signatures first, group signatures second, mail address specific signatures last.
