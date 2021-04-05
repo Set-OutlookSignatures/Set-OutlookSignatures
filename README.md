@@ -44,7 +44,7 @@ Set signature as default signature for new messages
 Set signature as default signature für reply for forwarded mails
 - [NETBIOS-Domain Group-SamAccountName]
 Make this signature specific to any member (direct or indirect) of this group
-- [<SMTP address>]
+- [SMTP address]
 Make this signature specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)
 Filename tags can be combined, so a signature may be assigned to several groups and several mail addresses at the samt time.
 ## Signature application order
