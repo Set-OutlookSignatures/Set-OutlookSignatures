@@ -42,7 +42,7 @@ Examples:
 Set signature as default signature for new messages
 - [defaultReplyFwd]
 Set signature as default signature für reply for forwarded mails
-- [<NETBIOS-Domain> <Group SamAccountName>]
+- [NETBIOS-Domain Group-SamAccountName]
 Make this signature specific to any member (direct or indirect) of this group
 - [<SMTP address>]
 Make this signature specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)
