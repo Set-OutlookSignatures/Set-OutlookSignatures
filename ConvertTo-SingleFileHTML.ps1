@@ -5,7 +5,7 @@
 # Input HTML file or folder
 # If folder, all .htm and .html files directly in this folder are considered
 # Every single HTML file must be UTF-8 encoded.
-$inputPath = 'C:\users\31101339\downloads'
+$inputPath = '.\source'
 
 
 function main {

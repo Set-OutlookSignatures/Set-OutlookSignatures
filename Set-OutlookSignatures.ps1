@@ -412,41 +412,46 @@ function Main {
                         }
 
                         if ($null -ne $TempOWASigFile) {
-                            Import-Module -Name '.\Microsoft.Exchange.WebServices.dll'
-                            $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
-                            $exchService.UseDefaultCredentials = $true
-                            $exchService.AutodiscoverUrl($ADPropsCurrentUser.mail)
-                            $folderid = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Root, $MailboxName)     
-                            #Specify the Root folder where the FAI Item is  
-                            $UsrConfig = [Microsoft.Exchange.WebServices.Data.UserConfiguration]::Bind($exchService, 'OWA.UserOptions', $folderid, [Microsoft.Exchange.WebServices.Data.UserConfigurationProperties]::All)  
-                            $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $SignaturePaths[0] -ChildPath ($TempOWASigFile + '.htm')) -Raw).ToString()
-                            $stTextSig = (Get-Content -LiteralPath (Join-Path -Path $SignaturePaths[0] -ChildPath ($TempOWASigFile + '.txt')) -Raw).ToString()  
+                            try {
+                                Import-Module -Name '.\Microsoft.Exchange.WebServices.dll'
+                                $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
+                                $exchService.UseDefaultCredentials = $true
+                                $exchService.AutodiscoverUrl($ADPropsCurrentUser.mail)
+                                $folderid = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Root, $MailboxName)     
+                                #Specify the Root folder where the FAI Item is  
+                                $UsrConfig = [Microsoft.Exchange.WebServices.Data.UserConfiguration]::Bind($exchService, 'OWA.UserOptions', $folderid, [Microsoft.Exchange.WebServices.Data.UserConfigurationProperties]::All)  
+                                $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $SignaturePaths[0] -ChildPath ($TempOWASigFile + '.htm')) -Raw).ToString()
+                                $stTextSig = (Get-Content -LiteralPath (Join-Path -Path $SignaturePaths[0] -ChildPath ($TempOWASigFile + '.txt')) -Raw).ToString()  
 
-                            if ($UsrConfig.Dictionary.ContainsKey('signaturehtml')) {
-                                $UsrConfig.Dictionary['signaturehtml'] = $hsHtmlSignature  
-                            } else {  
-                                $UsrConfig.Dictionary.Add('signaturehtml', $hsHtmlSignature)  
-                            }  
+                                if ($UsrConfig.Dictionary.ContainsKey('signaturehtml')) {
+                                    $UsrConfig.Dictionary['signaturehtml'] = $hsHtmlSignature  
+                                } else {  
+                                    $UsrConfig.Dictionary.Add('signaturehtml', $hsHtmlSignature)  
+                                }  
 
-                            if ($UsrConfig.Dictionary.ContainsKey('signaturetext')) {
-                                $UsrConfig.Dictionary['signaturetext'] = $stTextSig  
-                            } else {  
-                                $UsrConfig.Dictionary.Add('signaturetext', $stTextSig)  
+                                if ($UsrConfig.Dictionary.ContainsKey('signaturetext')) {
+                                    $UsrConfig.Dictionary['signaturetext'] = $stTextSig  
+                                } else {  
+                                    $UsrConfig.Dictionary.Add('signaturetext', $stTextSig)  
+                                }
+
+                                if ($UsrConfig.Dictionary.ContainsKey('autoaddsignature')) {
+                                    $UsrConfig.Dictionary['autoaddsignature'] = $TempOWASigSetNew  
+                                } else {  
+                                    $UsrConfig.Dictionary.Add('autoaddsignature', $TempOWASigSetNew)
+                                }
+
+                                if ($UsrConfig.Dictionary.ContainsKey('autoaddsignatureonreply')) {
+                                    $UsrConfig.Dictionary['autoaddsignatureonreply'] = $TempOWASigSetReply
+                                } else {  
+                                    $UsrConfig.Dictionary.Add('autoaddsignatureonreply', $TempOWASigSetReply)
+                                }
+
+                                $UsrConfig.Update()
+                            } catch {
+                                Write-Host '    Error setting Outlook Web signature, please contact you administrator.'
                             }
 
-                            if ($UsrConfig.Dictionary.ContainsKey('autoaddsignature')) {
-                                $UsrConfig.Dictionary['autoaddsignature'] = $TempOWASigSetNew  
-                            } else {  
-                                $UsrConfig.Dictionary.Add('autoaddsignature', $TempOWASigSetNew)
-                            }
-
-                            if ($UsrConfig.Dictionary.ContainsKey('autoaddsignatureonreply')) {
-                                $UsrConfig.Dictionary['autoaddsignatureonreply'] = $TempOWASigSetReply
-                            } else {  
-                                $UsrConfig.Dictionary.Add('autoaddsignatureonreply', $TempOWASigSetReply)
-                            }
-
-                            $UsrConfig.Update()
                         }
                     }
                 }
