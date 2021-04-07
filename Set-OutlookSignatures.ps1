@@ -299,40 +299,21 @@ function Main {
                                 $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $SignaturePaths[0] -ChildPath ($TempOWASigFile + '.htm')) -Raw).ToString()
                                 $stTextSig = (Get-Content -LiteralPath (Join-Path -Path $SignaturePaths[0] -ChildPath ($TempOWASigFile + '.txt')) -Raw).ToString()  
 
-                                if ($UsrConfig.Dictionary.ContainsKey('signaturehtml')) {
-                                    $UsrConfig.Dictionary['signaturehtml'] = $hsHtmlSignature  
-                                } else {  
-                                    $UsrConfig.Dictionary.Add('signaturehtml', $hsHtmlSignature)  
-                                }  
+                                $TempHash = @{}
+                                # Keys are case sensitive when setting them
+                                $TempHash.Add('signaturehtml', $hsHtmlSignature)
+                                $TempHash.Add('signaturetext', $stTextSig)
+                                $TempHash.Add('signaturetextonmobile', $null)
+                                $TempHash.Add('autoaddsignature', $TempOWASigSetNew)
+                                $TempHash.Add('autoaddsignatureonmobile', $TempOWASigSetNew)
+                                $TempHash.Add('autoaddsignatureonreply', $TempOWASigSetReply)
 
-                                if ($UsrConfig.Dictionary.ContainsKey('signaturetext')) {
-                                    $UsrConfig.Dictionary['signaturetext'] = $stTextSig  
-                                } else {  
-                                    $UsrConfig.Dictionary.Add('signaturetext', $stTextSig)  
-                                }
-
-                                if ($UsrConfig.Dictionary.ContainsKey('signaturetextonmobile')) {
-                                    $UsrConfig.Dictionary['signaturetextonmobile'] = $null  
-                                } else {  
-                                    $UsrConfig.Dictionary.Add('signaturetextonmobile', $null)  
-                                }
-
-                                if ($UsrConfig.Dictionary.ContainsKey('autoaddsignature')) {
-                                    $UsrConfig.Dictionary['autoaddsignature'] = $TempOWASigSetNew  
-                                } else {  
-                                    $UsrConfig.Dictionary.Add('autoaddsignature', $TempOWASigSetNew)
-                                }
-
-                                if ($UsrConfig.Dictionary.ContainsKey('autoaddsignatureonmobile')) {
-                                    $UsrConfig.Dictionary['autoaddsignatureonmobile'] = $TempOWASigSetNew  
-                                } else {  
-                                    $UsrConfig.Dictionary.Add('autoaddsignatureonmobile', $TempOWASigSetNew)
-                                }
-
-                                if ($UsrConfig.Dictionary.ContainsKey('autoaddsignatureonreply')) {
-                                    $UsrConfig.Dictionary['autoaddsignatureonreply'] = $TempOWASigSetReply
-                                } else {  
-                                    $UsrConfig.Dictionary.Add('autoaddsignatureonreply', $TempOWASigSetReply)
+                                foreach ($TempHashKey in $TempHashHash.Keys) {
+                                    if ($UsrConfig.Dictionary.ContainsKey($TempHashKey)) {
+                                        $UsrConfig.Dictionary[$TempHashKey] = $TempHash.$TempHashKey
+                                    } else {  
+                                        $UsrConfig.Dictionary.Add($TempHashKey, $TempHash.$TempHashKey)  
+                                    }
                                 }
 
                                 $UsrConfig.Update()
