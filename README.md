@@ -17,11 +17,13 @@ Error handling is implemented rudimentarily.
 ## Execution information
 Outlook and the script can run simultaneously. New and changed signatures are available instantly, but changed settings which signatures are to be used as default signature require an Outlook restart. 
 ## Signatur file format
-Only HTML files with the extension .HTM are supported.
+Only HTML files with the extension .HTM and Word files with the extension .DOC and .DOCX are supported.
+It is recommended to only use Word files with the extension .DOCX.
 The script does not support .MSG, .EML, .MHT, .MHTML or .HTML files.
-The files must be UTF8 encoded, or at least only contain UTF8 compatible characters.
-The files must be single HTML file, additional files are not supported.
-Graphics must either be embedded via a pulic URL, or be part of the HTML code as base64 encoded string.
+### HTML file requirements
+Files must be UTF8 encoded, or at least only contain UTF8 compatible characters.
+Files must be in single HTML file format, additional files are not supported.
+Graphics in .HTM files must either be embedded via a pulic URL, or be part of the HTML code as base64 encoded string.
 Possible approaches
 - Design the mail body in a HTML editor and use links to images, which can be accessed from the internet
 - Design the mail body in a HTML editor that is able to convert image links to inline Data URI Base64 strings
@@ -34,7 +36,7 @@ The script copies every signature file name as-is, with one exception: When tags
 Tags must be placed before the file extension and be separated from the base filename with a period.
 Examples:
 - 'ITSV extern.htm' -> 'ITSV extern.htm', no changes
-- 'ITSV extern.[defaultNew].htm' -> 'ITSV extern.htm', tag(s) is/are removed
+- 'ITSV extern.[defaultNew].docx' -> 'ITSV extern.htm', tag(s) is/are removed
 - 'ITSV extern [deutsch].htm' ' -> 'ITSV extern [deutsch].htm', tag(s) is/are not removed, because they are separated from base filename
 - 'ITSV extern [deutsch].[defaultNew] [ITSV-SVS Alle Mitarbeiter].htm' ' -> 'ITSV extern [deutsch].htm', tag(s) is/are removed, because they are separated from base filename
 ### Allowed filename tags
