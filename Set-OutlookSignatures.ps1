@@ -1,4 +1,4 @@
-﻿# Path to centrally managed signature templates
+# Path to centrally managed signature templates
 $SignatureTemplatePath = '.\source'
 
 
@@ -161,7 +161,7 @@ function Main {
     try {
         $MSWord = New-Object -ComObject word.application
     } catch {
-        Write-Host 'Outlook not installed or not working correctly. Exiting.'
+        Write-Host 'Word not installed or not working correctly. Exiting.'
         exit 1
     }
 
@@ -333,11 +333,11 @@ function Main {
 
     # Delete old signatures created by this script, which are no long available ni $source
     # We check all local signature for a specific marker in HTML code, so we don't touch user created signatures
-    Write-Host 'Removing old signatures created by this script, which are no longer centrally available.'
+    Write-Host 'Removing old signatures created by this script, which are no longer centrally available.'#
     $SignaturePaths | ForEach-Object {
         Get-ChildItem $_ -Filter '*.htm' -File | ForEach-Object {
             if ((Get-Content -LiteralPath $_.fullname -Raw) -like ('*' + $MarkerTag + '*')) {
-                if (($_.name -notin $SignatureFilesCommon.values) -and ($_.name -notin $SignatureFilesMailbox.Values) -and ($_.name -notin $SignatureFilesGroup.Values)) {
+                if (($_.name -notin $global:SignatureFilesDone) -and ($_.name -notin $SignatureFilesCommon.values) -and ($_.name -notin $SignatureFilesMailbox.Values) -and ($_.name -notin $SignatureFilesGroup.Values)) {
                     Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
                     Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
                     Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
@@ -361,9 +361,34 @@ function Set-Signatures {
     }
 
     if ($SignatureFileAlreadyDone -eq $false) {
-        $tempFileContent = Get-Content -LiteralPath $h.Name -Raw -Encoding UTF8
+        $tempPath = (New-Item -ItemType Directory -Path (Join-Path -path $env:temp -childpath ([System.Guid]::NewGuid()))).FullName
+
+        if (($h.Name -like "*.doc") -or ($h.Name -like "*.docx")) {
+            Write-Host '      Converting Word file to Filtered HTML.'
+
+            $path = $(Join-Path -Path $tempPath -ChildPath $h.value).tostring()
+            $h.value = $([System.IO.Path]::ChangeExtension($($h.value), '.htm'))
+            copy-item -LiteralPath $h.Name -Destination $path -Force
+
+            $global:SignatureFilesDone += $([System.IO.Path]::ChangeExtension($($h.value), '.htm'))
+
+            $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatAuto')
+            $MSWord.Documents.Open([ref]$path, $false) | Out-Null
+ 
+            $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
+            $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $h.value), '.htm'))
+            $MSWord.ActiveDocument.SaveAs([ref]$path, [ref]$saveFormat)
+
+            $MSWord.ActiveDocument.Close($false)
+        } else {
+                    $path = $h.name
+        }
+                
+        ConvertTo-SingleFileHTML
+        $tempFileContent = Get-Content -LiteralPath $(Join-Path -Path $tempPath -ChildPath $h.value).tostring() -Raw -Encoding UTF8
+        
         if ($tempFileContent.Contains([char]0xfffd)) {
-            Write-Host '      File is not UTF-8 encoded or contains byte sequences not valid in UTF-8, ignoring file.'
+            Write-Host '      HTML file is not UTF-8 encoded or contains byte sequences not valid in UTF-8, ignoring file.'
             return
         }
 
@@ -469,6 +494,8 @@ function Set-Signatures {
             Write-Host '        Close File.'
             $MSWord.ActiveDocument.Close($false)
         }
+
+        remove-item -LiteralPath $tempPath -Force -Recurse
     }
 
     # Set default signature for new mails
@@ -491,6 +518,60 @@ function Set-Signatures {
         }
     }
 }
+
+
+function ConvertTo-SingleFileHTML {
+        $html = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+
+        if ($html.Contains([char]0xfffd)) {
+            continue
+        }
+        
+        $src = @()
+        ([regex]'(?i)src="(.*?)"').Matches($html) |  ForEach-Object {
+            $src += $_.Groups[0].Value
+            $src += (Join-Path -Path (Split-Path -Path $path -Parent) -ChildPath ([uri]::UnEscapeDataString($_.Groups[1].Value)))
+        }
+
+        for ($i = 0; $i -lt $src.count; $i = $i + 2) {
+            if ($src[$i].StartsWith('src="data:')) {
+            } elseif (Test-Path -LiteralPath $src[$i + 1] -PathType leaf) {
+                $fmt = $null
+                switch ((Get-ChildItem -LiteralPath $src[$i + 1]).Extension) {
+                    '.apng' { $fmt = 'data:image/apng;base64,' }
+                    '.avif' { $fmt = 'data:image/avif;base64,' }
+                    '.gif' { $fmt = 'data:image/gif;base64,' }
+                    '.jpg' { $fmt = 'data:image/jpeg;base64,' }
+                    '.jpeg' { $fmt = 'data:image/jpeg;base64,' }
+                    '.jfif' { $fmt = 'data:image/jpeg;base64,' }
+                    '.pjpeg' { $fmt = 'data:image/jpeg;base64,' }
+                    '.pjp' { $fmt = 'data:image/jpeg;base64,' }
+                    '.png' { $fmt = 'data:image/png;base64,' }
+                    '.svg' { $fmt = 'data:image/svg+xml;base64,' }
+                    '.webp' { $fmt = 'data:image/webp;base64,' }
+                    '.css' { $fmt = 'data:text/css;base64,' }
+                    '.less' { $fmt = 'data:text/css;base64,' }
+                    '.js' { $fmt = 'data:text/javascript;base64,' }
+                    '.otf' { $fmt = 'data:font/otf;base64,' }
+                    '.sfnt' { $fmt = 'data:font/sfnt;base64,' }
+                    '.ttf' { $fmt = 'data:font/ttf;base64,' }
+                    '.woff' { $fmt = 'data:font/woff;base64,' }
+                    '.woff2' { $fmt = 'data:font/woff2;base64,' }
+                }
+                if ($fmt) {
+                    $html = $html.replace( `
+                            $src[$i], `
+                        ('src="' + $fmt + [Convert]::ToBase64String([IO.File]::ReadAllBytes($src[$i + 1])) + '"') `
+                    )
+
+                } else {
+                }
+            } else {
+            }
+        }
+
+        $html | Out-File -LiteralPath $(Join-Path -Path $tempPath -ChildPath $h.value).tostring() -Force -Encoding utf8
+    }
 
 
 Main
