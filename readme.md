@@ -95,7 +95,7 @@ Available variables:
 - Currently logged-on user
     - $CURRENTUSERGIVENNAME$: Given name
     - $CURRENTUSERSURNAME$: Surname
-    - $CURRENTUSERNAMEWITHTITLES$: SVSTitelVorne GivenName Surname, SVSTitelHinten (without unnecessary punctuatin marks when one of the attributes is not availabe)
+    - $CURRENTUSERNAMEWITHTITLES$: SVSTitelVorne GivenName Surname, SVSTitelHinten (without unnecessary punctuation marks when one of the attributes is not availabe)
     - $CURRENTUSERDEPARTMENT$: Department
     - $CURRENTUSERTITLE$: Title
     - $CURRENTUSERSTREETADDRESS$: StreetM
