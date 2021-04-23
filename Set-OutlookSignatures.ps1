@@ -12,13 +12,13 @@ Param(
 
 
 function Set-Signatures {
-    Write-Host "    '$($h.Name)'"
+    Write-Host "    '$($Signature.Name)'"
 
-    $SignatureFileAlreadyDone = ($global:SignatureFilesDone -contains $($h.Name))
+    $SignatureFileAlreadyDone = ($global:SignatureFilesDone -contains $($Signature.Name))
     if ($SignatureFileAlreadyDone) {
         Write-Host '      File already processed before'
     } else {
-        $global:SignatureFilesDone += $($h.Name)
+        $global:SignatureFilesDone += $($Signature.Name)
     }
 
     if ($SignatureFileAlreadyDone -eq $false) {
@@ -26,16 +26,16 @@ function Set-Signatures {
 
         Write-Host '      Copy file and open it in Word'
 
-        $path = $(Join-Path -Path $tempPath -ChildPath $h.value).tostring()
+        $path = $(Join-Path -Path $tempPath -ChildPath $Signature.value).tostring()
         try {
-            Copy-Item -LiteralPath $h.Name -Destination $path -Force
+            Copy-Item -LiteralPath $Signature.Name -Destination $path -Force
         } catch {
             Write-Host '        Error copying file. Skipping signature.'
             continue
         }
 
-        $h.value = $([System.IO.Path]::ChangeExtension($($h.value), '.htm'))
-        $global:SignatureFilesDone += $h.Value#([System.IO.Path]::ChangeExtension($($h.value), '.htm'))
+        $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
+        $global:SignatureFilesDone += $Signature.Value#([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
 
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatAuto')
         $COMWord.Documents.Open($path, $false) | Out-Null
@@ -140,24 +140,24 @@ function Set-Signatures {
 
         Write-Host '      Save as filtered .HTM file'
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
-        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $h.value), '.htm'))
+        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.htm'))
         $COMWord.ActiveDocument.Weboptions.encoding = 65001
         $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
         Write-Host '      Save as .RTF file'
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
-        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $h.value), '.rtf'))
+        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.rtf'))
         $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
         Write-Host '      Save as .TXT file'
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
-        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $h.value), '.txt'))
+        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.txt'))
         $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
         $COMWord.ActiveDocument.Close($false)
 
         Write-Host '      Embed local files in .HTM file and add marker'
-        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $h.value), '.htm'))
+        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.htm'))
 
         $tempFileContent = Get-Content -LiteralPath $path -Raw -Encoding UTF8
 
@@ -254,29 +254,29 @@ function Set-Signatures {
 
         $SignaturePaths | ForEach-Object {
             Write-Host "      Copy signature files to '$_'"
-            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $h.value), '.htm')) -Destination $_ -Force
-            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $h.value), '.rtf')) -Destination $_ -Force
-            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $h.value), '.txt')) -Destination $_ -Force
+            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.htm')) -Destination $_ -Force
+            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.rtf')) -Destination $_ -Force
+            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.txt')) -Destination $_ -Force
         }
         Remove-Item -LiteralPath $tempPath -Force -Recurse
     }
 
     # Set default signature for new mails
-    if ($SignatureFilesDefaultNew.contains('' + $h.name + '')) {
+    if ($SignatureFilesDefaultNew.contains('' + $Signature.name + '')) {
         for ($j = 0; $j -lt $MailAddresses.count; $j++) {
             if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                 Write-Host '      Set signature as default for new messages'
-                Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value (($h.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
             }
         }
     }
 
     # Set default signature for replies and forwarded mails
-    if ($SignatureFilesDefaultReplyFwd.contains($h.name)) {
+    if ($SignatureFilesDefaultReplyFwd.contains($Signature.name)) {
         for ($j = 0; $j -lt $MailAddresses.count; $j++) {
             if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                 Write-Host '      Set signature as default for reply/forward messages'
-                Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value (($h.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
             }
         }
     }
@@ -285,29 +285,28 @@ function Set-Signatures {
 
 Clear-Host
 
-Write-Host "Script started"
+Write-Host 'Script started'
 
-Write-Host "  Check parameters and script environment"
-
+Write-Host '  Check parameters and script environment'
 Set-Location $PSScriptRoot | Out-Null
+$Search = New-Object DirectoryServices.DirectorySearcher
+$Search.PageSize = 1000
+
 
 if ((Test-Path $SignatureTemplatePath -PathType Container) -eq $false) {
     Write-Host "  Problem connecting to or reading from folder '$SignatureTemplatePath'. Check path."
     exit 1
 }
 
-
 if (($ExecutionContext.SessionState.LanguageMode) -eq 'FullLanguage') {
-    $fullLanguageMode = $true
 } else {
-    $fullLanguageMode = $false
     Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode."
     Write-Host 'Base64 conversion not possible. Exiting.'
     exit 1
 }
 
 
-Write-Host "  Check Outlook version and profile"
+Write-Host '  Check Outlook version and profile'
 try {
     $COMOutlook = New-Object -ComObject outlook.application
     $OutlookRegistryVersion = [System.Version]::Parse($COMOutlook.Version)
@@ -321,7 +320,6 @@ try {
 
 if ($OutlookRegistryVersion.major -gt 16) {
     Write-Host "Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exiting."
-
 } elseif ($OutlookRegistryVersion.major -eq 16) {
     $OutlookRegistryVersion = '16.0'
 } elseif ($OutlookRegistryVersion.major -eq 15) {
@@ -352,12 +350,10 @@ if ($y -ne '') {
 
 # Other domains - either the list provided, or all outgoing and bidirectional trusts
 if (($x.count -eq 1) -and ($x[0] -eq '*')) {
-    $Domains = ([System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest()).domains
-    $search = New-Object DirectoryServices.DirectorySearcher
     $Search.SearchRoot = "GC://$(([ADSI]'LDAP://RootDSE').rootDomainNamingContext)"
     $Search.Filter = '(ObjectClass=trustedDomain)'
 
-    $search.FindAll() | ForEach-Object {
+    $Search.FindAll() | ForEach-Object {
         $TrustNameSID = (New-Object system.security.principal.securityidentifier($($_.properties.securityidentifier), 0)).tostring()
         $TrustOrigin = ($_.properties.distinguishedname -split ',DC=')[1..999] -join '.'
         $TrustName = $_.properties.name
@@ -367,68 +363,32 @@ if (($x.count -eq 1) -and ($x[0] -eq '*')) {
 
         #http://msdn.microsoft.com/en-us/library/cc220955.aspx
         Switch ($TrustTypeNumber) {
-            1 {
-                $TrustType = 'Downlevel (Windows NT domain external)'
-            }
-            2 {
-                $TrustType = 'Uplevel (Active Directory domain - parent-child, root domain, shortcut, external, or forest)'
-            }
-            3 {
-                $TrustType = 'MIT (non-Windows) Kerberos version 5 realm'
-            }
-            4 {
-                $TrustType = "DCE (Theoretical trust type - DCE refers to Open Group's Distributed Computing Environment specification)"
-            }
-            Default {
-                $TrustType = $TrustTypeNumber
-            }
+            1 { $TrustType = 'Downlevel (Windows NT domain external)' }
+            2 { $TrustType = 'Uplevel (Active Directory domain - parent-child, root domain, shortcut, external, or forest)' }
+            3 { $TrustType = 'MIT (non-Windows) Kerberos version 5 realm' }
+            4 { $TrustType = "DCE (Theoretical trust type - DCE refers to Open Group's Distributed Computing Environment specification)" }
+            Default { $TrustType = $TrustTypeNumber }
         }
 
         #http://msdn.microsoft.com/en-us/library/cc223779.aspx
         Switch ($TrustAttributesNumber) {
-            1 {
-                $TrustAttributes = 'Non-Transitive'
-            }
-            2 {
-                $TrustAttributes = 'Uplevel clients only (Windows 2000 or newer)'
-            }
-            4 {
-                $TrustAttributes = 'Quarantined Domain (External)'
-            }
-            8 {
-                $TrustAttributes = 'Forest Trust'
-            }
-            16 {
-                $TrustAttributes = 'Cross-Organizational Trust (Selective Authentication)'
-            }
-            32 {
-                $TrustAttributes = 'Intra-Forest Trust (trust within the forest)'
-            }
-            64 {
-                $TrustAttributes = 'Inter-Forest Trust (trust with another forest)'
-            }
-            Default {
-                $TrustAttributes = $TrustAttributesNumber
-            }
+            1 { $TrustAttributes = 'Non-Transitive' }
+            2 { $TrustAttributes = 'Uplevel clients only (Windows 2000 or newer)' }
+            4 { $TrustAttributes = 'Quarantined Domain (External)' }
+            8 { $TrustAttributes = 'Forest Trust' }
+            16 { $TrustAttributes = 'Cross-Organizational Trust (Selective Authentication)' }
+            32 { $TrustAttributes = 'Intra-Forest Trust (trust within the forest)' }
+            64 { $TrustAttributes = 'Inter-Forest Trust (trust with another forest)' }
+            Default { $TrustAttributes = $TrustAttributesNumber }
         }
 
         #http://msdn.microsoft.com/en-us/library/cc223768.aspx
         Switch ($TrustDirectionNumber) {
-            0 {
-                $TrustDirection = 'Disabled (The trust relationship exists but has been disabled)'
-            }
-            1 {
-                $TrustDirection = "Incoming (TrustING domain: $Trustname can be authenticated in $TrustOrigin)"
-            }
-            2 {
-                $TrustDirection = "Outgoing (TrustED domain: $TrustOrigin can be authenticated in $TrustName)"
-            }
-            3 {
-                $TrustDirection = 'Bidirectional (two-way trust)'
-            }
-            Default {
-                $TrustDirection = $TrustDirectionNumber
-            }
+            0 { $TrustDirection = 'Disabled (The trust relationship exists but has been disabled)' }
+            1 { $TrustDirection = "Incoming (TrustING domain: $Trustname can be authenticated in $TrustOrigin)" }
+            2 { $TrustDirection = "Outgoing (TrustED domain: $TrustOrigin can be authenticated in $TrustName)" }
+            3 { $TrustDirection = 'Bidirectional (two-way trust)' }
+            Default { $TrustDirection = $TrustDirectionNumber }
         }
 
         # which domains does the current user have access to?
@@ -440,17 +400,16 @@ if (($x.count -eq 1) -and ($x[0] -eq '*')) {
 } else {
     $x | ForEach-Object {
         $y = ($_ -replace ('DC=', '') -replace (',', '.'))
-        if ($y -eq $_) {
-            Write-Host "  User provided domain/forest: $y"
+        if ($y -eq $_) { 
+            Write-Host "  User provided domain/forest: $y" 
         } else {
-            Write-Host "  User provided domain/forest: $_ -> $y"
+            Write-Host "  User provided domain/forest: $_ -> $y" 
         }
         if ($y -match '[^a-zA-Z0-9.-]') {
-            Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.'
+            Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.' 
         } else {
             $DomainsToCheckForGroups += $y
         }
-
     }
 }
 
@@ -505,7 +464,7 @@ if ($OutlookDefaultProfile.length -eq '') {
             Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
         } else {
             Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
-            #write-host "      $LegacyExchangeDN"
+            write-host "        $LegacyExchangeDN"
         }
     }
 } else {
@@ -524,7 +483,7 @@ if ($OutlookDefaultProfile.length -eq '') {
             Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
         } else {
             Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
-            #write-host "      $LegacyExchangeDN"
+            write-host "        $LegacyExchangeDN"
         }
     }
 
@@ -543,7 +502,7 @@ if ($OutlookDefaultProfile.length -eq '') {
             Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
         } else {
             Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
-            #write-host "      $LegacyExchangeDN"
+            write-host "        $LegacyExchangeDN"
         }
     }
 
@@ -563,7 +522,7 @@ if ($OutlookDefaultProfile.length -eq '') {
                 Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
             } else {
                 Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
-                #write-host "      $LegacyExchangeDN"
+                write-host "        $LegacyExchangeDN"
             }
         }
     }
@@ -626,11 +585,12 @@ try {
     exit 1
 }
 
+
 # Process each mail address only once, but each corresponding registry path
 for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
     if ($AccountNumberRunning -le $MailAddresses.IndexOf($MailAddresses[$AccountNumberRunning])) {
         Write-Host "Mailbox $($MailAddresses[$AccountNumberRunning])"
-        #write-host "  $($LegacyExchangeDNs[$AccountNumberRunning])"
+        write-host "  $($LegacyExchangeDNs[$AccountNumberRunning])"
 
         $UserDomain = ''
 
@@ -643,12 +603,10 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
             for ($DomainNumber = 0; (($DomainNumber -lt $DomainsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
                 if (($DomainsToCheckForGroups[$DomainNumber] -ne '')) {
                     Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (mailbox user object)"
-                    $search = New-Object System.DirectoryServices.DirectorySearcher
-                    $search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
-                    $Search.PageSize = 1000
-                    $search.filter = '(objectclass=user)'
+                    $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
+                    $Search.filter = '(objectclass=user)'
                     try {
-                        $UserAccount = ([ADSI]"$(($search.FindOne()).path)")
+                        $UserAccount = ([ADSI]"$(($Search.FindOne()).path)")
                     } catch {
                         Write-Host "      Error connecting to $($DomainsToCheckForGroups[$DomainNumber]). Removing domain from list."
                         Write-Host '      If this error is permanent, check AD trust and firewall config. Consider using parameter DomainsToCheckForGroups.'
@@ -656,14 +614,14 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                         continue
                     }
 
-                    $search.filter = "(&(objectclass=user)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
-                    $u = $search.FindOne()
+                    $Search.filter = "(&(objectclass=user)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
+                    $u = $Search.FindOne()
                     if (($u.path -ne '') -and ($null -ne $u.path)) {
                         $UserAccount = [ADSI]"LDAP://$($u.properties.distinguishedname)"
                         $ADPropsCurrentMailbox = $UserAccount.Properties
                         try {
-                            $search.filter = "(distinguishedname=$($ADPropsCurrentMailbox.Manager))"
-                            $ADPropsCurrentMailboxManager = ([ADSI]"$(($search.FindOne()).path)").Properties
+                            $Search.filter = "(distinguishedname=$($ADPropsCurrentMailbox.Manager))"
+                            $ADPropsCurrentMailboxManager = ([ADSI]"$(($Search.FindOne()).path)").Properties
                         } catch {
                         }
                         $UserDomain = $DomainsToCheckForGroups[$DomainNumber]
@@ -675,11 +633,11 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                             $translated = $null
                             $sid = New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)
                             try {
-                                $translated = $sid.Translate("System.Security.Principal.NTAccount").ToString()
+                                $translated = $sid.Translate('System.Security.Principal.NTAccount').ToString()
                             } catch {
                                 try {
-                                    $adObject = ([ADSI]("LDAP://<SID=" + $sid.ToString() + ">"))
-                                    $translated = $adObject.Properties["samAccountName"][0].ToString()
+                                    $adObject = ([ADSI]('LDAP://<SID=' + $sid.ToString() + '>'))
+                                    $translated = $adObject.Properties['samAccountName'][0].ToString()
                                 } catch {
                                 }
                             }
@@ -737,12 +695,10 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
             for ($DomainNumber = 0; $DomainNumber -lt $DomainsToCheckForGroups.count; $DomainNumber++) {
                 if (($DomainsToCheckForGroups[$DomainNumber] -ne '') -and ($DomainsToCheckForGroups[$DomainNumber] -ine $UserDomain)) {
                     Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (mailbox user object membership across trusts)"
-                    $search = New-Object System.DirectoryServices.DirectorySearcher
-                    $search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
-                    $Search.PageSize = 1000
-                    $search.filter = '(objectclass=user)'
+                    $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
+                    $Search.filter = '(objectclass=user)'
                     try {
-                        $UserAccount = ([ADSI]"$(($search.FindOne()).path)")
+                        $UserAccount = ([ADSI]"$(($Search.FindOne()).path)")
                     } catch {
                         Write-Host "      Error connecting to $($DomainsToCheckForGroups[$DomainNumber]). Removing domain from list."
                         Write-Host '      If this error is permanent, check AD trust and firewall config. Consider using parameter DomainsToCheckForGroups.'
@@ -753,8 +709,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                         continue
                     }
 
-                    $search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
-                    foreach ($fsp in $search.FindAll()) {
+                    $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
+                    foreach ($fsp in $Search.FindAll()) {
                         if (($fsp.path -ne '') -and ($null -ne $fsp.path)) {
                             # Foreign Security Principals do not have the tokenGroups attribute
                             # We need to switch to another, slower search method
@@ -762,20 +718,18 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                             # member:1.2.840.113556.1.4.1941:= (LDAP_MATCHING_RULE_IN_CHAIN) only returns domain local groups from the domain defined in searchroot
                             # A Foreign Security Principal ist created in each (sub)domain, in which it is granted permissions,
                             # and it can only be member of a domain local group - so we set the searchroot to the (sub)domain of the Foreign Security Principal.
-                            $search = New-Object System.DirectoryServices.DirectorySearcher
-                            $search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$((($fsp.path -split ",DC=")[1..999] -join "."))")                            
-                            $Search.PageSize = 1000
-                            $search.filter = "(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname))"
+                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$((($fsp.path -split ',DC=')[1..999] -join '.'))")                            
+                            $Search.filter = "(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname))"
 
-                            foreach ($group in $search.findall()) {
+                            foreach ($group in $Search.findall()) {
                                 $translated = $null
                                 $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
                                 try {
-                                    $translated = $sid.Translate("System.Security.Principal.NTAccount").ToString()
+                                    $translated = $sid.Translate('System.Security.Principal.NTAccount').ToString()
                                 } catch {
                                     try {
-                                        $adObject = ([ADSI]("LDAP://$((($fsp.path -split ",DC=")[1..999] -join "."))/<SID=" + $sid.ToString() + ">"))
-                                        $translated = $adObject.Properties["samAccountName"][0].ToString()
+                                        $adObject = ([ADSI]("LDAP://$((($fsp.path -split ',DC=')[1..999] -join '.'))/<SID=" + $sid.ToString() + '>'))
+                                        $translated = $adObject.Properties['samAccountName'][0].ToString()
                                     } catch {
                                     }
                                 }
@@ -826,21 +780,21 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
         }
 
         Write-Host '  Process common signatures'
-        foreach ($h in $SignatureFilesCommon.GetEnumerator()) {
+        foreach ($Signature in $SignatureFilesCommon.GetEnumerator()) {
             Set-Signatures
         }
 
         Write-Host '  Process group signatures'
-        $TempHash = @{}
+        $OutlookWebHash = @{}
         if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
             foreach ($x in $SignatureFilesGroupFilePart.GetEnumerator()) {
                 $Groups | ForEach-Object {
                     if ($x.Value.tolower().Contains('[' + $_.tolower() + ']')) {
-                        $TempHash.add($x.Name, $SignatureFilesGroup[$x.Name])
+                        $OutlookWebHash.add($x.Name, $SignatureFilesGroup[$x.Name])
                     }
                 }
             }
-            foreach ($h in $TempHash.GetEnumerator()) {
+            foreach ($Signature in $OutlookWebHash.GetEnumerator()) {
                 Set-Signatures
             }
         } else {
@@ -849,15 +803,15 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
         }
 
         Write-Host '  Process mail address specific signatures'
-        $TempHash = @{}
+        $SignatureHash = @{}
         foreach ($x in $SignatureFilesMailboxFilePart.GetEnumerator()) {
             foreach ($y in $CurrentMailboxSMTPAddresses) {
                 if ($x.Value.tolower().contains('[' + $y.tolower() + ']')) {
-                    $TempHash.add($x.Name, $SignatureFilesMailbox[$x.Name])
+                    $SignatureHash.add($x.Name, $SignatureFilesMailbox[$x.Name])
                 }
             }
         }
-        foreach ($h in $TempHash.GetEnumerator()) {
+        foreach ($Signature in $SignatureHash.GetEnumerator()) {
             Set-Signatures
         }
     }
@@ -926,26 +880,26 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                             $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $SignaturePaths[0] -ChildPath ($TempOWASigFile + '.htm')) -Raw).ToString()
                             $stTextSig = (Get-Content -LiteralPath (Join-Path -Path $SignaturePaths[0] -ChildPath ($TempOWASigFile + '.txt')) -Raw).ToString()
 
-                            $TempHash = @{}
+                            $OutlookWebHash = @{}
                             # Keys are case sensitive when setting them
-                            $TempHash.Add('signaturehtml', $hsHtmlSignature)
-                            $TempHash.Add('signaturetext', $stTextSig)
-                            $TempHash.Add('signaturetextonmobile', $null)
-                            $TempHash.Add('autoaddsignature', $TempOWASigSetNew)
-                            $TempHash.Add('autoaddsignatureonmobile', $TempOWASigSetNew)
-                            $TempHash.Add('autoaddsignatureonreply', $TempOWASigSetReply)
+                            $OutlookWebHash.Add('signaturehtml', $hsHtmlSignature)
+                            $OutlookWebHash.Add('signaturetext', $stTextSig)
+                            $OutlookWebHash.Add('signaturetextonmobile', $stTextSig)
+                            $OutlookWebHash.Add('autoaddsignature', $TempOWASigSetNew)
+                            $OutlookWebHash.Add('autoaddsignatureonmobile', $TempOWASigSetNew)
+                            $OutlookWebHash.Add('autoaddsignatureonreply', $TempOWASigSetReply)
 
-                            foreach ($TempHashKey in $TempHash.Keys) {
-                                if ($UsrConfig.Dictionary.ContainsKey($TempHashKey)) {
-                                    $UsrConfig.Dictionary[$TempHashKey] = $TempHash.$TempHashKey
+                            foreach ($OutlookWebHashKey in $OutlookWebHash.Keys) {
+                                if ($UsrConfig.Dictionary.ContainsKey($OutlookWebHashKey)) {
+                                    $UsrConfig.Dictionary[$OutlookWebHashKey] = $OutlookWebHash.$OutlookWebHashKey
                                 } else {
-                                    $UsrConfig.Dictionary.Add($TempHashKey, $TempHash.$TempHashKey)
+                                    $UsrConfig.Dictionary.Add($OutlookWebHashKey, $OutlookWebHash.$OutlookWebHashKey)
                                 }
                             }
 
                             $UsrConfig.Update()
                         } catch {
-                            Write-Host '    Error setting Outlook Web signature, please contact you administrator'
+                            Write-Host '    Error setting Outlook Web signature, please contact your administrator'
                         }
 
                         Remove-Module -Name '.\Microsoft.Exchange.WebServices.dll' -ErrorAction SilentlyContinue
@@ -956,10 +910,12 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
     }
 }
 
+
 # Quit word, as all signatures have been edited
 $COMWord.Quit()
 [System.Runtime.Interopservices.Marshal]::ReleaseComObject($COMWord) | Out-Null
 Remove-Variable COMWord
+
 
 # Delete old signatures created by this script, which are no longer available in $SignatureTemplatePath
 # We check all local signatures for a specific marker in HTML code, so we don't touch user created signatures
