@@ -151,6 +151,7 @@ function Set-Signatures {
 
         Write-Host '      Save as .TXT file'
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
+        $COMWord.ActiveDocument.TextEncoding = 1200
         $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.txt'))
         $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
