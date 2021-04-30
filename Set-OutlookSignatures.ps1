@@ -1,5 +1,10 @@
 Param(
     # Path to centrally managed signature templates
+    # Local and remote paths are supported
+    #   Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates')
+    # WebDAV paths are supported (https only)
+    #   'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+    # The currently logged-on user needs at least read access to the path
     [string]$SignatureTemplatePath = '.\Signature templates',
 
     # List of domains/forests to check for group memberships across trusts
@@ -292,10 +297,69 @@ $Search = New-Object DirectoryServices.DirectorySearcher
 $Search.PageSize = 1000
 
 
+# Check paths
+if ($SignatureTemplatePath.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
+    $SignatureTemplatePath = (([uri]::UnescapeDataString($SignatureTemplatePath) -ireplace ('https://', '\\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\')
+}
+
+if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyContinue)) {
+    # Reconnect already connected network drives at the OS level
+    # New-PSDrive is not enough for this
+    Get-CimInstance Win32_NetworkConnection | ForEach-Object {
+        & net use $_.LocalName $_.RemoteName 2>&1 | Out-Null
+    }
+
+    if (-not (Test-Path -literalpath $SignatureTemplatePath -ErrorAction SilentlyContinue)) {
+        # Connect network drives
+        '`r`n' | & net use "$SignatureTemplatePath" 2>&1 | Out-Null
+        try {
+            (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction Stop) | Out-Null
+        } catch {
+            if ($_.CategoryInfo.Category -eq "PermissionDenied") {
+                & net use "$SignatureTemplatePath" 2>&1
+            }
+        }
+        & net use "$SignatureTemplatePath" /d 2>&1 | Out-Null
+    }
+
+    if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyContinue)) {
+        # Add site to trusted sites in internet options
+        New-Item ("HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\" + (New-Object System.Uri -ArgumentList ($SignatureTemplatePath -ireplace ('@SSL', ''))).Host) -Force | New-ItemProperty -Name * -Value 1 -Type DWORD -Force | Out-Null
+
+        # Open site in new IE process
+        $oIE = New-Object -com InternetExplorer.Application
+        $oIE.Visible = $false
+        $oIE.Navigate2("https://" + ((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
+        $oIE = $null
+        
+        # Wait until an IE tab with the corresponding URL is open            
+        $app = New-Object -com shell.application
+        $i = 0
+        while ($i -lt 1) {
+            $app.windows() | Where-Object { $_.LocationURL -like ("*" + ([uri]::EscapeUriString(((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + "*") } | ForEach-Object {
+            $i = $i + 1
+            }
+            Start-Sleep -Milliseconds 50
+        }
+        
+        # Wait until the corresponding URL is fully loaded, then close the tab
+        $app.windows() | Where-Object { $_.LocationURL -like ("*" + ([uri]::EscapeUriString(((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + "*") } | ForEach-Object {
+            while ($_.busy) {
+            Start-Sleep -Milliseconds 50
+            }
+            $_.quit()
+        }
+      
+        $app = $null
+          
+    }
+}
+
 if ((Test-Path $SignatureTemplatePath -PathType Container) -eq $false) {
     Write-Host "  Problem connecting to or reading from folder '$SignatureTemplatePath'. Check path."
     exit 1
 }
+
 
 if (($ExecutionContext.SessionState.LanguageMode) -eq 'FullLanguage') {
 } else {
