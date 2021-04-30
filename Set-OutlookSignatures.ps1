@@ -1,12 +1,10 @@
 Param(
     # Path to centrally managed signature templates
-    [ValidateScript( {
-            Test-Path $_ -PathType Container
-        }
-    )]
-    [string]
-    $SignatureTemplatePath = '.\Signature templates',
+    [string]$SignatureTemplatePath = '.\Signature templates',
 
+    # List of domains/forests to check for group memberships across trusts
+    # If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
+    # If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list
     [string[]]$DomainsToCheckForGroups = ('*')
 )
 
@@ -350,7 +348,7 @@ if ($y -ne '') {
 }
 
 # Other domains - either the list provided, or all outgoing and bidirectional trusts
-if (($x.count -eq 1) -and ($x[0] -eq '*')) {
+if ($x[0] -eq '*') {
     $Search.SearchRoot = "GC://$(([ADSI]'LDAP://RootDSE').rootDomainNamingContext)"
     $Search.Filter = '(ObjectClass=trustedDomain)'
 
@@ -398,18 +396,39 @@ if (($x.count -eq 1) -and ($x[0] -eq '*')) {
             $DomainsToCheckForGroups += $TrustName
         }
     }
-} else {
-    $x | ForEach-Object {
-        $y = ($_ -replace ('DC=', '') -replace (',', '.'))
-        if ($y -eq $_) { 
-            Write-Host "  User provided domain/forest: $y" 
-        } else {
-            Write-Host "  User provided domain/forest: $_ -> $y" 
-        }
-        if ($y -match '[^a-zA-Z0-9.-]') {
-            Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.' 
-        } else {
+}
+
+for ($a = 0; $a -lt $x.Count; $a++) {
+    if (($a -eq 0) -and ($x[$a] -ieq '*')) {
+        continue
+    }
+
+    $y = ($x[$a] -replace ('DC=', '') -replace (',', '.'))
+
+    if ($y -eq $x[$a]) { 
+        Write-Host "  User provided domain/forest: $y" 
+    } else {
+        Write-Host "  User provided domain/forest: $($x[$a]) -> $y" 
+    }
+
+    if (($a -ne 0) -and ($x[$a] -ieq '*')) {
+        Write-Host '    Skipping domain. Entry * is only allowed at first position in list.' 
+        continue
+    }
+
+    if ($y -match '[^a-zA-Z0-9.-]') {
+        Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.' 
+        continue
+    }
+    
+    if (-not ($y.StartsWith('-'))) {
             $DomainsToCheckForGroups += $y
+    } else {
+        Write-Host '    Removing domain.'
+        for ($z = 0; $z -lt $DomainsToCheckForGroups.Count; $z++) {
+            if ($DomainsToCheckForGroups[$z] -ilike $y.substring(1)) {
+                $DomainsToCheckForGroups[$z] = ''
+            }
         }
     }
 }
