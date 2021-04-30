@@ -44,11 +44,16 @@ Group membership is achieved by querying the tokenGroups attribute, which is not
 ## 1.7. Parameters
 ### 1.7.1. SignatureTemplatePath
 The parameter SignatureTemplatePath tells the script where signature template files are stored.
+Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').
+WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+The currently logged-on user needs at least read access to the path
 ### 1.7.2. DomainsToCheckForGroups
 The parameters tells the script which domains should be used to search for mailbox and user group memberships.
-The default value, '*", tells the script to query all trusted domains in the Active Directory forest of the logged-on user.
+The default value, '\*' tells the script to query all trusted domains in the Active Directory forest of the logged-on user.
 For a custom list of domains/forests, specify them as comma-separated list of strings: "domain-a.local", "dc=example,dc=com", "domain-b.internal".
-The Active Directory forest of the current user is always considered.
+When a domain/forest in the custom list starts with a dash or minus ('-domain-a.local'), this domain is removed from the list.
+The '\*' entry in a custom list is only considered when it is the first entry of the list.
+The Active Directory forest of the currently logged-on user is always considered.
 ## 1.8. Requirements
 Requires Outlook and Word, at least version 2010.
 The script must run in the security context of the currently logged-on user.
@@ -67,23 +72,23 @@ The script copies every signature file name as-is, with one exception: When tags
 Tags must be placed before the file extension and be separated from the base filename with a period.
 Examples:
 - 'Company external German.docx' -> 'Company external German.htm', no changes
-- 'Company external German.[defaultNew].docx' -> 'Company external German.htm', tag(s) is/are removed
-- 'Company external [English].docx' ' -> 'Company external [English].htm', tag(s) is/are not removed, because there is no dot before
-- 'Company external [English].[defaultNew] [Company-AD All Employees].docx' ' -> 'Company external [English].htm', tag(s) is/are removed, because they are separated from base filename
+- 'Company external German.\[defaultNew].docx' -> 'Company external German.htm', tag(s) is/are removed
+- 'Company external \[English].docx' ' -> 'Company external \[English].htm', tag(s) is/are not removed, because there is no dot before
+- 'Company external \[English].\[defaultNew] \[Company-AD All Employees].docx' ' -> 'Company external \[English].htm', tag(s) is/are removed, because they are separated from base filename
 ### 1.12.1. Allowed filename tags
-- [defaultNew]
+- \[defaultNew]
     - Set signature as default signature for new mails
-- [defaultReplyFwd]
+- \[defaultReplyFwd]
     - Set signature as default signature for replies and forwarded mails
-- [NETBIOS-Domain Group-SamAccountName]
+- \[NETBIOS-Domain Group-SamAccountName]
     - Make this signature specific for an Outlook mailbox or the currently logged-on user being a member (direct or indirect) of this group
     - Groups must be available in Active Directory. Groups like 'Everyone' and 'Authenticated Users' only exist locally, not in Active Directory.
-- [SMTP address]
+- \[SMTP address]
     - Make this signature specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)
 Filename tags can be combined, so a signature may be assigned to several groups and several mail addresses at the samt time.
 ## 1.13. Signature application order
 Signatures are applied in a specific order: Common signatures first, group signatures second, mail address specific signatures last.
-Common signatures are signatures with either no tag or only [defaultNew] and/or [defaultReplyFwd].
+Common signatures are signatures with either no tag or only \[defaultNew] and/or \[defaultReplyFwd].
 Within these groups, signatures are applied alphabetically ascending.
 Every centrally stored signature is applied only once, as there is only one signature path in Outlook, and subfolders are not allowed - so the file names have to be unique.
 The script always starts with the mailboxes in the default Outlook profile, preferrably with the current users personal mailbox.
@@ -107,11 +112,11 @@ Available variables:
     - $CURRENTUSERMOBILE$: Mobile phone
     - $CURRENTUSERMAIL$: Mail address
 - Manager of currently logged-on user
-    - Same variables as logged-on user, $CURRENTUSERMANAGER[...]$ instead of $CURRENTUSER[...]$
+    - Same variables as logged-on user, $CURRENTUSERMANAGER\[...]$ instead of $CURRENTUSER\[...]$
 - Current mailbox
-    - Same variables as logged-on user, $CURRENTMAILBOX[...]$ instead of $CURRENTUSER[...]$
+    - Same variables as logged-on user, $CURRENTMAILBOX\[...]$ instead of $CURRENTUSER\[...]$
 - Manager of current mailbox
-    - Same variables as logged-on user, $CURRENTMAILBOXMANAGER[...]$ instead of $CURRENTMAILBOX[...]$
+    - Same variables as logged-on user, $CURRENTMAILBOXMANAGER\[...]$ instead of $CURRENTMAILBOX\[...]$
 ## 1.15. Outlook Web
 If the currently logged-on user has configured his personal mailbox in Outlook, the default signature for new emails is configured in Outlook Web automatically.
 If the default signature for new mails matches the one used for replies and forwarded mail, this is also set in Outlook.
