@@ -309,43 +309,43 @@ if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyCon
         & net use $_.LocalName $_.RemoteName 2>&1 | Out-Null
     }
 
-    if (-not (Test-Path -literalpath $SignatureTemplatePath -ErrorAction SilentlyContinue)) {
+    if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyContinue)) {
         # Connect network drives
         '`r`n' | & net use "$SignatureTemplatePath" 2>&1 | Out-Null
         try {
             (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction Stop) | Out-Null
         } catch {
-            if ($_.CategoryInfo.Category -eq "PermissionDenied") {
+            if ($_.CategoryInfo.Category -eq 'PermissionDenied') {
                 & net use "$SignatureTemplatePath" 2>&1
             }
         }
         & net use "$SignatureTemplatePath" /d 2>&1 | Out-Null
     }
 
-    if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyContinue)) {
+    if (($SignatureTemplatePath -ilike '*@ssl\*') -and (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyContinue))) {
         # Add site to trusted sites in internet options
-        New-Item ("HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\" + (New-Object System.Uri -ArgumentList ($SignatureTemplatePath -ireplace ('@SSL', ''))).Host) -Force | New-ItemProperty -Name * -Value 1 -Type DWORD -Force | Out-Null
+        New-Item ('HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\' + (New-Object System.Uri -ArgumentList ($SignatureTemplatePath -ireplace ('@SSL', ''))).Host) -Force | New-ItemProperty -Name * -Value 1 -Type DWORD -Force | Out-Null
 
         # Open site in new IE process
         $oIE = New-Object -com InternetExplorer.Application
         $oIE.Visible = $false
-        $oIE.Navigate2("https://" + ((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
+        $oIE.Navigate2('https://' + ((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
         $oIE = $null
         
         # Wait until an IE tab with the corresponding URL is open            
         $app = New-Object -com shell.application
         $i = 0
         while ($i -lt 1) {
-            $app.windows() | Where-Object { $_.LocationURL -like ("*" + ([uri]::EscapeUriString(((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + "*") } | ForEach-Object {
-            $i = $i + 1
+            $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
+                $i = $i + 1
             }
             Start-Sleep -Milliseconds 50
         }
         
         # Wait until the corresponding URL is fully loaded, then close the tab
-        $app.windows() | Where-Object { $_.LocationURL -like ("*" + ([uri]::EscapeUriString(((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + "*") } | ForEach-Object {
+        $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
             while ($_.busy) {
-            Start-Sleep -Milliseconds 50
+                Start-Sleep -Milliseconds 50
             }
             $_.quit()
         }
@@ -355,7 +355,7 @@ if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyCon
     }
 }
 
-if ((Test-Path $SignatureTemplatePath -PathType Container) -eq $false) {
+if ((Test-Path -LiteralPath $SignatureTemplatePath -PathType Container) -eq $false) {
     Write-Host "  Problem connecting to or reading from folder '$SignatureTemplatePath'. Check path."
     exit 1
 }
@@ -417,47 +417,32 @@ if ($x[0] -eq '*') {
     $Search.Filter = '(ObjectClass=trustedDomain)'
 
     $Search.FindAll() | ForEach-Object {
-        $TrustNameSID = (New-Object system.security.principal.securityidentifier($($_.properties.securityidentifier), 0)).tostring()
-        $TrustOrigin = ($_.properties.distinguishedname -split ',DC=')[1..999] -join '.'
-        $TrustName = $_.properties.name
-        $TrustDirectionNumber = $_.properties.trustdirection
-        $TrustTypeNumber = $_.properties.trusttype
-        $TrustAttributesNumber = $_.properties.trustattributes
+        # DNS name of this side of the trust (could be the root domain or any subdomain)
+        # $TrustOrigin = ($_.properties.distinguishedname -split ',DC=')[1..999] -join '.'
+        
+        # DNS name of the other side of the trust (could be the root domain or any subdomain)
+        # $TrustName = $_.properties.name
 
-        #http://msdn.microsoft.com/en-us/library/cc220955.aspx
-        Switch ($TrustTypeNumber) {
-            1 { $TrustType = 'Downlevel (Windows NT domain external)' }
-            2 { $TrustType = 'Uplevel (Active Directory domain - parent-child, root domain, shortcut, external, or forest)' }
-            3 { $TrustType = 'MIT (non-Windows) Kerberos version 5 realm' }
-            4 { $TrustType = "DCE (Theoretical trust type - DCE refers to Open Group's Distributed Computing Environment specification)" }
-            Default { $TrustType = $TrustTypeNumber }
-        }
+        # Domain SID of the other side of the trust
+        # $TrustNameSID = (New-Object system.security.principal.securityidentifier($($_.properties.securityidentifier), 0)).tostring()
+        
+        # Trust direction
+        # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trustdirection?view=net-5.0
+        # $TrustDirectionNumber = $_.properties.trustdirection
+        
+        # Trust type
+        # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trusttype?view=net-5.0
+        # $TrustTypeNumber = $_.properties.trusttype
+        
+        # Trust attributes
+        # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/e9a2d23c-c31e-4a6f-88a0-6646fdb51a3c
+        # $TrustAttributesNumber = $_.properties.trustattributes
 
-        #http://msdn.microsoft.com/en-us/library/cc223779.aspx
-        Switch ($TrustAttributesNumber) {
-            1 { $TrustAttributes = 'Non-Transitive' }
-            2 { $TrustAttributes = 'Uplevel clients only (Windows 2000 or newer)' }
-            4 { $TrustAttributes = 'Quarantined Domain (External)' }
-            8 { $TrustAttributes = 'Forest Trust' }
-            16 { $TrustAttributes = 'Cross-Organizational Trust (Selective Authentication)' }
-            32 { $TrustAttributes = 'Intra-Forest Trust (trust within the forest)' }
-            64 { $TrustAttributes = 'Inter-Forest Trust (trust with another forest)' }
-            Default { $TrustAttributes = $TrustAttributesNumber }
-        }
-
-        #http://msdn.microsoft.com/en-us/library/cc223768.aspx
-        Switch ($TrustDirectionNumber) {
-            0 { $TrustDirection = 'Disabled (The trust relationship exists but has been disabled)' }
-            1 { $TrustDirection = "Incoming (TrustING domain: $Trustname can be authenticated in $TrustOrigin)" }
-            2 { $TrustDirection = "Outgoing (TrustED domain: $TrustOrigin can be authenticated in $TrustName)" }
-            3 { $TrustDirection = 'Bidirectional (two-way trust)' }
-            Default { $TrustDirection = $TrustDirectionNumber }
-        }
-
-        # which domains does the current user have access to?
-        if (($TrustAttributesNumber -ne 32) -and (($TrustDirectionNumber -eq 2) -or ($TrustDirectionNumber -eq 3)) ) {
-            Write-Host "  Trusted domain: $TrustName"
-            $DomainsToCheckForGroups += $TrustName
+        # Which domains does the current user have access to?
+        # No intra-forest trusts, only bidirectional trusts and outbound trusts
+        if (($($_.properties.trustattributes) -ne 32) -and (($($_.properties.trustdirection) -eq 2) -or ($($_.properties.trustdirection) -eq 3)) ) {
+            Write-Host "  Trusted domain: $($_.properties.name)"
+            $DomainsToCheckForGroups += $_.properties.name
         }
     }
 }
@@ -486,7 +471,7 @@ for ($a = 0; $a -lt $x.Count; $a++) {
     }
     
     if (-not ($y.StartsWith('-'))) {
-            $DomainsToCheckForGroups += $y
+        $DomainsToCheckForGroups += $y
     } else {
         Write-Host '    Removing domain.'
         for ($z = 0; $z -lt $DomainsToCheckForGroups.Count; $z++) {
@@ -548,7 +533,7 @@ if ($OutlookDefaultProfile.length -eq '') {
             Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
         } else {
             Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
-            write-host "        $LegacyExchangeDN"
+            Write-Host "        $LegacyExchangeDN"
         }
     }
 } else {
@@ -567,7 +552,7 @@ if ($OutlookDefaultProfile.length -eq '') {
             Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
         } else {
             Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
-            write-host "        $LegacyExchangeDN"
+            Write-Host "        $LegacyExchangeDN"
         }
     }
 
@@ -586,7 +571,7 @@ if ($OutlookDefaultProfile.length -eq '') {
             Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
         } else {
             Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
-            write-host "        $LegacyExchangeDN"
+            Write-Host "        $LegacyExchangeDN"
         }
     }
 
@@ -606,7 +591,7 @@ if ($OutlookDefaultProfile.length -eq '') {
                 Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
             } else {
                 Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
-                write-host "        $LegacyExchangeDN"
+                Write-Host "        $LegacyExchangeDN"
             }
         }
     }
@@ -674,13 +659,12 @@ try {
 for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
     if ($AccountNumberRunning -le $MailAddresses.IndexOf($MailAddresses[$AccountNumberRunning])) {
         Write-Host "Mailbox $($MailAddresses[$AccountNumberRunning])"
-        write-host "  $($LegacyExchangeDNs[$AccountNumberRunning])"
+        Write-Host "  $($LegacyExchangeDNs[$AccountNumberRunning])"
 
         $UserDomain = ''
 
         Write-Host '  Get AD properties and group membership of mailbox'
         $Groups = @()
-        $TokenGroups = @()
 
         if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
             # Loop through domains until the first one knows the legacyExchangeDN
@@ -714,17 +698,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                         $UserAccount.GetInfoEx(@('tokengroups'), 0)
 
                         foreach ($sidBytes in $UserAccount.Properties.tokenGroups) {
-                            $translated = $null
                             $sid = New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)
-                            try {
-                                $translated = $sid.Translate('System.Security.Principal.NTAccount').ToString()
-                            } catch {
-                                try {
-                                    $adObject = ([ADSI]('LDAP://<SID=' + $sid.ToString() + '>'))
-                                    $translated = $adObject.Properties['samAccountName'][0].ToString()
-                                } catch {
-                                }
-                            }
                             $objTrans = New-Object -ComObject 'NameTranslate'
                             $objNT = $objTrans.GetType()
                             $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $Null)) # 3 = ADS_NAME_INITTYPE_GC
@@ -798,7 +772,6 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                         if (($fsp.path -ne '') -and ($null -ne $fsp.path)) {
                             # Foreign Security Principals do not have the tokenGroups attribute
                             # We need to switch to another, slower search method
-                            #
                             # member:1.2.840.113556.1.4.1941:= (LDAP_MATCHING_RULE_IN_CHAIN) only returns domain local groups from the domain defined in searchroot
                             # A Foreign Security Principal ist created in each (sub)domain, in which it is granted permissions,
                             # and it can only be member of a domain local group - so we set the searchroot to the (sub)domain of the Foreign Security Principal.
@@ -806,17 +779,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                             $Search.filter = "(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname))"
 
                             foreach ($group in $Search.findall()) {
-                                $translated = $null
                                 $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
-                                try {
-                                    $translated = $sid.Translate('System.Security.Principal.NTAccount').ToString()
-                                } catch {
-                                    try {
-                                        $adObject = ([ADSI]("LDAP://$((($fsp.path -split ',DC=')[1..999] -join '.'))/<SID=" + $sid.ToString() + '>'))
-                                        $translated = $adObject.Properties['samAccountName'][0].ToString()
-                                    } catch {
-                                    }
-                                }
                                 $objTrans = New-Object -ComObject 'NameTranslate'
                                 $objNT = $objTrans.GetType()
                                 $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $Null)) # 3 = ADS_NAME_INITTYPE_GC
