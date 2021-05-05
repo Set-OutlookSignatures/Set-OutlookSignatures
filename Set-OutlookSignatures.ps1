@@ -1,3 +1,4 @@
+[CmdletBinding()]
 Param(
     # Path to centrally managed signature templates
     # Local and remote paths are supported
@@ -5,7 +6,7 @@ Param(
     # WebDAV paths are supported (https only)
     #   'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
     # The currently logged-on user needs at least read access to the path
-    [string]$SignatureTemplatePath = '.\Signature templates',
+    [ValidateNotNullOrEmpty()][string]$SignatureTemplatePath = '.\Signature templates',
 
     # List of domains/forests to check for group memberships across trusts
     # If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
