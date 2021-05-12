@@ -441,6 +441,7 @@ if ($x[0] -eq '*') {
 
         # Which domains does the current user have access to?
         # No intra-forest trusts, only bidirectional trusts and outbound trusts
+        
         if (($($_.properties.trustattributes) -ne 32) -and (($($_.properties.trustdirection) -eq 2) -or ($($_.properties.trustdirection) -eq 3)) ) {
             Write-Host "  Trusted domain: $($_.properties.name)"
             $DomainsToCheckForGroups += $_.properties.name
@@ -671,7 +672,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
             # Loop through domains until the first one knows the legacyExchangeDN
             for ($DomainNumber = 0; (($DomainNumber -lt $DomainsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
                 if (($DomainsToCheckForGroups[$DomainNumber] -ne '')) {
-                    Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (mailbox user object)"
+                    Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (searching for mailbox user object and it's group membership)"
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
                     $Search.filter = '(objectclass=user)'
                     try {
@@ -752,8 +753,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
             }
 
             for ($DomainNumber = 0; $DomainNumber -lt $DomainsToCheckForGroups.count; $DomainNumber++) {
-                if (($DomainsToCheckForGroups[$DomainNumber] -ne '') -and ($DomainsToCheckForGroups[$DomainNumber] -ine $UserDomain)) {
-                    Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (mailbox user object membership across trusts)"
+                if (($DomainsToCheckForGroups[$DomainNumber] -ne '') -and ($DomainsToCheckForGroups[$DomainNumber] -ine $UserDomain) -and ($UserDomain -ne '')) {
+                    Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (mailbox group membership across trusts, takes some time)"
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
                     $Search.filter = '(objectclass=user)'
                     try {
@@ -771,6 +772,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                     $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
                     foreach ($fsp in $Search.FindAll()) {
                         if (($fsp.path -ne '') -and ($null -ne $fsp.path)) {
+                            Write-Host "      $(($fsp.path -split ',DC=')[1..999] -join '.')"
                             # Foreign Security Principals do not have the tokenGroups attribute
                             # We need to switch to another, slower search method
                             # member:1.2.840.113556.1.4.1941:= (LDAP_MATCHING_RULE_IN_CHAIN) only returns domain local groups from the domain defined in searchroot
@@ -787,7 +789,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                                 try {
                                     $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (12, $sid.tostring())) # 12 = SIDORSIDHISTORY
                                     $Groups += ($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)) -replace '\\', ' ' # 3 = NT4NAME, 4 = DISPLAYNAME
-                                    Write-Host "      [$($Groups[-1])]" -NoNewline
+                                    Write-Host "        [$($Groups[-1])]" -NoNewline
                                     try {
                                         $x = (($Groups[-1] -split ' ')[0] + ' ' + ($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 4))) # 3 = NT4NAME, 4 = DISPLAYNAME
                                         if ($x -ine $Groups[-1]) {
