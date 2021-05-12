@@ -21,6 +21,7 @@
   - [1.15. Outlook Web](#115-outlook-web)
   - [1.16. FAQ](#116-faq)
     - [1.16.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#1161-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
+    - [1.16.2. Which ports are required?](#1162-which-ports-are-required)
 ## 1.2. General description  
 Downloads centrally stored signatures, replaces variables, optionally sets default signatures.  
 Signatures can be applicable to all users, specific groups or specific mail addresses.  
@@ -130,3 +131,5 @@ The legacyExchangeDN attribute is used to find the user behind a mailbox, becaus
 - A separate Active Directory forest for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.  
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.  
 The disadvantage of using legacyEchangeDn is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures.  
+### 1.16.2. Which ports are required?
+Ports 389 TCP (LDAP) and 3268 TCP (Global Catalog) are required to communication with Active Directory domains. 
