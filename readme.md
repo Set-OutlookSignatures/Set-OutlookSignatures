@@ -133,3 +133,5 @@ The legacyExchangeDN attribute is used to find the user behind a mailbox, becaus
 The disadvantage of using legacyEchangeDn is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures.  
 ### 1.16.2. Which ports are required?
 Ports 389 TCP (LDAP) and 3268 TCP (Global Catalog) are required to communication with Active Directory domains. 
+The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11).  
+The client needs port 443 to access a WebDAV share (a SharePoint document library, for example).  
