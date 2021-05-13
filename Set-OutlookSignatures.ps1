@@ -8,7 +8,7 @@ Param(
     # The currently logged-on user needs at least read access to the path
     [ValidateNotNullOrEmpty()][string]$SignatureTemplatePath = '.\Signature templates',
 
-    # List of domains/forests to check for group memberships across trusts
+    # List of domains/forests to check for group membership across trusts
     # If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
     # If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list
     [string[]]$DomainsToCheckForGroups = ('*')
@@ -398,7 +398,7 @@ if ($OutlookRegistryVersion.major -gt 16) {
 $HTMLMarkerTag = '<meta name=data-SignatureFileInfo content="Set-OutlookSignatures.ps1">'
 
 
-Write-Host 'Enumerate domains to check for group memberships'
+Write-Host 'Enumerate domains'
 $x = $DomainsToCheckForGroups
 $DomainsToCheckForGroups = @()
 
@@ -414,7 +414,7 @@ if ($y -ne '') {
 
 # Other domains - either the list provided, or all outgoing and bidirectional trusts
 if ($x[0] -eq '*') {
-    $Search.SearchRoot = "GC://$(([ADSI]'LDAP://RootDSE').rootDomainNamingContext)"
+    $Search.SearchRoot = "GC://$($DomainsToCheckForGroups[0])"
     $Search.Filter = '(ObjectClass=trustedDomain)'
 
     $Search.FindAll() | ForEach-Object {
@@ -484,6 +484,49 @@ for ($a = 0; $a -lt $x.Count; $a++) {
     }
 }
 
+Write-Host 'Check for open LDAP and GC ports and connectivity'
+for ($DomainNumber = 0; $DomainNumber -lt $DomainsToCheckForGroups.count; $DomainNumber++) {
+    if ($($DomainsToCheckForGroups[$DomainNumber]) -eq '') { continue }
+    Write-Host "  $($DomainsToCheckForGroups[$DomainNumber])"
+
+    if ((New-Object System.Net.Sockets.TcpClient).ConnectAsync($DomainsToCheckForGroups[$DomainNumber], 389).Wait(1000) -ne $true) {
+        Write-Host '    Port 389 (LDAP) not open, ignoring domain.'
+        $DomainsToCheckForGroups[$DomainNumber] = ''
+        continue
+    } else {
+        Write-Host '    Port 389 (LDAP) open, LDAP connectivity check ' -NoNewline
+        $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$($DomainsToCheckForGroups[$DomainNumber])")
+        $Search.filter = '(objectclass=user)'
+        try {
+            $UserAccount = ([ADSI]"$(($Search.FindOne()).path)")
+            Write-Host 'passed.'
+        } catch {
+            Write-Host 'failed. Removing domain from list.'
+            Write-Host '    If this error is permanent, check AD trust and firewall config. Consider using parameter DomainsToCheckForGroups.'
+            $DomainsToCheckForGroups[$DomainNumber] = ''
+            continue
+        }
+    }
+
+    if ((New-Object System.Net.Sockets.TcpClient).ConnectAsync($DomainsToCheckForGroups[$DomainNumber], 3268).Wait(1000) -ne $true) {
+        Write-Host '    Port 3268 (GC) not open, ignoring domain.'
+        $DomainsToCheckForGroups[$DomainNumber] = ''
+        continue
+    } else {
+        Write-Host '    Port 3268 (GC) open, GC connectivity check ' -NoNewline
+        $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
+        $Search.filter = '(objectclass=user)'
+        try {
+            $UserAccount = ([ADSI]"$(($Search.FindOne()).path)")
+            Write-Host 'passed.'
+        } catch {
+            Write-Host 'failed. Removing domain from list.'
+            Write-Host '    If this error is permanent, check AD trust and firewall config. Consider using parameter DomainsToCheckForGroups.'
+            $DomainsToCheckForGroups[$DomainNumber] = ''
+            continue
+        }
+    }
+}
 
 Write-Host 'Get AD properties of currently logged on user and his manager'
 try {
@@ -687,6 +730,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                     $Search.filter = "(&(objectclass=user)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
                     $u = $Search.FindOne()
                     if (($u.path -ne '') -and ($null -ne $u.path)) {
+                        # Connect to Domain Controller (LDAP), as Global Catalog (GC) does not have all attributes,
+                        # for example tokenGroups including domain local groups
                         $UserAccount = [ADSI]"LDAP://$($u.properties.distinguishedname)"
                         $ADPropsCurrentMailbox = $UserAccount.Properties
                         try {
