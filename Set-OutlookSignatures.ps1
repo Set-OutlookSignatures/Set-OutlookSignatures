@@ -488,6 +488,7 @@ for ($a = 0; $a -lt $x.Count; $a++) {
     }
 }
 
+
 Write-Host 'Check for open LDAP and GC ports and connectivity'
 for ($DomainNumber = 0; $DomainNumber -lt $DomainsToCheckForGroups.count; $DomainNumber++) {
     if ($($DomainsToCheckForGroups[$DomainNumber]) -eq '') { continue }
@@ -498,7 +499,7 @@ for ($DomainNumber = 0; $DomainNumber -lt $DomainsToCheckForGroups.count; $Domai
         $DomainsToCheckForGroups[$DomainNumber] = ''
         continue
     } else {
-        Write-Host '    Port 389 (LDAP) open, LDAP connectivity check ' -NoNewline
+        Write-Host '    Port 389 (LDAP) open, LDAP connectivity check (takes some time) ' -NoNewline
         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$($DomainsToCheckForGroups[$DomainNumber])")
         $Search.filter = '(objectclass=user)'
         try {
@@ -532,6 +533,7 @@ for ($DomainNumber = 0; $DomainNumber -lt $DomainsToCheckForGroups.count; $Domai
     }
 }
 
+
 Write-Host 'Get AD properties of currently logged on user and his manager'
 try {
     $ADPropsCurrentUser = ([adsisearcher]"(samaccountname=$env:username)").FindOne().Properties
@@ -547,6 +549,7 @@ try {
     $ADPropsCurrentUserManager = $null
 }
 
+
 Write-Host 'Get Outlook signature file path(s)'
 $SignaturePaths = @()
 Get-ItemProperty 'hkcu:\software\microsoft\office\*\common\general' | Where-Object { $_.'Signatures' -ne '' } | ForEach-Object {
@@ -561,6 +564,7 @@ Get-ItemProperty 'hkcu:\software\microsoft\office\*\common\general' | Where-Obje
     }
     Pop-Location
 }
+
 
 Write-Host 'Get mail addresses from Outlook profiles and corresponding registry paths'
 $MailAddresses = @()
@@ -656,6 +660,7 @@ $SignatureFilesMailboxFilePart = @{}
 $SignatureFilesDefaultNew = @{}
 $SignatureFilesDefaultReplyFwd = @{}
 $global:SignatureFilesDone = @()
+$SignatureFilesGroupSIDs = @{}
 
 foreach ($SignatureFile in (Get-ChildItem -Path $SignatureTemplatePath -File -Filter '*.docx')) {
     Write-Host ("  '$($SignatureFile.Name)'")
@@ -678,8 +683,30 @@ foreach ($SignatureFile in (Get-ChildItem -Path $SignatureTemplatePath -File -Fi
             $SignatureFilesMailboxFilePart.add($SignatureFile.FullName, $SignatureFilePart)
         } else {
             Write-Host '    Group specific signature'
+            ([regex]'\[.*?\]').Matches($SignatureFilePart) | ForEach-Object {
+                $groupname = $_.value
+                $NTName = ((($groupname -replace "\[", "") -replace "\]", "") -replace '(.*?) (.*)', '$1\$2')
+                if (-not $SignatureFilesGroupSIDs.ContainsKey($_.value)) {
+                    try {
+                        $SignatureFilesGroupSIDs.add($_.value, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
+                    } catch {
+                        # No group with this sAMAccountName found. Maybe it's a display name?
+                        try {
+                            $objTrans = New-Object -ComObject 'NameTranslate'
+                            $objNT = $objTrans.GetType()
+                            $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split "\\")[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
+                            $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($NTName -split "\\")[1]))
+                            $SignatureFilesGroupSIDs.add($groupname, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
+                        } catch {
+                        }
+                    }	
+                }    
+            }
+            foreach ($key in $SignatureFilesGroupSIDs.keys) {
+                $SignatureFilePart = $SignatureFilePart.replace($key, ($key + ('[' + $SignatureFilesGroupSIDs[$key] + ']')))
+            }
             $SignatureFilesGroup.add($SignatureFile.FullName, $SignatureFileTargetName)
-            $SignatureFilesGroupFilePart.add($SignatureFile.FullName, $SignatureFilePart)
+           	$SignatureFilesGroupFilePart.add($SignatureFile.FullName, $SignatureFilePart)
         }
     }
 
@@ -692,6 +719,12 @@ foreach ($SignatureFile in (Get-ChildItem -Path $SignatureTemplatePath -File -Fi
         $SignatureFilesDefaultReplyFwd.add($SignatureFile.FullName, $SignatureFileTargetName)
         Write-Host '    Default signature for replies and forwards'
     }
+}
+
+
+Write-Host "Signature group name to SID mapping"
+foreach ($key in $SignatureFilesGroupSIDs.keys) {
+    Write-Host "  $($key) = $($SignatureFilesGroupSIDs[$key])"
 }
 
 
@@ -713,7 +746,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
         $UserDomain = ''
 
         Write-Host '  Get AD properties and group membership of mailbox'
-        $Groups = @()
+        $GroupsSIDs = @()
 
         if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
             # Loop through domains until the first one knows the legacyExchangeDN
@@ -750,27 +783,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
 
                         foreach ($sidBytes in $UserAccount.Properties.tokenGroups) {
                             $sid = New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)
-                            $objTrans = New-Object -ComObject 'NameTranslate'
-                            $objNT = $objTrans.GetType()
-                            $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $Null)) # 3 = ADS_NAME_INITTYPE_GC
-                            try {
-                                $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (12, $sid.tostring())) # 12 = SIDORSIDHISTORY
-                                $Groups += ($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)) -replace '\\', ' ' # 3 = NT4NAME, 4 = DISPLAYNAME
-                                Write-Host "      [$($Groups[-1])]" -NoNewline
-                                try {
-                                    $x = (($Groups[-1] -split ' ')[0] + ' ' + ($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 4))) # 3 = NT4NAME, 4 = DISPLAYNAME
-                                    if ($x -ine $Groups[-1]) {
-                                        $Groups += $x
-                                        Write-Host ", [$x]"
-                                    } else {
-                                        Write-Host
-                                    }
-                                } catch {
-                                    Write-Host
-                                }
-                            } catch {
-                                continue
-                            }
+                            $GroupsSIDs += $sid.tostring()
+                            Write-Host "      $sid"
                         }
                         $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
                         $SIDsToCheckInTrusts += $UserAccount.properties.tokengroupsglobalanduniversal
@@ -832,27 +846,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
 
                             foreach ($group in $Search.findall()) {
                                 $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
-                                $objTrans = New-Object -ComObject 'NameTranslate'
-                                $objNT = $objTrans.GetType()
-                                $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $Null)) # 3 = ADS_NAME_INITTYPE_GC
-                                try {
-                                    $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (12, $sid.tostring())) # 12 = SIDORSIDHISTORY
-                                    $Groups += ($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)) -replace '\\', ' ' # 3 = NT4NAME, 4 = DISPLAYNAME
-                                    Write-Host "        [$($Groups[-1])]" -NoNewline
-                                    try {
-                                        $x = (($Groups[-1] -split ' ')[0] + ' ' + ($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 4))) # 3 = NT4NAME, 4 = DISPLAYNAME
-                                        if ($x -ine $Groups[-1]) {
-                                            $Groups += $x
-                                            Write-Host ", [$x]"
-                                        } else {
-                                            Write-Host
-                                        }
-                                    } catch {
-                                        Write-Host
-                                    }
-                                } catch {
-                                    continue
-                                }
+                                $GroupsSIDs += $sid.tostring()
+                                Write-Host "        $sid"
                             }
                         }
                     }
@@ -884,16 +879,16 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
         }
 
         Write-Host '  Process group signatures'
-        $OutlookWebHash = @{}
+        $SignatureHash = @{}
         if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
             foreach ($x in $SignatureFilesGroupFilePart.GetEnumerator()) {
-                $Groups | ForEach-Object {
+                $GroupsSIDs | ForEach-Object {
                     if ($x.Value.tolower().Contains('[' + $_.tolower() + ']')) {
-                        $OutlookWebHash.add($x.Name, $SignatureFilesGroup[$x.Name])
+                        $SignatureHash.add($x.Name, $SignatureFilesGroup[$x.Name])
                     }
                 }
             }
-            foreach ($Signature in $OutlookWebHash.GetEnumerator()) {
+            foreach ($Signature in $SignatureHash.GetEnumerator()) {
                 Set-Signatures
             }
         } else {
