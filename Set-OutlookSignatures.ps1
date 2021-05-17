@@ -473,7 +473,11 @@ for ($a = 0; $a -lt $x.Count; $a++) {
     }
     
     if (-not ($y.StartsWith('-'))) {
-        $DomainsToCheckForGroups += $y
+        if ($DomainsToCheckForGroups -icontains $y) {
+            Write-Host '    Domain already in list.'
+        } else {
+            $DomainsToCheckForGroups += $y
+        }
     } else {
         Write-Host '    Removing domain.'
         for ($z = 0; $z -lt $DomainsToCheckForGroups.Count; $z++) {
