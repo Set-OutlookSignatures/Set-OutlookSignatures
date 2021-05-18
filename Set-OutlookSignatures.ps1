@@ -864,7 +864,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
             $ADPropsCurrentMailbox.proxyaddresses | ForEach-Object {
                 if ([string]$_ -ilike 'smtp:*') {
                     $CurrentMailboxSMTPAddresses += [string]$_ -ireplace 'smtp:', ''
-                    Write-Host ('    [' + ([string]$_ -ireplace 'smtp:', '') + ']')
+                    Write-Host ('    ' + ([string]$_ -ireplace 'smtp:', ''))
                 }
             }
         } else {
