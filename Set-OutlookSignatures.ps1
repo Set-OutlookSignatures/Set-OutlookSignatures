@@ -288,6 +288,81 @@ function Set-Signatures {
 }
 
 
+function CheckADConnectivity {
+    param (
+        [array]$CheckDomains,
+        [string]$CheckProtocolText
+    )
+    [void][runspacefactory]::CreateRunspacePool()
+    $SessionState = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault()
+    $RunspacePool = [runspacefactory]::CreateRunspacePool(1, 10)
+    $PowerShell = [powershell]::Create()
+    $PowerShell.RunspacePool = $RunspacePool
+    $RunspacePool.Open()
+
+    for ($DomainNumber = 0; $DomainNumber -lt $CheckDomains.count; $DomainNumber++) {
+        if ($($CheckDomains[$DomainNumber]) -eq '') {
+            continue 
+        }
+
+        $PowerShell = [powershell]::Create()
+        $PowerShell.RunspacePool = $RunspacePool
+
+        [void]$PowerShell.AddScript( {
+                Param (
+                    [string]$CheckDomain,
+                    [string]$CheckProtocolText
+                )
+                $DebugPreference = 'Continue'
+                Write-Debug "Start(Ticks) = $((Get-Date).Ticks)"
+                Write-Output "$CheckDomain"
+                $Search = New-Object DirectoryServices.DirectorySearcher
+                $Search.PageSize = 1000
+                $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("$($CheckProtocolText)://$CheckDomain")
+                $Search.filter = '(objectclass=user)'
+                try {
+                    $UserAccount = ([ADSI]"$(($Search.FindOne()).path)")
+                    Write-Output 'QueryPassed'
+                } catch {
+                    Write-Output 'QueryFailed'
+                }
+            }).AddArgument($($CheckDomains[$DomainNumber])).AddArgument($CheckProtocolText)
+        $Object = New-Object 'System.Management.Automation.PSDataCollection[psobject]'
+        $Handle = $PowerShell.BeginInvoke($Object, $Object)
+        $temp = '' | Select-Object PowerShell, Handle, Object, StartTime, Done
+        $temp.PowerShell = $PowerShell
+        $temp.Handle = $Handle
+        $temp.Object = $Object
+        $temp.StartTime = $null
+        $temp.Done = $false
+        [void]$jobs.Add($Temp)
+    }
+    while (($jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
+        $jobs | ForEach-Object {
+            if (($null -eq $_.StartTime) -and ($_.Powershell.Streams.Debug[0].Message -match 'Start')) {
+                $StartTicks = $_.powershell.Streams.Debug[0].Message -replace '[^0-9]'
+                $_.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
+            }
+
+            if ($null -ne $_.StartTime) {
+                if ((($_.handle.IsCompleted -eq $true) -and ($_.Done -eq $false)) -or (($_.Done -eq $false) -and ((New-TimeSpan -Start $_.StartTime -End (Get-Date)).TotalSeconds -ge 5))) {
+                    $data = $_.Object[0..$(($_.object).count - 1)]
+                    Write-Host "  $($data[0])"
+                    if ($data -icontains 'QueryPassed') {
+                        Write-Host "    $CheckProtocolText query successful."
+                    } else {
+                        Write-Host "    $CheckProtocolText query failed, removing domain from list."
+                        Write-Host '    If this error is permanent, check firewalls and AD trust. Consider using parameter DomainsToCheckForGroups.'
+                        $DomainsToCheckForGroups.remove($data[0])
+                    }
+                    $_.Done = $true
+                }
+            }
+        }
+    }
+}
+
+
 Clear-Host
 
 Write-Host 'Script started'
@@ -296,6 +371,7 @@ Write-Host '  Check parameters and script environment'
 Set-Location $PSScriptRoot | Out-Null
 $Search = New-Object DirectoryServices.DirectorySearcher
 $Search.PageSize = 1000
+$jobs = New-Object System.Collections.ArrayList
 
 
 # Check paths
@@ -332,8 +408,8 @@ if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyCon
         $oIE.Visible = $false
         $oIE.Navigate2('https://' + ((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
         $oIE = $null
-        
-        # Wait until an IE tab with the corresponding URL is open            
+
+        # Wait until an IE tab with the corresponding URL is open
         $app = New-Object -com shell.application
         $i = 0
         while ($i -lt 1) {
@@ -342,7 +418,7 @@ if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyCon
             }
             Start-Sleep -Milliseconds 50
         }
-        
+
         # Wait until the corresponding URL is fully loaded, then close the tab
         $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
             while ($_.busy) {
@@ -350,9 +426,9 @@ if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyCon
             }
             $_.quit()
         }
-      
+
         $app = $null
-          
+
     }
 }
 
@@ -362,8 +438,7 @@ if ((Test-Path -LiteralPath $SignatureTemplatePath -PathType Container) -eq $fal
 }
 
 
-if (($ExecutionContext.SessionState.LanguageMode) -eq 'FullLanguage') {
-} else {
+if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
     Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode."
     Write-Host 'Base64 conversion not possible. Exiting.'
     exit 1
@@ -400,7 +475,7 @@ $HTMLMarkerTag = '<meta name=data-SignatureFileInfo content="Set-OutlookSignatur
 
 Write-Host 'Enumerate domains'
 $x = $DomainsToCheckForGroups
-$DomainsToCheckForGroups = @()
+[System.Collections.ArrayList]$DomainsToCheckForGroups = @()
 
 # Users own domain/forest is always included
 $y = ([ADSI]'LDAP://RootDSE').rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
@@ -420,28 +495,28 @@ if ($x[0] -eq '*') {
     $Search.FindAll() | ForEach-Object {
         # DNS name of this side of the trust (could be the root domain or any subdomain)
         # $TrustOrigin = ($_.properties.distinguishedname -split ',DC=')[1..999] -join '.'
-        
+
         # DNS name of the other side of the trust (could be the root domain or any subdomain)
         # $TrustName = $_.properties.name
 
         # Domain SID of the other side of the trust
         # $TrustNameSID = (New-Object system.security.principal.securityidentifier($($_.properties.securityidentifier), 0)).tostring()
-        
+
         # Trust direction
         # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trustdirection?view=net-5.0
         # $TrustDirectionNumber = $_.properties.trustdirection
-        
+
         # Trust type
         # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trusttype?view=net-5.0
         # $TrustTypeNumber = $_.properties.trusttype
-        
+
         # Trust attributes
         # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/e9a2d23c-c31e-4a6f-88a0-6646fdb51a3c
         # $TrustAttributesNumber = $_.properties.trustattributes
 
         # Which domains does the current user have access to?
         # No intra-forest trusts, only bidirectional trusts and outbound trusts
-        
+
         if (($($_.properties.trustattributes) -ne 32) -and (($($_.properties.trustdirection) -eq 2) -or ($($_.properties.trustdirection) -eq 3)) ) {
             Write-Host "  Trusted domain: $($_.properties.name)"
             $DomainsToCheckForGroups += $_.properties.name
@@ -456,22 +531,22 @@ for ($a = 0; $a -lt $x.Count; $a++) {
 
     $y = ($x[$a] -replace ('DC=', '') -replace (',', '.'))
 
-    if ($y -eq $x[$a]) { 
-        Write-Host "  User provided domain/forest: $y" 
+    if ($y -eq $x[$a]) {
+        Write-Host "  User provided domain/forest: $y"
     } else {
-        Write-Host "  User provided domain/forest: $($x[$a]) -> $y" 
+        Write-Host "  User provided domain/forest: $($x[$a]) -> $y"
     }
 
     if (($a -ne 0) -and ($x[$a] -ieq '*')) {
-        Write-Host '    Skipping domain. Entry * is only allowed at first position in list.' 
+        Write-Host '    Skipping domain. Entry * is only allowed at first position in list.'
         continue
     }
 
     if ($y -match '[^a-zA-Z0-9.-]') {
-        Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.' 
+        Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.'
         continue
     }
-    
+
     if (-not ($y.StartsWith('-'))) {
         if ($DomainsToCheckForGroups -icontains $y) {
             Write-Host '    Domain already in list.'
@@ -489,49 +564,12 @@ for ($a = 0; $a -lt $x.Count; $a++) {
 }
 
 
-Write-Host 'Check for open LDAP and GC ports and connectivity'
-for ($DomainNumber = 0; $DomainNumber -lt $DomainsToCheckForGroups.count; $DomainNumber++) {
-    if ($($DomainsToCheckForGroups[$DomainNumber]) -eq '') { continue }
-    Write-Host "  $($DomainsToCheckForGroups[$DomainNumber])"
+Write-Host 'Check for open LDAP port and connectivity'
+CheckADConnectivity $DomainsToCheckForGroups 'LDAP'
 
-    if ((New-Object System.Net.Sockets.TcpClient).ConnectAsync($DomainsToCheckForGroups[$DomainNumber], 389).Wait(1000) -ne $true) {
-        Write-Host '    Port 389 (LDAP) not open, ignoring domain.'
-        $DomainsToCheckForGroups[$DomainNumber] = ''
-        continue
-    } else {
-        Write-Host '    Port 389 (LDAP) open, LDAP connectivity check (takes some time) ' -NoNewline
-        $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$($DomainsToCheckForGroups[$DomainNumber])")
-        $Search.filter = '(objectclass=user)'
-        try {
-            $UserAccount = ([ADSI]"$(($Search.FindOne()).path)")
-            Write-Host 'passed.'
-        } catch {
-            Write-Host 'failed. Removing domain from list.'
-            Write-Host '    If this error is permanent, check AD trust and firewall config. Consider using parameter DomainsToCheckForGroups.'
-            $DomainsToCheckForGroups[$DomainNumber] = ''
-            continue
-        }
-    }
 
-    if ((New-Object System.Net.Sockets.TcpClient).ConnectAsync($DomainsToCheckForGroups[$DomainNumber], 3268).Wait(1000) -ne $true) {
-        Write-Host '    Port 3268 (GC) not open, ignoring domain.'
-        $DomainsToCheckForGroups[$DomainNumber] = ''
-        continue
-    } else {
-        Write-Host '    Port 3268 (GC) open, GC connectivity check ' -NoNewline
-        $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
-        $Search.filter = '(objectclass=user)'
-        try {
-            $UserAccount = ([ADSI]"$(($Search.FindOne()).path)")
-            Write-Host 'passed.'
-        } catch {
-            Write-Host 'failed. Removing domain from list.'
-            Write-Host '    If this error is permanent, check AD trust and firewall config. Consider using parameter DomainsToCheckForGroups.'
-            $DomainsToCheckForGroups[$DomainNumber] = ''
-            continue
-        }
-    }
-}
+Write-Host 'Check for open Global Catalog port and connectivity'
+CheckADConnectivity $DomainsToCheckForGroups 'GC'
 
 
 Write-Host 'Get AD properties of currently logged on user and his manager'
@@ -685,7 +723,7 @@ foreach ($SignatureFile in (Get-ChildItem -Path $SignatureTemplatePath -File -Fi
             Write-Host '    Group specific signature'
             ([regex]'\[.*?\]').Matches($SignatureFilePart) | ForEach-Object {
                 $groupname = $_.value
-                $NTName = ((($groupname -replace "\[", "") -replace "\]", "") -replace '(.*?) (.*)', '$1\$2')
+                $NTName = ((($groupname -replace '\[', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
                 if (-not $SignatureFilesGroupSIDs.ContainsKey($_.value)) {
                     try {
                         $SignatureFilesGroupSIDs.add($_.value, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
@@ -694,19 +732,19 @@ foreach ($SignatureFile in (Get-ChildItem -Path $SignatureTemplatePath -File -Fi
                         try {
                             $objTrans = New-Object -ComObject 'NameTranslate'
                             $objNT = $objTrans.GetType()
-                            $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split "\\")[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
-                            $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($NTName -split "\\")[1]))
+                            $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
+                            $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($NTName -split '\\')[1]))
                             $SignatureFilesGroupSIDs.add($groupname, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                         } catch {
                         }
-                    }	
-                }    
+                    }
+                }
             }
             foreach ($key in $SignatureFilesGroupSIDs.keys) {
                 $SignatureFilePart = $SignatureFilePart.replace($key, ($key + ('[' + $SignatureFilesGroupSIDs[$key] + ']')))
             }
             $SignatureFilesGroup.add($SignatureFile.FullName, $SignatureFileTargetName)
-           	$SignatureFilesGroupFilePart.add($SignatureFile.FullName, $SignatureFilePart)
+            $SignatureFilesGroupFilePart.add($SignatureFile.FullName, $SignatureFilePart)
         }
     }
 
@@ -722,7 +760,7 @@ foreach ($SignatureFile in (Get-ChildItem -Path $SignatureTemplatePath -File -Fi
 }
 
 
-Write-Host "Signature group name to SID mapping"
+Write-Host 'Signature group name to SID mapping'
 foreach ($key in $SignatureFilesGroupSIDs.keys) {
     Write-Host "  $($key) = $($SignatureFilesGroupSIDs[$key])"
 }
@@ -752,18 +790,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
             # Loop through domains until the first one knows the legacyExchangeDN
             for ($DomainNumber = 0; (($DomainNumber -lt $DomainsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
                 if (($DomainsToCheckForGroups[$DomainNumber] -ne '')) {
-                    Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (searching for mailbox user object and it's group membership)"
+                    Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (searching for mailbox user object and its group membership)"
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
-                    $Search.filter = '(objectclass=user)'
-                    try {
-                        $UserAccount = ([ADSI]"$(($Search.FindOne()).path)")
-                    } catch {
-                        Write-Host "      Error connecting to $($DomainsToCheckForGroups[$DomainNumber]). Removing domain from list."
-                        Write-Host '      If this error is permanent, check AD trust and firewall config. Consider using parameter DomainsToCheckForGroups.'
-                        $DomainsToCheckForGroups[$DomainNumber] = ''
-                        continue
-                    }
-
                     $Search.filter = "(&(objectclass=user)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
                     $u = $Search.FindOne()
                     if (($u.path -ne '') -and ($null -ne $u.path)) {
@@ -819,19 +847,6 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                 if (($DomainsToCheckForGroups[$DomainNumber] -ne '') -and ($DomainsToCheckForGroups[$DomainNumber] -ine $UserDomain) -and ($UserDomain -ne '')) {
                     Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (mailbox group membership across trusts, takes some time)"
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
-                    $Search.filter = '(objectclass=user)'
-                    try {
-                        $UserAccount = ([ADSI]"$(($Search.FindOne()).path)")
-                    } catch {
-                        Write-Host "      Error connecting to $($DomainsToCheckForGroups[$DomainNumber]). Removing domain from list."
-                        Write-Host '      If this error is permanent, check AD trust and firewall config. Consider using parameter DomainsToCheckForGroups.'
-                        $DomainsToCheckForGroups[$DomainNumber] = ''
-                        continue
-                    }
-                    if ($LdapFilterSIDs -eq '') {
-                        continue
-                    }
-
                     $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
                     foreach ($fsp in $Search.FindAll()) {
                         if (($fsp.path -ne '') -and ($null -ne $fsp.path)) {
@@ -841,8 +856,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                             # member:1.2.840.113556.1.4.1941:= (LDAP_MATCHING_RULE_IN_CHAIN) only returns domain local groups from the domain defined in searchroot
                             # A Foreign Security Principal ist created in each (sub)domain, in which it is granted permissions,
                             # and it can only be member of a domain local group - so we set the searchroot to the (sub)domain of the Foreign Security Principal.
-                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$((($fsp.path -split ',DC=')[1..999] -join '.'))")                            
-                            $Search.filter = "(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname))"
+                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$((($fsp.path -split ',DC=')[1..999] -join '.'))")
+                            $Search.filter = "(&(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname)))"
 
                             foreach ($group in $Search.findall()) {
                                 $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
