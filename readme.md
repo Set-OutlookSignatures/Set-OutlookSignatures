@@ -25,7 +25,7 @@
 ## 1.2. General description  
 Downloads centrally stored signatures, replaces variables, optionally sets default signatures.  
 Signatures can be applicable to all users, specific groups or specific mail addresses.  
-Signatures can be assigned time ranges within which they are valid. 
+Signatures can be assigned time ranges within which they are valid.  
 Signatures are also set in Outlook Web for the currently logged-on user.  
 ## 1.3. Removing old signatures  
 The script deletes locally available signatures, if they are no longer available centrally.  
