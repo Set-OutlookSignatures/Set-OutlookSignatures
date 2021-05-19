@@ -25,7 +25,8 @@
 ## 1.2. General description  
 Downloads centrally stored signatures, replaces variables, optionally sets default signatures.  
 Signatures can be applicable to all users, specific groups or specific mail addresses.  
-Signatures are also set in Outlook Web.  
+Signatures can be assigned time ranges within which they are valid. 
+Signatures are also set in Outlook Web for the currently logged-on user.  
 ## 1.3. Removing old signatures  
 The script deletes locally available signatures, if they are no longer available centrally.  
 Signature created manually by the user are not deleted. The script marks each downloaded signature with a specific HTML tag, which enables this cleaning feature.  
@@ -83,12 +84,15 @@ Examples:
     - Set signature as default signature for replies and forwarded mails  
 - \[NETBIOS-Domain Group-SamAccountName]  
     - Make this signature specific for an Outlook mailbox or the currently logged-on user being a member (direct or indirect) of this group  
-    - Groups must be available in Active Directory. Groups like 'Everyone' and 'Authenticated Users' only exist locally, not in Active Directory.  
+    - Groups must be available in Active Directory. Groups like 'Everyone' and 'Authenticated Users' only exist locally, not in Active Directory  
 - \[SMTP address]  
     - Make this signature specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
-Filename tags can be combined, so a signature may be assigned to several groups and several mail addresses at the samt time.  
+- \[yyyyMMddHHmm-yyyyMMddHHmm]  
+    - Make this signature valid only during the specific time range (yyyy = year, MM = month, dd = day, HH = hour, mm = minute)  
+Filename tags can be combined, so a signature may be assigned to several groups and several mail addresses at the same time.  
 ## 1.13. Signature application order  
 Signatures are applied in a specific order: Common signatures first, group signatures second, mail address specific signatures last.  
+Signatures with a time range tag are only considered if the current system time is in range of at least one of these tags.  
 Common signatures are signatures with either no tag or only \[defaultNew] and/or \[defaultReplyFwd].  
 Within these groups, signatures are applied alphabetically ascending.  
 Every centrally stored signature is applied only once, as there is only one signature path in Outlook, and subfolders are not allowed - so the file names have to be unique.  
@@ -132,6 +136,6 @@ The legacyExchangeDN attribute is used to find the user behind a mailbox, becaus
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.  
 The disadvantage of using legacyEchangeDn is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures.  
 ### 1.16.2. Which ports are required?
-Ports 389 TCP (LDAP) and 3268 TCP (Global Catalog) are required to communication with Active Directory domains. 
+Ports 389 TCP (LDAP) and 3268 TCP (Global Catalog) are required to communicate with Active Directory domains. 
 The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11).  
 The client needs port 443 to access a WebDAV share (a SharePoint document library, for example).  
