@@ -6,7 +6,7 @@
   - [1.3. Removing old signatures](#13-removing-old-signatures)
   - [1.4. Outlook signature path](#14-outlook-signature-path)
   - [1.5. Mailboxes](#15-mailboxes)
-  - [1.6. Group memberships](#16-group-memberships)
+  - [1.6. Group membership](#16-group-membership)
   - [1.7. Parameters](#17-parameters)
     - [1.7.1. SignatureTemplatePath](#171-signaturetemplatepath)
     - [1.7.2. DomainsToCheckForGroups](#172-domainstocheckforgroups)
@@ -38,7 +38,7 @@ If the relative path set in the registry would be a valid path but does not exis
 The script only considers primary mailboxes (mailboxes added as additional accounts), no secondary mailboxes.  
 This is the same way Outlook handles mailboxes from a signature perspective.  
 The script is created for Exchange environments. Non-Exchange mailboxes can not have group signatures, but common and mailbox specific signatures.  
-## 1.6. Group memberships  
+## 1.6. Group membership  
 The script considers all groups the currently logged-on user belongs to, as well as all groups the currently processed mailbox belongs to.  
 For both sets of groups, group membership is searched against the whole Active Directory forest of the currently logged-on user as well as all trusted domains the user can access.  
 Trusted domains can be modified with the DomainsToCheckForGroups parameter.  
@@ -50,7 +50,7 @@ Local and remote paths are supported. Local paths can be absolute ('C:\Signature
 WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'  
 The currently logged-on user needs at least read access to the path  
 ### 1.7.2. DomainsToCheckForGroups  
-The parameters tells the script which domains should be used to search for mailbox and user group memberships.  
+The parameters tells the script which domains should be used to search for mailbox and user group membership.  
 The default value, '\*' tells the script to query all trusted domains in the Active Directory forest of the logged-on user.  
 For a custom list of domains/forests, specify them as comma-separated list of strings: "domain-a.local", "dc=example,dc=com", "domain-b.internal".  
 When a domain/forest in the custom list starts with a dash or minus ('-domain-a.local'), this domain is removed from the list.  
