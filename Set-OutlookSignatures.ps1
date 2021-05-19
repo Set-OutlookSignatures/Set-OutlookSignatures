@@ -569,11 +569,11 @@ for ($a = 0; $a -lt $x.Count; $a++) {
 
 
 Write-Host 'Check for open LDAP port and connectivity'
-CheckADConnectivity $DomainsToCheckForGroups 'LDAP' '  ' | out-null
+CheckADConnectivity $DomainsToCheckForGroups 'LDAP' '  ' | Out-Null
 
 
 Write-Host 'Check for open Global Catalog port and connectivity'
-CheckADConnectivity $DomainsToCheckForGroups 'GC' '  ' | out-null
+CheckADConnectivity $DomainsToCheckForGroups 'GC' '  ' | Out-Null
 
 
 Write-Host 'Get AD properties of currently logged on user and his manager'
@@ -715,18 +715,49 @@ foreach ($SignatureFile in (Get-ChildItem -Path $SignatureTemplatePath -File -Fi
         $SignatureFileTargetName = $SignatureFile.Name
     }
 
+    $SignatureFileTimeActive = $true
+    if ($SignatureFilePart -match '\[\d{12}-\d{12}\]') {
+        $SignatureFileTimeActive = $false
+        Write-Host '    Time based signature'
+        foreach ($SignatureFilePartTag in ([regex]::Matches((($SignatureFilePart -replace '(?i)\[DefaultNew\]', '') -replace '(?i)\[DefaultReplyFwd\]', ''), '\[\d{12}-\d{12}\]').captures.value)) {
+            foreach ($DateTimeTag in ([regex]::Matches($SignatureFilePartTag, '\[\d{12}-\d{12}\]').captures.value)) {
+                Write-Host "      $($DateTimeTag): " -NoNewline
+                try {
+                    $DateTimeTagStart = [System.DateTime]::ParseExact(($DateTimeTag.tostring().Substring(1, 12)), 'yyyyMMddHHmm', $null)
+                    $DateTimeTagEnd = [System.DateTime]::ParseExact(($DateTimeTag.tostring().Substring(14, 12)), 'yyyyMMddHHmm', $null)
+
+                    if (((Get-Date) -ge $DateTimeTagStart) -and ((Get-Date) -le $DateTimeTagEnd)) {
+                        Write-Host 'Current DateTime in range'
+                        $SignatureFileTimeActive = $true
+                    } else {
+                        Write-Host 'Current DateTime out of range'
+                    }
+                } catch {
+                    Write-Host 'Invalid DateTime, ignoring tag'
+                }
+            }
+        }
+        if ($SignatureFileTimeActive -eq $true) {
+            Write-Host '      Current DateTime is in range of at least one DateTime tag, using signature'
+        } else {
+            Write-Host '      Current DateTime is not in range of any DateTime tag, ignoring signature'
+        }
+    }
+
+    if ($SignatureFileTimeActive -ne $true) {
+        continue
+    }
+
     [regex]::Matches((($SignatureFilePart -replace '(?i)\[DefaultNew\]', '') -replace '(?i)\[DefaultReplyFwd\]', ''), '\[(.*?)\]').captures.value | ForEach-Object {
-        if ($_ -eq $null) {
-            Write-Host '    Common signature'
-            $SignatureFilesCommon.add($SignatureFile.FullName, $SignatureFileTargetName)
-        } elseif ($_ -match '(.*?)@(.*?)\.(.*?)') {
+        $SignatureFilePartTag = $_
+        if ($SignatureFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') {
             Write-Host '    Mailbox specific signature'
             $SignatureFilesMailbox.add($SignatureFile.FullName, $SignatureFileTargetName)
             $SignatureFilesMailboxFilePart.add($SignatureFile.FullName, $SignatureFilePart)
-        } else {
+        } elseif ($SignatureFilePartTag -match '\[.*? .*?\]') {
             Write-Host '    Group specific signature'
-            ([regex]'\[.*?\]').Matches($SignatureFilePart) | ForEach-Object {
-                $groupname = $_.value
+            ([regex]'\[.*? .*?\]').Matches($SignatureFilePart) | ForEach-Object {
+                $groupname = $SignatureFilePartTag.value
                 $NTName = ((($groupname -replace '\[', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
                 if (-not $SignatureFilesGroupSIDs.ContainsKey($_.value)) {
                     try {
@@ -749,6 +780,9 @@ foreach ($SignatureFile in (Get-ChildItem -Path $SignatureTemplatePath -File -Fi
             }
             $SignatureFilesGroup.add($SignatureFile.FullName, $SignatureFileTargetName)
             $SignatureFilesGroupFilePart.add($SignatureFile.FullName, $SignatureFilePart)
+        } else {
+            Write-Host '    Common signature'
+            $SignatureFilesCommon.add($SignatureFile.FullName, $SignatureFileTargetName)
         }
     }
 
