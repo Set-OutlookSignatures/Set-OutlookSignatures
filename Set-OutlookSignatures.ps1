@@ -259,8 +259,8 @@ function Set-Signatures {
         $SignaturePaths | ForEach-Object {
             Write-Host "      Copy signature files to '$_'"
             Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ('\\?\' + (Join-Path -Path $($_ -replace [regex]::escape('\\?\'), '') -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
-            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ('\\?\' + (Join-Path -Path $($_ -replace [regex]::escape('\\?\'), '') -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
-            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ('\\?\' + (Join-Path -Path $($_ -replace [regex]::escape('\\?\'), '') -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
+            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ('\\?\' + (Join-Path -Path $($_ -replace [regex]::escape('\\?\'), '') -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
+            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ('\\?\' + (Join-Path -Path $($_ -replace [regex]::escape('\\?\'), '') -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
         }
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.docx')) -Force -Recurse
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Force -Recurse
@@ -1023,15 +1023,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                     }
                     if (($null -ne $TempOWASigFile) -and ($TempOWASigFile -ne '')) {
                         try {
-                            Import-Module -Name '.\Microsoft.Exchange.WebServices.dll'
-                            $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
-                            $exchService.UseDefaultCredentials = $true
-                            $exchService.AutodiscoverUrl($ADPropsCurrentUser.mail)
-                            $folderid = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Root, $($ADPropsCurrentUser.mail))
-                            #Specify the Root folder where the FAI Item is
-                            $UsrConfig = [Microsoft.Exchange.WebServices.Data.UserConfiguration]::Bind($exchService, 'OWA.UserOptions', $folderid, [Microsoft.Exchange.WebServices.Data.UserConfigurationProperties]::All)
-                            $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $SignaturePaths[0] -ChildPath ($TempOWASigFile + '.htm')) -Raw).ToString()
-                            $stTextSig = (Get-Content -LiteralPath (Join-Path -Path $SignaturePaths[0] -ChildPath ($TempOWASigFile + '.txt')) -Raw).ToString()
+                            $hsHtmlSignature = (Get-Content -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.htm'))) -Raw).ToString()
+                            $stTextSig = (Get-Content -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.txt'))) -Raw).ToString()
 
                             $OutlookWebHash = @{}
                             # Keys are case sensitive when setting them
@@ -1041,6 +1034,19 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                             $OutlookWebHash.Add('autoaddsignature', $TempOWASigSetNew)
                             $OutlookWebHash.Add('autoaddsignatureonmobile', $TempOWASigSetNew)
                             $OutlookWebHash.Add('autoaddsignatureonreply', $TempOWASigSetReply)
+
+                            try {
+                                Copy-Item -Path 'Microsoft.Exchange.WebServices.dll' -Destination (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
+                            } catch {
+                            }
+
+                            Import-Module -Name (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
+                            $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
+                            $exchService.UseDefaultCredentials = $true
+                            $exchService.AutodiscoverUrl($ADPropsCurrentUser.mail)
+                            $folderid = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Root, $($ADPropsCurrentUser.mail))
+                            #Specify the Root folder where the FAI Item is
+                            $UsrConfig = [Microsoft.Exchange.WebServices.Data.UserConfiguration]::Bind($exchService, 'OWA.UserOptions', $folderid, [Microsoft.Exchange.WebServices.Data.UserConfigurationProperties]::All)
 
                             foreach ($OutlookWebHashKey in $OutlookWebHash.Keys) {
                                 if ($UsrConfig.Dictionary.ContainsKey($OutlookWebHashKey)) {
@@ -1055,7 +1061,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                             Write-Host '    Error setting Outlook Web signature, please contact your administrator'
                         }
 
-                        Remove-Module -Name '.\Microsoft.Exchange.WebServices.dll' -ErrorAction SilentlyContinue
+                        Remove-Module -Name Microsoft.Exchange.WebServices -Force
+                        Remove-Item (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force -ErrorAction SilentlyContinue
                     }
                 }
             }
