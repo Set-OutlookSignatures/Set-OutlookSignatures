@@ -24,8 +24,8 @@
     - [1.16.2. Which ports are required?](#1162-which-ports-are-required)
 ## 1.2. General description  
 Downloads centrally stored signatures, replaces variables, optionally sets default signatures.  
-Signatures can be applicable to all users, specific groups or specific mail addresses.  
-Signatures can be assigned time ranges within which they are valid.  
+Signatures can be applied to all (mailbox) users, specific groups or specific mail addresses.  
+Signature templates can be assigned time ranges within which they are valid.  
 Signatures are also set in Outlook Web for the currently logged-on user.  
 ## 1.3. Removing old signatures  
 The script deletes locally available signatures, if they are no longer available centrally.  
@@ -35,20 +35,21 @@ The Outlook signature path is retrieved from the users registry, so the script i
 The registry setting does not allow for absolute paths, only for paths relative to '%APPDATA%\Microsoft'.  
 If the relative path set in the registry would be a valid path but does not exist, the script creates it.  
 ## 1.5. Mailboxes  
-The script only considers primary mailboxes (mailboxes added as additional accounts), no secondary mailboxes.  
+The script only considers primary mailboxes (mailboxes added as separate accounts), no secondary mailboxes.  
 This is the same way Outlook handles mailboxes from a signature perspective.  
 The script is created for Exchange environments. Non-Exchange mailboxes can not have group signatures, but common and mailbox specific signatures.  
 ## 1.6. Group membership  
 The script considers all groups the currently logged-on user belongs to, as well as all groups the currently processed mailbox belongs to.  
 For both sets of groups, group membership is searched against the whole Active Directory forest of the currently logged-on user as well as all trusted domains the user can access.  
+The script works fine with linked mailboxes in Exchange resource forest scenarios.  
 Trusted domains can be modified with the DomainsToCheckForGroups parameter.  
-Group membership is achieved by querying the tokenGroups attribute, which is not only very fast and resource saving on client and server, but also considers sIDHistory.    
+Group membership is achieved by querying the tokenGroups attribute, which is not only very fast and resource saving on client and server, but also considers sIDHistory.  
 ## 1.7. Parameters  
 ### 1.7.1. SignatureTemplatePath  
 The parameter SignatureTemplatePath tells the script where signature template files are stored.  
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').  
 WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'  
-The currently logged-on user needs at least read access to the path  
+The currently logged-on user needs at least read access to the path.  
 ### 1.7.2. DomainsToCheckForGroups  
 The parameters tells the script which domains should be used to search for mailbox and user group membership.  
 The default value, '\*' tells the script to query all trusted domains in the Active Directory forest of the logged-on user.  
@@ -66,7 +67,7 @@ Error handling is implemented rudimentarily.
 ## 1.10. Run script while Outlook is running  
 Outlook and the script can run simultaneously.  
 New and changed signatures can be used instantly in Outlook.  
-Changing which signatures are to be used as default signature require an Outlook restart.   
+Changing which signature is to be used as default signature for new mails for for replies and forwards requires restarting Outlook.   
 ## 1.11. Signature file format  
 Only Word files with the extension .DOCX are supported as signature template files.  
 ## 1.12. Signature file naming  
@@ -82,14 +83,15 @@ Examples:
     - Set signature as default signature for new mails  
 - \[defaultReplyFwd]  
     - Set signature as default signature for replies and forwarded mails  
-- \[NETBIOS-Domain Group-SamAccountName]  
+- \[NETBIOS-Domain Group-SamAccountName], e.g. \[EXAMPLE Domain Users]  
     - Make this signature specific for an Outlook mailbox or the currently logged-on user being a member (direct or indirect) of this group  
     - Groups must be available in Active Directory. Groups like 'Everyone' and 'Authenticated Users' only exist locally, not in Active Directory  
-- \[SMTP address]  
+- \[SMTP address], e.g. \[office@example.com]  
     - Make this signature specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
-- \[yyyyMMddHHmm-yyyyMMddHHmm]  
-    - Make this signature valid only during the specific time range (yyyy = year, MM = month, dd = day, HH = hour, mm = minute)  
-Filename tags can be combined, so a signature may be assigned to several groups and several mail addresses at the same time.  
+- \[yyyyMMddHHmm-yyyyMMddHHmm], e.g. \[202112150000-202112262359] for the 2021 Christmas season  
+    - Make this signature template valid only during the specific time range (yyyy = year, MM = month, dd = day, HH = hour, mm = minute)  
+    - If the script does not run after a template has expired, the signature is still available on the client and be used.  
+Filename tags can be combined, so a signature may be assigned to several groups, several mail addresses and several time ranges, be used as default signature for new e-mails and be used as default signature for replies and forwards at the same time. The number of possible tags is limited by Operating System file name and path length restrictions only.  
 ## 1.13. Signature application order  
 Signatures are applied in a specific order: Common signatures first, group signatures second, mail address specific signatures last.  
 Signatures with a time range tag are only considered if the current system time is in range of at least one of these tags.  
