@@ -291,7 +291,8 @@ function Set-Signatures {
 function CheckADConnectivity {
     param (
         [array]$CheckDomains,
-        [string]$CheckProtocolText
+        [string]$CheckProtocolText,
+        [string]$Indent
     )
     [void][runspacefactory]::CreateRunspacePool()
     $SessionState = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault()
@@ -347,19 +348,22 @@ function CheckADConnectivity {
             if ($null -ne $_.StartTime) {
                 if ((($_.handle.IsCompleted -eq $true) -and ($_.Done -eq $false)) -or (($_.Done -eq $false) -and ((New-TimeSpan -Start $_.StartTime -End (Get-Date)).TotalSeconds -ge 5))) {
                     $data = $_.Object[0..$(($_.object).count - 1)]
-                    Write-Host "  $($data[0])"
+                    Write-Host "$Indent$($data[0])"
                     if ($data -icontains 'QueryPassed') {
-                        Write-Host "    $CheckProtocolText query successful."
+                        Write-Host "$Indent  $CheckProtocolText query successful."
+                        $returnvalue = $true
                     } else {
-                        Write-Host "    $CheckProtocolText query failed, removing domain from list."
-                        Write-Host '    If this error is permanent, check firewalls and AD trust. Consider using parameter DomainsToCheckForGroups.'
+                        Write-Host "$Indent  $CheckProtocolText query failed, removing domain from list."
+                        Write-Host "$Indent  If this error is permanent, check firewalls and AD trust. Consider using parameter DomainsToCheckForGroups."
                         $DomainsToCheckForGroups.remove($data[0])
+                        $returnvalue = $false
                     }
                     $_.Done = $true
                 }
             }
         }
     }
+    return $returnvalue
 }
 
 
@@ -565,11 +569,11 @@ for ($a = 0; $a -lt $x.Count; $a++) {
 
 
 Write-Host 'Check for open LDAP port and connectivity'
-CheckADConnectivity $DomainsToCheckForGroups 'LDAP'
+CheckADConnectivity $DomainsToCheckForGroups 'LDAP' '  ' | out-null
 
 
 Write-Host 'Check for open Global Catalog port and connectivity'
-CheckADConnectivity $DomainsToCheckForGroups 'GC'
+CheckADConnectivity $DomainsToCheckForGroups 'GC' '  ' | out-null
 
 
 Write-Host 'Get AD properties of currently logged on user and his manager'
@@ -850,19 +854,20 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                     $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
                     foreach ($fsp in $Search.FindAll()) {
                         if (($fsp.path -ne '') -and ($null -ne $fsp.path)) {
-                            Write-Host "      $(($fsp.path -split ',DC=')[1..999] -join '.')"
-                            # Foreign Security Principals do not have the tokenGroups attribute
-                            # We need to switch to another, slower search method
-                            # member:1.2.840.113556.1.4.1941:= (LDAP_MATCHING_RULE_IN_CHAIN) only returns domain local groups from the domain defined in searchroot
-                            # A Foreign Security Principal ist created in each (sub)domain, in which it is granted permissions,
-                            # and it can only be member of a domain local group - so we set the searchroot to the (sub)domain of the Foreign Security Principal.
-                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$((($fsp.path -split ',DC=')[1..999] -join '.'))")
-                            $Search.filter = "(&(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname)))"
+                            if ((CheckADConnectivity $(($fsp.path -split ',DC=')[1..999] -join '.') 'GC' '      ') -eq $true) {
+                                # Foreign Security Principals do not have the tokenGroups attribute
+                                # We need to switch to another, slower search method
+                                # member:1.2.840.113556.1.4.1941:= (LDAP_MATCHING_RULE_IN_CHAIN) returns groups containing a specific DN as member
+                                # A Foreign Security Principal ist created in each (sub)domain, in which it is granted permissions,
+                                # and it can only be member of a domain local group - so we set the searchroot to the (sub)domain of the Foreign Security Principal.
+                                $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$((($fsp.path -split ',DC=')[1..999] -join '.'))")
+                                $Search.filter = "(&(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname)))"
 
-                            foreach ($group in $Search.findall()) {
-                                $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
-                                $GroupsSIDs += $sid.tostring()
-                                Write-Host "        $sid"
+                                foreach ($group in $Search.findall()) {
+                                    $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
+                                    $GroupsSIDs += $sid.tostring()
+                                    Write-Host "        $sid"
+                                }
                             }
                         }
                     }
