@@ -6,7 +6,7 @@
   - [1.3. Removing old signatures](#13-removing-old-signatures)
   - [1.4. Outlook signature path](#14-outlook-signature-path)
   - [1.5. Mailboxes](#15-mailboxes)
-  - [1.6. Group memberships](#16-group-memberships)
+  - [1.6. Group membership](#16-group-membership)
   - [1.7. Parameters](#17-parameters)
     - [1.7.1. SignatureTemplatePath](#171-signaturetemplatepath)
     - [1.7.2. DomainsToCheckForGroups](#172-domainstocheckforgroups)
@@ -25,7 +25,8 @@
 ## 1.2. General description  
 Downloads centrally stored signatures, replaces variables, optionally sets default signatures.  
 Signatures can be applicable to all users, specific groups or specific mail addresses.  
-Signatures are also set in Outlook Web.  
+Signatures can be assigned time ranges within which they are valid. 
+Signatures are also set in Outlook Web for the currently logged-on user.  
 ## 1.3. Removing old signatures  
 The script deletes locally available signatures, if they are no longer available centrally.  
 Signature created manually by the user are not deleted. The script marks each downloaded signature with a specific HTML tag, which enables this cleaning feature.  
@@ -37,7 +38,7 @@ If the relative path set in the registry would be a valid path but does not exis
 The script only considers primary mailboxes (mailboxes added as additional accounts), no secondary mailboxes.  
 This is the same way Outlook handles mailboxes from a signature perspective.  
 The script is created for Exchange environments. Non-Exchange mailboxes can not have group signatures, but common and mailbox specific signatures.  
-## 1.6. Group memberships  
+## 1.6. Group membership  
 The script considers all groups the currently logged-on user belongs to, as well as all groups the currently processed mailbox belongs to.  
 For both sets of groups, group membership is searched against the whole Active Directory forest of the currently logged-on user as well as all trusted domains the user can access.  
 Trusted domains can be modified with the DomainsToCheckForGroups parameter.  
@@ -49,7 +50,7 @@ Local and remote paths are supported. Local paths can be absolute ('C:\Signature
 WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'  
 The currently logged-on user needs at least read access to the path  
 ### 1.7.2. DomainsToCheckForGroups  
-The parameters tells the script which domains should be used to search for mailbox and user group memberships.  
+The parameters tells the script which domains should be used to search for mailbox and user group membership.  
 The default value, '\*' tells the script to query all trusted domains in the Active Directory forest of the logged-on user.  
 For a custom list of domains/forests, specify them as comma-separated list of strings: "domain-a.local", "dc=example,dc=com", "domain-b.internal".  
 When a domain/forest in the custom list starts with a dash or minus ('-domain-a.local'), this domain is removed from the list.  
@@ -83,12 +84,15 @@ Examples:
     - Set signature as default signature for replies and forwarded mails  
 - \[NETBIOS-Domain Group-SamAccountName]  
     - Make this signature specific for an Outlook mailbox or the currently logged-on user being a member (direct or indirect) of this group  
-    - Groups must be available in Active Directory. Groups like 'Everyone' and 'Authenticated Users' only exist locally, not in Active Directory.  
+    - Groups must be available in Active Directory. Groups like 'Everyone' and 'Authenticated Users' only exist locally, not in Active Directory  
 - \[SMTP address]  
     - Make this signature specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
-Filename tags can be combined, so a signature may be assigned to several groups and several mail addresses at the samt time.  
+- \[yyyyMMddHHmm-yyyyMMddHHmm]  
+    - Make this signature valid only during the specific time range (yyyy = year, MM = month, dd = day, HH = hour, mm = minute)  
+Filename tags can be combined, so a signature may be assigned to several groups and several mail addresses at the same time.  
 ## 1.13. Signature application order  
 Signatures are applied in a specific order: Common signatures first, group signatures second, mail address specific signatures last.  
+Signatures with a time range tag are only considered if the current system time is in range of at least one of these tags.  
 Common signatures are signatures with either no tag or only \[defaultNew] and/or \[defaultReplyFwd].  
 Within these groups, signatures are applied alphabetically ascending.  
 Every centrally stored signature is applied only once, as there is only one signature path in Outlook, and subfolders are not allowed - so the file names have to be unique.  
@@ -132,6 +136,6 @@ The legacyExchangeDN attribute is used to find the user behind a mailbox, becaus
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.  
 The disadvantage of using legacyEchangeDn is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures.  
 ### 1.16.2. Which ports are required?
-Ports 389 TCP (LDAP) and 3268 TCP (Global Catalog) are required to communication with Active Directory domains. 
+Ports 389 TCP (LDAP) and 3268 TCP (Global Catalog) are required to communicate with Active Directory domains. 
 The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11).  
 The client needs port 443 to access a WebDAV share (a SharePoint document library, for example).  
