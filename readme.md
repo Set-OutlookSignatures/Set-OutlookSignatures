@@ -91,7 +91,8 @@ Examples:
 - \[yyyyMMddHHmm-yyyyMMddHHmm], e.g. \[202112150000-202112262359] for the 2021 Christmas season  
     - Make this signature template valid only during the specific time range (yyyy = year, MM = month, dd = day, HH = hour, mm = minute)  
     - If the script does not run after a template has expired, the signature is still available on the client and be used.  
-Filename tags can be combined, so a signature may be assigned to several groups, several mail addresses and several time ranges, be used as default signature for new e-mails and be used as default signature for replies and forwards at the same time. The number of possible tags is limited by Operating System file name and path length restrictions only.  
+Filename tags can be combined: A signature may be assigned to several groups, several mail addresses and several time ranges, be used as default signature for new e-mails and as default signature for replies and forwards at the same time.  
+The number of possible tags is limited by Operating System file name and path length restrictions only. The script works with path names longer than the default Windows limit of 260 characters, even when "LongPathsEnabled" (https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation) is not active.  
 ## 1.13. Signature application order  
 Signatures are applied in a specific order: Common signatures first, group signatures second, mail address specific signatures last.  
 Signatures with a time range tag are only considered if the current system time is in range of at least one of these tags.  

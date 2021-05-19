@@ -26,11 +26,10 @@ function Set-Signatures {
     }
 
     if ($SignatureFileAlreadyDone -eq $false) {
-        $tempPath = (New-Item -ItemType Directory -Path (Join-Path -Path $env:temp -ChildPath ([System.Guid]::NewGuid()))).FullName
-
         Write-Host '      Copy file and open it in Word'
 
-        $path = $(Join-Path -Path $tempPath -ChildPath $Signature.value).tostring()
+        $path = $(Join-Path -Path $env:temp -ChildPath (New-Guid).guid).tostring() + '.docx'
+
         try {
             Copy-Item -LiteralPath $Signature.Name -Destination $path -Force
         } catch {
@@ -39,7 +38,7 @@ function Set-Signatures {
         }
 
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
-        $global:SignatureFilesDone += $Signature.Value#([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
+        $global:SignatureFilesDone += $Signature.Value
 
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatAuto')
         $COMWord.Documents.Open($path, $false) | Out-Null
@@ -144,25 +143,25 @@ function Set-Signatures {
 
         Write-Host '      Save as filtered .HTM file'
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
-        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.htm'))
+        $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
         $COMWord.ActiveDocument.Weboptions.encoding = 65001
         $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
         Write-Host '      Save as .RTF file'
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
-        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.rtf'))
+        $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
         $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
         Write-Host '      Save as .TXT file'
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
         $COMWord.ActiveDocument.TextEncoding = 1200
-        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.txt'))
+        $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
         $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
         $COMWord.ActiveDocument.Close($false)
 
         Write-Host '      Embed local files in .HTM file and add marker'
-        $path = $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.htm'))
+        $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
         $tempFileContent = Get-Content -LiteralPath $path -Raw -Encoding UTF8
 
@@ -259,11 +258,14 @@ function Set-Signatures {
 
         $SignaturePaths | ForEach-Object {
             Write-Host "      Copy signature files to '$_'"
-            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.htm')) -Destination $_ -Force
-            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.rtf')) -Destination $_ -Force
-            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension((Join-Path -Path $tempPath -ChildPath $Signature.value), '.txt')) -Destination $_ -Force
+            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ('\\?\' + (Join-Path -Path $($_ -replace [regex]::escape('\\?\'), '') -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
+            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ('\\?\' + (Join-Path -Path $($_ -replace [regex]::escape('\\?\'), '') -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
+            Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ('\\?\' + (Join-Path -Path $($_ -replace [regex]::escape('\\?\'), '') -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
         }
-        Remove-Item -LiteralPath $tempPath -Force -Recurse
+        Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.docx')) -Force -Recurse
+        Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Force -Recurse
+        Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Force -Recurse
+        Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Force -Recurse
     }
 
     # Set default signature for new mails
@@ -381,6 +383,9 @@ $jobs = New-Object System.Collections.ArrayList
 # Check paths
 if ($SignatureTemplatePath.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
     $SignatureTemplatePath = (([uri]::UnescapeDataString($SignatureTemplatePath) -ireplace ('https://', '\\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\')
+    $SignatureTemplatePath = $SignatureTemplatePath -replace [regex]::escape('\\'), '\\?\UNC\'
+} else {
+    $SignatureTemplatePath = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($SignatureTemplatePath))
 }
 
 if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyContinue)) {
@@ -596,7 +601,7 @@ Write-Host 'Get Outlook signature file path(s)'
 $SignaturePaths = @()
 Get-ItemProperty 'hkcu:\software\microsoft\office\*\common\general' | Where-Object { $_.'Signatures' -ne '' } | ForEach-Object {
     Push-Location (Join-Path -Path $env:AppData -ChildPath 'Microsoft')
-    $x = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Signatures)
+    $x = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Signatures))
     if (Test-Path $x -IsValid) {
         if (-not (Test-Path $x -type container)) {
             New-Item -Path $x -ItemType directory -Force
@@ -704,7 +709,7 @@ $SignatureFilesDefaultReplyFwd = @{}
 $global:SignatureFilesDone = @()
 $SignatureFilesGroupSIDs = @{}
 
-foreach ($SignatureFile in (Get-ChildItem -Path $SignatureTemplatePath -File -Filter '*.docx')) {
+foreach ($SignatureFile in (Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter '*.docx')) {
     Write-Host ("  '$($SignatureFile.Name)'")
     $x = $SignatureFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
     if ($x.count -ge 3) {
@@ -1069,7 +1074,7 @@ Remove-Variable COMWord
 # We check all local signatures for a specific marker in HTML code, so we don't touch user created signatures
 Write-Host 'Removing old signatures created by this script, which are no longer centrally available'
 $SignaturePaths | ForEach-Object {
-    Get-ChildItem $_ -Filter '*.htm' -File | ForEach-Object {
+    Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
         if ((Get-Content -LiteralPath $_.fullname -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
             if (($_.name -notin $global:SignatureFilesDone) -and ($_.name -notin $SignatureFilesCommon.values) -and ($_.name -notin $SignatureFilesMailbox.Values) -and ($_.name -notin $SignatureFilesGroup.Values)) {
                 Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
