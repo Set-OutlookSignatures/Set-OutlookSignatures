@@ -20,7 +20,7 @@ function Set-Signatures {
 
     $SignatureFileAlreadyDone = ($global:SignatureFilesDone -contains $($Signature.Name))
     if ($SignatureFileAlreadyDone) {
-        Write-Host '      File already processed before'
+        Write-Host '      File already processed before' -ForegroundColor Yellow
     } else {
         $global:SignatureFilesDone += $($Signature.Name)
     }
@@ -33,7 +33,7 @@ function Set-Signatures {
         try {
             Copy-Item -LiteralPath $Signature.Name -Destination $path -Force
         } catch {
-            Write-Host '        Error copying file. Skipping signature.'
+            Write-Host '        Error copying file. Skipping signature.' -ForegroundColor Red
             continue
         }
 
@@ -49,7 +49,6 @@ function Set-Signatures {
         # Currently logged on user
         $replaceHash.Add('$CURRENTUSERGIVENNAME$', [string]$ADPropsCurrentUser.givenname)
         $replaceHash.Add('$CURRENTUSERSURNAME$', [string]$ADPropsCurrentUser.sn)
-        $replaceHash.Add('$CURRENTUSERNAMEWITHTITLES$', (((((([string]$ADPropsCurrentUser.svstitelvorne, [string]$ADPropsCurrentUser.givenname, [string]$ADPropsCurrentUser.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUser.svstitelhinten) | Where-Object { $_ -ne '' }) -join ', '))
         $replaceHash.Add('$CURRENTUSERDEPARTMENT$', [string]$ADPropsCurrentUser.department)
         $replaceHash.Add('$CURRENTUSERTITLE$', [string]$ADPropsCurrentUser.title)
         $replaceHash.Add('$CURRENTUSERSTREETADDRESS$', [string]$ADPropsCurrentUser.streetaddress)
@@ -64,7 +63,6 @@ function Set-Signatures {
         # Manager of currently logged on user
         $replaceHash.Add('$CURRENTUSERMANAGERGIVENNAME$', [string]$ADPropsCurrentUserManager.givenname)
         $replaceHash.Add('$CURRENTUSERMANAGERSURNAME$', [string]$ADPropsCurrentUserManager.sn)
-        $replaceHash.Add('$CURRENTUSERMANAGERNAMEWITHTITLES$', (((((([string]$ADPropsCurrentUserManager.svstitelvorne, [string]$ADPropsCurrentUserManager.givenname, [string]$ADPropsCurrentUserManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUserManager.svstitelhinten) | Where-Object { $_ -ne '' }) -join ', '))
         $replaceHash.Add('$CURRENTUSERMANAGERDEPARTMENT$', [string]$ADPropsCurrentUserManager.department)
         $replaceHash.Add('$CURRENTUSERMANAGERTITLE$', [string]$ADPropsCurrentUserManager.title)
         $replaceHash.Add('$CURRENTUSERMANAGERSTREETADDRESS$', [string]$ADPropsCurrentUserManager.streetaddress)
@@ -79,7 +77,6 @@ function Set-Signatures {
         # Current mailbox
         $replaceHash.Add('$CURRENTMAILBOXGIVENNAME$', [string]$ADPropsCurrentMailbox.givenname)
         $replaceHash.Add('$CURRENTMAILBOXSURNAME$', [string]$ADPropsCurrentMailbox.sn)
-        $replaceHash.Add('$CURRENTMAILBOXNAMEWITHTITLES$', (((((([string]$ADPropsCurrentMailbox.svstitelvorne, [string]$ADPropsCurrentMailbox.givenname, [string]$ADPropsCurrentMailbox.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailbox.svstitelhinten) | Where-Object { $_ -ne '' }) -join ', '))
         $replaceHash.Add('$CURRENTMAILBOXDEPARTMENT$', [string]$ADPropsCurrentMailbox.department)
         $replaceHash.Add('$CURRENTMAILBOXTITLE$', [string]$ADPropsCurrentMailbox.title)
         $replaceHash.Add('$CURRENTMAILBOXSTREETADDRESS$', [string]$ADPropsCurrentMailbox.streetaddress)
@@ -94,7 +91,6 @@ function Set-Signatures {
         # Manager of current mailbox
         $replaceHash.Add('$CURRENTMAILBOXMANAGERGIVENNAME$', [string]$ADPropsCurrentMailboxManager.givenname)
         $replaceHash.Add('$CURRENTMAILBOXMANAGERSURNAME$', [string]$ADPropsCurrentMailboxManager.sn)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERNAMEWITHTITLES$', (((((([string]$ADPropsCurrentMailboxManager.svstitelvorne, [string]$ADPropsCurrentMailboxManager.givenname, [string]$ADPropsCurrentMailboxManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailboxManager.svstitelhinten) | Where-Object { $_ -ne '' }) -join ', '))
         $replaceHash.Add('$CURRENTMAILBOXMANAGERDEPARTMENT$', [string]$ADPropsCurrentMailboxManager.department)
         $replaceHash.Add('$CURRENTMAILBOXMANAGERTITLE$', [string]$ADPropsCurrentMailboxManager.title)
         $replaceHash.Add('$CURRENTMAILBOXMANAGERSTREETADDRESS$', [string]$ADPropsCurrentMailboxManager.streetaddress)
@@ -105,6 +101,26 @@ function Set-Signatures {
         $replaceHash.Add('$CURRENTMAILBOXMANAGERFAX$', [string]$ADPropsCurrentMailboxManager.facsimiletelephonenumber)
         $replaceHash.Add('$CURRENTMAILBOXMANAGERMOBILE$', [string]$ADPropsCurrentMailboxManager.mobile)
         $replaceHash.Add('$CURRENTMAILBOXMANAGERMAIL$', [string]$ADPropsCurrentMailboxManager.mail)
+
+        # Custom replacement variables
+        if (Test-Path -Path 'Custom Replacement Variables.txt' -PathType Leaf) {
+            Write-Host '        Custom replacement variables'
+            (Get-Content -LiteralPath 'Custom Replacement Variables.txt') | ForEach-Object {
+                if ($_.tostring().StartsWith('$replaceHash[''$CURRENT')) {
+                    try {
+                        Invoke-Expression -Command $_
+                    } catch {
+                        Write-Host "          Error: $_" -ForegroundColor Red
+                    }
+                } elseif (!($_.tostring().StartsWith('#')) -and ($_.tostring() -ne '')) {
+                    Write-Host "          Invalid line: $_" -ForegroundColor Red
+                }
+            }
+        }
+        $replaceHash['$CURRENTUSERNAMEWITHTITLES$']
+        $replaceHash['$CURRENTUSERMANAGERNAMEWITHTITLES$']
+        $replaceHash['$CURRENTMAILBOXNAMEWITHTITLES$']
+        $replaceHash['$CURRENTMAILBOXMANAGERNAMEWITHTITLES$']
 
         $wdFindContinue = 1
         $MatchCase = $true
@@ -355,8 +371,8 @@ function CheckADConnectivity {
                         Write-Host "$Indent  $CheckProtocolText query successful."
                         $returnvalue = $true
                     } else {
-                        Write-Host "$Indent  $CheckProtocolText query failed, removing domain from list."
-                        Write-Host "$Indent  If this error is permanent, check firewalls and AD trust. Consider using parameter DomainsToCheckForGroups."
+                        Write-Host "$Indent  $CheckProtocolText query failed, removing domain from list." -ForegroundColor Red
+                        Write-Host "$Indent  If this error is permanent, check firewalls and AD trust. Consider using parameter DomainsToCheckForGroups." -ForegroundColor Red
                         $DomainsToCheckForGroups.remove($data[0])
                         $returnvalue = $false
                     }
@@ -442,14 +458,14 @@ if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyCon
 }
 
 if ((Test-Path -LiteralPath $SignatureTemplatePath -PathType Container) -eq $false) {
-    Write-Host "  Problem connecting to or reading from folder '$SignatureTemplatePath'. Check path."
+    Write-Host "  Problem connecting to or reading from folder '$SignatureTemplatePath'. Check path." -ForegroundColor Red
     exit 1
 }
 
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-    Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode."
-    Write-Host 'Base64 conversion not possible. Exiting.'
+    Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+    Write-Host 'Base64 conversion not possible. Exiting.' -ForegroundColor Red
     exit 1
 }
 
@@ -462,12 +478,12 @@ try {
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($COMOutlook) | Out-Null
     Remove-Variable COMOutlook
 } catch {
-    Write-Host 'Outlook not installed or not working correctly. Exiting.'
+    Write-Host 'Outlook not installed or not working correctly. Exiting.' -ForegroundColor Red
     exit 1
 }
 
 if ($OutlookRegistryVersion.major -gt 16) {
-    Write-Host "Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exiting."
+    Write-Host "Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exiting." -ForegroundColor Red
 } elseif ($OutlookRegistryVersion.major -eq 16) {
     $OutlookRegistryVersion = '16.0'
 } elseif ($OutlookRegistryVersion.major -eq 15) {
@@ -475,7 +491,7 @@ if ($OutlookRegistryVersion.major -gt 16) {
 } elseif ($OutlookRegistryVersion.major -eq 14) {
     $OutlookRegistryVersion = '14.0'
 } else {
-    Write-Host "Outlook version $OutlookRegistryVersion is below minimum required version 14 (Outlook 2010). Exiting."
+    Write-Host "Outlook version $OutlookRegistryVersion is below minimum required version 14 (Outlook 2010). Exiting." -ForegroundColor Red
     exit 1
 }
 
@@ -492,7 +508,7 @@ if ($y -ne '') {
     Write-Host "  Current user forest: $y"
     $DomainsToCheckForGroups += $y
 } else {
-    Write-Host '  Problem connecting to Active Directory, or user is a local user. Exiting.'
+    Write-Host '  Problem connecting to Active Directory, or user is a local user. Exiting.' -ForegroundColor Red
     exit 1
 }
 
@@ -547,18 +563,18 @@ for ($a = 0; $a -lt $x.Count; $a++) {
     }
 
     if (($a -ne 0) -and ($x[$a] -ieq '*')) {
-        Write-Host '    Skipping domain. Entry * is only allowed at first position in list.'
+        Write-Host '    Skipping domain. Entry * is only allowed at first position in list.' -ForegroundColor Red
         continue
     }
 
     if ($y -match '[^a-zA-Z0-9.-]') {
-        Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.'
+        Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.' -ForegroundColor Red
         continue
     }
 
     if (-not ($y.StartsWith('-'))) {
         if ($DomainsToCheckForGroups -icontains $y) {
-            Write-Host '    Domain already in list.'
+            Write-Host '    Domain already in list.' -ForegroundColor Yellow
         } else {
             $DomainsToCheckForGroups += $y
         }
@@ -586,7 +602,7 @@ try {
     $ADPropsCurrentUser = ([adsisearcher]"(samaccountname=$env:username)").FindOne().Properties
 } catch {
     $ADPropsCurrentUser = $null
-    Write-Host '  Problem connecting to Active Directory, or user is a local user. Exiting.'
+    Write-Host '  Problem connecting to Active Directory, or user is a local user. Exiting.' -ForegroundColor Red
     exit 1
 }
 
@@ -630,7 +646,7 @@ if ($OutlookDefaultProfile.length -eq '') {
         Write-Host "  $($_.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $_.PSDrive)"
         Write-Host "    $($_.'Account Name')"
         if ($LegacyExchangeDN -eq '') {
-            Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
+            Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox' -ForegroundColor Yellow
         } else {
             Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
             Write-Host "        $LegacyExchangeDN"
@@ -649,7 +665,7 @@ if ($OutlookDefaultProfile.length -eq '') {
         Write-Host "  $($_.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $_.PSDrive)"
         Write-Host "    $($_.'Account Name')"
         if ($LegacyExchangeDN -eq '') {
-            Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
+            Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox' -ForegroundColor Yellow
         } else {
             Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
             Write-Host "        $LegacyExchangeDN"
@@ -668,7 +684,7 @@ if ($OutlookDefaultProfile.length -eq '') {
         Write-Host "  $($_.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $_.PSDrive)"
         Write-Host "    $($_.'Account Name')"
         if ($LegacyExchangeDN -eq '') {
-            Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
+            Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox' -ForegroundColor Yellow
         } else {
             Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
             Write-Host "        $LegacyExchangeDN"
@@ -688,7 +704,7 @@ if ($OutlookDefaultProfile.length -eq '') {
             Write-Host "  $($_.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $_.PSDrive)"
             Write-Host "    $($_.'Account Name')"
             if ($LegacyExchangeDN -eq '') {
-                Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox'
+                Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox' -ForegroundColor Yellow
             } else {
                 Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
                 Write-Host "        $LegacyExchangeDN"
@@ -738,14 +754,14 @@ foreach ($SignatureFile in (Get-ChildItem -LiteralPath $SignatureTemplatePath -F
                         Write-Host 'Current DateTime out of range'
                     }
                 } catch {
-                    Write-Host 'Invalid DateTime, ignoring tag'
+                    Write-Host 'Invalid DateTime, ignoring tag' -ForegroundColor Red
                 }
             }
         }
         if ($SignatureFileTimeActive -eq $true) {
             Write-Host '      Current DateTime is in range of at least one DateTime tag, using signature'
         } else {
-            Write-Host '      Current DateTime is not in range of any DateTime tag, ignoring signature'
+            Write-Host '      Current DateTime is not in range of any DateTime tag, ignoring signature' -ForegroundColor Yellow
         }
     }
 
@@ -813,7 +829,7 @@ foreach ($key in $SignatureFilesGroupSIDs.keys) {
 try {
     $COMWord = New-Object -ComObject word.application
 } catch {
-    Write-Host 'Word not installed or not working correctly. Exiting.'
+    Write-Host 'Word not installed or not working correctly. Exiting.' -ForegroundColor Red
     exit 1
 }
 
@@ -913,7 +929,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                 }
             }
         } else {
-            Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox'
+            Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor yellow
         }
 
 
@@ -928,8 +944,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
             }
         } else {
             $CurrentMailboxSMTPAddresses += $($MailAddresses[$AccountNumberRunning])
-            Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox'
-            Write-Host '    Using mailbox name as single known SMTP address'
+            Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor Yellow
+            Write-Host '    Using mailbox name as single known SMTP address' -ForegroundColor Yellow
         }
 
         Write-Host '  Process common signatures'
@@ -952,7 +968,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
             }
         } else {
             $CurrentMailboxSMTPAddresses += $($MailAddresses[$AccountNumberRunning])
-            Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox'
+            Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor Yellow
         }
 
         Write-Host '  Process mail address specific signatures'
@@ -1058,7 +1074,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
 
                             $UsrConfig.Update()
                         } catch {
-                            Write-Host '    Error setting Outlook Web signature, please contact your administrator'
+                            Write-Host '    Error setting Outlook Web signature, please contact your administrator' -ForegroundColor Red
                         }
 
                         Remove-Module -Name Microsoft.Exchange.WebServices -Force
@@ -1092,3 +1108,6 @@ $SignaturePaths | ForEach-Object {
         }
     }
 }
+
+
+Write-Host 'Script ended'
