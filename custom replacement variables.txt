@@ -1,0 +1,35 @@
+﻿# This file allows defining custom replacement variables for Set-OutlookSignatures.ps1
+#   
+# The script only considers the following:
+#   Comments, i.e. lines start with a hash (#), just like this line
+#   Lines starting with '$replaceHash['$CURRENT'
+#   All other lines are ignored
+#
+# Replacement variables are case sensitive.
+# It is recommended to use full uppercase replacement variables.
+#
+# For a list of replacment variables predefined in Set-OutlookSignatures.ps1, see
+#   signature template file 'Test all signature replacement variables.docx' in folder 'Signature templates'
+# 
+# A replacement variable defined in this file overrides the definition of a predefined
+#   variable in the script.
+#
+# A replacement variable definition is limited to one line in this file,
+#   multiple lines are not supported.
+#
+
+
+# $CURRENTUSERNAMEWITHTITLES$, $CURRENTUSERMANAGERNAMEWITHTITLES$
+# $CURRENTMAILBOXNAMEWITHTITLES$, $CURRENTMAILBOXMANAGERNAMEWITHTITLES$
+# Academic titles according to standards in German speaking countries
+# <custom AD attribute 'svstitelvorne'> <standard AD attribute 'givenname'> <standard AD attribute 'surname'>, <custom AD attribute 'svstitelhinten'>
+# If one or more attributes are not set, unnecessary whitespaces and commas are avoided by using '-join'
+# Examples:
+#   Mag. Dr. John Doe, BA MA PhD
+#   Dr. John Doe
+#   John Doe, PhD
+#   John Doe
+$replaceHash['$CURRENTUSERNAMEWITHTITLES$'] = (((((([string]$ADPropsCurrentUser.svstitelvorne, [string]$ADPropsCurrentUser.givenname, [string]$ADPropsCurrentUser.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUser.svstitelhinten) | Where-Object { $_ -ne '' }) -join ', ')
+$replaceHash['$CURRENTUSERMANAGERNAMEWITHTITLES$'] = (((((([string]$ADPropsCurrentUserManager.svstitelvorne, [string]$ADPropsCurrentUserManager.givenname, [string]$ADPropsCurrentUserManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUserManager.svstitelhinten) | Where-Object { $_ -ne '' }) -join ', ')
+$replaceHash['$CURRENTMAILBOXNAMEWITHTITLES$'] = (((((([string]$ADPropsCurrentMailbox.svstitelvorne, [string]$ADPropsCurrentMailbox.givenname, [string]$ADPropsCurrentMailbox.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailbox.svstitelhinten) | Where-Object { $_ -ne '' }) -join ', ')
+$replaceHash['$CURRENTMAILBOXMANAGERNAMEWITHTITLES$'] = (((((([string]$ADPropsCurrentMailboxManager.svstitelvorne, [string]$ADPropsCurrentMailboxManager.givenname, [string]$ADPropsCurrentMailboxManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailboxManager.svstitelhinten) | Where-Object { $_ -ne '' }) -join ', ')

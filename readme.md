@@ -103,15 +103,14 @@ The script always starts with the mailboxes in the default Outlook profile, pref
 ## 1.14. Variable replacement  
 Variables are case sensitive.  
 Variables are replaced everywhere in the signature files, including href-Links. With this feature, you can not only show mail addresses and telephone numbers in the signature, but show them as links which open a new mail message ("mailto:") or dial the number ("tel:") via a locally installed softphone when clicked.  
-Custom attributes are supported, see SVSTitelVorne and SVSTitelHinten in the following list.  
-Available variables:  
+Custom Active directory attributes are supported as well as custom replacement variables, see 'Custom Replacement Variables.txt' for details.  
+Available built-in replacement variables:  
 - Currently logged-on user  
     - $CURRENTUSERGIVENNAME$: Given name  
     - $CURRENTUSERSURNAME$: Surname  
-    - $CURRENTUSERNAMEWITHTITLES$: SVSTitelVorne GivenName Surname, SVSTitelHinten (without unnecessary punctuation marks when one of the attributes is not availabe)  
     - $CURRENTUSERDEPARTMENT$: Department  
     - $CURRENTUSERTITLE$: Title  
-    - $CURRENTUSERSTREETADDRESS$: StreetM  
+    - $CURRENTUSERSTREETADDRESS$: Street address  
     - $CURRENTUSERPOSTALCODE$: Postal code  
     - $CURRENTUSERLOCATION$: Location  
     - $CURRENTUSERCOUNTRY$: Country  
