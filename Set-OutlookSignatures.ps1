@@ -117,10 +117,6 @@ function Set-Signatures {
                 }
             }
         }
-        $replaceHash['$CURRENTUSERNAMEWITHTITLES$']
-        $replaceHash['$CURRENTUSERMANAGERNAMEWITHTITLES$']
-        $replaceHash['$CURRENTMAILBOXNAMEWITHTITLES$']
-        $replaceHash['$CURRENTMAILBOXMANAGERNAMEWITHTITLES$']
 
         $wdFindContinue = 1
         $MatchCase = $true
