@@ -148,9 +148,17 @@ If there is no photo available in Active Directory, there are two options:
 - You used the $CURRENT\[...]PHOTO$ variables: The sample image used as placeholder is shown in the signature.  
 - You used the $CURRENT\[...]PHOTODELETEEMPTY$ variables: The sample image used as placeholder is deleted from the signature, which may affect the layout of the remaining signature depending on your formatting options.  
   
-Attention: A signature with embedded images has the expected file size in DOCX, HTM and TXT formats, but the RTF format can be drastically bigger. This is a known issue in Microsoft Word related to a compatibility setting which is activated per default.  
-If you ran into this problem, please consider modifying the ExportPictureWithMetafile setting as described in https://support.microsoft.com/kb/224663.  
-There is currently no known workaround that can be activated in Set-OutlookSignatures.ps1 only.  
+
+Attention: A signature with embedded images has the expected file size in DOCX, HTM and TXT formats, but the RTF format file will be much bigger.  
+The signature template 'Test all signature replacement variables.docx' contains several embedded images and can be used for a file comparison:  
+- DOCX: 23 KB  
+- HTM: 87 KB  
+- RTF without workaround: 27.5 MB  
+- RTF with workaround: 1.4 MB  
+  
+The script uses a workaround, but the resulting RTF files are still huge compared to other file types and especially for use in emails. If this is a problem, please either do not use embedded images in the signature template (including photos from Active Directory), or switch to HTML formatted emails.  
+  
+If you ran into this problem outside this script, please consider modifying the ExportPictureWithMetafile setting as described in https://support.microsoft.com/kb/224663.  
 ## 1.15. Outlook Web  
 If the currently logged-on user has configured his personal mailbox in Outlook, the default signature for new emails is configured in Outlook Web automatically.  
 If the default signature for new mails matches the one used for replies and forwarded mail, this is also set in Outlook.  

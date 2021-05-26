@@ -299,18 +299,32 @@ function Set-Signatures {
         $COMWord.ActiveDocument.Weboptions.encoding = 65001
         $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
-        Write-Host '      Save as .RTF file'
-        $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
-        $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
-        $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-
         Write-Host '      Save as .TXT file'
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
         $COMWord.ActiveDocument.TextEncoding = 1200
         $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
         $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
+        Write-Host '      Save as .RTF file'
+        $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
+        $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
+        $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
         $COMWord.ActiveDocument.Close($false)
+
+        # RTF files with embedded images get really huge
+        # See https://support.microsoft.com/kb/224663 for a system-wide workaround
+        # The following workaround is from https://answers.microsoft.com/en-us/msoffice/forum/msoffice_word-mso_mac-mso_mac2011/huge-rtf-files-solved-on-windows-but-searching-for/58e54b37-cfd0-4a07-ac62-1cfc2769cad5
+        $openFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatUnicodeText')
+        $COMWord.Documents.Open($path, $false, $false, $false, '', '', $true, '', '', $openFormat) | out-null
+        $FindText = '\{\\nonshppict*\}\}'
+        $ReplaceWith = ''
+        $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
+            $true, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
+            $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
+        $COMWord.ActiveDocument.Save()
+        $COMWord.ActiveDocument.Close($false)
+
+
 
         Write-Host '      Embed local files in .HTM file and add marker'
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
@@ -418,6 +432,9 @@ function Set-Signatures {
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Force -Recurse
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Force -Recurse
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Force -Recurse
+        Foreach ($x in (get-childitem  -Path ("$($env:temp)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + "*") -Directory).FullName) {
+            Remove-Item -LiteralPath $x -Force -Recurse
+        }
     }
 
     # Set default signature for new mails
