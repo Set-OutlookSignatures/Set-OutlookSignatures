@@ -18,6 +18,7 @@
     - [1.12.1. Allowed filename tags](#1121-allowed-filename-tags)
   - [1.13. Signature application order](#113-signature-application-order)
   - [1.14. Variable replacement](#114-variable-replacement)
+    - [1.14.1. Photos from Active Directory](#1141-photos-from-active-directory)
   - [1.15. Outlook Web](#115-outlook-web)
   - [1.16. FAQ](#116-faq)
     - [1.16.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#1161-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
@@ -124,6 +125,32 @@ Available built-in replacement variables:
     - Same variables as logged-on user, $CURRENTMAILBOX\[...]$ instead of $CURRENTUSER\[...]$  
 - Manager of current mailbox  
     - Same variables as logged-on user, $CURRENTMAILBOXMANAGER\[...]$ instead of $CURRENTMAILBOX\[...]$  
+### 1.14.1. Photos from Active Directory  
+The script supports replacing images in the signature template with photos stored in Active Directory.  
+As with other variables, photos can be obtained from the currently logged-on user, it's manager, the currently processed mailbox and it's manager.  
+  
+To be able to apply Word image features such as sizing, cropping, frames, 3D effects etc, you have to exactly follow these steps:  
+1. Create a sample image file which contains one of the following variable names in it's file name:  
+ - $CURRENTUSERPHOTO$  
+ - $CURRENTUSERPHOTODELETEEMPTY$  
+ - $CURRENTUSERMANAGERPHOTO$  
+ - $CURRENTUSERMANAGERPHOTODELETEEMPTY$  
+ - $CURRENTMAILBOXPHOTO$  
+ - $CURRENTMAILBOXPHOTODELETEEMPTY$  
+ - $CURRENTMAILBOXMANAGERPHOTO$  
+ - $CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$  
+2. Put the image into the signature template via xxx. Make sure to select the option "" - if you forget this step, the original file name is lost and the script will not be able to identify the image to replace.  
+3. Format the picture as wanted.  
+  
+The script will replace all images meeting the conditions described in the steps above and replace them with Active Directory photos in the background. This keeps Work image formatting option alive, just as if you would use the "Change picture" function.  
+  
+If there is no photo available in Active Directory, there are two options:  
+- You used the $CURRENT\[...]PHOTO$ variables: The sample image used as placeholder is shown in the signature.  
+- You used the $CURRENT\[...]PHOTODELETEEMPTY$ variables: The sample image used as placeholder is deleted from the signature, which may affect the layout of the remaining signature depending on your formatting options.  
+  
+Attention: A signature with embedded images has the expected file size in DOCX, HTM and TXT formats, but the RTF format can be drastically bigger. This is a known issue in Microsoft Word related to a compatibility setting which is activated per default.  
+If you ran into this problem, please consider modifying the ExportPictureWithMetafile setting as described in https://support.microsoft.com/kb/224663.  
+There is currently no known workaround that can be activated in Set-OutlookSignatures.ps1 only.  
 ## 1.15. Outlook Web  
 If the currently logged-on user has configured his personal mailbox in Outlook, the default signature for new emails is configured in Outlook Web automatically.  
 If the default signature for new mails matches the one used for replies and forwarded mail, this is also set in Outlook.  
@@ -138,6 +165,6 @@ The legacyExchangeDN attribute is used to find the user behind a mailbox, becaus
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.  
 The disadvantage of using legacyEchangeDn is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures.  
 ### 1.16.2. Which ports are required?
-Ports 389 TCP (LDAP) and 3268 TCP (Global Catalog) are required to communicate with Active Directory domains. 
+Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, are required to communicate with Active Directory domains. 
 The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11).  
 The client needs port 443 to access a WebDAV share (a SharePoint document library, for example).  
