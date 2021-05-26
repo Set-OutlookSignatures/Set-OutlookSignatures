@@ -139,7 +139,7 @@ To be able to apply Word image features such as sizing, cropping, frames, 3D eff
  - $CURRENTMAILBOXPHOTODELETEEMPTY$  
  - $CURRENTMAILBOXMANAGERPHOTO$  
  - $CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$  
-2. Put the image into the signature template via xxx. Make sure to select the option "" - if you forget this step, the original file name is lost and the script will not be able to identify the image to replace.  
+2. Put the image into the signature template via "Insert | Pictures | This device". Make sure to select the option "Insert and Link" - if you forget this step, the original file name is lost and the script will not be able to identify the image to replace.  
 3. Format the picture as wanted.  
   
 The script will replace all images meeting the conditions described in the steps above and replace them with Active Directory photos in the background. This keeps Work image formatting option alive, just as if you would use the "Change picture" function.  
