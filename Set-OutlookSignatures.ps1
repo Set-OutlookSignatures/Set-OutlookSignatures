@@ -625,11 +625,7 @@ if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
 
 Write-Host '  Check Outlook version and profile'
 try {
-    $COMOutlook = New-Object -ComObject outlook.application
-    $OutlookRegistryVersion = [System.Version]::Parse($COMOutlook.Version)
-    $OutlookDefaultProfile = $COMOutlook.DefaultProfileName
-    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($COMOutlook) | Out-Null
-    Remove-Variable COMOutlook
+    $OutlookRegistryVersion = [System.Version]::Parse(((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer').'(default)' -ireplace "Outlook.Application.", "") + '.0.0.0.0') -split '\.')[0..3] -join ".")
 } catch {
     Write-Host 'Outlook not installed or not working correctly. Exiting.' -ForegroundColor Red
     exit 1
@@ -647,6 +643,9 @@ if ($OutlookRegistryVersion.major -gt 16) {
     Write-Host "Outlook version $OutlookRegistryVersion is below minimum required version 14 (Outlook 2010). Exiting." -ForegroundColor Red
     exit 1
 }
+
+$OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook").DefaultProfile
+
 
 $HTMLMarkerTag = '<meta name=data-SignatureFileInfo content="Set-OutlookSignatures.ps1">'
 
