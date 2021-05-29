@@ -140,13 +140,15 @@ function Set-Signatures {
                 ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
                     if ((((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
                         if ($null -ne $ReplaceHash[$_]) {
+                            $ImageAlternativeTextOriginal = $image.AlternativeText
                             $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
-                            $image.alternativetext = $image.alternativetext.replace($_, '')
+                            $image.alternativetext = $ImageAlternativeTextOriginal.replace($_, '')
                         }
                     } elseif (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains(($_[-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[-999..-2] -join '') + 'DELETEEMPTY$'))) {
                         if ($null -ne $ReplaceHash[$_]) {
+                            $ImageAlternativeTextOriginal = $image.AlternativeText
                             $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
-                            $image.alternativetext = $image.alternativetext.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                            $image.alternativetext = $ImageAlternativeTextOriginal.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
                         } else {
                             $image.delete()
                         }
@@ -797,7 +799,7 @@ $SignatureFilesDefaultReplyFwd = @{}
 $global:SignatureFilesDone = @()
 $SignatureFilesGroupSIDs = @{}
 
-foreach ($SignatureFile in (Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter '*.docx')) {
+foreach ($SignatureFile in ((Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter '*.docx') | Sort-Object)) {
     Write-Host ("  '$($SignatureFile.Name)'")
     $x = $SignatureFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
     if ($x.count -ge 3) {
@@ -1021,7 +1023,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
         }
 
         Write-Host '  Process common signatures'
-        foreach ($Signature in $SignatureFilesCommon.GetEnumerator()) {
+        foreach ($Signature in ($SignatureFilesCommon.GetEnumerator() | Sort-Object)) {
             Set-Signatures
         }
 
@@ -1035,7 +1037,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                     }
                 }
             }
-            foreach ($Signature in $SignatureHash.GetEnumerator()) {
+            foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object)) {
                 Set-Signatures
             }
         } else {
@@ -1052,7 +1054,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                 }
             }
         }
-        foreach ($Signature in $SignatureHash.GetEnumerator()) {
+        foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object)) {
             Set-Signatures
         }
     }
