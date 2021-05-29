@@ -1,16 +1,16 @@
 [CmdletBinding()]
 Param(
     # Path to centrally managed signature templates
-    # Local and remote paths are supported
-    #   Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates')
-    # WebDAV paths are supported (https only)
-    #   'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    # The currently logged-on user needs at least read access to the path
+    #   Local and remote paths are supported
+    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates')
+    #   WebDAV paths are supported (https only)
+    #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+    #   The currently logged-on user needs at least read access to the path
     [ValidateNotNullOrEmpty()][string]$SignatureTemplatePath = '.\Signature templates',
 
     # List of domains/forests to check for group membership across trusts
-    # If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
-    # If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list
+    #   If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
+    #   If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list
     [string[]]$DomainsToCheckForGroups = ('*')
 )
 
@@ -112,17 +112,10 @@ function Set-Signatures {
         $replaceHash.Add('$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', $ADPropsCurrentMailboxManager.thumbnailphoto)
 
         # Export pictures if available
-        if ($null -ne $ReplaceHash['$CURRENTUSERPHOTO$']) {
-            $ReplaceHash['$CURRENTUSERPHOTO$'] | Set-Content -LiteralPath (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERPHOTO$.jpeg') -Encoding Byte -Force
-        }
-        if ($null -ne $ReplaceHash['$CURRENTUSERMANAGERPHOTO$']) {
-            $ReplaceHash['$CURRENTUSERMANAGERPHOTO$'] | Set-Content -LiteralPath (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERMANAGERPHOTO$.jpeg') -Encoding Byte -Force
-        }
-        if ($null -ne $ReplaceHash['$CURRENTMAILBOXPHOTO$']) {
-            $ReplaceHash['$CURRENTMAILBOXPHOTO$'] | Set-Content -LiteralPath (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXPHOTO$.jpeg') -Encoding Byte -Force
-        }
-        if ($null -ne $ReplaceHash['$CURRENTMAILBOXMANAGERPHOTO$']) {
-            $ReplaceHash['$CURRENTMAILBOXMANAGERPHOTO$'] | Set-Content -LiteralPath (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXMANAGERPHOTO$.jpeg') -Encoding Byte -Force
+        ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
+            if ($null -ne $ReplaceHash[$_]) {
+                $ReplaceHash[$_] | Set-Content -LiteralPath (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg')) -Encoding Byte -Force
+            }
         }
 
         # Custom replacement variables
@@ -141,120 +134,47 @@ function Set-Signatures {
             }
         }
 
-
-        # Replace pictures in InlineShapes
-        foreach ($image in $ComWord.ActiveDocument.InlineShapes) {
+        # Replace pictures in Shapes and InlineShapes
+        foreach ($image in ($ComWord.ActiveDocument.InlineShapes + $ComWord.ActiveDocument.Shapes)) {
             if ($null -ne $image.linkformat.sourcefullname) {
-                # Current user
-                if (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTUSERPHOTO$')) -and ($null -ne $ReplaceHash['$CURRENTUSERPHOTO$'])) {
-                    $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERPHOTO$.jpeg')
-                } elseif ((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTUSERPHOTODELETEEMPTY$')) {
-                    if ($null -ne $ReplaceHash['$CURRENTUSERPHOTO$']) {
-                        $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERPHOTO$.jpeg')
-                    } else {
-                        $image.delete()
-                    }
-                }
-
-                # Current user manager
-                if (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTUSERMANAGERPHOTO$')) -and ($null -ne $ReplaceHash['$CURRENTUSERMANAGERPHOTO$'])) {
-                    $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERMANAGERPHOTO$.jpeg')
-                } elseif ((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTUSERMANAGERPHOTODELETEEMPTY$')) {
-                    if ($null -ne $ReplaceHash['$CURRENTUSERMANAGERPHOTO$']) {
-                        $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERMANAGERPHOTO$.jpeg')
-                    } else {
-                        $image.delete()
-                    }
-                }
-
-                # Current mailbox
-                if (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTMAILBOXPHOTO$')) -and ($null -ne $ReplaceHash['$CURRENTMAILBOXPHOTO$'])) {
-                    $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXPHOTO$.jpeg')
-                } elseif ((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTMAILBOXPHOTODELETEEMPTY$')) {
-                    if ($null -ne $ReplaceHash['$CURRENTMAILBOXPHOTO$']) {
-                        $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXPHOTO$.jpeg')
-                    } else {
-                        $image.delete()
-                    }
-                }
-
-                # Current mailbox manager
-                if (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTMAILBOXMANAGERPHOTO$')) -and ($null -ne $ReplaceHash['$CURRENTMAILBOXMANAGERPHOTO$'])) {
-                    $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXMANAGERPHOTO$.jpeg')
-                } elseif ((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$')) {
-                    if ($null -ne $ReplaceHash['$CURRENTMAILBOXMANAGERPHOTO$']) {
-                        $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXMANAGERPHOTO$.jpeg')
-                    } else {
-                        $image.delete()
+                ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
+                    if ((((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
+                        if ($null -ne $ReplaceHash[$_]) {
+                            $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
+                            $image.alternativetext = $image.alternativetext.replace($_, '')
+                        }
+                    } elseif (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains(($_[-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[-999..-2] -join '') + 'DELETEEMPTY$'))) {
+                        if ($null -ne $ReplaceHash[$_]) {
+                            $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
+                            $image.alternativetext = $image.alternativetext.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                        } else {
+                            $image.delete()
+                        }
                     }
                 }
             }
-        }
-
-        # Replace pictures in Shapes
-        foreach ($image in $ComWord.ActiveDocument.Shapes) {
-            if ($null -ne $image.linkformat.sourcefullname) {
-                # Current user
-                if (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTUSERPHOTO$')) -and ($null -ne $ReplaceHash['$CURRENTUSERPHOTO$'])) {
-                    $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERPHOTO$.jpeg')
-                } elseif ((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTUSERPHOTODELETEEMPTY$')) {
-                    if ($null -ne $ReplaceHash['$CURRENTUSERPHOTO$']) {
-                        $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERPHOTO$.jpeg')
-                    } else {
-                        $image.delete()
-                    }
-                }
-
-                # Current user manager
-                if (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTUSERMANAGERPHOTO$')) -and ($null -ne $ReplaceHash['$CURRENTUSERMANAGERPHOTO$'])) {
-                    $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERMANAGERPHOTO$.jpeg')
-                } elseif ((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTUSERMANAGERPHOTODELETEEMPTY$')) {
-                    if ($null -ne $ReplaceHash['$CURRENTUSERMANAGERPHOTO$']) {
-                        $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERMANAGERPHOTO$.jpeg')
-                    } else {
-                        $image.delete()
-                    }
-                }
-
-                # Current mailbox
-                if (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTMAILBOXPHOTO$')) -and ($null -ne $ReplaceHash['$CURRENTMAILBOXPHOTO$'])) {
-                    $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXPHOTO$.jpeg')
-                } elseif ((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTMAILBOXPHOTODELETEEMPTY$')) {
-                    if ($null -ne $ReplaceHash['$CURRENTMAILBOXPHOTO$']) {
-                        $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXPHOTO$.jpeg')
-                    } else {
-                        $image.delete()
-                    }
-                }
-
-                # Current mailbox manager
-                if (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTMAILBOXMANAGERPHOTO$')) -and ($null -ne $ReplaceHash['$CURRENTMAILBOXMANAGERPHOTO$'])) {
-                    $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXMANAGERPHOTO$.jpeg')
-                } elseif ((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains('$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$')) {
-                    if ($null -ne $ReplaceHash['$CURRENTMAILBOXMANAGERPHOTO$']) {
-                        $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXMANAGERPHOTO$.jpeg')
-                    } else {
-                        $image.delete()
-                    }
+            foreach ($replaceKey in $replaceHash.Keys) {
+                try {
+                    $image.alternativetext = $image.alternativetext.replace($replaceKey, $replaceHash.replaceKey)
+                    $image.hyperlink.Name = $image.hyperlink.name.replace($replaceKey, $replaceHash.replaceKey)
+                    $image.hyperlink.Address = $image.hyperlink.Address.replace($replaceKey, $replaceHash.replaceKey)
+                    $image.hyperlink.AddressOld = $image.hyperlink.AddressOld.replace($replaceKey, $replaceHash.replaceKey)
+                    $image.hyperlink.SubAddress = $image.hyperlink.SubAddress.replace($replaceKey, $replaceHash.replaceKey)
+                    $image.hyperlink.SubAddressOld = $image.hyperlink.SubAddressOld.replace($replaceKey, $replaceHash.replaceKey)
+                    $image.hyperlink.EmailSubject = $image.hyperlink.EmailSubject.replace($replaceKey, $replaceHash.replaceKey)
+                    $image.hyperlink.ScreenTip = $image.hyperlink.ScreenTip.replace($replaceKey, $replaceHash.replaceKey)
+                } catch {
                 }
             }
         }
 
         # Delete photos from file system
         # and remove picture-relate entries from hashtable
-        Remove-Item -LiteralPath (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERPHOTO$.jpeg') -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath (Join-Path -Path $env:temp -ChildPath '$CURRENTUSERMANAGERPHOTO$.jpeg') -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXPHOTO$.jpeg') -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXMANAGERPHOTO$.jpeg') -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath (Join-Path -Path $env:temp -ChildPath '$CURRENTMAILBOXMANAGERPHOTO$.jpegx') -Force -ErrorAction SilentlyContinue
-        $ReplaceHash.Remove('$CURRENTUSERPHOTO$')
-        $ReplaceHash.Remove('$CURRENTUSERPHOTODELETEEMPTY$')
-        $ReplaceHash.Remove('$CURRENTUSERMANAGERPHOTO$')
-        $ReplaceHash.Remove('$CURRENTUSERMANAGERPHOTODELETEEMPTY$')
-        $ReplaceHash.Remove('$CURRENTMAILBOXPHOTO$')
-        $ReplaceHash.Remove('$CURRENTMAILBOXPHOTODELETEEMPTY$')
-        $ReplaceHash.Remove('$CURRENTMAILBOXMANAGERPHOTO$')
-        $ReplaceHash.Remove('$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$')
+        ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
+            Remove-Item -LiteralPath (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg')) -Force -ErrorAction SilentlyContinue
+            $ReplaceHash.Remove($_)
+            $ReplaceHash.Remove(($_[-999..-2] -join '') + 'DELETEEMPTY$')
+        }
 
         # Replace non-picture related variables        
         $wdFindContinue = 1
@@ -315,12 +235,12 @@ function Set-Signatures {
         # See https://support.microsoft.com/kb/224663 for a system-wide workaround
         # The following workaround is from https://answers.microsoft.com/en-us/msoffice/forum/msoffice_word-mso_mac-mso_mac2011/huge-rtf-files-solved-on-windows-but-searching-for/58e54b37-cfd0-4a07-ac62-1cfc2769cad5
         $openFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatUnicodeText')
-        $COMWord.Documents.Open($path, $false, $false, $false, '', '', $true, '', '', $openFormat) | out-null
+        $COMWord.Documents.Open($path, $false, $false, $false, '', '', $true, '', '', $openFormat) | Out-Null
         $FindText = '\{\\nonshppict*\}\}'
         $ReplaceWith = ''
         $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
-            $true, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
-            $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
+                $true, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
+                $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
         $COMWord.ActiveDocument.Save()
         $COMWord.ActiveDocument.Close($false)
 
@@ -432,7 +352,7 @@ function Set-Signatures {
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Force -Recurse
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Force -Recurse
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Force -Recurse
-        Foreach ($x in (get-childitem  -Path ("$($env:temp)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + "*") -Directory).FullName) {
+        Foreach ($x in (Get-ChildItem -Path ("$($env:temp)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
             Remove-Item -LiteralPath $x -Force -Recurse
         }
     }
@@ -625,7 +545,7 @@ if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
 
 Write-Host '  Check Outlook version and profile'
 try {
-    $OutlookRegistryVersion = [System.Version]::Parse(((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer').'(default)' -ireplace "Outlook.Application.", "") + '.0.0.0.0') -split '\.')[0..3] -join ".")
+    $OutlookRegistryVersion = [System.Version]::Parse(((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer').'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0') -split '\.')[0..3] -join '.')
 } catch {
     Write-Host 'Outlook not installed or not working correctly. Exiting.' -ForegroundColor Red
     exit 1

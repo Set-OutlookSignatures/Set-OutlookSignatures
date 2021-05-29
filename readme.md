@@ -103,7 +103,9 @@ Every centrally stored signature is applied only once, as there is only one sign
 The script always starts with the mailboxes in the default Outlook profile, preferrably with the current users personal mailbox.  
 ## 1.14. Variable replacement  
 Variables are case sensitive.  
-Variables are replaced everywhere in the signature files, including href-Links. With this feature, you can not only show mail addresses and telephone numbers in the signature, but show them as links which open a new mail message ("mailto:") or dial the number ("tel:") via a locally installed softphone when clicked.  
+Variables are replaced everywhere in the signature files, including links, QuickTips and alternative text of images.  
+With this feature, you can not only show mail addresses and telephone numbers in the signature, but show them as links which open a new mail message ("mailto:") or dial the number ("tel:") via a locally installed softphone when clicked.  
+When using images in signatures, consider using the alternative text feature to help visually impaired people.  
 Custom Active directory attributes are supported as well as custom replacement variables, see 'Custom Replacement Variables.txt' for details.  
 Available built-in replacement variables:  
 - Currently logged-on user  
@@ -130,7 +132,8 @@ The script supports replacing images in the signature template with photos store
 As with other variables, photos can be obtained from the currently logged-on user, it's manager, the currently processed mailbox and it's manager.  
   
 To be able to apply Word image features such as sizing, cropping, frames, 3D effects etc, you have to exactly follow these steps:  
-1. Create a sample image file which contains one of the following variable names in it's file name:  
+1. Create a sample image file which will later be used as placeholder.  
+2. Optionally: If the sample image file name contains one of the following variable names, the script recognizes it and you do not need to add the value to the alternative text of the image in step 4:  
  - $CURRENTUSERPHOTO$  
  - $CURRENTUSERPHOTODELETEEMPTY$  
  - $CURRENTUSERMANAGERPHOTO$  
@@ -139,8 +142,19 @@ To be able to apply Word image features such as sizing, cropping, frames, 3D eff
  - $CURRENTMAILBOXPHOTODELETEEMPTY$  
  - $CURRENTMAILBOXMANAGERPHOTO$  
  - $CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$  
-2. Put the image into the signature template via "Insert | Pictures | This device". Make sure to select the option "Insert and Link" - if you forget this step, the original file name is lost and the script will not be able to identify the image to replace.  
-3. Format the picture as wanted.  
+3. Insert the image into the signature template. Make sure to use "Insert | Pictures | This device" (Word 2019, other versions have the same feature in different menus) and to select the option "Insert and Link" - if you forget this step, a specific Word property is not set and the script will not be able to replace the image.  
+4. If you did not follow optional step 2, please add one of the following variable names to the alternative text of the image in Word (these variables are removed from the alternative text in the final signature):  
+ - $CURRENTUSERPHOTO$  
+ - $CURRENTUSERPHOTODELETEEMPTY$  
+ - $CURRENTUSERMANAGERPHOTO$  
+ - $CURRENTUSERMANAGERPHOTODELETEEMPTY$  
+ - $CURRENTMAILBOXPHOTO$  
+ - $CURRENTMAILBOXPHOTODELETEEMPTY$  
+ - $CURRENTMAILBOXMANAGERPHOTO$  
+ - $CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$  
+5. Format the image as wanted.  
+  
+For the script to recognize images to replace, you need to follow at least one of the steps 2 and 4. If you follow both, the script first checks for step 2 first. If you provide multiple image replacement variables, $CURRENTUSER\[..]$ has the highest priority, followed by $CURRENTUSERMANAGER\[..]$, $CURRENTMAILBOX\[..]$ and $CURRENTMAILBOXMANAGER\[..]$. It is recommended to use only one image replacement variable per image.  
   
 The script will replace all images meeting the conditions described in the steps above and replace them with Active Directory photos in the background. This keeps Work image formatting option alive, just as if you would use the "Change picture" function.  
   
