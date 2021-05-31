@@ -1,4 +1,52 @@
+<#
+  .SYNOPSIS
+  Central Outlook text signature management and deployment script.
+
+  .DESCRIPTION
+  Set-OutlookSignatures.ps1 downloads centrally stored signatures, replaces variables, optionally sets default signatures.
+  Signatures can be applied to all (mailbox) users, specific groups or specific mail addresses.
+  Signature templates can be assigned time ranges within which they are valid.
+  Signatures are also set in Outlook Web for the currently logged-on user.
+
+  .LINK
+  Online help: https://github.com/GruberMarkus/Set-OutlookSignatures
+
+  .LINK
+  License and copyright: https://github.com/GruberMarkus/Set-OutlookSignatures/blob/main/license.txt
+
+  .PARAMETER SignatureTemplatePath
+  Path to centrally managed signature templates.
+  Local and remote paths are supported.
+  Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').
+  WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+
+  .PARAMETER DomainsToCheckForGroups 
+  List of domains/forests to check for group membership across trusts.
+  If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
+  If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list.
+
+  .INPUTS
+  None. You cannot pipe objects to Set-OutlookSignatures.ps1.
+
+  .OUTPUTS
+  Set-OutlookSignatures.ps1 outputs the current activities, warnings and error messages to the standard output streams.
+
+  .EXAMPLE
+  PS> .\Set-OutlookSignatures.ps1
+
+  .EXAMPLE
+  PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates'
+
+  .EXAMPLE
+  PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups '*', '-internal-test.example.com'
+
+  .EXAMPLE
+  PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups 'internal-test.example.com', 'company.b.com'
+#>
+
+
 [CmdletBinding()]
+
 Param(
     # Path to centrally managed signature templates
     #   Local and remote paths are supported
