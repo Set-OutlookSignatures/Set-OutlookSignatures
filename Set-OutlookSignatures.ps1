@@ -20,6 +20,12 @@
   Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').
   WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 
+  .PARAMETER ReplacementVariableConfigFile
+  Path to a replacement variable config file.
+  Local and remote paths are supported.
+  Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').
+  WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+
   .PARAMETER DomainsToCheckForGroups 
   List of domains/forests to check for group membership across trusts.
   If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
@@ -42,6 +48,12 @@
 
   .EXAMPLE
   PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups 'internal-test.example.com', 'company.b.com'
+
+  .NOTES
+  Version    : 1.1.0
+  Author     : Markus Gruber
+  License    : MIT License
+  Copyright  : (c) 2021 Markus Gruber
 #>
 
 
@@ -56,11 +68,42 @@ Param(
     #   The currently logged-on user needs at least read access to the path
     [ValidateNotNullOrEmpty()][string]$SignatureTemplatePath = '.\Signature templates',
 
+    # Path to a replacement variable config file.
+    #   Local and remote paths are supported
+    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates')
+    #   WebDAV paths are supported (https only)
+    #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+    #   The currently logged-on user needs at least read access to the path
+    [ValidateNotNullOrEmpty()][string]$ReplacementVariableConfigFile = '.\config\default replacement variables.txt',
+    
     # List of domains/forests to check for group membership across trusts
     #   If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
     #   If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list
     [string[]]$DomainsToCheckForGroups = ('*')
 )
+
+
+function GetVersionInfo {
+    $notes = [Ordered]@{}
+    $lines = (((Get-Help -Full $PSCommandPath).alertSet.alert.Text) -split '\r?\n').Trim()
+
+    foreach ($line in $lines) {
+        if (!$line) {
+            continue
+        }
+
+        $name = $null
+
+        # Split line by the first colon (:) character.
+        if ($line.Contains(':')) {
+            $nameValue = $null
+            $nameValue = ($line -split ':', 2).Trim()
+            $notes[$nameValue[0]] = $nameValue[1].trim()
+        }
+    }
+
+    return $notes
+}
 
 
 function Set-Signatures {
@@ -94,82 +137,10 @@ function Set-Signatures {
         Write-Host '      Replace variables'
         $ReplaceHash = @{}
 
-        # Currently logged on user
-        $replaceHash.Add('$CURRENTUSERGIVENNAME$', [string]$ADPropsCurrentUser.givenname)
-        $replaceHash.Add('$CURRENTUSERSURNAME$', [string]$ADPropsCurrentUser.sn)
-        $replaceHash.Add('$CURRENTUSERDEPARTMENT$', [string]$ADPropsCurrentUser.department)
-        $replaceHash.Add('$CURRENTUSERTITLE$', [string]$ADPropsCurrentUser.title)
-        $replaceHash.Add('$CURRENTUSERSTREETADDRESS$', [string]$ADPropsCurrentUser.streetaddress)
-        $replaceHash.Add('$CURRENTUSERPOSTALCODE$', [string]$ADPropsCurrentUser.postalcode)
-        $replaceHash.Add('$CURRENTUSERLOCATION$', [string]$ADPropsCurrentUser.l)
-        $replaceHash.Add('$CURRENTUSERCOUNTRY$', [string]$ADPropsCurrentUser.co)
-        $replaceHash.Add('$CURRENTUSERTELEPHONE$', [string]$ADPropsCurrentUser.telephonenumber)
-        $replaceHash.Add('$CURRENTUSERFAX$', [string]$ADPropsCurrentUser.facsimiletelephonenumber)
-        $replaceHash.Add('$CURRENTUSERMOBILE$', [string]$ADPropsCurrentUser.mobile)
-        $replaceHash.Add('$CURRENTUSERMAIL$', [string]$ADPropsCurrentUser.mail)
-        $replaceHash.Add('$CURRENTUSERPHOTO$', $ADPropsCurrentUser.thumbnailphoto)
-        $replaceHash.Add('$CURRENTUSERPHOTODELETEEMPTY$', $ADPropsCurrentUser.thumbnailphoto)
-
-
-        # Manager of currently logged on user
-        $replaceHash.Add('$CURRENTUSERMANAGERGIVENNAME$', [string]$ADPropsCurrentUserManager.givenname)
-        $replaceHash.Add('$CURRENTUSERMANAGERSURNAME$', [string]$ADPropsCurrentUserManager.sn)
-        $replaceHash.Add('$CURRENTUSERMANAGERDEPARTMENT$', [string]$ADPropsCurrentUserManager.department)
-        $replaceHash.Add('$CURRENTUSERMANAGERTITLE$', [string]$ADPropsCurrentUserManager.title)
-        $replaceHash.Add('$CURRENTUSERMANAGERSTREETADDRESS$', [string]$ADPropsCurrentUserManager.streetaddress)
-        $replaceHash.Add('$CURRENTUSERMANAGERPOSTALCODE$', [string]$ADPropsCurrentUserManager.postalcode)
-        $replaceHash.Add('$CURRENTUSERMANAGERLOCATION$', [string]$ADPropsCurrentUserManager.l)
-        $replaceHash.Add('$CURRENTUSERMANAGERCOUNTRY$', [string]$ADPropsCurrentUserManager.co)
-        $replaceHash.Add('$CURRENTUSERMANAGERTELEPHONE$', [string]$ADPropsCurrentUserManager.telephonenumber)
-        $replaceHash.Add('$CURRENTUSERMANAGERFAX$', [string]$ADPropsCurrentUserManager.facsimiletelephonenumber)
-        $replaceHash.Add('$CURRENTUSERMANAGERMOBILE$', [string]$ADPropsCurrentUserManager.mobile)
-        $replaceHash.Add('$CURRENTUSERMANAGERMAIL$', [string]$ADPropsCurrentUserManager.mail)
-        $replaceHash.Add('$CURRENTUSERMANAGERPHOTO$', $ADPropsCurrentUserManager.thumbnailphoto)
-        $replaceHash.Add('$CURRENTUSERMANAGERPHOTODELETEEMPTY$', $ADPropsCurrentUserManager.thumbnailphoto)
-
-        # Current mailbox
-        $replaceHash.Add('$CURRENTMAILBOXGIVENNAME$', [string]$ADPropsCurrentMailbox.givenname)
-        $replaceHash.Add('$CURRENTMAILBOXSURNAME$', [string]$ADPropsCurrentMailbox.sn)
-        $replaceHash.Add('$CURRENTMAILBOXDEPARTMENT$', [string]$ADPropsCurrentMailbox.department)
-        $replaceHash.Add('$CURRENTMAILBOXTITLE$', [string]$ADPropsCurrentMailbox.title)
-        $replaceHash.Add('$CURRENTMAILBOXSTREETADDRESS$', [string]$ADPropsCurrentMailbox.streetaddress)
-        $replaceHash.Add('$CURRENTMAILBOXPOSTALCODE$', [string]$ADPropsCurrentMailbox.postalcode)
-        $replaceHash.Add('$CURRENTMAILBOXLOCATION$', [string]$ADPropsCurrentMailbox.l)
-        $replaceHash.Add('$CURRENTMAILBOXCOUNTRY$', [string]$ADPropsCurrentMailbox.co)
-        $replaceHash.Add('$CURRENTMAILBOXTELEPHONE$', [string]$ADPropsCurrentMailbox.telephonenumber)
-        $replaceHash.Add('$CURRENTMAILBOXFAX$', [string]$ADPropsCurrentMailbox.facsimiletelephonenumber)
-        $replaceHash.Add('$CURRENTMAILBOXMOBILE$', [string]$ADPropsCurrentMailbox.mobile)
-        $replaceHash.Add('$CURRENTMAILBOXMAIL$', [string]$ADPropsCurrentMailbox.mail)
-        $replaceHash.Add('$CURRENTMAILBOXPHOTO$', $ADPropsCurrentMailbox.thumbnailphoto)
-        $replaceHash.Add('$CURRENTMAILBOXPHOTODELETEEMPTY$', $ADPropsCurrentMailbox.thumbnailphoto)
-
-        # Manager of current mailbox
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERGIVENNAME$', [string]$ADPropsCurrentMailboxManager.givenname)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERSURNAME$', [string]$ADPropsCurrentMailboxManager.sn)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERDEPARTMENT$', [string]$ADPropsCurrentMailboxManager.department)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERTITLE$', [string]$ADPropsCurrentMailboxManager.title)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERSTREETADDRESS$', [string]$ADPropsCurrentMailboxManager.streetaddress)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERPOSTALCODE$', [string]$ADPropsCurrentMailboxManager.postalcode)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERLOCATION$', [string]$ADPropsCurrentMailboxManager.l)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERCOUNTRY$', [string]$ADPropsCurrentMailboxManager.co)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERTELEPHONE$', [string]$ADPropsCurrentMailboxManager.telephonenumber)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERFAX$', [string]$ADPropsCurrentMailboxManager.facsimiletelephonenumber)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERMOBILE$', [string]$ADPropsCurrentMailboxManager.mobile)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERMAIL$', [string]$ADPropsCurrentMailboxManager.mail)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERPHOTO$', $ADPropsCurrentMailboxManager.thumbnailphoto)
-        $replaceHash.Add('$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', $ADPropsCurrentMailboxManager.thumbnailphoto)
-
-        # Export pictures if available
-        ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-            if ($null -ne $ReplaceHash[$_]) {
-                $ReplaceHash[$_] | Set-Content -LiteralPath (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg')) -Encoding Byte -Force
-            }
-        }
-
         # Custom replacement variables
-        if (Test-Path -Path 'Custom Replacement Variables.txt' -PathType Leaf) {
+        if (Test-Path -Path './config/Custom Replacement Variables.txt' -PathType Leaf) {
             Write-Host '        Custom replacement variables'
-            (Get-Content -LiteralPath 'Custom Replacement Variables.txt') | ForEach-Object {
+            (Get-Content -LiteralPath './config/Custom Replacement Variables.txt') | ForEach-Object {
                 if ($_.tostring().StartsWith('$replaceHash[''$CURRENT')) {
                     try {
                         Invoke-Expression -Command $_
@@ -179,6 +150,13 @@ function Set-Signatures {
                 } elseif (!($_.tostring().StartsWith('#')) -and ($_.tostring() -ne '')) {
                     Write-Host "          Invalid line: $_" -ForegroundColor Red
                 }
+            }
+        }
+
+        # Export pictures if available
+        ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
+            if ($null -ne $ReplaceHash[$_]) {
+                $ReplaceHash[$_] | Set-Content -LiteralPath (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg')) -Encoding Byte -Force
             }
         }
 
@@ -436,7 +414,6 @@ function CheckADConnectivity {
         [string]$Indent
     )
     [void][runspacefactory]::CreateRunspacePool()
-    $SessionState = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault()
     $RunspacePool = [runspacefactory]::CreateRunspacePool(1, 10)
     $PowerShell = [powershell]::Create()
     $PowerShell.RunspacePool = $RunspacePool
@@ -508,7 +485,85 @@ function CheckADConnectivity {
 }
 
 
+function CheckPath([string]$path) {
+    if ($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
+        $path = (([uri]::UnescapeDataString($path) -ireplace ('https://', '\\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\')
+        $path = $path -replace [regex]::escape('\\'), '\\?\UNC\'
+    } else {
+        $path = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path))
+    }
+
+    if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
+        # Reconnect already connected network drives at the OS level
+        # New-PSDrive is not enough for this
+        Get-CimInstance Win32_NetworkConnection | ForEach-Object {
+            & net use $_.LocalName $_.RemoteName 2>&1 | Out-Null
+        }
+
+        if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
+            # Connect network drives
+            '`r`n' | & net use "$path" 2>&1 | Out-Null
+            try {
+                (Test-Path -LiteralPath $path -ErrorAction Stop) | Out-Null
+            } catch {
+                if ($_.CategoryInfo.Category -eq 'PermissionDenied') {
+                    & net use "$path" 2>&1
+                }
+            }
+            & net use "$path" /d 2>&1 | Out-Null
+        }
+
+        if (($path -ilike '*@ssl\*') -and (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue))) {
+            # Add site to trusted sites in internet options
+            New-Item ('HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\' + (New-Object System.Uri -ArgumentList ($path -ireplace ('@SSL', ''))).Host) -Force | New-ItemProperty -Name * -Value 1 -Type DWORD -Force | Out-Null
+
+            # Open site in new IE process
+            $oIE = New-Object -com InternetExplorer.Application
+            $oIE.Visible = $false
+            $oIE.Navigate2('https://' + ((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
+            $oIE = $null
+
+            # Wait until an IE tab with the corresponding URL is open
+            $app = New-Object -com shell.application
+            $i = 0
+            while ($i -lt 1) {
+                $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
+                    $i = $i + 1
+                }
+                Start-Sleep -Milliseconds 50
+            }
+
+            # Wait until the corresponding URL is fully loaded, then close the tab
+            $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
+                while ($_.busy) {
+                    Start-Sleep -Milliseconds 50
+                }
+                $_.quit()
+            }
+
+            $app = $null
+
+        }
+    }
+
+    if ((Test-Path -LiteralPath $path) -eq $false) {
+        Write-Host ": Problem connecting to or reading from folder '$path'. Exiting." -ForegroundColor Red
+        exit 1
+    } else {
+        Write-Host
+    }
+}
+
+
 Clear-Host
+
+
+Write-Host 'Set-OutlookSignatures.ps1'
+$versionInfo = GetVersionInfo
+foreach ($key in $versionInfo.keys) {
+    Write-Host "  $($key): $($versionInfo[$key])"
+}
+
 
 Write-Host 'Script started'
 
@@ -518,73 +573,10 @@ $Search = New-Object DirectoryServices.DirectorySearcher
 $Search.PageSize = 1000
 $jobs = New-Object System.Collections.ArrayList
 
-
-# Check paths
-if ($SignatureTemplatePath.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
-    $SignatureTemplatePath = (([uri]::UnescapeDataString($SignatureTemplatePath) -ireplace ('https://', '\\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\')
-    $SignatureTemplatePath = $SignatureTemplatePath -replace [regex]::escape('\\'), '\\?\UNC\'
-} else {
-    $SignatureTemplatePath = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($SignatureTemplatePath))
-}
-
-if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyContinue)) {
-    # Reconnect already connected network drives at the OS level
-    # New-PSDrive is not enough for this
-    Get-CimInstance Win32_NetworkConnection | ForEach-Object {
-        & net use $_.LocalName $_.RemoteName 2>&1 | Out-Null
-    }
-
-    if (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyContinue)) {
-        # Connect network drives
-        '`r`n' | & net use "$SignatureTemplatePath" 2>&1 | Out-Null
-        try {
-            (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction Stop) | Out-Null
-        } catch {
-            if ($_.CategoryInfo.Category -eq 'PermissionDenied') {
-                & net use "$SignatureTemplatePath" 2>&1
-            }
-        }
-        & net use "$SignatureTemplatePath" /d 2>&1 | Out-Null
-    }
-
-    if (($SignatureTemplatePath -ilike '*@ssl\*') -and (-not (Test-Path -LiteralPath $SignatureTemplatePath -ErrorAction SilentlyContinue))) {
-        # Add site to trusted sites in internet options
-        New-Item ('HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\' + (New-Object System.Uri -ArgumentList ($SignatureTemplatePath -ireplace ('@SSL', ''))).Host) -Force | New-ItemProperty -Name * -Value 1 -Type DWORD -Force | Out-Null
-
-        # Open site in new IE process
-        $oIE = New-Object -com InternetExplorer.Application
-        $oIE.Visible = $false
-        $oIE.Navigate2('https://' + ((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
-        $oIE = $null
-
-        # Wait until an IE tab with the corresponding URL is open
-        $app = New-Object -com shell.application
-        $i = 0
-        while ($i -lt 1) {
-            $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
-                $i = $i + 1
-            }
-            Start-Sleep -Milliseconds 50
-        }
-
-        # Wait until the corresponding URL is fully loaded, then close the tab
-        $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($SignatureTemplatePath -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
-            while ($_.busy) {
-                Start-Sleep -Milliseconds 50
-            }
-            $_.quit()
-        }
-
-        $app = $null
-
-    }
-}
-
-if ((Test-Path -LiteralPath $SignatureTemplatePath -PathType Container) -eq $false) {
-    Write-Host "  Problem connecting to or reading from folder '$SignatureTemplatePath'. Check path." -ForegroundColor Red
-    exit 1
-}
-
+Write-Host '    SignatureTemplatePath' -NoNewline
+CheckPath $SignatureTemplatePath
+Write-Host '    ReplacementVariableConfigFile' -NoNewline
+CheckPath $ReplacementVariableConfigFile
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
     Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
@@ -1174,7 +1166,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                             $OutlookWebHash.Add('autoaddsignatureonreply', $TempOWASigSetReply)
 
                             try {
-                                Copy-Item -Path 'Microsoft.Exchange.WebServices.dll' -Destination (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
+                                Copy-Item -Path './bin/Microsoft.Exchange.WebServices.dll' -Destination (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
                             } catch {
                             }
 
