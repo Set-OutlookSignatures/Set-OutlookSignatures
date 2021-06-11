@@ -26,7 +26,7 @@
   Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').
   WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 
-  .PARAMETER DomainsToCheckForGroups 
+  .PARAMETER DomainsToCheckForGroups
   List of domains/forests to check for group membership across trusts.
   If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
   If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list.
@@ -50,10 +50,11 @@
   PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups 'internal-test.example.com', 'company.b.com'
 
   .NOTES
-  Version    : 1.1.0
-  Author     : Markus Gruber
-  License    : MIT License
-  Copyright  : (c) 2021 Markus Gruber
+  Script : Set-OutlookSignatures.ps1
+  Version: 1.2.0
+  Author : Markus Gruber
+  License: MIT License (see license.txt for details and copyright)
+  Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
 #>
 
 
@@ -75,7 +76,7 @@ Param(
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
     #   The currently logged-on user needs at least read access to the path
     [ValidateNotNullOrEmpty()][string]$ReplacementVariableConfigFile = '.\config\default replacement variables.txt',
-    
+
     # List of domains/forests to check for group membership across trusts
     #   If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
     #   If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list
@@ -135,33 +136,8 @@ function Set-Signatures {
         $COMWord.Documents.Open($path, $false) | Out-Null
 
         Write-Host '      Replace variables'
-        $ReplaceHash = @{}
-
-        # Custom replacement variables
-        if (Test-Path -Path './config/Custom Replacement Variables.txt' -PathType Leaf) {
-            Write-Host '        Custom replacement variables'
-            (Get-Content -LiteralPath './config/Custom Replacement Variables.txt') | ForEach-Object {
-                if ($_.tostring().StartsWith('$replaceHash[''$CURRENT')) {
-                    try {
-                        Invoke-Expression -Command $_
-                    } catch {
-                        Write-Host "          Error: $_" -ForegroundColor Red
-                    }
-                } elseif (!($_.tostring().StartsWith('#')) -and ($_.tostring() -ne '')) {
-                    Write-Host "          Invalid line: $_" -ForegroundColor Red
-                }
-            }
-        }
-
-        # Export pictures if available
-        ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-            if ($null -ne $ReplaceHash[$_]) {
-                $ReplaceHash[$_] | Set-Content -LiteralPath (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg')) -Encoding Byte -Force
-            }
-        }
-
         # Replace pictures in Shapes and InlineShapes
-        foreach ($image in ($ComWord.ActiveDocument.InlineShapes + $ComWord.ActiveDocument.Shapes)) {
+        foreach ($image in ($ComWord.ActiveDocument.InlineShapes + $ComWord.ActiveDocument.InlineShapes)) {
             if ($null -ne $image.linkformat.sourcefullname) {
                 ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
                     if ((((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
@@ -181,30 +157,73 @@ function Set-Signatures {
                     }
                 }
             }
+
+            # Setting the values in word is very slow, so we use temporay variables
+            $tempImageAlternativeText = $image.alternativetext
+            $tempImageHyperlinkName = $image.hyperlink.Name
+            $tempImageHyperlinkAddress = $image.hyperlink.Address
+            $tempImageHyperlinkAddressOld = $image.hyperlink.AddressOld
+            $tempImageHyperlinkSubAddress = $image.hyperlink.SubAddress
+            $tempImageHyperlinkSubaddressOld = $image.hyperlink.SubAddressOld
+            $tempImageHyperlinkEmailSubject = $image.hyperlink.EmailSubject
+            $tempImageHyperlinkScreenTip = $image.hyperlink.ScreenTip
+
             foreach ($replaceKey in $replaceHash.Keys) {
-                try {
-                    $image.alternativetext = $image.alternativetext.replace($replaceKey, $replaceHash.replaceKey)
-                    $image.hyperlink.Name = $image.hyperlink.name.replace($replaceKey, $replaceHash.replaceKey)
-                    $image.hyperlink.Address = $image.hyperlink.Address.replace($replaceKey, $replaceHash.replaceKey)
-                    $image.hyperlink.AddressOld = $image.hyperlink.AddressOld.replace($replaceKey, $replaceHash.replaceKey)
-                    $image.hyperlink.SubAddress = $image.hyperlink.SubAddress.replace($replaceKey, $replaceHash.replaceKey)
-                    $image.hyperlink.SubAddressOld = $image.hyperlink.SubAddressOld.replace($replaceKey, $replaceHash.replaceKey)
-                    $image.hyperlink.EmailSubject = $image.hyperlink.EmailSubject.replace($replaceKey, $replaceHash.replaceKey)
-                    $image.hyperlink.ScreenTip = $image.hyperlink.ScreenTip.replace($replaceKey, $replaceHash.replaceKey)
-                } catch {
+                if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
+                    if ($null -ne $tempimagealternativetext) {
+                        $tempimagealternativetext = $tempimagealternativetext.replace($replaceKey, $replaceHash.replaceKey)
+                    }
+                    if ($null -ne $tempimagehyperlinkName) {
+                        $tempimagehyperlinkname = $tempimagehyperlinkname.replace($replaceKey, $replaceHash.replaceKey)
+                    }
+                    if ($null -ne $tempimagehyperlinkAddress) {
+                        $tempimagehyperlinkAddress = $tempimagehyperlinkAddress.replace($replaceKey, $replaceHash.replaceKey)
+                    }
+                    if ($null -ne $tempimagehyperlinkAddressOld) {
+                        $tempimagehyperlinkAddressOld = $tempimagehyperlinkAddressOld.replace($replaceKey, $replaceHash.replaceKey)
+                    }
+                    if ($null -ne $tempimagehyperlinkSubAddress) {
+                        $tempimagehyperlinkSubAddress = $tempimagehyperlinkSubAddress.replace($replaceKey, $replaceHash.replaceKey)
+                    }
+                    if ($null -ne $tempimagehyperlinkSubAddressOld) {
+                        $tempimagehyperlinkSubAddressOld = $tempimagehyperlinkSubAddressOld.replace($replaceKey, $replaceHash.replaceKey)
+                    }
+                    if ($null -ne $tempimagehyperlinkEmailSubject) {
+                        $tempimagehyperlinkEmailSubject = $tempimagehyperlinkEmailSubject.replace($replaceKey, $replaceHash.replaceKey)
+                    }
+                    if ($null -ne $tempimagehyperlinkScreenTip) {
+                        $tempimagehyperlinkScreenTip = $tempimagehyperlinkScreenTip.replace($replaceKey, $replaceHash.replaceKey)
+                    }
                 }
+            }
+
+            if ($null -ne $tempimagealternativetext) {
+                $image.alternativetext = $tempImageAlternativeText
+            }
+            if ($null -ne $tempimagehyperlinkName) {
+                $image.hyperlink.Name = $tempImageHyperlinkName
+            }
+            if ($null -ne $tempimagehyperlinkAddress) {
+                $image.hyperlink.Address = $tempImageHyperlinkAddress
+            }
+            if ($null -ne $tempimagehyperlinkAddressOld) {
+                $image.hyperlink.AddressOld = $tempImageHyperlinkAddressOld
+            }
+            if ($null -ne $tempimagehyperlinkSubAddress) {
+                $image.hyperlink.SubAddress = $tempImageHyperlinkSubAddress
+            }
+            if ($null -ne $tempimagehyperlinkSubAddressOld) {
+                $image.hyperlink.SubAddressOld = $tempImageHyperlinkSubaddressOld
+            }
+            if ($null -ne $tempimagehyperlinkEmailSubject) {
+                $image.hyperlink.EmailSubject = $tempImageHyperlinkEmailSubject
+            }
+            if ($null -ne $tempimagehyperlinkScreenTip) {
+                $image.hyperlink.ScreenTip = $tempImageHyperlinkScreenTip
             }
         }
 
-        # Delete photos from file system
-        # and remove picture-relate entries from hashtable
-        ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-            Remove-Item -LiteralPath (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg')) -Force -ErrorAction SilentlyContinue
-            $ReplaceHash.Remove($_)
-            $ReplaceHash.Remove(($_[-999..-2] -join '') + 'DELETEEMPTY$')
-        }
-
-        # Replace non-picture related variables        
+        # Replace non-picture related variables
         $wdFindContinue = 1
         $MatchCase = $true
         $MatchWholeWord = $true
@@ -219,22 +238,26 @@ function Set-Signatures {
 
         # Replace in current view (show or hide field codes)
         foreach ($replaceKey in $replaceHash.Keys) {
-            $FindText = $replaceKey
-            $ReplaceWith = $replaceHash.$replaceKey
-            $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
-                    $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
-                    $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
+            if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
+                $FindText = $replaceKey
+                $ReplaceWith = $replaceHash.$replaceKey
+                $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
+                        $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
+                        $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
+            }
         }
 
         # Invert current view (show or hide field codes)
         # This is neccessary to be able to replace variables in hyperlinks and quicktips of hyperlinks
         $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
         foreach ($replaceKey in $replaceHash.Keys) {
-            $FindText = $replaceKey
-            $ReplaceWith = $replaceHash.$replaceKey
-            $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
-                    $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
-                    $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
+            if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
+                $FindText = $replaceKey
+                $ReplaceWith = $replaceHash.$replaceKey
+                $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
+                        $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
+                        $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
+            }
         }
 
         # Restore original view
@@ -271,8 +294,6 @@ function Set-Signatures {
                 $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
         $COMWord.ActiveDocument.Save()
         $COMWord.ActiveDocument.Close($false)
-
-
 
         Write-Host '      Embed local files in .HTM file and add marker'
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
@@ -421,7 +442,7 @@ function CheckADConnectivity {
 
     for ($DomainNumber = 0; $DomainNumber -lt $CheckDomains.count; $DomainNumber++) {
         if ($($CheckDomains[$DomainNumber]) -eq '') {
-            continue 
+            continue
         }
 
         $PowerShell = [powershell]::Create()
@@ -558,14 +579,13 @@ function CheckPath([string]$path) {
 Clear-Host
 
 
-Write-Host 'Set-OutlookSignatures.ps1'
+Write-Host 'Script started'
+
+Write-Host '  Script notes'
 $versionInfo = GetVersionInfo
 foreach ($key in $versionInfo.keys) {
-    Write-Host "  $($key): $($versionInfo[$key])"
+    Write-Host "    $($key): $($versionInfo[$key])"
 }
-
-
-Write-Host 'Script started'
 
 Write-Host '  Check parameters and script environment'
 Set-Location $PSScriptRoot | Out-Null
@@ -573,10 +593,13 @@ $Search = New-Object DirectoryServices.DirectorySearcher
 $Search.PageSize = 1000
 $jobs = New-Object System.Collections.ArrayList
 
-Write-Host '    SignatureTemplatePath' -NoNewline
+Write-Host "    Script name: '$PSCommandPath'"
+Write-Host "    Script path: '$PSScriptRoot'"
+Write-Host "    SignatureTemplatePath: '$SignatureTemplatePath'" -NoNewline
 CheckPath $SignatureTemplatePath
-Write-Host '    ReplacementVariableConfigFile' -NoNewline
+Write-Host "    ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
 CheckPath $ReplacementVariableConfigFile
+Write-Host ('    DomainsToCheckForGroups: ' + ('''' + $($DomainsToCheckForGroups -join ''', ''') + ''''))
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
     Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
@@ -1062,6 +1085,43 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
             Write-Host '    Using mailbox name as single known SMTP address' -ForegroundColor Yellow
         }
 
+        Write-Host '  Get data for replacement variables'
+        $ReplaceHash = @{}
+        if (Test-Path -Path $ReplacementVariableConfigFile -PathType Leaf) {
+            (Get-Content -LiteralPath $ReplacementVariableConfigFile) | ForEach-Object {
+                if ($_.tostring().StartsWith('$ReplaceHash[''$CURRENT')) {
+                    try {
+                        Invoke-Expression -Command $_
+                    } catch {
+                        Write-Host "    Error: $_" -ForegroundColor Red
+                    }
+                } elseif (!($_.tostring().StartsWith('#')) -and ($_.tostring() -ne '')) {
+                    Write-Host "        Invalid line: $_" -ForegroundColor Red
+                }
+            }
+        } else {
+            Write-Host "    Problem connecting to or reading from file '$ReplacementVariableConfigFile'. " -ForegroundColor Yellow
+        }
+        foreach ($replaceKey in ($replaceHash.Keys | Sort-Object)) {
+            if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
+                Write-Host "    $($replaceKey): $($replaceHash[$replaceKey])"
+            } else {
+                Write-Host "    $($replaceKey): " -NoNewline
+                if ($null -ne $($replaceHash[$replaceKey])) {
+                    Write-Host 'Photo available'
+                } else {
+                    Write-Host 'No photo available'
+                }
+            }
+        }
+
+        # Export pictures if available
+        ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
+            if ($null -ne $ReplaceHash[$_]) {
+                $ReplaceHash[$_] | Set-Content -LiteralPath (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg')) -Encoding Byte -Force
+            }
+        }
+
         Write-Host '  Process common signatures'
         foreach ($Signature in ($SignatureFilesCommon.GetEnumerator() | Sort-Object)) {
             Set-Signatures
@@ -1096,6 +1156,13 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
         }
         foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object)) {
             Set-Signatures
+        }
+
+        # Delete photos from file system
+        ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
+            Remove-Item -LiteralPath (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg')) -Force -ErrorAction SilentlyContinue
+            $ReplaceHash.Remove($_)
+            $ReplaceHash.Remove(($_[-999..-2] -join '') + 'DELETEEMPTY$')
         }
     }
 

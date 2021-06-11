@@ -2,7 +2,7 @@
 #   
 # The script only considers the following:
 #   Comments, i.e. lines start with a hash (#), just like this line
-#   Lines starting with '$ReplaceHash['$CURRENT'
+#   Lines starting with '$ReplaceHash['$CURRENT' (case sensitive)
 #   All other lines are ignored
 #
 # Replacement variables are case sensitive.
