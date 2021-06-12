@@ -1,4 +1,5 @@
-![Set-OutlookSignatures.ps1](.github/logo/Set-OutlookSignatures%20Logo%20320x180.jpg?raw=true)  
+# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src=".logo/Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a>  
+- [<a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src=".logo/Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a>](#)
 - [General description](#general-description)
 - [Requirements](#requirements)
 - [Parameters](#parameters)

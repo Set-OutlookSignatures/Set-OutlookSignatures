@@ -1,3 +1,4 @@
 # exclude .gitignore and similar from the generated tarball
 .git*           export-ignore
 readme.md       export-ignore
+.logo           export-ignore
