@@ -51,7 +51,7 @@
 
   .NOTES
   Script : Set-OutlookSignatures.ps1
-  Version: 1.2.0
+  Version: 1.2.1
   Author : Markus Gruber
   License: MIT License (see license.txt for details and copyright)
   Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
