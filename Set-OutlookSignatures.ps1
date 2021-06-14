@@ -914,12 +914,12 @@ foreach ($SignatureFile in ((Get-ChildItem -LiteralPath $SignatureTemplatePath -
             $SignatureFilesMailboxFilePart.add($SignatureFile.FullName, $SignatureFilePart)
         } elseif ($SignatureFilePartTag -match '\[.*? .*?\]') {
             Write-Host '    Group specific signature'
-            ([regex]'\[.*? .*?\]').Matches($SignatureFilePart) | ForEach-Object {
-                $groupname = $SignatureFilePartTag.value
-                $NTName = ((($groupname -replace '\[', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
-                if (-not $SignatureFilesGroupSIDs.ContainsKey($_.value)) {
+            (([regex]'\[.*? .*?\]').Matches($SignatureFilePart)).value | ForEach-Object {
+                $groupname = $_
+                $NTName = ((($_ -replace '\[', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
+                if (-not $SignatureFilesGroupSIDs.ContainsKey($_)) {
                     try {
-                        $SignatureFilesGroupSIDs.add($_.value, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
+                        $SignatureFilesGroupSIDs.add($_, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
                     } catch {
                         # No group with this sAMAccountName found. Maybe it's a display name?
                         try {
