@@ -7,6 +7,7 @@
   - [DomainsToCheckForGroups](#domainstocheckforgroups)
   - [DeleteUserCreatedSignatures](#deleteusercreatedsignatures)
   - [SetCurrentUserOutlookWebSignature](#setcurrentuseroutlookwebsignature)
+  - [AdditionalSignaturePath](#additionalsignaturepath)
 - [Outlook signature path](#outlook-signature-path)
 - [Mailboxes](#mailboxes)
 - [Group membership](#group-membership)
@@ -61,6 +62,11 @@ Default value: $false
 ## SetCurrentUserOutlookWebSignature  
 Shall the script set the Outlook Web signature of the currently logged on user?  
 Default value: $true  
+## AdditionalSignaturePath  
+An additional path that the signatures shall be copied to.  
+Ideally, this path is available on all devices of the user, for example via OneDrive.  
+This way, the user can easily copy-paste his preferred preconfigured signature for use in a mail app not support by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.  
+Default value: "$($env:OneDriveCommercial)\Outlook signatures"  
 # Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.  
 The registry setting does not allow for absolute paths, only for paths relative to '%APPDATA%\Microsoft'.  
