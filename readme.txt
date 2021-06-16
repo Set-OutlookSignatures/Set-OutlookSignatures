@@ -8,6 +8,7 @@ Set-OutlookSignatures.ps1
     -   DomainsToCheckForGroups
     -   DeleteUserCreatedSignatures
     -   SetCurrentUserOutlookWebSignature
+    -   AdditionalSignaturePath
 -   Outlook signature path
 -   Mailboxes
 -   Group membership
@@ -118,6 +119,13 @@ The registry setting does not allow for absolute paths, only for paths
 relative to '%APPDATA%\Microsoft'.
 If the relative path set in the registry would be a valid path but does
 not exist, the script creates it.
+
+AdditionalSignaturePath
+
+An additional path that the signatures shall be copied to.
+Ideally, this path is available on all devices of the user, for example via OneDrive.
+This way, the user can easily copy-paste his preferred preconfigured signature for use in a mail app not support by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
+Default value: "$($env:OneDriveCommercial)\Outlook signatures"
 
 Mailboxes
 
