@@ -19,17 +19,29 @@
   Local and remote paths are supported.
   Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').
   WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+  Default value: '.\Signature templates'
 
   .PARAMETER ReplacementVariableConfigFile
   Path to a replacement variable config file.
   Local and remote paths are supported.
   Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').
   WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+  Default value: '.\config\default replacement variables.txt'
 
   .PARAMETER DomainsToCheckForGroups
   List of domains/forests to check for group membership across trusts.
   If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
   If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list.
+  Default value: '*'
+
+  .PARAMETER DeleteUserCreatedSignatures
+  Shall the script delete signatures which were created by the user itself?
+  The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
+  Default value: $false
+
+  .PARAMETER SetCurrentUserOutlookWebSignature
+  Shall the script set the Outlook Web signature of the currently logged on user?
+  Default value: $true
 
   .INPUTS
   None. You cannot pipe objects to Set-OutlookSignatures.ps1.
@@ -51,7 +63,7 @@
 
   .NOTES
   Script : Set-OutlookSignatures.ps1
-  Version: 1.2.1
+  Version: 1.3.0
   Author : Markus Gruber
   License: MIT License (see license.txt for details and copyright)
   Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
@@ -80,7 +92,14 @@ Param(
     # List of domains/forests to check for group membership across trusts
     #   If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
     #   If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list
-    [string[]]$DomainsToCheckForGroups = ('*')
+    [string[]]$DomainsToCheckForGroups = ('*'),
+
+    # Shall the script delete signatures which were created by the user itself?
+    #   The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
+    [bool]$DeleteUserCreatedSignatures = $false,
+
+    # Shall the script set the Outlook Web signature of the currently logged on user?
+    [bool]$SetCurrentUserOutlookWebSignature = $true
 )
 
 
@@ -600,6 +619,8 @@ CheckPath $SignatureTemplatePath
 Write-Host "    ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
 CheckPath $ReplacementVariableConfigFile
 Write-Host ('    DomainsToCheckForGroups: ' + ('''' + $($DomainsToCheckForGroups -join ''', ''') + ''''))
+Write-Host "    DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
+Write-Host "    SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
     Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
@@ -1167,8 +1188,8 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
     }
 
     # Outlook Web Access
-    if ($ADPropsCurrentMailbox.mail -ieq $ADPropsCurrentUser.mail) {
-        Write-Host '  Setting Outlook Web signature'
+    if (($SetCurrentUserOutlookWebSignature -eq $true) -and ($ADPropsCurrentMailbox.mail -ieq $ADPropsCurrentUser.mail)) {
+        Write-Host '  Set Outlook Web signature'
         # if the mailbox of the currenlty logged on user is part of his default Outlook Profile, copy the signature to OWA
         for ($j = 0; $j -lt $MailAddresses.count; $j++) {
             if ($MailAddresses[$j] -ieq [string]$ADPropsCurrentUser.mail) {
@@ -1233,7 +1254,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                             $OutlookWebHash.Add('autoaddsignatureonreply', $TempOWASigSetReply)
 
                             try {
-                                Copy-Item -Path './bin/Microsoft.Exchange.WebServices.dll' -Destination (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
+                                Copy-Item -Path '.\bin\Microsoft.Exchange.WebServices.dll' -Destination (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
                             } catch {
                             }
 
@@ -1276,7 +1297,7 @@ Remove-Variable COMWord
 
 # Delete old signatures created by this script, which are no longer available in $SignatureTemplatePath
 # We check all local signatures for a specific marker in HTML code, so we don't touch user created signatures
-Write-Host 'Removing old signatures created by this script, which are no longer centrally available'
+Write-Host 'Remove old signatures created by this script, which are no longer centrally available'
 $SignaturePaths | ForEach-Object {
     Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
         if ((Get-Content -LiteralPath $_.fullname -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
@@ -1285,6 +1306,22 @@ $SignaturePaths | ForEach-Object {
                 Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
                 Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
                 Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
+            }
+        }
+    }
+}
+
+
+# Delete user created signatures if the corresponding parameter is set
+if ($DeleteUserCreatedSignatures -eq $true) {
+    Write-Host 'Remove user created signatures'
+    $SignaturePaths | ForEach-Object {
+        Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
+            if ((Get-Content -LiteralPath $_.fullname -Raw) -notlike ('*' + $HTMLMarkerTag + '*')) {
+                    Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
+                    Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
+                    Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
+                    Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
             }
         }
     }

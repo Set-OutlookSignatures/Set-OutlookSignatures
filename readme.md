@@ -5,6 +5,8 @@
   - [SignatureTemplatePath](#signaturetemplatepath)
   - [ReplacementVariableConfigFile](#replacementvariableconfigfile)
   - [DomainsToCheckForGroups](#domainstocheckforgroups)
+  - [DeleteUserCreatedSignatures](#deleteusercreatedsignatures)
+  - [SetCurrentUserOutlookWebSignature](#setcurrentuseroutlookwebsignature)
 - [Outlook signature path](#outlook-signature-path)
 - [Mailboxes](#mailboxes)
 - [Group membership](#group-membership)
@@ -37,11 +39,13 @@ The parameter SignatureTemplatePath tells the script where signature template fi
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').  
 WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'  
 The currently logged-on user needs at least read access to the path.  
+Default value: '.\Signature templates'  
 ## ReplacementVariableConfigFile  
 The parameter ReplacementVariableConfigFile tells the script where the file defining replacement variables is located.  
 Local and remote paths are supported. Local paths can be absolute ('C:\config\default replacement variables.txt') or relative to the script path ('.\config\default replacement variables.txt').  
 WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/config/default replacement variables.txt' or '\\server.domain@SSL\SignatureSite\config\default replacement variables.txt'  
 The currently logged-on user needs at least read access to the file.  
+Default value: '.\config\default replacement variables.txt'  
 ## DomainsToCheckForGroups  
 The parameters tells the script which domains should be used to search for mailbox and user group membership.  
 The default value, '\*' tells the script to query all trusted domains in the Active Directory forest of the logged-on user.  
@@ -49,6 +53,14 @@ For a custom list of domains/forests, specify them as comma-separated list of st
 When a domain/forest in the custom list starts with a dash or minus ('-domain-a.local'), this domain is removed from the list.  
 The '\*' entry in a custom list is only considered when it is the first entry of the list.  
 The Active Directory forest of the currently logged-on user is always considered.  
+Default value: '*'  
+## DeleteUserCreatedSignatures  
+Shall the script delete signatures which were created by the user itself? The default value for this parameter is $false.  
+Remark: The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.  
+Default value: $false  
+## SetCurrentUserOutlookWebSignature  
+Shall the script set the Outlook Web signature of the currently logged on user?  
+Default value: $true  
 # Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.  
 The registry setting does not allow for absolute paths, only for paths relative to '%APPDATA%\Microsoft'.  
