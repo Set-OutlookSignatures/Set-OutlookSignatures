@@ -43,6 +43,12 @@
   Shall the script set the Outlook Web signature of the currently logged on user?
   Default value: $true
 
+  .PARAMETER AdditionalSignaturePath
+  An additional path that the signatures shall be copied to.
+  Ideally, this path is available on all devices of the user, for example via OneDrive.
+  This way, the user can easily copy-paste his preferred preconfigured signature for use in a mail app not support by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
+  Default value: "$($env:OneDriveCommercial)\Outlook signatures"
+
   .INPUTS
   None. You cannot pipe objects to Set-OutlookSignatures.ps1.
 
@@ -99,7 +105,10 @@ Param(
     [bool]$DeleteUserCreatedSignatures = $false,
 
     # Shall the script set the Outlook Web signature of the currently logged on user?
-    [bool]$SetCurrentUserOutlookWebSignature = $true
+    [bool]$SetCurrentUserOutlookWebSignature = $true,
+    
+    # An additional path that the signatures shall be copied to
+    [ValidateNotNullOrEmpty()][string]$AdditionalSignaturePath = "$($env:OneDriveCommercial)\Outlook signatures"
 )
 
 
@@ -621,6 +630,7 @@ CheckPath $ReplacementVariableConfigFile
 Write-Host ('    DomainsToCheckForGroups: ' + ('''' + $($DomainsToCheckForGroups -join ''', ''') + ''''))
 Write-Host "    DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
 Write-Host "    SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
+Write-Host "    AdditionalSignaturePath: '$AdditionalSignaturePath'"
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
     Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
@@ -784,6 +794,22 @@ Get-ItemProperty 'hkcu:\software\microsoft\office\*\common\general' | Where-Obje
         Write-Host "  $x"
     }
     Pop-Location
+}
+
+
+if ($AdditionalSignaturePath) {
+    $AdditionalSignaturePath = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($AdditionalSignaturePath))
+    Write-Host "  Add additional signature path '$AdditionalSignaturePath'"
+    if ((test-path $AdditionalSignaturePath -PathType Container) -eq $false) {
+        New-Item -Path $AdditionalSignaturePath -ItemType Directory -Force
+        if ((test-path $AdditionalSignaturePath -PathType Container) -eq $false) {
+            write-host '    Path could not be accessed or created, ignoring path."
+        } else {
+            $SignaturePaths += $AdditionalSignaturePath
+        }
+    } else {
+        $SignaturePaths += $AdditionalSignaturePath
+    }
 }
 
 
