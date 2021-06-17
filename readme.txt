@@ -1,5 +1,17 @@
 Set-OutlookSignatures.ps1
 
+Downloads centrally stored signatures, replaces variables, optionally sets default signatures.
+Signatures can be
+- applied to all mailboxes, specific groups or specific addresses,
+- assigned time ranges within which they are valid,
+- set in Outlook Web for the currently logged-on user,
+- centrally managed only or exist along user created signatures,
+- copied to an alternate path for easy access on mobile devices not directly supported by this script.
+The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).
+
+
+Table of Contents
+
 - General description
 - Requirements
 - Parameters
@@ -25,18 +37,7 @@ Set-OutlookSignatures.ps1
 - FAQ
   - Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?
   - Which ports are required?
-
-
-General description
-
-Downloads centrally stored signatures, replaces variables, optionally sets default signatures.
-Signatures can be
-- applied to all mailboxes, specific groups or specific addresses,
-- assigned time ranges within which they are valid,
-- set in Outlook Web for the currently logged-on user,
-- centrally managed only or exist along user created signatures,
-- copied to an alternate path for easy access on mobile devices not directly supported by this script.
-The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).
+  - What about the new signature roaming feature Microsoft announced?
 
 
 Requirements
@@ -279,3 +280,13 @@ Which ports are required?
 
 Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, are required to communicate with Active Directory domains. The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11).
 The client needs port 443 to access a WebDAV share (a SharePoint document library, for example).
+
+What about the new signature roaming feature Microsoft announced?  
+
+Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
+This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.
+Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).
+Microsoft has stated that only cloud mailboxes support the new feature and that Outlook for Windows will be the only client supporting the new feature for now. I am confident more mail clients will follow soon. Future will tell if the feature will be made available for mailboxes on premises, too.
+Currently, there is no detailed documentation and no API available to programatically access the new feature.
+Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensures full compatibility with this script.
+For details, please see https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us.
