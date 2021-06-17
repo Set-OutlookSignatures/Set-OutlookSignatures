@@ -1,5 +1,17 @@
 # <a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src=".logo/Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a>  
-- [General description](#general-description)
+
+Downloads centrally stored signatures, replaces variables, optionally sets default signatures.  
+Signatures can be  
+- applied to all mailboxes, specific groups or specific addresses,  
+- assigned time ranges within which they are valid,  
+- set in Outlook Web for the currently logged-on user,  
+- centrally managed only or exist along user created signatures,  
+- copied to an alternate path for easy access on mobile devices not directly supported by this script.  
+  
+The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).  
+  
+  
+# Table of Contents
 - [Requirements](#requirements)
 - [Parameters](#parameters)
   - [SignatureTemplatePath](#signaturetemplatepath)
@@ -7,6 +19,7 @@
   - [DomainsToCheckForGroups](#domainstocheckforgroups)
   - [DeleteUserCreatedSignatures](#deleteusercreatedsignatures)
   - [SetCurrentUserOutlookWebSignature](#setcurrentuseroutlookwebsignature)
+  - [AdditionalSignaturePath](#additionalsignaturepath)
 - [Outlook signature path](#outlook-signature-path)
 - [Mailboxes](#mailboxes)
 - [Group membership](#group-membership)
@@ -22,12 +35,9 @@
 - [Outlook Web](#outlook-web)
 - [FAQ](#faq)
   - [Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
-  - [Which ports are required?](#which-ports-are-required)
-# General description  
-Downloads centrally stored signatures, replaces variables, optionally sets default signatures.  
-Signatures can be applied to all (mailbox) users, specific groups or specific mail addresses.  
-Signature templates can be assigned time ranges within which they are valid.  
-Signatures are also set in Outlook Web for the currently logged-on user.  
+  - [Which ports are required?](#which-ports-are-required)  
+  
+  
 # Requirements  
 Requires Outlook and Word, at least version 2010.  
 The script must run in the security context of the currently logged-on user.  
@@ -61,6 +71,11 @@ Default value: $false
 ## SetCurrentUserOutlookWebSignature  
 Shall the script set the Outlook Web signature of the currently logged on user?  
 Default value: $true  
+## AdditionalSignaturePath  
+An additional path that the signatures shall be copied to.  
+Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.  
+This way, the user can easily copy-paste his preferred preconfigured signature for use in a mail app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.  
+Default value: "$(\[environment]::GetFolderPath(“MyDocuments”))\Outlook signatures"  
 # Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.  
 The registry setting does not allow for absolute paths, only for paths relative to '%APPDATA%\Microsoft'.  
@@ -76,8 +91,8 @@ The script works fine with linked mailboxes in Exchange resource forest scenario
 Trusted domains can be modified with the DomainsToCheckForGroups parameter.  
 Group membership is achieved by querying the tokenGroups attribute, which is not only very fast and resource saving on client and server, but also considers sIDHistory.  
 # Removing old signatures  
-The script deletes locally available signatures, if they are no longer available centrally.  
-Signature created manually by the user are not deleted. The script marks each downloaded signature with a specific HTML tag, which enables this cleaning feature.  
+The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository. The script marks each processed signature with a specific HTML tag, which enables this cleaning feature.  
+Signatures created manually by the user are not deleted by default, this behavior can be changed with the DeleteUserCreatedSignatures parameter.  
 # Error handling  
 Error handling is implemented rudimentarily.  
 # Run script while Outlook is running  
@@ -106,7 +121,7 @@ Examples:
     - Make this signature specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
 - \[yyyyMMddHHmm-yyyyMMddHHmm], e.g. \[202112150000-202112262359] for the 2021 Christmas season  
     - Make this signature template valid only during the specific time range (yyyy = year, MM = month, dd = day, HH = hour, mm = minute)  
-    - If the script does not run after a template has expired, the signature is still available on the client and be used.  
+    - If the script does not run after a template has expired, the signature is still available on the client and can be used.  
 Filename tags can be combined: A signature may be assigned to several groups, several mail addresses and several time ranges, be used as default signature for new e-mails and as default signature for replies and forwards at the same time.  
 The number of possible tags is limited by Operating System file name and path length restrictions only. The script works with path names longer than the default Windows limit of 260 characters, even when "LongPathsEnabled" (https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation) is not active.  
 # Signature application order  
@@ -203,7 +218,7 @@ All this happens with the credentials of the currently logged-on user, without a
 The legacyExchangeDN attribute is used to find the user behind a mailbox, because mail and proxyAddresses are not unique in certain Exchange scenarios:  
 - A separate Active Directory forest for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.  
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.  
-The disadvantage of using legacyEchangeDn is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures.  
+The disadvantage of using legacyExchangeDN is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures.  
 ## Which ports are required?
 Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, are required to communicate with Active Directory domains. 
 The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11).  

@@ -43,6 +43,12 @@
   Shall the script set the Outlook Web signature of the currently logged on user?
   Default value: $true
 
+  .PARAMETER AdditionalSignaturePath
+  An additional path that the signatures shall be copied to.
+  Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
+  This way, the user can easily copy-paste his preferred preconfigured signature for use in a mail app not support by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
+  Default value: "$([environment]::GetFolderPath('MyDocuments'ù))\Outlook signatures"
+
   .INPUTS
   None. You cannot pipe objects to Set-OutlookSignatures.ps1.
 
@@ -63,7 +69,7 @@
 
   .NOTES
   Script : Set-OutlookSignatures.ps1
-  Version: 1.3.0
+  Version: 1.4.0
   Author : Markus Gruber
   License: MIT License (see license.txt for details and copyright)
   Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
@@ -99,7 +105,10 @@ Param(
     [bool]$DeleteUserCreatedSignatures = $false,
 
     # Shall the script set the Outlook Web signature of the currently logged on user?
-    [bool]$SetCurrentUserOutlookWebSignature = $true
+    [bool]$SetCurrentUserOutlookWebSignature = $true,
+    
+    # An additional path that the signatures shall be copied to
+    [string]$AdditionalSignaturePath = "$([environment]::GetFolderPath('MyDocuments'))\Outlook signatures"
 )
 
 
@@ -621,6 +630,7 @@ CheckPath $ReplacementVariableConfigFile
 Write-Host ('    DomainsToCheckForGroups: ' + ('''' + $($DomainsToCheckForGroups -join ''', ''') + ''''))
 Write-Host "    DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
 Write-Host "    SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
+Write-Host "    AdditionalSignaturePath: '$AdditionalSignaturePath'"
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
     Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
@@ -872,7 +882,7 @@ if ($OutlookDefaultProfile.length -eq '') {
 }
 
 
-Write-Host 'Get all signature files and categorize them'
+Write-Host 'Get all signature template files and categorize them'
 $SignatureFilesCommon = @{}
 $SignatureFilesGroup = @{}
 $SignatureFilesGroupFilePart = @{}
@@ -1312,7 +1322,7 @@ $SignaturePaths | ForEach-Object {
 }
 
 
-# Delete user created signatures if the corresponding parameter is set
+# Delete user created signatures if $DeleteUserCreatedSignatures -eq $true
 if ($DeleteUserCreatedSignatures -eq $true) {
     Write-Host 'Remove user created signatures'
     $SignaturePaths | ForEach-Object {
@@ -1324,6 +1334,25 @@ if ($DeleteUserCreatedSignatures -eq $true) {
                     Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
             }
         }
+    }
+}
+
+
+# Copy signatures to additional path if $AdditionalSignaturePath is set
+if ($AdditionalSignaturePath) {
+    $AdditionalSignaturePath = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($AdditionalSignaturePath)).replace("\\?\\\", "\\?\UNC\")
+    Write-Host "Copy signatures to '$AdditionalSignaturePath'"
+    if (-not (test-path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
+        New-Item -Path $AdditionalSignaturePath -ItemType Directory -Force | Out-Null
+        if (-not (test-path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
+            write-host '  Path could not be accessed or created, ignoring path.' -BackgroundColor Yellow
+        } else {
+            Remove-Item -Path $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
+            Copy-Item -Path $SignaturePaths[0] -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    } else {
+        Remove-Item -Path $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
+        Copy-Item -Path $SignaturePaths[0] -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 
