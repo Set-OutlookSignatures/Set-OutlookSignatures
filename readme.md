@@ -1,12 +1,16 @@
 # <a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src=".logo/Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a>  
 
-Downloads centrally stored signatures, replaces variables, optionally sets default signatures.  
-Signatures can be  
+Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.  
+ 
+Signatures and OOF messages can be  
+- customized with a broad range of variables, including photos from Active Directory,  
 - applied to all mailboxes, specific groups or specific addresses,  
 - assigned time ranges within which they are valid,  
 - set in Outlook Web for the currently logged-on user,  
-- centrally managed only or exist along user created signatures,  
-- copied to an alternate path for easy access on mobile devices not directly supported by this script.  
+- centrally managed only or exist along user created signatures (signatures only),  
+- copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only).  
+- set as default signature for new mails, or for replies and forwards (signatures only),  
+- set as default OOF message for internal or external recipients (OOF messages only).  
   
 The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).  
   
@@ -19,6 +23,8 @@ The script is designed to work in big and complex environments (Exchange resourc
   - [DomainsToCheckForGroups](#domainstocheckforgroups)
   - [DeleteUserCreatedSignatures](#deleteusercreatedsignatures)
   - [SetCurrentUserOutlookWebSignature](#setcurrentuseroutlookwebsignature)
+  - [SetCurrentUserOOFMessage](#setcurrentuseroofmessage)
+  - [OOFTemplatePath](#ooftemplatepath)
   - [AdditionalSignaturePath](#additionalsignaturepath)
 - [Outlook signature path](#outlook-signature-path)
 - [Mailboxes](#mailboxes)
@@ -26,16 +32,17 @@ The script is designed to work in big and complex environments (Exchange resourc
 - [Removing old signatures](#removing-old-signatures)
 - [Error handling](#error-handling)
 - [Run script while Outlook is running](#run-script-while-outlook-is-running)
-- [Signature file format](#signature-file-format)
-  - [Signature file naming](#signature-file-naming)
+- [Signature and OOF file format](#signature-and-oof-file-format)
+  - [Signature and OOF file naming](#signature-and-oof-file-naming)
   - [Allowed filename tags](#allowed-filename-tags)
-- [Signature application order](#signature-application-order)
+- [Signature and OOF application order](#signature-and-oof-application-order)
 - [Variable replacement](#variable-replacement)
   - [Photos from Active Directory](#photos-from-active-directory)
 - [Outlook Web](#outlook-web)
 - [FAQ](#faq)
   - [Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
   - [Which ports are required?](#which-ports-are-required)  
+  - [Why is Out of Office abbreviated OOF and not OOO?](#why-is-out-of-office-abbreviated-oof-and-not-ooo)
   - [What about the new signature roaming feature Microsoft announced?](#what-about-the-new-signature-roaming-feature-microsoft-announced)
   
   
@@ -43,7 +50,7 @@ The script is designed to work in big and complex environments (Exchange resourc
 Requires Outlook and Word, at least version 2010.  
 The script must run in the security context of the currently logged-on user.  
 The script must run in PowerShell Full Language mode. Constrained Language mode is not supported, as some features such as BASE64 conversions are not available in this mode or require very slow workarounds. If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell script.  
-The path to the signature template files (SignatureTemplatePath) must be accessible by the currently logged-on user. The template files must be at least readable for the currently logged-on user.  
+The paths to the template files (SignatureTemplatePath, OOFTemplatePath) must be accessible by the currently logged-on user. The template files must be at least readable for the currently logged-on user.  
 # Parameters  
 ## SignatureTemplatePath  
 The parameter SignatureTemplatePath tells the script where signature template files are stored.  
@@ -72,6 +79,15 @@ Default value: $false
 ## SetCurrentUserOutlookWebSignature  
 Shall the script set the Outlook Web signature of the currently logged on user?  
 Default value: $true  
+## SetCurrentUserOOFMessage  
+Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?  
+Default value: $true  
+## OOFTemplatePath  
+Path to centrally managed signature templates.  
+Local and remote paths are supported.  
+Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').  
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'  
+Default value: '.\OOF templates'  
 ## AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.  
@@ -84,7 +100,7 @@ If the relative path set in the registry would be a valid path but does not exis
 # Mailboxes  
 The script only considers primary mailboxes (mailboxes added as separate accounts), no secondary mailboxes.  
 This is the same way Outlook handles mailboxes from a signature perspective.  
-The script is created for Exchange environments. Non-Exchange mailboxes can not have group signatures, but common and mailbox specific signatures.  
+The script is created for Exchange environments. Non-Exchange mailboxes can not have OOF messages or group signatures, but common and mailbox specific signatures.  
 # Group membership  
 The script considers all groups the currently logged-on user belongs to, as well as all groups the currently processed mailbox belongs to.  
 For both sets of groups, group membership is searched against the whole Active Directory forest of the currently logged-on user as well as all trusted domains the user can access.  
@@ -100,10 +116,10 @@ Error handling is implemented rudimentarily.
 Outlook and the script can run simultaneously.  
 New and changed signatures can be used instantly in Outlook.  
 Changing which signature is to be used as default signature for new mails for for replies and forwards requires restarting Outlook.   
-# Signature file format  
-Only Word files with the extension .DOCX are supported as signature template files.  
-## Signature file naming  
-The script copies every signature file name as-is, with one exception: When tags are defined in the file name, these tags are removed.  
+# Signature and OOF file format  
+Only Word files with the extension .DOCX are supported as signature and OOF template files.  
+## Signature and OOF file naming  
+The script copies every signature and OOF file as-is, with one exception: When tags are defined in the file name, these tags are removed.  
 Tags must be placed before the file extension and be separated from the base filename with a period.  
 Examples:  
 - 'Company external German.docx' -> 'Company external German.htm', no changes  
@@ -111,32 +127,37 @@ Examples:
 - 'Company external \[English].docx' ' -> 'Company external \[English].htm', tag(s) is/are not removed, because there is no dot before  
 - 'Company external \[English].\[defaultNew] \[Company-AD All Employees].docx' ' -> 'Company external \[English].htm', tag(s) is/are removed, because they are separated from base filename  
 ## Allowed filename tags  
-- \[defaultNew]  
+- \[defaultNew] (signature template files only)  
     - Set signature as default signature for new mails  
-- \[defaultReplyFwd]  
+- \[defaultReplyFwd] (signature template files only)  
     - Set signature as default signature for replies and forwarded mails  
+- \[internal] (OOF template files only)  
+    - Set template as default OOF message for internal recipients  
+    - If neither \[internal] nor \[external] is defined, the template is set as default OOF message for internal and external recipients  
+- \[external] (OOF template files only)  
+    - Set template as default OOF message for external recipients  
+    - If neither \[internal] nor \[external] is defined, the template is set as default OOF message for internal and external recipients  
 - \[NETBIOS-Domain Group-SamAccountName], e.g. \[EXAMPLE Domain Users]  
-    - Make this signature specific for an Outlook mailbox or the currently logged-on user being a member (direct or indirect) of this group  
+    - Make this template specific for an Outlook mailbox or the currently logged-on user being a member (direct or indirect) of this group  
     - Groups must be available in Active Directory. Groups like 'Everyone' and 'Authenticated Users' only exist locally, not in Active Directory  
 - \[SMTP address], e.g. \[office@example.com]  
-    - Make this signature specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
+    - Make this template specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
 - \[yyyyMMddHHmm-yyyyMMddHHmm], e.g. \[202112150000-202112262359] for the 2021 Christmas season  
-    - Make this signature template valid only during the specific time range (yyyy = year, MM = month, dd = day, HH = hour, mm = minute)  
-    - If the script does not run after a template has expired, the signature is still available on the client and can be used.  
-Filename tags can be combined: A signature may be assigned to several groups, several mail addresses and several time ranges, be used as default signature for new e-mails and as default signature for replies and forwards at the same time.  
+    - Make this template valid only during the specific time range (yyyy = year, MM = month, dd = day, HH = hour, mm = minute)  
+    - If the script does not run after a template has expired, the template is still available on the client and can be used.  
+Filename tags can be combined: A template may be assigned to several groups, several mail addresses and several time ranges, be used as default signature for new e-mails and as default signature for replies and forwards at the same time.  
 The number of possible tags is limited by Operating System file name and path length restrictions only. The script works with path names longer than the default Windows limit of 260 characters, even when "LongPathsEnabled" (https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation) is not active.  
-# Signature application order  
-Signatures are applied in a specific order: Common signatures first, group signatures second, mail address specific signatures last.  
-Signatures with a time range tag are only considered if the current system time is in range of at least one of these tags.  
-Common signatures are signatures with either no tag or only \[defaultNew] and/or \[defaultReplyFwd].  
-Within these groups, signatures are applied alphabetically ascending.  
-Every centrally stored signature is applied only once, as there is only one signature path in Outlook, and subfolders are not allowed - so the file names have to be unique.  
+# Signature and OOF application order  
+Templates are applied in a specific order: Common tempaltes first, group templates second, mail address specific templates last.  
+Templates with a time range tag are only considered if the current system time is in range of at least one of these tags.  
+Common templates are templates with either no tag or only \[defaultNew] and/or \[defaultReplyFwd] (\[internal] and \[external] for OOF templates).  
+Within these groups, templates are applied alphabetically ascending.  
+Every centrally stored signature template is applied only once, as there is only one signature path in Outlook, and subfolders are not allowed - so the file names have to be unique.  
 The script always starts with the mailboxes in the default Outlook profile, preferrably with the current users personal mailbox.  
 # Variable replacement  
 Variables are case sensitive.  
-Variables are replaced everywhere in the signature files, including links, QuickTips and alternative text of images.  
-With this feature, you can not only show mail addresses and telephone numbers in the signature, but show them as links which open a new mail message ("mailto:") or dial the number ("tel:") via a locally installed softphone when clicked.  
-When using images in signatures, consider using the alternative text feature to help visually impaired people.  
+Variables are replaced everywhere, including links, QuickTips and alternative text of images.  
+With this feature, you can not only show mail addresses and telephone numbers in the signature and OOF message, but show them as links which open a new mail message ("mailto:") or dial the number ("tel:") via a locally installed softphone when clicked.  
 Custom Active directory attributes are supported as well as custom replacement variables, see './config/default replacement variables.txt' for details.  
 Per default, './config/default replacement variables.txt' contains the following replacement variables:  
 - Currently logged-on user  
@@ -162,7 +183,9 @@ Per default, './config/default replacement variables.txt' contains the following
 - Manager of current mailbox  
     - Same variables as logged-on user, $CURRENTMAILBOXMANAGER\[...]$ instead of $CURRENTMAILBOX\[...]$  
 ## Photos from Active Directory  
-The script supports replacing images in the signature template with photos stored in Active Directory.  
+The script supports replacing images in signature templates with photos stored in Active Directory.  
+When using images in OOF templates, please be aware that Exchange and Outlook do not yet support images in OOF messages.  
+  
 As with other variables, photos can be obtained from the currently logged-on user, it's manager, the currently processed mailbox and it's manager.  
   
 To be able to apply Word image features such as sizing, cropping, frames, 3D effects etc, you have to exactly follow these steps:  
@@ -219,11 +242,13 @@ All this happens with the credentials of the currently logged-on user, without a
 The legacyExchangeDN attribute is used to find the user behind a mailbox, because mail and proxyAddresses are not unique in certain Exchange scenarios:  
 - A separate Active Directory forest for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.  
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.  
-The disadvantage of using legacyExchangeDN is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures.  
+The disadvantage of using legacyExchangeDN is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures and OOF messages.  
 ## Which ports are required?  
 Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, are required to communicate with Active Directory domains. 
 The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11).  
 The client needs port 443 to access a WebDAV share (a SharePoint document library, for example).  
+## Why is Out of Office abbreviated OOF and not OOO?  
+Back in the 1980s, Microsoft had a UNIX OS named Xenix ... but read yourself: https://techcommunity.microsoft.com/t5/exchange-team-blog/why-is-oof-an-oof-and-not-an-ooo/ba-p/610191  
 ## What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.  
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.  
