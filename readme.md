@@ -1,4 +1,4 @@
-# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src=".logo/Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a>  
+# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src="https://raw.githubusercontent.com/GruberMarkus/Set-OutlookSignatures/main/logo/Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a>  
 
 Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.  
  
