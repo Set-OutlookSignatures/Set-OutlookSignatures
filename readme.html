@@ -123,7 +123,7 @@ Default value: $true</p>
 <p>Path to centrally managed signature templates.<br>
 Local and remote paths are supported.<br>
 Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').<br>
-WebDAV paths are supported (https only): '<a href="https://server.domain/SignatureSite/SignatureTemplates">https://server.domain/SignatureSite/SignatureTemplates</a>' or '\server.domain@SSL\SignatureSite\SignatureTemplates'<br>
+WebDAV paths are supported (https only): 'https:<area><a href="//server.domain/SignatureSite/SignatureTemplates">//server.domain/SignatureSite/SignatureTemplates</a>' or '\server.domain@SSL\SignatureSite\SignatureTemplates'<br>
 Default value: '.\OOF templates'</p>
 <h2 id="28-additionalsignaturepath">2.8. AdditionalSignaturePath</h2>
 <p>An additional path that the signatures shall be copied to.<br>
@@ -195,7 +195,7 @@ Examples:</p>
 <li>Groups must be available in Active Directory. Groups like 'Everyone' and 'Authenticated Users' only exist locally, not in Active Directory</li>
 </ul>
 </li>
-<li>[SMTP address], e.g. [office@example.com]
+<li>[SMTP address], e.g. [office<area>@example.com]
 <ul>
 <li>Make this template specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)</li>
 </ul>

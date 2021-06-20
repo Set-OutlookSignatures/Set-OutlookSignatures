@@ -87,7 +87,7 @@ Default value: \$true
 Path to centrally managed signature templates.  
 Local and remote paths are supported.  
 Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').  
-WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'  
+WebDAV paths are supported (https only): 'https:<area>//server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'  
 Default value: '.\OOF templates'  
 ## 2.8. AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
@@ -141,7 +141,7 @@ Examples:
 - \[NETBIOS-Domain Group-SamAccountName], e.g. \[EXAMPLE Domain Users]  
     - Make this template specific for an Outlook mailbox or the currently logged-on user being a member (direct or indirect) of this group  
     - Groups must be available in Active Directory. Groups like 'Everyone' and 'Authenticated Users' only exist locally, not in Active Directory  
-- \[SMTP address], e.g. \[office@example.com]  
+- \[SMTP address], e.g. \[office<area>@example.com]  
     - Make this template specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
 - \[yyyyMMddHHmm-yyyyMMddHHmm], e.g. \[202112150000-202112262359] for the 2021 Christmas season  
     - Make this template valid only during the specific time range (yyyy = year, MM = month, dd = day, HH = hour, mm = minute)  
