@@ -89,7 +89,7 @@
 
   .NOTES
   Script : Set-OutlookSignatures.ps1
-  Version: 1.5.0
+  Version: 1.5.1
   Author : Markus Gruber
   License: MIT License (see license.txt for details and copyright)
   Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
@@ -1533,7 +1533,6 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                         Set-Signatures -ProcessOOF
                     }
 
-                    Write-Host '    '
                     if (Test-Path -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFCommon.htm'))) {
                         $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFCommon.htm')) -Raw).ToString())
                         $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFCommon.htm')) -Raw).ToString())
