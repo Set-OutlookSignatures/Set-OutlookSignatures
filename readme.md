@@ -155,6 +155,7 @@ Common templates are templates with either no tag or only \[defaultNew] and/or \
 Within these groups, templates are applied alphabetically ascending.  
 Every centrally stored signature template is applied only once, as there is only one signature path in Outlook, and subfolders are not allowed - so the file names have to be unique.  
 The script always starts with the mailboxes in the default Outlook profile, preferrably with the current users personal mailbox.  
+OOF templates are only applied if the Out of Office assistant is currently disabled. If it is currently active or scheduled to be activated in the future, OOF templates are not applied.  
 # 11. Variable replacement  
 Variables are case sensitive.  
 Variables are replaced everywhere, including links, QuickTips and alternative text of images.  

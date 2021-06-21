@@ -89,7 +89,7 @@
 
   .NOTES
   Script : Set-OutlookSignatures.ps1
-  Version: 1.5.1
+  Version: 1.5.2
   Author : Markus Gruber
   License: MIT License (see license.txt for details and copyright)
   Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
@@ -1367,9 +1367,13 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
 
     # Set OOF message and Outlook Web signature
     if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($ADPropsCurrentMailbox.mail -ieq $ADPropsCurrentUser.mail)) {
-        $error.clear()
         try {
             Copy-Item -Path '.\bin\Microsoft.Exchange.WebServices.dll' -Destination (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
+        } catch {
+        }
+
+        $error.clear()
+        try {
             Import-Module -Name (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
             $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
             $exchService.UseDefaultCredentials = $true

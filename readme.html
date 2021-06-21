@@ -215,7 +215,8 @@ Templates with a time range tag are only considered if the current system time i
 Common templates are templates with either no tag or only [defaultNew] and/or [defaultReplyFwd] ([internal] and [external] for OOF templates).<br>
 Within these groups, templates are applied alphabetically ascending.<br>
 Every centrally stored signature template is applied only once, as there is only one signature path in Outlook, and subfolders are not allowed - so the file names have to be unique.<br>
-The script always starts with the mailboxes in the default Outlook profile, preferrably with the current users personal mailbox.</p>
+The script always starts with the mailboxes in the default Outlook profile, preferrably with the current users personal mailbox.<br>
+OOF templates are only applied if the Out of Office assistant is currently disabled. If it is currently active or scheduled to be activated in the future, OOF templates are not applied.</p>
 <h1 id="11-variable-replacement">11. Variable replacement</h1>
 <p>Variables are case sensitive.<br>
 Variables are replaced everywhere, including links, QuickTips and alternative text of images.<br>
