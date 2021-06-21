@@ -1375,14 +1375,14 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
             $exchService.UseDefaultCredentials = $true
             $exchService.AutodiscoverUrl($ADPropsCurrentUser.mail)
         } catch {
-            Write-Host "  Error connecting to Outlook Web: $_" -BackgroundColor Red
+            Write-Host "  Error connecting to Outlook Web: $_" -ForegroundColor Red
 
             if ($SetCurrentUserOutlookWebSignature) {
-                Write-Host '  Outlook Web signature can not be set' -BackgroundColor Red
+                Write-Host '  Outlook Web signature can not be set' -ForegroundColor Red
             }
 
             if ($SetCurrentUserOOFMessage) {
-                Write-Host '  Out of Office (OOF) auto reply message(s) can not be set' -BackgroundColor Red
+                Write-Host '  Out of Office (OOF) auto reply message(s) can not be set' -ForegroundColor Red
             }
         }
 
@@ -1546,7 +1546,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                         Write-Host '    Error setting Outlook Web Out of Office (OOF) auto reply message(s)' -ForegroundColor Red
                     }
                 } else {
-                    Write-Host '    Out of Office (OOF) auto reply currently active or scheduled, not changing settings' -BackgroundColor Yellow
+                    Write-Host '    Out of Office (OOF) auto reply currently active or scheduled, not changing settings' -ForegroundColor Yellow
                 }
 
                 # Delete temporary OOF files from file system
@@ -1607,7 +1607,7 @@ if ($AdditionalSignaturePath) {
     if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
         New-Item -Path $AdditionalSignaturePath -ItemType Directory -Force | Out-Null
         if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
-            Write-Host '  Path could not be accessed or created, ignoring path.' -BackgroundColor Yellow
+            Write-Host '  Path could not be accessed or created, ignoring path.' -ForegroundColor Yellow
         } else {
             Remove-Item -Path $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
             Copy-Item -Path $SignaturePaths[0] -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
