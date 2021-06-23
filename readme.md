@@ -56,13 +56,13 @@ The paths to the template files (SignatureTemplatePath, OOFTemplatePath) must be
 ## 2.1. SignatureTemplatePath  
 The parameter SignatureTemplatePath tells the script where signature template files are stored.  
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').  
-WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'  
+WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/SignatureTemplates' or '\\\\server.domain@SSL\SignatureSite\SignatureTemplates'  
 The currently logged-on user needs at least read access to the path.  
 Default value: '.\Signature templates'  
 ## 2.2. ReplacementVariableConfigFile  
 The parameter ReplacementVariableConfigFile tells the script where the file defining replacement variables is located.  
 Local and remote paths are supported. Local paths can be absolute ('C:\config\default replacement variables.txt') or relative to the script path ('.\config\default replacement variables.txt').  
-WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/config/default replacement variables.txt' or '\\server.domain@SSL\SignatureSite\config\default replacement variables.txt'  
+WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/config/default replacement variables.txt' or '\\\\server.domain@SSL\SignatureSite\config\default replacement variables.txt'  
 The currently logged-on user needs at least read access to the file.  
 Default value: '.\config\default replacement variables.txt'  
 ## 2.3. DomainsToCheckForGroups  
@@ -84,15 +84,20 @@ Default value: \$true
 Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?  
 Default value: \$true  
 ## 2.7. OOFTemplatePath  
-Path to centrally managed signature templates.  
+Path to centrally managed Out of Office (OOF) auto reply templates.  
 Local and remote paths are supported.  
-Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').  
-WebDAV paths are supported (https only): 'https:<area>//server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'  
+Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\OOF templates').  
+WebDAV paths are supported (https only): 'https:<area>//server.domain/SignatureSite/OOFTemplates' or '\\\\server.domain@SSL\SignatureSite\OOFTemplates'  
+The currently logged-on user needs at least read access to the path.  
 Default value: '.\OOF templates'  
 ## 2.8. AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.  
 This way, the user can easily copy-paste his preferred preconfigured signature for use in a mail app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.  
+Local and remote paths are supported.  
+Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').  
+WebDAV paths are supported (https only): 'https:<area>//server.domain/User/Outlook signatures' or '\\\\server.domain@SSL\User\Outlook signatures'  
+The currently logged-on user needs at least write access to the path.  
 Default value: "\$(\[environment]::GetFolderPath(“MyDocuments”))\Outlook signatures"  
 # 3. Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.  

@@ -1,4 +1,4 @@
-<#
+<# 
   .SYNOPSIS
   Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.
 
@@ -59,15 +59,20 @@
   .PARAMETER OOFTemplatePath
   Path to centrally managed signature templates.
   Local and remote paths are supported.
-  Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').
-  WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+  Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\OOF templates').
+  WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
+  The currently logged-on user needs at least read access to the path.
   Default value: '.\OOF templates'
 
   .PARAMETER AdditionalSignaturePath
   An additional path that the signatures shall be copied to.
   Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
   This way, the user can easily copy-paste his preferred preconfigured signature for use in a mail app not support by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
-  Default value: "$([environment]::GetFolderPath('MyDocuments'))\Outlook signatures"
+  Local and remote paths are supported.
+  Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
+  WebDAV paths are supported (https only): 'https://server.domain/User/Outlook signatures' or '\\server.domain@SSL\User\Outlook signatures'
+  The currently logged-on user needs at least write access to the path.
+  Default value: "$([environment]::GetFolderPath('MyDocuments'Â))\Outlook signatures"
 
   .INPUTS
   None. You cannot pipe objects to Set-OutlookSignatures.ps1.
@@ -89,7 +94,7 @@
 
   .NOTES
   Script : Set-OutlookSignatures.ps1
-  Version: 1.5.2
+  Version: 1.5.3
   Author : Markus Gruber
   License: MIT License (see license.txt for details and copyright)
   Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
@@ -586,10 +591,13 @@ function CheckADConnectivity {
 
 function CheckPath([string]$path) {
     if ($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
-        $path = (([uri]::UnescapeDataString($path) -ireplace ('https://', '\\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\')
-        $path = $path -replace [regex]::escape('\\'), '\\?\UNC\'
+        $path = (([uri]::UnescapeDataString($path) -ireplace ('https://', '\\?\UNC\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\')
+        #$path = $path -replace [regex]::escape('\\'), '\\?\UNC\'
     } else {
-        $path = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path))
+        $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
+        if (($path.StartsWith('\\?\UNC\', 'CurrentCultureIgnoreCase')) -or (-not ($path.StartsWith('\\', 'CurrentCultureIgnoreCase')))) {
+            $path = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path))
+        }
     }
 
     if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
@@ -613,35 +621,37 @@ function CheckPath([string]$path) {
         }
 
         if (($path -ilike '*@ssl\*') -and (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue))) {
-            # Add site to trusted sites in internet options
-            New-Item ('HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\' + (New-Object System.Uri -ArgumentList ($path -ireplace ('@SSL', ''))).Host) -Force | New-ItemProperty -Name * -Value 1 -Type DWORD -Force | Out-Null
+            Try {
+                # Add site to trusted sites in internet options
+                New-Item ('HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\' + (New-Object System.Uri -ArgumentList ($path -ireplace ('@SSL', ''))).Host) -Force | New-ItemProperty -Name * -Value 1 -Type DWORD -Force | Out-Null
 
-            # Open site in new IE process
-            $oIE = New-Object -com InternetExplorer.Application
-            $oIE.Visible = $false
-            $oIE.Navigate2('https://' + ((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
-            $oIE = $null
+                # Open site in new IE process
+                $oIE = New-Object -com InternetExplorer.Application
+                $oIE.Visible = $false
+                $oIE.Navigate2('https://' + ((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
+                $oIE = $null
 
-            # Wait until an IE tab with the corresponding URL is open
-            $app = New-Object -com shell.application
-            $i = 0
-            while ($i -lt 1) {
-                $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
-                    $i = $i + 1
-                }
-                Start-Sleep -Milliseconds 50
-            }
-
-            # Wait until the corresponding URL is fully loaded, then close the tab
-            $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
-                while ($_.busy) {
+                # Wait until an IE tab with the corresponding URL is open
+                $app = New-Object -com shell.application
+                $i = 0
+                while ($i -lt 1) {
+                    $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
+                        $i = $i + 1
+                    }
                     Start-Sleep -Milliseconds 50
                 }
-                $_.quit()
+
+                # Wait until the corresponding URL is fully loaded, then close the tab
+                $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
+                    while ($_.busy) {
+                        Start-Sleep -Milliseconds 50
+                    }
+                    $_.quit()
+                }
+
+                $app = $null
+            } catch {
             }
-
-            $app = $null
-
         }
     }
 
@@ -685,12 +695,29 @@ if ($SetCurrentUserOOFMessage) {
     Write-Host "    OOFTemplatePath: '$OOFTemplatePath'" -NoNewline
     CheckPath $OOFTemplatePath
 }
-Write-Host "    AdditionalSignaturePath: '$AdditionalSignaturePath'"
+Write-Host "    AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
+CheckPath $AdditionalSignaturePath
+
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
     Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
     Write-Host 'Base64 conversion not possible. Exiting.' -ForegroundColor Red
     exit 1
+}
+
+
+('SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath') | ForEach-Object {
+    $path = (Get-Variable -Name $_).Value
+    if ($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
+        $path = (([uri]::UnescapeDataString($path) -ireplace ('https://', '\\?\UNC\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\')
+        #$path = $path -replace [regex]::escape('\\'), '\\?\UNC\'
+    } else {
+        $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
+        if (($path.StartsWith('\\?\UNC\', 'CurrentCultureIgnoreCase')) -or (-not ($path.StartsWith('\\', 'CurrentCultureIgnoreCase')))) {
+            $path = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path))
+        }
+    }
+    Set-Variable -Name $_ -Value $path
 }
 
 
@@ -1531,7 +1558,9 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                         $SignatureHash.add($OOFExternal, 'OOFExternal.docx')
                     } else {
                         Write-Host "    Common template for internal and external recpients: '$OOFInternal'"
-                        $SignatureHash.add($OOFInternal, 'OOFCommon.docx')
+                        if (($OOFInternal -ne $null) -and ($OOFInternal -ne '')) {
+                            $SignatureHash.add($OOFInternal, 'OOFCommon.docx')
+                        }
                     }
                     foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object -Property Name)) {
                         Set-Signatures -ProcessOOF
@@ -1606,7 +1635,6 @@ if ($DeleteUserCreatedSignatures -eq $true) {
 
 # Copy signatures to additional path if $AdditionalSignaturePath is set
 if ($AdditionalSignaturePath) {
-    $AdditionalSignaturePath = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($AdditionalSignaturePath)).replace('\\?\\\', '\\?\UNC\')
     Write-Host "Copy signatures to '$AdditionalSignaturePath'"
     if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
         New-Item -Path $AdditionalSignaturePath -ItemType Directory -Force | Out-Null
