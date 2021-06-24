@@ -80,6 +80,7 @@
 <li><a href="#132-which-ports-are-required">13.2. Which ports are required?</a></li>
 <li><a href="#133-why-is-out-of-office-abbreviated-oof-and-not-ooo">13.3. Why is Out of Office abbreviated OOF and not OOO?</a></li>
 <li><a href="#134-what-about-the-new-signature-roaming-feature-microsoft-announced">13.4. What about the new signature roaming feature Microsoft announced?</a></li>
+<li><a href="#135-why-docx-as-template-format-and-not-html-signatures-in-outlook-sometimes-look-different-than-my-docx-templates">13.5. Why DOCX as template format and not HTML? Signatures in Outlook sometimes look different than my DOCX templates.</a></li>
 </ul>
 </li>
 </ul>
@@ -346,6 +347,21 @@ Microsoft has stated that only cloud mailboxes support the new feature and that 
 Currently, there is no detailed documentation and no API available to programatically access the new feature.<br>
 Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensures full compatibility with this script.<br>
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&amp;rs=en-us&amp;ad=us">https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&amp;rs=en-us&amp;ad=us</a>.</p>
+<h2 id="135-why-docx-as-template-format-and-not-html-signatures-in-outlook-sometimes-look-different-than-my-docx-templates">13.5. Why DOCX as template format and not HTML? Signatures in Outlook sometimes look different than my DOCX templates.</h2>
+<p>The script uses DOCX as template format, as this seems to be the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications.<br>
+I am aware that not all Word formatting options are supported in HTML, which can lead to signatures looking a bit different than templates. For example, images may be placed at a different position in the signature compared to the template - this is because the Outlook HTML component only supports the &quot;in line with text&quot; text wrapping option, while Word offers more options.<br>
+The script can be adopted to work with HTML files, but the requirements for these files are harder to fulfill as it is the case with DOCX files:</p>
+<ul>
+<li>The template must be UTF8 encoded, or at least only contain UTF8 compatible characters</li>
+<li>The template must be a single file, additional files and folders not be supported</li>
+<li>Images must either reference a public URL or be part of the template as Base64 encoded string</li>
+</ul>
+<p>Possible approaches for fulfilling these requirements are:</p>
+<ul>
+<li>Design the template in a HTML editor that supports all features required</li>
+<li>Design the template in Outlook, paste it into Word, save it as &quot;Website, filtered&quot; and run the resulting file through a script that converts the Word output to a single UTF8 encoded HTML file</li>
+</ul>
+<p>If you prefer HTML templates over Word templates, please leave feedback on the script homepage and I will consider it as an option for a future release.</p>
 
     </body>
     </html>

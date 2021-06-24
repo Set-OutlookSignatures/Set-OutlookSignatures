@@ -94,7 +94,7 @@
 
   .NOTES
   Script : Set-OutlookSignatures.ps1
-  Version: 1.5.3
+  Version: 1.5.4
   Author : Markus Gruber
   License: MIT License (see license.txt for details and copyright)
   Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
@@ -208,7 +208,7 @@ function Set-Signatures {
 
         Write-Host '      Replace variables'
         # Replace pictures in Shapes and InlineShapes
-        foreach ($image in ($ComWord.ActiveDocument.InlineShapes + $ComWord.ActiveDocument.InlineShapes)) {
+        foreach ($image in ($ComWord.ActiveDocument.Shapes + $ComWord.ActiveDocument.InlineShapes)) {
             if ($null -ne $image.linkformat.sourcefullname) {
                 ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
                     if ((((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
@@ -1558,7 +1558,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                         $SignatureHash.add($OOFExternal, 'OOFExternal.docx')
                     } else {
                         Write-Host "    Common template for internal and external recpients: '$OOFInternal'"
-                        if (($OOFInternal -ne $null) -and ($OOFInternal -ne '')) {
+                        if (($null -ne $OOFInternal) -and ($OOFInternal -ne '')) {
                             $SignatureHash.add($OOFInternal, 'OOFCommon.docx')
                         }
                     }
