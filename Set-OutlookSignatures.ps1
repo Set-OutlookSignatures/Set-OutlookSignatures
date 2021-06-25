@@ -3,19 +3,23 @@
   Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.
 
   .DESCRIPTION
-  Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.
+  Signatures and OOF messages can be
+  - generated from templates in DOCX or HTML file format
+  - customized with a broad range of variables, including photos from Active Directory
+  - applied to all mailboxes, specific groups or specific addresses
+  - assigned time ranges within which they are valid
+  - set as default signature for new mails, or for replies and forwards (signatures only)
+  - set as default OOF message for internal or external recipients (OOF messages only)
+  - set in Outlook Web for the currently logged-on user
+  - centrally managed only or exist along user created signatures (signatures only)
+  - copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
 
-  Signatures and OOF messages can be  
-  - customized with a broad range of variables, including photos from Active Directory,  
-  - applied to all mailboxes, specific groups or specific addresses,  
-  - assigned time ranges within which they are valid,  
-  - set in Outlook Web for the currently logged-on user,  
-  - centrally managed only or exist along user created signatures (signatures only),  
-  - copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only).  
-  - set as default signature for new mails, or for replies and forwards (signatures only),  
-  - set as default OOF message for internal or external recipients (OOF messages only).  
-  
-  The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).  
+  Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
+
+  The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).
+
+  The script is Free and open-source software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FST), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3.
+  Please see license.txt for copyright and MIT license details.
 
   .LINK
   Online help: https://github.com/GruberMarkus/Set-OutlookSignatures
@@ -26,14 +30,14 @@
   .PARAMETER SignatureTemplatePath
   Path to centrally managed signature templates.
   Local and remote paths are supported.
-  Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').
+  Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
   WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-  Default value: '.\Signature templates'
+  Default value: '.\templates\Signatures DOCX'
 
   .PARAMETER ReplacementVariableConfigFile
   Path to a replacement variable config file.
   Local and remote paths are supported.
-  Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').
+  Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
   WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
   Default value: '.\config\default replacement variables.txt'
 
@@ -59,10 +63,10 @@
   .PARAMETER OOFTemplatePath
   Path to centrally managed signature templates.
   Local and remote paths are supported.
-  Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\OOF templates').
+  Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office').
   WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
   The currently logged-on user needs at least read access to the path.
-  Default value: '.\OOF templates'
+  Default value: '.\templates\Out of Office DOCX'
 
   .PARAMETER AdditionalSignaturePath
   An additional path that the signatures shall be copied to.
@@ -70,9 +74,19 @@
   This way, the user can easily copy-paste his preferred preconfigured signature for use in a mail app not support by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
   Local and remote paths are supported.
   Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
-  WebDAV paths are supported (https only): 'https://server.domain/User/Outlook signatures' or '\\server.domain@SSL\User\Outlook signatures'
+  WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
   The currently logged-on user needs at least write access to the path.
-  Default value: "$([environment]::GetFolderPath('MyDocuments'Â))\Outlook signatures"
+  Default value: "$([environment]::GetFolderPath('MyDocuments'))"
+
+  .PARAMETER AdditionalSignaturePathFolder
+  A folder or folder structure below AdditionalSignaturePath.
+  If the folder or folder structure does not exist, it is created.
+  Default value: 'Outlook signatures'
+
+  .PARAMETER UseHtmTemplates  
+  With this parameter, the script searches for templates with the extension .htm instead of .docx.
+  Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
+  Default value: \$false
 
   .INPUTS
   None. You cannot pipe objects to Set-OutlookSignatures.ps1.
@@ -94,7 +108,7 @@
 
   .NOTES
   Script : Set-OutlookSignatures.ps1
-  Version: 1.5.4
+  Version: 1.6.0
   Author : Markus Gruber
   License: MIT License (see license.txt for details and copyright)
   Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
@@ -106,15 +120,15 @@
 Param(
     # Path to centrally managed signature templates
     #   Local and remote paths are supported
-    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates')
+    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
     #   The currently logged-on user needs at least read access to the path
-    [ValidateNotNullOrEmpty()][string]$SignatureTemplatePath = '.\Signature templates',
+    [ValidateNotNullOrEmpty()][string]$SignatureTemplatePath = '.\templates\Signatures DOCX',
 
     # Path to a replacement variable config file.
     #   Local and remote paths are supported
-    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates')
+    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signature')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
     #   The currently logged-on user needs at least read access to the path
@@ -137,14 +151,20 @@ Param(
 
     # Path to centrally managed Out of Office (OOF, automatic reply) templates
     #   Local and remote paths are supported
-    #     Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\OOF templates')
+    #     Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
     #   The currently logged-on user needs at least read access to the path
-    [ValidateNotNullOrEmpty()][string]$OOFTemplatePath = '.\OOF templates',
+    [ValidateNotNullOrEmpty()][string]$OOFTemplatePath = '.\templates\Out of Office DOCX',
 
     # An additional path that the signatures shall be copied to
-    [string]$AdditionalSignaturePath = "$([environment]::GetFolderPath('MyDocuments'))\Outlook signatures"
+    [string]$AdditionalSignaturePath = "$([environment]::GetFolderPath('MyDocuments'))",
+
+    # Subfolder to create in $AdditionalSignaturePath
+    [string]$AdditionalSignaturePathFolder = 'Outlook signatures',
+
+    # Use templates in .HTM file format instead of .DOCX
+    [switch]$UseHtmTemplates = $false
 )
 
 
@@ -171,12 +191,61 @@ function GetVersionInfo {
 }
 
 
+Function ConvertTo-SingleFileHTML([string]$inputfile, [string]$outputfile) { 
+    $tempFileContent = Get-Content -LiteralPath $inputfile -Raw -Encoding UTF8
+
+    $src = @()
+    ([regex]'(?i)src="(.*?)"').Matches($tempFileContent) | ForEach-Object {
+        $src += $_.Groups[0].Value
+        if ($_.Groups[0].Value.StartsWith('src="data:')) {
+            $src += ''
+        } else {
+            $src += ((Split-Path -Path $inputfile -Parent) + '\' + ([uri]::UnEscapeDataString($_.Groups[1].Value)))
+        }
+    }
+    for ($x = 0; $x -lt $src.count; $x = $x + 2) {
+        if ($src[$x].StartsWith('src="data:')) {
+        } elseif (Test-Path -LiteralPath $src[$x + 1] -PathType leaf) {
+            $fmt = $null
+            switch ((Get-ChildItem -LiteralPath $src[$x + 1]).Extension) {
+                '.apng' { $fmt = 'data:image/apng;base64,' }
+                '.avif' { $fmt = 'data:image/avif;base64,' }
+                '.gif' { $fmt = 'data:image/gif;base64,' }
+                '.jpg' { $fmt = 'data:image/jpeg;base64,' }
+                '.jpeg' { $fmt = 'data:image/jpeg;base64,' }
+                '.jfif' { $fmt = 'data:image/jpeg;base64,' }
+                '.pjpeg' { $fmt = 'data:image/jpeg;base64,' }
+                '.pjp' { $fmt = 'data:image/jpeg;base64,' }
+                '.png' { $fmt = 'data:image/png;base64,' }
+                '.svg' { $fmt = 'data:image/svg+xml;base64,' }
+                '.webp' { $fmt = 'data:image/webp;base64,' }
+                '.css' { $fmt = 'data:text/css;base64,' }
+                '.less' { $fmt = 'data:text/css;base64,' }
+                '.js' { $fmt = 'data:text/javascript;base64,' }
+                '.otf' { $fmt = 'data:font/otf;base64,' }
+                '.sfnt' { $fmt = 'data:font/sfnt;base64,' }
+                '.ttf' { $fmt = 'data:font/ttf;base64,' }
+                '.woff' { $fmt = 'data:font/woff;base64,' }
+                '.woff2' { $fmt = 'data:font/woff2;base64,' }
+            }
+            if ($fmt) {
+                $tempFileContent = $tempFileContent.replace($src[$x], ('src="' + $fmt + [Convert]::ToBase64String((Get-Content -LiteralPath $src[$x + 1] -Encoding Byte)) + '"'))
+                #$tempFileContent = $tempFileContent.replace($src[$x], ('src="' + $fmt + [Convert]::ToBase64String([IO.File]::ReadAllBytes($src[$x + 1])) + '"'))
+            }
+        }
+    }
+
+    $tempFileContent | Out-File -LiteralPath $outputfile -Encoding UTF8 -Force
+}
+
+
 function Set-Signatures {
     Param(
         [switch]$ProcessOOF = $false
     )
 
     Write-Host "    '$($Signature.Name)'"
+    Write-Host "      Outlook signature name: '$([System.IO.Path]::ChangeExtension($($Signature.value), $null) -replace '.$')'"
 
     if (-not $ProcessOOF) {
         $SignatureFileAlreadyDone = ($global:SignatureFilesDone -contains $($Signature.Name))
@@ -187,15 +256,25 @@ function Set-Signatures {
         }
     }
     if (($SignatureFileAlreadyDone -eq $false) -or $ProcessOOF) {
-        Write-Host '      Copy file and open it in Word'
+        Write-Host '      Copy file'
 
-        $path = $(Join-Path -Path $env:temp -ChildPath (New-Guid).guid).tostring() + '.docx'
-
-        try {
-            Copy-Item -LiteralPath $Signature.Name -Destination $path -Force
-        } catch {
-            Write-Host '        Error copying file. Skipping signature.' -ForegroundColor Red
-            continue
+        if ($UseHtmTemplates) {
+            # use .html for temporary file, .htm for final file
+            $path = $(Join-Path -Path $env:temp -ChildPath (New-Guid).guid).tostring() + '.htm'
+            #try {
+            ConvertTo-SingleFileHTML $Signature.Name $path
+            #} catch {
+            #Write-Host '        Error copying file. Skipping signature.' -ForegroundColor Red
+            #continue
+            #}
+        } else {
+            $path = $(Join-Path -Path $env:temp -ChildPath (New-Guid).guid).tostring() + '.docx'
+            try {
+                Copy-Item -LiteralPath $Signature.Name -Destination $path -Force
+            } catch {
+                Write-Host '        Error copying file. Skipping signature.' -ForegroundColor Red
+                continue
+            }
         }
 
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
@@ -203,152 +282,193 @@ function Set-Signatures {
             $global:SignatureFilesDone += $Signature.Value
         }
 
+        if ($UseHtmTemplates) {
+            Write-Host '      Replace picture variables'
+            $html = New-Object -ComObject 'HTMLFile'
+            $HTML.IHTMLDocument2_write((Get-Content -LiteralPath $path -Raw -Encoding UTF8))
+                
+            foreach ($image in ($html.images)) {
+                ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
+                    if (($image.src -clike "*$_*") -or ($image.alt -clike "*$_*")) {
+                        if ($null -ne $ReplaceHash[$_]) {
+                            $ImageAlternativeTextOriginal = $image.alt
+                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg')))))
+                            $image.alt = $ImageAlternativeTextOriginal.replace($_, '')
+                        }
+                    } elseif (($image.src -clike "*$(($_[-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($_[-999..-2] -join '') + 'DELETEEMPTY$')*")) {
+                        if ($null -ne $ReplaceHash[$_]) {
+                            $ImageAlternativeTextOriginal = $image.alt
+                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg')))))
+                            $image.alt = $ImageAlternativeTextOriginal.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                        } else {
+                            $image.removenode() | Out-Null
+                        }
+                    }
+                }
+            }
+        
+            Write-Host '      Replace non-picture variables'
+            $tempFileContent = $html.documentelement.outerhtml
+            foreach ($replaceKey in $replaceHash.Keys) {
+                if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
+                    $tempFileContent = $tempFileContent.replace($replacekey, $replaceHash.$replaceKey)
+                }
+            }
+
+            if (-not $ProcessOOF) {
+                $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
+            } else {
+                $tempFileContent | Out-File -LiteralPath (Join-Path -Path $env:temp -ChildPath $Signature.Value) -Encoding UTF8 -Force
+            }
+        }
+
         $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatAuto')
         $COMWord.Documents.Open($path, $false) | Out-Null
 
-        Write-Host '      Replace variables'
-        # Replace pictures in Shapes and InlineShapes
-        foreach ($image in ($ComWord.ActiveDocument.Shapes + $ComWord.ActiveDocument.InlineShapes)) {
-            if ($null -ne $image.linkformat.sourcefullname) {
-                ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-                    if ((((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
-                        if ($null -ne $ReplaceHash[$_]) {
-                            $ImageAlternativeTextOriginal = $image.AlternativeText
-                            $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
-                            $image.alternativetext = $ImageAlternativeTextOriginal.replace($_, '')
-                        }
-                    } elseif (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains(($_[-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[-999..-2] -join '') + 'DELETEEMPTY$'))) {
-                        if ($null -ne $ReplaceHash[$_]) {
-                            $ImageAlternativeTextOriginal = $image.AlternativeText
-                            $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
-                            $image.alternativetext = $ImageAlternativeTextOriginal.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
-                        } else {
-                            $image.delete()
+        if (-not $UseHtmTemplates) {
+            Write-Host '      Replace picture variables'
+            foreach ($image in ($ComWord.ActiveDocument.Shapes + $ComWord.ActiveDocument.InlineShapes)) {
+                if ($null -ne $image.linkformat.sourcefullname) {
+                    ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
+                        if ((((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
+                            if ($null -ne $ReplaceHash[$_]) {
+                                $ImageAlternativeTextOriginal = $image.AlternativeText
+                                $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
+                                $image.alternativetext = $ImageAlternativeTextOriginal.replace($_, '')
+                            }
+                        } elseif (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains(($_[-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[-999..-2] -join '') + 'DELETEEMPTY$'))) {
+                            if ($null -ne $ReplaceHash[$_]) {
+                                $ImageAlternativeTextOriginal = $image.AlternativeText
+                                $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
+                                $image.alternativetext = $ImageAlternativeTextOriginal.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                            } else {
+                                $image.delete()
+                            }
                         }
                     }
                 }
+
+                # Setting the values in word is very slow, so we use temporay variables
+                $tempImageAlternativeText = $image.alternativetext
+                $tempImageHyperlinkName = $image.hyperlink.Name
+                $tempImageHyperlinkAddress = $image.hyperlink.Address
+                $tempImageHyperlinkAddressOld = $image.hyperlink.AddressOld
+                $tempImageHyperlinkSubAddress = $image.hyperlink.SubAddress
+                $tempImageHyperlinkSubaddressOld = $image.hyperlink.SubAddressOld
+                $tempImageHyperlinkEmailSubject = $image.hyperlink.EmailSubject
+                $tempImageHyperlinkScreenTip = $image.hyperlink.ScreenTip
+
+                foreach ($replaceKey in $replaceHash.Keys) {
+                    if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
+                        if ($null -ne $tempimagealternativetext) {
+                            $tempimagealternativetext = $tempimagealternativetext.replace($replaceKey, $replaceHash.replaceKey)
+                        }
+                        if ($null -ne $tempimagehyperlinkName) {
+                            $tempimagehyperlinkname = $tempimagehyperlinkname.replace($replaceKey, $replaceHash.replaceKey)
+                        }
+                        if ($null -ne $tempimagehyperlinkAddress) {
+                            $tempimagehyperlinkAddress = $tempimagehyperlinkAddress.replace($replaceKey, $replaceHash.replaceKey)
+                        }
+                        if ($null -ne $tempimagehyperlinkAddressOld) {
+                            $tempimagehyperlinkAddressOld = $tempimagehyperlinkAddressOld.replace($replaceKey, $replaceHash.replaceKey)
+                        }
+                        if ($null -ne $tempimagehyperlinkSubAddress) {
+                            $tempimagehyperlinkSubAddress = $tempimagehyperlinkSubAddress.replace($replaceKey, $replaceHash.replaceKey)
+                        }
+                        if ($null -ne $tempimagehyperlinkSubAddressOld) {
+                            $tempimagehyperlinkSubAddressOld = $tempimagehyperlinkSubAddressOld.replace($replaceKey, $replaceHash.replaceKey)
+                        }
+                        if ($null -ne $tempimagehyperlinkEmailSubject) {
+                            $tempimagehyperlinkEmailSubject = $tempimagehyperlinkEmailSubject.replace($replaceKey, $replaceHash.replaceKey)
+                        }
+                        if ($null -ne $tempimagehyperlinkScreenTip) {
+                            $tempimagehyperlinkScreenTip = $tempimagehyperlinkScreenTip.replace($replaceKey, $replaceHash.replaceKey)
+                        }
+                    }
+                }
+
+                if ($null -ne $tempimagealternativetext) {
+                    $image.alternativetext = $tempImageAlternativeText
+                }
+                if ($null -ne $tempimagehyperlinkName) {
+                    $image.hyperlink.Name = $tempImageHyperlinkName
+                }
+                if ($null -ne $tempimagehyperlinkAddress) {
+                    $image.hyperlink.Address = $tempImageHyperlinkAddress
+                }
+                if ($null -ne $tempimagehyperlinkAddressOld) {
+                    $image.hyperlink.AddressOld = $tempImageHyperlinkAddressOld
+                }
+                if ($null -ne $tempimagehyperlinkSubAddress) {
+                    $image.hyperlink.SubAddress = $tempImageHyperlinkSubAddress
+                }
+                if ($null -ne $tempimagehyperlinkSubAddressOld) {
+                    $image.hyperlink.SubAddressOld = $tempImageHyperlinkSubaddressOld
+                }
+                if ($null -ne $tempimagehyperlinkEmailSubject) {
+                    $image.hyperlink.EmailSubject = $tempImageHyperlinkEmailSubject
+                }
+                if ($null -ne $tempimagehyperlinkScreenTip) {
+                    $image.hyperlink.ScreenTip = $tempImageHyperlinkScreenTip
+                }
             }
 
-            # Setting the values in word is very slow, so we use temporay variables
-            $tempImageAlternativeText = $image.alternativetext
-            $tempImageHyperlinkName = $image.hyperlink.Name
-            $tempImageHyperlinkAddress = $image.hyperlink.Address
-            $tempImageHyperlinkAddressOld = $image.hyperlink.AddressOld
-            $tempImageHyperlinkSubAddress = $image.hyperlink.SubAddress
-            $tempImageHyperlinkSubaddressOld = $image.hyperlink.SubAddressOld
-            $tempImageHyperlinkEmailSubject = $image.hyperlink.EmailSubject
-            $tempImageHyperlinkScreenTip = $image.hyperlink.ScreenTip
+            Write-Host '      Replace non-picture variables'
+            $wdFindContinue = 1
+            $MatchCase = $true
+            $MatchWholeWord = $true
+            $MatchWildcards = $False
+            $MatchSoundsLike = $False
+            $MatchAllWordForms = $False
+            $Forward = $True
+            $Wrap = $wdFindContinue
+            $Format = $False
+            $wdFindContinue = 1
+            $ReplaceAll = 2
 
+            # Replace in current view (show or hide field codes)
             foreach ($replaceKey in $replaceHash.Keys) {
                 if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
-                    if ($null -ne $tempimagealternativetext) {
-                        $tempimagealternativetext = $tempimagealternativetext.replace($replaceKey, $replaceHash.replaceKey)
-                    }
-                    if ($null -ne $tempimagehyperlinkName) {
-                        $tempimagehyperlinkname = $tempimagehyperlinkname.replace($replaceKey, $replaceHash.replaceKey)
-                    }
-                    if ($null -ne $tempimagehyperlinkAddress) {
-                        $tempimagehyperlinkAddress = $tempimagehyperlinkAddress.replace($replaceKey, $replaceHash.replaceKey)
-                    }
-                    if ($null -ne $tempimagehyperlinkAddressOld) {
-                        $tempimagehyperlinkAddressOld = $tempimagehyperlinkAddressOld.replace($replaceKey, $replaceHash.replaceKey)
-                    }
-                    if ($null -ne $tempimagehyperlinkSubAddress) {
-                        $tempimagehyperlinkSubAddress = $tempimagehyperlinkSubAddress.replace($replaceKey, $replaceHash.replaceKey)
-                    }
-                    if ($null -ne $tempimagehyperlinkSubAddressOld) {
-                        $tempimagehyperlinkSubAddressOld = $tempimagehyperlinkSubAddressOld.replace($replaceKey, $replaceHash.replaceKey)
-                    }
-                    if ($null -ne $tempimagehyperlinkEmailSubject) {
-                        $tempimagehyperlinkEmailSubject = $tempimagehyperlinkEmailSubject.replace($replaceKey, $replaceHash.replaceKey)
-                    }
-                    if ($null -ne $tempimagehyperlinkScreenTip) {
-                        $tempimagehyperlinkScreenTip = $tempimagehyperlinkScreenTip.replace($replaceKey, $replaceHash.replaceKey)
-                    }
+                    $FindText = $replaceKey
+                    $ReplaceWith = $replaceHash.$replaceKey
+                    $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
+                            $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
+                            $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
                 }
             }
 
-            if ($null -ne $tempimagealternativetext) {
-                $image.alternativetext = $tempImageAlternativeText
+            # Invert current view (show or hide field codes)
+            # This is neccessary to be able to replace variables in hyperlinks and quicktips of hyperlinks
+            $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
+            foreach ($replaceKey in $replaceHash.Keys) {
+                if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
+                    $FindText = $replaceKey
+                    $ReplaceWith = $replaceHash.$replaceKey
+                    $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
+                            $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
+                            $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
+                }
             }
-            if ($null -ne $tempimagehyperlinkName) {
-                $image.hyperlink.Name = $tempImageHyperlinkName
-            }
-            if ($null -ne $tempimagehyperlinkAddress) {
-                $image.hyperlink.Address = $tempImageHyperlinkAddress
-            }
-            if ($null -ne $tempimagehyperlinkAddressOld) {
-                $image.hyperlink.AddressOld = $tempImageHyperlinkAddressOld
-            }
-            if ($null -ne $tempimagehyperlinkSubAddress) {
-                $image.hyperlink.SubAddress = $tempImageHyperlinkSubAddress
-            }
-            if ($null -ne $tempimagehyperlinkSubAddressOld) {
-                $image.hyperlink.SubAddressOld = $tempImageHyperlinkSubaddressOld
-            }
-            if ($null -ne $tempimagehyperlinkEmailSubject) {
-                $image.hyperlink.EmailSubject = $tempImageHyperlinkEmailSubject
-            }
-            if ($null -ne $tempimagehyperlinkScreenTip) {
-                $image.hyperlink.ScreenTip = $tempImageHyperlinkScreenTip
-            }
+
+            # Restore original view
+            $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
+
+            # Exports
+            Write-Host '      Save as filtered .HTM file'
+            $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
+            $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+            $COMWord.ActiveDocument.Weboptions.encoding = 65001
+            $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
         }
-
-        # Replace non-picture related variables
-        $wdFindContinue = 1
-        $MatchCase = $true
-        $MatchWholeWord = $true
-        $MatchWildcards = $False
-        $MatchSoundsLike = $False
-        $MatchAllWordForms = $False
-        $Forward = $True
-        $Wrap = $wdFindContinue
-        $Format = $False
-        $wdFindContinue = 1
-        $ReplaceAll = 2
-
-        # Replace in current view (show or hide field codes)
-        foreach ($replaceKey in $replaceHash.Keys) {
-            if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
-                $FindText = $replaceKey
-                $ReplaceWith = $replaceHash.$replaceKey
-                $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
-                        $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
-                        $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
-            }
-        }
-
-        # Invert current view (show or hide field codes)
-        # This is neccessary to be able to replace variables in hyperlinks and quicktips of hyperlinks
-        $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
-        foreach ($replaceKey in $replaceHash.Keys) {
-            if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
-                $FindText = $replaceKey
-                $ReplaceWith = $replaceHash.$replaceKey
-                $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
-                        $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
-                        $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
-            }
-        }
-
-        # Restore original view
-        $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
-
-        # Exports
-        Write-Host '      Save as filtered .HTM file'
-        $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
-        $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-        $COMWord.ActiveDocument.Weboptions.encoding = 65001
-        $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
         if (-not $ProcessOOF) {
-            Write-Host '      Save as .TXT file'
+            Write-Host '      Export to TXT format'
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
             $COMWord.ActiveDocument.TextEncoding = 1200
             $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
             $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
-            Write-Host '      Save as .RTF file'
+            Write-Host '      Export to RTF format'
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
             $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
             $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
@@ -367,108 +487,30 @@ function Set-Signatures {
             $COMWord.ActiveDocument.Save()
             $COMWord.ActiveDocument.Close($false)
         } else {
-            $COMWord.ActiveDocument.Close($false)
+            $COMWord.ActiveDocument.Close(0)
         }
 
-        Write-Host '      Embed local files in .HTM file and add marker'
+        Write-Host '      Embed local files in HTM format and add marker'
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
         $tempFileContent = Get-Content -LiteralPath $path -Raw -Encoding UTF8
 
         if ($tempFileContent -notlike "*$HTMLMarkerTag*") {
             if ($tempFileContent -like '*<head>*') {
-                $tempFileContent = $tempFileContent -ireplace ('<HEAD>', ('<head>' + $HTMLMarkerTag))
+                $tempFileContent = $tempFileContent -ireplace ('<HEAD>', ('<HEAD>' + $HTMLMarkerTag))
             } else {
-                $tempFileContent = $tempFileContent -ireplace ('<HTML>', ('<HTML><head>' + $HTMLMarkerTag + '</head>'))
+                $tempFileContent = $tempFileContent -ireplace ('<HTML>', ('<HTML><HEAD>' + $HTMLMarkerTag + '</HEAD>'))
             }
         }
 
-        $src = @()
-        ([regex]'(?i)src="(.*?)"').Matches($tempFileContent) | ForEach-Object {
-            $src += $_.Groups[0].Value
-            $src += (Join-Path -Path (Split-Path -Path $path -Parent) -ChildPath ([uri]::UnEscapeDataString($_.Groups[1].Value)))
-        }
-
-        for ($x = 0; $x -lt $src.count; $x = $x + 2) {
-            if ($src[$x].StartsWith('src="data:')) {
-            } elseif (Test-Path -LiteralPath $src[$x + 1] -PathType leaf) {
-                $fmt = $null
-                switch ((Get-ChildItem -LiteralPath $src[$x + 1]).Extension) {
-                    '.apng' {
-                        $fmt = 'data:image/apng;base64,'
-                    }
-                    '.avif' {
-                        $fmt = 'data:image/avif;base64,'
-                    }
-                    '.gif' {
-                        $fmt = 'data:image/gif;base64,'
-                    }
-                    '.jpg' {
-                        $fmt = 'data:image/jpeg;base64,'
-                    }
-                    '.jpeg' {
-                        $fmt = 'data:image/jpeg;base64,'
-                    }
-                    '.jfif' {
-                        $fmt = 'data:image/jpeg;base64,'
-                    }
-                    '.pjpeg' {
-                        $fmt = 'data:image/jpeg;base64,'
-                    }
-                    '.pjp' {
-                        $fmt = 'data:image/jpeg;base64,'
-                    }
-                    '.png' {
-                        $fmt = 'data:image/png;base64,'
-                    }
-                    '.svg' {
-                        $fmt = 'data:image/svg+xml;base64,'
-                    }
-                    '.webp' {
-                        $fmt = 'data:image/webp;base64,'
-                    }
-                    '.css' {
-                        $fmt = 'data:text/css;base64,'
-                    }
-                    '.less' {
-                        $fmt = 'data:text/css;base64,'
-                    }
-                    '.js' {
-                        $fmt = 'data:text/javascript;base64,'
-                    }
-                    '.otf' {
-                        $fmt = 'data:font/otf;base64,'
-                    }
-                    '.sfnt' {
-                        $fmt = 'data:font/sfnt;base64,'
-                    }
-                    '.ttf' {
-                        $fmt = 'data:font/ttf;base64,'
-                    }
-                    '.woff' {
-                        $fmt = 'data:font/woff;base64,'
-                    }
-                    '.woff2' {
-                        $fmt = 'data:font/woff2;base64,'
-                    }
-                }
-                if ($fmt) {
-                    $tempFileContent = $tempFileContent.replace( `
-                            $src[$x], `
-                        ('src="' + $fmt + [Convert]::ToBase64String([IO.File]::ReadAllBytes($src[$x + 1])) + '"') `
-                    )
-
-                } else {
-                }
-            } else {
-            }
-        }
-
+        $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
+        
         if (-not $ProcessOOF) {
-            $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
+            ConvertTo-SingleFileHTML $path $path
         } else {
-            $tempFileContent | Out-File -LiteralPath (Join-Path -Path $env:temp -ChildPath $Signature.Value) -Encoding UTF8 -Force
+            ConvertTo-SingleFileHTML $path (Join-Path -Path $env:temp -ChildPath $Signature.Value) -Encoding UTF8 -Force
         }
+
 
         if (-not $ProcessOOF) {
             $SignaturePaths | ForEach-Object {
@@ -697,7 +739,24 @@ if ($SetCurrentUserOOFMessage) {
 }
 Write-Host "    AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
 CheckPath $AdditionalSignaturePath
-
+Write-Host "    AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
+if ($AdditionalSignaturePathFolder) {
+    $AdditionalSignaturePath = (Join-Path -Path $AdditionalSignaturePath -ChildPath $AdditionalSignaturePathFolder)
+    try {
+        if (-not (Test-Path -LiteralPath $AdditionalSignaturePath -PathType Container)) {
+            New-Item -Path $AdditionalSignaturePath -ItemType directory -Force | Out-Null
+            if (-not (Test-Path -LiteralPath $AdditionalSignaturePath -PathType Container)) {
+                throw
+            }            
+        }
+    } catch {
+        Write-Host "      Problem connecting to, creating or reading from folder '$AdditionalSignaturePath'. Deactivating feature." -ForegroundColor Yellow
+        $AdditionalSignaturePath = ''
+    }
+} else {
+    Write-Host
+}
+Write-Host "    UseHtmTemplates: '$UseHtmTemplates'"
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
     Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
@@ -975,7 +1034,7 @@ $SignatureFilesDefaultReplyFwd = @{}
 $global:SignatureFilesDone = @()
 $SignatureFilesGroupSIDs = @{}
 
-foreach ($SignatureFile in ((Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter '*.docx') | Sort-Object)) {
+foreach ($SignatureFile in ((Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)) {
     Write-Host ("  '$($SignatureFile.Name)'")
     $x = $SignatureFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
     if ($x.count -ge 3) {
@@ -1086,7 +1145,7 @@ if ($SetCurrentUserOOFMessage) {
     $global:OOFFilesDone = @()
     $OOFFilesGroupSIDs = @{}
 
-    foreach ($OOFFile in ((Get-ChildItem -LiteralPath $OOFTemplatePath -File -Filter '*.docx') | Sort-Object)) {
+    foreach ($OOFFile in ((Get-ChildItem -LiteralPath $OOFTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)) {
         Write-Host ("  '$($OOFFile.Name)'")
         $x = $OOFFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
         if ($x.count -ge 3) {
@@ -1442,14 +1501,14 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                             }
 
                             if (($TempNewSig -ne '') -and ($TempReplySig -eq '')) {
-                                Write-Host '    Signature for new mails found'
+                                Write-Host "    Only default signature for new mails is set: $TempNewSig"
                                 $TempOWASigFile = $TempNewSig
                                 $TempOWASigSetNew = 'True'
                                 $TempOWASigSetReply = 'False'
                             }
 
                             if (($TempNewSig -eq '') -and ($TempReplySig -ne '')) {
-                                Write-Host '    Default signature for reply/forward found'
+                                Write-Host "    Only default signature for reply/forward is set: $TempReplySig"
                                 $TempOWASigFile = $TempReplySig
                                 $TempOWASigSetNew = 'False'
                                 $TempOWASigSetReply = 'True'
@@ -1457,22 +1516,33 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
 
 
                             if ((($TempNewSig -ne '') -and ($TempReplySig -ne '')) -and ($TempNewSig -ine $TempReplySig)) {
-                                Write-Host '    Different default signatures for new and reply/forward found, using new signature'
+                                Write-Host "    Different default signatures for new and reply/forward set, using new one: $TempNewSig"
                                 $TempOWASigFile = $TempNewSig
                                 $TempOWASigSetNew = 'True'
                                 $TempOWASigSetReply = 'False'
                             }
 
                             if ((($TempNewSig -ne '') -and ($TempReplySig -ne '')) -and ($TempNewSig -ieq $TempReplySig)) {
-                                Write-Host '    Same default signature for new and reply/forward'
+                                Write-Host "    Same default signature for new and reply/forward: $TempNewSig"
                                 $TempOWASigFile = $TempNewSig
                                 $TempOWASigSetNew = 'True'
                                 $TempOWASigSetReply = 'True'
                             }
                             if (($null -ne $TempOWASigFile) -and ($TempOWASigFile -ne '')) {
+
                                 try {
-                                    $hsHtmlSignature = (Get-Content -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.htm'))) -Raw).ToString()
-                                    $stTextSig = (Get-Content -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.txt'))) -Raw).ToString()
+                                    if (Test-Path -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.htm'))) -PathType Leaf) {
+                                        $hsHtmlSignature = (Get-Content -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.htm'))) -Raw).ToString()
+                                    } else {
+                                        $hsHtmlSignature = ''
+                                        Write-Host "      Signature file '$($TempOWASigFile + '.htm')' not found. Outlook Web HTML signature will be blank." -ForegroundColor Yellow
+                                    }
+                                    if (Test-Path -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.txt'))) -PathType Leaf) {
+                                        $stTextSig = (Get-Content -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.txt'))) -Raw).ToString()
+                                    } else {
+                                        $hsHtmlSignature = ''
+                                        Write-Host "      Signature file '$($TempOWASigFile + '.txt')' not found. Outlook Web text signature will be blank." -ForegroundColor Yellow
+                                    }
 
                                     $OutlookWebHash = @{}
                                     # Keys are case sensitive when setting them
@@ -1553,13 +1623,25 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
                     $SignatureHash = @{}
                     if ($OOFInternal -ine $OOFExternal) {
                         Write-Host "    Message template for internal recpients: '$OOFInternal'"
-                        $SignatureHash.add($OOFInternal, 'OOFInternal.docx')
+                        if ($UseHtmTemplates) {
+                            $SignatureHash.add($OOFInternal, 'OOFInternal.htm')
+                        } else { 
+                            $SignatureHash.add($OOFInternal, 'OOFInternal.docx') 
+                        }
                         Write-Host "    Message template for external recpients: '$OOFExternal'"
-                        $SignatureHash.add($OOFExternal, 'OOFExternal.docx')
+                        if ($UseHtmTemplates) {
+                            $SignatureHash.add($OOFExternal, 'OOFExternal.htm')
+                        } else {
+                            $SignatureHash.add($OOFExternal, 'OOFExternal.docx')
+                        }
                     } else {
                         Write-Host "    Common template for internal and external recpients: '$OOFInternal'"
                         if (($null -ne $OOFInternal) -and ($OOFInternal -ne '')) {
-                            $SignatureHash.add($OOFInternal, 'OOFCommon.docx')
+                            if ($UseHtmTemplates) {
+                                $SignatureHash.add($OOFInternal, 'OOFCommon.htm')
+                            } else {
+                                $SignatureHash.add($OOFInternal, 'OOFCommon.docx')
+                            }
                         }
                     }
                     foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object -Property Name)) {
@@ -1584,7 +1666,7 @@ for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; 
 
                 # Delete temporary OOF files from file system
                 ('OOFCommon', 'OOFInternal', 'OOFExternal') | ForEach-Object {
-                    Remove-Item -LiteralPath (Join-Path -Path $env:temp -ChildPath ($_ + '.*')) -Force -ErrorAction SilentlyContinue
+                    Remove-Item (Join-Path -Path $env:temp -ChildPath ($_ + '.*')) -Force -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -1606,7 +1688,7 @@ Write-Host 'Remove old signatures created by this script, which are no longer ce
 $SignaturePaths | ForEach-Object {
     Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
         if ((Get-Content -LiteralPath $_.fullname -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
-            if (($_.name -notin $global:SignatureFilesDone) -and ($_.name -notin $SignatureFilesCommon.values) -and ($_.name -notin $SignatureFilesMailbox.Values) -and ($_.name -notin $SignatureFilesGroup.Values)) {
+            if ($_.name -notin $global:SignatureFilesDone) {
                 Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
                 Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
                 Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
