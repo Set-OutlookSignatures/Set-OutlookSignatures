@@ -1,21 +1,26 @@
 <!-- title: Set-OutlookSignatures.ps1 -->
 <!-- omit in toc -->
 # <a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src="https://raw.githubusercontent.com/GruberMarkus/Set-OutlookSignatures/main/logo/Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a>  
-Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.  
+**Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.**  
  
 Signatures and OOF messages can be  
-- customized with a broad range of variables, including photos from Active Directory,  
-- applied to all mailboxes, specific groups or specific addresses,  
-- assigned time ranges within which they are valid,  
-- set in Outlook Web for the currently logged-on user,  
-- centrally managed only or exist along user created signatures (signatures only),  
-- copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only).  
-- set as default signature for new mails, or for replies and forwards (signatures only),  
-- set as default OOF message for internal or external recipients (OOF messages only).  
+- generated from templates in DOCX or HTML file format  
+- customized with a broad range of variables, including photos from Active Directory  
+- applied to all mailboxes, specific groups or specific addresses  
+- assigned time ranges within which they are valid  
+- set as default signature for new mails, or for replies and forwards (signatures only)  
+- set as default OOF message for internal or external recipients (OOF messages only)  
+- set in Outlook Web for the currently logged-on user  
+- centrally managed only or exist along user created signatures (signatures only)  
+- copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)  
   
+Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.  
+
 The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).  
   
-  
+The script is Free and open-source software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FST), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3. Please see license.txt for copyright and MIT license details.  
+
+
 # Table of Contents  <!-- omit in toc -->
 - [1. Requirements](#1-requirements)
 - [2. Parameters](#2-parameters)
@@ -27,6 +32,8 @@ The script is designed to work in big and complex environments (Exchange resourc
   - [2.6. SetCurrentUserOOFMessage](#26-setcurrentuseroofmessage)
   - [2.7. OOFTemplatePath](#27-ooftemplatepath)
   - [2.8. AdditionalSignaturePath](#28-additionalsignaturepath)
+  - [2.9. AdditionalSignaturePathFolder](#29-additionalsignaturepathfolder)
+  - [2.10. UseHtmTemplates](#210-usehtmtemplates)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -45,7 +52,7 @@ The script is designed to work in big and complex environments (Exchange resourc
   - [13.2. Which ports are required?](#132-which-ports-are-required)
   - [13.3. Why is Out of Office abbreviated OOF and not OOO?](#133-why-is-out-of-office-abbreviated-oof-and-not-ooo)
   - [13.4. What about the new signature roaming feature Microsoft announced?](#134-what-about-the-new-signature-roaming-feature-microsoft-announced)
-  - [13.5. Why DOCX as template format and not HTML? Signatures in Outlook sometimes look different than my DOCX templates.](#135-why-docx-as-template-format-and-not-html-signatures-in-outlook-sometimes-look-different-than-my-docx-templates)
+  - [13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
   
   
 # 1. Requirements  
@@ -56,10 +63,10 @@ The paths to the template files (SignatureTemplatePath, OOFTemplatePath) must be
 # 2. Parameters  
 ## 2.1. SignatureTemplatePath  
 The parameter SignatureTemplatePath tells the script where signature template files are stored.  
-Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\Signature templates').  
+Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').  
 WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/SignatureTemplates' or '\\\\server.domain@SSL\SignatureSite\SignatureTemplates'  
 The currently logged-on user needs at least read access to the path.  
-Default value: '.\Signature templates'  
+Default value: '.\templates\Signatures DOCX'  
 ## 2.2. ReplacementVariableConfigFile  
 The parameter ReplacementVariableConfigFile tells the script where the file defining replacement variables is located.  
 Local and remote paths are supported. Local paths can be absolute ('C:\config\default replacement variables.txt') or relative to the script path ('.\config\default replacement variables.txt').  
@@ -87,10 +94,10 @@ Default value: \$true
 ## 2.7. OOFTemplatePath  
 Path to centrally managed Out of Office (OOF) auto reply templates.  
 Local and remote paths are supported.  
-Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\OOF templates').  
+Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office').  
 WebDAV paths are supported (https only): 'https:<area>//server.domain/SignatureSite/OOFTemplates' or '\\\\server.domain@SSL\SignatureSite\OOFTemplates'  
 The currently logged-on user needs at least read access to the path.  
-Default value: '.\OOF templates'  
+Default value: '.\templates\Out of Office DOCX'  
 ## 2.8. AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.  
@@ -100,6 +107,14 @@ Local paths can be absolute ('C:\Outlook signatures') or relative to the script 
 WebDAV paths are supported (https only): 'https:<area>//server.domain/User/Outlook signatures' or '\\\\server.domain@SSL\User\Outlook signatures'  
 The currently logged-on user needs at least write access to the path.  
 Default value: "\$(\[environment]::GetFolderPath(“MyDocuments”))\Outlook signatures"  
+## 2.9. AdditionalSignaturePathFolder
+A folder or folder structure below AdditionalSignaturePath.  
+If the folder or folder structure does not exist, it is created.  
+Default value: 'Outlook signatures'  
+## 2.10. UseHtmTemplates  
+With this parameter, the script searches for templates with the extension .htm instead of .docx.  
+Each format has advantages and disadvantages, please see [13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates) for a quick overview.  
+Default value: \$false  
 # 3. Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.  
 The registry setting does not allow for absolute paths, only for paths relative to '%APPDATA%\Microsoft'.  
@@ -122,9 +137,9 @@ Error handling is implemented rudimentarily.
 # 8. Run script while Outlook is running  
 Outlook and the script can run simultaneously.  
 New and changed signatures can be used instantly in Outlook.  
-Changing which signature is to be used as default signature for new mails for for replies and forwards requires restarting Outlook.   
+Changing which signature is to be used as default signature for new mails or for replies and forwards requires restarting Outlook.   
 # 9. Signature and OOF file format  
-Only Word files with the extension .DOCX are supported as signature and OOF template files.  
+Only Word files with the extension .docx and HTML files with the extension .htm are supported as signature and OOF template files.  
 ## 9.1. Signature and OOF file naming  
 The script copies every signature and OOF file as-is, with one exception: When tags are defined in the file name, these tags are removed.  
 Tags must be placed before the file extension and be separated from the base filename with a period.  
@@ -228,12 +243,12 @@ If there is no photo available in Active Directory, there are two options:
 - You used the \$CURRENT\[...]PHOTODELETEEMPTY\$ variables: The sample image used as placeholder is deleted from the signature, which may affect the layout of the remaining signature depending on your formatting options.  
   
 
-Attention: A signature with embedded images has the expected file size in DOCX, HTM and TXT formats, but the RTF format file will be much bigger.  
+Attention: A signature with embedded images has the expected file size in DOCX, HTML and TXT formats, but the RTF file will be much bigger.  
 The signature template 'Test all signature replacement variables.docx' contains several embedded images and can be used for a file comparison:  
-- DOCX: 23 KB  
-- HTM: 87 KB  
-- RTF without workaround: 27.5 MB  
-- RTF with workaround: 1.4 MB  
+- .docx: 23 KB  
+- .htm: 87 KB  
+- .RTF without workaround: 27.5 MB  
+- .RTF with workaround: 1.4 MB  
   
 The script uses a workaround, but the resulting RTF files are still huge compared to other file types and especially for use in emails. If this is a problem, please either do not use embedded images in the signature template (including photos from Active Directory), or switch to HTML formatted emails.  
   
@@ -265,16 +280,32 @@ Microsoft has stated that only cloud mailboxes support the new feature and that 
 Currently, there is no detailed documentation and no API available to programatically access the new feature.  
 Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensures full compatibility with this script.  
 For details, please see https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us.  
-## 13.5. Why DOCX as template format and not HTML? Signatures in Outlook sometimes look different than my DOCX templates.  
-The script uses DOCX as template format, as this seems to be the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications.  
-I am aware that not all Word formatting options are supported in HTML, which can lead to signatures looking a bit different than templates. For example, images may be placed at a different position in the signature compared to the template - this is because the Outlook HTML component only supports the "in line with text" text wrapping option, while Word offers more options.  
-The script can be adopted to work with HTML files, but the requirements for these files are harder to fulfill as it is the case with DOCX files:  
-- The template must be UTF8 encoded, or at least only contain UTF8 compatible characters  
-- The template must be a single file, additional files and folders not be supported  
-- Images must either reference a public URL or be part of the template as Base64 encoded string  
+## 13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
+The script uses DOCX as default template format, as this seems to be the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications:  
+- Not all Word formatting options are supported in HTML, which can lead to signatures looking a bit different than templates. For example, images may be placed at a different position in the signature compared to the template - this is because the Outlook HTML component only supports the "in line with text" text wrapping option, while Word offers more options.  
+- On the other hand, the Outlook HTML renderer works better with templates in the DOCX format: The Outlook HTML renderer does not respect the HTML image tags "width" and "height" and displays all images in their original size. When using DOCX as template format, the images are resized when exported to the HTM format.  
 
+I recommend to start with .docx as template format and to only use .htm when the template maintainers have really good HTML knowledge.  
+With the parameter UseHtmTemplates, the script searches for .htm template files instead of DOCX.  
+The requirements for .htm files these files are harder to fulfill as it is the case with DOCX files:  
+- The template must be UTF8 encoded, or at least only contain UTF8 compatible characters  
+- The template should be a single file, additional files and folders are not recommended  
+- Images should ideally either reference a public URL or be part of the template as Base64 encoded string  
+- The template must have the file extension .htm, .html is not supported  
+  
 Possible approaches for fulfilling these requirements are:  
 - Design the template in a HTML editor that supports all features required
-- Design the template in Outlook, paste it into Word, save it as "Website, filtered" and run the resulting file through a script that converts the Word output to a single UTF8 encoded HTML file  
-
-If you prefer HTML templates over Word templates, please leave feedback on the script homepage and I will consider it as an option for a future release.  
+- Design the template in Outlook  
+  - Paste it into Word and save it as "Website, filtered". The "filtered" is important here, as any other web format will not work.  
+  - Run the resulting file through a script that converts the Word output to a single UTF8 encoded HTML file. Alternatively, but not recommended, you can copy the .htm file and the associated folder containing images and other HTML information into the template folder.
+You can use the script function ConvertTo-SingleFileHTML for embedding:
+```
+get-childitem ".\templates\Signatures HTML" -File | foreach-object {
+    $_.FullName  
+    ConvertTo-SingleFileHTML $_.FullName ($_.FullName -replace ".htm$", " embedded.htm")
+} 
+```
+The templates delivered with this script represent all possible formats:  
+- '.\templates\Out of Office DOCX' and '.\templates\signatures DOCX' contain templates in the DOCX format  
+- '.\templates\Out of Office HTML' contains templates in the HTML format as Word exports them when using "Website, filtered" as format. Note the additional folders for each signature.  
+- '.\templates\Signatures HTML' contains templates in the HTML format. Note that there are no additional folders, as the Word export files have been processed with ConvertTo-SingleFileHTML function to create a single HTMl file with all local images embedded.  
