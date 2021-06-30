@@ -108,7 +108,7 @@
 
   .NOTES
   Script : Set-OutlookSignatures.ps1
-  Version: 1.6.0
+  Version: 1.6.1
   Author : Markus Gruber
   License: MIT License (see license.txt for details and copyright)
   Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
@@ -740,7 +740,7 @@ if ($SetCurrentUserOOFMessage) {
 Write-Host "    AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
 CheckPath $AdditionalSignaturePath
 Write-Host "    AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
-if ($AdditionalSignaturePathFolder) {
+if ($AdditionalSignaturePathFolder -and $AdditionalSignaturePath) {
     $AdditionalSignaturePath = (Join-Path -Path $AdditionalSignaturePath -ChildPath $AdditionalSignaturePathFolder)
     try {
         if (-not (Test-Path -LiteralPath $AdditionalSignaturePath -PathType Container)) {
@@ -753,8 +753,6 @@ if ($AdditionalSignaturePathFolder) {
         Write-Host "      Problem connecting to, creating or reading from folder '$AdditionalSignaturePath'. Deactivating feature." -ForegroundColor Yellow
         $AdditionalSignaturePath = ''
     }
-} else {
-    Write-Host
 }
 Write-Host "    UseHtmTemplates: '$UseHtmTemplates'"
 
@@ -770,7 +768,7 @@ if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
     if ($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
         $path = (([uri]::UnescapeDataString($path) -ireplace ('https://', '\\?\UNC\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\')
         #$path = $path -replace [regex]::escape('\\'), '\\?\UNC\'
-    } else {
+    } elseif (($path -ne '') -and ($null -ne $path)) {
         $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
         if (($path.StartsWith('\\?\UNC\', 'CurrentCultureIgnoreCase')) -or (-not ($path.StartsWith('\\', 'CurrentCultureIgnoreCase')))) {
             $path = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path))
@@ -1727,8 +1725,8 @@ if ($AdditionalSignaturePath) {
             Copy-Item -Path $SignaturePaths[0] -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
         }
     } else {
-        Remove-Item -Path $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
-        Copy-Item -Path $SignaturePaths[0] -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path $AdditionalSignaturePath -Recurse -Force
+        Copy-Item -Path $SignaturePaths[0] -Destination $AdditionalSignaturePath -Recurse -Force
     }
 }
 
