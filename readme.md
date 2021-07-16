@@ -18,7 +18,7 @@ Sample templates for signatures and OOF messages demonstrate all available featu
 
 The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).  
   
-The script is Free and open-source software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FST), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3. Please see license.txt for copyright and MIT license details.  
+The script is Free and open-source software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3. Please see license.txt for copyright and MIT license details.  
 
 
 # Table of Contents  <!-- omit in toc -->
@@ -49,10 +49,11 @@ The script is Free and open-source software (FOSS). It is published under the MI
 - [12. Outlook Web](#12-outlook-web)
 - [13. FAQ](#13-faq)
   - [13.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#131-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
-  - [13.2. Which ports are required?](#132-which-ports-are-required)
-  - [13.3. Why is Out of Office abbreviated OOF and not OOO?](#133-why-is-out-of-office-abbreviated-oof-and-not-ooo)
-  - [13.4. What about the new signature roaming feature Microsoft announced?](#134-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [13.2. How is the personal mailbox of the currently logged-on user identified?](#132-how-is-the-personal-mailbox-of-the-currently-logged-on-user-identified)
+  - [13.3. Which ports are required?](#133-which-ports-are-required)
+  - [13.4. Why is Out of Office abbreviated OOF and not OOO?](#134-why-is-out-of-office-abbreviated-oof-and-not-ooo)
   - [13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
+  - [13.6. What about the new signature roaming feature Microsoft announced?](#136-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
   
 # 1. Requirements  
@@ -266,25 +267,23 @@ The legacyExchangeDN attribute is used to find the user behind a mailbox, becaus
 - A separate Active Directory forest for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.  
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.  
 The disadvantage of using legacyExchangeDN is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures and OOF messages.  
-## 13.2. Which ports are required?  
-Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, are required to communicate with Active Directory domains. 
+## 13.2. How is the personal mailbox of the currently logged-on user identified?  
+The personal mailbox of the currently logged-on user is preferred to other mailboxes, as it receives signatures first and is the only mailbox where the Outlook Web signature can be set.  
+The personal mailbox is found by simply checking if the Active Directory mail attribute of the currently logged-on user matches the primary SMTP address of one of the mailboxes connected in Outlook.  
+There are two caveats:  
+- When Active Directory attributes are directly modified to create or modify users and mailboxes (instead of using Exchange Admin Center or Exchange Management Shell), the mail attribute is often not updated and does not match the primary SMTP address of a mailbox. Microsoft strongly recommends that the mail attribute matches the primary SMTP address.  
+- When using Linked Mailboxes, the mail attribute of the linked account is often not set or synched back from the Exchange resource forest. Technically, this is not necessary. From an organizational point of view it makes sense, as this can be used to determine if a specific user has a linked mailbox in another forest, and as some applications (such as "scan to mail") may need this attribute anyhow.  
+## 13.3. Which ports are required?  
+Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, are required to communicate with Active Directory domains.  
 The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11).  
 The client needs port 443 to access a WebDAV share (a SharePoint document library, for example).  
-## 13.3. Why is Out of Office abbreviated OOF and not OOO?  
+## 13.4. Why is Out of Office abbreviated OOF and not OOO?  
 Back in the 1980s, Microsoft had a UNIX OS named Xenix ... but read yourself: https://techcommunity.microsoft.com/t5/exchange-team-blog/why-is-oof-an-oof-and-not-an-ooo/ba-p/610191  
-## 13.4. What about the new signature roaming feature Microsoft announced?  
-Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.  
-This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.  
-Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).  
-Microsoft has stated that only cloud mailboxes support the new feature and that Outlook for Windows will be the only client supporting the new feature for now. I am confident more mail clients will follow soon. Future will tell if the feature will be made available for mailboxes on premises, too.  
-Currently, there is no detailed documentation and no API available to programatically access the new feature.  
-Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensures full compatibility with this script.  
-For details, please see https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us.  
 ## 13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
 The script uses DOCX as default template format, as this seems to be the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications:  
 - Not all Word formatting options are supported in HTML, which can lead to signatures looking a bit different than templates. For example, images may be placed at a different position in the signature compared to the template - this is because the Outlook HTML component only supports the "in line with text" text wrapping option, while Word offers more options.  
 - On the other hand, the Outlook HTML renderer works better with templates in the DOCX format: The Outlook HTML renderer does not respect the HTML image tags "width" and "height" and displays all images in their original size. When using DOCX as template format, the images are resized when exported to the HTM format.  
-
+  
 I recommend to start with .docx as template format and to only use .htm when the template maintainers have really good HTML knowledge.  
 With the parameter UseHtmTemplates, the script searches for .htm template files instead of DOCX.  
 The requirements for .htm files these files are harder to fulfill as it is the case with DOCX files:  
@@ -294,10 +293,10 @@ The requirements for .htm files these files are harder to fulfill as it is the c
 - The template must have the file extension .htm, .html is not supported  
   
 Possible approaches for fulfilling these requirements are:  
-- Design the template in a HTML editor that supports all features required
+- Design the template in a HTML editor that supports all features required  
 - Design the template in Outlook  
   - Paste it into Word and save it as "Website, filtered". The "filtered" is important here, as any other web format will not work.  
-  - Run the resulting file through a script that converts the Word output to a single UTF8 encoded HTML file. Alternatively, but not recommended, you can copy the .htm file and the associated folder containing images and other HTML information into the template folder.
+  - Run the resulting file through a script that converts the Word output to a single UTF8 encoded HTML file. Alternatively, but not recommended, you can copy the .htm file and the associated folder containing images and other HTML information into the template folder.  
 You can use the script function ConvertTo-SingleFileHTML for embedding:
 ```
 get-childitem ".\templates\Signatures HTML" -File | foreach-object {
@@ -309,3 +308,11 @@ The templates delivered with this script represent all possible formats:
 - '.\templates\Out of Office DOCX' and '.\templates\signatures DOCX' contain templates in the DOCX format  
 - '.\templates\Out of Office HTML' contains templates in the HTML format as Word exports them when using "Website, filtered" as format. Note the additional folders for each signature.  
 - '.\templates\Signatures HTML' contains templates in the HTML format. Note that there are no additional folders, as the Word export files have been processed with ConvertTo-SingleFileHTML function to create a single HTMl file with all local images embedded.  
+## 13.6. What about the new signature roaming feature Microsoft announced?  
+Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.  
+This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.  
+Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).  
+Microsoft has stated that only cloud mailboxes support the new feature and that Outlook for Windows will be the only client supporting the new feature for now. I am confident more mail clients will follow soon. Future will tell if the feature will be made available for mailboxes on premises, too.  
+Currently, there is no detailed documentation and no API available to programatically access the new feature.  
+Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensures full compatibility with this script.  
+For details, please see https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us.  
