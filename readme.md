@@ -15,7 +15,9 @@ Signatures and OOF messages can be
 - copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)  
   
 Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.  
-
+  
+Simulation mode allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.  
+  
 The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).  
   
 The script is Free and open-source software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3. Please see license.txt for copyright and MIT license details.  
@@ -34,6 +36,8 @@ The script is Free and open-source software (FOSS). It is published under the MI
   - [2.8. AdditionalSignaturePath](#28-additionalsignaturepath)
   - [2.9. AdditionalSignaturePathFolder](#29-additionalsignaturepathfolder)
   - [2.10. UseHtmTemplates](#210-usehtmtemplates)
+  - [2.11. SimulationUser](#211-simulationuser)
+  - [2.12. SimulationMailboxes](#212-simulationmailboxes)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -47,13 +51,14 @@ The script is Free and open-source software (FOSS). It is published under the MI
 - [11. Variable replacement](#11-variable-replacement)
   - [11.1. Photos from Active Directory](#111-photos-from-active-directory)
 - [12. Outlook Web](#12-outlook-web)
-- [13. FAQ](#13-faq)
-  - [13.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#131-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
-  - [13.2. How is the personal mailbox of the currently logged-on user identified?](#132-how-is-the-personal-mailbox-of-the-currently-logged-on-user-identified)
-  - [13.3. Which ports are required?](#133-which-ports-are-required)
-  - [13.4. Why is Out of Office abbreviated OOF and not OOO?](#134-why-is-out-of-office-abbreviated-oof-and-not-ooo)
-  - [13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
-  - [13.6. What about the new signature roaming feature Microsoft announced?](#136-what-about-the-new-signature-roaming-feature-microsoft-announced)
+- [13. Simulation mode](#13-simulation-mode)
+- [14. FAQ](#14-faq)
+  - [14.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#141-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
+  - [14.2. How is the personal mailbox of the currently logged-on user identified?](#142-how-is-the-personal-mailbox-of-the-currently-logged-on-user-identified)
+  - [14.3. Which ports are required?](#143-which-ports-are-required)
+  - [14.4. Why is Out of Office abbreviated OOF and not OOO?](#144-why-is-out-of-office-abbreviated-oof-and-not-ooo)
+  - [14.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#145-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
+  - [14.6. What about the new signature roaming feature Microsoft announced?](#146-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
   
 # 1. Requirements  
@@ -116,6 +121,12 @@ Default value: 'Outlook signatures'
 With this parameter, the script searches for templates with the extension .htm instead of .docx.  
 Each format has advantages and disadvantages, please see [13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates) for a quick overview.  
 Default value: \$false  
+## 2.11. SimulationUser  
+SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.  
+See [Simulation mode](#13-simulation-mode) for details.  
+## 2.12. SimulationMailboxes  
+SimulationMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of strings replacing the list of mailboxes otherwise gathered from the registry.  
+See [Simulation mode](#13-simulation-mode) for details.  
 # 3. Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.  
 The registry setting does not allow for absolute paths, only for paths relative to '%APPDATA%\Microsoft'.  
@@ -261,25 +272,39 @@ If different signatures for new and reply/forward are set, only the new signatur
 If only a default signature for replies and forwards is set, only this new signature is copied to Outlook Web.  
 If there is no default signature in Outlook, Outlook Web settings are not changed.  
 All this happens with the credentials of the currently logged-on user, without any interaction neccessary.  
-# 13. FAQ  
-## 13.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?  
+# 13. Simulation mode  
+Simulation mode is enabled when the parameter SimulatedUser is passed to the script. It answers the question "What will the signatures look like for user A, when Outlook is configured for the mailboxes X, Y and Z?".  
+Simulation mode is useful for content creators and admins, as it allows to simulate the behavior of the script and to inspect the resulting signature files before going live.  
+  
+In simulation mode, Outlook registry entries are not considered and nothing is changed in Outlook and Outlook web. The template files are handled just as during a real script run, but only saved to the folder passed by the parameters AdditionalSignaturePath and AdditionalSignaturePath folder.  
+  
+SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.  
+SimulationMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of strings replacing the list of mailboxes otherwise gathered from the registry.  
+  
+Active Directory data for both parameters is searched using Active Directory Ambigous Name Resolution (ANR), so you can pass very different values to finde the desired object (mail address, logon name, display name, etc.). Please see https://social.technet.microsoft.com/wiki/contents/articles/22653.active-directory-ambiguous-name-resolution.aspx for details about ANR.  
+  
+Attention: Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.  
+# 14. FAQ  
+## 14.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?  
 The legacyExchangeDN attribute is used to find the user behind a mailbox, because mail and proxyAddresses are not unique in certain Exchange scenarios:  
 - A separate Active Directory forest for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.  
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.  
 The disadvantage of using legacyExchangeDN is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures and OOF messages.  
-## 13.2. How is the personal mailbox of the currently logged-on user identified?  
+## 14.2. How is the personal mailbox of the currently logged-on user identified?  
 The personal mailbox of the currently logged-on user is preferred to other mailboxes, as it receives signatures first and is the only mailbox where the Outlook Web signature can be set.  
-The personal mailbox is found by simply checking if the Active Directory mail attribute of the currently logged-on user matches the primary SMTP address of one of the mailboxes connected in Outlook.  
-There are two caveats:  
+The personal mailbox is found by simply checking if the Active Directory mail attribute of the currently logged-on user matches an SMTP address of one of the mailboxes connected in Outlook.  
+If the mail attribute is not set, the currently logged-on user's objectSID is compared with all the mailboxes' msExchMasterAccountSID. If there is exactly one match, this mailbox is used as primary one.  
+  
+Please consider the following caveats regarding the mail attribute:  
 - When Active Directory attributes are directly modified to create or modify users and mailboxes (instead of using Exchange Admin Center or Exchange Management Shell), the mail attribute is often not updated and does not match the primary SMTP address of a mailbox. Microsoft strongly recommends that the mail attribute matches the primary SMTP address.  
-- When using Linked Mailboxes, the mail attribute of the linked account is often not set or synched back from the Exchange resource forest. Technically, this is not necessary. From an organizational point of view it makes sense, as this can be used to determine if a specific user has a linked mailbox in another forest, and as some applications (such as "scan to mail") may need this attribute anyhow.  
-## 13.3. Which ports are required?  
+- When using linked mailboxes, the mail attribute of the linked account is often not set or synced back from the Exchange resource forest. Technically, this is not necessary. From an organizational point of view it makes sense, as this can be used to determine if a specific user has a linked mailbox in another forest, and as some applications (such as "scan to mail") may need this attribute anyhow.  
+## 14.3. Which ports are required?  
 Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, are required to communicate with Active Directory domains.  
 The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11).  
 The client needs port 443 to access a WebDAV share (a SharePoint document library, for example).  
-## 13.4. Why is Out of Office abbreviated OOF and not OOO?  
+## 14.4. Why is Out of Office abbreviated OOF and not OOO?  
 Back in the 1980s, Microsoft had a UNIX OS named Xenix ... but read yourself: https://techcommunity.microsoft.com/t5/exchange-team-blog/why-is-oof-an-oof-and-not-an-ooo/ba-p/610191  
-## 13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
+## 14.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
 The script uses DOCX as default template format, as this seems to be the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications:  
 - Not all Word formatting options are supported in HTML, which can lead to signatures looking a bit different than templates. For example, images may be placed at a different position in the signature compared to the template - this is because the Outlook HTML component only supports the "in line with text" text wrapping option, while Word offers more options.  
 - On the other hand, the Outlook HTML renderer works better with templates in the DOCX format: The Outlook HTML renderer does not respect the HTML image tags "width" and "height" and displays all images in their original size. When using DOCX as template format, the images are resized when exported to the HTM format.  
@@ -308,7 +333,7 @@ The templates delivered with this script represent all possible formats:
 - '.\templates\Out of Office DOCX' and '.\templates\signatures DOCX' contain templates in the DOCX format  
 - '.\templates\Out of Office HTML' contains templates in the HTML format as Word exports them when using "Website, filtered" as format. Note the additional folders for each signature.  
 - '.\templates\Signatures HTML' contains templates in the HTML format. Note that there are no additional folders, as the Word export files have been processed with ConvertTo-SingleFileHTML function to create a single HTMl file with all local images embedded.  
-## 13.6. What about the new signature roaming feature Microsoft announced?  
+## 14.6. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.  
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.  
 Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).  
