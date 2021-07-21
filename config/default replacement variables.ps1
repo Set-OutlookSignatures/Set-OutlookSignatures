@@ -1,7 +1,12 @@
 ﻿# This file allows defining custom replacement variables for Set-OutlookSignatures.ps1
 #   
+# This script is executed as a whole once for each mailbox.
+# This allows for complex replacement variable handling (complex string transformations, retrieving information from web services and databases, etc.).
+#
+# Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to to define replacement variables and test it thoroughly.
+#
 # Replacement variable names are case sensitive.
-# It is recommended to use full uppercase replacement variables.
+# It is required to use full uppercase replacement variables.
 #
 # A variable defined in this file overrides the definition of the same variable defined earlier in the script.
 

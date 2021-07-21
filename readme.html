@@ -102,7 +102,8 @@
 <li><a href="#143-which-ports-are-required">14.3. Which ports are required?</a></li>
 <li><a href="#144-why-is-out-of-office-abbreviated-oof-and-not-ooo">14.4. Why is Out of Office abbreviated OOF and not OOO?</a></li>
 <li><a href="#145-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates">14.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.</a></li>
-<li><a href="#146-what-about-the-new-signature-roaming-feature-microsoft-announced">14.6. What about the new signature roaming feature Microsoft announced?</a></li>
+<li><a href="#146-how-can-i-log-the-script-output">14.6. How can I log the script output?</a></li>
+<li><a href="#147-what-about-the-new-signature-roaming-feature-microsoft-announced">14.7. What about the new signature roaming feature Microsoft announced?</a></li>
 </ul>
 </li>
 </ul>
@@ -369,6 +370,7 @@ Simulation mode is useful for content creators and admins, as it allows to simul
 SimulationMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of strings replacing the list of mailboxes otherwise gathered from the registry.</p>
 <p>Active Directory data for both parameters is searched using Active Directory Ambigous Name Resolution (ANR), so you can pass very different values to finde the desired object (mail address, logon name, display name, etc.). Please see <a href="https://social.technet.microsoft.com/wiki/contents/articles/22653.active-directory-ambiguous-name-resolution.aspx">https://social.technet.microsoft.com/wiki/contents/articles/22653.active-directory-ambiguous-name-resolution.aspx</a> for details about ANR.</p>
 <p>Attention: Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.</p>
+<p>Attention: Simulation mode only works, when the user starting the simulation is at least from the same Active Directory forest as the user defined in SimulationUser.  Users from other forests will not work.</p>
 <h1 id="14-faq">14. FAQ</h1>
 <h2 id="141-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses">14.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?</h2>
 <p>The legacyExchangeDN attribute is used to find the user behind a mailbox, because mail and proxyAddresses are not unique in certain Exchange scenarios:</p>
@@ -429,7 +431,10 @@ You can use the script function ConvertTo-SingleFileHTML for embedding:</li>
 <li>'.\templates\Out of Office HTML' contains templates in the HTML format as Word exports them when using &quot;Website, filtered&quot; as format. Note the additional folders for each signature.</li>
 <li>'.\templates\Signatures HTML' contains templates in the HTML format. Note that there are no additional folders, as the Word export files have been processed with ConvertTo-SingleFileHTML function to create a single HTMl file with all local images embedded.</li>
 </ul>
-<h2 id="146-what-about-the-new-signature-roaming-feature-microsoft-announced">14.6. What about the new signature roaming feature Microsoft announced?</h2>
+<h2 id="146-how-can-i-log-the-script-output">14.6. How can I log the script output?</h2>
+<p>The script has no built-in logging option other than writing output to the host window.<br>
+You can, for example, use PowerShell's Start-Transcript and Stop-Transcript commands to create a logging wrapper around Set-OutlookSignatures.ps1.</p>
+<h2 id="147-what-about-the-new-signature-roaming-feature-microsoft-announced">14.7. What about the new signature roaming feature Microsoft announced?</h2>
 <p>Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.<br>
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.<br>
 Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).<br>
