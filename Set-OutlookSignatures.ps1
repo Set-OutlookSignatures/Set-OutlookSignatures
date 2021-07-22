@@ -1,128 +1,128 @@
 <#
-  .SYNOPSIS
-  Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.
+.SYNOPSIS
+Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.
 
-  .DESCRIPTION
-  Signatures and OOF messages can be
-  - generated from templates in DOCX or HTML file format
-  - customized with a broad range of variables, including photos from Active Directory
-  - applied to all mailboxes, specific groups or specific addresses
-  - assigned time ranges within which they are valid
-  - set as default signature for new mails, or for replies and forwards (signatures only)
-  - set as default OOF message for internal or external recipients (OOF messages only)
-  - set in Outlook Web for the currently logged-on user
-  - centrally managed only or exist along user created signatures (signatures only)
-  - copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
+.DESCRIPTION
+Signatures and OOF messages can be
+- generated from templates in DOCX or HTML file format
+- customized with a broad range of variables, including photos from Active Directory
+- applied to all mailboxes, specific groups or specific addresses
+- assigned time ranges within which they are valid
+- set as default signature for new mails, or for replies and forwards (signatures only)
+- set as default OOF message for internal or external recipients (OOF messages only)
+- set in Outlook Web for the currently logged-on user
+- centrally managed only or exist along user created signatures (signatures only)
+- copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
 
-  Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
+Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 
-  Simulation mode allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
+Simulation mode allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
 
-  The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).
+The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).
 
-  The script is Free and open-source software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FST), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3.
-  Please see license.txt for copyright and MIT license details.
+The script is Free and open-source software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FST), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3.
+Please see license.txt for copyright and MIT license details.
 
-  .LINK
-  Online help: https://github.com/GruberMarkus/Set-OutlookSignatures
+.LINK
+Github: https://github.com/GruberMarkus/Set-OutlookSignatures
 
-  .LINK
-  License and copyright: https://github.com/GruberMarkus/Set-OutlookSignatures/blob/main/license.txt
+.PARAMETER SignatureTemplatePath
+Path to centrally managed signature templates.
+Local and remote paths are supported.
+Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+Default value: '.\templates\Signatures DOCX'
 
-  .PARAMETER SignatureTemplatePath
-  Path to centrally managed signature templates.
-  Local and remote paths are supported.
-  Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
-  WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-  Default value: '.\templates\Signatures DOCX'
+.PARAMETER ReplacementVariableConfigFile
+Path to a replacement variable config file.
+Local and remote paths are supported.
+Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+Default value: '.\config\default replacement variables.txt'
 
-  .PARAMETER ReplacementVariableConfigFile
-  Path to a replacement variable config file.
-  Local and remote paths are supported.
-  Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
-  WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-  Default value: '.\config\default replacement variables.txt'
+.PARAMETER DomainsToCheckForGroups
+List of domains/forests to check for group membership across trusts.
+If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
+If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list.
+Default value: '*'
 
-  .PARAMETER DomainsToCheckForGroups
-  List of domains/forests to check for group membership across trusts.
-  If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
-  If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list.
-  Default value: '*'
+.PARAMETER DeleteUserCreatedSignatures
+Shall the script delete signatures which were created by the user itself?
+The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
+Default value: $false
 
-  .PARAMETER DeleteUserCreatedSignatures
-  Shall the script delete signatures which were created by the user itself?
-  The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
-  Default value: $false
+.PARAMETER SetCurrentUserOutlookWebSignature
+Shall the script set the Outlook Web signature of the currently logged on user?
+Default value: $true
 
-  .PARAMETER SetCurrentUserOutlookWebSignature
-  Shall the script set the Outlook Web signature of the currently logged on user?
-  Default value: $true
+.PARAMETER SetCurrentUserOOFMessage
+Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?
+Default value: $true
 
-  .PARAMETER SetCurrentUserOOFMessage
-  Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?
-  Default value: $true
+.PARAMETER OOFTemplatePath
+Path to centrally managed signature templates.
+Local and remote paths are supported.
+Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office').
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
+The currently logged-on user needs at least read access to the path.
+Default value: '.\templates\Out of Office DOCX'
 
-  .PARAMETER OOFTemplatePath
-  Path to centrally managed signature templates.
-  Local and remote paths are supported.
-  Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office').
-  WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
-  The currently logged-on user needs at least read access to the path.
-  Default value: '.\templates\Out of Office DOCX'
+.PARAMETER AdditionalSignaturePath
+An additional path that the signatures shall be copied to.
+Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
+This way, the user can easily copy-paste the preferred preconfigured signature for use in a mail app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
+Local and remote paths are supported.
+Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
+WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
+The currently logged-on user needs at least write access to the path.
+Default value: "$([environment]::GetFolderPath('MyDocuments'))"
 
-  .PARAMETER AdditionalSignaturePath
-  An additional path that the signatures shall be copied to.
-  Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
-  This way, the user can easily copy-paste the preferred preconfigured signature for use in a mail app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
-  Local and remote paths are supported.
-  Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
-  WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
-  The currently logged-on user needs at least write access to the path.
-  Default value: "$([environment]::GetFolderPath('MyDocuments'))"
+.PARAMETER AdditionalSignaturePathFolder
+A folder or folder structure below AdditionalSignaturePath.
+If the folder or folder structure does not exist, it is created.
+Default value: 'Outlook signatures'
 
-  .PARAMETER AdditionalSignaturePathFolder
-  A folder or folder structure below AdditionalSignaturePath.
-  If the folder or folder structure does not exist, it is created.
-  Default value: 'Outlook signatures'
+.PARAMETER UseHtmTemplates
+With this parameter, the script searches for templates with the extension .htm instead of .docx.
+Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
+Default value: \$false
 
-  .PARAMETER UseHtmTemplates
-  With this parameter, the script searches for templates with the extension .htm instead of .docx.
-  Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
-  Default value: \$false
+.PARAMETER SimulationUser
+SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.
+Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.
 
-  .PARAMETER SimulationUser
-  SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.
-  Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.
+.PARAMETER SimulationMailboxes
+SimulationMailboxes is optional for simulation mode, although highly recommended.
+It is a comma separated list of strings replacing the list of mailboxes otherwise gathered from the registry.
+Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.
 
-  .PARAMETER SimulationMailboxes
-  SimulationMailboxes is optional for simulation mode, although highly recommended.
-  It is a comma separated list of strings replacing the list of mailboxes otherwise gathered from the registry.
-  Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.
+.INPUTS
+None. You cannot pipe objects to Set-OutlookSignatures.ps1.
 
-  .INPUTS
-  None. You cannot pipe objects to Set-OutlookSignatures.ps1.
+.OUTPUTS
+Set-OutlookSignatures.ps1 writes the current activities, warnings and error messages to the standard output stream.
 
-  .OUTPUTS
-  Set-OutlookSignatures.ps1 outputs the current activities, warnings and error messages to the standard output streams.
+.EXAMPLE
+PS> .\Set-OutlookSignatures.ps1
 
-  .EXAMPLE
-  PS> .\Set-OutlookSignatures.ps1
+.EXAMPLE
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates'
 
-  .EXAMPLE
-  PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates'
+.EXAMPLE
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups '*', '-internal-test.example.com'
 
-  .EXAMPLE
-  PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups '*', '-internal-test.example.com'
+.EXAMPLE
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups 'internal-test.example.com', 'company.b.com'
 
-  .EXAMPLE
-  PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups 'internal-test.example.com', 'company.b.com'
+.EXAMPLE
+Please see readme.html and https://github.com/GruberMarkus/Set-OutlookSignatures for more details.
 
-  .NOTES
-  Script : Set-OutlookSignatures.ps1
-  Version: 2.0.0
-  Author : Markus Gruber
-  License: MIT license (see license.txt for details and copyright)
-  Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
+.NOTES
+Script : Set-OutlookSignatures.ps1
+Version: 2.0.1
+Author : Markus Gruber
+License: MIT license (see license.txt for details and copyright)
+Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
 #>
 
 
@@ -484,7 +484,18 @@ function main {
         } else {
             $Search.SearchRoot = "GC://$($DomainsToCheckForGroups[0])"
             $Search.Filter = "(&(ObjectClass=user)(anr=$SimulationUser))"
-            $ADPropsCurrentUser = $Search.FindOne().Properties
+            $ADPropsCurrentUser = $Search.FindAll()
+            if ($ADPropsCurrentUser.count -eq 0) {
+                Write-Host "    '$SimulationUser' matches no Active Directory user, exiting." -ForegroundColor Red
+                exit 1
+            } elseif ($ADPropsCurrentUser.Count -gt 1) {
+                Write-Host "    '$SimulationUser' matches multiple Active Directory users, exiting." -ForegroundColor Red
+                $ADPropsCurrentUser | ForEach-Object { Write-Host "    $($_.path)" -ForegroundColor Red }
+                exit 1
+            } else {
+                $ADPropsCurrentUser = ([adsisearcher]('(distinguishedName=' + $(([adsi]"$($ADPropsCurrentUser[0].path)").distinguishedName) + ')')).FindOne().Properties
+                Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
+            }
         }
     } catch {
         $ADPropsCurrentUser = $null
@@ -498,7 +509,7 @@ function main {
     } catch {
         $ADPropsCurrentUserManager = $null
     }
-
+    if ($ADPropsCurrentUserManager) { Write-Host "    $($ADPropsCurrentUserManager.distinguishedname)" }
 
     Write-Host
     Write-Host 'Get AD properties of each mailbox and sort mailbox list' -NoNewline
@@ -526,19 +537,27 @@ function main {
                     } else {
                         $Search.filter = "(&(objectclass=user)(legacyExchangeDN=*)(anr=$($MailAddresses[$AccountNumberRunning])))"
                     }
-                    $u = $Search.FindOne()
-                    if (($u.path -ne '') -and ($null -ne $u.path)) {
+                    $u = $Search.FindAll()
+                    if ($u.count -eq 0) {
+                        Write-Host
+                        Write-Host "        '$($MailAddresses[$AccountNumberRunning])' matches no Active Directory user, ignoring." -ForegroundColor Yellow
+                    } elseif ($u.count -gt 1) {
+                        Write-Host
+                        Write-Host "        '$($MailAddresses[$AccountNumberRunning])' matches multiple Active Directory users, ignoring." -ForegroundColor Yellow
+                        $u | ForEach-Object { Write-Host "          $($_.path)" -ForegroundColor Yellow }
+                        $LegacyExchangeDNs[$AccountNumberRunning] = ''
+                        $MailAddresses[$AccountNumberRunning] = ''
+                        $UserDomain = $null
+                    } else {
                         # Connect to Domain Controller (LDAP), as Global Catalog (GC) does not have all attributes,
                         # for example tokenGroups including domain local groups
-                        $UserAccount = [ADSI]"LDAP://$($u.properties.distinguishedname)"
-                        $ADPropsMailboxes[$AccountNumberRunning] = $UserAccount.Properties
+                        $ADPropsMailboxes[$AccountNumberRunning] = ([adsisearcher]('(distinguishedName=' + $(([adsi]"$($u[0].path)").distinguishedname) + ')')).FindOne().Properties
                         $UserDomain = $DomainsToCheckForGroups[$DomainNumber]
                         $ADPropsMailboxesUserDomain[$AccountNumberRunning] = $UserDomain
-                        $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyExchangeDN
+                        $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyexchangedn
                         $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
                         Write-Host 'found'
-                    } else {
-                        Write-Host 'not found'
+                        Write-Host "        $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
                     }
                 }
             }
@@ -547,44 +566,47 @@ function main {
         }
     }
 
-    Write-Host "  Sort mailbox list: User's primary mailbox, mailboxes in default Outlook profile, others"
+
+    Write-Host
+    Write-Host "Sort mailbox list: User's primary mailbox, mailboxes in default Outlook profile, others" -NoNewline
+    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
     # Get users primary mailbox
-    $k = $null
+    $p = $null
     # First, check if the user has a mail attribute set
     if ($ADPropsCurrentUser.mail) {
-        Write-Host "    AD mail attribute of currently logged-on user: $($ADPropsCurrentUser.mail)"
-        for ($i = 0; $i -lt $MailAddresses.count; $i++) {
-            if ($ADPropsMailboxes[$i].proxyAddresses -icontains $('SMTP:' + $ADPropsCurrentUser.mail)) {
-                $k = $i
+        Write-Host "  AD mail attribute of currently logged-on user: $($ADPropsCurrentUser.mail)"
+        for ($i = 0; $i -lt $LegacyExchangeDNs.count; $i++) {
+            if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -contains $('SMTP:' + $ADPropsCurrentUser.mail))) {
+                $p = $i
                 break
             }
         }
-        if ($k -ge 0) {
-            Write-Host '      Matching mailbox found'
+        if ($p -ge 0) {
+            Write-Host '    Matching mailbox found'
         } else {
-            Write-Host '      No matching mailbox found' -ForegroundColor Yellow
+            Write-Host '    No matching mailbox found' -ForegroundColor Yellow
         }
     } else {
-        Write-Host '    AD mail attribute of currently logged-on user is empty, searching msExchMasterAccountSid'
+        Write-Host '  AD mail attribute of currently logged-on user is empty, searching msExchMasterAccountSid'
         # No mail attribute set, check for match(es) of user's objectSID and mailbox's msExchMasterAccountSid
         for ($i = 0; $i -lt $MailAddresses.count; $i++) {
-            if ($ADPropsMailboxes[$i].msExchMasterAccountSID) {
-                if (((New-Object System.Security.Principal.SecurityIdentifier $ADPropsMailboxes[$i].msExchMasterAccountSID[0], 0).value -ieq (New-Object System.Security.Principal.SecurityIdentifier $ADPropsCurrentUser.objectsid[0], 0).Value)) {
-                    if ($k -ge 0) {
-                        # $k already set before, there must be at least two matches, so set it to -1
-                        $k = -1
-                    } elseif (-not $k) {
-                        $k = $i
+            if ($ADPropsMailboxes[$i].msexchmasteraccountsid) {
+                if (((New-Object System.Security.Principal.SecurityIdentifier $ADPropsMailboxes[$i].msexchmasteraccountsid[0], 0).value -ieq (New-Object System.Security.Principal.SecurityIdentifier $ADPropsCurrentUser.objectsid[0], 0).Value)) {
+                    if ($p -ge 0) {
+                        # $p already set before, there must be at least two matches, so set it to -1
+                        $p = -1
+                    } elseif (-not $p) {
+                        $p = $i
                     }
                 }
             }
         }
-        if ($k -ge 0) {
-            Write-Host "      One matching mailbox found: $MailAddresses[$i]"
-        } elseif ($k -eq $null) {
-            Write-Host '      No matching mailbox found' -ForegroundColor Yellow
+        if ($p -ge 0) {
+            Write-Host "    One matching mailbox found: $MailAddresses[$i]"
+        } elseif ($p -eq $null) {
+            Write-Host '    No matching mailbox found' -ForegroundColor Yellow
         } else {
-            Write-Host '      Multiple matching mailboxes found, no prioritization possible' -ForegroundColor Yellow
+            Write-Host '    Multiple matching mailboxes found, no prioritization possible' -ForegroundColor Yellow
         }
 
     }
@@ -592,19 +614,19 @@ function main {
     $MailboxNewOrder = @()
     $PrimaryMailboxAddress = $null
 
-    if ($k -ge 0) {
-        $MailboxNewOrder += $k
-        $PrimaryMailboxAddress = $MailAddresses[$k]
+    if ($p -ge 0) {
+        $MailboxNewOrder += $p
+        $PrimaryMailboxAddress = $MailAddresses[$p]
     }
 
     for ($i = 0; $i -le $RegistryPaths.length - 1; $i++) {
-        if (($RegistryPaths[$i] -ilike "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\*") -and ($i -ne $k)) {
+        if (($RegistryPaths[$i] -ilike "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\*") -and ($i -ne $p) -and ($LegacyExchangeDNs[$i])) {
             $MailboxNewOrder += $i
         }
     }
 
     for ($i = 0; $i -le $RegistryPaths.length - 1; $i++) {
-        if (($RegistryPaths[$i] -notlike "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\*") -and ($i -ne $k)) {
+        if (($RegistryPaths[$i] -notlike "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\*") -and ($i -ne $p) -and ($LegacyExchangeDNs[$i])) {
             $MailboxNewOrder += $i
         }
     }
@@ -612,7 +634,10 @@ function main {
     ('RegistryPaths', 'MailAddresses', 'LegacyExchangeDNs', 'ADPropsMailboxesUserDomain', 'ADPropsMailboxes') | ForEach-Object {
         (Get-Variable -Name $_).value = (Get-Variable -Name $_).value[$MailboxNewOrder]
     }
-
+    Write-Host '  Mailbox priority (highest to lowest):'
+    $MailAddresses | ForEach-Object {
+        Write-Host "    $_"
+    }
 
     Write-Host
     Write-Host 'Get all signature template files and categorize them' -NoNewline
@@ -880,7 +905,7 @@ function main {
                 $ADPropsCurrentMailbox = $ADPropsMailboxes[$AccountNumberRunning]
                 $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($ADPropsMailboxesUserDomain[$AccountNumberRunning])")
                 try {
-                    $Search.filter = "(distinguishedname=$($ADPropsCurrentMailbox.Manager))"
+                    $Search.filter = "(distinguishedname=$($ADPropsCurrentMailbox.manager))"
                     $ADPropsCurrentMailboxManager = ([ADSI]"$(($Search.FindOne()).path)").Properties
                 } catch {
                     $ADPropsCurrentMailboxManager = @()
@@ -888,11 +913,11 @@ function main {
 
                 $UserDomain = $ADPropsMailboxesUserDomain[$AccountNumberRunning]
                 $SIDsToCheckInTrusts = @()
-                $SIDsToCheckInTrusts += $ADPropsCurrentMailbox.objectSid
+                $SIDsToCheckInTrusts += $ADPropsCurrentMailbox.objectsid
                 $UserAccount = [ADSI]"LDAP://$($ADPropsCurrentMailbox.distinguishedname)"
                 $UserAccount.GetInfoEx(@('tokengroups'), 0)
 
-                foreach ($sidBytes in $UserAccount.Properties.tokenGroups) {
+                foreach ($sidBytes in $UserAccount.Properties.tokengroups) {
                     $sid = New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)
                     $GroupsSIDs += $sid.tostring()
                     Write-Host "      $sid"
@@ -931,7 +956,7 @@ function main {
                         $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
                         foreach ($fsp in $Search.FindAll()) {
                             if (($fsp.path -ne '') -and ($null -ne $fsp.path)) {
-                                # Foreign Security Principals do not have the tokenGroups attribute
+                                # Foreign Security Principals do not have the tokengroups attribute
                                 # We need to switch to another, slower search method
                                 # member:1.2.840.113556.1.4.1941:= (LDAP_MATCHING_RULE_IN_CHAIN) returns groups containing a specific DN as member
                                 # A Foreign Security Principal ist created in each (sub)domain, in which it is granted permissions,
@@ -1184,6 +1209,10 @@ function main {
                 }
 
                 if ($SetCurrentUserOOFMessage) {
+                    $OOFCommonGUID = (New-Guid).guid
+                    $OOFInternalGUID = (New-Guid).guid
+                    $OOFExternalGUID = (New-Guid).guid
+
                     Write-Host '  Process Out of Office (OOF) auto replies' -NoNewline
                     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
                     if ($SimulationUser) {
@@ -1237,23 +1266,23 @@ function main {
                         if ($OOFInternal -ine $OOFExternal) {
                             Write-Host "    Message template for internal recpients: '$OOFInternal'"
                             if ($UseHtmTemplates) {
-                                $SignatureHash.add($OOFInternal, 'OOFInternal.htm')
+                                $SignatureHash.add($OOFInternal, "$OOFInternalGUID OOFInternal.htm")
                             } else {
-                                $SignatureHash.add($OOFInternal, 'OOFInternal.docx')
+                                $SignatureHash.add($OOFInternal, "$OOFInternalGUID OOFInternal.docx")
                             }
                             Write-Host "    Message template for external recpients: '$OOFExternal'"
                             if ($UseHtmTemplates) {
-                                $SignatureHash.add($OOFExternal, 'OOFExternal.htm')
+                                $SignatureHash.add($OOFExternal, "$OOFExternalGUID OOFExternal.htm")
                             } else {
-                                $SignatureHash.add($OOFExternal, 'OOFExternal.docx')
+                                $SignatureHash.add($OOFExternal, "$OOFExternalGUID OOFExternal.docx")
                             }
                         } else {
                             Write-Host "    Common template for internal and external recpients: '$OOFInternal'"
                             if (($null -ne $OOFInternal) -and ($OOFInternal -ne '')) {
                                 if ($UseHtmTemplates) {
-                                    $SignatureHash.add($OOFInternal, 'OOFCommon.htm')
+                                    $SignatureHash.add($OOFInternal, "$OOFCommonGUID OOFCommon.htm")
                                 } else {
-                                    $SignatureHash.add($OOFInternal, 'OOFCommon.docx')
+                                    $SignatureHash.add($OOFInternal, "$OOFCommonGUID OOFCommon.docx")
                                 }
                             }
                         }
@@ -1261,23 +1290,23 @@ function main {
                             Set-Signatures -ProcessOOF
                         }
 
-                        if (Test-Path -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFCommon.htm'))) {
+                        if (Test-Path -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath "$OOFCommonGUID OOFCommon.htm"))) {
                             if (-not $SimulationUser) {
-                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFCommon.htm')) -Raw).ToString())
-                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFCommon.htm')) -Raw).ToString())
+                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
+                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                             } else {
                                 $SignaturePaths | ForEach-Object {
-                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFCommon.htm')) -Destination ((New-Item -ItemType Directory ($_ + '\OOF\') -Force) + '\OOFInternal.htm')
-                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFCommon.htm')) -Destination ((New-Item -ItemType Directory ($_ + '\OOF\') -Force) + '\OOFExternal.htm') }
+                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((New-Item -ItemType Directory ($_ + '\OOF\') -Force) + '\OOFInternal.htm')
+                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((New-Item -ItemType Directory ($_ + '\OOF\') -Force) + '\OOFExternal.htm') }
                             }
                         } else {
                             if (-not $SimulationUser) {
-                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFInternal.htm')) -Raw).ToString())
-                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFExternal.htm')) -Raw).ToString())
+                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString())
+                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString())
                             } else {
                                 $SignaturePaths | ForEach-Object {
-                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFInternal.htm')) -Destination (New-Item -ItemType Directory ($_ + '\OOF\') -Force) -Force
-                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath 'OOFExternal.htm')) -Destination (New-Item -ItemType Directory ($_ + '\OOF\') -Force) -Force
+                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Destination (New-Item -ItemType Directory ($_ + '\OOF\') -Force) -Force
+                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $env:temp -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Destination (New-Item -ItemType Directory ($_ + '\OOF\') -Force) -Force
                                 }
                             }
                         }
@@ -1293,7 +1322,7 @@ function main {
                     }
 
                     # Delete temporary OOF files from file system
-                    ('OOFCommon', 'OOFInternal', 'OOFExternal') | ForEach-Object {
+                    ("$OOFCommonGUID OOFCommon", "$OOFInternalGUID OOFInternal", "$OOFExternalGUID OOFExternal") | ForEach-Object {
                         Remove-Item (Join-Path -Path $env:temp -ChildPath ($_ + '.*')) -Force -ErrorAction SilentlyContinue
                     }
                 }
@@ -1372,7 +1401,7 @@ function main {
         }
     }
 
-    
+
     Write-Host
     Write-Host 'Script ended' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray

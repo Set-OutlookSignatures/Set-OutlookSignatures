@@ -59,7 +59,8 @@ The script is Free and open-source software (FOSS). It is published under the MI
   - [14.4. Why is Out of Office abbreviated OOF and not OOO?](#144-why-is-out-of-office-abbreviated-oof-and-not-ooo)
   - [14.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#145-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
   - [14.6. How can I log the script output?](#146-how-can-i-log-the-script-output)
-  - [14.7. What about the new signature roaming feature Microsoft announced?](#147-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [14.7. Can multiple script instances run in parallel?](#147-can-multiple-script-instances-run-in-parallel)
+  - [14.8. What about the new signature roaming feature Microsoft announced?](#148-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
   
 # 1. Requirements  
@@ -284,9 +285,9 @@ SimulationMailboxes is optional for simulation mode, although highly recommended
   
 Active Directory data for both parameters is searched using Active Directory Ambigous Name Resolution (ANR), so you can pass very different values to finde the desired object (mail address, logon name, display name, etc.). Please see https://social.technet.microsoft.com/wiki/contents/articles/22653.active-directory-ambiguous-name-resolution.aspx for details about ANR.  
   
-Attention: Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.  
+Attention: Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name. The script informs when there is more than one or no result.  
   
-Attention: Simulation mode only works, when the user starting the simulation is at least from the same Active Directory forest as the user defined in SimulationUser.  Users from other forests will not work.  
+Attention: Simulation mode only works when the user starting the simulation is at least from the same Active Directory forest as the user defined in SimulationUser.  Users from other forests will not work.  
 # 14. FAQ  
 ## 14.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?  
 The legacyExchangeDN attribute is used to find the user behind a mailbox, because mail and proxyAddresses are not unique in certain Exchange scenarios:  
@@ -339,7 +340,12 @@ The templates delivered with this script represent all possible formats:
 ## 14.6. How can I log the script output?  
 The script has no built-in logging option other than writing output to the host window.  
 You can, for example, use PowerShell's Start-Transcript and Stop-Transcript commands to create a logging wrapper around Set-OutlookSignatures.ps1.  
-## 14.7. What about the new signature roaming feature Microsoft announced?  
+## 14.7. Can multiple script instances run in parallel?  
+The script is designed for being run in multiple instances at the same. You can combine any of the following scenarios:  
+- One user runs multiple instances of the script in parallel  
+- One user runs multiple instances of the script in simulation mode in parallel  
+- Multiple users on the same machine (e.g. Terminal Server) run multiple instances of the script in parallel  
+## 14.8. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.  
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.  
 Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).  
