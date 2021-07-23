@@ -266,7 +266,7 @@ The signature template 'Test all signature replacement variables.docx' contains 
   
 The script uses a workaround, but the resulting RTF files are still huge compared to other file types and especially for use in emails. If this is a problem, please either do not use embedded images in the signature template (including photos from Active Directory), or switch to HTML formatted emails.  
   
-If you ran into this problem outside this script, please consider modifying the ExportPictureWithMetafile setting as described in https://support.microsoft.com/kb/224663.  
+If you ran into this problem outside this script, please consider modifying the ExportPictureWithMetafile setting as described in https://support.microsoft.com/kb/224663. If the link is not working, please visit the Internet Archive Wayback Machine's snapshot of Microsoft's article at https://web.archive.org/web/20180827213151/https://support.microsoft.com/en-us/help/224663/document-file-size-increases-with-emf-png-gif-or-jpeg-graphics-in-word.  
 # 12. Outlook Web  
 If the currently logged-on user has configured his personal mailbox in Outlook, the default signature for new emails is configured in Outlook Web automatically.  
 If the default signature for new mails matches the one used for replies and forwarded mail, this is also set in Outlook.  

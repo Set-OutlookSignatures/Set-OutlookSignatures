@@ -223,27 +223,6 @@ function main {
     Write-Host "    AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
     CheckPath $AdditionalSignaturePath
     Write-Host "    AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
-    if ($AdditionalSignaturePathFolder -and $AdditionalSignaturePath) {
-        $AdditionalSignaturePath = (Join-Path -Path $AdditionalSignaturePath -ChildPath $AdditionalSignaturePathFolder)
-        try {
-            if (-not (Test-Path -LiteralPath $AdditionalSignaturePath -PathType Container)) {
-                New-Item -Path $AdditionalSignaturePath -ItemType directory -Force | Out-Null
-                if (-not (Test-Path -LiteralPath $AdditionalSignaturePath -PathType Container)) {
-                    throw
-                }
-            }
-            if ($SimulationUser) {
-                New-Item -Path ($AdditionalSignaturePath + '\OOF') -ItemType directory -Force | Out-Null
-                if (-not (Test-Path -LiteralPath ($AdditionalSignaturePath + '\OOF') -PathType Container)) {
-                    throw
-                }
-                Get-ChildItem ($AdditionalSignaturePath + '\OOF\*') -Recurse | Remove-Item -Force -Recurse -Confirm:$false
-            }
-        } catch {
-            Write-Host "      Problem connecting to, creating or reading from folder '$AdditionalSignaturePath'. Deactivating feature." -ForegroundColor Yellow
-            $AdditionalSignaturePath = ''
-        }
-    }
     Write-Host "    UseHtmTemplates: '$UseHtmTemplates'"
     Write-Host "    SimulationUser: '$SimulationUser'"
     Write-Host ('    SimulationMailboxes: ' + ('''' + $($SimulationMailboxes -join ''', ''') + ''''))
@@ -269,6 +248,28 @@ function main {
         Set-Variable -Name $_ -Value $path
     }
 
+
+    if ($AdditionalSignaturePathFolder -and $AdditionalSignaturePath) {
+        $AdditionalSignaturePath = (Join-Path -Path $AdditionalSignaturePath -ChildPath $AdditionalSignaturePathFolder)
+        try {
+            if (-not (Test-Path -LiteralPath $AdditionalSignaturePath -PathType Container)) {
+                New-Item -Path $AdditionalSignaturePath -ItemType directory -Force | Out-Null
+                if (-not (Test-Path -LiteralPath $AdditionalSignaturePath -PathType Container)) {
+                    throw
+                }
+            }
+            if ($SimulationUser) {
+                New-Item -Path ($AdditionalSignaturePath + '\OOF') -ItemType directory -Force | Out-Null
+                if (-not (Test-Path -LiteralPath ($AdditionalSignaturePath + '\OOF') -PathType Container)) {
+                    throw
+                }
+                Get-ChildItem ($AdditionalSignaturePath + '\OOF\*') -Recurse | Remove-Item -Force -Recurse -Confirm:$false
+            }
+        } catch {
+            Write-Host "      Problem connecting to, creating or reading from folder '$AdditionalSignaturePath'. Deactivating feature." -ForegroundColor Yellow
+            $AdditionalSignaturePath = ''
+        }
+    }
 
     if ($SimulationUser) {
         Write-Host
@@ -493,7 +494,8 @@ function main {
                 $ADPropsCurrentUser | ForEach-Object { Write-Host "    $($_.path)" -ForegroundColor Red }
                 exit 1
             } else {
-                $ADPropsCurrentUser = ([adsisearcher]('(distinguishedName=' + $(([adsi]"$($ADPropsCurrentUser[0].path)").distinguishedName) + ')')).FindOne().Properties
+                $Search.Filter = "((distinguishedname=$(([adsi]"$($ADPropsCurrentUser[0].path)").distinguishedname)))"
+                $ADPropsCurrentUser = $Search.FindOne().Properties
                 Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
             }
         }
@@ -505,7 +507,8 @@ function main {
 
     Write-Host '  Manager of currently logged-on user'
     try {
-        $ADPropsCurrentUserManager = ([adsisearcher]('(distinguishedname=' + $ADPropsCurrentUser.manager + ')')).FindOne().Properties
+        $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
+        $ADPropsCurrentUserManager = $Search.FindOne().Properties
     } catch {
         $ADPropsCurrentUserManager = $null
     }
@@ -551,9 +554,10 @@ function main {
                     } else {
                         # Connect to Domain Controller (LDAP), as Global Catalog (GC) does not have all attributes,
                         # for example tokenGroups including domain local groups
-                        $ADPropsMailboxes[$AccountNumberRunning] = ([adsisearcher]('(distinguishedName=' + $(([adsi]"$($u[0].path)").distinguishedname) + ')')).FindOne().Properties
+                        $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
+                        $ADPropsMailboxes[$AccountNumberRunning] = $Search.FindOne().Properties
                         $UserDomain = $DomainsToCheckForGroups[$DomainNumber]
-                        $ADPropsMailboxesUserDomain[$AccountNumberRunning] = $UserDomain
+                        $ADPropsMailboxesUserDomain[$AccountNumberRunning] = $DomainsToCheckForGroups[$DomainNumber]
                         $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyexchangedn
                         $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
                         Write-Host 'found'
@@ -914,17 +918,20 @@ function main {
                 $UserDomain = $ADPropsMailboxesUserDomain[$AccountNumberRunning]
                 $SIDsToCheckInTrusts = @()
                 $SIDsToCheckInTrusts += $ADPropsCurrentMailbox.objectsid
-                $UserAccount = [ADSI]"LDAP://$($ADPropsCurrentMailbox.distinguishedname)"
-                $UserAccount.GetInfoEx(@('tokengroups'), 0)
+                try {
+                    $UserAccount = [ADSI]"LDAP://$($ADPropsCurrentMailbox.distinguishedname)"
+                    $UserAccount.GetInfoEx(@('tokengroups'), 0)
+                    foreach ($sidBytes in $UserAccount.Properties.tokengroups) {
+                        $sid = New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)
+                        $GroupsSIDs += $sid.tostring()
+                        Write-Host "      $sid"
+                    }
 
-                foreach ($sidBytes in $UserAccount.Properties.tokengroups) {
-                    $sid = New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)
-                    $GroupsSIDs += $sid.tostring()
-                    Write-Host "      $sid"
+                    $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
+                    $SIDsToCheckInTrusts += $UserAccount.properties.tokengroupsglobalanduniversal
+                } catch {
+                    Write-Host "      Error getting group information from $((($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.'), check firewalls and AD trust" -ForegroundColor Red
                 }
-                $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
-                $SIDsToCheckInTrusts += $UserAccount.properties.tokengroupsglobalanduniversal
-
                 # Loop through all domains to check if the mailbox account has a group membership there
                 # Across a trust, a user can only be added to a domain local group.
                 # Domain local groups can not be used outside their own domain, so we don't need to query recursively
@@ -954,6 +961,7 @@ function main {
                         Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
                         $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
+
                         foreach ($fsp in $Search.FindAll()) {
                             if (($fsp.path -ne '') -and ($null -ne $fsp.path)) {
                                 # Foreign Security Principals do not have the tokengroups attribute
@@ -1215,12 +1223,15 @@ function main {
 
                     Write-Host '  Process Out of Office (OOF) auto replies' -NoNewline
                     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+                    $OOFDisabled = $null
                     if ($SimulationUser) {
                         Write-Host '    Simulation mode enabled, processing OOF templates without changing OOF settings' -ForegroundColor Yellow
                     } else {
                         $OOFSettings = $exchService.GetUserOOFSettings($PrimaryMailboxAddress)
+                        if ($OOFSettings.STATE -eq [Microsoft.Exchange.WebServices.Data.OOFState]::Disabled) { $OOFDisabled = $true }
                     }
-                    if ((($OOFSettings.STATE -eq [Microsoft.Exchange.WebServices.Data.OOFState]::Disabled) -and (-not $SimulationUser)) -or ($SimulationUser)) {
+
+                    if (($OOFDisabled -and (-not $SimulationUser)) -or ($SimulationUser)) {
                         # First, loop through common OOF files
                         foreach ($OOF in ($OOFFilesCommon.GetEnumerator() | Sort-Object -Property Name)) {
                             if (($OOFFilesInternal.contains('' + $OOF.name + '')) -or (-not ($OOFFilesExternal.contains('' + $OOF.name + '')))) {
@@ -1569,24 +1580,27 @@ function Set-Signatures {
         if (-not $UseHtmTemplates) {
             Write-Host '      Replace picture variables'
             foreach ($image in ($ComWord.ActiveDocument.Shapes + $ComWord.ActiveDocument.InlineShapes)) {
-                if ($null -ne $image.linkformat.sourcefullname) {
-                    ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-                        if ((((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
-                            if ($null -ne $ReplaceHash[$_]) {
-                                $ImageAlternativeTextOriginal = $image.AlternativeText
-                                $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
-                                $image.alternativetext = $ImageAlternativeTextOriginal.replace($_, '')
-                            }
-                        } elseif (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains(($_[-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[-999..-2] -join '') + 'DELETEEMPTY$'))) {
-                            if ($null -ne $ReplaceHash[$_]) {
-                                $ImageAlternativeTextOriginal = $image.AlternativeText
-                                $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
-                                $image.alternativetext = $ImageAlternativeTextOriginal.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
-                            } else {
-                                $image.delete()
+                try {
+                    if (($null -ne $($image.linkformat.sourcefullname)) -and ($($image.linkformat.sourcefullname) -ne '')) {
+                        ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
+                            if ((((Split-Path -Path $($image.linkformat.sourcefullname) -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
+                                if ($null -ne $ReplaceHash[$_]) {
+                                    $ImageAlternativeTextOriginal = $image.AlternativeText
+                                    $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
+                                    $image.alternativetext = $ImageAlternativeTextOriginal.replace($_, '')
+                                }
+                            } elseif (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains(($_[-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[-999..-2] -join '') + 'DELETEEMPTY$'))) {
+                                if ($null -ne $ReplaceHash[$_]) {
+                                    $ImageAlternativeTextOriginal = $image.AlternativeText
+                                    $image.linkformat.sourcefullname = (Join-Path -Path $env:temp -ChildPath ($_ + '.jpeg'))
+                                    $image.alternativetext = $ImageAlternativeTextOriginal.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                                } else {
+                                    $image.delete()
+                                }
                             }
                         }
                     }
+                } catch {
                 }
 
                 # Setting the values in word is very slow, so we use temporay variables
