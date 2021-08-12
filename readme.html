@@ -43,8 +43,8 @@
 <p>Signatures and OOF messages can be</p>
 <ul>
 <li>generated from templates in DOCX or HTML file format</li>
-<li>customized with a broad range of variables, including photos from Active Directory</li>
-<li>applied to all mailboxes, specific groups or specific addresses</li>
+<li>customized with a broad range of variables, including photos, from Active Directory and other sources</li>
+<li>applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific email addresses, for every primary mailbox across all Outlook profiles</li>
 <li>assigned time ranges within which they are valid</li>
 <li>set as default signature for new mails, or for replies and forwards (signatures only)</li>
 <li>set as default OOF message for internal or external recipients (OOF messages only)</li>
@@ -55,7 +55,7 @@
 <p>Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.</p>
 <p>Simulation mode allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.</p>
 <p>The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).</p>
-<p>The script is Free and open-source software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3. Please see license.txt for copyright and MIT license details.</p>
+<p>The script is Free and Open-Source Software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3. Please see license.txt for copyright and MIT license details.</p>
 <h1 id="table-of-contents--">Table of Contents  <!-- omit in toc --></h1>
 <ul>
 <li><a href="#1-requirements">1. Requirements</a></li>
@@ -122,10 +122,10 @@ The currently logged-on user needs at least read access to the path.<br>
 Default value: '.\templates\Signatures DOCX'</p>
 <h2 id="22-replacementvariableconfigfile">2.2. ReplacementVariableConfigFile</h2>
 <p>The parameter ReplacementVariableConfigFile tells the script where the file defining replacement variables is located.<br>
-Local and remote paths are supported. Local paths can be absolute ('C:\config\default replacement variables.txt') or relative to the script path ('.\config\default replacement variables.txt').<br>
-WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/config/default replacement variables.txt' or '\\server.domain@SSL\SignatureSite\config\default replacement variables.txt'<br>
+Local and remote paths are supported. Local paths can be absolute ('C:\config\default replacement variables.ps1') or relative to the script path ('.\config\default replacement variables.ps1').<br>
+WebDAV paths are supported (https only): 'https<area>://server.domain/SignatureSite/config/default replacement variables.ps1' or '\\server.domain@SSL\SignatureSite\config\default replacement variables.ps1'<br>
 The currently logged-on user needs at least read access to the file.<br>
-Default value: '.\config\default replacement variables.txt'</p>
+Default value: '.\config\default replacement variables.ps1'</p>
 <h2 id="23-domainstocheckforgroups">2.3. DomainsToCheckForGroups</h2>
 <p>The parameters tells the script which domains should be used to search for mailbox and user group membership.<br>
 The default value, '*' tells the script to query all trusted domains in the Active Directory forest of the logged-on user.<br>
@@ -179,12 +179,12 @@ See <a href="#13-simulation-mode">Simulation mode</a> for details.</p>
 The registry setting does not allow for absolute paths, only for paths relative to '%APPDATA%\Microsoft'.<br>
 If the relative path set in the registry would be a valid path but does not exist, the script creates it.</p>
 <h1 id="4-mailboxes">4. Mailboxes</h1>
-<p>The script only considers primary mailboxes (mailboxes added as separate accounts), no secondary mailboxes.<br>
-This is the same way Outlook handles mailboxes from a signature perspective.<br>
+<p>The script only considers primary mailboxes, these are mailboxes added as separate accounts.<br>
+This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via &quot;Open these additional mailboxes&quot;).<br>
 The script is created for Exchange environments. Non-Exchange mailboxes can not have OOF messages or group signatures, but common and mailbox specific signatures.</p>
 <h1 id="5-group-membership">5. Group membership</h1>
 <p>The script considers all groups the currently logged-on user belongs to, as well as all groups the currently processed mailbox belongs to.<br>
-For both sets of groups, group membership is searched against the whole Active Directory forest of the currently logged-on user as well as all trusted domains the user can access.<br>
+For both sets of groups, group membership is evaluated against the whole Active Directory forest of the currently logged-on user, and against all trusted domains the user has access to.<br>
 The script works fine with linked mailboxes in Exchange resource forest scenarios.<br>
 Trusted domains can be modified with the DomainsToCheckForGroups parameter.<br>
 Group membership is achieved by querying the tokenGroups attribute, which is not only very fast and resource saving on client and server, but also considers sIDHistory.</p>
@@ -265,8 +265,9 @@ OOF templates are only applied if the Out of Office assistant is currently disab
 <p>Variables are case sensitive.<br>
 Variables are replaced everywhere, including links, QuickTips and alternative text of images.<br>
 With this feature, you can not only show mail addresses and telephone numbers in the signature and OOF message, but show them as links which open a new mail message (&quot;mailto:&quot;) or dial the number (&quot;tel:&quot;) via a locally installed softphone when clicked.<br>
-Custom Active directory attributes are supported as well as custom replacement variables, see './config/default replacement variables.txt' for details.<br>
-Per default, './config/default replacement variables.txt' contains the following replacement variables:</p>
+Custom Active directory attributes are supported as well as custom replacement variables, see './config/default replacement variables.ps1' for details.<br>
+Variables can also be retrieved from other sources than Active Directory by adding custom code to the variable config file.<br>
+Per default, './config/default replacement variables.ps1' contains the following replacement variables:</p>
 <ul>
 <li>Currently logged-on user
 <ul>

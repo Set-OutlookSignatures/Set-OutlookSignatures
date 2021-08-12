@@ -5,8 +5,8 @@ Central Outlook for Windows management and deployment script for text signatures
 .DESCRIPTION
 Signatures and OOF messages can be
 - generated from templates in DOCX or HTML file format
-- customized with a broad range of variables, including photos from Active Directory
-- applied to all mailboxes, specific groups or specific addresses
+- customized with a broad range of variables, including photos, from Active Directory and other sources
+- applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific email addresses, for every primary mailbox across all Outlook profiles
 - assigned time ranges within which they are valid
 - set as default signature for new mails, or for replies and forwards (signatures only)
 - set as default OOF message for internal or external recipients (OOF messages only)
@@ -20,9 +20,7 @@ Simulation mode allows content creators and admins to simulate the behavior of t
 
 The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).
 
-The script is Free and open-source software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FST), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3.
-Please see license.txt for copyright and MIT license details.
-
+The script is Free and Open-Source Software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3. Please see license.txt for copyright and MIT license details.
 .LINK
 Github: https://github.com/GruberMarkus/Set-OutlookSignatures
 
@@ -1961,4 +1959,5 @@ function CheckPath([string]$path) {
 }
 
 
+main
 main
