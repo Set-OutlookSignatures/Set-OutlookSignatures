@@ -1960,4 +1960,3 @@ function CheckPath([string]$path) {
 
 
 main
-main
