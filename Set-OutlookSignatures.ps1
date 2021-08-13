@@ -1,130 +1,134 @@
 <#
-    .SYNOPSIS
-    Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.
+.SYNOPSIS
+Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.
 
-    .DESCRIPTION
-    Signatures and OOF messages can be
-    - generated from templates in DOCX or HTML file format
-    - customized with a broad range of variables, including photos, from Active Directory and other sources
-    - applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific email addresses, for every primary mailbox across all Outlook profiles
-    - assigned time ranges within which they are valid
-    - set as default signature for new mails, or for replies and forwards (signatures only)
-    - set as default OOF message for internal or external recipients (OOF messages only)
-    - set in Outlook Web for the currently logged-on user
-    - centrally managed only or exist along user created signatures (signatures only)
-    - copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
+.DESCRIPTION
+Signatures and OOF messages can be
+- generated from templates in DOCX or HTML file format
+- customized with a broad range of variables, including photos, from Active Directory and other sources
+- applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific email addresses, for every primary mailbox across all Outlook profiles
+- assigned time ranges within which they are valid
+- set as default signature for new mails, or for replies and forwards (signatures only)
+- set as default OOF message for internal or external recipients (OOF messages only)
+- set in Outlook Web for the currently logged-on user
+- centrally managed only or exist along user created signatures (signatures only)
+- copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
 
-    Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
+Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 
-    Simulation mode allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
+Simulation mode allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
 
-    The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).
+The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).
 
-    The script is Free and Open-Source Software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3. Please see license.txt for copyright and MIT license details.
-    .LINK
-    Github: https://github.com/GruberMarkus/Set-OutlookSignatures
+The script is Free and Open-Source Software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3. Please see license.txt for copyright and MIT license details.
+.LINK
+Github: https://github.com/GruberMarkus/Set-OutlookSignatures
 
-    .PARAMETER SignatureTemplatePath
-    Path to centrally managed signature templates.
-    Local and remote paths are supported.
-    Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
-    WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    Default value: '.\templates\Signatures DOCX'
+.PARAMETER SignatureTemplatePath
+Path to centrally managed signature templates.
+Local and remote paths are supported.
+Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+Default value: '.\templates\Signatures DOCX'
 
-    .PARAMETER ReplacementVariableConfigFile
-    Path to a replacement variable config file.
-    Local and remote paths are supported.
-    Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
-    WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    Default value: '.\config\default replacement variables.txt'
+.PARAMETER ReplacementVariableConfigFile
+Path to a replacement variable config file.
+Local and remote paths are supported.
+Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+Default value: '.\config\default replacement variables.txt'
 
-    .PARAMETER DomainsToCheckForGroups
-    List of domains/forests to check for group membership across trusts.
-    If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
-    If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list.
-    Default value: '*'
+.PARAMETER DomainsToCheckForGroups
+List of domains/forests to check for group membership across trusts.
+If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
+If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list.
+Default value: '*'
 
-    .PARAMETER DeleteUserCreatedSignatures
-    Shall the script delete signatures which were created by the user itself?
-    The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
-    Default value: $false
+.PARAMETER DeleteUserCreatedSignatures
+Shall the script delete signatures which were created by the user itself?
+The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
+Default value: $false
 
-    .PARAMETER SetCurrentUserOutlookWebSignature
-    Shall the script set the Outlook Web signature of the currently logged on user?
-    Default value: $true
+.PARAMETER SetCurrentUserOutlookWebSignature
+Shall the script set the Outlook Web signature of the currently logged on user?
+Default value: $true
 
-    .PARAMETER SetCurrentUserOOFMessage
-    Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?
-    Default value: $true
+.PARAMETER SetCurrentUserOOFMessage
+Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?
+Default value: $true
 
-    .PARAMETER OOFTemplatePath
-    Path to centrally managed signature templates.
-    Local and remote paths are supported.
-    Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office').
-    WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
-    The currently logged-on user needs at least read access to the path.
-    Default value: '.\templates\Out of Office DOCX'
+.PARAMETER OOFTemplatePath
+Path to centrally managed signature templates.
+Local and remote paths are supported.
+Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office').
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
+The currently logged-on user needs at least read access to the path.
+Default value: '.\templates\Out of Office DOCX'
 
-    .PARAMETER AdditionalSignaturePath
-    An additional path that the signatures shall be copied to.
-    Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
-    This way, the user can easily copy-paste the preferred preconfigured signature for use in a mail app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
-    Local and remote paths are supported.
-    Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
-    WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
-    The currently logged-on user needs at least write access to the path.
-    Default value: "$([environment]::GetFolderPath('MyDocuments'))"
+.PARAMETER AdditionalSignaturePath
+An additional path that the signatures shall be copied to.
+Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
+This way, the user can easily copy-paste the preferred preconfigured signature for use in a mail app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
+Local and remote paths are supported.
+Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
+WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
+The currently logged-on user needs at least write access to the path.
+Default value: "$([environment]::GetFolderPath('MyDocuments'))"
 
-    .PARAMETER AdditionalSignaturePathFolder
-    A folder or folder structure below AdditionalSignaturePath.
-    If the folder or folder structure does not exist, it is created.
-    Default value: 'Outlook signatures'
+.PARAMETER AdditionalSignaturePathFolder
+A folder or folder structure below AdditionalSignaturePath.
+If the folder or folder structure does not exist, it is created.
+Default value: 'Outlook signatures'
 
-    .PARAMETER UseHtmTemplates
-    With this parameter, the script searches for templates with the extension .htm instead of .docx.
-    Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
-    Default value: \$false
+.PARAMETER UseHtmTemplates
+With this parameter, the script searches for templates with the extension .htm instead of .docx.
+Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
+Default value: \$false
 
-    .PARAMETER SimulationUser
-    SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.
-    Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.
+.PARAMETER SimulationUser
+SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.
+Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.
 
-    .PARAMETER SimulationMailboxes
-    SimulationMailboxes is optional for simulation mode, although highly recommended.
-    It is a comma separated list of strings replacing the list of mailboxes otherwise gathered from the registry.
-    Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.
+.PARAMETER SimulationMailboxes
+SimulationMailboxes is optional for simulation mode, although highly recommended.
+It is a comma separated list of strings replacing the list of mailboxes otherwise gathered from the registry.
+Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.
 
-    .INPUTS
-    None. You cannot pipe objects to Set-OutlookSignatures.ps1.
+.INPUTS
+None. You cannot pipe objects to Set-OutlookSignatures.ps1.
 
-    .OUTPUTS
-    Set-OutlookSignatures.ps1 writes the current activities, warnings and error messages to the standard output stream.
+.OUTPUTS
+Set-OutlookSignatures.ps1 writes the current activities, warnings and error messages to the standard output stream.
 
-    .EXAMPLE
-    PS> .\Set-OutlookSignatures.ps1
+.EXAMPLE
+PS> .\Set-OutlookSignatures.ps1
 
-    .EXAMPLE
-    PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates'
+.EXAMPLE
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates'
 
-    .EXAMPLE
-    PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups '*', '-internal-test.example.com'
+.EXAMPLE
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups '*', '-internal-test.example.com'
 
-    .EXAMPLE
-    PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups 'internal-test.example.com', 'company.b.com'
+.EXAMPLE
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups 'internal-test.example.com', 'company.b.com'
 
-    .EXAMPLE
-    Please see readme.html and https://github.com/GruberMarkus/Set-OutlookSignatures for more details.
+.EXAMPLE
+PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"
+Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. See readme for details.
 
-    .NOTES
-    Script : Set-OutlookSignatures.ps1
-    Version: 2.0.2
-    Author : Markus Gruber
-    License: MIT license (see license.txt for details and copyright)
-    Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
+.EXAMPLE
+Please see readme.html and https://github.com/GruberMarkus/Set-OutlookSignatures for more details.
+
+.NOTES
+Script : Set-OutlookSignatures.ps1
+Version: 2.1.0
+Author : Markus Gruber
+License: MIT license (see license.txt for details and copyright)
+Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
 #>
 
 
-[CmdletBinding()]
+[CmdletBinding(PositionalBinding = $false)]
 
 Param(
     # Path to centrally managed signature templates
@@ -199,13 +203,13 @@ function main {
 
     Write-Host '  Check parameters and script environment'
     Set-Location $PSScriptRoot | Out-Null
-    
+
     if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
         Write-Host "    This PowerShell session is running in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
         Write-Host '    Required features are only available in FullLanguage mode. Exiting.' -ForegroundColor Red
         exit 1
     }
-    
+
     $Search = New-Object DirectoryServices.DirectorySearcher
     $Search.PageSize = 1000
     $jobs = New-Object System.Collections.ArrayList
@@ -263,10 +267,10 @@ function main {
             if (($path.StartsWith('\\', 'CurrentCultureIgnoreCase')) -and (-not ($path.StartsWith('\\?\', 'CurrentCultureIgnoreCase')))) {
                 $path = $path.replace('\\', '\\?\UNC\')
             }
-        
+
             if (-not ($path.StartsWith('\\', 'CurrentCultureIgnoreCase'))) {
                 $path = ('\\?\' + $path)
-            }    
+            }
         }
         Set-Variable -Name $_ -Value $path
     }
@@ -1894,10 +1898,10 @@ function CheckPath([string]$path) {
         if (($path.StartsWith('\\', 'CurrentCultureIgnoreCase')) -and (-not ($path.StartsWith('\\?\', 'CurrentCultureIgnoreCase')))) {
             $path = $path.replace('\\', '\\?\UNC\')
         }
-        
+
         if (-not ($path.StartsWith('\\', 'CurrentCultureIgnoreCase'))) {
             $path = ('\\?\' + $path)
-        }    
+        }
     }
 
     if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {

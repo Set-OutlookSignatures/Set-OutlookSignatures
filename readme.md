@@ -60,7 +60,8 @@ The script is Free and Open-Source Software (FOSS). It is published under the MI
   - [14.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#145-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
   - [14.6. How can I log the script output?](#146-how-can-i-log-the-script-output)
   - [14.7. Can multiple script instances run in parallel?](#147-can-multiple-script-instances-run-in-parallel)
-  - [14.8. What about the new signature roaming feature Microsoft announced?](#148-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [14.8. How do I start the script from the command line or a scheduled task?](#148-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
+  - [14.9. What about the new signature roaming feature Microsoft announced?](#149-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
   
 # 1. Requirements  
@@ -346,7 +347,21 @@ The script is designed for being run in multiple instances at the same. You can 
 - One user runs multiple instances of the script in parallel  
 - One user runs multiple instances of the script in simulation mode in parallel  
 - Multiple users on the same machine (e.g. Terminal Server) run multiple instances of the script in parallel  
-## 14.8. What about the new signature roaming feature Microsoft announced?  
+## 14.8. How do I start the script from the command line or a scheduled task?  
+Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. You have to be very careful about when to use single quotes or double quotes.  
+A working example:
+```
+PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"
+```  
+You will lots of information about this topic on the internet. The following links provide a first starting point:  
+- https://stackoverflow.com/questions/45760457/how-can-i-run-a-powershell-script-with-white-spaces-in-the-path-from-the-command
+- https://stackoverflow.com/questions/28311191/how-do-i-pass-in-a-string-with-spaces-into-powershell
+- https://stackoverflow.com/questions/10542313/powershell-and-schtask-with-task-that-has-a-space  
+  
+If you have to use the PowerShell.exe -Command or -File parameter depends on details of your configuration, for example AppLocker in combination with PowerShell. You may also want to consider the -EncodedCommand parameter to start Set-OutlookSignatures.ps1 and pass parameters to it.  
+  
+If you provided your users a link so they can start Set-OutlookSignatures.ps1 with the correct parameters on their own, you may want to use the official icon: '.\logo\Set-OutlookSignatures Icon.ico"  
+## 14.9. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.  
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.  
 Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).  
