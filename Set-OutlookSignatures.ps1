@@ -199,6 +199,13 @@ function main {
 
     Write-Host '  Check parameters and script environment'
     Set-Location $PSScriptRoot | Out-Null
+    
+    if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
+        Write-Host "    This PowerShell session is running in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+        Write-Host '    Required features are only available in FullLanguage mode. Exiting.' -ForegroundColor Red
+        exit 1
+    }
+    
     $Search = New-Object DirectoryServices.DirectorySearcher
     $Search.PageSize = 1000
     $jobs = New-Object System.Collections.ArrayList
@@ -224,13 +231,6 @@ function main {
     Write-Host "    UseHtmTemplates: '$UseHtmTemplates'"
     Write-Host "    SimulationUser: '$SimulationUser'"
     Write-Host ('    SimulationMailboxes: ' + ('''' + $($SimulationMailboxes -join ''', ''') + ''''))
-
-    if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-        Write-Host "This PowerShell session is in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
-        Write-Host 'Base64 conversion not possible. Exiting.' -ForegroundColor Red
-        exit 1
-    }
-
 
     ('SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath') | ForEach-Object {
         $path = (Get-Variable -Name $_).Value
