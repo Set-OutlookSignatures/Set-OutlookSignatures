@@ -61,7 +61,8 @@ The script is Free and Open-Source Software (FOSS). It is published under the MI
   - [14.6. How can I log the script output?](#146-how-can-i-log-the-script-output)
   - [14.7. Can multiple script instances run in parallel?](#147-can-multiple-script-instances-run-in-parallel)
   - [14.8. How do I start the script from the command line or a scheduled task?](#148-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
-  - [14.9. What about the new signature roaming feature Microsoft announced?](#149-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [14.9. How to create a shortcut to the script with parameters?](#149-how-to-create-a-shortcut-to-the-script-with-parameters)
+  - [14.10. What about the new signature roaming feature Microsoft announced?](#1410-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
   
 # 1. Requirements  
@@ -361,7 +362,24 @@ You will lots of information about this topic on the internet. The following lin
 If you have to use the PowerShell.exe -Command or -File parameter depends on details of your configuration, for example AppLocker in combination with PowerShell. You may also want to consider the -EncodedCommand parameter to start Set-OutlookSignatures.ps1 and pass parameters to it.  
   
 If you provided your users a link so they can start Set-OutlookSignatures.ps1 with the correct parameters on their own, you may want to use the official icon: '.\logo\Set-OutlookSignatures Icon.ico"  
-## 14.9. What about the new signature roaming feature Microsoft announced?  
+## 14.9. How to create a shortcut to the script with parameters?  
+You may want to provide a link on the desktop or in the start menu, so they can start the script on their own.  
+The Windows user interface does not allow you to create a shortcut with a combined length of full target path and arguments greater than 259 characters.  
+You can overcome this user interface limitation by using PowerShell to create a shortcut (.lnk file):  
+```  
+$WshShell = New-Object -ComObject WScript.Shell  
+$Shortcut = $WshShell.CreateShortcut((Join-Path -Path $([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Desktop)) -ChildPath 'Set Outlook signatures.lnk'))  
+$Shortcut.WorkingDirectory = '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Set-OutlookSignatures'  
+$Shortcut.TargetPath = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'  
+$Shortcut.Arguments = "-NoExit -Command ""& '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Set-OutlookSignatures\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Templates\Signatures DOCX' -OOFTemplatePath '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Templates\Out of Office DOCX'"""  
+$Shortcut.IconLocation = '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Set-OutlookSignatures\logo\Set-OutlookSignatures Icon.ico'  
+$Shortcut.Description = 'Set Outlook signatures using Set-OutlookSignatures.ps1'  
+$Shortcut.WindowStyle = 1 # 1 = undefined, 3 = maximized, 7 = minimized  
+$Shortcut.Hotkey = ''  
+$Shortcut.Save()  
+```  
+Attention: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.  
+## 14.10. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.  
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.  
 Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).  
