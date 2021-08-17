@@ -18,7 +18,7 @@ Sample templates for signatures and OOF messages demonstrate all available featu
   
 Simulation mode allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.  
   
-The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects).  
+The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). The script is multi-client capable by using different template paths, configuration files and script parameters.  
   
 The script is Free and Open-Source Software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF), the Open Source Initiative (OSI) and is compatible with the General Public License (GPL) v3. Please see license.txt for copyright and MIT license details.  
 
