@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Set-OutlookSignatures&period;ps1</title>
+        <style>
+/* From extension vscode.markdown-math */
+@font-face{font-family:KaTeX_AMS;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype");font-weight:400;font-style:normal}@font-face{font-family:KaTeX_Caligraphic;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype");font-weight:700;font-style:normal}@font-face{font-family:KaTeX_Caligraphic;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype");font-weight:400;font-style:normal}@font-face{font-family:KaTeX_Fraktur;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype");font-weight:700;font-style:normal}@font-face{font-family:KaTeX_Fraktur;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype");font-weight:400;font-style:normal}@font-face{font-family:KaTeX_Main;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype");font-weight:700;font-style:normal}@font-face{font-family:KaTeX_Main;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype");font-weight:700;font-style:italic}@font-face{font-family:KaTeX_Main;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype");font-weight:400;font-style:italic}@font-face{font-family:KaTeX_Main;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype");font-weight:400;font-style:normal}@font-face{font-family:KaTeX_Math;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype");font-weight:700;font-style:italic}@font-face{font-family:KaTeX_Math;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype");font-weight:400;font-style:italic}@font-face{font-family:"KaTeX_SansSerif";src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype");font-weight:700;font-style:normal}@font-face{font-family:"KaTeX_SansSerif";src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype");font-weight:400;font-style:italic}@font-face{font-family:"KaTeX_SansSerif";src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype");font-weight:400;font-style:normal}@font-face{font-family:KaTeX_Script;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype");font-weight:400;font-style:normal}@font-face{font-family:KaTeX_Size1;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype");font-weight:400;font-style:normal}@font-face{font-family:KaTeX_Size2;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype");font-weight:400;font-style:normal}@font-face{font-family:KaTeX_Size3;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype");font-weight:400;font-style:normal}@font-face{font-family:KaTeX_Size4;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype");font-weight:400;font-style:normal}@font-face{font-family:KaTeX_Typewriter;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype");font-weight:400;font-style:normal}.katex{font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;text-indent:0;text-rendering:auto;border-color:currentColor}.katex *{-ms-high-contrast-adjust:none!important}.katex .katex-version:after{content:"0.13.0"}.katex .katex-mathml{position:absolute;clip:rect(1px,1px,1px,1px);padding:0;border:0;height:1px;width:1px;overflow:hidden}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-weight:700;font-style:italic}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{display:inline-table;table-layout:fixed;border-collapse:collapse}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;vertical-align:bottom;position:relative}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;vertical-align:bottom;font-size:1px;width:2px;min-width:2px}.katex .vbox{display:inline-flex;flex-direction:column;align-items:baseline}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{width:0;max-width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{display:inline-block;width:100%;border-bottom-style:solid}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .clap,.katex .llap,.katex .rlap{width:0;position:relative}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{display:inline-block;border:0 solid;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{display:inline-block;width:100%;border-bottom-style:solid}.katex .hdashline{display:inline-block;width:100%;border-bottom-style:dashed}.katex .sqrt>.root{margin-left:.27777778em;margin-right:-.55555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.83333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.16666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.33333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.66666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.45666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.14666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.71428571em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.85714286em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.14285714em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.28571429em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.42857143em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.71428571em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.05714286em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.46857143em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.96285714em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.55428571em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.55555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.66666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.77777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.88888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.11111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.33333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.30444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.76444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.41666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.58333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.66666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.83333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.72833333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.07333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.34722222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.41666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.48611111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.55555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.69444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.83333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.44027778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.72777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.28935185em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.34722222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.40509259em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.46296296em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.52083333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.69444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.83333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.20023148em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.43981481em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.24108004em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.28929605em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.33751205em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.38572806em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.43394407em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.48216008em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.57859209em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.69431051em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.83317261em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.19961427em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.20096463em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.24115756em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.28135048em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.32154341em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.36173633em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.40192926em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.48231511em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.57877814em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.69453376em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.83360129em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{display:block;position:absolute;width:100%;height:inherit;fill:currentColor;stroke:currentColor;fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex svg path{stroke:none}.katex img{border-style:none;min-width:0;min-height:0;max-width:none;max-height:none}.katex .stretchy{width:100%;display:block;position:relative;overflow:hidden}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{width:100%;position:relative;overflow:hidden}.katex .halfarrow-left{position:absolute;left:0;width:50.2%;overflow:hidden}.katex .halfarrow-right{position:absolute;right:0;width:50.2%;overflow:hidden}.katex .brace-left{position:absolute;left:0;width:25.1%;overflow:hidden}.katex .brace-center{position:absolute;left:25%;width:50%;overflow:hidden}.katex .brace-right{position:absolute;right:0;width:25.1%;overflow:hidden}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{box-sizing:border-box;border:.04em solid}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{box-sizing:border-content;border-top:.049em solid;border-right:.049em solid;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{counter-increment:katexEqnNo;content:"(" counter(katexEqnNo) ")"}.katex .mml-eqn-num:before{counter-increment:mmlEqnNo;content:"(" counter(mmlEqnNo) ")"}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;position:absolute;left:calc(50% + .3em);text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{text-align:left;padding-left:2em}body{counter-reset:katexEqnNo mmlEqnNo}
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.katex-error {
+	color: var(--vscode-editorError-foreground);
+}
+
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <!-- title: Set-OutlookSignatures.ps1 -->
+<!-- omit in toc -->
+<h1 id=""><a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src="file:///c:\Users\grube\.GitHub\Set-OutlookSignatures\logo\Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a></h1>
+<p><strong>Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.</strong></p>
+<h1 id="what-is-the-recommended-approach-to-implement-the-software--">What is the recommended approach to implement the software?  <!-- omit in toc --></h1>
+<p>There is certainly no definitive generic recommendation, but this document should be a good starting point.<br>
+The content is based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes.<br>
+It contains proven procedures and recommendations for product managers, architects, operations managers, account managers and mail and client administrators. It is suited for service providers as well as for clients.<br>
+It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.<br>
+The document is available in English and German language.</p>
+<h1 id="table-of-contents--">Table of Contents  <!-- omit in toc --></h1>
+<ul>
+<li><a href="#1-english">1. English</a>
+<ul>
+<li><a href="#11-overview">1.1. Overview</a></li>
+<li><a href="#12-manual-maintenance-of-signatures">1.2. Manual maintenance of signatures</a>
+<ul>
+<li><a href="#121-signatures-in-outlook">1.2.1. Signatures in Outlook</a></li>
+<li><a href="#122-signature-in-outlook-on-the-web">1.2.2. Signature in Outlook on the Web</a></li>
+</ul>
+</li>
+<li><a href="#13-automatic-maintenance-of-signatures">1.3. Automatic maintenance of signatures</a>
+<ul>
+<li><a href="#131-server-based-signatures">1.3.1. Server-based signatures</a></li>
+<li><a href="#132-client-based-signatures">1.3.2. Client-based signatures</a></li>
+</ul>
+</li>
+<li><a href="#14-alignment-of-signatures-between-different-devices">1.4. Alignment of signatures between different devices</a></li>
+<li><a href="#15-recommendation-set-outlooksignaturesps1">1.5. Recommendation: Set-OutlookSignatures.ps1</a>
+<ul>
+<li><a href="#151-scope-of-functions">1.5.1. Scope of functions</a>
+<ul>
+<li><a href="#1511-general-description-licence-model">1.5.1.1. General description, licence model</a></li>
+<li><a href="#1512-features">1.5.1.2. Features</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#16-administration">1.6. Administration</a>
+<ul>
+<li><a href="#161-system-requirements">1.6.1. System requirements</a>
+<ul>
+<li><a href="#1611-client">1.6.1.1. Client</a></li>
+<li><a href="#1612-server">1.6.1.2. Server</a></li>
+</ul>
+</li>
+<li><a href="#162-filing-the-script">1.6.2. Filing the script</a></li>
+<li><a href="#163-storage-of-the-templates">1.6.3. Storage of the templates</a></li>
+<li><a href="#164-template-management">1.6.4. Template management</a></li>
+<li><a href="#165-execute-the-script">1.6.5. Execute the script</a>
+<ul>
+<li><a href="#1651-parameters">1.6.5.1. Parameters</a></li>
+<li><a href="#1652-runtime-and-visibility-of-the-script">1.6.5.2. Runtime and visibility of the script</a></li>
+<li><a href="#1653-using-outlook-and-word-while-the-script-is-running">1.6.5.3. Using Outlook and Word while the script is running</a></li>
+</ul>
+</li>
+<li><a href="#166-support-from-the-service-provider">1.6.6. Support from the service provider</a>
+<ul>
+<li><a href="#1661-counselling-and-introductory-phase">1.6.6.1. Counselling and introductory phase</a>
+<ul>
+<li><a href="#16611-initial-vote-on-textual-signatures">1.6.6.1.1. Initial vote on textual signatures</a>
+<ul>
+<li><a href="#166111-participants">1.6.6.1.1.1. Participants</a></li>
+<li><a href="#166112-agenda-and-goals">1.6.6.1.1.2. Agenda and goals</a></li>
+<li><a href="#166113-duration">1.6.6.1.1.3. Duration</a></li>
+</ul>
+</li>
+<li><a href="#16612-training-for-template-administrators">1.6.6.1.2. Training for template administrators</a>
+<ul>
+<li><a href="#166121-participants">1.6.6.1.2.1. Participants</a></li>
+<li><a href="#166122-agenda-and-goals">1.6.6.1.2.2. Agenda and goals</a></li>
+<li><a href="#166123-duration">1.6.6.1.2.3. Duration</a></li>
+<li><a href="#166124-prerequisites">1.6.6.1.2.4. Prerequisites</a></li>
+</ul>
+</li>
+<li><a href="#16613-client-management-training">1.6.6.1.3. Client management training</a>
+<ul>
+<li><a href="#166131-participants">1.6.6.1.3.1. Participants</a></li>
+<li><a href="#166132-agenda-and-goals">1.6.6.1.3.2. Agenda and goals</a></li>
+<li><a href="#166133-duration">1.6.6.1.3.3. Duration</a></li>
+<li><a href="#166134-prerequisites">1.6.6.1.3.4. Prerequisites:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#1662-tests-pilot-operation-rollout">1.6.6.2. Tests, pilot operation, rollout</a></li>
+</ul>
+</li>
+<li><a href="#167-running-operation">1.6.7. Running operation</a>
+<ul>
+<li><a href="#1671-create-and-maintain-templates">1.6.7.1. Create and maintain templates</a></li>
+<li><a href="#1672-setting-and-maintaining-ad-attributes">1.6.7.2. Setting and maintaining AD attributes</a></li>
+<li><a href="#1673-configuration-adjustments">1.6.7.3. Configuration adjustments</a></li>
+<li><a href="#1674-problems-and-questions-during-operation">1.6.7.4. Problems and questions during operation</a></li>
+<li><a href="#1675-supported-versions">1.6.7.5. Supported versions</a></li>
+<li><a href="#1676-new-versions">1.6.7.6. New versions</a></li>
+<li><a href="#1677-adjustments-to-the-code-of-the-product">1.6.7.7. Adjustments to the code of the product</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-german-deutsch">2. German (Deutsch)</a>
+<ul>
+<li><a href="#21-%C3%BCberblick">2.1. Überblick</a></li>
+<li><a href="#22-manuelle-wartung-von-signaturen">2.2. Manuelle Wartung von Signaturen</a>
+<ul>
+<li><a href="#221-signaturen-in-outlook">2.2.1. Signaturen in Outlook</a></li>
+<li><a href="#222-signatur-in-outlook-im-web">2.2.2. Signatur in Outlook im Web</a></li>
+</ul>
+</li>
+<li><a href="#23-automatische-wartung-von-signaturen">2.3. Automatische Wartung von Signaturen</a>
+<ul>
+<li><a href="#231-serverbasierte-signaturen">2.3.1. Serverbasierte Signaturen</a></li>
+<li><a href="#232-clientbasierte-signaturen">2.3.2. Clientbasierte Signaturen</a></li>
+</ul>
+</li>
+<li><a href="#24-abgleich-von-signaturen-zwischen-verschiedenen-ger%C3%A4ten">2.4. Abgleich von Signaturen zwischen verschiedenen Geräten</a></li>
+<li><a href="#25-empfehlung-set-outlooksignaturesps1">2.5. Empfehlung: Set-OutlookSignatures.ps1</a>
+<ul>
+<li><a href="#251-funktionsumfang">2.5.1. Funktionsumfang</a>
+<ul>
+<li><a href="#2511-allgemeine-beschreibung-lizenzmodell">2.5.1.1. Allgemeine Beschreibung, Lizenzmodell</a></li>
+<li><a href="#2512-funktionen">2.5.1.2. Funktionen</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#26-administration">2.6. Administration</a>
+<ul>
+<li><a href="#261-systemanforderungen">2.6.1. Systemanforderungen</a>
+<ul>
+<li><a href="#2611-client">2.6.1.1. Client</a></li>
+<li><a href="#2612-server">2.6.1.2. Server</a></li>
+</ul>
+</li>
+<li><a href="#262-ablage-des-scripts">2.6.2. Ablage des Scripts</a></li>
+<li><a href="#263-ablage-der-vorlagen">2.6.3. Ablage der Vorlagen</a></li>
+<li><a href="#264-verwaltung-der-vorlagen">2.6.4. Verwaltung der Vorlagen</a></li>
+<li><a href="#265-ausf%C3%BChren-des-scripts">2.6.5. Ausführen des Scripts</a>
+<ul>
+<li><a href="#2651-parameter">2.6.5.1. Parameter</a></li>
+<li><a href="#2652-laufzeit-und-sichtbarkeit-des-scripts">2.6.5.2. Laufzeit und Sichtbarkeit des Scripts</a></li>
+<li><a href="#2653-nutzung-von-outlook-und-word-w%C3%A4hrend-der-laufzeit">2.6.5.3. Nutzung von Outlook und Word während der Laufzeit</a></li>
+</ul>
+</li>
+<li><a href="#266-unterst%C3%BCtzung-durch-den-service-provider">2.6.6. Unterstützung durch den Service-Provider</a>
+<ul>
+<li><a href="#2661-beratungs--und-einf%C3%BChrungsphase">2.6.6.1. Beratungs- und Einführungsphase</a>
+<ul>
+<li><a href="#26611-erstabstimmung-zu-textuellen-signaturen">2.6.6.1.1. Erstabstimmung zu textuellen Signaturen</a>
+<ul>
+<li><a href="#266111-teilnehmer">2.6.6.1.1.1. Teilnehmer</a></li>
+<li><a href="#266112-inhalt-und-ziele">2.6.6.1.1.2. Inhalt und Ziele</a></li>
+<li><a href="#266113-dauer">2.6.6.1.1.3. Dauer</a></li>
+</ul>
+</li>
+<li><a href="#26612-schulung-der-vorlagen-verwalter">2.6.6.1.2. Schulung der Vorlagen-Verwalter</a>
+<ul>
+<li><a href="#266121-teilnehmer">2.6.6.1.2.1. Teilnehmer</a></li>
+<li><a href="#266122-inhalt-und-ziele">2.6.6.1.2.2. Inhalt und Ziele</a></li>
+<li><a href="#266123-dauer">2.6.6.1.2.3. Dauer</a></li>
+<li><a href="#266124-voraussetzungen">2.6.6.1.2.4. Voraussetzungen</a></li>
+</ul>
+</li>
+<li><a href="#26613-schulung-des-clientmanagements">2.6.6.1.3. Schulung des Clientmanagements</a>
+<ul>
+<li><a href="#266131-teilnehmer">2.6.6.1.3.1. Teilnehmer</a></li>
+<li><a href="#266132-inhalt-und-ziele">2.6.6.1.3.2. Inhalt und Ziele</a></li>
+<li><a href="#266133-dauer">2.6.6.1.3.3. Dauer</a></li>
+<li><a href="#266134-voraussetzungen">2.6.6.1.3.4. Voraussetzungen</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2662-tests-pilotbetrieb-rollout">2.6.6.2. Tests, Pilotbetrieb, Rollout</a></li>
+</ul>
+</li>
+<li><a href="#267-laufender-betrieb">2.6.7. Laufender Betrieb</a>
+<ul>
+<li><a href="#2671-erstellen-und-warten-von-vorlagen">2.6.7.1. Erstellen und Warten von Vorlagen</a></li>
+<li><a href="#2672-setzen-und-warten-von-ad-attributen">2.6.7.2. Setzen und Warten von AD-Attributen</a></li>
+<li><a href="#2673-konfigurationsanpassungen">2.6.7.3. Konfigurationsanpassungen</a></li>
+<li><a href="#2674-probleme-und-fragen-im-laufenden-betrieb">2.6.7.4. Probleme und Fragen im laufenden Betrieb</a></li>
+<li><a href="#2675-unterst%C3%BCtzte-versionen">2.6.7.5. Unterstützte Versionen</a></li>
+<li><a href="#2676-neue-versionen">2.6.7.6. Neue Versionen</a></li>
+<li><a href="#2677-anpassungen-am-code-des-produkts">2.6.7.7. Anpassungen am Code des Produkts</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="1-english">1. English</h1>
+<h2 id="11-overview">1.1. Overview</h2>
+<p>Textual signatures are not only an essential aspect of corporate identity, but together with the disclaimer are usually a legal necessity.<br>
+This document provides a general overview of signatures, guidance for end users, and details of the service provider's recommended solution for centralised management and automated distribution of textual signatures.<br>
+The word &quot;signature&quot; in this document is always to be understood as a textual signature and is not to be confused with a digital signature, which serves to encrypt e-mails and/or legitimise the sender.</p>
+<h2 id="12-manual-maintenance-of-signatures">1.2. Manual maintenance of signatures</h2>
+<p>In the case of manual maintenance, the user is provided with a template for the textual signature via the intranet, for example.<br>
+Each user sets up the signature himself/herself. Depending on the technical configuration of the client, signatures move with or have to be set up again when the computer used is changed.<br>
+There is no central maintenance.<br>
+At the time of writing, most of the service provider's customers are using this variant, while at the same time virtually all existing and also new customers have confirmed their desire for a centrally controlled solution.</p>
+<h3 id="121-signatures-in-outlook">1.2.1. Signatures in Outlook</h3>
+<p>In Outlook, practically any number of signatures can be created per mailbox. This is practical, for example, to distinguish between internal and external e-mails or e-mails in different languages.<br>
+In addition, a standard signature for new e-mails and one for replies can be set per mailbox.</p>
+<h3 id="122-signature-in-outlook-on-the-web">1.2.2. Signature in Outlook on the Web</h3>
+<p>If you also work with Outlook on the Web, you must set up your signature in Outlook on the Web independently of your signature on the client:</p>
+<ol>
+<li>Log on to <a href="https://mail.example.com">https://mail.example.com</a> in a web browser. Enter your user name and password, then click Log In.</li>
+<li>From the navigation bar, select Settings &gt; Options.</li>
+<li>Under Options, select Settings &gt; Email.</li>
+<li>Enter the signature you want to use in the text field under Email Signature. Use the Format mini toolbar to change the appearance of the signature.</li>
+<li>If you want your signature to appear automatically at the end of all outgoing messages, including replies and forwarded messages, tick Automatically include signature in my sent messages. If you do not activate this option, you can add your signature to each message manually.</li>
+<li>Click on Save.</li>
+</ol>
+<p>In Outlook on the Web, only one signature is possible.</p>
+<h2 id="13-automatic-maintenance-of-signatures">1.3. Automatic maintenance of signatures</h2>
+<p>For some service provider customers, signatures for personal or group mailboxes are automatically created and associated settings configured. For details, please contact your local IT.<br>
+The service provider recommends a free script-based solution with central administration and extended client-side functionality, which can be operated and maintained by the customers themselves with the support of the service provider. For details see &quot;Recommendation: Set-OutlookSignatures.ps1&quot;.</p>
+<h3 id="131-server-based-signatures">1.3.1. Server-based signatures</h3>
+<p>The biggest advantage of a server-based solution is that a defined set of rules is used to capture every email, regardless of which application or device it was sent from.<br>
+Since the signature is only attached at the server, the user does not see which signature is used during the creation of an e-mail.<br>
+After the signature has been attached to the server, the now modified e-mail must be downloaded again by the client so that it is displayed correctly in the &quot;Sent items&quot; folder. This generates additional network traffic.<br>
+If a message is already digitally signed or encrypted when it is created, the textual signature cannot be added on the server side without breaking the digital signature and the encryption. Alternatively, the message is adapted so that the content consists only of the textual signature and the unchanged original message is sent as an attachment.<br>
+When evaluating server-based products, the following aspects, among others, should be examined:</p>
+<ul>
+<li>Can the product handle the number of AD and mail objects in the environment without reproducible crashes or incomplete search results?</li>
+<li>Does the product have to be installed directly on the mail servers? This means additional dependencies and sources of errors, and can have a negative impact on the availability and reliability of the AD and mail system.</li>
+<li>Can the administration of the products be delegated directly on the mail servers without granting significant rights? Can customers be authorised separately from each other?</li>
+<li>Can variables in the signatures only be filled with values from the Active Directory in which Exchange is also located, or also with values from the Active Directory in which the actually authorised users are located when using Linked Mailboxes?</li>
+<li>How high are the acquisition and maintenance costs? Are these above the tender limit?</li>
+</ul>
+<h3 id="132-client-based-signatures">1.3.2. Client-based signatures</h3>
+<p>In client-based solutions, templates and application rules for textual signatures are defined on a central repository. A component on the client checks the central configuration when it is called up automatically or manually and applies it locally.<br>
+Client-based solutions, unlike server-based solutions, are tied to specific email clients and specific operating systems.<br>
+The user already sees the signature during the creation of the e-mail and can adjust it if necessary.<br>
+Encryption and digital signing of messages are not a problem on either the client or server side.<br>
+When evaluating server-based products, the following aspects, among others, should be examined:</p>
+<ul>
+<li>Can the product handle the number of AD and mail objects in the environment without reproducible crashes or incomplete search results?</li>
+<li>Can variables in the signatures only be filled with values from the Active Directory in which Exchange is also located, or also with values from the Active Directory in which the actually authorised users are located when using Linked Mailboxes?</li>
+<li>Can the product handle group mailboxes and additional connected mailboxes?</li>
+<li>Can the administration of the products be delegated? Can customers be authorised separately from each other?</li>
+<li>How high are the acquisition and maintenance costs? Are these above the tender limit?</li>
+</ul>
+<p>Due to the costs and the fulfilled requirements for functionality and maintainability, the service provider recommends the use of the open source product Set-OutlookSignatures.ps1 and offers its customers support for implementation and operation.</p>
+<h2 id="14-alignment-of-signatures-between-different-devices">1.4. Alignment of signatures between different devices</h2>
+<p>The signatures in Outlook, Outlook on the Web and other clients (e.g. in smartphone apps) are not synchronised and must therefore be set up separately.<br>
+Depending on the client configuration, Outlook signatures may or may not roam with the user between different Windows devices, please contact your local IT for details.<br>
+The client-based tool recommended by the service provider can set signatures in Outlook as well as in Outlook on the Web and also offers the user a simple way to transfer existing signatures to other e-mail clients.</p>
+<h2 id="15-recommendation-set-outlooksignaturesps1">1.5. Recommendation: Set-OutlookSignatures.ps1</h2>
+<p>The service provider recommends the free open-source software Set-OutlookSignatures.ps1 after surveying customer requirements and testing several server- and client-based products.<br>
+This document provides an overview of the functional scope and administration of the recommended solution, support of the service provider during implementation and operation, as well as associated expenses.</p>
+<h3 id="151-scope-of-functions">1.5.1. Scope of functions</h3>
+<h4 id="1511-general-description-licence-model">1.5.1.1. General description, licence model</h4>
+<p>Set-OutlookSignatures.ps1 (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures">https://github.com/GruberMarkus/Set-OutlookSignatures</a>) is a free open source product.<br>
+The product is used for the central administration and local distribution of textual signatures and out-of-office messages to clients. Outlook on Windows is supported as the target platform.<br>
+By using the MIT licence, there are virtually no restrictions on the use or modification of the existing code, even for commercial use.<br>
+The script is written in PowerShell. PowerShell has been a fixed component of Windows since Windows 7, is actively developed further by Microsoft and is now open source itself. PowerShell is designed to make it as easy as possible to read and create code.<br>
+Since virtually every Microsoft product is administered via PowerShell (even many graphical user interfaces issue PowerShell commands in the background), there is extensive skill and knowledge of this language at the service provider, including in the mail and client product teams.<br>
+The integration of PowerShell scripts into the client secured with the help of AppLocker and other mechanisms is also technically and organisationally possible through established measures (such as the digital signing of PowerShell scripts).</p>
+<h4 id="1512-features">1.5.1.2. Features</h4>
+<p>Signatures and absence messages can be</p>
+<ul>
+<li>be generated from templates in DOCX or HTML file format</li>
+<li>be customised with a wide range of variables, including photos, from Active Directory and other sources</li>
+<li>be applied to all primary mailboxes (incl. group mailboxes), specific mailbox groups or specific email addresses in all Outlook profiles</li>
+<li>be assigned time ranges within which they are valid</li>
+<li>be set as the default signature for new mails or for replies and forwards (signatures only)</li>
+<li>be defined as an absence message for internal or external recipients (only OOF messages)</li>
+<li>be set in Outlook Web for the currently logged in user</li>
+<li>are only centrally managed or exist in parallel with user-created signatures (signatures only)</li>
+<li>be copied to an alternative path to facilitate access on mobile devices that are not directly supported by this script (signatures only)</li>
+</ul>
+<p>Sample templates for signatures and out-of-office messages demonstrate all available functions and are provided as . docx and . htm files.<br>
+The product is designed for large and complex environments (Exchange Resource Forest scenarios, across AD trusts, linked mailboxes, multi-level AD subdomains, many objects). The product is multi-client capable.</p>
+<h2 id="16-administration">1.6. Administration</h2>
+<h3 id="161-system-requirements">1.6.1. System requirements</h3>
+<h4 id="1611-client">1.6.1.1. Client</h4>
+<ul>
+<li>Outlook and Word, each from version 2010</li>
+<li>The script must run in the security context of the user currently logged in.</li>
+<li>The PowerShell script must be executed in &quot;Full Language Mode&quot;. The &quot;Constrained Language Mode&quot; is not supported because certain functions such as Base64 conversions are not available in this mode or require very slow alternatives.</li>
+<li>If AppLocker or comparable solutions are used, the script may need to be digitally signed.</li>
+<li>Network releases:
+<ul>
+<li>Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, must be enabled between the client and all domain controllers. If this is not the case, signature-relevant information and variables cannot be retrieved. The script checks with each run whether access is possible.</li>
+<li>To access the SMB file share with the script components, the following ports are required: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details see <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)">https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)</a>).</li>
+<li>Port 443 TCP is required to access WebDAV shares (e.g. SharePoint document libraries).</li>
+</ul>
+</li>
+</ul>
+<h4 id="1612-server">1.6.1.2. Server</h4>
+<ul>
+<li>An SMB file share in which the script and its components are stored. All users must have read access to this file share and its contents.</li>
+<li>One or more SMB file shares or WEBDAV shares (e.g. SharePoint document libraries) in which the templates for signatures and out-of-office messages are stored and managed.<br>
+If variables (e.g. first name, last name, telephone number) are used in the templates, the corresponding values must be available in the Active Directory. In the case of Linked Mailboxes, a distinction can be made between the attributes of the current user and the attributes of the mailbox, which are located in different AD forests.</li>
+</ul>
+<h3 id="162-filing-the-script">1.6.2. Filing the script</h3>
+<p>As described in the system requirements, the script and its components must be stored on an SMB file share. Alternatively, it can be distributed to the clients by any mechanism and executed from there.<br>
+All users need read access to the script and all its components.<br>
+As long as these requirements are met, any SMB file share can be used, for example</p>
+<ul>
+<li>the NETLOGON share of an Active Directory</li>
+<li>a share on a Windows server in any architecture (single server or cluster, classic share or DFS in all variations)</li>
+<li>a share on a Windows client</li>
+<li>a share on any non-Windows system, e.g. via SAMBA<br>
+As long as all customers use the same version of the script and only configure it via parameters, a central repository for the script components is sufficient.<br>
+For maximum performance and flexibility, it is recommended that each client places the script in its own SMB file share and replicates this across sites to different servers if necessary.</li>
+</ul>
+<h3 id="163-storage-of-the-templates">1.6.3. Storage of the templates</h3>
+<p>As described in the system requirements, templates for signatures and out-of-office messages can be stored on SMB file shares or WebDAV shares (e.g. SharePoint document libraries) analogous to the script itself.<br>
+SharePoint document libraries have the advantage of optional versioning of files, so that in the event of an error, template administrators can quickly restore a previous version of a template.<br>
+At least one share with separate subdirectories for signature and absence templates is recommended per client.<br>
+Users need read access to all templates.<br>
+By simply granting write access to the entire template folder or to individual files within it, the creation and management of signature and absence templates is delegated to a defined group of people. Typically, the templates are defined, created and maintained by the Corporate Communications and Marketing departments.<br>
+For maximum performance and flexibility, it is recommended that each client places the script in its own SMB file share and replicates this across sites to different servers if necessary.</p>
+<h3 id="164-template-management">1.6.4. Template management</h3>
+<p>By simply granting write access to the template folder or to individual files in it, the creation and management of signature and absence templates is delegated to a defined group of people. Typically, the templates are defined, created and maintained by the Corporate Communications and Marketing departments.<br>
+The script can process templates in DOCX or HTML format. For a start, the use of the DOCX format is recommended; the reasons for this recommendation and the advantages and disadvantages of the respective format are described in the script's &quot;readme.html&quot; file.<br>
+The file &quot;readme.html&quot; supplied with the script provides an overview of how templates are to be named so that they are</p>
+<ul>
+<li>Only apply to certain groups or mailboxes</li>
+<li>be set as the default signature for new mails or replies and forwards</li>
+<li>be set as an internal or external absence message<br>
+In &quot;readme.html&quot; and the sample templates, the replaceable variables, the extension with user-defined variables and the handling of photos from the Active Directory are also described.<br>
+The example file &quot;Test all signature replacement variables.docx&quot; provided contains all variables.</li>
+</ul>
+<h3 id="165-execute-the-script">1.6.5. Execute the script</h3>
+<p>The script can be executed via any mechanism, for example</p>
+<ul>
+<li>When the user logs in as part of the logon script or as a script of its own</li>
+<li>via task scheduling at fixed times or for specific events</li>
+<li>by the user himself, e.g. via a shortcut on the desktop</li>
+<li>through a client management tool<br>
+Since Set-OutlookSignatures.ps1 is a pure PowerShell script, it is called like any other script of this file type:</li>
+</ul>
+<pre><code><code><div>powershell.exe &lt;PowerShell parameter&gt; -file &lt;path to Set-OutlookSignatures.ps1&gt; &lt;Script parameter&gt;  
+</div></code></code></pre>
+<h4 id="1651-parameters">1.6.5.1. Parameters</h4>
+<p>The behaviour of the script can be controlled via parameters. Particularly relevant are SignatureTemplatePath and OOFTemplatePath, which are used to specify the path to the signature and absence templates.<br>
+The following is an example where the signature templates are on an SMB file share and the out-of-office service provider templates are on a WebDAV share:</p>
+<pre><code><code><div>powershell.exe -file '\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' -SignatureTemplatePath '\netlogon\set-outlooksignatures\set-outlooksignatures Outlook' -OOFTemplatePath 'https://webdav.example.com/CorporateCommunications/Templates/Out of Office templates'.  
+</div></code></code></pre>
+<p>At the time of writing, other parameters were available. The following is a brief overview of the possibilities, for details please refer to the documentation of the script in the file &quot;readme.html&quot;:</p>
+<ul>
+<li>SignatureTemplatePath: Path to the signature templates. Can be an SMB or WebDAV share.</li>
+<li>ReplacementVariableConfigFile: Path to the file in which variables deviating from the standard are defined. Can be an SMB or WebDAV share.</li>
+<li>DomainsToCheckForGroups: By default, all trusts are queried for mailbox information. This parameter can be used to remove certain domains and add non-trusted domains.</li>
+<li>DeleteUserCreatedSignatures: Should signatures created by the user be deleted? This is not done by default.</li>
+<li>SetCurrentUserOutlookWebSignature: By default, a signature is set in Outlook on the web for the logged-in user. This can be prevented via this parameter.</li>
+<li>SetCurrentUserOOFMessage: By default, the text of the out-of-office messages is set. This parameter can be used to change this behaviour.</li>
+<li>OOFTemplatePath: Path to the absence templates. Can be an SMB or WebDAV share.</li>
+<li>AdditionalSignaturePath: Path to an additional share to which all signatures are to be copied, e.g. for access from a mobile device and for simplified configuration of clients not supported by the script. Can be an SMB or WebDAV share.</li>
+<li>AdditionalSignaturePathFolder: Folder structure to be created under AdditionalSignaturePath.</li>
+<li>UseHtmTemplates: By default, templates are processed in DOCX format. This button can be used to switch to HTML (. htm).</li>
+</ul>
+<h4 id="1652-runtime-and-visibility-of-the-script">1.6.5.2. Runtime and visibility of the script</h4>
+<p>The script is designed for fast turnaround time and minimal network load, but the runtime of the script still depends on many parameters:</p>
+<ul>
+<li>General speed of the client (CPU, RAM, HDD)</li>
+<li>Number of mailboxes configured in Outlook</li>
+<li>Number of Trusted Domains</li>
+<li>Response time of the domain controller and file server</li>
+<li>Response time of the Exchange servers (setting signatures in Outlook Web, out-of-office notifications)</li>
+<li>Number of templates and complexity of variables in them (e.g. photos)</li>
+</ul>
+<p>A reproducible running time of approx. 30 seconds was measured under the following conditions:</p>
+<ul>
+<li>Standard client</li>
+<li>Connected to the company network via VPN</li>
+<li>4 mailboxes</li>
+<li>Query all domains connected by trust</li>
+<li>9 signature templates to be processed, all with variables and graphics (but without user photos), partly restricted to groups and mail addresses</li>
+<li>8 absence templates to be processed, all with variables and graphics (but without user photos), partly restricted to groups and mail addresses</li>
+<li>Setting the signature in Outlook on the Web</li>
+<li>No copying of signatures to an additional network path</li>
+</ul>
+<p>Since the script does not require any user interaction, it can be minimised or hidden using the usual mechanisms.</p>
+<h4 id="1653-using-outlook-and-word-while-the-script-is-running">1.6.5.3. Using Outlook and Word while the script is running</h4>
+<p>The script does not start Outlook, all queries and configurations are done via the file system and the registry.<br>
+Outlook can be started, used or closed at will while the script is running.<br>
+All changes to signatures and out-of-office notifications are immediately visible and usable for the user, with one exception: If the name of the default signature to be used for new e-mails or for replies and forwardings changes, this change only takes effect the next time Outlook is started. If only the content changes, but not the name of one of the standard signatures, this change is immediately available.<br>
+Word can be started, used or closed at will while the script is running.<br>
+The script uses Word to replace variables in DOCX templates and to convert DOCX and HTML to RTF and TXT. Word is started as a separate invisible process. This process can practically not be influenced by the user and does not influence Word processes started by the user.</p>
+<h3 id="166-support-from-the-service-provider">1.6.6. Support from the service provider</h3>
+<p>The service provider not only recommends the Set-OutlookSignature.ps1 software, but also offers its customers defined free support.<br>
+Additional support can be obtained by prior agreement at a separate charge.<br>
+The central point of contact for all kinds of questions is Mail Product Management.</p>
+<h4 id="1661-counselling-and-introductory-phase">1.6.6.1. Counselling and introductory phase</h4>
+<p>The following services are covered by the product price:</p>
+<h5 id="16611-initial-vote-on-textual-signatures">1.6.6.1.1. Initial vote on textual signatures</h5>
+<h6 id="166111-participants">1.6.6.1.1.1. Participants</h6>
+<ul>
+<li>Client: Corporate communications, marketing, client management, project coordinator</li>
+<li>Service provider: mail product management, mail operations management or mail architecture</li>
+</ul>
+<h6 id="166112-agenda-and-goals">1.6.6.1.1.2. Agenda and goals</h6>
+<ul>
+<li>Client: Presentation of own wishes for textual signatures</li>
+<li>Service provider: Brief description of the basic options for textual signatures, advantages and disadvantages of the different approaches, reasons for deciding on the recommended product.</li>
+<li>Comparison of customer wishes with the technical and organisational possibilities</li>
+<li>Live demonstration of the product taking into account the customer's wishes</li>
+<li>Determining the next steps</li>
+</ul>
+<h6 id="166113-duration">1.6.6.1.1.3. Duration</h6>
+<p>4 hours</p>
+<h5 id="16612-training-for-template-administrators">1.6.6.1.2. Training for template administrators</h5>
+<h6 id="166121-participants">1.6.6.1.2.1. Participants</h6>
+<ul>
+<li>Client: Template administrator (corporate communications, marketing, analyst), optional client management, coordinator of the project.</li>
+<li>Service provider: mail product management, mail operations management or mail architecture</li>
+</ul>
+<h6 id="166122-agenda-and-goals">1.6.6.1.2.2. Agenda and goals</h6>
+<ul>
+<li>Summary of the previous meeting &quot;Initial agreement on textual signatures&quot;, with a focus on desired and realisable functions</li>
+<li>Presentation of the structure of the template directories, with a focus on</li>
+<li>Naming conventions</li>
+<li>Application order (general, group-specific, postbox-specific, alphabetical in each group)</li>
+<li>Setting default signatures for new emails and for replies and forwards</li>
+<li>Definition of absence texts for internal and external recipients.</li>
+<li>Determination of the temporal validity of templates</li>
+<li>Variables and user photos in templates</li>
+<li>Differences DOCX and HTML format</li>
+<li>Options for integrating a disclaimer</li>
+<li>Joint development of initial templates based on existing templates and customer requirements</li>
+<li>Live demonstration on a standard client with a test user and test mailboxes of the customer (see requirements)</li>
+</ul>
+<h6 id="166123-duration">1.6.6.1.2.3. Duration</h6>
+<p>4 hours</p>
+<h6 id="166124-prerequisites">1.6.6.1.2.4. Prerequisites</h6>
+<ul>
+<li>The client provides a standard client with Outlook and Word.</li>
+<li>The screen content of the client must be able to be projected by a beamer or displayed on an appropriately large monitor for joint work.</li>
+<li>The client provides a test user. This test user must be registered on the standard client.
+<ul>
+<li>be allowed to download script files from the Internet (<a href="http://github.com">github.com</a>) once (alternatively, the client can provide a BitLocker-encrypted USB stick for data transfer).</li>
+<li>be allowed to run unsigned PowerShell scripts in Full Language Mode</li>
+<li>have a mailbox</li>
+<li>Have full access to various test mailboxes (personal mailboxes or group mailboxes) which, if possible, are directly or indirectly members of various groups or distribution lists. For full access, the user can be appropriately authorised to the other mailboxes, or the user name and password of the additional mailboxes are known.</li>
+</ul>
+</li>
+</ul>
+<h5 id="16613-client-management-training">1.6.6.1.3. Client management training</h5>
+<h6 id="166131-participants">1.6.6.1.3.1. Participants</h6>
+<ul>
+<li>Client: Client management, optionally an administrator of the Active Directory, optionally an administrator of the file server and/or SharePoint server, optionally corporate communications and marketing, project coordinator</li>
+<li>Service provider: mail product management, mail operations management or mail architecture, a representative of the client team at corresponding clients</li>
+</ul>
+<h6 id="166132-agenda-and-goals">1.6.6.1.3.2. Agenda and goals</h6>
+<ul>
+<li>Summary of the previous meeting &quot;Initial agreement on textual signatures&quot;, with a focus on desired and realisable functions</li>
+<li>Presentation of the possibilities with a focus on</li>
+<li>Basic procedure of the script</li>
+<li>Client system requirements (Office, PowerShell, AppLocker, digital signature of the script, network ports)</li>
+<li>System requirements server (storage of templates)</li>
+<li>Possibilities for integrating the product (logon script, scheduled task, desktop shortcut)</li>
+<li>Parameterisation of the script, among other things:</li>
+<li>Announcement of the template folders</li>
+<li>Consider Outlook on the Web?</li>
+<li>Take absence messages into account?</li>
+<li>Which trusts to consider?</li>
+<li>How to define additional variables?</li>
+<li>Allow user-created signatures?</li>
+<li>Store signatures on an additional path?</li>
+<li>Joint tests based on templates and customer requirements previously developed by the customer</li>
+<li>Determination of next steps</li>
+</ul>
+<h6 id="166133-duration">1.6.6.1.3.3. Duration</h6>
+<p>4 hours</p>
+<h6 id="166134-prerequisites">1.6.6.1.3.4. Prerequisites:</h6>
+<ul>
+<li>The client provides a standard client with Outlook and Word.</li>
+<li>The screen content of the client must be able to be projected via a beamer or displayed on an appropriately large monitor for joint work.</li>
+<li>The client provides a test user. This test user must be registered on the standard client.
+<ul>
+<li>be allowed to download script files from the Internet (<a href="http://github.com">github.com</a>) once (alternatively, the client can provide a BitLocker-encrypted USB stick for data transfer).</li>
+<li>be allowed to run unsigned PowerShell scripts in Full Language Mode</li>
+<li>have a mailbox</li>
+<li>Have full access to various test mailboxes (personal mailboxes or group mailboxes) which, if possible, are directly or indirectly members of various groups or distribution lists. For full access, the user can be appropriately authorised to the other mailboxes, or the user name and password of the additional mailboxes are known.</li>
+</ul>
+</li>
+<li>The Client shall provide at least one central SMB file or WebDAV share for the storage of the templates.</li>
+<li>The client provides a central SMB file share for the storage of the script and its components.</li>
+</ul>
+<h4 id="1662-tests-pilot-operation-rollout">1.6.6.2. Tests, pilot operation, rollout</h4>
+<p>The planning and coordination of tests, pilot operation and rollout is carried out by the client's project manager.<br>
+The concrete technical implementation is carried out by the client. If, in addition to mail, the client is also serviced by service providers, the client team will assist with the integration of the script (logon script, scheduled task, desktop shortcut).<br>
+In the event of fundamental technical problems, Mail Product Management provides support in researching the causes, works out proposals for solutions and, if necessary, establishes contact with the manufacturer of the product.<br>
+The creation and maintenance of templates is the responsibility of the client.<br>
+For the procedure for adjustments to the code or the release of new functions, see chapter &quot;Ongoing operation&quot;.</p>
+<h3 id="167-running-operation">1.6.7. Running operation</h3>
+<h4 id="1671-create-and-maintain-templates">1.6.7.1. Create and maintain templates</h4>
+<p>The creation and maintenance of templates is the responsibility of the client.<br>
+Mail product management is available to advise on feasibility and impact issues.<br>
+Create and maintain storage shares for templates and script components<br>
+The creation and maintenance of storage shares for templates and script components is the responsibility of the client.<br>
+Mail product management is available to advise on feasibility and impact issues.</p>
+<h4 id="1672-setting-and-maintaining-ad-attributes">1.6.7.2. Setting and maintaining AD attributes</h4>
+<p>Setting and maintaining AD attributes related to textual signatures (e.g. attributes for variables, user photos, group memberships) is the responsibility of the client.<br>
+Mail product management is available to advise on feasibility and impact issues.</p>
+<h4 id="1673-configuration-adjustments">1.6.7.3. Configuration adjustments</h4>
+<p>Configuration adjustments explicitly provided for by the developers of the script are supported at all times.<br>
+Mail product management is available to advise on questions regarding the feasibility and impact of desired adjustments.<br>
+The planning and coordination of tests, pilot operation and rollout in connection with configuration adjustments is carried out by the customer, as is the concrete technical implementation.<br>
+If, in addition to mail, the client is also managed by the service provider, the client team will assist with the integration of the script (logon script, scheduled task, desktop shortcut).</p>
+<h4 id="1674-problems-and-questions-during-operation">1.6.7.4. Problems and questions during operation</h4>
+<p>In the event of fundamental technical problems, Mail Product Management provides support in researching the causes, works out proposals for solutions and, if necessary, establishes contact with the manufacturer of the product.<br>
+For general questions about the product and its application possibilities, the Mail product management is also available.</p>
+<h4 id="1675-supported-versions">1.6.7.5. Supported versions</h4>
+<p>The version numbers of the product follow the specifications of Semantic Versioning and are therefore structured according to the format &quot;Major.Minor.Patch&quot;.</p>
+<ul>
+<li>&quot;Major&quot; is raised when compatibility with previous versions is no longer given.</li>
+<li>&quot;Minor&quot; is increased when new functions compatible with previous versions are introduced.</li>
+<li>&quot;Patch&quot; is raised if the changes include only bug fixes compatible with previous versions.</li>
+<li>In addition, pre-release identifiers and build metadata are available as attachments to the &quot;Major.Minor.Patch&quot; format, e.g. &quot;-Beta1&quot;.<br>
+Versions supported by the service provider:</li>
+<li>The highest version of the product released by the service provider, regardless of its release date.</li>
+<li>All versions of the product in the highest major branch released by the service provider, provided they are not older than three months.</li>
+<li>All versions of the product in the second most recent major branch released by the service provider, provided they are not older than three months.</li>
+</ul>
+<p>Customers therefore have three months after the release of a new version to switch to this version before the service provider support for previously released versions expires.<br>
+The release of major branches by the service provider ensures that no more than one changeover in the major area has to take place in the 3-month period. This protects both customers and service providers from gross errors in product development that force incompatibilities and thus new major versions in quick succession.</p>
+<h4 id="1676-new-versions">1.6.7.6. New versions</h4>
+<p>When new versions of the product are released, Mail Product Management informs contacts defined by the customer about the changes associated with this version, possible effects on the existing configuration and indicates upgrade options.<br>
+The planning and coordination of the introduction of the new version is carried out by the contact person at the customer.<br>
+The concrete technical implementation is also carried out by the client. If, in addition to mail, the client is also serviced by service providers, the client team provides support with the integration of the script (logon script, scheduled task, desktop shortcut).<br>
+In the event of fundamental technical problems, Mail Product Management provides support in researching the causes, works out proposals for solutions and, if necessary, establishes contact with the manufacturer of the product.</p>
+<h4 id="1677-adjustments-to-the-code-of-the-product">1.6.7.7. Adjustments to the code of the product</h4>
+<p>If adaptations to the code of the product are desired, the associated expenses will be estimated and charged separately after commissioning.<br>
+In line with the open source spirit of the product, code adaptations are submitted to the product's developers as suggestions for improvement.<br>
+To ensure the maintainability of the product, the service provider can only support code that is officially included in the product. Each customer is free to adapt the code of the product itself, but in this case the service provider can no longer offer support. For details, see &quot;Supported versions&quot;.</p>
+<h1 id="2-german-deutsch">2. German (Deutsch)</h1>
+<h2 id="21-überblick">2.1. Überblick</h2>
+<p>Textuelle Signaturen sind nicht nur ein wesentlicher Aspekt der Corporate Identity, sondern gemeinsam mit dem Disclaimer im Regelfall eine rechtliche Notwendigkeit.<br>
+Dieses Dokument bietet einen generellen Überblick über Signaturen, Anleitungen für Endbenutzer, sowie Details zur vom Service-Provider empfohlenen Lösung zur zentralen Verwaltung und automatisierten Verteilung von textuellen Signaturen.<br>
+Das Wort &quot;Signatur&quot; ist in diesem Dokument immer als textuelle Signatur zu verstehen und nicht mit einer digitalen Signatur, die der Verschlüsselung von E-Mails und/oder der Legitimierung des Absenders dient, zu verwechseln.</p>
+<h2 id="22-manuelle-wartung-von-signaturen">2.2. Manuelle Wartung von Signaturen</h2>
+<p>Bei der manuellen Wartung wird dem Benutzer z. B. über das Intranet eine Vorlage für die textuelle Signatur zur Verfügung gestellt.<br>
+Jeder Benutzer richtet sich die Signatur selbst ein. Je nach technischer Konfiguration des Clients wandern Signaturen bei einem Wechsel des verwendeten Computers mit oder sind neu einzurichten.<br>
+Eine zentrale Wartung gibt es nicht.<br>
+Zum Zeitpunkt der Erstellung dieses Dokuments nutzen die meisten Kunden des Service-Providers diese Variante, während gleichzeitig praktisch alle Bestands- und auch Neukunden ihren Wunsch nach einer zentral gesteuerten Lösung bekräftigt haben.</p>
+<h3 id="221-signaturen-in-outlook">2.2.1. Signaturen in Outlook</h3>
+<p>In Outlook können pro Postfach praktisch beliebig viele Signaturen erstellt werden. Dies ist beispielsweise praktisch, um zwischen internen und externen E-Mails, oder E-Mails in verschiedenen Sprachen zu unterscheiden.<br>
+Pro Postfach kann darüber hinaus eine Standard-Signatur für neue E-Mails und eine für Antworten festgelegt werden.</p>
+<h3 id="222-signatur-in-outlook-im-web">2.2.2. Signatur in Outlook im Web</h3>
+<p>Falls Sie auch mit Outlook im Web arbeiten, müssen Sie sich unabhängig von Ihrer Signatur am Client Ihre Signatur in Outlook im Web einrichten:</p>
+<ol>
+<li>Melden Sie sich in einem Webbrowser auf <a href="https://mail.example.com">https://mail.example.com</a> an. Geben Sie Ihren Benutzernamen und Ihr Kennwort ein, und klicken Sie dann auf Anmelden.</li>
+<li>Wählen Sie auf der Navigationsleiste Einstellungen &gt; Optionen aus.</li>
+<li>Wählen Sie unter Optionen den Befehl Einstellungen &gt; E-Mail aus.</li>
+<li>Geben Sie im Textfeld unter E-Mail-Signatur die Signatur ein, die Sie verwenden möchten. Verwenden Sie die Minisymbolleiste &quot;Formatieren&quot;, um das Aussehen der Signatur zu ändern.</li>
+<li>Wenn Ihre Signatur automatisch am Ende aller ausgehenden Nachrichten angezeigt werden soll, und zwar auch in Antworten und weitergeleiteten Nachrichten, aktivieren Sie Signatur automatisch in meine gesendeten Nachrichten einschließen. Wenn Sie diese Option nicht aktivieren, können Sie Ihre Signatur jeder Nachricht manuell hinzufügen.</li>
+<li>Klicken Sie auf Speichern.</li>
+</ol>
+<p>In Outlook im Web ist nur eine einzige Signatur möglich.</p>
+<h2 id="23-automatische-wartung-von-signaturen">2.3. Automatische Wartung von Signaturen</h2>
+<p>Bei einigen Kunden des Service-Providers werden Signaturen für persönliche Postfächer oder Gruppenpostfächer automatisch erstellt und zugehörige Einstellungen konfiguriert. Für Details wenden Sie sich bitte an Ihre lokale IT.<br>
+Der Service-Provider empfiehlt eine kostenlose scriptbasierte Lösung mit zentraler Verwaltung und erweitertem clientseitigen Funktionsumfang, die mit Unterstützung des Service-Providers von den Kunden selbst betrieben und gewartet werden kann. Details siehe „Empfehlung: Set-OutlookSignatures.ps1“.</p>
+<h3 id="231-serverbasierte-signaturen">2.3.1. Serverbasierte Signaturen</h3>
+<p>Der größte Vorteil einer serverbasierten Lösung ist, dass an Hand eines definierten Regelsets jedes E-Mail erfasst wird, ganz gleich, von welcher Applikation oder welchem Gerät es verschickt wurde.<br>
+Da die Signatur erst am Server angehängt wird, sieht der Benutzer während der Erstellung eines E-Mails nicht, welche Signatur verwendet wird.<br>
+Nachdem die Signatur am Server angehängt wurde, muss das nun veränderte E-Mail vom Client neu heruntergeladen werden, damit es im Ordner „Gesendete Elemente“ korrekt angezeigt wird. Das erzeugt zusätzlichen Netzwerkverkehr.<br>
+Wird eine Nachricht schon bei Erstellung digital signiert oder verschlüsselt, kann die textuelle Signatur serverseitig nicht hinzugefügt werden, ohne die digitale Signatur und die Verschlüsselung zu brechen. Alternativ wird die Nachricht so angepasst, dass der Inhalt nur aus der textuellen Signatur besteht und unveränderte ursprüngliche Nachricht als Anhang mitgeschickt wird.<br>
+Bei der Evaluierung von serverbasierten Produkten sollten unter anderem folgende Aspekte geprüft werden:</p>
+<ul>
+<li>Kann das Produkt mit der Anzahl der AD- und Mail-Objekte in der Umgebung ohne reproduzierbare Abstürze oder unvollständige Suchergebnissen umgehen?</li>
+<li>Muss das Produkt direkt auf den Mail-Servern installiert werden? Das bedeutet zusätzliche Abhängigkeiten und Fehlerquellen, und kann sich negativ auf Verfügbarkeit und Zuverlässigkeit des AD- und Mail-Systems auswirken.</li>
+<li>Kann die Administration der Produkte ohne Vergabe erheblicher Rechte direkt auf den Mail-Servern delegiert werden? Können Kunden separat voneinander berechtigt werden?</li>
+<li>Können Variablen in den Signaturen nur mit Werten aus dem Active Directory befüllt werden, in dem sich auch Exchange befindet, oder auch mit Werten aus dem Active Directory, in dem sich bei der Verwendung von Linked Mailboxen die tatsächlich berechtigten Benutzer befinden?</li>
+<li>Wie hoch sind die Anschaffungs- und Wartungskosten? Liegen diese über der Ausschreibungsgrenze?</li>
+</ul>
+<h3 id="232-clientbasierte-signaturen">2.3.2. Clientbasierte Signaturen</h3>
+<p>Bei clientbasierten Lösungen werden auf einer zentralen Ablage Vorlagen und Anwendungsregeln für textuelle Signaturen definiert. Eine Komponente am Client prüft bei automatisiertem oder manuellen Aufruf die zentrale Konfiguration und wendet sie lokal an.<br>
+Clientbasierte Lösungen sind im Gegensatz zu serverbasierten Lösungen an bestimmte E-Mail-Clients und bestimmte Betriebssysteme gebunden.<br>
+Der Benutzer sieht die Signatur bereits während der Erstellung des E-Mails und kann diese gegebenenfalls anpassen.<br>
+Die Verschlüsselung und das digitale Signieren von Nachrichten stellen weder client- noch serverseitig ein Problem dar.<br>
+Bei der Evaluierung von serverbasierten Produkten sollten unter anderem folgende Aspekte geprüft werden:</p>
+<ul>
+<li>Kann das Produkt mit der Anzahl der AD- und Mail-Objekte in der Umgebung ohne reproduzierbare Abstürze oder unvollständige Suchergebnissen umgehen?</li>
+<li>Können Variablen in den Signaturen nur mit Werten aus dem Active Directory befüllt werden, in dem sich auch Exchange befindet, oder auch mit Werten aus dem Active Directory, in dem sich bei der Verwendung von Linked Mailboxen die tatsächlich berechtigten Benutzer befinden?</li>
+<li>Kann das Produkt mit Gruppenpostfächer und zusätzlich verbundenen Postfächern umgehen?</li>
+<li>Kann die Administration der Produkte delegiert werden? Können Kunden separat voneinander berechtigt werden?</li>
+<li>Wie hoch sind die Anschaffungs- und Wartungskosten? Liegen diese über der Ausschreibungsgrenze?</li>
+</ul>
+<p>Auf Grund der Kosten und der erfüllten Anforderungen an Funktionalität und Wartbarkeit empfiehlt der Service-Provider die Verwendung des Open-Source-Produkts Set-OutlookSignatures.ps1 und bietet seinen Kunden Unterstützung bei Einführung und Betrieb an.</p>
+<h2 id="24-abgleich-von-signaturen-zwischen-verschiedenen-geräten">2.4. Abgleich von Signaturen zwischen verschiedenen Geräten</h2>
+<p>Die Signaturen in Outlook, Outlook im Web und anderen Clients (z. B. in Smartphone-Apps) sind nicht synchronisiert und müssen daher separat eingerichtet werden.<br>
+Je nach Client-Konfiguration wandern Outlook-Signaturen mit dem Benutzer zwischen verschiedenen Windows-Geräten mit oder nicht, für Details wenden Sie sich bitte an Ihre lokale IT.<br>
+Das vom Service-Provider empfohlene clientbasierte Werkzeug kann Signaturen sowohl in Outlook als auch in Outlook im Web setzen und bietet dem Benutzer darüber hinaus eine einfache Möglichkeit zur Übernahme bestehender Signaturen in weitere E-Mail-Clients an.</p>
+<h2 id="25-empfehlung-set-outlooksignaturesps1">2.5. Empfehlung: Set-OutlookSignatures.ps1</h2>
+<p>Der Service-Provider empfiehlt nach einer Erhebung der Kundenanforderungen und Tests mehrerer server- und clientbasierten Produkte die kostenlose Open-Source-Software Set-OutlookSignatures.ps1.<br>
+Dieses Dokument bietet einen Überblick über Funktionsumfang und Administration der empfohlenen Lösung, Unterstützung des Service-Providers bei Einführung und Betrieb, sowie damit verbundene Aufwände.</p>
+<h3 id="251-funktionsumfang">2.5.1. Funktionsumfang</h3>
+<h4 id="2511-allgemeine-beschreibung-lizenzmodell">2.5.1.1. Allgemeine Beschreibung, Lizenzmodell</h4>
+<p>Set-OutlookSignatures.ps1 (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures">https://github.com/GruberMarkus/Set-OutlookSignatures</a>) ist ein kostenloses Open-Source-Produkt.<br>
+Das Produkt dient der zentralen Verwaltung und lokalen Verteilung textueller Signaturen und Abwesenheits-Nachrichten auf Clients. Als Zielplattform wird dabei Outlook auf Windows unterstützt.<br>
+Durch die Verwendung der MIT-Lizenz gibt es auch bei kommerzieller Nutzung praktisch keine Einschränkungen in Bezug auf Nutzung oder Veränderung des bestehenden Codes.<br>
+Das Script ist in PowerShell geschrieben. PowerShell ist seit Windows 7 fixer Bestandteil von Windows, wird von Microsoft aktiv weiterentwickelt und ist mittlerweile selbst Open Source. PowerShell ist darauf ausgelegt, den Code möglichst einfach lesen und erstellen zu können.<br>
+Da praktisch jedes Microsoft-Produkt über PowerShell administriert wird (selbst viele grafische Oberflächen setzen im Hintergrund PowerShell-Befehle ab), gibt es beim Service-Provider umfangreiches Können und Wissen zu dieser Sprache, auch in den Mail- und Client-Produktteams.<br>
+Auch die Einbindung von PowerShell-Skripten in den mit Hilfe von AppLocker und anderen Mechanismen abgesicherten Client ist durch etablierte Maßnahmen (wie z. B. dem digitalen Signieren von PowerShell-Skripten) technisch und organisatorisch möglich.</p>
+<h4 id="2512-funktionen">2.5.1.2. Funktionen</h4>
+<p>Signaturen und Abwesenheits-Nachrichten können</p>
+<ul>
+<li>aus Vorlagen im DOCX- oder HTML-Dateiformat erzeugt werden</li>
+<li>mit einer breiten Palette von Variablen, einschließlich Fotos, aus Active Directory und anderen Quellen angepasst werden</li>
+<li>auf alle primären Postfächer (inkl. Gruppenpostfächer), bestimmte Postfach-Gruppen oder bestimmte E-Mail-Adressen in allen Outlook-Profilen angewandt werden</li>
+<li>Zeitbereichen zugewiesen werden, innerhalb derer sie gültig sind</li>
+<li>als Standardsignatur für neue Mails oder für Antworten und Weiterleitungen (nur Signaturen) festgelegt werden</li>
+<li>als Abwesenheits-Nachricht für interne oder externe Empfänger definiert werden (nur OOF-Nachrichten)</li>
+<li>in Outlook Web für den aktuell angemeldeten Benutzer gesetzt werden</li>
+<li>nur zentral verwaltet werden oder parallel mit vom Benutzer erstellten Signaturen existieren (nur Signaturen)</li>
+<li>in einen alternativen Pfad kopiert werden, um den Zugriff auf mobilen Geräten zu erleichtern, die nicht direkt von diesem Skript unterstützt werden (nur Signaturen)</li>
+</ul>
+<p>Beispielvorlagen für Signaturen und Abwesenheits-Nachrichten demonstrieren alle verfügbaren Funktionen und werden als .docx- und .htm-Dateien bereitgestellt.<br>
+Das Produkt ist auf große und komplexe Umgebungen ausgelegt (Exchange Resource Forest-Szenarien, über AD-Trusts hinweg, Linked Mailboxen, mehrstufige AD-Subdomänen, viele Objekte). Das Produkt ist mandantenfähig.</p>
+<h2 id="26-administration">2.6. Administration</h2>
+<h3 id="261-systemanforderungen">2.6.1. Systemanforderungen</h3>
+<h4 id="2611-client">2.6.1.1. Client</h4>
+<ul>
+<li>Outlook und Word, jeweils ab Version 2010</li>
+<li>Das Script muss im Sicherheitskontext des aktuell angemeldeten Benutzers laufen.</li>
+<li>Das PowerShell-Script muss im „Full Language Mode” ausgeführt werden. Der „Constrained Language Mode“ wird nicht unterstützt, da gewisse Funktionen wie z. B. Base64-Konvertierungen in diesem Modus nicht verfügbar sind oder sehr langsame Alternativen benötigen.</li>
+<li>Falls AppLocker oder vergleichbare Lösungen zum Einsatz kommen, muss das Script möglicherweise digital signiert werden.</li>
+<li>Netzwerkfreischaltungen:
+<ul>
+<li>Die Ports 389 (LDAP) and 3268 (Global Catalog), jeweils TCP and UDP, müssen zwischen Client und allen Domain Controllern freigeschaltet sein. Falls dies nicht der Fall ist, können signaturrelevante Informationen und Variablen nicht abgerufen werden. Das Script prüft bei jedem Lauf, ob der Zugriff möglich ist.</li>
+<li>Für den Zugriff auf den SMB-File-Share mit den Script-Komponenten werden folgende Ports benötigt: 137 UDP, 138 UDP, 139 TCP, 445 TCP (Details siehe <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)">https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)</a>).</li>
+<li>Für den Zugriff auf WebDAV-Shares (z. B. SharePoint Dokumentbibliotheken) wird Port 443 TCP benötigt.</li>
+</ul>
+</li>
+</ul>
+<h4 id="2612-server">2.6.1.2. Server</h4>
+<ul>
+<li>Ein SMB-File-Share, in den das Script und seine Komponenten abgelegt werden. Auf diesen File-Share und seine Inhalte müssen alle Benutzer lesend zugreifen können.</li>
+<li>Ein oder mehrere SMB-File-Shares oder WEBDAV-Shares (z. B. SharePoint Dokumentbibliotheken), in den die Vorlagen für Signaturen und Abwesenheitsnachrichten gespeichert und verwaltet werden.<br>
+Falls in den Vorlagen Variablen (z. B. Vorname, Nachname, Telefonnummer) genutzt werden, müssen die entsprechenden Werte im Active Directory vorhanden sein. Im Fall von Linked Mailboxes kann dabei zwischen den Attributen des aktuellen Benutzers und den Attributen des Postfachs, die sich in unterschiedlichen AD-Forests befinden, unterschieden werden.</li>
+</ul>
+<h3 id="262-ablage-des-scripts">2.6.2. Ablage des Scripts</h3>
+<p>Wie in den Systemanforderungen beschrieben, ist das Script samt seinen Komponenten auf einem SMB-File-Share abzulegen. Alternativ kann es durch einen beliebigen Mechanismus auf die Clients verteilt und von dort ausgeführt werden.<br>
+Alle Benutzer benötigen Lesezugriff auf das Script und alle seine Komponenten.<br>
+Solange diese Anforderungen erfüllt sind, kann jeder beliebige SMB-File-Share genutzt werden, beispielsweise</p>
+<ul>
+<li>der NETLOGON-Share eines Active Directory</li>
+<li>ein Share auf einem Windows-Server in beliebiger Architektur (einzelner Server oder Cluster, klassischer Share oder DFS in allen Variationen)</li>
+<li>ein Share auf einem Windows-Client</li>
+<li>ein Share auf einem beliebigen Nicht-Windows-System, z. B. über SAMBA<br>
+Solange alle Kunden die gleiche Version des Scripts einsetzen und dieses nur über Parameter konfigurieren, genügt eine zentrale Ablage für die Script-Komponenten.<br>
+Für maximale Leistung und Flexibilität wird empfohlen, dass jeder Kunde das Script in einem eigenen SMB-File-Share ablegt und diesen gegebenenfalls über Standorte hinweg auf verschiedene Server repliziert.</li>
+</ul>
+<h3 id="263-ablage-der-vorlagen">2.6.3. Ablage der Vorlagen</h3>
+<p>Wie in den Systemanforderungen beschrieben, können Vorlagen für Signaturen und Abwesenheitsnachrichten analog zum Script selbst auf SMB-File-Shares oder WebDAV-Shares (z. B. SharePoint Dokumentbibliotheken) abgelegt werden.<br>
+SharePoint-Dokumentbibliotheken haben den Vorteil der optionalen Versionierung von Dateien, so dass im Fehlerfall durch die Vorlagen-Verwalter rasch eine frühere Version einer Vorlage wiederhergestellt werden kann.<br>
+Es wird pro Kunde zumindest ein Share mit separaten Unterverzeichnissen für Signatur- und Abwesenheits-Vorlagen empfohlen.<br>
+Benutzer benötigen lesenden Zugriff auf alle Vorlagen.<br>
+Durch simple Vergabe von Schreibrechten auf den gesamten Vorlagen-Ordner oder auf einzelne Dateien darin wird die Erstellung und Verwaltung von Signatur- und Abwesenheits-Vorlagen an eine definierte Gruppe von Personen delegiert. Üblicherweise werden die Vorlagen von den Abteilungen Unternehmenskommunikation und Marketing definiert, erstellt und gewartet.<br>
+Für maximale Leistung und Flexibilität wird empfohlen, dass jeder Kunde das Script in einem eigenen SMB-File-Share ablegt und diesen gegebenenfalls über Standorte hinweg auf verschiedene Server repliziert.</p>
+<h3 id="264-verwaltung-der-vorlagen">2.6.4. Verwaltung der Vorlagen</h3>
+<p>Durch simple Vergabe von Schreibrechten auf den Vorlagen-Ordner oder auf einzelne Dateien darin wird die Erstellung und Verwaltung von Signatur- und Abwesenheits-Vorlagen an eine definierte Gruppe von Personen delegiert. Üblicherweise werden die Vorlagen von den Abteilungen Unternehmenskommunikation und Marketing definiert, erstellt und gewartet.<br>
+Das Script kann Vorlagen im DOCX- oder im HTML-Format verarbeiten. Für den Anfang wird die Verwendung des DOCX-Formats empfohlen; die Gründe für diese Empfehlung und die Vor- und Nachteile des jeweiligen Formats werden in der Datei „readme.html“ des Scripts beschrieben.<br>
+Die mit dem Script mitgelieferte Datei „readme.html“ bietet eine Übersicht, wie Vorlagen zu benennen sind, damit sie</p>
+<ul>
+<li>nur für bestimmte Gruppen oder Postfächer gelten</li>
+<li>als Standard-Signatur für neue Mails oder Antworten und Weiterleitungen gesetzt werden</li>
+<li>als interne oder externe Abwesenheits-Nachricht gesetzt werden<br>
+In „readme.html“ und den Beispiel-Vorlagen werden zudem die ersetzbaren Variablen, die Erweiterung um benutzerdefinierte Variablen und der Umgang mit Fotos aus dem Active Directory beschrieben.<br>
+In der mitgelieferten Beispiel-Datei „Test all signature replacement variables.docx“ sind alle Variablen enthalten.</li>
+</ul>
+<h3 id="265-ausführen-des-scripts">2.6.5. Ausführen des Scripts</h3>
+<p>Das Script kann über einen beliebigen Mechanismus ausgeführt werden, beispielsweise</p>
+<ul>
+<li>bei Anmeldung des Benutzers als Teil des Logon-Scripts oder als eigenes Script</li>
+<li>über die Aufgabenplanung zu fixen Zeiten oder bei bestimmten Ereignissen</li>
+<li>durch den Benutzer selbst, z. B. über eine Verknüpfung auf dem Desktop</li>
+<li>durch ein Werkzeug zur Client-Verwaltung<br>
+Da es sich bei Set-OutlookSignatures.ps1 um ein reines PowerShell-Script handelt, erfolgt der Aufruf wie bei jedem anderen Script dieses Dateityps:</li>
+</ul>
+<pre><code><code><div>powershell.exe &lt;PowerShell-Parameter&gt; -file &lt;Pfad zu Set-OutlookSignatures.ps1&gt; &lt;Script-Parameter&gt;  
+</div></code></code></pre>
+<h4 id="2651-parameter">2.6.5.1. Parameter</h4>
+<p>Das Verhalten des Scripts kann über Parameter gesteuert werden. Besonders relevant sind dabei SignatureTemplatePath und OOFTemplatePath, über die der Pfad zu den Signatur- und Abwesenheits-Vorlagen angegeben wird.<br>
+Folgend ein Beispiel, bei dem die Signatur-Vorlagen auf einem SMB-File-Share und die AbwesenheService-Providerorlagen auf einem WebDAV-Share liegen:</p>
+<pre><code><code><div>powershell.exe -file '\\example.com\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' –SignatureTemplatePath '\\example.com\DFS-Share\Common\Templates\Signatures Outlook' –OOFTemplatePath 'https://webdav.example.com/CorporateCommunications/Templates/Out of Office templates'  
+</div></code></code></pre>
+<p>Zum Zeitpunkt der Erstellung dieses Dokuments waren noch weitere Parameter verfügbar. Folgend eine kurze Übersicht der Möglichkeit, für Details sei auf die Dokumentation des Scripts in der Datei „readme.html“ verwiesen:</p>
+<ul>
+<li>SignatureTemplatePath: Pfad zu den Signatur-Vorlagen. Kann ein SMB- oder WebDAV-Share sein.</li>
+<li>ReplacementVariableConfigFile: Pfad zur Datei, in der vom Standard abweichende Variablen definiert werden. Kann ein SMB- oder WebDAV-Share sein.</li>
+<li>DomainsToCheckForGroups: Standardmäßig werden alle Trusts nach Postfachinformationen abgefragt. Über diesen Parameter können bestimmte Domains entfernt und nicht-getrustete Domains hinzugefügt werden.</li>
+<li>DeleteUserCreatedSignatures: Sollen vom Benutzer selbst erstelle Signaturen gelöscht werden? Standardmäßig erfolgt dies nicht.</li>
+<li>SetCurrentUserOutlookWebSignature: Standardmäßig wird für den angemeldeten Benutzer eine Signatur in Outlook im Web gesetzt. Über diesen Parameter kann das verhindert werden.</li>
+<li>SetCurrentUserOOFMessage: Standardmäßig wird der Text der Abwesenheits-Nachrichten gesetzt. Über diesen Parameter kann dieses Verhalten geändert werden.</li>
+<li>OOFTemplatePath: Pfad zu den Abwesenheits-Vorlagen. Kann ein SMB- oder WebDAV-Share sein.</li>
+<li>AdditionalSignaturePath: Pfad zu einem zusätzlichen Share, in den alle Signaturen kopiert werden sollen, z. B. für den Zugriff von einem mobilen Gerät aus und zur vereinfachten Konfiguration nicht vom Script unterstützter Clients. Kann ein SMB- oder WebDAV-Share sein.</li>
+<li>AdditionalSignaturePathFolder: Zu erstellende Ordnerstruktur unter AdditionalSignaturePath.</li>
+<li>UseHtmTemplates: Standardmäßig werden Vorlagen im DOCX-Format verarbeitet. Über diesen Schalter kann auf HTML (.htm) umgeschaltet werden.</li>
+</ul>
+<h4 id="2652-laufzeit-und-sichtbarkeit-des-scripts">2.6.5.2. Laufzeit und Sichtbarkeit des Scripts</h4>
+<p>Das Script ist auf schnelle Durchlaufzeit und minimale Netzwerkbelastung ausgelegt, die Laufzeit des Scripts hängt dennoch von vielen Parametern ab:</p>
+<ul>
+<li>allgemeine Geschwindigkeit des Clients (CPU, RAM, HDD)</li>
+<li>Anzahl der in Outlook konfigurierten Postfächer</li>
+<li>Anzahl der Trusted Domains</li>
+<li>Reaktionszeit der Domain Controller und File Server</li>
+<li>Reaktionszeit der Exchange-Server (Setzen von Signaturen in Outlook Web, Abwesenheits-Benachrichtigungen)</li>
+<li>Anzahl der Vorlagen und Komplexität der Variablen darin (z. B. Fotos)</li>
+</ul>
+<p>Unter folgenden Rahmenbedingungen wurde eine reproduzierbare Laufzeit von ca. 30 Sekunden gemessen:</p>
+<ul>
+<li>Standard-Client</li>
+<li>Über VPN mit dem Firmennetzwerk verbunden</li>
+<li>4 Postfächer</li>
+<li>Abfrage aller per Trust verbundenen Domains</li>
+<li>9 zu verarbeitende Signatur-Vorlagen, alle mit Variablen und Grafiken (aber ohne Benutzerfotos), teilweise auf Gruppen und Mail-Adressen eingeschränkt</li>
+<li>8 zu verarbeitende Abwesenheits-Vorlagen, alle mit Variablen und Grafiken (aber ohne Benutzerfotos), teilweise auf Gruppen und Mail-Adressen eingeschränkt</li>
+<li>Setzen der Signatur in Outlook im Web</li>
+<li>Kein Kopieren der Signaturen auf einen zusätzlichen Netzwerkpfad</li>
+</ul>
+<p>Da das Script keine Benutzerinteraktion erfordert, kann es über die üblichen Mechanismen minimiert oder versteckt ausgeführt werden.</p>
+<h4 id="2653-nutzung-von-outlook-und-word-während-der-laufzeit">2.6.5.3. Nutzung von Outlook und Word während der Laufzeit</h4>
+<p>Das Script startet Outlook nicht, alle Abfragen und Konfigurationen erfolgen über das Dateisystem und die Registry.<br>
+Outlook kann während der Ausführung des Scripts nach Belieben gestartet, verwendet oder geschlossen werden.<br>
+Sämtliche Änderungen an Signaturen und Abwesenheits-Benachrichtigungen sind für den Benutzer sofort sichtbar und verwendbar, mit einer Ausnahme: Falls sich der Name der zu verwendenden Standard-Signatur für neue E-Mails oder für Antworten und Weiterleitungen ändert, so greift diese Änderung erst beim nächsten Start von Outlook. Ändert sich nur der Inhalt, aber nicht der Name einer der Standard-Signaturen, so ist diese Änderung sofort verfügbar.<br>
+Word kann während der Ausführung des Scripts nach Belieben gestartet, verwendet oder geschlossen werden.<br>
+Das Script nutzt Word zum Ersatz von Variablen in DOCX-Vorlagen und zum Konvertieren von DOCX und HTML nach RTF und TXT. Word wird dabei als eigener unsichtbarer Prozess gestartet. Dieser Prozess kann vom Benutzer praktisch nicht beeinflusst werden und beeinflusst vom Benutzer gestartete Word-Prozesse nicht.</p>
+<h3 id="266-unterstützung-durch-den-service-provider">2.6.6. Unterstützung durch den Service-Provider</h3>
+<p>Der Service-Provider empfiehlt die Software Set-OutlookSignature.ps1 nicht nur, sondern bietet seinen Kunden auch definierte kostenlose Unterstützung an.<br>
+Darüberhinausgehende Unterstützung kann nach vorheriger Abstimmung gegen separate Verrechnung bezogen werden.<br>
+Zentrale Anlaufstelle für Fragen aller Art ist das Mail-Produktmanagement.</p>
+<h4 id="2661-beratungs--und-einführungsphase">2.6.6.1. Beratungs- und Einführungsphase</h4>
+<p>Folgende Leistungen sind mit dem Produktpreis abgedeckt:</p>
+<h5 id="26611-erstabstimmung-zu-textuellen-signaturen">2.6.6.1.1. Erstabstimmung zu textuellen Signaturen</h5>
+<h6 id="266111-teilnehmer">2.6.6.1.1.1. Teilnehmer</h6>
+<ul>
+<li>Kunde: Unternehmenskommunikation, Marketing, Clientmanagement, Koordinator des Vorhabens</li>
+<li>Service-Provider: Mail-Produktmanagement, Mail-Betriebsführung oder Mail-Architektur</li>
+</ul>
+<h6 id="266112-inhalt-und-ziele">2.6.6.1.1.2. Inhalt und Ziele</h6>
+<ul>
+<li>Kunde: Vorstellung der eigenen Wünsche zu textuellen Signaturen</li>
+<li>Service-Provider: Kurze Beschreibung zu prinzipiellen Möglichkeiten rund um textuelle Signaturen, Vor- und Nachteile der unterschiedlichen Ansätze, Gründe für die Entscheidung zum empfohlenen Produkt</li>
+<li>Abgleich der Kundenwünsche mit den technisch-organisatorischen Möglichkeiten</li>
+<li>Live-Demonstration des Produkts unter Berücksichtigung der Kundenwünsche</li>
+<li>Festlegung der nächsten Schritte</li>
+</ul>
+<h6 id="266113-dauer">2.6.6.1.1.3. Dauer</h6>
+<p>4 Stunden</p>
+<h5 id="26612-schulung-der-vorlagen-verwalter">2.6.6.1.2. Schulung der Vorlagen-Verwalter</h5>
+<h6 id="266121-teilnehmer">2.6.6.1.2.1. Teilnehmer</h6>
+<ul>
+<li>Kunde: Vorlagen-Verwalter (Unternehmenskommunikation, Marketing, Analytiker), optional Clientmanagement, Koordinator des Vorhabens</li>
+<li>Service-Provider: Mail-Produktmanagement, Mail-Betriebsführung oder Mail-Architektur</li>
+</ul>
+<h6 id="266122-inhalt-und-ziele">2.6.6.1.2.2. Inhalt und Ziele</h6>
+<ul>
+<li>Zusammenfassung des vorangegangenen Termins „Erstabstimmung zu textuellen Signaturen“, mit Fokus auf gewünschte und realisierbare Funktionen</li>
+<li>Vorstellung des Aufbaus der Vorlagen-Verzeichnisse, mit Fokus auf</li>
+<li>Namenskonventionen</li>
+<li>Anwendungsreihenfolge (allgemein, gruppenspezifisch, postfachspezifisch, in jeder Gruppe alphabetisch)</li>
+<li>Festlegung von Standard-Signaturen für neue E-Mails und für Antworten und Weiterleitungen</li>
+<li>Festlegung von Abwesenheits-Texten für interne und externe Empfänger.</li>
+<li>Festlegung der zeitlichen Gültigkeit von Vorlagen</li>
+<li>Variablen und Benutzerfotos in Vorlagen</li>
+<li>Unterschiede DOCX- und HTML-Format</li>
+<li>Möglichkeiten zur Einbindung eines Disclaimers</li>
+<li>Gemeinsame Erarbeitung erster Vorlagen auf Basis bestehender Vorlagen und Kundenanforderungen</li>
+<li>Live-Demonstration auf einem Standard-Client mit einem Testbenutzer und Testpostfächern des Kunden (siehe Voraussetzungen)</li>
+</ul>
+<h6 id="266123-dauer">2.6.6.1.2.3. Dauer</h6>
+<p>4 Stunden</p>
+<h6 id="266124-voraussetzungen">2.6.6.1.2.4. Voraussetzungen</h6>
+<ul>
+<li>Der Kunde stellt einen Standard-Client mit Outlook und Word zu Verfügung.</li>
+<li>Der Bildschirminhalt des Clients muss zur gemeinsamen Arbeit per Beamer projiziert oder auf einem entsprechend großen Monitor dargestellt werden können.</li>
+<li>Der Kunde stellt einen Testbenutzer zur Verfügung. Dieser Testbenutzer muss auf dem Standard-Client
+<ul>
+<li>einmalig Script-Dateien aus dem Internet (<a href="http://github.com">github.com</a>) herunterladen dürfen (alternativ kann der Kunde einen BitLocker-verschlüsselten USB-Stick für die Datenübertragung stellen).</li>
+<li>unsignierte PowerShell-Scripte im Full Language Mode ausführen dürfen</li>
+<li>über ein Mail-Postfach verfügen</li>
+<li>Vollzugriff auf diverse Testpostfächer (persönliche Postfächer oder Gruppenpostfächer) haben, die nach Möglichkeit direkt oder indirekt Mitglied in diversen Gruppen oder Verteilerlisten sind. Für den Vollzugriff kann der Benutzer auf die anderen Postfächer entsprechend berechtigt sein, oder Benutzername und Passwort der zusätzlichen Postfächer sind bekannt.</li>
+</ul>
+</li>
+</ul>
+<h5 id="26613-schulung-des-clientmanagements">2.6.6.1.3. Schulung des Clientmanagements</h5>
+<h6 id="266131-teilnehmer">2.6.6.1.3.1. Teilnehmer</h6>
+<ul>
+<li>Kunde: Clientmanagement, optional ein Administrator des Active Directory, optional ein Administrator des File-Servers und/oder SharePoint-Server, optional Unternehmenskommunikation und Marketing, Koordinator des Vorhabens</li>
+<li>Service-Provider: Mail-Produktmanagement, Mail-Betriebsführung oder Mail-Architektur, ein Vertreter des Client-Teams bei entsprechenden Kunden</li>
+</ul>
+<h6 id="266132-inhalt-und-ziele">2.6.6.1.3.2. Inhalt und Ziele</h6>
+<ul>
+<li>Zusammenfassung des vorangegangenen Termins „Erstabstimmung zu textuellen Signaturen“, mit Fokus auf gewünschte und realisierbare Funktionen</li>
+<li>Vorstellung der Möglichkeiten mit Fokus auf</li>
+<li>Prinzipieller Ablauf des Scripts</li>
+<li>Systemanforderungen Client (Office, PowerShell, AppLocker, digitale Signatur des Scripts, Netzwerk-Ports)</li>
+<li>Systemanforderungen Server (Ablage der Vorlagen)</li>
+<li>Möglichkeiten der Einbindung des Produkts (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung)</li>
+<li>Parametrisierung des Scripts, unter anderem:</li>
+<li>Bekanntgabe der Vorlagen-Ordner</li>
+<li>Outlook im Web berücksichtigen?</li>
+<li>Abwesenheitsnachrichten berücksichtigen?</li>
+<li>Welche Trusts berücksichtigen?</li>
+<li>Wie zusätzliche Variablen definieren?</li>
+<li>Vom Benutzer erstellte Signaturen erlauben?</li>
+<li>Signaturen auf einem zusätzlichen Pfad ablegen?</li>
+<li>Gemeinsame Tests auf Basis zuvor vom Kunden erarbeiteter Vorlagen und Kundenanforderungen</li>
+<li>Festlegung nächster Schritte</li>
+</ul>
+<h6 id="266133-dauer">2.6.6.1.3.3. Dauer</h6>
+<p>4 Stunden</p>
+<h6 id="266134-voraussetzungen">2.6.6.1.3.4. Voraussetzungen</h6>
+<ul>
+<li>Der Kunde stellt einen Standard-Client mit Outlook und Word zu Verfügung.</li>
+<li>Der Bildschirminhalt des Clients muss zur gemeinsamen Arbeit per Beamer projiziert oder auf einem entsprechend großen Monitor dargestellt werden können.</li>
+<li>Der Kunde stellt einen Testbenutzer zur Verfügung. Dieser Testbenutzer muss auf dem Standard-Client
+<ul>
+<li>einmalig Script-Dateien aus dem Internet (<a href="http://github.com">github.com</a>) herunterladen dürfen (alternativ kann der Kunde einen BitLocker-verschlüsselten USB-Stick für die Datenübertragung stellen).</li>
+<li>unsignierte PowerShell-Scripte im Full Language Mode ausführen dürfen</li>
+<li>über ein Mail-Postfach verfügen</li>
+<li>Vollzugriff auf diverse Testpostfächer (persönliche Postfächer oder Gruppenpostfächer) haben, die nach Möglichkeit direkt oder indirekt Mitglied in diversen Gruppen oder Verteilerlisten sind. Für den Vollzugriff kann der Benutzer auf die anderen Postfächer entsprechend berechtigt sein, oder Benutzername und Passwort der zusätzlichen Postfächer sind bekannt.</li>
+</ul>
+</li>
+<li>Der Kunde stellt mindestens einen zentralen SMB-File- oder WebDAV-Share für die Ablage der Vorlagen zur Verfügung.</li>
+<li>Der Kunde stellt einen zentralen SMB-File-Share für die Ablage des Scripts und seiner Komponenten zur Verfügung.</li>
+</ul>
+<h4 id="2662-tests-pilotbetrieb-rollout">2.6.6.2. Tests, Pilotbetrieb, Rollout</h4>
+<p>Die Planung und Koordination von Tests, Pilotbetrieb und Rollout erfolgt durch den Vorhabens-Verantwortlichen des Kunden.<br>
+Die konkrete technische Umsetzung erfolgt durch den Kunden. Falls zusätzlich zu Mail auch der Client durch Service-Provider betreut wird, unterstützt das Client-Team bei der Einbindung des Scripts (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung).<br>
+Bei prinzipiellen technischen Problemen unterstützt das Mail-Produktmanagement bei der Ursachenforschung, arbeitet Lösungsvorschläge aus und stellt gegebenenfalls den Kontakt zum Hersteller des Produkts her.<br>
+Die Erstellung und Wartung von Vorlagen ist Aufgabe des Kunden.<br>
+Zur Vorgehensweise bei Anpassungen am Code oder der Veröffentlichung neuer Funktionen siehe Kapitel „Laufender Betrieb“.</p>
+<h3 id="267-laufender-betrieb">2.6.7. Laufender Betrieb</h3>
+<h4 id="2671-erstellen-und-warten-von-vorlagen">2.6.7.1. Erstellen und Warten von Vorlagen</h4>
+<p>Das Erstellen und Warten von Vorlagen ist Aufgabe des Kunden.<br>
+Das Mail-Produktmanagement steht für Fragen zu Realisierbarkeit und Auswirkungen beratend zur Verfügung.<br>
+Erstellen und Warten von Ablage-Shares für Vorlagen und Script-Komponenten<br>
+Das Erstellen und Warten von Ablage-Shares für Vorlagen und Script-Komponenten ist Aufgabe des Kunden.<br>
+Das Mail-Produktmanagement steht für Fragen zu Realisierbarkeit und Auswirkungen beratend zur Verfügung.</p>
+<h4 id="2672-setzen-und-warten-von-ad-attributen">2.6.7.2. Setzen und Warten von AD-Attributen</h4>
+<p>Das Setzen und Warten von AD-Attributen, die im Zusammenhang mit textuellen Signaturen stehen (z. B. Attribute für Variablen, Benutzerfotos, Gruppenmitgliedschaften), ist Aufgabe des Kunden.<br>
+Das Mail-Produktmanagement steht für Fragen zu Realisierbarkeit und Auswirkungen beratend zur Verfügung.</p>
+<h4 id="2673-konfigurationsanpassungen">2.6.7.3. Konfigurationsanpassungen</h4>
+<p>Konfigurationsanpassungen, die von den Entwicklern des Scripts explizit vorgesehen sind, werden jederzeit unterstützt.<br>
+Das Mail-Produktmanagement steht für Fragen zur Realisierbarkeit und den Auswirkungen gewünschter Anpassungen beratend zur Verfügung.<br>
+Die Planung und Koordination von Tests, Pilotbetrieb und Rollout im Zusammenhang mit Konfigurationsanpassungen erfolgt ebenso durch den Kunden wie die konkrete technische Umsetzung.<br>
+Falls zusätzlich zu Mail auch der Client durch den Service-Provider betreut wird, unterstützt das Client-Team bei der Einbindung des Scripts (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung).</p>
+<h4 id="2674-probleme-und-fragen-im-laufenden-betrieb">2.6.7.4. Probleme und Fragen im laufenden Betrieb</h4>
+<p>Bei prinzipiellen technischen Problemen unterstützt das Mail-Produktmanagement bei der Ursachenforschung, arbeitet Lösungsvorschläge aus und stellt gegebenenfalls den Kontakt zum Hersteller des Produkts her.<br>
+Für allgemeine Fragen zum Produkt und dessen Anwendungsmöglichkeiten steht ebenfalls das Mail-Produktmanagement zur Verfügung.</p>
+<h4 id="2675-unterstützte-versionen">2.6.7.5. Unterstützte Versionen</h4>
+<p>Die Versionsnummern des Produkts folgen den Vorgaben des Semantic Versioning und sind daher nach dem Format „Major.Minor.Patch“ aufgebaut.</p>
+<ul>
+<li>„Major“ wird erhöht, wenn die Kompatibilität zu bisherigen Versionen nicht mehr gegeben ist.</li>
+<li>„Minor“ wird erhöht, wenn neue Funktionen, die zu bisherigen Versionen kompatibel sind, eingeführt werden.</li>
+<li>„Patch“ wird erhöht, wenn die Änderungen ausschließlich zu bisherigen Versionen kompatible Fehlerbehebungen umfassen.</li>
+<li>Zusätzlich sind Bezeichner für Vorveröffentlichungen und Build-Metadaten als Anhänge zum „Major.Minor.Patch“-Format verfügbar, z. B. „-Beta1“.<br>
+Vom Service-Provider unterstützte Versionen:</li>
+<li>Die höchste vom Service-Provider freigegebene Version des Produkts, unabhängig von deren Veröffentlichungsdatum.</li>
+<li>Alle Versionen des Produkts im höchsten von der Service-Provider freigegebenen Major-Zweig, sofern diese nicht älter als drei Monate sind.</li>
+<li>Alle Versionen des Produkts im zweitaktuellsten von der Service-Provider freigegebenen Major-Zweig, sofern diese nicht älter als drei Monate sind.</li>
+</ul>
+<p>Kunden haben nach Freigabe einer neuen Version also drei Monate Zeit, auf diese Version umzusteigen, bevor der Service-Provider-Support für davor freigegebene Versionen erlischt.<br>
+Die Freigabe von Major-Zweigen durch den Service-Provider stellt sicher, dass im 3-Monats-Zeitraum nicht mehr als eine Umstellung im Major-Bereich erfolgen muss. Dies schützt sowohl Kunden als auch Service-Provider vor groben Fehlern in der Produktentwicklung, die in rascher Folge Inkompatibilitäten und damit neue Major-Versionen erzwingen.</p>
+<h4 id="2676-neue-versionen">2.6.7.6. Neue Versionen</h4>
+<p>Wenn neue Versionen des Produkts veröffentlicht werden, informiert das Mail-Produktmanagement vom Kunden definierte Ansprechpartner über die mit dieser Version verbundenen Änderungen, mögliche Auswirkungen auf die bestehende Konfiguration und zeigt Aktualisierungsmöglichkeiten auf.<br>
+Die Planung und Koordination der Einführung der neuen Version erfolgt durch den Ansprechpartner beim Kunden.<br>
+Die konkrete technische Umsetzung erfolgt ebenfalls durch den Kunden. Falls zusätzlich zu Mail auch der Client durch Service-Provider betreut wird, unterstützt das Client-Team bei der Einbindung des Scripts (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung).<br>
+Bei prinzipiellen technischen Problemen unterstützt das Mail-Produktmanagement bei der Ursachenforschung, arbeitet Lösungsvorschläge aus und stellt gegebenenfalls den Kontakt zum Hersteller des Produkts her.</p>
+<h4 id="2677-anpassungen-am-code-des-produkts">2.6.7.7. Anpassungen am Code des Produkts</h4>
+<p>Falls Anpassungen am Code des Produkts gewünscht werden, werden die damit verbundenen Aufwände geschätzt und nach Beauftragung separat verrechnet.<br>
+Entsprechend dem Open-Source-Gedanken des Produkts werden die Code-Anpassungen als Verbesserungsvorschlag an die Entwickler des Produkts übermittelt.<br>
+Um die Wartbarkeit des Produkts sicherzustellen, kann der Service-Provider nur Code unterstützen, der auch offiziell in das Produkt übernommen wird. Jedem Kunden steht es frei, den Code des Produkts selbst anzupassen, in diesem Fall kann der Service-Provider allerdings keine Unterstützung mehr anbieten. Für Details, siehe „Unterstützte Versionen“.</p>
+
+    </body>
+    </html>

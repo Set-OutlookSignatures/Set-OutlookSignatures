@@ -1,6 +1,6 @@
 <!-- title: Set-OutlookSignatures.ps1 -->
 <!-- omit in toc -->
-# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src="https://raw.githubusercontent.com/GruberMarkus/Set-OutlookSignatures/main/logo/Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a>  
+# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src="./logo/Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a>  
 **Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.**  
   
 Signatures and OOF messages can be  
@@ -62,7 +62,8 @@ The script is Free and Open-Source Software (FOSS). It is published under the MI
   - [14.7. Can multiple script instances run in parallel?](#147-can-multiple-script-instances-run-in-parallel)
   - [14.8. How do I start the script from the command line or a scheduled task?](#148-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
   - [14.9. How to create a shortcut to the script with parameters?](#149-how-to-create-a-shortcut-to-the-script-with-parameters)
-  - [14.10. What about the new signature roaming feature Microsoft announced?](#1410-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [14.10. What is the recommended approach to implement the software?](#1410-what-is-the-recommended-approach-to-implement-the-software)
+  - [14.11. What about the new signature roaming feature Microsoft announced?](#1411-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
   
 # 1. Requirements  
@@ -379,7 +380,13 @@ $Shortcut.Hotkey = ''
 $Shortcut.Save()  
 ```  
 Attention: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.  
-## 14.10. What about the new signature roaming feature Microsoft announced?  
+## 14.10. What is the recommended approach to implement the software?  
+There is certainly no definitive generic recommendation, but the file "Implementation approach.html" should be a good starting point.  
+The content is based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes.  
+It contains proven procedures and recommendations for product managers, architects, operations managers, account managers and mail and client administrators. It is suited for service providers as well as for clients.  
+It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.  
+The document is available in English and German language.  
+## 14.11. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.  
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.  
 Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).  
