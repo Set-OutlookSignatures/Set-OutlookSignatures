@@ -1,4 +1,3 @@
 # exclude .gitignore and similar from the generated tarball
 .git*           export-ignore
-readme.md       export-ignore
-"implementation approach.md"  export-ignore
+*.md            export-ignore
