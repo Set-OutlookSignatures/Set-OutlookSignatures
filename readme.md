@@ -62,7 +62,7 @@ The script is Free and Open-Source Software (FOSS). It is published under the MI
   - [14.7. Can multiple script instances run in parallel?](#147-can-multiple-script-instances-run-in-parallel)
   - [14.8. How do I start the script from the command line or a scheduled task?](#148-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
   - [14.9. How to create a shortcut to the script with parameters?](#149-how-to-create-a-shortcut-to-the-script-with-parameters)
-  - [14.10. What is the recommended approach to implement the software?](#1410-what-is-the-recommended-approach-to-implement-the-software)
+  - [14.10. What is the recommended approach for implementing the software?](#1410-what-is-the-recommended-approach-for-implementing-the-software)
   - [14.11. What about the new signature roaming feature Microsoft announced?](#1411-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
   
@@ -380,7 +380,7 @@ $Shortcut.Hotkey = ''
 $Shortcut.Save()  
 ```  
 Attention: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.  
-## 14.10. What is the recommended approach to implement the software?  
+## 14.10. What is the recommended approach for implementing the software?  
 There is certainly no definitive generic recommendation, but the file "Implementation approach.html" should be a good starting point.  
 The content is based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes.  
 It contains proven procedures and recommendations for product managers, architects, operations managers, account managers and mail and client administrators. It is suited for service providers as well as for clients.  

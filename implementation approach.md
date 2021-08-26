@@ -3,7 +3,7 @@
 # <a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src="./logo/Set-OutlookSignatures%20Logo.png" width="500" title="Set-OutlookSignatures.ps1" alt="Set-OutlookSignatures.ps1"></a>  
 **Central Outlook for Windows management and deployment script for text signatures and Out of Office (OOF) auto reply messages.**  
   
-# What is the recommended approach to implement the software?  <!-- omit in toc -->
+# What is the recommended approach for implementing the software?  <!-- omit in toc -->
 There is certainly no definitive generic recommendation, but this document should be a good starting point.  
 The content is based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes.  
 It contains proven procedures and recommendations for product managers, architects, operations managers, account managers and mail and client administrators. It is suited for service providers as well as for clients.  
