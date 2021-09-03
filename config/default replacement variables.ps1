@@ -1,12 +1,15 @@
-﻿# This file allows defining custom replacement variables for Set-OutlookSignatures.ps1
-#   
+﻿# This file allows defining custom replacement variables for Set-OutlookSignatures
+#
 # This script is executed as a whole once for each mailbox.
-# This allows for complex replacement variable handling (complex string transformations, retrieving information from web services and databases, etc.).
+# It allows for complex replacement variable handling (complex string transformations, retrieving information from web services and databases, etc.).
 #
 # Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to to define replacement variables and test it thoroughly.
 #
 # Replacement variable names are case sensitive.
-# It is required to use full uppercase replacement variables.
+# It is required to use full uppercase replacement variable names.
+#
+# Active Directory property names are case sensitive.
+# It is required to use full lowercase Active Directory property names.
 #
 # A variable defined in this file overrides the definition of the same variable defined earlier in the script.
 
@@ -26,21 +29,21 @@ $ReplaceHash['$CURRENTUSERMOBILE$'] = [string]$ADPropsCurrentUser.mobile
 $ReplaceHash['$CURRENTUSERMAIL$'] = [string]$ADPropsCurrentUser.mail
 $ReplaceHash['$CURRENTUSERPHOTO$'] = $ADPropsCurrentUser.thumbnailphoto
 $ReplaceHash['$CURRENTUSERPHOTODELETEEMPTY$'] = $ADPropsCurrentUser.thumbnailphoto
-$ReplaceHash['$CURRENTUSEREXTATTR1$'] = [string]$ADPropsCurrentUser.extensionAttribute1
-$ReplaceHash['$CURRENTUSEREXTATTR2$'] = [string]$ADPropsCurrentUser.extensionAttribute2
-$ReplaceHash['$CURRENTUSEREXTATTR3$'] = [string]$ADPropsCurrentUser.extensionAttribute3
-$ReplaceHash['$CURRENTUSEREXTATTR4$'] = [string]$ADPropsCurrentUser.extensionAttribute4
-$ReplaceHash['$CURRENTUSEREXTATTR5$'] = [string]$ADPropsCurrentUser.extensionAttribute5
-$ReplaceHash['$CURRENTUSEREXTATTR6$'] = [string]$ADPropsCurrentUser.extensionAttribute6
-$ReplaceHash['$CURRENTUSEREXTATTR7$'] = [string]$ADPropsCurrentUser.extensionAttribute7
-$ReplaceHash['$CURRENTUSEREXTATTR8$'] = [string]$ADPropsCurrentUser.extensionAttribute8
-$ReplaceHash['$CURRENTUSEREXTATTR9$'] = [string]$ADPropsCurrentUser.extensionAttribute9
-$ReplaceHash['$CURRENTUSEREXTATTR10$'] = [string]$ADPropsCurrentUser.extensionAttribute10
-$ReplaceHash['$CURRENTUSEREXTATTR11$'] = [string]$ADPropsCurrentUser.extensionAttribute11
-$ReplaceHash['$CURRENTUSEREXTATTR12$'] = [string]$ADPropsCurrentUser.extensionAttribute12
-$ReplaceHash['$CURRENTUSEREXTATTR13$'] = [string]$ADPropsCurrentUser.extensionAttribute13
-$ReplaceHash['$CURRENTUSEREXTATTR14$'] = [string]$ADPropsCurrentUser.extensionAttribute14
-$ReplaceHash['$CURRENTUSEREXTATTR15$'] = [string]$ADPropsCurrentUser.extensionAttribute15
+$ReplaceHash['$CURRENTUSEREXTATTR1$'] = [string]$ADPropsCurrentUser.extensionattribute1
+$ReplaceHash['$CURRENTUSEREXTATTR2$'] = [string]$ADPropsCurrentUser.extensionattribute2
+$ReplaceHash['$CURRENTUSEREXTATTR3$'] = [string]$ADPropsCurrentUser.extensionattribute3
+$ReplaceHash['$CURRENTUSEREXTATTR4$'] = [string]$ADPropsCurrentUser.extensionattribute4
+$ReplaceHash['$CURRENTUSEREXTATTR5$'] = [string]$ADPropsCurrentUser.extensionattribute5
+$ReplaceHash['$CURRENTUSEREXTATTR6$'] = [string]$ADPropsCurrentUser.extensionattribute6
+$ReplaceHash['$CURRENTUSEREXTATTR7$'] = [string]$ADPropsCurrentUser.extensionattribute7
+$ReplaceHash['$CURRENTUSEREXTATTR8$'] = [string]$ADPropsCurrentUser.extensionattribute8
+$ReplaceHash['$CURRENTUSEREXTATTR9$'] = [string]$ADPropsCurrentUser.extensionattribute9
+$ReplaceHash['$CURRENTUSEREXTATTR10$'] = [string]$ADPropsCurrentUser.extensionattribute10
+$ReplaceHash['$CURRENTUSEREXTATTR11$'] = [string]$ADPropsCurrentUser.extensionattribute11
+$ReplaceHash['$CURRENTUSEREXTATTR12$'] = [string]$ADPropsCurrentUser.extensionattribute12
+$ReplaceHash['$CURRENTUSEREXTATTR13$'] = [string]$ADPropsCurrentUser.extensionattribute13
+$ReplaceHash['$CURRENTUSEREXTATTR14$'] = [string]$ADPropsCurrentUser.extensionattribute14
+$ReplaceHash['$CURRENTUSEREXTATTR15$'] = [string]$ADPropsCurrentUser.extensionattribute15
 
 
 # Manager of currently logged on user
@@ -58,21 +61,21 @@ $ReplaceHash['$CURRENTUSERMANAGERMOBILE$'] = [string]$ADPropsCurrentUserManager.
 $ReplaceHash['$CURRENTUSERMANAGERMAIL$'] = [string]$ADPropsCurrentUserManager.mail
 $ReplaceHash['$CURRENTUSERMANAGERPHOTO$'] = $ADPropsCurrentUserManager.thumbnailphoto
 $ReplaceHash['$CURRENTUSERMANAGERPHOTODELETEEMPTY$'] = $ADPropsCurrentUserManager.thumbnailphoto
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR1$'] = [string]$ADPropsCurrentUserManager.extensionAttribute1
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR2$'] = [string]$ADPropsCurrentUserManager.extensionAttribute2
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR3$'] = [string]$ADPropsCurrentUserManager.extensionAttribute3
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR4$'] = [string]$ADPropsCurrentUserManager.extensionAttribute4
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR5$'] = [string]$ADPropsCurrentUserManager.extensionAttribute5
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR6$'] = [string]$ADPropsCurrentUserManager.extensionAttribute6
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR7$'] = [string]$ADPropsCurrentUserManager.extensionAttribute7
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR8$'] = [string]$ADPropsCurrentUserManager.extensionAttribute8
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR9$'] = [string]$ADPropsCurrentUserManager.extensionAttribute9
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR10$'] = [string]$ADPropsCurrentUserManager.extensionAttribute10
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR11$'] = [string]$ADPropsCurrentUserManager.extensionAttribute11
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR12$'] = [string]$ADPropsCurrentUserManager.extensionAttribute12
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR13$'] = [string]$ADPropsCurrentUserManager.extensionAttribute13
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR14$'] = [string]$ADPropsCurrentUserManager.extensionAttribute14
-$ReplaceHash['$CURRENTUSERMANAGEREXTATTR15$'] = [string]$ADPropsCurrentUserManager.extensionAttribute15
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR1$'] = [string]$ADPropsCurrentUserManager.extensionattribute1
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR2$'] = [string]$ADPropsCurrentUserManager.extensionattribute2
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR3$'] = [string]$ADPropsCurrentUserManager.extensionattribute3
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR4$'] = [string]$ADPropsCurrentUserManager.extensionattribute4
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR5$'] = [string]$ADPropsCurrentUserManager.extensionattribute5
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR6$'] = [string]$ADPropsCurrentUserManager.extensionattribute6
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR7$'] = [string]$ADPropsCurrentUserManager.extensionattribute7
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR8$'] = [string]$ADPropsCurrentUserManager.extensionattribute8
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR9$'] = [string]$ADPropsCurrentUserManager.extensionattribute9
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR10$'] = [string]$ADPropsCurrentUserManager.extensionattribute10
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR11$'] = [string]$ADPropsCurrentUserManager.extensionattribute11
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR12$'] = [string]$ADPropsCurrentUserManager.extensionattribute12
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR13$'] = [string]$ADPropsCurrentUserManager.extensionattribute13
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR14$'] = [string]$ADPropsCurrentUserManager.extensionattribute14
+$ReplaceHash['$CURRENTUSERMANAGEREXTATTR15$'] = [string]$ADPropsCurrentUserManager.extensionattribute15
 
 
 # Current mailbox
@@ -90,21 +93,21 @@ $ReplaceHash['$CURRENTMAILBOXMOBILE$'] = [string]$ADPropsCurrentMailbox.mobile
 $ReplaceHash['$CURRENTMAILBOXMAIL$'] = [string]$ADPropsCurrentMailbox.mail
 $ReplaceHash['$CURRENTMAILBOXPHOTO$'] = $ADPropsCurrentMailbox.thumbnailphoto
 $ReplaceHash['$CURRENTMAILBOXPHOTODELETEEMPTY$'] = $ADPropsCurrentMailbox.thumbnailphoto
-$ReplaceHash['$CURRENTMAILBOXEXTATTR1$'] = [string]$ADPropsCurrentMailbox.extensionAttribute1
-$ReplaceHash['$CURRENTMAILBOXEXTATTR2$'] = [string]$ADPropsCurrentMailbox.extensionAttribute2
-$ReplaceHash['$CURRENTMAILBOXEXTATTR3$'] = [string]$ADPropsCurrentMailbox.extensionAttribute3
-$ReplaceHash['$CURRENTMAILBOXEXTATTR4$'] = [string]$ADPropsCurrentMailbox.extensionAttribute4
-$ReplaceHash['$CURRENTMAILBOXEXTATTR5$'] = [string]$ADPropsCurrentMailbox.extensionAttribute5
-$ReplaceHash['$CURRENTMAILBOXEXTATTR6$'] = [string]$ADPropsCurrentMailbox.extensionAttribute6
-$ReplaceHash['$CURRENTMAILBOXEXTATTR7$'] = [string]$ADPropsCurrentMailbox.extensionAttribute7
-$ReplaceHash['$CURRENTMAILBOXEXTATTR8$'] = [string]$ADPropsCurrentMailbox.extensionAttribute8
-$ReplaceHash['$CURRENTMAILBOXEXTATTR9$'] = [string]$ADPropsCurrentMailbox.extensionAttribute9
-$ReplaceHash['$CURRENTMAILBOXEXTATTR10$'] = [string]$ADPropsCurrentMailbox.extensionAttribute10
-$ReplaceHash['$CURRENTMAILBOXEXTATTR11$'] = [string]$ADPropsCurrentMailbox.extensionAttribute11
-$ReplaceHash['$CURRENTMAILBOXEXTATTR12$'] = [string]$ADPropsCurrentMailbox.extensionAttribute12
-$ReplaceHash['$CURRENTMAILBOXEXTATTR13$'] = [string]$ADPropsCurrentMailbox.extensionAttribute13
-$ReplaceHash['$CURRENTMAILBOXEXTATTR14$'] = [string]$ADPropsCurrentMailbox.extensionAttribute14
-$ReplaceHash['$CURRENTMAILBOXEXTATTR15$'] = [string]$ADPropsCurrentMailbox.extensionAttribute15
+$ReplaceHash['$CURRENTMAILBOXEXTATTR1$'] = [string]$ADPropsCurrentMailbox.extensionattribute1
+$ReplaceHash['$CURRENTMAILBOXEXTATTR2$'] = [string]$ADPropsCurrentMailbox.extensionattribute2
+$ReplaceHash['$CURRENTMAILBOXEXTATTR3$'] = [string]$ADPropsCurrentMailbox.extensionattribute3
+$ReplaceHash['$CURRENTMAILBOXEXTATTR4$'] = [string]$ADPropsCurrentMailbox.extensionattribute4
+$ReplaceHash['$CURRENTMAILBOXEXTATTR5$'] = [string]$ADPropsCurrentMailbox.extensionattribute5
+$ReplaceHash['$CURRENTMAILBOXEXTATTR6$'] = [string]$ADPropsCurrentMailbox.extensionattribute6
+$ReplaceHash['$CURRENTMAILBOXEXTATTR7$'] = [string]$ADPropsCurrentMailbox.extensionattribute7
+$ReplaceHash['$CURRENTMAILBOXEXTATTR8$'] = [string]$ADPropsCurrentMailbox.extensionattribute8
+$ReplaceHash['$CURRENTMAILBOXEXTATTR9$'] = [string]$ADPropsCurrentMailbox.extensionattribute9
+$ReplaceHash['$CURRENTMAILBOXEXTATTR10$'] = [string]$ADPropsCurrentMailbox.extensionattribute10
+$ReplaceHash['$CURRENTMAILBOXEXTATTR11$'] = [string]$ADPropsCurrentMailbox.extensionattribute11
+$ReplaceHash['$CURRENTMAILBOXEXTATTR12$'] = [string]$ADPropsCurrentMailbox.extensionattribute12
+$ReplaceHash['$CURRENTMAILBOXEXTATTR13$'] = [string]$ADPropsCurrentMailbox.extensionattribute13
+$ReplaceHash['$CURRENTMAILBOXEXTATTR14$'] = [string]$ADPropsCurrentMailbox.extensionattribute14
+$ReplaceHash['$CURRENTMAILBOXEXTATTR15$'] = [string]$ADPropsCurrentMailbox.extensionattribute15
 
 
 # Manager of current mailbox
@@ -122,21 +125,21 @@ $ReplaceHash['$CURRENTMAILBOXMANAGERMOBILE$'] = [string]$ADPropsCurrentMailboxMa
 $ReplaceHash['$CURRENTMAILBOXMANAGERMAIL$'] = [string]$ADPropsCurrentMailboxManager.mail
 $ReplaceHash['$CURRENTMAILBOXMANAGERPHOTO$'] = $ADPropsCurrentMailboxManager.thumbnailphoto
 $ReplaceHash['$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$'] = $ADPropsCurrentMailboxManager.thumbnailphoto
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR1$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute1
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR2$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute2
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR3$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute3
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR4$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute4
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR5$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute5
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR6$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute6
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR7$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute7
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR8$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute8
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR9$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute9
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR10$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute10
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR11$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute11
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR12$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute12
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR13$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute13
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR14$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute14
-$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR15$'] = [string]$ADPropsCurrentMailboxManager.extensionAttribute15
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR1$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute1
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR2$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute2
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR3$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute3
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR4$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute4
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR5$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute5
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR6$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute6
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR7$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute7
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR8$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute8
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR9$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute9
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR10$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute10
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR11$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute11
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR12$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute12
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR13$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute13
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR14$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute14
+$ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR15$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute15
 
 
 # $CURRENTUSERNAMEWITHTITLES$, $CURRENTUSERMANAGERNAMEWITHTITLES$
