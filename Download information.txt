@@ -1,0 +1,11 @@
+Thank you very much for your interest in Set-OutlookSignatures.ps1!
+
+
+Please visit the following link to download a pre-built official release:
+    https://github.com/GruberMarkus/Set-OutlookSignatures/releases
+
+
+Downloading the source code as ZIP or tarball has been intentionally disabled,
+as this allows for better tracking of download and clone numbers.
+For accessing the source code, use the following URL in your preferred tool:
+    https://github.com/GruberMarkus/Set-OutlookSignatures.git
