@@ -9,6 +9,7 @@
 - Revise repository structure, as well as the process for development, build and release
 ### Added
 - Add FAQs: "Where can I find the changelog?", "How can I contribute, propose a new feature or file a bug?"
+- Add file hash of build artifacts to release information and hashes.txt 
 - Add dark mode support and badges to documentation files
 ### Fixed
 - Do not show an error message when no default Outlook profile is configured
