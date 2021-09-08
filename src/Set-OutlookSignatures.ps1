@@ -1616,11 +1616,9 @@ function Set-Signatures {
             }
         }
 
-        if (-not $UseHtmTemplates) {
-            # Open .docx file, replace variables, save it as .htm, close the .docx file
-            # We later work with the .htm and not with .docx to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
-            $COMWord.Documents.Open($path, $false) | Out-Null
+        $COMWord.Documents.Open($path, $false) | Out-Null
 
+        if (-not $UseHtmTemplates) {
             Write-Host '      Replace picture variables'
             foreach ($image in ($ComWord.ActiveDocument.Shapes + $ComWord.ActiveDocument.InlineShapes)) {
                 try {
@@ -1757,19 +1755,9 @@ function Set-Signatures {
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
             $COMWord.ActiveDocument.Weboptions.encoding = 65001
             $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-            $COMWord.ActiveDocument.Close(0)
         }
 
         if (-not $ProcessOOF) {
-            # We work with the .htm file to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
-            $COMWord.Documents.Open($path, $false) | Out-Null
-
-            Write-Host '      Export to TXT format'
-            $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
-            $COMWord.ActiveDocument.TextEncoding = 1200
-            $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
-            $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-
             Write-Host '      Export to RTF format'
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
             $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
@@ -1787,6 +1775,19 @@ function Set-Signatures {
                     $true, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
                     $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
             $COMWord.ActiveDocument.Save()
+            $COMWord.ActiveDocument.Close($false)
+
+
+            Write-Host '      Export to TXT format'
+            # We work with the .htm file to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
+            $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+            $COMWord.Documents.Open($path, $false) | Out-Null
+            $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
+            $COMWord.ActiveDocument.TextEncoding = 1200
+            $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
+            $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            $COMWord.ActiveDocument.Close($false)
+        } else {
             $COMWord.ActiveDocument.Close($false)
         }
 
