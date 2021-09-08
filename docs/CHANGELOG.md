@@ -6,14 +6,13 @@
 ## [v2.2.0] - 2021-09-08
 ### Changed
 - Make script compatible with PowerShell versions greater than 5.1 (a.k.a PowerShell Core based on .Net Core)
-- Avoid additional blank lines at the end of .txt signature files when .doxc templates are used ([#13](https://github.com/GruberMarkus/Set-OutlookSignatures/issues/13))
-- Update documentation: Modified logo, dark mode support and badges
 - Revise repository structure, as well as the process for development, build and release
 ### Added
-- Add CHANGELOG file
-- Add CONTRIBUTING file
+- Add FAQs: "Where can I find the changelog?", "How can I contribute, propose a new feature or file a bug?"
+- Add dark mode support and badges to documentation files
 ### Fixed
 - Do not show an error message when no default Outlook profile is configured
+- Avoid additional blank lines at the end of .txt signature files when .doxc templates are used ([#13](https://github.com/GruberMarkus/Set-OutlookSignatures/issues/13))
 
 ## [v2.1.2] - 2021-09-03
 ### Fixed
