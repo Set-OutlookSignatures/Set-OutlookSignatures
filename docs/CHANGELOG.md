@@ -3,9 +3,10 @@
 
 # Changelog
 
-## [v2.2.0-beta.1] - YYYY-MM-DD
+## [v2.2.0] - 2021-09-08
 ### Changed
 - Make script compatible with PowerShell versions greater than 5.1 (a.k.a PowerShell Core based on .Net Core)
+- Avoid additional blank lines at the end of .txt signature files when .doxc templates are used ([#13](https://github.com/GruberMarkus/Set-OutlookSignatures/issues/13))
 - Update documentation: Modified logo, dark mode support and badges
 - Revise repository structure, as well as the process for development, build and release
 ### Added
@@ -153,7 +154,7 @@ _Initial release._
 ## v0.1.0 - 2021-04-21
 _First lines of code were written as proof of concept, but never published._
 
-[v2.2.0-beta.1]: https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.2-beta.1
+[v2.2.0]: https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.0
 [v2.1.2]: https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.2
 [v2.1.1]: https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.1
 [v2.1.0]: https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.0
