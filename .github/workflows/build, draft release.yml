@@ -1,0 +1,57 @@
+name: build, draft release
+on:
+  push:
+    # tags:
+    #   - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.10
+        with:
+          versionSpec: "5.x"
+
+      - name: Determine SemVer
+        uses: gittools/actions/gitversion/execute@v0.9.10
+        with:
+          additionalArguments: '/overrideconfig major-version-bump-message="^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\\([\\w\\s]*\\))?(!:|:.*\\n\\n((.+\\n)+\\n)?BREAKING CHANGE:\\s.+)" /overrideconfig minor-version-bump-message="^(feat)(\\([\\w\\s]*\\))?:" /overrideconfig patch-version-bump-message="^(build|chore|ci|docs|fix|perf|refactor|revert|style|test)(\\([\\w\\s]*\\))?:"'
+
+      - name: Display SemVer
+        run: |
+          write-output "SemVer: $env:GITVERSION_SEMVER"
+
+      - name: Get tag name
+        run: |
+          if ($($env:GITHUB_REF).startswith("refs/tags/")) {
+            $ReleaseTag = ($env:GITHUB_REF -replace 'refs/tags/', '')
+          } else {
+            $ReleaseTag = "v$($env:GITVERSION_SEMVER)"
+          }
+          "RELEASETAG=$ReleaseTag" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Output "ReleaseTag: $ReleaseTag"
+
+      - name: Build
+        run: build/build.ps1
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.RELEASETAG }}
+          commit: ${{ env.GITHUB_SHA }}
+          artifactErrorsFailBuild: true
+          artifacts: |
+            ${{ env.RELEASEFILE }}
+          bodyFile: build/CHANGELOG.md
+          draft: true
+          name: ${{ env.RELEASENAME }}
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
