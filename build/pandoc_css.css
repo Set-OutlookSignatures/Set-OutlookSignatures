@@ -91,9 +91,10 @@ blockquote {
 
 code {
   font-family: inherit;
+  padding: 0.2em 0.4em;
   margin: 0;
-  font-style: italic;
-  /*background-color: Azure;*/
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
 }
 
 pre {
@@ -107,9 +108,10 @@ pre {
 
 pre code {
   padding: 0;
+  word-break: normal;
+  white-space: pre;
+  background: transparent;
   overflow: visible;
-  overflow-wrap: break-word;
-  white-space: pre-wrap;
   font-style: inherit;
 }
 

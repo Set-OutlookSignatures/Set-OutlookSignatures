@@ -1,4 +1,5 @@
 # exclude .gitignore and similar from the generated tarball
+/.git                                    export-ignore
 /.github                                 export-ignore
 /build                                   export-ignore
 /docs                                    export-ignore

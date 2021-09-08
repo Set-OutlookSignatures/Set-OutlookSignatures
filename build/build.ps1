@@ -51,7 +51,7 @@ function main {
         ('.\docs\CONTRIBUTING.md', "$BuildDir\docs\CONTRIBUTING.html"),
         ('.\docs\README.md', "$BuildDir\docs\README.html")
     ) | ForEach-Object {
-        & pandoc.exe $($_[0]) --resource-path=".;docs" -f gfm -t html --self-contained -H .\build\pandoc_header.html --css .\build\pandoc.css --metadata pagetitle="$(([System.IO.FileInfo]"$($_[0])").basename) - Set-OutlookSignatures" -o $($_[1])
+        & pandoc.exe $($_[0]) --resource-path=".;docs" -f gfm -t html --self-contained -H .\build\pandoc_header.html --css .\build\pandoc_css.css --metadata pagetitle="$(([System.IO.FileInfo]"$($_[0])").basename) - Set-OutlookSignatures" -o $($_[1])
     }
 
 
