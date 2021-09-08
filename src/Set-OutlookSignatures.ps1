@@ -193,7 +193,6 @@ Param(
 function main {
     Clear-Host
 
-
     Write-Host 'Script started' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
 
@@ -1116,7 +1115,7 @@ function main {
             if (-not $SimulationUser) {
                 try {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        Copy-Item -Path '.\bin\Microsoft.Exchange.WebServices.NETStandard.dll' -Destination (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll') -Force
+                        Copy-Item -Path '.\bin\Microsoft.Exchange.WebServices.NETStandard.dll' -Destination (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll') -Force -ErrorAction SilentlyContinue
                     } else {
                         Copy-Item -Path '.\bin\Microsoft.Exchange.WebServices.dll' -Destination (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
                     }
@@ -1127,9 +1126,9 @@ function main {
 
                 try {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        Add-Type -Path (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')
+                        Import-Module -Name (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll') -Force
                     } else {
-                        Add-Type -Path (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll')
+                        Import-Module -Name (Join-Path -Path $env:temp -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
                     }
 
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
@@ -1617,10 +1616,11 @@ function Set-Signatures {
             }
         }
 
-        $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatAuto')
-        $COMWord.Documents.Open($path, $false) | Out-Null
-
         if (-not $UseHtmTemplates) {
+            # Open .docx file, replace variables, save it as .htm, close the .docx file
+            # We later work with the .htm and not with .docx to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
+            $COMWord.Documents.Open($path, $false) | Out-Null
+
             Write-Host '      Replace picture variables'
             foreach ($image in ($ComWord.ActiveDocument.Shapes + $ComWord.ActiveDocument.InlineShapes)) {
                 try {
@@ -1757,9 +1757,13 @@ function Set-Signatures {
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
             $COMWord.ActiveDocument.Weboptions.encoding = 65001
             $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            $COMWord.ActiveDocument.Close(0)
         }
 
         if (-not $ProcessOOF) {
+            # We work with the .htm file to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
+            $COMWord.Documents.Open($path, $false) | Out-Null
+
             Write-Host '      Export to TXT format'
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
             $COMWord.ActiveDocument.TextEncoding = 1200
@@ -1784,8 +1788,6 @@ function Set-Signatures {
                     $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
             $COMWord.ActiveDocument.Save()
             $COMWord.ActiveDocument.Close($false)
-        } else {
-            $COMWord.ActiveDocument.Close(0)
         }
 
         Write-Host '      Embed local files in HTM format and add marker'
