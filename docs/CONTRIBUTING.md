@@ -58,3 +58,5 @@ The draft release includes the build artifact(s), the corresponding changelog en
 The build artifacts can be downloaded and go through the final test process.
 - If these final tests are passed and the information in the draft build is correct, the build can directly be released.  
 - If these final tests fail or the information in the draft release is wrong, delete the draft release and go on with with development process.
+
+The build process is built on GitHub Actions workflows and currently only works in this environment.
