@@ -1,7 +1,4 @@
 # exclude .gitignore and similar from the generated tarball
-/.git                                    export-ignore
-/.github                                 export-ignore
-/build                                   export-ignore
-/docs                                    export-ignore
-/src                                     export-ignore
-/.gitattributes                          export-ignore
+.git*                                    export-ignore
+/readme.md                               export-ignore
+/implementation[[:space:]]approach.md    export-ignore
