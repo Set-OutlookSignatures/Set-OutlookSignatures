@@ -6,7 +6,7 @@ Thank you very much for your interest in Set-OutlookSignatures.
 
 If you have an idea for a new feature or have found a problem, please [create an issue on GitHub](https://github.com/GruberMarkus/Set-OutlookSignatures/issues).
 
-If you want to contribute code, this document give you a rough overview on the proposed process.  
+If you want to contribute code, this document gives you a rough overview of the proposed process.  
 I'm not a professional developer - if you are one and you notice something negative in the code or process, please let me know. 
 # Branches
 The default branch is named `main`. It contains the source of the latest stable release.

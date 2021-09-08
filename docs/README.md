@@ -50,17 +50,19 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
 - [12. Outlook Web](#12-outlook-web)
 - [13. Simulation mode](#13-simulation-mode)
 - [14. FAQ](#14-faq)
-  - [14.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#141-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
-  - [14.2. How is the personal mailbox of the currently logged-on user identified?](#142-how-is-the-personal-mailbox-of-the-currently-logged-on-user-identified)
-  - [14.3. Which ports are required?](#143-which-ports-are-required)
-  - [14.4. Why is Out of Office abbreviated OOF and not OOO?](#144-why-is-out-of-office-abbreviated-oof-and-not-ooo)
-  - [14.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#145-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
-  - [14.6. How can I log the script output?](#146-how-can-i-log-the-script-output)
-  - [14.7. Can multiple script instances run in parallel?](#147-can-multiple-script-instances-run-in-parallel)
-  - [14.8. How do I start the script from the command line or a scheduled task?](#148-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
-  - [14.9. How to create a shortcut to the script with parameters?](#149-how-to-create-a-shortcut-to-the-script-with-parameters)
-  - [14.10. What is the recommended approach for implementing the software?](#1410-what-is-the-recommended-approach-for-implementing-the-software)
-  - [14.11. What about the new signature roaming feature Microsoft announced?](#1411-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [14.1. Where can I find the changelog?](#141-where-can-i-find-the-changelog)
+  - [14.2. How can I contribute, propose a new feature or file a bug?](#142-how-can-i-contribute-propose-a-new-feature-or-file-a-bug)
+  - [14.3. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#143-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
+  - [14.4. How is the personal mailbox of the currently logged-on user identified?](#144-how-is-the-personal-mailbox-of-the-currently-logged-on-user-identified)
+  - [14.5. Which ports are required?](#145-which-ports-are-required)
+  - [14.6. Why is Out of Office abbreviated OOF and not OOO?](#146-why-is-out-of-office-abbreviated-oof-and-not-ooo)
+  - [14.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#147-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
+  - [14.8. How can I log the script output?](#148-how-can-i-log-the-script-output)
+  - [14.9. Can multiple script instances run in parallel?](#149-can-multiple-script-instances-run-in-parallel)
+  - [14.10. How do I start the script from the command line or a scheduled task?](#1410-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
+  - [14.11. How to create a shortcut to the script with parameters?](#1411-how-to-create-a-shortcut-to-the-script-with-parameters)
+  - [14.12. What is the recommended approach for implementing the software?](#1412-what-is-the-recommended-approach-for-implementing-the-software)
+  - [14.13. What about the new signature roaming feature Microsoft announced?](#1413-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -358,14 +360,20 @@ Active Directory data for both parameters is searched using Active Directory Amb
 **Attention**:  
 - Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name. The script informs when there is more than one or no result.  
 - Simulation mode only works when the user starting the simulation is at least from the same Active Directory forest as the user defined in SimulationUser.  Users from other forests will not work.  
-# 14. FAQ  
-## 14.1. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?  
+# 14. FAQ
+## 14.1. Where can I find the changelog?
+The changelog is located in the `'.\docs'` folder, along with other documents related to Set-OutlookSignatures.
+## 14.2. How can I contribute, propose a new feature or file a bug?
+If you have an idea for a new feature or have found a problem, please [create an issue on GitHub](https://github.com/GruberMarkus/Set-OutlookSignatures/issues).
+
+If you want to contribute code, please have a look at `'.\docs\CONTRIBUTING'` for a rough overview of the proposed process.
+## 14.3. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?  
 The legacyExchangeDN attribute is used to find the user behind a mailbox, because mail and proxyAddresses are not unique in certain Exchange scenarios:  
 - A separate Active Directory forest for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.  
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.
 
 The disadvantage of using legacyExchangeDN is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures and OOF messages.  
-## 14.2. How is the personal mailbox of the currently logged-on user identified?  
+## 14.4. How is the personal mailbox of the currently logged-on user identified?  
 The personal mailbox of the currently logged-on user is preferred to other mailboxes, as it receives signatures first and is the only mailbox where the Outlook Web signature can be set.
 
 The personal mailbox is found by simply checking if the Active Directory mail attribute of the currently logged-on user matches an SMTP address of one of the mailboxes connected in Outlook.
@@ -375,15 +383,15 @@ If the mail attribute is not set, the currently logged-on user's objectSID is co
 Please consider the following caveats regarding the mail attribute:  
 - When Active Directory attributes are directly modified to create or modify users and mailboxes (instead of using Exchange Admin Center or Exchange Management Shell), the mail attribute is often not updated and does not match the primary SMTP address of a mailbox. Microsoft strongly recommends that the mail attribute matches the primary SMTP address.  
 - When using linked mailboxes, the mail attribute of the linked account is often not set or synced back from the Exchange resource forest. Technically, this is not necessary. From an organizational point of view it makes sense, as this can be used to determine if a specific user has a linked mailbox in another forest, and as some applications (such as "scan to mail") may need this attribute anyhow.  
-## 14.3. Which ports are required?  
+## 14.5. Which ports are required?  
 Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, are required to communicate with Active Directory domains.
 
 The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11).
 
 The client needs port 443 to access a WebDAV share (a SharePoint document library, for example).  
-## 14.4. Why is Out of Office abbreviated OOF and not OOO?  
+## 14.6. Why is Out of Office abbreviated OOF and not OOO?  
 Back in the 1980s, Microsoft had a UNIX OS named Xenix ... but read yourself: https://techcommunity.microsoft.com/t5/exchange-team-blog/why-is-oof-an-oof-and-not-an-ooo/ba-p/610191  
-## 14.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
+## 14.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
 The script uses DOCX as default template format, as this seems to be the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications:  
 - Not all Word formatting options are supported in HTML, which can lead to signatures looking a bit different than templates. For example, images may be placed at a different position in the signature compared to the template - this is because the Outlook HTML component only supports the "in line with text" text wrapping option, while Word offers more options.  
 - On the other hand, the Outlook HTML renderer works better with templates in the DOCX format: The Outlook HTML renderer does not respect the HTML image tags "width" and "height" and displays all images in their original size. When using DOCX as template format, the images are resized when exported to the HTM format.
@@ -416,16 +424,16 @@ The templates delivered with this script represent all possible formats:
 - `'.\templates\Out of Office DOCX'` and `'.\templates\signatures DOCX'` contain templates in the DOCX format  
 - `'.\templates\Out of Office HTML'` contains templates in the HTML format as Word exports them when using `"Website, filtered"` as format. Note the additional folders for each signature.  
 - `'.\templates\Signatures HTML'` contains templates in the HTML format. Note that there are no additional folders, as the Word export files have been processed with ConvertTo-SingleFileHTML function to create a single HTMl file with all local images embedded.  
-## 14.6. How can I log the script output?  
+## 14.8. How can I log the script output?  
 The script has no built-in logging option other than writing output to the host window.
 
 You can, for example, use PowerShell's `Start-Transcript` and `Stop-Transcript` commands to create a logging wrapper around Set-OutlookSignatures.ps1.  
-## 14.7. Can multiple script instances run in parallel?  
+## 14.9. Can multiple script instances run in parallel?  
 The script is designed for being run in multiple instances at the same. You can combine any of the following scenarios:  
 - One user runs multiple instances of the script in parallel  
 - One user runs multiple instances of the script in simulation mode in parallel  
 - Multiple users on the same machine (e.g. Terminal Server) run multiple instances of the script in parallel  
-## 14.8. How do I start the script from the command line or a scheduled task?  
+## 14.10. How do I start the script from the command line or a scheduled task?  
 Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. You have to be very careful about when to use single quotes or double quotes.
 
 A working example:
@@ -440,7 +448,7 @@ You will find lots of information about this topic on the internet. The followin
 If you have to use the PowerShell.exe `-Command` or `-File` parameter depends on details of your configuration, for example AppLocker in combination with PowerShell. You may also want to consider the `-EncodedCommand` parameter to start Set-OutlookSignatures.ps1 and pass parameters to it.
   
 If you provided your users a link so they can start Set-OutlookSignatures.ps1 with the correct parameters on their own, you may want to use the official icon: `'.\logo\Set-OutlookSignatures Icon.ico'`  
-## 14.9. How to create a shortcut to the script with parameters?  
+## 14.11. How to create a shortcut to the script with parameters?  
 You may want to provide a link on the desktop or in the start menu, so they can start the script on their own.
 
 The Windows user interface does not allow you to create a shortcut with a combined length of full target path and arguments greater than 259 characters.
@@ -459,7 +467,7 @@ $Shortcut.Hotkey = ''
 $Shortcut.Save()  
 ```
 **Attention**: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.  
-## 14.10. What is the recommended approach for implementing the software?  
+## 14.12. What is the recommended approach for implementing the software?  
 There is certainly no definitive generic recommendation, but the file `'.\docs\Implementation approach.html'` should be a good starting point.
 
 The content is based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes.
@@ -469,7 +477,7 @@ It contains proven procedures and recommendations for product managers, architec
 It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The document is available in English and German language.  
-## 14.11. What about the new signature roaming feature Microsoft announced?  
+## 14.13. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.
