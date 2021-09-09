@@ -305,6 +305,7 @@ function main {
     }
 
 
+    Write-Host
     Write-Host 'Get Outlook version and profile' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
     if ($SimulationUser) {
@@ -548,6 +549,7 @@ function main {
     }
     if ($ADPropsCurrentUserManager) { Write-Host "    $($ADPropsCurrentUserManager.distinguishedname)" }
 
+
     Write-Host
     Write-Host 'Get AD properties of each mailbox and sort mailbox list' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
@@ -676,6 +678,7 @@ function main {
     $MailAddresses | ForEach-Object {
         Write-Host "    $_"
     }
+
 
     Write-Host
     Write-Host 'Get all signature template files and categorize them' -NoNewline
@@ -1023,7 +1026,6 @@ function main {
                 Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor yellow
             }
 
-
             Write-Host '  SMTP addresses' -NoNewline
             Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
             $CurrentMailboxSMTPAddresses = @()
@@ -1118,7 +1120,6 @@ function main {
             foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object -Property Name)) {
                 Set-Signatures
             }
-
 
             # Delete photos from file system
             ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
