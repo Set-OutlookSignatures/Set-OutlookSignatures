@@ -1,0 +1,1 @@
+This placeholder file will be filled at build time with file hashes.
