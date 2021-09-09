@@ -1,0 +1,12 @@
+Thank you very much for your interest in Set-OutlookSignatures!
+
+
+Please visit the following link to download a pre-built official release:
+  https://github.com/GruberMarkus/Set-OutlookSignatures/releases
+
+
+You can access the full source code anytime
+  at GitHub via
+    https://github.com/GruberMarkus/Set-OutlookSignatures
+  with your preferred, Git-aware development suite via
+    https://github.com/GruberMarkus/Set-OutlookSignatures.git
