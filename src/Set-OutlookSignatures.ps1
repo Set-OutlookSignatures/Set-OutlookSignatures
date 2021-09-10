@@ -311,27 +311,29 @@ function main {
     if ($SimulationUser) {
         Write-Host '  Simulation mode enabled, skipping task' -ForegroundColor Yellow
     } else {
-        try {
-            $OutlookRegistryVersion = [System.Version]::Parse(((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer').'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0') -split '\.')[0..3] -join '.')
-        } catch {
-            Write-Host 'Outlook not installed or not working correctly. Exiting.' -ForegroundColor Red
-            exit 1
-        }
-
-        if ($OutlookRegistryVersion.major -gt 16) {
+        $OutlookRegistryVersion = [System.Version]::Parse(((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0') -split '\.')[0..3] -join '.')
+            
+        if ($OutlookRegistryVersion.major -eq 0) {
+            $OutlookRegistryVersion = $null
+        } elseif ($OutlookRegistryVersion.major -gt 16) {
             Write-Host "Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exiting." -ForegroundColor Red
+            exit 1
         } elseif ($OutlookRegistryVersion.major -eq 16) {
             $OutlookRegistryVersion = '16.0'
         } elseif ($OutlookRegistryVersion.major -eq 15) {
             $OutlookRegistryVersion = '15.0'
         } elseif ($OutlookRegistryVersion.major -eq 14) {
             $OutlookRegistryVersion = '14.0'
-        } else {
-            Write-Host "Outlook version $OutlookRegistryVersion is below minimum required version 14 (Outlook 2010). Exiting." -ForegroundColor Red
+        } elseif ($OutlookRegistryVersion.major -lt 14) {
+            Write-Host "Outlook version $OutlookRegistryVersion is older than Outlook 2010 and not supported. Please inform your administrator. Exiting." -ForegroundColor Red
             exit 1
         }
 
-        $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook" -ErrorAction SilentlyContinue).DefaultProfile
+        if ($null -ne $OutlookRegistryVersion) {
+            $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook" -ErrorAction SilentlyContinue).DefaultProfile
+        } else {
+            $OutlookDefaultProfile = $null
+        }
 
         Write-Host "  Outlook version: $OutlookRegistryVersion"
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
@@ -516,6 +518,16 @@ function main {
     try {
         if (-not $SimulationUser) {
             $ADPropsCurrentUser = ([adsisearcher]"(samaccountname=$env:username)").FindOne().Properties
+            if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -notcontains $ADPropsCurrentUser)) {
+                # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
+                # Maybe this is a pure Outlook Web user, so we will add a helper entry
+                # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
+                Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature"
+                Write-Host ' and/or OOF message should be set. Adding Mailbox dummy entry.'
+                $MailAddresses = (@($ADPropsCurrentUser.mail) + $MailAddresses)
+                $RegistryPaths = (@("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths)
+                $LegacyExchangeDNs = (@('') + $LegacyExchangeDNs)
+            }
         } else {
             $Search.SearchRoot = "GC://$($DomainsToCheckForGroups[0])"
             $Search.Filter = "(&(ObjectClass=user)(anr=$SimulationUser))"
@@ -559,20 +571,23 @@ function main {
 
     for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
         Write-Host "    Mailbox $($MailAddresses[$AccountNumberRunning])"
-        if (-not $SimulationUser) { Write-Host "      $($LegacyExchangeDNs[$AccountNumberRunning])" }
 
         $UserDomain = ''
         $ADPropsMailboxes += $null
         $ADPropsMailboxesUserDomain += $null
 
-        if ((($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '') -and (-not $SimulationUser)) -or ($SimulationUser -and ($($MailAddresses[$AccountNumberRunning]) -ne ''))) {
+        if (((($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '') -or ($($MailAddresses[$AccountNumberRunning]) -ne '')) -and (-not $SimulationUser)) -or ($SimulationUser -and ($($MailAddresses[$AccountNumberRunning]) -ne ''))) {
             # Loop through domains until the first one knows the legacyExchangeDN
             for ($DomainNumber = 0; (($DomainNumber -lt $DomainsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
                 if (($DomainsToCheckForGroups[$DomainNumber] -ne '')) {
                     Write-Host "      $($DomainsToCheckForGroups[$DomainNumber]) (searching for mailbox user object) ... " -NoNewline
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
                     if (-not $SimulationUser) {
-                        $Search.filter = "(&(objectclass=user)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
+                        if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
+                            $Search.filter = "(&(objectclass=user)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
+                        } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
+                            $Search.filter = "(&(objectclass=user)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
+                        }
                     } else {
                         $Search.filter = "(&(objectclass=user)(legacyExchangeDN=*)(anr=$($MailAddresses[$AccountNumberRunning])))"
                     }
