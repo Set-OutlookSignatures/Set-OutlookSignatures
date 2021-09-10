@@ -311,7 +311,7 @@ function main {
     if ($SimulationUser) {
         Write-Host '  Simulation mode enabled, skipping task' -ForegroundColor Yellow
     } else {
-        $OutlookRegistryVersion = [System.Version]::Parse(((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0') -split '\.')[0..3] -join '.')
+        $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
             
         if ($OutlookRegistryVersion.major -eq 0) {
             $OutlookRegistryVersion = $null
@@ -335,7 +335,7 @@ function main {
             $OutlookDefaultProfile = $null
         }
 
-        Write-Host "  Outlook version: $OutlookRegistryVersion"
+        Write-Host "  Outlook registry version: $OutlookRegistryVersion"
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
     }
 
@@ -348,6 +348,9 @@ function main {
         $SignaturePaths = $AdditionalSignaturePath
         Write-Host '  Simulation mode enabled, skipping task, using AdditionalSignaturePath instead' -ForegroundColor Yellow
     } else {
+        if ($NEWUNNAMEDPARAMETER -eq $true) {
+            $SignaturePaths += (New-Item -ItemType Directory (Join-Path -Path $tempDir -ChildPath (New-Guid).guid)).fullname
+        }
         Get-ItemProperty 'hkcu:\software\microsoft\office\*\common\general' -ErrorAction SilentlyContinue | Where-Object { $_.'Signatures' -ne '' } | ForEach-Object {
             Push-Location (Join-Path -Path $env:AppData -ChildPath 'Microsoft')
 
@@ -522,8 +525,8 @@ function main {
                 # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
                 # Maybe this is a pure Outlook Web user, so we will add a helper entry
                 # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
-                Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature"
-                Write-Host ' and/or OOF message should be set. Adding Mailbox dummy entry.'
+                Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Adding Mailbox dummy entry." -ForegroundColor Yellow
+                $NEWUNNAMEDPARAMETER = $true
                 $MailAddresses = (@($ADPropsCurrentUser.mail) + $MailAddresses)
                 $RegistryPaths = (@("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths)
                 $LegacyExchangeDNs = (@('') + $LegacyExchangeDNs)
@@ -1193,12 +1196,20 @@ function main {
                             if ($MailAddresses[$j] -ieq $PrimaryMailboxAddress) {
                                 if ($RegistryPaths[$j] -like ('*\Outlook\Profiles\' + $OutlookDefaultProfile + '\9375CFF0413111d3B88A00104B2A6676\*')) {
                                     try {
-                                        $TempNewSig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'New Signature'
+                                        if (-not $NEWUNNAMEDPARAMETER) {
+                                            $TempNewSig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'New Signature'
+                                        } else {
+                                            $TempNewSig = $NEWUNNAMEDPARAMETERDEFAULTSIGNEW
+                                        }
                                     } catch {
                                         $TempNewSig = ''
                                     }
                                     try {
-                                        $TempReplySig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature'
+                                        if (-not $NEWUNNAMEDPARAMETER) {
+                                            $TempReplySig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature'
+                                        } else {
+                                            $TempReplySig = $NEWUNNAMEDPARAMETERDEFAULTSIGREPLY
+                                        }
                                     } catch {
                                         $TempReplySig = ''
                                     }
@@ -1378,8 +1389,9 @@ function main {
                                 $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                             } else {
                                 $SignaturePaths | ForEach-Object {
-                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((New-Item -ItemType Directory (Join-Path -Path $_ -ChildPath 'OOF\') -Force) + '\OOFInternal.htm')
-                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((New-Item -ItemType Directory (Join-Path -Path $_ -ChildPath 'OOF\') -Force) + '\OOFExternal.htm') }
+                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination (Join-Path -Path (New-Item -ItemType Directory (Join-Path -Path $_ -ChildPath 'OOF\') -Force).fullname -ChildPath 'OOFInternal.htm')
+                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination (Join-Path -Path (New-Item -ItemType Directory (Join-Path -Path $_ -ChildPath 'OOF\') -Force).fullname -ChildPath 'OOFExternal.htm')
+                                }
                             }
                         } else {
                             if (-not $SimulationUser) {
@@ -1483,6 +1495,10 @@ function main {
             }
         }
     }
+
+    if ($NEWUNNAMEDPARAMETER -eq $true) {
+        Remove-Item $SignaturePaths[0] -Recurse -Force
+    }
 }
 
 
@@ -1553,7 +1569,9 @@ function Set-Signatures {
         if ($SignatureFileAlreadyDone) {
             Write-Host '      Template already processed before (mailbox or signature group with higher priority), skipping' -ForegroundColor Yellow
         } else {
-            $global:SignatureFilesDone += $($Signature.Name)
+            if (-not $NEWUNNAMEDPARAMETER) {
+                $global:SignatureFilesDone += $($Signature.Name)
+            }
         }
     }
     if (($SignatureFileAlreadyDone -eq $false) -or $ProcessOOF) {
@@ -1580,7 +1598,9 @@ function Set-Signatures {
 
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
         if (-not $ProcessOOF) {
-            $global:SignatureFilesDone += $Signature.Value
+            if (-not $NEWUNNAMEDPARAMETER) {
+                $global:SignatureFilesDone += $Signature.Value
+            }
         }
 
         if ($UseHtmTemplates) {
@@ -1821,7 +1841,7 @@ function Set-Signatures {
 
 
         if (-not $ProcessOOF) {
-            $SignaturePaths | ForEach-Object {
+            $(if ($NEWUNNAMEDPARAMETER) { $SignaturePaths[0] } else { $SignaturePaths }) | ForEach-Object {
                 Write-Host "      Copy signature files to '$_'"
                 Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination (Join-Path -Path $_ -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm'))) -Force
                 Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination (Join-Path -Path $_ -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf'))) -Force
@@ -1843,7 +1863,11 @@ function Set-Signatures {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     Write-Host '      Set signature as default for new messages'
-                    Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                    if (-not $NEWUNNAMEDPARAMETER) {
+                        Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                    } else {
+                        $NEWUNNAMEDPARAMETERDEFAULTSIGNEW = $Signature.Value
+                    }
                 }
             }
         }
@@ -1853,7 +1877,11 @@ function Set-Signatures {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     Write-Host '      Set signature as default for reply/forward messages'
-                    Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                    if (-not $NEWUNNAMEDPARAMETER) {
+                        Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                    } else {
+                        $NEWUNNAMEDPARAMETERDEFAULTSIGREPLY = $Signature.Value
+                    }
                 }
             }
         }
