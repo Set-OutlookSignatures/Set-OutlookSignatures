@@ -124,7 +124,7 @@ Please see '.\docs\README.html' and https://github.com/GruberMarkus/Set-OutlookS
 
 .NOTES
 Script : Set-OutlookSignatures
-Version: xxxVersionStringxxx
+Version: v2.2.0-alpha.19
 Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
 License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)
 #>
@@ -348,9 +348,6 @@ function main {
         $SignaturePaths = $AdditionalSignaturePath
         Write-Host '  Simulation mode enabled, skipping task, using AdditionalSignaturePath instead' -ForegroundColor Yellow
     } else {
-        if ($NEWUNNAMEDPARAMETER -eq $true) {
-            $SignaturePaths += (New-Item -ItemType Directory (Join-Path -Path $tempDir -ChildPath (New-Guid).guid)).fullname
-        }
         Get-ItemProperty 'hkcu:\software\microsoft\office\*\common\general' -ErrorAction SilentlyContinue | Where-Object { $_.'Signatures' -ne '' } | ForEach-Object {
             Push-Location (Join-Path -Path $env:AppData -ChildPath 'Microsoft')
 
@@ -526,10 +523,13 @@ function main {
                 # Maybe this is a pure Outlook Web user, so we will add a helper entry
                 # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
                 Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Adding Mailbox dummy entry." -ForegroundColor Yellow
-                $NEWUNNAMEDPARAMETER = $true
+                $script:NEWUNNAMEDPARAMETER = $true
+                $SignaturePaths = @((New-Item -ItemType Directory (Join-Path -Path $tempDir -ChildPath (New-Guid).guid)).fullname) + $SignaturePaths
                 $MailAddresses = (@($ADPropsCurrentUser.mail) + $MailAddresses)
                 $RegistryPaths = (@("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths)
                 $LegacyExchangeDNs = (@('') + $LegacyExchangeDNs)
+            } else {
+                $script:NEWUNNAMEDPARAMETER = $false
             }
         } else {
             $Search.SearchRoot = "GC://$($DomainsToCheckForGroups[0])"
@@ -708,7 +708,7 @@ function main {
     $SignatureFilesMailboxFilePart = @{}
     $SignatureFilesDefaultNew = @{}
     $SignatureFilesDefaultReplyFwd = @{}
-    $global:SignatureFilesDone = @()
+    $script:SignatureFilesDone = @()
     $SignatureFilesGroupSIDs = @{}
 
     foreach ($SignatureFile in ((Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)) {
@@ -823,7 +823,7 @@ function main {
         $OOFFilesMailboxFilePart = @{}
         $OOFFilesInternal = @{}
         $OOFFilesExternal = @{}
-        $global:OOFFilesDone = @()
+        $script:OOFFilesDone = @()
         $OOFFilesGroupSIDs = @{}
 
         foreach ($OOFFile in ((Get-ChildItem -LiteralPath $OOFTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)) {
@@ -1196,19 +1196,19 @@ function main {
                             if ($MailAddresses[$j] -ieq $PrimaryMailboxAddress) {
                                 if ($RegistryPaths[$j] -like ('*\Outlook\Profiles\' + $OutlookDefaultProfile + '\9375CFF0413111d3B88A00104B2A6676\*')) {
                                     try {
-                                        if (-not $NEWUNNAMEDPARAMETER) {
+                                        if ($script:NEWUNNAMEDPARAMETER -ne $true) {
                                             $TempNewSig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'New Signature'
                                         } else {
-                                            $TempNewSig = $NEWUNNAMEDPARAMETERDEFAULTSIGNEW
+                                            $TempNewSig = $script:NEWUNNAMEDPARAMETERDEFAULTSIGNEW
                                         }
                                     } catch {
                                         $TempNewSig = ''
                                     }
                                     try {
-                                        if (-not $NEWUNNAMEDPARAMETER) {
+                                        if ($script:NEWUNNAMEDPARAMETER -ne $true) {
                                             $TempReplySig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature'
                                         } else {
-                                            $TempReplySig = $NEWUNNAMEDPARAMETERDEFAULTSIGREPLY
+                                            $TempReplySig = $script:NEWUNNAMEDPARAMETERDEFAULTSIGREPLY
                                         }
                                     } catch {
                                         $TempReplySig = ''
@@ -1444,7 +1444,7 @@ function main {
     $SignaturePaths | ForEach-Object {
         Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
             if ((Get-Content -LiteralPath $_.fullname -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
-                if ($_.name -notin $global:SignatureFilesDone) {
+                if ($_.name -notin $script:SignatureFilesDone) {
                     Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
                     Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
                     Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
@@ -1487,16 +1487,16 @@ function main {
                 if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
                     Write-Host '  Path could not be accessed or created, ignoring path.' -ForegroundColor Yellow
                 } else {
-                    Copy-Item -Path (Join-Path -Path $SignaturePaths[0] -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
+                    Copy-Item -Path (Join-Path -Path ($(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[1] } else { $SignaturePaths[0] }) -replace '\\\\\?\\', '') -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
                 }
             } else {
                 (Get-ChildItem -Path $AdditionalSignaturePath -Recurse -Force).fullname | Remove-Item -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
-                Copy-Item -Path ($SignaturePaths[0] + '\*') -Destination $AdditionalSignaturePath -Recurse -Force
+                Copy-Item -Path (Join-Path -Path ($(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[1] } else { $SignaturePaths[0] }) -replace '\\\\\?\\', '') -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force
             }
         }
     }
 
-    if ($NEWUNNAMEDPARAMETER -eq $true) {
+    if ($script:NEWUNNAMEDPARAMETER -eq $true) {
         Remove-Item $SignaturePaths[0] -Recurse -Force
     }
 }
@@ -1565,12 +1565,12 @@ function Set-Signatures {
     }
 
     if (-not $ProcessOOF) {
-        $SignatureFileAlreadyDone = ($global:SignatureFilesDone -contains $($Signature.Name))
+        $SignatureFileAlreadyDone = ($script:SignatureFilesDone -contains $($Signature.Name))
         if ($SignatureFileAlreadyDone) {
             Write-Host '      Template already processed before (mailbox or signature group with higher priority), skipping' -ForegroundColor Yellow
         } else {
-            if (-not $NEWUNNAMEDPARAMETER) {
-                $global:SignatureFilesDone += $($Signature.Name)
+            if ($script:NEWUNNAMEDPARAMETER -ne $true) {
+                $script:SignatureFilesDone += $($Signature.Name)
             }
         }
     }
@@ -1598,8 +1598,8 @@ function Set-Signatures {
 
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
         if (-not $ProcessOOF) {
-            if (-not $NEWUNNAMEDPARAMETER) {
-                $global:SignatureFilesDone += $Signature.Value
+            if ($script:NEWUNNAMEDPARAMETER -ne $true) {
+                $script:SignatureFilesDone += $Signature.Value
             }
         }
 
@@ -1841,7 +1841,7 @@ function Set-Signatures {
 
 
         if (-not $ProcessOOF) {
-            $(if ($NEWUNNAMEDPARAMETER) { $SignaturePaths[0] } else { $SignaturePaths }) | ForEach-Object {
+            $(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[0] } else { $SignaturePaths }) | ForEach-Object {
                 Write-Host "      Copy signature files to '$_'"
                 Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination (Join-Path -Path $_ -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm'))) -Force
                 Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination (Join-Path -Path $_ -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf'))) -Force
@@ -1863,10 +1863,10 @@ function Set-Signatures {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     Write-Host '      Set signature as default for new messages'
-                    if (-not $NEWUNNAMEDPARAMETER) {
+                    if ($script:NEWUNNAMEDPARAMETER -ne $true) {
                         Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
                     } else {
-                        $NEWUNNAMEDPARAMETERDEFAULTSIGNEW = $Signature.Value
+                        $script:NEWUNNAMEDPARAMETERDEFAULTSIGNEW = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                     }
                 }
             }
@@ -1877,10 +1877,10 @@ function Set-Signatures {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     Write-Host '      Set signature as default for reply/forward messages'
-                    if (-not $NEWUNNAMEDPARAMETER) {
+                    if ($script:NEWUNNAMEDPARAMETER -ne $true) {
                         Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
                     } else {
-                        $NEWUNNAMEDPARAMETERDEFAULTSIGREPLY = $Signature.Value
+                        $script:NEWUNNAMEDPARAMETERDEFAULTSIGREPLY = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                     }
                 }
             }
@@ -2052,7 +2052,7 @@ try {
     main
 } catch {
     'Unexpected error. Exiting.'
-    $Error
+    $Error[0]
     exit 1
 } finally {
     Write-Host
