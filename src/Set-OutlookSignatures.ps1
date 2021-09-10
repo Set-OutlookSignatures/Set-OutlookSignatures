@@ -532,21 +532,18 @@ function main {
                 $script:NEWUNNAMEDPARAMETER = $false
             }
         } else {
-            $Search.SearchRoot = "GC://$($DomainsToCheckForGroups[0])"
-            $Search.Filter = "(&(ObjectClass=user)(anr=$SimulationUser))"
-            $ADPropsCurrentUser = $Search.FindAll()
-            if ($ADPropsCurrentUser.count -eq 0) {
-                Write-Host "    '$SimulationUser' matches no Active Directory user, exiting." -ForegroundColor Red
-                exit 1
-            } elseif ($ADPropsCurrentUser.Count -gt 1) {
-                Write-Host "    '$SimulationUser' matches multiple Active Directory users, exiting." -ForegroundColor Red
-                $ADPropsCurrentUser | ForEach-Object { Write-Host "    $($_.path)" -ForegroundColor Red }
-                exit 1
-            } else {
-                $Search.Filter = "((distinguishedname=$(([adsi]"$($ADPropsCurrentUser[0].path)").distinguishedname)))"
-                $ADPropsCurrentUser = $Search.FindOne().Properties
-                Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
+            try {
+                $objTrans = New-Object -ComObject 'NameTranslate'
+                $objNT = $objTrans.GetType()
+                $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $null)) # 3 = ADS_NAME_INITTYPE_GC
+                $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (8, $SimulationUser)) # 8 = ADS_NAME_TYPE_UNKNOWN
+                $SimulationUserDN = $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3) # 1 = Const ADS_NAME_TYPE_1779 (DN)
+            } catch {
             }
+            $Search.SearchRoot = "GC://$(($SimulationUserDN -split ',DC=')[1..999] -join '.')"
+            $Search.Filter = "((distinguishedname=$SimulationUserDN))"
+            $ADPropsCurrentUser = $Search.FindOne().Properties
+            Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
         }
     } catch {
         $ADPropsCurrentUser = $null
@@ -587,12 +584,12 @@ function main {
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
                     if (-not $SimulationUser) {
                         if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                            $Search.filter = "(&(objectclass=user)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
+                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(msExchMailboxGuid=*)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
                         } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
-                            $Search.filter = "(&(objectclass=user)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
+                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(msExchMailboxGuid=*)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
                         }
                     } else {
-                        $Search.filter = "(&(objectclass=user)(legacyExchangeDN=*)(anr=$($MailAddresses[$AccountNumberRunning])))"
+                        $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(msExchMailboxGuid=*)(legacyExchangeDN=*)(anr=$($MailAddresses[$AccountNumberRunning])))"
                     }
                     $u = $Search.FindAll()
                     if ($u.count -eq 0) {
@@ -1915,7 +1912,6 @@ function CheckADConnectivity {
                     [string]$CheckProtocolText
                 )
                 $DebugPreference = 'Continue'
-                Write-Debug "Start(Ticks) = $((Get-Date).Ticks)"
                 Write-Output "$CheckDomain"
                 $Search = New-Object DirectoryServices.DirectorySearcher
                 $Search.PageSize = 1000
