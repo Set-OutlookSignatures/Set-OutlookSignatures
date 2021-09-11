@@ -218,9 +218,9 @@ function main {
         $IsLinux = $IsMacOS = $false
     }
     if ($IsWindows) {
-        $tempDir = $env:temp
+        $script:tempDir = $env:temp
     } else {
-        $tempDir = '/tmp'
+        $script:tempDir = '/tmp'
     }
 
     if ($IsWindows -eq $false) {
@@ -257,7 +257,7 @@ function main {
     Write-Host ('  SimulationMailboxes: ' + ('''' + $($SimulationMailboxes -join ''', ''') + ''''))
 
     if ($AdditionalSignaturePathFolder -and $AdditionalSignaturePath) {
-        $AdditionalSignaturePath = (Join-Path -Path $AdditionalSignaturePath -ChildPath $AdditionalSignaturePathFolder)
+        $AdditionalSignaturePath = ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath $AdditionalSignaturePathFolder))
         try {
             if (-not (Test-Path -LiteralPath $AdditionalSignaturePath -PathType Container)) {
                 New-Item -Path $AdditionalSignaturePath -ItemType directory -Force | Out-Null
@@ -266,11 +266,11 @@ function main {
                 }
             }
             if ($SimulationUser) {
-                New-Item -Path (Join-Path -Path $AdditionalSignaturePath -ChildPath 'OOF') -ItemType directory -Force | Out-Null
-                if (-not (Test-Path -LiteralPath (Join-Path -Path $AdditionalSignaturePath -ChildPath 'OOF') -PathType Container)) {
+                New-Item -Path ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath 'OOF')) -ItemType directory -Force | Out-Null
+                if (-not (Test-Path -LiteralPath ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath 'OOF')) -PathType Container)) {
                     throw
                 }
-                Get-ChildItem (Join-Path -Path $AdditionalSignaturePath -ChildPath 'OOF\*') -Recurse | Remove-Item -Force -Recurse -Confirm:$false
+                Get-ChildItem ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath 'OOF\*')) -Recurse | Remove-Item -Force -Recurse -Confirm:$false
             }
         } catch {
             Write-Host "    Problem connecting to, creating or reading from folder '$AdditionalSignaturePath'. Deactivating feature." -ForegroundColor Yellow
@@ -281,20 +281,10 @@ function main {
     ('ReplacementVariableConfigFile', 'SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath') | ForEach-Object {
         $path = (Get-Variable -Name $_).Value
         if ($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
-            $path = (([uri]::UnescapeDataString($path) -ireplace ('https://', '\\?\UNC\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\')
+            $path = ((([uri]::UnescapeDataString($path) -ireplace ('https://', '\\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\'))
         } else {
             $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
-            if (($path.StartsWith('\\', 'CurrentCultureIgnoreCase')) -and (-not ($path.StartsWith('\\?\', 'CurrentCultureIgnoreCase')))) {
-                $path = $path.replace('\\', '\\?\UNC\')
-            }
-
-            if (-not ($path.StartsWith('\\', 'CurrentCultureIgnoreCase'))) {
-                $path = ('\\?\' + $path)
-            }
-        }
-        if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-            $path = $path -replace '^\\\\\?\\UNC\\', '\\'
-            $path = $path -replace '^\\\\\?\\', ''
+            $path = $path
         }
         Set-Variable -Name $_ -Value $path
     }
@@ -349,13 +339,8 @@ function main {
         Write-Host '  Simulation mode enabled, skipping task, using AdditionalSignaturePath instead' -ForegroundColor Yellow
     } else {
         Get-ItemProperty 'hkcu:\software\microsoft\office\*\common\general' -ErrorAction SilentlyContinue | Where-Object { $_.'Signatures' -ne '' } | ForEach-Object {
-            Push-Location (Join-Path -Path $env:AppData -ChildPath 'Microsoft')
-
-            if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                $x = ($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Signatures))
-            } else {
-                $x = ('\\?\' + $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Signatures))
-            }
+            Push-Location ((Join-Path -Path ($env:AppData) -ChildPath 'Microsoft'))
+            $x = ($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Signatures))
             if (Test-Path $x -IsValid) {
                 if (-not (Test-Path $x -type container)) {
                     New-Item -Path $x -ItemType directory -Force
@@ -511,20 +496,20 @@ function main {
     Write-Host
     Write-Host 'Get AD properties of currently logged on user and assigned manager' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
-    if ($SimulationUser) {
-        Write-Host '  Simulation mode enabled, using SimulationUser instead' -ForegroundColor Yellow
-    }
     Write-Host '  Currently logged-on user'
+    if ($SimulationUser) {
+        Write-Host '    Simulation mode enabled, using SimulationUser instead' -ForegroundColor Yellow
+    }
     try {
         if (-not $SimulationUser) {
             $ADPropsCurrentUser = ([adsisearcher]"(samaccountname=$env:username)").FindOne().Properties
-            if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -notcontains $ADPropsCurrentUser)) {
+            if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -notcontains $ADPropsCurrentUser.mail)) {
                 # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
                 # Maybe this is a pure Outlook Web user, so we will add a helper entry
                 # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
                 Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Adding Mailbox dummy entry." -ForegroundColor Yellow
                 $script:NEWUNNAMEDPARAMETER = $true
-                $SignaturePaths = @((New-Item -ItemType Directory (Join-Path -Path $tempDir -ChildPath (New-Guid).guid)).fullname) + $SignaturePaths
+                $SignaturePaths = @((New-Item -ItemType Directory (((Join-Path -Path ($script:tempDir) -ChildPath (New-Guid).guid)).fullname)) + $SignaturePaths)
                 $MailAddresses = (@($ADPropsCurrentUser.mail) + $MailAddresses)
                 $RegistryPaths = (@("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths)
                 $LegacyExchangeDNs = (@('') + $LegacyExchangeDNs)
@@ -533,22 +518,22 @@ function main {
             }
         } else {
             try {
-                $objTrans = New-Object -ComObject 'NameTranslate'
-                $objNT = $objTrans.GetType()
-                $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $null)) # 3 = ADS_NAME_INITTYPE_GC
-                $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (8, $SimulationUser)) # 8 = ADS_NAME_TYPE_UNKNOWN
-                $SimulationUserDN = $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3) # 1 = Const ADS_NAME_TYPE_1779 (DN)
+                $SimulationUserSID = (New-Object System.Security.Principal.NTAccount($SimulationUser)).Translate([System.Security.Principal.SecurityIdentifier]).value
+                $SimulationUserDN = ([adsi]"LDAP://<SID=$SimulationUserSID>").distinguishedname
+                $Search.SearchRoot = "GC://$(($SimulationUserDN -split ',DC=')[1..999] -join '.')"
+                $Search.Filter = "((distinguishedname=$SimulationUserDN))"
+                $ADPropsCurrentUser = $Search.FindOne().Properties
+                Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
             } catch {
+                write-host "    Simulation user '$($Simulationuser)' not found. Exiting." -ForegroundColor REd
+                $error[0]
+                exit 1
             }
-            $Search.SearchRoot = "GC://$(($SimulationUserDN -split ',DC=')[1..999] -join '.')"
-            $Search.Filter = "((distinguishedname=$SimulationUserDN))"
-            $ADPropsCurrentUser = $Search.FindOne().Properties
-            Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
         }
     } catch {
         $ADPropsCurrentUser = $null
         Write-Host '    Problem connecting to Active Directory, or user is a local user. Exiting.' -ForegroundColor Red
-        $error
+        $error[0]
         exit 1
     }
 
@@ -931,11 +916,11 @@ function main {
     try {
         $COMWord = New-Object -ComObject word.application
         if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-            Add-Type -Path (Get-ChildItem -LiteralPath (Join-Path -Path $env:SystemRoot -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word') -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
+            Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
         }
     } catch {
         Write-Host 'Word not installed or not working correctly. Exiting.' -ForegroundColor Red
-        $error
+        $error[0]
         exit 1
     }
 
@@ -1067,7 +1052,7 @@ function main {
                 } catch {
                     Write-Host "    Problem executing content of '$ReplacementVariableConfigFile'. Exiting." -ForegroundColor Red
                     Write-Host "    Error: $_" -ForegroundColor Red
-                    $error
+                    $error[0]
                     exit 1
                 }
             } else {
@@ -1090,9 +1075,9 @@ function main {
             ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
                 if ($null -ne $ReplaceHash[$_]) {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        $ReplaceHash[$_] | Set-Content -LiteralPath (Join-Path -Path $tempDir -ChildPath ($_ + '.jpeg')) -AsByteStream -Force
+                        $ReplaceHash[$_] | Set-Content -LiteralPath (((Join-Path -Path ($script:tempDir) -ChildPath ($_ + '.jpeg')))) -AsByteStream -Force
                     } else {
-                        $ReplaceHash[$_] | Set-Content -LiteralPath (Join-Path -Path $tempDir -ChildPath ($_ + '.jpeg')) -Encoding Byte -Force
+                        $ReplaceHash[$_] | Set-Content -LiteralPath (((Join-Path -Path ($script:tempDir) -ChildPath ($_ + '.jpeg')))) -Encoding Byte -Force
                     }
                 }
             }
@@ -1138,7 +1123,7 @@ function main {
 
             # Delete photos from file system
             ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-                Remove-Item -LiteralPath (Join-Path -Path $tempDir -ChildPath ($_ + '.jpeg')) -Force -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath (((Join-Path -Path ($script:tempDir) -ChildPath ($_ + '.jpeg')))) -Force -ErrorAction SilentlyContinue
                 $ReplaceHash.Remove($_)
                 $ReplaceHash.Remove(($_[-999..-2] -join '') + 'DELETEEMPTY$')
             }
@@ -1150,9 +1135,9 @@ function main {
             if (-not $SimulationUser) {
                 try {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        Copy-Item -Path (Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.NETStandard.dll') -Destination (Join-Path -Path $tempDir -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll') -Force -ErrorAction SilentlyContinue
+                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.NETStandard.dll')) -Destination ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force -ErrorAction SilentlyContinue
                     } else {
-                        Copy-Item -Path (Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.dll') -Destination (Join-Path -Path $tempDir -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
+                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.dll')) -Destination ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.dll')) -Force
                     }
                 } catch {
                 }
@@ -1161,9 +1146,9 @@ function main {
 
                 try {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        Import-Module -Name (Join-Path -Path $tempDir -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll') -Force
+                        Import-Module -Name ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force
                     } else {
-                        Import-Module -Name (Join-Path -Path $tempDir -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force
+                        Import-Module -Name ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.dll')) -Force
                     }
 
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
@@ -1248,14 +1233,14 @@ function main {
                                     if (($null -ne $TempOWASigFile) -and ($TempOWASigFile -ne '')) {
 
                                         try {
-                                            if (Test-Path -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.htm'))) -PathType Leaf) {
-                                                $hsHtmlSignature = (Get-Content -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.htm'))) -Raw).ToString()
+                                            if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -PathType Leaf) {
+                                                $hsHtmlSignature = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -Raw).ToString()
                                             } else {
                                                 $hsHtmlSignature = ''
                                                 Write-Host "      Signature file '$($TempOWASigFile + '.htm')' not found. Outlook Web HTML signature will be blank." -ForegroundColor Yellow
                                             }
-                                            if (Test-Path -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.txt'))) -PathType Leaf) {
-                                                $stTextSig = (Get-Content -LiteralPath ('\\?\' + (Join-Path -Path ($SignaturePaths[0] -replace [regex]::escape('\\?\')) -ChildPath ($TempOWASigFile + '.txt'))) -Raw).ToString()
+                                            if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -PathType Leaf) {
+                                                $stTextSig = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -Raw).ToString()
                                             } else {
                                                 $hsHtmlSignature = ''
                                                 Write-Host "      Signature file '$($TempOWASigFile + '.txt')' not found. Outlook Web text signature will be blank." -ForegroundColor Yellow
@@ -1380,24 +1365,24 @@ function main {
                             Set-Signatures -ProcessOOF
                         }
 
-                        if (Test-Path -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm"))) {
+                        if (Test-Path -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm"))) {
                             if (-not $SimulationUser) {
-                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
-                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
+                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
+                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                             } else {
                                 $SignaturePaths | ForEach-Object {
-                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination (Join-Path -Path (New-Item -ItemType Directory (Join-Path -Path $_ -ChildPath 'OOF\') -Force).fullname -ChildPath 'OOFInternal.htm')
-                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination (Join-Path -Path (New-Item -ItemType Directory (Join-Path -Path $_ -ChildPath 'OOF\') -Force).fullname -ChildPath 'OOFExternal.htm')
+                                    Copy-Item -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFInternal.htm')) -force
+                                    Copy-Item -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFExternal.htm')) -force
                                 }
                             }
                         } else {
                             if (-not $SimulationUser) {
-                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString())
-                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString())
+                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString())
+                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString())
                             } else {
                                 $SignaturePaths | ForEach-Object {
-                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Destination (New-Item -ItemType Directory (Join-Path -Path $_ -ChildPath 'OOF\') -Force) -Force
-                                    Copy-Item -LiteralPath ('\\?\' + (Join-Path -Path $tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Destination (New-Item -ItemType Directory (Join-Path -Path $_ -ChildPath 'OOF\') -Force) -Force
+                                    Copy-Item -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFInternal.htm')) -Force
+                                    Copy-Item -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFExternal.htm')) -Force
                                 }
                             }
                         }
@@ -1414,13 +1399,13 @@ function main {
 
                     # Delete temporary OOF files from file system
                     ("$OOFCommonGUID OOFCommon", "$OOFInternalGUID OOFInternal", "$OOFExternalGUID OOFExternal") | ForEach-Object {
-                        Remove-Item (Join-Path -Path $tempDir -ChildPath ($_ + '.*')) -Force -ErrorAction SilentlyContinue
+                        Remove-Item ((Join-Path -Path ($script:tempDir) -ChildPath ($_ + '.*'))) -Force -ErrorAction SilentlyContinue
                     }
                 }
             }
             Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
-            Remove-Item (Join-Path -Path $tempDir -ChildPath 'Microsoft.Exchange.WebServices.dll') -Force -ErrorAction SilentlyContinue
-            Remove-Item (Join-Path -Path $tempDir -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll') -Force -ErrorAction SilentlyContinue
+            Remove-Item ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.dll')) -Force -ErrorAction SilentlyContinue
+            Remove-Item ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force -ErrorAction SilentlyContinue
         }
     }
 
@@ -1484,11 +1469,11 @@ function main {
                 if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
                     Write-Host '  Path could not be accessed or created, ignoring path.' -ForegroundColor Yellow
                 } else {
-                    Copy-Item -Path (Join-Path -Path ($(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[1] } else { $SignaturePaths[0] }) -replace '\\\\\?\\', '') -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
+                    Copy-Item -Path (Join-Path -Path ($(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[1] } else { $SignaturePaths[0] })) -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
                 }
             } else {
                 (Get-ChildItem -Path $AdditionalSignaturePath -Recurse -Force).fullname | Remove-Item -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
-                Copy-Item -Path (Join-Path -Path ($(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[1] } else { $SignaturePaths[0] }) -replace '\\\\\?\\', '') -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force
+                Copy-Item -Path (Join-Path -Path ($(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[1] } else { $SignaturePaths[0] })) -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force
             }
         }
     }
@@ -1508,7 +1493,7 @@ Function ConvertTo-SingleFileHTML([string]$inputfile, [string]$outputfile) {
         if ($_.Groups[0].Value.StartsWith('src="data:')) {
             $src += ''
         } else {
-            $src += (Join-Path -Path (Split-Path -Path $inputfile -Parent) -ChildPath ([uri]::UnEscapeDataString($_.Groups[1].Value)))
+            $src += (Join-Path -Path (Split-Path -Path ($inputfile) -Parent) -ChildPath ([uri]::UnEscapeDataString($_.Groups[1].Value)))
         }
     }
     for ($x = 0; $x -lt $src.count; $x = $x + 2) {
@@ -1576,7 +1561,7 @@ function Set-Signatures {
 
         if ($UseHtmTemplates) {
             # use .html for temporary file, .htm for final file
-            $path = $(Join-Path -Path $tempDir -ChildPath (New-Guid).guid).tostring() + '.htm'
+            $path = ($(Join-Path -Path ($script:tempDir) -ChildPath (New-Guid).guid).tostring() + '.htm')
             #try {
             ConvertTo-SingleFileHTML $Signature.Name $path
             #} catch {
@@ -1584,7 +1569,7 @@ function Set-Signatures {
             #continue
             #}
         } else {
-            $path = $(Join-Path -Path $tempDir -ChildPath (New-Guid).guid).tostring() + '.docx'
+            $path = ($(Join-Path -Path ($script:tempDir) -ChildPath (New-Guid).guid).tostring() + '.docx')
             try {
                 Copy-Item -LiteralPath $Signature.Name -Destination $path -Force
             } catch {
@@ -1610,13 +1595,13 @@ function Set-Signatures {
                     if (($image.src -clike "*$_*") -or ($image.alt -clike "*$_*")) {
                         if ($null -ne $ReplaceHash[$_]) {
                             $ImageAlternativeTextOriginal = $image.alt
-                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path -Path $tempDir -ChildPath ($_ + '.jpeg')))))
+                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path ($script:tempDir) -ChildPath ($_ + '.jpeg'))))))
                             $image.alt = $ImageAlternativeTextOriginal.replace($_, '')
                         }
                     } elseif (($image.src -clike "*$(($_[-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($_[-999..-2] -join '') + 'DELETEEMPTY$')*")) {
                         if ($null -ne $ReplaceHash[$_]) {
                             $ImageAlternativeTextOriginal = $image.alt
-                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path -Path $tempDir -ChildPath ($_ + '.jpeg')))))
+                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path ($script:tempDir) -ChildPath ($_ + '.jpeg'))))))
                             $image.alt = $ImageAlternativeTextOriginal.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
                         } else {
                             $image.removenode() | Out-Null
@@ -1636,7 +1621,7 @@ function Set-Signatures {
             if (-not $ProcessOOF) {
                 $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
             } else {
-                $tempFileContent | Out-File -LiteralPath (Join-Path -Path $tempDir -ChildPath $Signature.Value) -Encoding UTF8 -Force
+                $tempFileContent | Out-File -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $Signature.Value) -Encoding UTF8 -Force
             }
         }
 
@@ -1648,16 +1633,16 @@ function Set-Signatures {
                 try {
                     if (($null -ne $($image.linkformat.sourcefullname)) -and ($($image.linkformat.sourcefullname) -ne '')) {
                         ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-                            if ((((Split-Path -Path $($image.linkformat.sourcefullname) -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
+                            if ((((Split-Path -Path ($($image.linkformat.sourcefullname)) -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
                                 if ($null -ne $ReplaceHash[$_]) {
                                     $ImageAlternativeTextOriginal = $image.AlternativeText
-                                    $image.linkformat.sourcefullname = (Join-Path -Path $tempDir -ChildPath ($_ + '.jpeg'))
+                                    $image.linkformat.sourcefullname = (Join-Path -Path ($script:tempDir) -ChildPath ($_ + '.jpeg'))
                                     $image.alternativetext = $ImageAlternativeTextOriginal.replace($_, '')
                                 }
-                            } elseif (((Split-Path -Path $image.linkformat.sourcefullname -Leaf).contains(($_[-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[-999..-2] -join '') + 'DELETEEMPTY$'))) {
+                            } elseif (((Split-Path -Path ($($image.linkformat.sourcefullname)) -Leaf).contains(($_[-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[-999..-2] -join '') + 'DELETEEMPTY$'))) {
                                 if ($null -ne $ReplaceHash[$_]) {
                                     $ImageAlternativeTextOriginal = $image.AlternativeText
-                                    $image.linkformat.sourcefullname = (Join-Path -Path $tempDir -ChildPath ($_ + '.jpeg'))
+                                    $image.linkformat.sourcefullname = (Join-Path -Path ($script:tempDir) -ChildPath ($_ + '.jpeg'))
                                     $image.alternativetext = $ImageAlternativeTextOriginal.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
                                 } else {
                                     $image.delete()
@@ -1833,23 +1818,23 @@ function Set-Signatures {
         if (-not $ProcessOOF) {
             ConvertTo-SingleFileHTML $path $path
         } else {
-            ConvertTo-SingleFileHTML $path (Join-Path -Path $tempDir -ChildPath $Signature.Value) -Encoding UTF8 -Force
+            ConvertTo-SingleFileHTML $path ((Join-Path -Path ($script:tempDir) -ChildPath $Signature.Value)) -Encoding UTF8 -Force
         }
 
 
         if (-not $ProcessOOF) {
             $(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[0] } else { $SignaturePaths }) | ForEach-Object {
                 Write-Host "      Copy signature files to '$_'"
-                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination (Join-Path -Path $_ -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm'))) -Force
-                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination (Join-Path -Path $_ -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf'))) -Force
-                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination (Join-Path -Path $_ -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt'))) -Force
+                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
+                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
+                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
             }
         }
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.docx')) -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Force -Recurse -ErrorAction SilentlyContinue
-        Foreach ($x in (Get-ChildItem -Path ("$($tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
+        Foreach ($x in (Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
             Remove-Item -LiteralPath $x -Force -Recurse -ErrorAction SilentlyContinue
         }
     }
@@ -1912,6 +1897,7 @@ function CheckADConnectivity {
                     [string]$CheckProtocolText
                 )
                 $DebugPreference = 'Continue'
+                Write-Debug "Start(Ticks) = $((Get-Date).Ticks)"
                 Write-Output "$CheckDomain"
                 $Search = New-Object DirectoryServices.DirectorySearcher
                 $Search.PageSize = 1000
@@ -1965,16 +1951,9 @@ function CheckADConnectivity {
 
 function CheckPath([string]$path) {
     if ($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
-        $path = (([uri]::UnescapeDataString($path) -ireplace ('https://', '\\?\UNC\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\')
+        $path = ((([uri]::UnescapeDataString($path) -ireplace ('https://', '\\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\'))
     } else {
         $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
-        if (($path.StartsWith('\\', 'CurrentCultureIgnoreCase')) -and (-not ($path.StartsWith('\\?\', 'CurrentCultureIgnoreCase')))) {
-            $path = $path.replace('\\', '\\?\UNC\')
-        }
-
-        if (-not ($path.StartsWith('\\', 'CurrentCultureIgnoreCase'))) {
-            $path = ('\\?\' + $path)
-        }
     }
 
     if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
@@ -2047,7 +2026,8 @@ try {
 
     main
 } catch {
-    'Unexpected error. Exiting.'
+    write-host
+    write-host 'Unexpected error. Exiting.' -foregroundcolor red
     $Error[0]
     exit 1
 } finally {
