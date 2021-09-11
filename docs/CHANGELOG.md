@@ -3,11 +3,14 @@
 
 # Changelog
 
-## [v2.2.0] - 2021-09-09
+## [v2.2.0] - YYYY-MM-DD
 ### Changed
 - Make script compatible with PowerShell versions greater than 5.1 (a.k.a PowerShell Core based on .Net Core)
+- Reduce and speed up Active Directory queries by only accepting input in the 'Domain\User' or UPN (User Principal Name) format for the 'SimulationUser' parameter
+- Reduce and speed up Active Directory queries by only accepting e-mail addresses as input for the 'SimulationMailboxes' parameter
 - Revise repository structure, as well as the process for development, build and release
 ### Added
+- Full support for Exchange mailboxes added in Outlook as POP3 or IMAP4 accounts
 - Add FAQs: "Where can I find the changelog?", "How can I contribute, propose a new feature or file a bug?"
 - Add file hash of build artifacts to release information and hashes.txt 
 - Add dark mode support and badges to documentation files

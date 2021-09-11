@@ -54,10 +54,12 @@ Default value: $false
 
 .PARAMETER SetCurrentUserOutlookWebSignature
 Shall the script set the Outlook Web signature of the currently logged on user?
+If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used.
 Default value: $true
 
 .PARAMETER SetCurrentUserOOFMessage
 Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?
+If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used.
 Default value: $true
 
 .PARAMETER OOFTemplatePath
@@ -90,12 +92,11 @@ Default value: \$false
 
 .PARAMETER SimulationUser
 SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.
-Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.
+Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 .PARAMETER SimulationMailboxes
 SimulationMailboxes is optional for simulation mode, although highly recommended.
-It is a comma separated list of strings replacing the list of mailboxes otherwise gathered from the registry.
-Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name - the results are returned in random order, the script always chooses the first result.
+It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
 .INPUTS
 None. You cannot pipe objects to Set-OutlookSignatures.ps1.
@@ -195,7 +196,7 @@ function main {
 
     $Search = New-Object DirectoryServices.DirectorySearcher
     $Search.PageSize = 1000
-    $jobs = New-Object System.Collections.ArrayList
+    $script:jobs = New-Object System.Collections.ArrayList
     $HTMLMarkerTag = '<meta name=data-SignatureFileInfo content="Set-OutlookSignatures.ps1">'
 
 
@@ -213,17 +214,17 @@ function main {
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
 
     if (-not (Test-Path 'variable:IsWindows')) {
-        # Automatic variable $IsWindows not set, must be Powershell version lower than 6 running on Windows
-        $IsWindows = $true
-        $IsLinux = $IsMacOS = $false
+        # Automatic variable $script:IsWindows not set, must be Powershell version lower than 6 running on Windows
+        $script:IsWindows = $true
+        $script:IsLinux = $script:IsMacOS = $false
     }
-    if ($IsWindows) {
+    if ($script:IsWindows) {
         $script:tempDir = $env:temp
     } else {
         $script:tempDir = '/tmp'
     }
 
-    if ($IsWindows -eq $false) {
+    if ($script:IsWindows -eq $false) {
         Write-Host '  This script is supported on Windows, but not on Linux or macOS. Exiting.' -ForegroundColor Red
         Write-Host '  Required features are only available in FullLanguage mode. Exiting.' -ForegroundColor Red
         exit 1
@@ -302,7 +303,7 @@ function main {
         Write-Host '  Simulation mode enabled, skipping task' -ForegroundColor Yellow
     } else {
         $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
-            
+
         if ($OutlookRegistryVersion.major -eq 0) {
             $OutlookRegistryVersion = $null
         } elseif ($OutlookRegistryVersion.major -gt 16) {
@@ -378,12 +379,6 @@ function main {
             $LegacyExchangeDNs += $LegacyExchangeDN
             Write-Host "  $($_.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $_.PSDrive)"
             Write-Host "    $($_.'Account Name')"
-            if ($LegacyExchangeDN -eq '') {
-                Write-Host '      No legacyExchangeDN found, assuming mailbox is no Exchange mailbox' -ForegroundColor Yellow
-            } else {
-                Write-Host '      Found legacyExchangeDN, assuming mailbox is an Exchange mailbox'
-                Write-Host "        $LegacyExchangeDN"
-            }
         }
     }
 
@@ -496,9 +491,10 @@ function main {
     Write-Host
     Write-Host 'Get AD properties of currently logged on user and assigned manager' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
-    Write-Host '  Currently logged-on user'
-    if ($SimulationUser) {
-        Write-Host '    Simulation mode enabled, using SimulationUser instead' -ForegroundColor Yellow
+    if (-not $SimulationUser) {
+        Write-Host '  Currently logged-on user'
+    } else {
+        Write-Host "  Simulating '$SimulationUser' as currently logged-on user" -ForegroundColor Yellow
     }
     try {
         if (-not $SimulationUser) {
@@ -508,13 +504,13 @@ function main {
                 # Maybe this is a pure Outlook Web user, so we will add a helper entry
                 # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
                 Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Adding Mailbox dummy entry." -ForegroundColor Yellow
-                $script:NEWUNNAMEDPARAMETER = $true
+                $script:CurrentUserDummyMailbox = $true
                 $SignaturePaths = @((New-Item -ItemType Directory (((Join-Path -Path ($script:tempDir) -ChildPath (New-Guid).guid)).fullname)) + $SignaturePaths)
                 $MailAddresses = (@($ADPropsCurrentUser.mail) + $MailAddresses)
                 $RegistryPaths = (@("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths)
                 $LegacyExchangeDNs = (@('') + $LegacyExchangeDNs)
             } else {
-                $script:NEWUNNAMEDPARAMETER = $false
+                $script:CurrentUserDummyMailbox = $false
             }
         } else {
             try {
@@ -525,7 +521,7 @@ function main {
                 $ADPropsCurrentUser = $Search.FindOne().Properties
                 Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
             } catch {
-                write-host "    Simulation user '$($Simulationuser)' not found. Exiting." -ForegroundColor REd
+                Write-Host "    Simulation user '$($Simulationuser)' not found. Exiting." -ForegroundColor REd
                 $error[0]
                 exit 1
             }
@@ -537,7 +533,11 @@ function main {
         exit 1
     }
 
-    Write-Host '  Manager of currently logged-on user'
+    if (-not $SimulationUser) {
+        Write-Host '  Manager of currently logged-on user'
+    } else {
+        Write-Host '  Manager of simulated currently logged-on user' -ForegroundColor Yellow
+    }
     try {
         $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
         $ADPropsCurrentUserManager = $Search.FindOne().Properties
@@ -561,28 +561,24 @@ function main {
         $ADPropsMailboxes += $null
         $ADPropsMailboxesUserDomain += $null
 
-        if (((($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '') -or ($($MailAddresses[$AccountNumberRunning]) -ne '')) -and (-not $SimulationUser)) -or ($SimulationUser -and ($($MailAddresses[$AccountNumberRunning]) -ne ''))) {
-            # Loop through domains until the first one knows the legacyExchangeDN
+        if ((($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '') -or ($($MailAddresses[$AccountNumberRunning]) -ne ''))) {
+            # Loop through domains until the first one knows the legacyExchangeDN or the proxy address
             for ($DomainNumber = 0; (($DomainNumber -lt $DomainsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
                 if (($DomainsToCheckForGroups[$DomainNumber] -ne '')) {
                     Write-Host "      $($DomainsToCheckForGroups[$DomainNumber]) (searching for mailbox user object) ... " -NoNewline
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
-                    if (-not $SimulationUser) {
-                        if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(msExchMailboxGuid=*)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
-                        } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
-                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(msExchMailboxGuid=*)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
-                        }
-                    } else {
-                        $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(msExchMailboxGuid=*)(legacyExchangeDN=*)(anr=$($MailAddresses[$AccountNumberRunning])))"
+                    if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
+                        $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(msExchMailboxGuid=*)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
+                    } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
+                        $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(msExchMailboxGuid=*)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
                     }
                     $u = $Search.FindAll()
                     if ($u.count -eq 0) {
                         Write-Host
-                        Write-Host "        '$($MailAddresses[$AccountNumberRunning])' matches no Active Directory user, ignoring." -ForegroundColor Yellow
+                        Write-Host "        '$($MailAddresses[$AccountNumberRunning])' matches no Exchange mailbox." -ForegroundColor Yellow
                     } elseif ($u.count -gt 1) {
                         Write-Host
-                        Write-Host "        '$($MailAddresses[$AccountNumberRunning])' matches multiple Active Directory users, ignoring." -ForegroundColor Yellow
+                        Write-Host "        '$($MailAddresses[$AccountNumberRunning])' matches multiple Exchange mailboxes, ignoring." -ForegroundColor Yellow
                         $u | ForEach-Object { Write-Host "          $($_.path)" -ForegroundColor Yellow }
                         $LegacyExchangeDNs[$AccountNumberRunning] = ''
                         $MailAddresses[$AccountNumberRunning] = ''
@@ -914,7 +910,7 @@ function main {
     Write-Host 'Start Word background process for template editing' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
     try {
-        $COMWord = New-Object -ComObject word.application
+        $script:COMWord = New-Object -ComObject word.application
         if ($($PSVersionTable.PSEdition) -ieq 'Core') {
             Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
         }
@@ -946,7 +942,6 @@ function main {
             $GroupsSIDs = @()
 
             if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                # Loop through domains until the first one knows the legacyExchangeDN
                 $ADPropsCurrentMailbox = $ADPropsMailboxes[$AccountNumberRunning]
                 $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($ADPropsMailboxesUserDomain[$AccountNumberRunning])")
                 try {
@@ -1178,19 +1173,19 @@ function main {
                             if ($MailAddresses[$j] -ieq $PrimaryMailboxAddress) {
                                 if ($RegistryPaths[$j] -like ('*\Outlook\Profiles\' + $OutlookDefaultProfile + '\9375CFF0413111d3B88A00104B2A6676\*')) {
                                     try {
-                                        if ($script:NEWUNNAMEDPARAMETER -ne $true) {
+                                        if ($script:CurrentUserDummyMailbox -ne $true) {
                                             $TempNewSig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'New Signature'
                                         } else {
-                                            $TempNewSig = $script:NEWUNNAMEDPARAMETERDEFAULTSIGNEW
+                                            $TempNewSig = $script:CurrentUserDummyMailboxDefaultSigNew
                                         }
                                     } catch {
                                         $TempNewSig = ''
                                     }
                                     try {
-                                        if ($script:NEWUNNAMEDPARAMETER -ne $true) {
+                                        if ($script:CurrentUserDummyMailbox -ne $true) {
                                             $TempReplySig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature'
                                         } else {
-                                            $TempReplySig = $script:NEWUNNAMEDPARAMETERDEFAULTSIGREPLY
+                                            $TempReplySig = $script:CurrentUserDummyMailboxDefaultSigReply
                                         }
                                     } catch {
                                         $TempReplySig = ''
@@ -1371,8 +1366,8 @@ function main {
                                 $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                             } else {
                                 $SignaturePaths | ForEach-Object {
-                                    Copy-Item -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFInternal.htm')) -force
-                                    Copy-Item -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFExternal.htm')) -force
+                                    Copy-Item -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFInternal.htm')) -Force
+                                    Copy-Item -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFExternal.htm')) -Force
                                 }
                             }
                         } else {
@@ -1403,19 +1398,8 @@ function main {
                     }
                 }
             }
-            Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
-            Remove-Item ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.dll')) -Force -ErrorAction SilentlyContinue
-            Remove-Item ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force -ErrorAction SilentlyContinue
         }
     }
-
-
-    Write-Host
-    Write-Host 'Close Word background process' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
-    $COMWord.Quit()
-    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($COMWord) | Out-Null
-    Remove-Variable COMWord
 
 
     # Delete old signatures created by this script, which are no longer available in $SignatureTemplatePath
@@ -1469,16 +1453,16 @@ function main {
                 if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
                     Write-Host '  Path could not be accessed or created, ignoring path.' -ForegroundColor Yellow
                 } else {
-                    Copy-Item -Path (Join-Path -Path ($(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[1] } else { $SignaturePaths[0] })) -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
+                    Copy-Item -Path (Join-Path -Path ($(if ($script:CurrentUserDummyMailbox -eq $true) { $SignaturePaths[1] } else { $SignaturePaths[0] })) -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
                 }
             } else {
                 (Get-ChildItem -Path $AdditionalSignaturePath -Recurse -Force).fullname | Remove-Item -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
-                Copy-Item -Path (Join-Path -Path ($(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[1] } else { $SignaturePaths[0] })) -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force
+                Copy-Item -Path (Join-Path -Path ($(if ($script:CurrentUserDummyMailbox -eq $true) { $SignaturePaths[1] } else { $SignaturePaths[0] })) -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force
             }
         }
     }
 
-    if ($script:NEWUNNAMEDPARAMETER -eq $true) {
+    if ($script:CurrentUserDummyMailbox -eq $true) {
         Remove-Item $SignaturePaths[0] -Recurse -Force
     }
 }
@@ -1551,7 +1535,7 @@ function Set-Signatures {
         if ($SignatureFileAlreadyDone) {
             Write-Host '      Template already processed before (mailbox or signature group with higher priority), skipping' -ForegroundColor Yellow
         } else {
-            if ($script:NEWUNNAMEDPARAMETER -ne $true) {
+            if ($script:CurrentUserDummyMailbox -ne $true) {
                 $script:SignatureFilesDone += $($Signature.Name)
             }
         }
@@ -1580,7 +1564,7 @@ function Set-Signatures {
 
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
         if (-not $ProcessOOF) {
-            if ($script:NEWUNNAMEDPARAMETER -ne $true) {
+            if ($script:CurrentUserDummyMailbox -ne $true) {
                 $script:SignatureFilesDone += $Signature.Value
             }
         }
@@ -1625,11 +1609,11 @@ function Set-Signatures {
             }
         }
 
-        $COMWord.Documents.Open($path, $false) | Out-Null
+        $script:COMWord.Documents.Open($path, $false) | Out-Null
 
         if (-not $UseHtmTemplates) {
             Write-Host '      Replace picture variables'
-            foreach ($image in ($ComWord.ActiveDocument.Shapes + $ComWord.ActiveDocument.InlineShapes)) {
+            foreach ($image in ($script:COMWord.ActiveDocument.Shapes + $script:COMWord.ActiveDocument.InlineShapes)) {
                 try {
                     if (($null -ne $($image.linkformat.sourcefullname)) -and ($($image.linkformat.sourcefullname) -ne '')) {
                         ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
@@ -1736,7 +1720,7 @@ function Set-Signatures {
                 if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
                     $FindText = $replaceKey
                     $ReplaceWith = $replaceHash.$replaceKey
-                    $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
+                    $script:COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
                             $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
                             $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
                 }
@@ -1744,60 +1728,60 @@ function Set-Signatures {
 
             # Invert current view (show or hide field codes)
             # This is neccessary to be able to replace variables in hyperlinks and quicktips of hyperlinks
-            $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
+            $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
             foreach ($replaceKey in $replaceHash.Keys) {
                 if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
                     $FindText = $replaceKey
                     $ReplaceWith = $replaceHash.$replaceKey
-                    $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
+                    $script:COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
                             $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
                             $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
                 }
             }
 
             # Restore original view
-            $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
+            $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
 
             # Exports
             Write-Host '      Save as filtered .HTM file'
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-            $COMWord.ActiveDocument.Weboptions.encoding = 65001
-            $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            $script:COMWord.ActiveDocument.Weboptions.encoding = 65001
+            $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
         }
 
         if (-not $ProcessOOF) {
             Write-Host '      Export to RTF format'
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
             $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
-            $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-            $COMWord.ActiveDocument.Close($false)
+            $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            $script:COMWord.ActiveDocument.Close($false)
 
             # RTF files with embedded images get really huge
             # See https://support.microsoft.com/kb/224663 for a system-wide workaround
             # The following workaround is from https://answers.microsoft.com/en-us/msoffice/forum/msoffice_word-mso_mac-mso_mac2011/huge-rtf-files-solved-on-windows-but-searching-for/58e54b37-cfd0-4a07-ac62-1cfc2769cad5
             $openFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatUnicodeText')
-            $COMWord.Documents.Open($path, $false, $false, $false, '', '', $true, '', '', $openFormat) | Out-Null
+            $script:COMWord.Documents.Open($path, $false, $false, $false, '', '', $true, '', '', $openFormat) | Out-Null
             $FindText = '\{\\nonshppict*\}\}'
             $ReplaceWith = ''
-            $COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
+            $script:COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
                     $true, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
                     $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
-            $COMWord.ActiveDocument.Save()
-            $COMWord.ActiveDocument.Close($false)
+            $script:COMWord.ActiveDocument.Save()
+            $script:COMWord.ActiveDocument.Close($false)
 
 
             Write-Host '      Export to TXT format'
             # We work with the .htm file to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-            $COMWord.Documents.Open($path, $false) | Out-Null
+            $script:COMWord.Documents.Open($path, $false) | Out-Null
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
-            $COMWord.ActiveDocument.TextEncoding = 1200
+            $script:COMWord.ActiveDocument.TextEncoding = 1200
             $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
-            $COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-            $COMWord.ActiveDocument.Close($false)
+            $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            $script:COMWord.ActiveDocument.Close($false)
         } else {
-            $COMWord.ActiveDocument.Close($false)
+            $script:COMWord.ActiveDocument.Close($false)
         }
 
         Write-Host '      Embed local files in HTM format and add marker'
@@ -1823,7 +1807,7 @@ function Set-Signatures {
 
 
         if (-not $ProcessOOF) {
-            $(if ($script:NEWUNNAMEDPARAMETER -eq $true) { $SignaturePaths[0] } else { $SignaturePaths }) | ForEach-Object {
+            $(if ($script:CurrentUserDummyMailbox -eq $true) { $SignaturePaths[0] } else { $SignaturePaths }) | ForEach-Object {
                 Write-Host "      Copy signature files to '$_'"
                 Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
                 Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
@@ -1845,10 +1829,10 @@ function Set-Signatures {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     Write-Host '      Set signature as default for new messages'
-                    if ($script:NEWUNNAMEDPARAMETER -ne $true) {
+                    if ($script:CurrentUserDummyMailbox -ne $true) {
                         Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
                     } else {
-                        $script:NEWUNNAMEDPARAMETERDEFAULTSIGNEW = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                        $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                     }
                 }
             }
@@ -1859,10 +1843,10 @@ function Set-Signatures {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     Write-Host '      Set signature as default for reply/forward messages'
-                    if ($script:NEWUNNAMEDPARAMETER -ne $true) {
+                    if ($script:CurrentUserDummyMailbox -ne $true) {
                         Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
                     } else {
-                        $script:NEWUNNAMEDPARAMETERDEFAULTSIGREPLY = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                        $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                     }
                 }
             }
@@ -1918,10 +1902,10 @@ function CheckADConnectivity {
         $temp.Object = $Object
         $temp.StartTime = $null
         $temp.Done = $false
-        [void]$jobs.Add($Temp)
+        [void]$script:jobs.Add($Temp)
     }
-    while (($jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
-        $jobs | ForEach-Object {
+    while (($script:jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
+        $script:jobs | ForEach-Object {
             if (($null -eq $_.StartTime) -and ($_.Powershell.Streams.Debug[0].Message -match 'Start')) {
                 $StartTicks = $_.powershell.Streams.Debug[0].Message -replace '[^0-9]'
                 $_.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
@@ -2026,11 +2010,25 @@ try {
 
     main
 } catch {
-    write-host
-    write-host 'Unexpected error. Exiting.' -foregroundcolor red
+    Write-Host
+    Write-Host 'Unexpected error. Exiting.' -ForegroundColor red
     $Error[0]
     exit 1
 } finally {
+    Write-Host
+    Write-Host 'Cleanup tasks' -NoNewline
+    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    if ($script:COMWord) {
+        $script:COMWord.Quit()
+        [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWord) | Out-Null
+        Remove-Variable COMWord
+    }
+
+    Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
+    Remove-Item ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.dll')) -Force -ErrorAction SilentlyContinue
+    Remove-Item ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force -ErrorAction SilentlyContinue
+
+
     Write-Host
     Write-Host 'Script ended' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray

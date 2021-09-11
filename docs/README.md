@@ -115,9 +115,13 @@ Default value: `$false`
 ## 2.5. SetCurrentUserOutlookWebSignature  
 Shall the script set the Outlook Web signature of the currently logged on user?
 
+If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
+
 Default value: `$true`  
 ## 2.6. SetCurrentUserOOFMessage  
 Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?
+
+If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
 ## 2.7. OOFTemplatePath  
@@ -161,9 +165,11 @@ Default value: `$false`
 ## 2.11. SimulationUser  
 SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.
 
+Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
+
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
 ## 2.12. SimulationMailboxes  
-SimulationMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of strings replacing the list of mailboxes otherwise gathered from the registry.
+SimulationMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
 # 3. Outlook signature path  
@@ -349,17 +355,15 @@ Simulation mode is enabled when the parameter SimulatedUser is passed to the scr
 
 Simulation mode is useful for content creators and admins, as it allows to simulate the behavior of the script and to inspect the resulting signature files before going live.
   
-In simulation mode, Outlook registry entries are not considered and nothing is changed in Outlook and Outlook web. The template files are handled just as during a real script run, but only saved to the folder passed by the parameters AdditionalSignaturePath and AdditionalSignaturePath folder.
+In simulation mode, Outlook registry entries are not considered and nothing is changed in Outlook and Outlook web.
+
+The template files are handled just as during a real script run, but only saved to the folder passed by the parameters AdditionalSignaturePath and AdditionalSignaturePath folder.
   
-`SimulationUser` is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.
+`SimulationUser` is a mandatory parameter for simulation mode. This value replaces the currently logged-on user. Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
-`SimulationMailboxes` is optional for simulation mode, although highly recommended. It is a comma separated list of strings replacing the list of mailboxes otherwise gathered from the registry.
+`SimulationMailboxes` is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
-Active Directory data for both parameters is searched using Active Directory Ambigous Name Resolution (ANR), so you can pass very different values to find the desired object (mail address, logon name, display name, etc.). Please see https://social.technet.microsoft.com/wiki/contents/articles/22653.active-directory-ambiguous-name-resolution.aspx for details about ANR.
-
-**Attention**:  
-- Use values that are unique in an Active Directoy forest, not just in a domain. The script queries against the Global Catalog and always works with the first result returned only (even if there are additional results). For example, the logon name (sAMAccountName) must be unique within an Active Directory domain, but each domain in an Active Directory forest can have one account with this logon name. The script informs when there is more than one or no result.  
-- Simulation mode only works when the user starting the simulation is at least from the same Active Directory forest as the user defined in SimulationUser.  Users from other forests will not work.  
+**Attention**: Simulation mode only works when the user starting the simulation is at least from the same Active Directory forest as the user defined in SimulationUser.  Users from other forests will not work.  
 # 14. FAQ
 ## 14.1. Where can I find the changelog?
 The changelog is located in the `'.\docs'` folder, along with other documents related to Set-OutlookSignatures.
@@ -372,7 +376,9 @@ The legacyExchangeDN attribute is used to find the user behind a mailbox, becaus
 - A separate Active Directory forest for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.  
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.
 
-The disadvantage of using legacyExchangeDN is that no group membership information can be retrieved for Exchange mailboxes configured as IMAP or POP accounts in Outlook. This scenario is very rare in Exchange/Outlook enterprise environments. These mailboxes can still receive common and mailbox specific signatures and OOF messages.  
+If Outlook is configured to access mailbox via protocols such as POP3 or IMAP4, the script searches for the legacyExchangeDN using the e-mail address of the mailbox.
+
+Without a legacyExchangeDN, group membership information can not be retrieved. These mailboxes can still receive common and mailbox specific signatures and OOF messages.  
 ## 14.4. How is the personal mailbox of the currently logged-on user identified?  
 The personal mailbox of the currently logged-on user is preferred to other mailboxes, as it receives signatures first and is the only mailbox where the Outlook Web signature can be set.
 
