@@ -196,7 +196,11 @@ function main {
 
     $Search = New-Object DirectoryServices.DirectorySearcher
     $Search.PageSize = 1000
+
     $script:jobs = New-Object System.Collections.ArrayList
+
+    Add-Type -AssemblyName System.DirectoryServices.AccountManagement
+
     $HTMLMarkerTag = '<meta name=data-SignatureFileInfo content="Set-OutlookSignatures.ps1">'
 
 
@@ -214,17 +218,14 @@ function main {
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
 
     if (-not (Test-Path 'variable:IsWindows')) {
-        # Automatic variable $script:IsWindows not set, must be Powershell version lower than 6 running on Windows
-        $script:IsWindows = $true
-        $script:IsLinux = $script:IsMacOS = $false
-    }
-    if ($script:IsWindows) {
-        $script:tempDir = $env:temp
-    } else {
-        $script:tempDir = '/tmp'
+        # Automatic variable $IsWindows not set, must be Powershell version lower than 6 running on Windows
+        $IsWindows = $true
+        $IsLinux = $IsMacOS = $false
     }
 
-    if ($script:IsWindows -eq $false) {
+    $script:tempDir = [System.IO.Path]::GetTempPath()
+
+    if ($IsWindows -eq $false) {
         Write-Host '  This script is supported on Windows, but not on Linux or macOS. Exiting.' -ForegroundColor Red
         Write-Host '  Required features are only available in FullLanguage mode. Exiting.' -ForegroundColor Red
         exit 1
@@ -390,7 +391,7 @@ function main {
     [System.Collections.ArrayList]$DomainsToCheckForGroups = @()
 
     # Users own domain/forest is always included
-    $y = ([ADSI]'LDAP://RootDSE').rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
+    $y = ([ADSI]"LDAP://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
     if ($y -ne '') {
         Write-Host "  Current user forest: $y"
         $DomainsToCheckForGroups += $y
@@ -498,7 +499,9 @@ function main {
     }
     try {
         if (-not $SimulationUser) {
-            $ADPropsCurrentUser = ([adsisearcher]"(samaccountname=$env:username)").FindOne().Properties
+            $Search.SearchRoot = "GC://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
+            $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
+            $ADPropsCurrentUser = $Search.FindOne().Properties
             if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -notcontains $ADPropsCurrentUser.mail)) {
                 # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
                 # Maybe this is a pure Outlook Web user, so we will add a helper entry
@@ -539,6 +542,7 @@ function main {
         Write-Host '  Manager of simulated currently logged-on user' -ForegroundColor Yellow
     }
     try {
+        $Search.SearchRoot = "GC://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
         $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
         $ADPropsCurrentUserManager = $Search.FindOne().Properties
     } catch {
