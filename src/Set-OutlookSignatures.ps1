@@ -12,7 +12,7 @@ Signatures and OOF messages can be:
 - Assigned time ranges within which they are valid
 - Set as default signature for new mails, or for replies and forwards (signatures only)
 - Set as default OOF message for internal or external recipients (OOF messages only)
-- Set in Outlook Web for the currently logged-on user
+- Set in Outlook Web for the currently logged on user
 - Centrally managed only or exist along user created signatures (signatures only)
 - Copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
 
@@ -67,7 +67,7 @@ Path to centrally managed signature templates.
 Local and remote paths are supported.
 Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office').
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
-The currently logged-on user needs at least read access to the path.
+The currently logged on user needs at least read access to the path.
 Default value: '.\templates\Out of Office DOCX'
 
 .PARAMETER AdditionalSignaturePath
@@ -77,7 +77,7 @@ This way, the user can easily copy-paste the preferred preconfigured signature f
 Local and remote paths are supported.
 Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
 WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
-The currently logged-on user needs at least write access to the path.
+The currently logged on user needs at least write access to the path.
 Default value: "$([environment]::GetFolderPath('MyDocuments'))"
 
 .PARAMETER AdditionalSignaturePathFolder
@@ -91,7 +91,7 @@ Each format has advantages and disadvantages, please see "Should I use .docx or 
 Default value: \$false
 
 .PARAMETER SimulationUser
-SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.
+SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged on user.
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 .PARAMETER SimulationMailboxes
@@ -139,7 +139,7 @@ Param(
     #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    #   The currently logged-on user needs at least read access to the path
+    #   The currently logged on user needs at least read access to the path
     [ValidateNotNullOrEmpty()][string]$SignatureTemplatePath = '.\templates\Signatures DOCX',
 
     # Path to a replacement variable config file.
@@ -147,7 +147,7 @@ Param(
     #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signature')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    #   The currently logged-on user needs at least read access to the path
+    #   The currently logged on user needs at least read access to the path
     [ValidateNotNullOrEmpty()][string]$ReplacementVariableConfigFile = '.\config\default replacement variables.ps1',
 
     # List of domains/forests to check for group membership across trusts
@@ -170,7 +170,7 @@ Param(
     #     Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
-    #   The currently logged-on user needs at least read access to the path
+    #   The currently logged on user needs at least read access to the path
     [ValidateNotNullOrEmpty()][string]$OOFTemplatePath = '.\templates\Out of Office DOCX',
 
     # An additional path that the signatures shall be copied to
@@ -182,7 +182,7 @@ Param(
     # Use templates in .HTM file format instead of .DOCX
     [switch]$UseHtmTemplates = $false,
 
-    # Simulate another user as currently logged-on user
+    # Simulate another user as currently logged on user
     [string]$SimulationUser = $null,
 
     # Simulate list of mailboxes instead of mailboxes configured in Outlook
@@ -493,9 +493,9 @@ function main {
     Write-Host 'Get AD properties of currently logged on user and assigned manager' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
     if (-not $SimulationUser) {
-        Write-Host '  Currently logged-on user'
+        Write-Host '  Currently logged on user'
     } else {
-        Write-Host "  Simulating '$SimulationUser' as currently logged-on user" -ForegroundColor Yellow
+        Write-Host "  Simulating '$SimulationUser' as currently logged on user" -ForegroundColor Yellow
     }
     try {
         if (-not $SimulationUser) {
@@ -522,7 +522,6 @@ function main {
                 $Search.SearchRoot = "GC://$(($SimulationUserDN -split ',DC=')[1..999] -join '.')"
                 $Search.Filter = "((distinguishedname=$SimulationUserDN))"
                 $ADPropsCurrentUser = $Search.FindOne().Properties
-                Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
             } catch {
                 Write-Host "    Simulation user '$($Simulationuser)' not found. Exiting." -ForegroundColor REd
                 $error[0]
@@ -536,10 +535,12 @@ function main {
         exit 1
     }
 
+    Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
+
     if (-not $SimulationUser) {
-        Write-Host '  Manager of currently logged-on user'
+        Write-Host '  Manager of currently logged on user'
     } else {
-        Write-Host '  Manager of simulated currently logged-on user' -ForegroundColor Yellow
+        Write-Host '  Manager of simulated currently logged on user' -ForegroundColor Yellow
     }
     try {
         $Search.SearchRoot = "GC://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
@@ -552,14 +553,13 @@ function main {
 
 
     Write-Host
-    Write-Host 'Get AD properties of each mailbox and sort mailbox list' -NoNewline
+    Write-Host 'Get AD properties of each mailbox' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
-    Write-Host '  Get AD properties'
     $ADPropsMailboxes = @()
     $ADPropsMailboxesUserDomain = @()
 
     for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
-        Write-Host "    Mailbox $($MailAddresses[$AccountNumberRunning])"
+        Write-Host "  Mailbox $($MailAddresses[$AccountNumberRunning])"
 
         $UserDomain = ''
         $ADPropsMailboxes += $null
@@ -569,7 +569,7 @@ function main {
             # Loop through domains until the first one knows the legacyExchangeDN or the proxy address
             for ($DomainNumber = 0; (($DomainNumber -lt $DomainsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
                 if (($DomainsToCheckForGroups[$DomainNumber] -ne '')) {
-                    Write-Host "      $($DomainsToCheckForGroups[$DomainNumber]) (searching for mailbox user object) ... " -NoNewline
+                    Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (searching for mailbox user object) ... " -NoNewline
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
                     if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
                         $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(msExchMailboxGuid=*)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
@@ -579,10 +579,10 @@ function main {
                     $u = $Search.FindAll()
                     if ($u.count -eq 0) {
                         Write-Host
-                        Write-Host "        '$($MailAddresses[$AccountNumberRunning])' matches no Exchange mailbox." -ForegroundColor Yellow
+                        Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches no Exchange mailbox." -ForegroundColor Yellow
                     } elseif ($u.count -gt 1) {
                         Write-Host
-                        Write-Host "        '$($MailAddresses[$AccountNumberRunning])' matches multiple Exchange mailboxes, ignoring." -ForegroundColor Yellow
+                        Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches multiple Exchange mailboxes, ignoring." -ForegroundColor Yellow
                         $u | ForEach-Object { Write-Host "          $($_.path)" -ForegroundColor Yellow }
                         $LegacyExchangeDNs[$AccountNumberRunning] = ''
                         $MailAddresses[$AccountNumberRunning] = ''
@@ -597,7 +597,7 @@ function main {
                         $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyexchangedn
                         $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
                         Write-Host 'found'
-                        Write-Host "        $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
+                        Write-Host "      $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
                     }
                 }
             }
@@ -614,7 +614,7 @@ function main {
     $p = $null
     # First, check if the user has a mail attribute set
     if ($ADPropsCurrentUser.mail) {
-        Write-Host "  AD mail attribute of currently logged-on user: $($ADPropsCurrentUser.mail)"
+        Write-Host "  AD mail attribute of currently logged on user: $($ADPropsCurrentUser.mail)"
         for ($i = 0; $i -lt $LegacyExchangeDNs.count; $i++) {
             if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -contains $('SMTP:' + $ADPropsCurrentUser.mail))) {
                 $p = $i
@@ -627,7 +627,7 @@ function main {
             Write-Host '    No matching mailbox found' -ForegroundColor Yellow
         }
     } else {
-        Write-Host '  AD mail attribute of currently logged-on user is empty, searching msExchMasterAccountSid'
+        Write-Host '  AD mail attribute of currently logged on user is empty, searching msExchMasterAccountSid'
         # No mail attribute set, check for match(es) of user's objectSID and mailbox's msExchMasterAccountSid
         for ($i = 0; $i -lt $MailAddresses.count; $i++) {
             if ($ADPropsMailboxes[$i].msexchmasteraccountsid) {
@@ -931,9 +931,6 @@ function main {
             Write-Host
             Write-Host "Mailbox $($MailAddresses[$AccountNumberRunning])" -NoNewline
             Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
-            if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                Write-Host "  $($LegacyExchangeDNs[$AccountNumberRunning])"
-            }
 
             $UserDomain = ''
 
@@ -2037,3 +2034,4 @@ try {
     Write-Host 'Script ended' -NoNewline
     Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
 }
+
