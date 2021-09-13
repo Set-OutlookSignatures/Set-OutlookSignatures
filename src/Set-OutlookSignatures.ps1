@@ -514,8 +514,7 @@ function main {
                 $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                 $ADPropsCurrentUser = $Search.FindOne().Properties
             } catch {
-                Write-Host "    Simulation user '$($SimulateUser)' not found. Exiting." -ForegroundColor REd
-                $error[0]
+                Write-Host "    Simulation user '$($SimulateUser)' not found in AD forest $($DomainsToCheckForGroups[0]). Exiting." -ForegroundColor REd
                 exit 1
             }
         }
@@ -549,7 +548,7 @@ function main {
     $ADPropsMailboxesUserDomain = @()
 
     for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
-        Write-Host "  Mailbox $($MailAddresses[$AccountNumberRunning])"
+        Write-Host "  Mailbox '$($MailAddresses[$AccountNumberRunning])'"
 
         $UserDomain = ''
         $ADPropsMailboxes += $null
@@ -569,10 +568,10 @@ function main {
                     $u = $Search.FindAll()
                     if ($u.count -eq 0) {
                         Write-Host
-                        Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches no Exchange mailbox." -ForegroundColor Yellow
+                        Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches no Exchange mailbox."
                     } elseif ($u.count -gt 1) {
                         Write-Host
-                        Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches multiple Exchange mailboxes, ignoring." -ForegroundColor Yellow
+                        Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches multiple Exchange mailboxes, ignoring." -ForegroundColor Red
                         $u | ForEach-Object { Write-Host "          $($_.path)" -ForegroundColor Yellow }
                         $LegacyExchangeDNs[$AccountNumberRunning] = ''
                         $MailAddresses[$AccountNumberRunning] = ''
@@ -663,7 +662,7 @@ function main {
     ('RegistryPaths', 'MailAddresses', 'LegacyExchangeDNs', 'ADPropsMailboxesUserDomain', 'ADPropsMailboxes') | ForEach-Object {
         (Get-Variable -Name $_).value = (Get-Variable -Name $_).value[$MailboxNewOrder]
     }
-    Write-Host '  Mailbox priority (highest to lowest):'
+    Write-Host '  Mailbox priority (highest to lowest)'
     $MailAddresses | ForEach-Object {
         Write-Host "    $_"
     }
