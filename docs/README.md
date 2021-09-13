@@ -62,7 +62,8 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [14.10. How do I start the script from the command line or a scheduled task?](#1410-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
   - [14.11. How to create a shortcut to the script with parameters?](#1411-how-to-create-a-shortcut-to-the-script-with-parameters)
   - [14.12. What is the recommended approach for implementing the software?](#1412-what-is-the-recommended-approach-for-implementing-the-software)
-  - [14.13. What about the new signature roaming feature Microsoft announced?](#1413-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [14.13. What is the recommended approach for custom configuration files?](#1413-what-is-the-recommended-approach-for-custom-configuration-files)
+  - [14.14. What about the new signature roaming feature Microsoft announced?](#1414-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -483,7 +484,19 @@ It contains proven procedures and recommendations for product managers, architec
 It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The document is available in English and German language.  
-## 14.13. What about the new signature roaming feature Microsoft announced?  
+## 14.13. What is the recommended approach for custom configuration files?
+You should not change the default configuration file `'.\config\default replacement variable.ps1'`, as it might be changed in a future release of Set-OutlookSignatures. In this case, you would have to sort out the changes yourself.
+
+The following steps are recommended:
+1. Create a new custom configuration file in a separate folder.
+2. The first step in the new custom configuration file should be to load the default configuration file:
+   ```
+   # Loading default replacement variables shipped with Set-OutlookSignatures
+   . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath '\\server\share\folder\Set-OutlookSignatures\config\default replacement variables.ps1' -Raw)))
+   ```
+3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
+4. Start Set-OutlookSignatures with the parameter `ReplacementVariableConfigFile` pointing to the new custom configuration file.
+## 14.14. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.

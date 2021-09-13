@@ -12,7 +12,18 @@
 # It is required to use full lowercase Active Directory property names.
 #
 # A variable defined in this file overrides the definition of the same variable defined earlier in the script.
-
+#
+#
+# What is the recommended approach for custom configuration files?
+# You should not change the default configuration file `'.\config\default replacement variable.ps1'`, as it might be changed in a future release of Set-OutlookSignatures. In this case, you would have to sort out the changes yourself.
+#
+# The following steps are recommended:
+# 1. Create a new custom configuration file in a separate folder.
+# 2. The first step in the new custom configuration file should be to load the default configuration file:
+#    # Loading default replacement variables shipped with Set-OutlookSignatures
+#    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath '\\server\share\folder\Set-OutlookSignatures\config\default replacement variables.ps1' -Raw)))
+# 3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
+# 4. Start Set-OutlookSignatures with the parameter 'ReplacementVariableConfigFile' pointing to the new custom configuration file.
 
 # Currently logged on user
 $ReplaceHash['$CURRENTUSERGIVENNAME$'] = [string]$ADPropsCurrentUser.givenname
