@@ -9,7 +9,7 @@
 - Assigned time ranges within which they are valid  
 - Set as default signature for new mails, or for replies and forwards (signatures only)  
 - Set as default OOF message for internal or external recipients (OOF messages only)  
-- Set in Outlook Web for the currently logged-on user  
+- Set in Outlook Web for the currently logged on user  
 - Centrally managed only or exist along user created signatures (signatures only)  
 - Copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
   
@@ -53,7 +53,7 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [14.1. Where can I find the changelog?](#141-where-can-i-find-the-changelog)
   - [14.2. How can I contribute, propose a new feature or file a bug?](#142-how-can-i-contribute-propose-a-new-feature-or-file-a-bug)
   - [14.3. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#143-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
-  - [14.4. How is the personal mailbox of the currently logged-on user identified?](#144-how-is-the-personal-mailbox-of-the-currently-logged-on-user-identified)
+  - [14.4. How is the personal mailbox of the currently logged on user identified?](#144-how-is-the-personal-mailbox-of-the-currently-logged-on-user-identified)
   - [14.5. Which ports are required?](#145-which-ports-are-required)
   - [14.6. Why is Out of Office abbreviated OOF and not OOO?](#146-why-is-out-of-office-abbreviated-oof-and-not-ooo)
   - [14.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#147-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
@@ -66,11 +66,11 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
-The script must run in the security context of the currently logged-on user.
+The script must run in the security context of the currently logged on user.
 
 The script must run in PowerShell Full Language mode. Constrained Language mode is not supported, as some features such as BASE64 conversions are not available in this mode or require very slow workarounds. If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell script.
 
-The paths to the template files (SignatureTemplatePath, OOFTemplatePath) must be accessible by the currently logged-on user. The template files must be at least readable for the currently logged-on user.  
+The paths to the template files (SignatureTemplatePath, OOFTemplatePath) must be accessible by the currently logged on user. The template files must be at least readable for the currently logged on user.  
 # 2. Parameters  
 ## 2.1. SignatureTemplatePath  
 The parameter SignatureTemplatePath tells the script where signature template files are stored.
@@ -79,7 +79,7 @@ Local and remote paths are supported. Local paths can be absolute (`'C:\Signatur
 
 WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/SignatureTemplates'` or `'\\server.domain@SSL\SignatureSite\SignatureTemplates'`
 
-The currently logged-on user needs at least read access to the path.
+The currently logged on user needs at least read access to the path.
 
 Default value: `'.\templates\Signatures DOCX'`  
 ## 2.2. ReplacementVariableConfigFile  
@@ -89,13 +89,13 @@ Local and remote paths are supported. Local paths can be absolute (`'C:\config\d
 
 WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/config/default replacement variables.ps1'` or `'\\server.domain@SSL\SignatureSite\config\default replacement variables.ps1'`
 
-The currently logged-on user needs at least read access to the file.
+The currently logged on user needs at least read access to the file.
 
 Default value: `'.\config\default replacement variables.ps1'`  
 ## 2.3. DomainsToCheckForGroups  
 The parameters tells the script which domains should be used to search for mailbox and user group membership.
 
-The default value, `'\*'` tells the script to query all trusted domains in the Active Directory forest of the logged-on user.
+The default value, `'\*'` tells the script to query all trusted domains in the Active Directory forest of the logged on user.
 
 For a custom list of domains/forests, specify them as comma-separated list of strings: `"domain-a.local", "dc=example,dc=com", "domain-b.internal"`.
 
@@ -103,7 +103,7 @@ When a domain/forest in the custom list starts with a dash or minus (`'-domain-a
 
 The `'\*'` entry in a custom list is only considered when it is the first entry of the list.
 
-The Active Directory forest of the currently logged-on user is always considered.
+The Active Directory forest of the currently logged on user is always considered.
 
 Default value: `'*'`  
 ## 2.4. DeleteUserCreatedSignatures  
@@ -133,7 +133,7 @@ Local paths can be absolute (`'C:\OOF templates'`) or relative to the script pat
 
 WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/OOFTemplates'` or `'\\server.domain@SSL\SignatureSite\OOFTemplates'`
 
-The currently logged-on user needs at least read access to the path.
+The currently logged on user needs at least read access to the path.
 
 Default value: `'.\templates\Out of Office DOCX'`  
 ## 2.8. AdditionalSignaturePath  
@@ -148,7 +148,7 @@ Local paths can be absolute (`'C:\Outlook signatures'`) or relative to the scrip
 
 WebDAV paths are supported (https only): `'https://server.domain/User/Outlook signatures'` or `'\\server.domain@SSL\User\Outlook signatures'`
 
-The currently logged-on user needs at least write access to the path.
+The currently logged on user needs at least write access to the path.
 
 Default value: `"$([environment]::GetFolderPath("MyDocuments"))\Outlook signatures"`  
 ## 2.9. AdditionalSignaturePathFolder
@@ -163,7 +163,7 @@ Each format has advantages and disadvantages, please see "[13.5. Should I use .d
 
 Default value: `$false`  
 ## 2.11. SimulationUser  
-SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged-on user.
+SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged on user.
 
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
@@ -185,9 +185,9 @@ This is the same way Outlook handles mailboxes from a signature perspective: Out
 
 The script is created for Exchange environments. Non-Exchange mailboxes can not have OOF messages or group signatures, but common and mailbox specific signatures.  
 # 5. Group membership  
-The script considers all groups the currently logged-on user belongs to, as well as all groups the currently processed mailbox belongs to.
+The script considers all groups the currently logged on user belongs to, as well as all groups the currently processed mailbox belongs to.
 
-For both sets of groups, group membership is evaluated against the whole Active Directory forest of the currently logged-on user, and against all trusted domains the user has access to.
+For both sets of groups, group membership is evaluated against the whole Active Directory forest of the currently logged on user, and against all trusted domains the user has access to.
 
 The script works fine with linked mailboxes in Exchange resource forest scenarios.
 
@@ -230,7 +230,7 @@ Examples:
     - Set template as default OOF message for external recipients  
     - If neither `[internal]` nor `[external]` is defined, the template is set as default OOF message for internal and external recipients  
 - `[<NETBIOS Domain> <Group SamAccountName>]`, e.g. `[EXAMPLE Domain Users]`  
-    - Make this template specific for an Outlook mailbox or the currently logged-on user being a member (direct or indirect) of this group  
+    - Make this template specific for an Outlook mailbox or the currently logged on user being a member (direct or indirect) of this group  
     - Groups must be available in Active Directory. Groups like `'Everyone'` and `'Authenticated Users'` only exist locally, not in Active Directory  
 - `[<SMTP address>]`, e.g. `[office<area>@example.com]`  
     - Make this template specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
@@ -267,7 +267,7 @@ Custom Active directory attributes are supported as well as custom replacement v
 Variables can also be retrieved from other sources than Active Directory by adding custom code to the variable config file.
 
 Per default, `'.\config\default replacement variables.ps1'` contains the following replacement variables:  
-- Currently logged-on user  
+- Currently logged on user  
     - `$CURRENTUSERGIVENNAME$`: Given name  
     - `$CURRENTUSERSURNAME$`: Surname  
     - `$CURRENTUSERDEPARTMENT$`: Department  
@@ -283,18 +283,18 @@ Per default, `'.\config\default replacement variables.ps1'` contains the followi
     - `$CURRENTUSERPHOTO$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
     - `$CURRENTUSERPHOTODELETEEMPTY$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
     - `$CURRENTUSEREXTATTR1$` to `$CURRENTUSEREXTATTR15$`: Exchange Extension Attributes 1 to 15  
-- Manager of currently logged-on user  
-    - Same variables as logged-on user, `$CURRENTUSERMANAGER\[...]$` instead of `$CURRENTUSER\[...]$`  
+- Manager of currently logged on user  
+    - Same variables as logged on user, `$CURRENTUSERMANAGER\[...]$` instead of `$CURRENTUSER\[...]$`  
 - Current mailbox  
-    - Same variables as logged-on user, `$CURRENTMAILBOX\[...]$` instead of `$CURRENTUSER\[...]$`  
+    - Same variables as logged on user, `$CURRENTMAILBOX\[...]$` instead of `$CURRENTUSER\[...]$`  
 - Manager of current mailbox  
-    - Same variables as logged-on user, `$CURRENTMAILBOXMANAGER\[...]$` instead of `$CURRENTMAILBOX[...]$`  
+    - Same variables as logged on user, `$CURRENTMAILBOXMANAGER\[...]$` instead of `$CURRENTMAILBOX[...]$`  
 ## 11.1. Photos from Active Directory  
 The script supports replacing images in signature templates with photos stored in Active Directory.
 
 When using images in OOF templates, please be aware that Exchange and Outlook do not yet support images in OOF messages.
 
-As with other variables, photos can be obtained from the currently logged-on user, it's manager, the currently processed mailbox and it's manager.
+As with other variables, photos can be obtained from the currently logged on user, it's manager, the currently processed mailbox and it's manager.
   
 To be able to apply Word image features such as sizing, cropping, frames, 3D effects etc, you have to exactly follow these steps:  
 1. Create a sample image file which will later be used as placeholder.  
@@ -339,7 +339,7 @@ The script uses a workaround, but the resulting RTF files are still huge compare
 
 If you ran into this problem outside this script, please consider modifying the ExportPictureWithMetafile setting as described in https://support.microsoft.com/kb/224663. If the link is not working, please visit the Internet Archive Wayback Machine's snapshot of Microsoft's article at https://web.archive.org/web/20180827213151/https://support.microsoft.com/en-us/help/224663/document-file-size-increases-with-emf-png-gif-or-jpeg-graphics-in-word.  
 # 12. Outlook Web  
-If the currently logged-on user has configured his personal mailbox in Outlook, the default signature for new emails is configured in Outlook Web automatically.
+If the currently logged on user has configured his personal mailbox in Outlook, the default signature for new emails is configured in Outlook Web automatically.
 
 If the default signature for new mails matches the one used for replies and forwarded mail, this is also set in Outlook.
 
@@ -349,7 +349,7 @@ If only a default signature for replies and forwards is set, only this new signa
 
 If there is no default signature in Outlook, Outlook Web settings are not changed.
 
-All this happens with the credentials of the currently logged-on user, without any interaction neccessary.  
+All this happens with the credentials of the currently logged on user, without any interaction neccessary.  
 # 13. Simulation mode  
 Simulation mode is enabled when the parameter SimulatedUser is passed to the script. It answers the question `"What will the signatures look like for user A, when Outlook is configured for the mailboxes X, Y and Z?"`.
 
@@ -359,7 +359,7 @@ In simulation mode, Outlook registry entries are not considered and nothing is c
 
 The template files are handled just as during a real script run, but only saved to the folder passed by the parameters AdditionalSignaturePath and AdditionalSignaturePath folder.
   
-`SimulationUser` is a mandatory parameter for simulation mode. This value replaces the currently logged-on user. Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
+`SimulationUser` is a mandatory parameter for simulation mode. This value replaces the currently logged on user. Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 `SimulationMailboxes` is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
@@ -379,12 +379,12 @@ The legacyExchangeDN attribute is used to find the user behind a mailbox, becaus
 If Outlook is configured to access mailbox via protocols such as POP3 or IMAP4, the script searches for the legacyExchangeDN using the e-mail address of the mailbox.
 
 Without a legacyExchangeDN, group membership information can not be retrieved. These mailboxes can still receive common and mailbox specific signatures and OOF messages.  
-## 14.4. How is the personal mailbox of the currently logged-on user identified?  
-The personal mailbox of the currently logged-on user is preferred to other mailboxes, as it receives signatures first and is the only mailbox where the Outlook Web signature can be set.
+## 14.4. How is the personal mailbox of the currently logged on user identified?  
+The personal mailbox of the currently logged on user is preferred to other mailboxes, as it receives signatures first and is the only mailbox where the Outlook Web signature can be set.
 
-The personal mailbox is found by simply checking if the Active Directory mail attribute of the currently logged-on user matches an SMTP address of one of the mailboxes connected in Outlook.
+The personal mailbox is found by simply checking if the Active Directory mail attribute of the currently logged on user matches an SMTP address of one of the mailboxes connected in Outlook.
 
-If the mail attribute is not set, the currently logged-on user's objectSID is compared with all the mailboxes' msExchMasterAccountSID. If there is exactly one match, this mailbox is used as primary one.
+If the mail attribute is not set, the currently logged on user's objectSID is compared with all the mailboxes' msExchMasterAccountSID. If there is exactly one match, this mailbox is used as primary one.
   
 Please consider the following caveats regarding the mail attribute:  
 - When Active Directory attributes are directly modified to create or modify users and mailboxes (instead of using Exchange Admin Center or Exchange Management Shell), the mail attribute is often not updated and does not match the primary SMTP address of a mailbox. Microsoft strongly recommends that the mail attribute matches the primary SMTP address.  
