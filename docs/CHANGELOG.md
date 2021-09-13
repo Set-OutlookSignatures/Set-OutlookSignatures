@@ -5,7 +5,7 @@
 
 ## [v2.2.0] - YYYY-MM-DD
 ### Changed
-- Make script compatible with PowerShell versions greater than 5.1 (a.k.a. PowerShell Core based on .Net Standard and .Net Core)
+- Make script compatible with PowerShell Core 7.x on Windows (Linux and MacOS are not supported)
 - Reduce and speed up Active Directory queries by only accepting input in the 'Domain\User' or UPN (User Principal Name) format for the 'SimulateUser' parameter
 - Reduce and speed up Active Directory queries by only accepting e-mail addresses as input for the 'SimulateMailboxes' parameter
 - Revise repository structure, as well as the process for development, build and release
