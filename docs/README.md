@@ -284,11 +284,11 @@ Per default, `'.\config\default replacement variables.ps1'` contains the followi
     - `$CURRENTUSERPHOTODELETEEMPTY$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
     - `$CURRENTUSEREXTATTR1$` to `$CURRENTUSEREXTATTR15$`: Exchange Extension Attributes 1 to 15  
 - Manager of currently logged on user  
-    - Same variables as logged on user, `$CURRENTUSERMANAGER\[...]$` instead of `$CURRENTUSER\[...]$`  
+    - Same variables as logged on user, `$CURRENTUSERMANAGER[...]$` instead of `$CURRENTUSER[...]$`  
 - Current mailbox  
-    - Same variables as logged on user, `$CURRENTMAILBOX\[...]$` instead of `$CURRENTUSER\[...]$`  
+    - Same variables as logged on user, `$CURRENTMAILBOX[...]$` instead of `$CURRENTUSER[...]$`  
 - Manager of current mailbox  
-    - Same variables as logged on user, `$CURRENTMAILBOXMANAGER\[...]$` instead of `$CURRENTMAILBOX[...]$`  
+    - Same variables as logged on user, `$CURRENTMAILBOXMANAGER[...]$` instead of `$CURRENTMAILBOX[...]$`  
 ## 11.1. Photos from Active Directory  
 The script supports replacing images in signature templates with photos stored in Active Directory.
 
