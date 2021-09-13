@@ -33,8 +33,8 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [2.8. AdditionalSignaturePath](#28-additionalsignaturepath)
   - [2.9. AdditionalSignaturePathFolder](#29-additionalsignaturepathfolder)
   - [2.10. UseHtmTemplates](#210-usehtmtemplates)
-  - [2.11. SimulationUser](#211-simulationuser)
-  - [2.12. SimulationMailboxes](#212-simulationmailboxes)
+  - [2.11. SimulateUser](#211-simulateuser)
+  - [2.12. SimulateMailboxes](#212-simulatemailboxes)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -162,14 +162,14 @@ With this parameter, the script searches for templates with the extension .htm i
 Each format has advantages and disadvantages, please see "[13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)" for a quick overview.
 
 Default value: `$false`  
-## 2.11. SimulationUser  
-SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged on user.
+## 2.11. SimulateUser  
+SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged on user.
 
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
-## 2.12. SimulationMailboxes  
-SimulationMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
+## 2.12. SimulateMailboxes  
+SimulateMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
 # 3. Outlook signature path  
@@ -359,11 +359,11 @@ In simulation mode, Outlook registry entries are not considered and nothing is c
 
 The template files are handled just as during a real script run, but only saved to the folder passed by the parameters AdditionalSignaturePath and AdditionalSignaturePath folder.
   
-`SimulationUser` is a mandatory parameter for simulation mode. This value replaces the currently logged on user. Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
+`SimulateUser` is a mandatory parameter for simulation mode. This value replaces the currently logged on user. Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
-`SimulationMailboxes` is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
+`SimulateMailboxes` is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
-**Attention**: Simulation mode only works when the user starting the simulation is at least from the same Active Directory forest as the user defined in SimulationUser.  Users from other forests will not work.  
+**Attention**: Simulation mode only works when the user starting the simulation is at least from the same Active Directory forest as the user defined in SimulateUser.  Users from other forests will not work.  
 # 14. FAQ
 ## 14.1. Where can I find the changelog?
 The changelog is located in the `'.\docs'` folder, along with other documents related to Set-OutlookSignatures.
