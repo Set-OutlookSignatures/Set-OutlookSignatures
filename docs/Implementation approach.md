@@ -134,7 +134,7 @@ In Outlook, practically any number of signatures can be created per mailbox. Thi
 In addition, a standard signature for new e-mails and one for replies can be set per mailbox.   
 ### 1.2.2. Signature in Outlook on the Web
 If you also work with Outlook on the Web, you must set up your signature in Outlook on the Web independently of your signature on the client:  
-1. Log on to <a href="https://mail.example.com" target="_blank">https://mail.example.com</a> in a web browser. Enter your user name and password, then click Log In.  
+1. Log on to <a href="https://mail.example.com" target="_blank">https<area>://mail.example.com</a> in a web browser. Enter your user name and password, then click Log In.  
 2. From the navigation bar, select Settings > Options.  
 3. Under Options, select Settings > Email.  
 4. Enter the signature you want to use in the text field under Email Signature. Use the Format mini toolbar to change the appearance of the signature.  
@@ -492,7 +492,7 @@ In Outlook können pro Postfach praktisch beliebig viele Signaturen erstellt wer
 Pro Postfach kann darüber hinaus eine Standard-Signatur für neue E-Mails und eine für Antworten festgelegt werden.   
 ### 2.2.2. Signatur in Outlook im Web  
 Falls Sie auch mit Outlook im Web arbeiten, müssen Sie sich unabhängig von Ihrer Signatur am Client Ihre Signatur in Outlook im Web einrichten:  
-1. Melden Sie sich in einem Webbrowser auf <a href="https://mail.example.com" target="_blank">https://mail.example.com</a> an. Geben Sie Ihren Benutzernamen und Ihr Kennwort ein, und klicken Sie dann auf Anmelden.  
+1. Melden Sie sich in einem Webbrowser auf <a href="https://mail.example.com" target="_blank">https<area>://mail.example.com</a> an. Geben Sie Ihren Benutzernamen und Ihr Kennwort ein, und klicken Sie dann auf Anmelden.  
 2. Wählen Sie auf der Navigationsleiste Einstellungen > Optionen aus.  
 3. Wählen Sie unter Optionen den Befehl Einstellungen > E-Mail aus.  
 4. Geben Sie im Textfeld unter E-Mail-Signatur die Signatur ein, die Sie verwenden möchten. Verwenden Sie die Minisymbolleiste "Formatieren", um das Aussehen der Signatur zu ändern.  
