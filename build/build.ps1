@@ -92,7 +92,7 @@ function main {
     $ChangelogEndline = $null
     for ($i = 0; $i -lt $ChangeLogLines.count; $i++) {
         if (-not $ChangelogStartline) {
-            if ($ChangeLogLines[$i] -match ("^## \t*(\[$ReleaseTag\] \t*|$ReleaseTag \t*|$ReleaseTag$)")) {
+            if ($ChangeLogLines[$i] -match ("^## \t*(\[$ReleaseTag\] \t*|$ReleaseTag \t*|$ReleaseTag$)|>$ReleaseTag<")) {
                 $ChangelogStartline = $i
                 continue
             }
