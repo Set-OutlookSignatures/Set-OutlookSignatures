@@ -205,6 +205,13 @@ function main {
 
     $HTMLMarkerTag = '<meta name=data-SignatureFileInfo content="Set-OutlookSignatures.ps1">'
 
+    if (-not (Test-Path 'variable:IsWindows')) {
+        # Automatic variable $IsWindows not set, must be Powershell version lower than 6 running on Windows
+        $IsWindows = $true
+        $IsLinux = $IsMacOS = $false
+    }
+
+    $script:tempDir = [System.IO.Path]::GetTempPath()
 
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
@@ -217,17 +224,8 @@ function main {
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
-    if (-not (Test-Path 'variable:IsWindows')) {
-        # Automatic variable $IsWindows not set, must be Powershell version lower than 6 running on Windows
-        $IsWindows = $true
-        $IsLinux = $IsMacOS = $false
-    }
-
-    $script:tempDir = [System.IO.Path]::GetTempPath()
-
     if ($IsWindows -eq $false) {
         Write-Host '  This script is supported on Windows, but not on Linux or macOS. Exiting.' -ForegroundColor Red
-        Write-Host '  Required features are only available in FullLanguage mode. Exiting.' -ForegroundColor Red
         exit 1
     }
 
@@ -501,10 +499,10 @@ function main {
                 # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
                 Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Adding Mailbox dummy entry." -ForegroundColor Yellow
                 $script:CurrentUserDummyMailbox = $true
-                $SignaturePaths = @(New-Item -ItemType Directory (((Join-Path -Path $script:tempDir -ChildPath (New-Guid).guid)).fullname)) + $SignaturePaths
-                $MailAddresses = (@($ADPropsCurrentUser.mail) + $MailAddresses)
-                $RegistryPaths = (@("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths)
-                $LegacyExchangeDNs = (@('') + $LegacyExchangeDNs)
+                $SignaturePaths = @((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath New-Guid.guid)).fullname) + $SignaturePaths
+                $MailAddresses = @($ADPropsCurrentUser.mail) + $MailAddresses
+                $RegistryPaths = @("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths
+                $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
             } else {
                 $script:CurrentUserDummyMailbox = $false
             }
