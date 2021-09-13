@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally&nbsp;manage&nbsp;and&nbsp;deploy Outlook&nbsp;text&nbsp;signatures&nbsp;and Out&nbsp;of&nbsp;Office&nbsp;auto&nbsp;reply&nbsp;messages.<br><a href="https://github.com/GruberMarkus/Set-OutlookSignatures/blob/main/license.txt"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://www.paypal.com/donate?business=JBM584K3L5PX4&no_recurring=0&currency_code=EUR"><img src="https://img.shields.io/badge/sponsor-grey?logo=paypal" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
+# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally&nbsp;manage&nbsp;and&nbsp;deploy Outlook&nbsp;text&nbsp;signatures&nbsp;and Out&nbsp;of&nbsp;Office&nbsp;auto&nbsp;reply&nbsp;messages.<br><a href="https://github.com/GruberMarkus/Set-OutlookSignatures/blob/main/license.txt" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt="License"></a> <a href="https://www.paypal.com/donate?business=JBM584K3L5PX4&no_recurring=0&currency_code=EUR" target="_blank"><img src="https://img.shields.io/badge/sponsor-grey?logo=paypal" alt="Sponsor"></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="Views" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="Clones" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="Forks" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="Downloads" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="Stars" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="Issues" data-external="1"></a>  
 
 # What is the recommended approach for implementing the software? <!-- omit in toc -->
 There is certainly no definitive generic recommendation, but this document should be a good starting point.
@@ -134,7 +134,7 @@ In Outlook, practically any number of signatures can be created per mailbox. Thi
 In addition, a standard signature for new e-mails and one for replies can be set per mailbox.   
 ### 1.2.2. Signature in Outlook on the Web
 If you also work with Outlook on the Web, you must set up your signature in Outlook on the Web independently of your signature on the client:  
-1. Log on to https://mail.example.com in a web browser. Enter your user name and password, then click Log In.  
+1. Log on to <a href="https://mail.example.com" target="_blank">https://mail.example.com</a> in a web browser. Enter your user name and password, then click Log In.  
 2. From the navigation bar, select Settings > Options.  
 3. Under Options, select Settings > Email.  
 4. Enter the signature you want to use in the text field under Email Signature. Use the Format mini toolbar to change the appearance of the signature.  
@@ -192,7 +192,7 @@ The service provider recommends the free open-source software Set-OutlookSignatu
 This document provides an overview of the functional scope and administration of the recommended solution, support of the service provider during implementation and operation, as well as associated expenses.  
 ### 1.5.1. Scope of functions  
 #### 1.5.1.1. General description, licence model  
-Set-OutlookSignatures (https://github.com/GruberMarkus/Set-OutlookSignatures) is a free open source product.  
+<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank">Set-OutlookSignatures</a> is a free open source product.  
 The product is used for the central administration and local distribution of textual signatures and out-of-office messages to clients. Outlook on Windows is supported as the target platform.
 
 By using the MIT licence, there are virtually no restrictions on the use or modification of the existing code, even for commercial use.
@@ -226,7 +226,7 @@ The product is designed for large and complex environments (Exchange Resource Fo
 - If AppLocker or comparable solutions are used, the script may need to be digitally signed.  
 - Network releases:  
 	- Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, must be enabled between the client and all domain controllers. If this is not the case, signature-relevant information and variables cannot be retrieved. The script checks with each run whether access is possible.  
-	- To access the SMB file share with the script components, the following ports are required: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details see https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)).  
+	- To access the SMB file share with the script components, the following ports are required: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details see <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)" target="_blank">this Microsoft article</a>).  
 	- Port 443 TCP is required to access WebDAV shares (e.g. SharePoint document libraries).  
 #### 1.6.1.2. Server
 - An SMB file share in which the script and its components are stored. All users must have read access to this file share and its contents.  
@@ -492,7 +492,7 @@ In Outlook können pro Postfach praktisch beliebig viele Signaturen erstellt wer
 Pro Postfach kann darüber hinaus eine Standard-Signatur für neue E-Mails und eine für Antworten festgelegt werden.   
 ### 2.2.2. Signatur in Outlook im Web  
 Falls Sie auch mit Outlook im Web arbeiten, müssen Sie sich unabhängig von Ihrer Signatur am Client Ihre Signatur in Outlook im Web einrichten:  
-1. Melden Sie sich in einem Webbrowser auf https://mail.example.com an. Geben Sie Ihren Benutzernamen und Ihr Kennwort ein, und klicken Sie dann auf Anmelden.  
+1. Melden Sie sich in einem Webbrowser auf <a href="https://mail.example.com" target="_blank">https://mail.example.com</a> an. Geben Sie Ihren Benutzernamen und Ihr Kennwort ein, und klicken Sie dann auf Anmelden.  
 2. Wählen Sie auf der Navigationsleiste Einstellungen > Optionen aus.  
 3. Wählen Sie unter Optionen den Befehl Einstellungen > E-Mail aus.  
 4. Geben Sie im Textfeld unter E-Mail-Signatur die Signatur ein, die Sie verwenden möchten. Verwenden Sie die Minisymbolleiste "Formatieren", um das Aussehen der Signatur zu ändern.  
@@ -548,7 +548,7 @@ Der Service-Provider empfiehlt nach einer Erhebung der Kundenanforderungen und T
 Dieses Dokument bietet einen Überblick über Funktionsumfang und Administration der empfohlenen Lösung, Unterstützung des Service-Providers bei Einführung und Betrieb, sowie damit verbundene Aufwände.  
 ### 2.5.1. Funktionsumfang  
 #### 2.5.1.1. Allgemeine Beschreibung, Lizenzmodell  
-Set-OutlookSignatures (https://github.com/GruberMarkus/Set-OutlookSignatures) ist ein kostenloses Open-Source-Produkt.
+<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank">Set-OutlookSignatures</a> ist ein kostenloses Open-Source-Produkt.
 
 Das Produkt dient der zentralen Verwaltung und lokalen Verteilung textueller Signaturen und Abwesenheits-Nachrichten auf Clients. Als Zielplattform wird dabei Outlook auf Windows unterstützt.
 
@@ -583,7 +583,7 @@ Das Produkt ist auf große und komplexe Umgebungen ausgelegt (Exchange Resource 
 - Falls AppLocker oder vergleichbare Lösungen zum Einsatz kommen, muss das Script möglicherweise digital signiert werden.  
 - Netzwerkfreischaltungen:  
 	- Die Ports 389 (LDAP) and 3268 (Global Catalog), jeweils TCP and UDP, müssen zwischen Client und allen Domain Controllern freigeschaltet sein. Falls dies nicht der Fall ist, können signaturrelevante Informationen und Variablen nicht abgerufen werden. Das Script prüft bei jedem Lauf, ob der Zugriff möglich ist.  
-	- Für den Zugriff auf den SMB-File-Share mit den Script-Komponenten werden folgende Ports benötigt: 137 UDP, 138 UDP, 139 TCP, 445 TCP (Details siehe https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)).  
+	- Für den Zugriff auf den SMB-File-Share mit den Script-Komponenten werden folgende Ports benötigt: 137 UDP, 138 UDP, 139 TCP, 445 TCP (Details <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)" target="_blank">in diesem Microsoft-Artikel</a>).  
 	- Für den Zugriff auf WebDAV-Shares (z. B. SharePoint Dokumentbibliotheken) wird Port 443 TCP benötigt.  
 #### 2.6.1.2. Server  
 - Ein SMB-File-Share, in den das Script und seine Komponenten abgelegt werden. Auf diesen File-Share und seine Inhalte müssen alle Benutzer lesend zugreifen können.  
