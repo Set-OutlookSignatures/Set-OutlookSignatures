@@ -5,7 +5,7 @@
 **Signatures and OOF messages can be:**
 - Generated from templates in DOCX or HTML file format  
 - Customized with a broad range of variables, including photos, from Active Directory and other sources  
-- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific email addresses, for every primary mailbox across all Outlook profiles  
+- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles  
 - Assigned time ranges within which they are valid  
 - Set as default signature for new mails, or for replies and forwards (signatures only)  
 - Set as default OOF message for internal or external recipients (OOF messages only)  
@@ -141,7 +141,7 @@ Default value: `'.\templates\Out of Office DOCX'`
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
 
-This way, the user can easily copy-paste his preferred preconfigured signature for use in a mail app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
+This way, the user can easily copy-paste his preferred preconfigured signature for use in an e-mail app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
 
 Local and remote paths are supported.
 
@@ -234,18 +234,18 @@ Examples:
     - Make this template specific for an Outlook mailbox or the currently logged on user being a member (direct or indirect) of this group  
     - Groups must be available in Active Directory. Groups like `'Everyone'` and `'Authenticated Users'` only exist locally, not in Active Directory  
 - `[<SMTP address>]`, e.g. `[office<area>@example.com]`  
-    - Make this template specific for the assigned mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
+    - Make this template specific for the assigned e-mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
 - `[yyyyMMddHHmm-yyyyMMddHHmm]`, e.g. `[202112150000-202112262359]` for the 2021 Christmas season  
     - Make this template valid only during the specific time range (`yyyy` = year, `MM` = month, `dd` = day, `HH` = hour, `mm` = minute)  
     - If the script does not run after a template has expired, the template is still available on the client and can be used.
 
-Filename tags can be combined: A template may be assigned to several groups, several mail addresses and several time ranges, be used as default signature for new e-mails and as default signature for replies and forwards at the same time.
+Filename tags can be combined: A template may be assigned to several groups, several e-mail addresses and several time ranges, be used as default signature for new e-mails and as default signature for replies and forwards at the same time.
 
 The number of possible tags is limited by Operating System file name and path length restrictions only.  
 On Powershell 7+, the script works with path names longer than the default Windows limit of 260 characters.  
 On Powershell 5.1, enable "LongPathsEnabled" on the Operating System level as described in <a href="https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation" target="_blank">this Microsoft article</a>.  
 # 10. Signature and OOF application order  
-Templates are applied in a specific order: Common tempaltes first, group templates second, mail address specific templates last.
+Templates are applied in a specific order: Common tempaltes first, group templates second, e-mail address specific templates last.
 
 Templates with a time range tag are only considered if the current system time is in range of at least one of these tags.
 
@@ -263,7 +263,7 @@ Variables are case sensitive.
 
 Variables are replaced everywhere, including links, QuickTips and alternative text of images.
 
-With this feature, you can not only show mail addresses and telephone numbers in the signature and OOF message, but show them as links which open a new mail message (`"mailto:"`) or dial the number (`"tel:"`) via a locally installed softphone when clicked.
+With this feature, you can not only show e-mail addresses and telephone numbers in the signature and OOF message, but show them as links which open a new mail message (`"mailto:"`) or dial the number (`"tel:"`) via a locally installed softphone when clicked.
 
 Custom Active directory attributes are supported as well as custom replacement variables, see `'.\config\default replacement variables.ps1'` for details.
 
@@ -282,7 +282,7 @@ Per default, `'.\config\default replacement variables.ps1'` contains the followi
     - `$CURRENTUSERTELEPHONE$`: Telephone number  
     - `$CURRENTUSERFAX$`: Facsimile number  
     - `$CURRENTUSERMOBILE$`: Mobile phone  
-    - `$CURRENTUSERMAIL$`: Mail address  
+    - `$CURRENTUSERMAIL$`: E-mail address  
     - `$CURRENTUSERPHOTO$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
     - `$CURRENTUSERPHOTODELETEEMPTY$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
     - `$CURRENTUSEREXTATTR1$` to `$CURRENTUSEREXTATTR15$`: Exchange Extension Attributes 1 to 15  
@@ -482,7 +482,7 @@ There is certainly no definitive generic recommendation, but the file `'.\docs\I
 
 The content is based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes.
 
-It contains proven procedures and recommendations for product managers, architects, operations managers, account managers and mail and client administrators. It is suited for service providers as well as for clients.
+It contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators. It is suited for service providers as well as for clients.
 
 It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
@@ -506,7 +506,7 @@ This is a good idea, as it makes signatures available across devices and avoids 
 
 Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).
 
-Microsoft has stated that only cloud mailboxes support the new feature and that Outlook for Windows will be the only client supporting the new feature for now. I am confident more mail clients will follow soon. Future will tell if the feature will be made available for mailboxes on premises, too.
+Microsoft has stated that only cloud mailboxes support the new feature and that Outlook for Windows will be the only client supporting the new feature for now. I am confident more e-mail clients will follow soon. Future will tell if the feature will be made available for mailboxes on premises, too.
 
 Currently, there is no detailed documentation and no API available to programatically access the new feature.
 

@@ -8,7 +8,7 @@ Centrally manage and deploy Outlook text signatures and Out of Office auto reply
 Signatures and OOF messages can be:
 - Generated from templates in DOCX or HTML file format
 - Customized with a broad range of variables, including photos, from Active Directory and other sources
-- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific email addresses, for every primary mailbox across all Outlook profiles
+- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles
 - Assigned time ranges within which they are valid
 - Set as default signature for new mails, or for replies and forwards (signatures only)
 - Set as default OOF message for internal or external recipients (OOF messages only)
@@ -73,7 +73,7 @@ Default value: '.\templates\Out of Office DOCX'
 .PARAMETER AdditionalSignaturePath
 An additional path that the signatures shall be copied to.
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
-This way, the user can easily copy-paste the preferred preconfigured signature for use in a mail app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
+This way, the user can easily copy-paste the preferred preconfigured signature for use in an e-mail app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
 Local and remote paths are supported.
 Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
 WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
@@ -183,12 +183,12 @@ Param(
     [switch]$UseHtmTemplates = $false,
 
     # Simulate another user as currently logged on user
-    [Alias("SimulationUser")]
+    [Alias('SimulationUser')]
     [string]$SimulateUser = $null,
 
     # Simulate list of mailboxes instead of mailboxes configured in Outlook
     # Works only together with SimulateUser
-    [Alias("SimulationMailboxes")]
+    [Alias('SimulationMailboxes')]
     [string[]]$SimulateMailboxes = ('')
 )
 
@@ -352,7 +352,7 @@ function main {
 
 
     Write-Host
-    Write-Host "Get mail addresses from Outlook profiles and corresponding registry paths @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    Write-Host "Get e-mail addresses from Outlook profiles and corresponding registry paths @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $MailAddresses = @()
     $RegistryPaths = @()
     $LegacyExchangeDNs = @()
@@ -911,7 +911,7 @@ function main {
     }
 
 
-    # Process each mail address only once
+    # Process each e-mail address only once
     for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
         if (($AccountNumberRunning -le $MailAddresses.IndexOf($MailAddresses[$AccountNumberRunning])) -and ($($MailAddresses[$AccountNumberRunning]) -like '*@*')) {
             Write-Host
@@ -1059,9 +1059,14 @@ function main {
             }
 
             Write-Host "  Process common signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-            foreach ($Signature in ($SignatureFilesCommon.GetEnumerator() | Sort-Object -Property Name)) {
-                Set-Signatures
+            if ($SignatureFilesCommon.count -gt 0) {
+                foreach ($Signature in ($SignatureFilesCommon.GetEnumerator() | Sort-Object -Property Name)) {
+                    Set-Signatures
+                }
+            } else {
+                Write-Host '    Found no common signatures for this mailbox.'
             }
+
 
             Write-Host "  Process group specific signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $SignatureHash = @{}
@@ -1073,15 +1078,19 @@ function main {
                         }
                     }
                 }
-                foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object -Property Name)) {
-                    Set-Signatures
+                if ($SignatureHash.count -gt 0) {
+                    foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object -Property Name)) {
+                        Set-Signatures
+                    }
+                } else {
+                    Write-Host '    Found no group specific signatures for this mailbox.'
                 }
             } else {
                 $CurrentMailboxSMTPAddresses += $($MailAddresses[$AccountNumberRunning])
                 Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor Yellow
             }
 
-            Write-Host "  Process mail address specific signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            Write-Host "  Process e-mail address specific signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $SignatureHash = @{}
             foreach ($x in ($SignatureFilesMailboxFilePart.GetEnumerator() | Sort-Object -Property Name)) {
                 foreach ($y in $CurrentMailboxSMTPAddresses) {
@@ -1090,8 +1099,12 @@ function main {
                     }
                 }
             }
-            foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object -Property Name)) {
-                Set-Signatures
+            if ($SignatureHash.count -gt 0) {
+                foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object -Property Name)) {
+                    Set-Signatures
+                }
+            } else {
+                Write-Host '    Found no e-mail address specific signatures for this mailbox.'
             }
 
             # Delete photos from file system
@@ -1294,7 +1307,7 @@ function main {
                             $CurrentMailboxSMTPAddresses += $($MailAddresses[$AccountNumberRunning])
                             Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor Yellow
                         }
-                        # Third, loop through mail address specific OOF files
+                        # Third, loop through e-mail address specific OOF files
                         foreach ($x in ($OOFFilesMailboxFilePart.GetEnumerator() | Sort-Object -Property Name)) {
                             foreach ($y in ($CurrentMailboxSMTPAddresses | Sort-Object -Property Name)) {
                                 if ($x.Value.tolower().contains('[' + $y.tolower() + ']')) {
@@ -1417,9 +1430,9 @@ function main {
     if ($AdditionalSignaturePath) {
         Write-Host
         Write-Host "Copy signatures to AdditionalSignaturePath @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-        Write-Host "  $AdditionalSignaturePath"
+        Write-Host "  '$AdditionalSignaturePath'"
         if ($SimulateUser) {
-            Write-Host '  Simulation mode enabled, skipping task' -ForegroundColor Yellow
+            Write-Host '    Simulation mode enabled, skipping task' -ForegroundColor Yellow
         } else {
             if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
                 New-Item -Path $AdditionalSignaturePath -ItemType Directory -Force | Out-Null
@@ -1787,7 +1800,7 @@ function Set-Signatures {
             }
         }
 
-        Write-Host "      Remove temporary files"
+        Write-Host '      Remove temporary files'
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.docx')) -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Force -Recurse -ErrorAction SilentlyContinue
@@ -1979,7 +1992,7 @@ function CheckPath([string]$path) {
 
 
 try {
-    clear-host
+    Clear-Host
 
     Write-Host "Script started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
