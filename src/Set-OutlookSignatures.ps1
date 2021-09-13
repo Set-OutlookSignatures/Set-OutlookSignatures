@@ -499,7 +499,7 @@ function main {
                 # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
                 Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Adding Mailbox dummy entry." -ForegroundColor Yellow
                 $script:CurrentUserDummyMailbox = $true
-                $SignaturePaths = @((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath New-Guid.guid)).fullname) + $SignaturePaths
+                $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
                 $MailAddresses = @($ADPropsCurrentUser.mail) + $MailAddresses
                 $RegistryPaths = @("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths
                 $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
