@@ -1901,7 +1901,7 @@ function CheckADConnectivity {
                     $data = $_.Object[0..$(($_.object).count - 1)]
                     Write-Host "$Indent$($data[0])"
                     if ($data -icontains 'QueryPassed') {
-                        Write-Host "$Indent  $CheckProtocolText query successful."
+                        Write-Host "$Indent  $CheckProtocolText query successful"
                         $returnvalue = $true
                     } else {
                         Write-Host "$Indent  $CheckProtocolText query failed, removing domain from list." -ForegroundColor Red
