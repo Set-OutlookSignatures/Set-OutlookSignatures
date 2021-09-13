@@ -946,7 +946,6 @@ function main {
                         $GroupsSIDs += $sid.tostring()
                         Write-Host "      $sid"
                     }
-                    if ($GroupsSIDs.count -eq 0) {write-host "      No group memberships found."}
                     $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
                     $SIDsToCheckInTrusts += $UserAccount.properties.tokengroupsglobalanduniversal
                 } catch {
@@ -996,7 +995,6 @@ function main {
                                     $GroupsSIDs += $sid.tostring()
                                     Write-Host "      $sid"
                                 }
-                                if ($GroupsSIDs.count -eq 0) {write-host "      No group memberships found."}
                             }
                         }
                     }
