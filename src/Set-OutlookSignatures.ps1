@@ -994,7 +994,7 @@ function main {
                                 foreach ($group in $Search.findall()) {
                                     $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
                                     $GroupsSIDs += $sid.tostring()
-                                    Write-Host "        $sid"
+                                    Write-Host "      $sid"
                                 }
                             }
                         }
