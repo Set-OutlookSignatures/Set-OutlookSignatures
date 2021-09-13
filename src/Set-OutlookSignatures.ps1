@@ -90,12 +90,12 @@ With this parameter, the script searches for templates with the extension .htm i
 Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
 Default value: \$false
 
-.PARAMETER SimulationUser
-SimulationUser is a mandatory parameter for simulation mode. This value replaces the currently logged on user.
+.PARAMETER SimulateUser
+SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged on user.
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
-.PARAMETER SimulationMailboxes
-SimulationMailboxes is optional for simulation mode, although highly recommended.
+.PARAMETER SimulateMailboxes
+SimulateMailboxes is optional for simulation mode, although highly recommended.
 It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
 .INPUTS
@@ -183,11 +183,13 @@ Param(
     [switch]$UseHtmTemplates = $false,
 
     # Simulate another user as currently logged on user
-    [string]$SimulationUser = $null,
+    [Alias("SimulationUser")]
+    [string]$SimulateUser = $null,
 
     # Simulate list of mailboxes instead of mailboxes configured in Outlook
-    # Works only together with SimulationUser
-    [string[]]$SimulationMailboxes = ('')
+    # Works only together with SimulateUser
+    [Alias("SimulationMailboxes")]
+    [string[]]$SimulateMailboxes = ('')
 )
 
 
@@ -205,8 +207,7 @@ function main {
 
 
     Write-Host
-    Write-Host 'Script notes' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     (((Get-Help -Full $PSCommandPath).alertSet.alert.Text) -split "`r?`n").Trim() | ForEach-Object {
         $x = ($_.split(':', 2)).trim()
         Write-Host "  $($x[0].trim()): $($x[1].trim())"
@@ -214,8 +215,7 @@ function main {
 
 
     Write-Host
-    Write-Host 'Check parameters and script environment' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
     if (-not (Test-Path 'variable:IsWindows')) {
         # Automatic variable $IsWindows not set, must be Powershell version lower than 6 running on Windows
@@ -255,8 +255,8 @@ function main {
     CheckPath $AdditionalSignaturePath
     Write-Host "  AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
     Write-Host "  UseHtmTemplates: '$UseHtmTemplates'"
-    Write-Host "  SimulationUser: '$SimulationUser'"
-    Write-Host ('  SimulationMailboxes: ' + ('''' + $($SimulationMailboxes -join ''', ''') + ''''))
+    Write-Host "  SimulateUser: '$SimulateUser'"
+    Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
 
     if ($AdditionalSignaturePathFolder -and $AdditionalSignaturePath) {
         $AdditionalSignaturePath = ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath $AdditionalSignaturePathFolder))
@@ -267,7 +267,7 @@ function main {
                     throw
                 }
             }
-            if ($SimulationUser) {
+            if ($SimulateUser) {
                 New-Item -Path ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath 'OOF')) -ItemType directory -Force | Out-Null
                 if (-not (Test-Path -LiteralPath ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath 'OOF')) -PathType Container)) {
                     throw
@@ -291,16 +291,15 @@ function main {
         Set-Variable -Name $_ -Value $path
     }
 
-    if ($SimulationUser) {
+    if ($SimulateUser) {
         Write-Host
         Write-Host 'Simulation mode enabled' -ForegroundColor Yellow
     }
 
 
     Write-Host
-    Write-Host 'Get Outlook version and profile' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
-    if ($SimulationUser) {
+    Write-Host "Get Outlook version and profile @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    if ($SimulateUser) {
         Write-Host '  Simulation mode enabled, skipping task' -ForegroundColor Yellow
     } else {
         $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
@@ -333,10 +332,9 @@ function main {
 
 
     Write-Host
-    Write-Host 'Get Outlook signature file path(s)' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Get Outlook signature file path(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $SignaturePaths = @()
-    if ($SimulationUser) {
+    if ($SimulateUser) {
         $SignaturePaths = $AdditionalSignaturePath
         Write-Host '  Simulation mode enabled, skipping task, using AdditionalSignaturePath instead' -ForegroundColor Yellow
     } else {
@@ -356,16 +354,15 @@ function main {
 
 
     Write-Host
-    Write-Host 'Get mail addresses from Outlook profiles and corresponding registry paths' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Get mail addresses from Outlook profiles and corresponding registry paths @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $MailAddresses = @()
     $RegistryPaths = @()
     $LegacyExchangeDNs = @()
 
-    if ($SimulationUser) {
-        Write-Host '  Simulation mode enabled, skipping task, using SimulationMailboxes instead' -ForegroundColor Yellow
-        for ($i = 0; $i -lt $SimulationMailboxes.count; $i++) {
-            $MailAddresses += $SimulationMailboxes[$i]
+    if ($SimulateUser) {
+        Write-Host '  Simulation mode enabled, skipping task, using SimulateMailboxes instead' -ForegroundColor Yellow
+        for ($i = 0; $i -lt $SimulateMailboxes.count; $i++) {
+            $MailAddresses += $SimulateMailboxes[$i]
             $RegistryPaths += ''
             $LegacyExchangeDNs += ''
         }
@@ -385,8 +382,7 @@ function main {
 
 
     Write-Host
-    Write-Host 'Enumerate domains' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Enumerate domains @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $x = $DomainsToCheckForGroups
     [System.Collections.ArrayList]$DomainsToCheckForGroups = @()
 
@@ -478,27 +474,24 @@ function main {
 
 
     Write-Host
-    Write-Host 'Check for open LDAP port and connectivity' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Check for open LDAP port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     CheckADConnectivity $DomainsToCheckForGroups 'LDAP' '  ' | Out-Null
 
 
     Write-Host
-    Write-Host 'Check for open Global Catalog port and connectivity' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Check for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     CheckADConnectivity $DomainsToCheckForGroups 'GC' '  ' | Out-Null
 
 
     Write-Host
-    Write-Host 'Get AD properties of currently logged on user and assigned manager' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
-    if (-not $SimulationUser) {
+    Write-Host "Get AD properties of currently logged on user and assigned manager @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    if (-not $SimulateUser) {
         Write-Host '  Currently logged on user'
     } else {
-        Write-Host "  Simulating '$SimulationUser' as currently logged on user" -ForegroundColor Yellow
+        Write-Host "  Simulating '$SimulateUser' as currently logged on user" -ForegroundColor Yellow
     }
     try {
-        if (-not $SimulationUser) {
+        if (-not $SimulateUser) {
             $Search.SearchRoot = "GC://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
             $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
             $ADPropsCurrentUser = $Search.FindOne().Properties
@@ -517,13 +510,13 @@ function main {
             }
         } else {
             try {
-                $SimulationUserSID = (New-Object System.Security.Principal.NTAccount($SimulationUser)).Translate([System.Security.Principal.SecurityIdentifier]).value
-                $SimulationUserDN = ([adsi]"LDAP://<SID=$SimulationUserSID>").distinguishedname
-                $Search.SearchRoot = "GC://$(($SimulationUserDN -split ',DC=')[1..999] -join '.')"
-                $Search.Filter = "((distinguishedname=$SimulationUserDN))"
+                $SimulateUserSID = (New-Object System.Security.Principal.NTAccount($SimulateUser)).Translate([System.Security.Principal.SecurityIdentifier]).value
+                $SimulateUserDN = ([adsi]"LDAP://<SID=$SimulateUserSID>").distinguishedname
+                $Search.SearchRoot = "GC://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
+                $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                 $ADPropsCurrentUser = $Search.FindOne().Properties
             } catch {
-                Write-Host "    Simulation user '$($Simulationuser)' not found. Exiting." -ForegroundColor REd
+                Write-Host "    Simulation user '$($SimulateUser)' not found. Exiting." -ForegroundColor REd
                 $error[0]
                 exit 1
             }
@@ -537,7 +530,7 @@ function main {
 
     Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
 
-    if (-not $SimulationUser) {
+    if (-not $SimulateUser) {
         Write-Host '  Manager of currently logged on user'
     } else {
         Write-Host '  Manager of simulated currently logged on user' -ForegroundColor Yellow
@@ -553,8 +546,7 @@ function main {
 
 
     Write-Host
-    Write-Host 'Get AD properties of each mailbox' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Get AD properties of each mailbox @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $ADPropsMailboxes = @()
     $ADPropsMailboxesUserDomain = @()
 
@@ -608,8 +600,7 @@ function main {
 
 
     Write-Host
-    Write-Host "Sort mailbox list: User's primary mailbox, mailboxes in default Outlook profile, others" -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Sort mailbox list: User's primary mailbox, mailboxes in default Outlook profile, others @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     # Get users primary mailbox
     $p = $null
     # First, check if the user has a mail attribute set
@@ -681,8 +672,7 @@ function main {
 
 
     Write-Host
-    Write-Host 'Get all signature template files and categorize them' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Get all signature template files and categorize them @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $SignatureFilesCommon = @{}
     $SignatureFilesGroup = @{}
     $SignatureFilesGroupFilePart = @{}
@@ -796,8 +786,7 @@ function main {
 
     if ($SetCurrentUserOOFMessage) {
         Write-Host
-        Write-Host 'Get all Out of Office (OOF) auto reply template files and categorize them' -NoNewline
-        Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+        Write-Host "Get all Out of Office (OOF) auto reply template files and categorize them @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         $OOFFilesCommon = @{}
         $OOFFilesGroup = @{}
         $OOFFilesGroupFilePart = @{}
@@ -911,8 +900,7 @@ function main {
 
 
     Write-Host
-    Write-Host 'Start Word background process for template editing' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Start Word background process for template editing @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     try {
         $script:COMWord = New-Object -ComObject word.application
         if ($($PSVersionTable.PSEdition) -ieq 'Core') {
@@ -929,16 +917,13 @@ function main {
     for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
         if (($AccountNumberRunning -le $MailAddresses.IndexOf($MailAddresses[$AccountNumberRunning])) -and ($($MailAddresses[$AccountNumberRunning]) -like '*@*')) {
             Write-Host
-            Write-Host "Mailbox $($MailAddresses[$AccountNumberRunning])" -NoNewline
-            Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+            Write-Host "Mailbox $($MailAddresses[$AccountNumberRunning]) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
             $UserDomain = ''
 
-            Write-Host '  Get group membership of mailbox' -NoNewline
-            Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+            Write-Host "  Get group membership of mailbox @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             if ($($ADPropsMailboxesUserDomain[$AccountNumberRunning])) {
-                Write-Host "    $($ADPropsMailboxesUserDomain[$AccountNumberRunning])" -NoNewline
-                Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+                Write-Host "    $($ADPropsMailboxesUserDomain[$AccountNumberRunning]) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             }
             $GroupsSIDs = @()
 
@@ -994,8 +979,7 @@ function main {
 
                 for ($DomainNumber = 0; $DomainNumber -lt $DomainsToCheckForGroups.count; $DomainNumber++) {
                     if (($DomainsToCheckForGroups[$DomainNumber] -ne '') -and ($DomainsToCheckForGroups[$DomainNumber] -ine $UserDomain) -and ($UserDomain -ne '')) {
-                        Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (mailbox group membership across trusts, takes some time)" -NoNewline
-                        Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+                        Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (mailbox group membership across trusts, takes some time) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
                         $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
 
@@ -1022,8 +1006,7 @@ function main {
                 Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor yellow
             }
 
-            Write-Host '  SMTP addresses' -NoNewline
-            Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+            Write-Host "  SMTP addresses @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $CurrentMailboxSMTPAddresses = @()
             if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
                 $ADPropsCurrentMailbox.proxyaddresses | ForEach-Object {
@@ -1038,8 +1021,7 @@ function main {
                 Write-Host '    Using mailbox name as single known SMTP address' -ForegroundColor Yellow
             }
 
-            Write-Host '  Data for replacement variables' -NoNewline
-            Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+            Write-Host "  Data for replacement variables @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $ReplaceHash = @{}
             if (Test-Path -Path $ReplacementVariableConfigFile -PathType Leaf) {
                 try {
@@ -1078,14 +1060,12 @@ function main {
                 }
             }
 
-            Write-Host '  Process common signatures' -NoNewline
-            Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+            Write-Host "  Process common signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             foreach ($Signature in ($SignatureFilesCommon.GetEnumerator() | Sort-Object -Property Name)) {
                 Set-Signatures
             }
 
-            Write-Host '  Process group specific signatures' -NoNewline
-            Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+            Write-Host "  Process group specific signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $SignatureHash = @{}
             if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
                 foreach ($x in ($SignatureFilesGroupFilePart.GetEnumerator() | Sort-Object -Property Name)) {
@@ -1103,8 +1083,7 @@ function main {
                 Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor Yellow
             }
 
-            Write-Host '  Process mail address specific signatures' -NoNewline
-            Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+            Write-Host "  Process mail address specific signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $SignatureHash = @{}
             foreach ($x in ($SignatureFilesMailboxFilePart.GetEnumerator() | Sort-Object -Property Name)) {
                 foreach ($y in $CurrentMailboxSMTPAddresses) {
@@ -1128,7 +1107,7 @@ function main {
 
         # Set OOF message and Outlook Web signature
         if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
-            if (-not $SimulationUser) {
+            if (-not $SimulateUser) {
                 try {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
                         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.NETStandard.dll')) -Destination ((Join-Path -Path ($script:tempDir) -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force -ErrorAction SilentlyContinue
@@ -1162,11 +1141,10 @@ function main {
                     }
                 }
             }
-            if ((!$error -and (-not $SimulationUser)) -or ($SimulationUser)) {
+            if ((!$error -and (-not $SimulateUser)) -or ($SimulateUser)) {
                 if ($SetCurrentUserOutlookWebSignature) {
-                    Write-Host '  Set Outlook Web signature' -NoNewline
-                    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
-                    if ($SimulationUser) {
+                    Write-Host "  Set Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                    if ($SimulateUser) {
                         Write-Host '    Simulation mode enabled, skipping task' -ForegroundColor Yellow
                     } else {
                         # If this is the primary mailbox, set OWA signature
@@ -1280,10 +1258,9 @@ function main {
                     $OOFInternalGUID = (New-Guid).guid
                     $OOFExternalGUID = (New-Guid).guid
 
-                    Write-Host '  Process Out of Office (OOF) auto replies' -NoNewline
-                    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+                    Write-Host "  Process Out of Office (OOF) auto replies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                     $OOFDisabled = $null
-                    if ($SimulationUser) {
+                    if ($SimulateUser) {
                         Write-Host '    Simulation mode enabled, processing OOF templates without changing OOF settings' -ForegroundColor Yellow
                     } else {
                         $OOFSettings = $exchService.GetUserOOFSettings($PrimaryMailboxAddress)
@@ -1291,7 +1268,7 @@ function main {
                         if ($OOFSettings.STATE -eq [Microsoft.Exchange.WebServices.Data.OOFState]::Disabled) { $OOFDisabled = $true }
                     }
 
-                    if (($OOFDisabled -and (-not $SimulationUser)) -or ($SimulationUser)) {
+                    if (($OOFDisabled -and (-not $SimulateUser)) -or ($SimulateUser)) {
                         # First, loop through common OOF files
                         foreach ($OOF in ($OOFFilesCommon.GetEnumerator() | Sort-Object -Property Name)) {
                             if (($OOFFilesInternal.contains('' + $OOF.name + '')) -or (-not ($OOFFilesExternal.contains('' + $OOF.name + '')))) {
@@ -1362,7 +1339,7 @@ function main {
                         }
 
                         if (Test-Path -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm"))) {
-                            if (-not $SimulationUser) {
+                            if (-not $SimulateUser) {
                                 $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                                 $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                             } else {
@@ -1372,7 +1349,7 @@ function main {
                                 }
                             }
                         } else {
-                            if (-not $SimulationUser) {
+                            if (-not $SimulateUser) {
                                 $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString())
                                 $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path ($script:tempDir) -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString())
                             } else {
@@ -1382,7 +1359,7 @@ function main {
                                 }
                             }
                         }
-                        if (-not $SimulationUser) {
+                        if (-not $SimulateUser) {
                             try {
                                 $exchService.SetUserOOFSettings($PrimaryMailboxAddress, $OOFSettings) | Out-Null
                             } catch {
@@ -1406,8 +1383,7 @@ function main {
     # Delete old signatures created by this script, which are no longer available in $SignatureTemplatePath
     # We check all local signatures for a specific marker in HTML code, so we don't touch user created signatures
     Write-Host
-    Write-Host 'Remove old signatures created by this script, which are no longer centrally available' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Remove old signatures created by this script, which are no longer centrally available @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $SignaturePaths | ForEach-Object {
         Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
             if ((Get-Content -LiteralPath $_.fullname -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
@@ -1425,8 +1401,7 @@ function main {
     # Delete user created signatures if $DeleteUserCreatedSignatures -eq $true
     if ($DeleteUserCreatedSignatures -eq $true) {
         Write-Host
-        Write-Host 'Remove user created signatures' -NoNewline
-        Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+        Write-Host "Remove user created signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         $SignaturePaths | ForEach-Object {
             Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
                 if ((Get-Content -LiteralPath $_.fullname -Raw) -notlike ('*' + $HTMLMarkerTag + '*')) {
@@ -1443,10 +1418,9 @@ function main {
     # Copy signatures to additional path if $AdditionalSignaturePath is set
     if ($AdditionalSignaturePath) {
         Write-Host
-        Write-Host 'Copy signatures to AdditionalSignaturePath' -NoNewline
-        Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+        Write-Host "Copy signatures to AdditionalSignaturePath @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         Write-Host "  $AdditionalSignaturePath"
-        if ($SimulationUser) {
+        if ($SimulateUser) {
             Write-Host '  Simulation mode enabled, skipping task' -ForegroundColor Yellow
         } else {
             if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
@@ -1525,8 +1499,7 @@ function Set-Signatures {
         [switch]$ProcessOOF = $false
     )
 
-    Write-Host "    '$($Signature.Name)'" -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "    '$($Signature.Name)' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     if (-not $ProcessOOF) {
         Write-Host "      Outlook signature name: '$([System.IO.Path]::ChangeExtension($($Signature.value), $null) -replace '.$')'"
     }
@@ -1542,7 +1515,7 @@ function Set-Signatures {
         }
     }
     if (($SignatureFileAlreadyDone -eq $false) -or $ProcessOOF) {
-        Write-Host '      Copy file'
+        Write-Host '      Create temporary file copy'
 
         if ($UseHtmTemplates) {
             # use .html for temporary file, .htm for final file
@@ -1744,7 +1717,7 @@ function Set-Signatures {
             $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
 
             # Exports
-            Write-Host '      Save as filtered .HTM file'
+            Write-Host '      Export to HTM format'
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
             $script:COMWord.ActiveDocument.Weboptions.encoding = 65001
@@ -1815,6 +1788,8 @@ function Set-Signatures {
                 Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
             }
         }
+
+        Write-Host "      Remove temporary files"
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.docx')) -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Force -Recurse -ErrorAction SilentlyContinue
@@ -1824,7 +1799,7 @@ function Set-Signatures {
         }
     }
 
-    if ((-not $ProcessOOF) -and (-not $SimulationUser)) {
+    if ((-not $ProcessOOF) -and (-not $SimulateUser)) {
         # Set default signature for new mails
         if ($SignatureFilesDefaultNew.contains('' + $Signature.name + '')) {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
@@ -2006,8 +1981,9 @@ function CheckPath([string]$path) {
 
 
 try {
-    Write-Host 'Script started' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    clear-host
+
+    Write-Host "Script started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
     main
 } catch {
@@ -2017,8 +1993,7 @@ try {
     exit 1
 } finally {
     Write-Host
-    Write-Host 'Cleanup tasks' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Cleanup tasks @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     if ($script:COMWord) {
         $script:COMWord.Quit()
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWord) | Out-Null
@@ -2031,7 +2006,5 @@ try {
 
 
     Write-Host
-    Write-Host 'Script ended' -NoNewline
-    Write-Host " @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@" -ForegroundColor Gray
+    Write-Host "Script ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 }
-
