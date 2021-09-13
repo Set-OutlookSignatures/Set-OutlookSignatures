@@ -1062,7 +1062,7 @@ function main {
                     Set-Signatures
                 }
             } else {
-                Write-Host '    Found no common signatures for this mailbox.'
+                Write-Host '    Found no common signatures for this mailbox'
             }
 
 
@@ -1081,7 +1081,7 @@ function main {
                         Set-Signatures
                     }
                 } else {
-                    Write-Host '    Found no group specific signatures for this mailbox.'
+                    Write-Host '    Found no group specific signatures for this mailbox'
                 }
             } else {
                 $CurrentMailboxSMTPAddresses += $($MailAddresses[$AccountNumberRunning])
@@ -1102,7 +1102,7 @@ function main {
                     Set-Signatures
                 }
             } else {
-                Write-Host '    Found no e-mail address specific signatures for this mailbox.'
+                Write-Host '    Found no e-mail address specific signatures for this mailbox'
             }
 
             # Delete photos from file system
