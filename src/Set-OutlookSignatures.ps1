@@ -508,8 +508,11 @@ function main {
             }
         } else {
             try {
-                $SimulateUserSID = (New-Object System.Security.Principal.NTAccount($SimulateUser)).Translate([System.Security.Principal.SecurityIdentifier]).value
-                $SimulateUserDN = ([adsi]"LDAP://<SID=$SimulateUserSID>").distinguishedname
+                $objTrans = New-Object -ComObject 'NameTranslate'
+                $objNT = $objTrans.GetType()
+                $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $null))
+                $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (8, $SimulateUser))
+                $SimulateUserDN = $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1)
                 $Search.SearchRoot = "GC://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
                 $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                 $ADPropsCurrentUser = $Search.FindOne().Properties
@@ -1430,7 +1433,7 @@ function main {
         Write-Host "Copy signatures to AdditionalSignaturePath @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         Write-Host "  '$AdditionalSignaturePath'"
         if ($SimulateUser) {
-            Write-Host '    Simulation mode enabled, skipping task' -ForegroundColor Yellow
+            Write-Host '    Simulation mode enabled, AdditionalSignaturePath already used as output directory' -ForegroundColor Yellow
         } else {
             if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
                 New-Item -Path $AdditionalSignaturePath -ItemType Directory -Force | Out-Null
