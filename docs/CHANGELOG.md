@@ -17,7 +17,7 @@
 ### Fixed
 - Do not show an error message when no default Outlook profile is configured
 - Avoid additional blank lines at the end of TXT signature files when DOCX templates are used (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/13" target="_blank">#13</a>)
-- Detect user's domain correctly when logged on to a machine in a different AD forest
+- Detect user's domain correctly when user and computer belong to different AD forests
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.2" target="_blank">v2.1.2</a> - 2021-09-03
 ### Fixed
