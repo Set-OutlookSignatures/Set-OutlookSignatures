@@ -199,19 +199,8 @@ function main {
     $Search = New-Object DirectoryServices.DirectorySearcher
     $Search.PageSize = 1000
 
-    $script:jobs = New-Object System.Collections.ArrayList
+    $HTMLMarkerTag = '<meta name=data-SignatureFileInfo content="Set-OutlookSignatures">'
 
-    Add-Type -AssemblyName System.DirectoryServices.AccountManagement
-
-    $HTMLMarkerTag = '<meta name=data-SignatureFileInfo content="Set-OutlookSignatures.ps1">'
-
-    if (-not (Test-Path 'variable:IsWindows')) {
-        # Automatic variable $IsWindows not set, must be Powershell version lower than 6 running on Windows
-        $IsWindows = $true
-        $IsLinux = $IsMacOS = $false
-    }
-
-    $script:tempDir = [System.IO.Path]::GetTempPath()
 
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
@@ -223,6 +212,14 @@ function main {
 
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    Write-Host "  Script name: '$PSCommandPath'"
+    Write-Host "  Script path: '$PSScriptRoot'"
+
+    if (-not (Test-Path 'variable:IsWindows')) {
+        # Automatic variable $IsWindows not set, must be Powershell version lower than 6 running on Windows
+        $IsWindows = $true
+        $IsLinux = $IsMacOS = $false
+    }
 
     if ($IsWindows -eq $false) {
         Write-Host '  This script is supported on Windows, but not on Linux or macOS. Exiting.' -ForegroundColor Red
@@ -235,8 +232,12 @@ function main {
         exit 1
     }
 
-    Write-Host "  Script name: '$PSCommandPath'"
-    Write-Host "  Script path: '$PSScriptRoot'"
+    $script:tempDir = [System.IO.Path]::GetTempPath()
+
+    $script:jobs = New-Object System.Collections.ArrayList
+
+    Add-Type -AssemblyName System.DirectoryServices.AccountManagement
+
     Write-Host "  ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
     CheckPath $ReplacementVariableConfigFile
     Write-Host "  SignatureTemplatePath: '$SignatureTemplatePath'" -NoNewline
@@ -2012,10 +2013,11 @@ try {
         Remove-Variable COMWord
     }
 
-    Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
-    Remove-Item ((Join-Path -Path $script:tempDir -ChildPath 'Microsoft.Exchange.WebServices.dll')) -Force -ErrorAction SilentlyContinue
-    Remove-Item ((Join-Path -Path $script:tempDir -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force -ErrorAction SilentlyContinue
-
+    if (($ExecutionContext.SessionState.LanguageMode) -ieq 'FullLanguage') {
+        Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
+        Remove-Item ((Join-Path -Path $script:tempDir -ChildPath 'Microsoft.Exchange.WebServices.dll')) -Force -ErrorAction SilentlyContinue
+        Remove-Item ((Join-Path -Path $script:tempDir -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force -ErrorAction SilentlyContinue
+    }
 
     Write-Host
     Write-Host "Script ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
