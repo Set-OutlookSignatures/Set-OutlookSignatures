@@ -3,7 +3,7 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.0" target="_blank">v2.2.0</a> - YYYY-MM-DD
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.0" target="_blank">v2.2.0</a> - 2021-09-15
 ### Changed
 - Make script compatible with PowerShell Core 7.x on Windows (Linux and MacOS are not supported yet)
 - Reduce and speed up Active Directory queries by only accepting input in the 'Domain\User' or UPN (User Principal Name) format for the 'SimulateUser' parameter
@@ -18,6 +18,8 @@
 - Do not show an error message when no default Outlook profile is configured
 - Avoid additional blank lines at the end of TXT signature files when DOCX templates are used (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/13" target="_blank">#13</a>)
 - Detect user's domain correctly when user and computer belong to different AD forests
+- Do not show an error message when only external or interal OOF message is set
+- Set current user's OWA signature even when mailbox is in another Outlook profile than the default one
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.2" target="_blank">v2.1.2</a> - 2021-09-03
 ### Fixed

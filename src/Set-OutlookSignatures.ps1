@@ -1121,7 +1121,7 @@ function main {
         # Set OOF message and Outlook Web signature
         if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
             if (-not $SimulateUser) {
-                $script:dllPath = (join-path -path $script:tempDir -childpath (((new-guid).guid) + '.dll'))
+                $script:dllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                 try {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
                         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.NETStandard.dll')) -Destination $script:dllPath -Force -ErrorAction SilentlyContinue
@@ -1324,7 +1324,7 @@ function main {
                             Write-Host "    Message template for internal recpients: '$OOFInternal'"
                             if (($UseHtmTemplates -eq $false) -and $OOFInternal) {
                                 $SignatureHash.add($OOFInternal, "$OOFInternalGUID OOFInternal.htm")
-                            } elseif (($UseHtmTemplates -eq $true) -and $OOFInternal)  {
+                            } elseif (($UseHtmTemplates -eq $true) -and $OOFInternal) {
                                 $SignatureHash.add($OOFInternal, "$OOFInternalGUID OOFInternal.docx")
                             }
                             Write-Host "    Message template for external recpients: '$OOFExternal'"
@@ -1357,18 +1357,18 @@ function main {
                             }
                         } else {
                             if (-not $SimulateUser) {
-                                if (test-path -literalpath (join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
+                                if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
                                     $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString())
                                 }
-                                if (test-path -literalpath (join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
+                                if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
                                     $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString())
                                 }
                             } else {
                                 $SignaturePaths | ForEach-Object {
-                                    if (test-path -literalpath (join-path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
+                                    if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
                                         Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFInternal.htm')) -Force
                                     }
-                                    if (test-path (join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
+                                    if (Test-Path (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
                                         Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFExternal.htm')) -Force
                                     }
                                 }
