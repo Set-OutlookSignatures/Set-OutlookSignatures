@@ -125,7 +125,7 @@ Please see '.\docs\README.html' and https://github.com/GruberMarkus/Set-OutlookS
 
 .NOTES
 Script : Set-OutlookSignatures
-Version: xxxVersionStringxxx
+Version: v2.2.0-alpha.55
 Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
 License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)
 #>
@@ -1121,8 +1121,8 @@ function main {
         # Set OOF message and Outlook Web signature
         if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
             if (-not $SimulateUser) {
+                $script:dllPath = (join-path -path $script:tempDir -childpath (((new-guid).guid) + '.dll'))
                 try {
-                    $script:dllPath = (join-path -path $script:tempDir -childpath (((new-guid).guid) + '.dll'))
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
                         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.NETStandard.dll')) -Destination $script:dllPath -Force -ErrorAction SilentlyContinue
                         Unblock-File -LiteralPath $script:dllPath
@@ -1136,9 +1136,7 @@ function main {
                 $error.clear()
 
                 try {
-                        Import-Module -Name $script:dllPath -Force
-                    }
-
+                    Import-Module -Name $script:dllPath -Force
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
                     $exchService.UseDefaultCredentials = $true
                     $exchService.AutodiscoverUrl($PrimaryMailboxAddress) | Out-Null
