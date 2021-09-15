@@ -204,10 +204,10 @@ function main {
 
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    #    (((Get-Help -Full $PSCommandPath).alertSet.alert.Text) -split "`r?`n").Trim() | ForEach-Object {
-    #        $x = ($_.split(':', 2)).trim()
-    #        Write-Host "  $($x[0].trim()): $($x[1].trim())"
-    #    }
+    (((Get-Help -Full $PSCommandPath).alertSet.alert.Text) -split "`r?`n").Trim() | ForEach-Object {
+        $x = ($_.split(':', 2)).trim()
+        Write-Host "  $($x[0].trim()): $($x[1].trim())"
+    }
 
 
     Write-Host
