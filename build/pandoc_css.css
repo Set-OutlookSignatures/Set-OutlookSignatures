@@ -1,0 +1,155 @@
+html {
+  line-height: 1.5;
+  font-family: sans-serif;
+  font-size: 15px;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 95%;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  hyphens: auto;
+  overflow-wrap: break-word;
+  text-rendering: optimizeLegibility;
+  font-kerning: normal;
+}
+
+@media (max-width: 600px) {
+  body {
+    font-size: 0.9em;
+    padding: 1em;
+  }
+}
+
+@media print {
+  body {
+    background-color: transparent;
+    color: black;
+    font-size: 12pt;
+  }
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+  h2,
+  h3,
+  h4 {
+    page-break-after: avoid;
+  }
+}
+
+p {
+  margin: 1em 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 1.4em;
+  margin-bottom: -0.4em;
+}
+
+h5,
+h6 {
+  font-size: 1em;
+  font-style: italic;
+}
+
+h6 {
+  font-weight: normal;
+}
+
+ol,
+ul {
+  padding-left: 1.7em;
+  margin-top: 1em;
+}
+
+li > ol,
+li > ul {
+  margin-top: 0;
+}
+
+blockquote {
+  margin: 1em 0 1em 1.7em;
+  padding-left: 1em;
+  border-left: 2px solid azure;
+}
+
+code {
+  font-family: inherit;
+  padding: 0.2em 0.4em;
+  margin: 0;
+  background-color: whitesmoke;
+  border-radius: 3px;
+}
+
+pre {
+  border-left: 2px solid black;
+  padding-left: 0.5em;
+  background-color: whitesmoke;
+  margin: 1em 0;
+  overflow: auto;
+}
+
+pre code {
+  padding: 0;
+  word-break: normal;
+  white-space: pre;
+  background: transparent;
+  overflow: visible;
+  font-family: inherit;
+}
+
+#TOC li {
+  list-style: none;
+}
+
+#TOC a:not(:hover) {
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  a {
+    color: dodgerblue;
+  }
+
+  a:visited {
+    color: slateblue;
+  }
+
+  html {
+    color: white;
+    background: black !important;
+  }
+
+  body {
+    background-color: black;
+    background-image: none !important;
+  }
+
+  html {
+    filter: contrast(100%) brightness(100%) saturate(100%);
+  }
+
+  code {
+    background-color: rgba(112,128,144,50%);
+  }
+
+  pre {
+    background-color: rgba(112,128,144,50%);
+    border-left: 2px solid white;
+  }
+}
