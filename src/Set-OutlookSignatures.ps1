@@ -125,7 +125,7 @@ Please see '.\docs\README.html' and https://github.com/GruberMarkus/Set-OutlookS
 
 .NOTES
 Script : Set-OutlookSignatures
-Version: v2.2.0-alpha.19
+Version: xxxVersionStringxxx
 Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
 License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)
 #>
@@ -1994,8 +1994,7 @@ function CheckPath([string]$path) {
 
 
 try {
-    Clear-Host
-
+    Write-Host
     Write-Host "Script started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
     main
