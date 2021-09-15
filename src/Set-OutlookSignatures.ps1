@@ -1122,10 +1122,13 @@ function main {
         if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
             if (-not $SimulateUser) {
                 try {
+                    $script:dllPath = (join-path -path $script:tempDir -childpath (((new-guid).guid) + '.dll'))
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.NETStandard.dll')) -Destination ((Join-Path -Path $script:tempDir -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force -ErrorAction SilentlyContinue
+                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.NETStandard.dll')) -Destination $script:dllPath -Force -ErrorAction SilentlyContinue
+                        Unblock-File -LiteralPath $script:dllPath
                     } else {
-                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.dll')) -Destination ((Join-Path -Path $script:tempDir -ChildPath 'Microsoft.Exchange.WebServices.dll')) -Force
+                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.dll')) -Destination $script:dllPath -Force
+                        Unblock-File -LiteralPath $script:dllPath
                     }
                 } catch {
                 }
@@ -1133,10 +1136,7 @@ function main {
                 $error.clear()
 
                 try {
-                    if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        Import-Module -Name ((Join-Path -Path $script:tempDir -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force
-                    } else {
-                        Import-Module -Name ((Join-Path -Path $script:tempDir -ChildPath 'Microsoft.Exchange.WebServices.dll')) -Force
+                        Import-Module -Name $script:dllPath -Force
                     }
 
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
@@ -2014,8 +2014,7 @@ try {
 
     if (($ExecutionContext.SessionState.LanguageMode) -ieq 'FullLanguage') {
         Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
-        Remove-Item ((Join-Path -Path $script:tempDir -ChildPath 'Microsoft.Exchange.WebServices.dll')) -Force -ErrorAction SilentlyContinue
-        Remove-Item ((Join-Path -Path $script:tempDir -ChildPath 'Microsoft.Exchange.WebServices.NETStandard.dll')) -Force -ErrorAction SilentlyContinue
+        Remove-Item $script:dllPath -Force -ErrorAction SilentlyContinue
     }
 
     Write-Host
