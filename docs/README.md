@@ -69,7 +69,11 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
 Requires Outlook and Word, at least version 2010.  
 The script must run in the security context of the currently logged on user.
 
-The script must run in PowerShell Full Language mode. Constrained Language mode is not supported, as some features such as BASE64 conversions are not available in this mode or require very slow workarounds. If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell script.
+The script must run in PowerShell Full Language mode. Constrained Language mode is not supported, as some features such as BASE64 conversions are not available in this mode or require very slow workarounds.
+
+If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell 'Set-OutlokSignatures.ps1'. It is usually not necessary to sign the variable replacement configuration files, e. g. '.\config\default replacement variables.ps1'.
+
+Don't forget to unblock at least 'Set-OutlookSignatures.ps1' after extracting them from the downloaded ZIP file. You can use the PowerShell commandlet 'Unblock-File' for this.
 
 The paths to the template files (SignatureTemplatePath, OOFTemplatePath) must be accessible by the currently logged on user. The template files must be at least readable for the currently logged on user.  
 # 2. Parameters  
