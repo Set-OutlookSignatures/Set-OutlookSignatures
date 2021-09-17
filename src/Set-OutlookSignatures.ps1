@@ -78,12 +78,14 @@ Local and remote paths are supported.
 Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
 WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
 The currently logged on user needs at least write access to the path.
-Default value: "$([environment]::GetFolderPath('MyDocuments'))"
+If the folder or folder structure does not exist, it is created.
+Default value: "$([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures'))"
 
 .PARAMETER AdditionalSignaturePathFolder
-A folder or folder structure below AdditionalSignaturePath.
+An optional folder or folder structure below AdditionalSignaturePath.
+This parameter is available for compatibility with versions before 2.2.1. Starting with 2.2.1, you can pass a full path via the parameter AdditionalSignaturePath, so AdditionalSignaturePathFolder is no longer needed.
 If the folder or folder structure does not exist, it is created.
-Default value: 'Outlook signatures'
+Default value: ''
 
 .PARAMETER UseHtmTemplates
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
@@ -174,10 +176,10 @@ Param(
     [ValidateNotNullOrEmpty()][string]$OOFTemplatePath = '.\templates\Out of Office DOCX',
 
     # An additional path that the signatures shall be copied to
-    [string]$AdditionalSignaturePath = $(try { $([environment]::GetFolderPath('MyDocuments')) }catch {}),
+    [string]$AdditionalSignaturePath = $(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) }catch {}),
 
     # Subfolder to create in $AdditionalSignaturePath
-    [string]$AdditionalSignaturePathFolder = 'Outlook Signatures',
+    [ValidateNotNull()][string]$AdditionalSignaturePathFolder = '',
 
     # Use templates in .HTM file format instead of .DOCX
     [switch]$UseHtmTemplates = $false,
@@ -250,45 +252,30 @@ function main {
         Write-Host "  OOFTemplatePath: '$OOFTemplatePath'" -NoNewline
         CheckPath $OOFTemplatePath
     }
-    Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
-    CheckPath $AdditionalSignaturePath
+    Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'"
     Write-Host "  AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
+    $AdditionalSignaturePath = [IO.Path]::Combine($AdditionalSignaturePath, $AdditionalSignaturePathFolder.trim('\'))
+    Write-Host "  AdditionalSignaturePath combined: '$AdditionalSignaturePath'" -NoNewline
+    checkpath $AdditionalSignaturePath -create
     Write-Host "  UseHtmTemplates: '$UseHtmTemplates'"
     Write-Host "  SimulateUser: '$SimulateUser'"
     Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
 
-    if ($AdditionalSignaturePathFolder -and $AdditionalSignaturePath) {
-        $AdditionalSignaturePath = ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath $AdditionalSignaturePathFolder))
-        try {
-            if (-not (Test-Path -LiteralPath $AdditionalSignaturePath -PathType Container)) {
-                New-Item -Path $AdditionalSignaturePath -ItemType directory -Force | Out-Null
-                if (-not (Test-Path -LiteralPath $AdditionalSignaturePath -PathType Container)) {
-                    throw
-                }
-            }
-            if ($SimulateUser) {
-                New-Item -Path ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath 'OOF')) -ItemType directory -Force | Out-Null
-                if (-not (Test-Path -LiteralPath ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath 'OOF')) -PathType Container)) {
-                    throw
-                }
-                Get-ChildItem ((Join-Path -Path ($AdditionalSignaturePath) -ChildPath 'OOF\*')) -Recurse | Remove-Item -Force -Recurse -Confirm:$false
-            }
-        } catch {
-            Write-Host "    Problem connecting to, creating or reading from folder '$AdditionalSignaturePath'. Deactivating feature." -ForegroundColor Yellow
-            $AdditionalSignaturePath = ''
-        }
-    }
-
     ('ReplacementVariableConfigFile', 'SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath') | ForEach-Object {
         $path = (Get-Variable -Name $_).Value
-        if ($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
-            $path = ((([uri]::UnescapeDataString($path) -ireplace ('https://', '\\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\'))
+        if (($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) -or ($path -ilike '*@ssl\*')) {
+            $path = $path -ireplace '@ssl\\', '\'
+            $path = ([uri]::UnescapeDataString($path) -ireplace ('https://', '\\'))
+            $path = ([System.URI]$path).AbsoluteURI -replace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\$2' -replace '/', '\'
+            $path = [uri]::UnescapeDataString($path)
         } else {
             $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
-            $path = $path
+            $path = ([System.URI]$path).absoluteuri -ireplace 'file:///', '' -ireplace 'file://', '\\' -replace '/', '\'
+            $path = [uri]::UnescapeDataString($path)
         }
         Set-Variable -Name $_ -Value $path
     }
+
 
     if ($SimulateUser) {
         Write-Host
@@ -334,7 +321,7 @@ function main {
     Write-Host "Get Outlook signature file path(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $SignaturePaths = @()
     if ($SimulateUser) {
-        $SignaturePaths = $AdditionalSignaturePath
+        $SignaturePaths += $AdditionalSignaturePath
         Write-Host '  Simulation mode enabled, skipping task, using AdditionalSignaturePath instead' -ForegroundColor Yellow
     } else {
         Get-ItemProperty 'hkcu:\software\microsoft\office\*\common\general' -ErrorAction SilentlyContinue | Where-Object { $_.'Signatures' -ne '' } | ForEach-Object {
@@ -1351,8 +1338,8 @@ function main {
                                 $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                             } else {
                                 $SignaturePaths | ForEach-Object {
-                                    Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFInternal.htm')) -Force
-                                    Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFExternal.htm')) -Force
+                                    Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF Internal.htm')) -Force
+                                    Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF External.htm')) -Force
                                 }
                             }
                         } else {
@@ -1366,10 +1353,10 @@ function main {
                             } else {
                                 $SignaturePaths | ForEach-Object {
                                     if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
-                                        Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFInternal.htm')) -Force
+                                        Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF Internal.htm')) -Force
                                     }
                                     if (Test-Path (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
-                                        Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath 'OOF\') -Force).fullname) -ChildPath 'OOFExternal.htm')) -Force
+                                        Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF External.htm')) -Force
                                     }
                                 }
                             }
@@ -1814,16 +1801,22 @@ function Set-Signatures {
         }
     }
 
-    if ((-not $ProcessOOF) -and (-not $SimulateUser)) {
+    if ((-not $ProcessOOF)) {
         # Set default signature for new mails
         if ($SignatureFilesDefaultNew.contains('' + $Signature.name + '')) {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
-                    Write-Host '      Set signature as default for new messages'
-                    if ($script:CurrentUserDummyMailbox -ne $true) {
-                        Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                    if (-not $SimulateUser) {
+                        Write-Host '      Set signature as default for new messages'
+                        if ($script:CurrentUserDummyMailbox -ne $true) {
+                            Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                        } else {
+                            $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                        }
                     } else {
-                        $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                        Copy-Item -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + '.htm')) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePaths[0]) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'Default New.htm')) -Force
+                        Copy-Item -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + '.rtf')) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePaths[0]) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'Default New.rtf')) -Force
+                        Copy-Item -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + '.txt')) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePaths[0]) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'Default New.txt')) -Force
                     }
                 }
             }
@@ -1833,11 +1826,17 @@ function Set-Signatures {
         if ($SignatureFilesDefaultReplyFwd.contains($Signature.name)) {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
-                    Write-Host '      Set signature as default for reply/forward messages'
-                    if ($script:CurrentUserDummyMailbox -ne $true) {
-                        Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                    if (-not $SimulateUser) {
+                        Write-Host '      Set signature as default for reply/forward messages'
+                        if ($script:CurrentUserDummyMailbox -ne $true) {
+                            Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                        } else {
+                            $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                        }
                     } else {
-                        $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                        Copy-Item -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + '.htm')) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePaths[0]) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'Default Reply-Forward.htm')) -Force
+                        Copy-Item -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + '.rtf')) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePaths[0]) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'Default Reply-Forward.rtf')) -Force
+                        Copy-Item -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + '.txt')) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePaths[0]) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'Default Reply-Forward.txt')) -Force
                     }
                 }
             }
@@ -1924,75 +1923,136 @@ function CheckADConnectivity {
 }
 
 
-function CheckPath([string]$path) {
-    if ($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
-        $path = ((([uri]::UnescapeDataString($path) -ireplace ('https://', '\\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\'))
-    } else {
-        $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
-    }
-
-    if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
-        # Reconnect already connected network drives at the OS level
-        # New-PSDrive is not enough for this
-        Get-CimInstance Win32_NetworkConnection | ForEach-Object {
-            & net use $_.LocalName $_.RemoteName 2>&1 | Out-Null
+function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $false) {
+    if ($create -eq $false) {
+        if (($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) -or ($path -ilike '*@ssl\*')) {
+            $path = $path -ireplace '@ssl\\', '\'
+            $path = ([uri]::UnescapeDataString($path) -ireplace ('https://', '\\'))
+            $path = ([System.URI]$path).AbsoluteURI -replace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\$2' -replace '/', '\'
+            $path = [uri]::UnescapeDataString($path)
+        } else {
+            try {
+                $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
+                $path = ([System.URI]$path).absoluteuri -ireplace 'file:///', '' -ireplace 'file://', '\\' -replace '/', '\'
+                $path = [uri]::UnescapeDataString($path)
+            } catch {
+                if ($silent -eq $false) {
+                    Write-Host ': ' -NoNewline
+                    Write-Host "Problem connecting to or reading from folder '$path'. Exiting." -ForegroundColor Red
+                    exit 1
+                }
+            }
         }
 
         if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
-            # Connect network drives
-            '`r`n' | & net use "$path" 2>&1 | Out-Null
-            try {
-                (Test-Path -LiteralPath $path -ErrorAction Stop) | Out-Null
-            } catch {
-                if ($_.CategoryInfo.Category -eq 'PermissionDenied') {
-                    & net use "$path" 2>&1
-                }
+            # Reconnect already connected network drives at the OS level
+            # New-PSDrive is not enough for this
+            Get-CimInstance Win32_NetworkConnection | ForEach-Object {
+                & net use $_.LocalName $_.RemoteName 2>&1 | Out-Null
             }
-            & net use "$path" /d 2>&1 | Out-Null
-        }
 
-        if (($path -ilike '*@ssl\*') -and (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue))) {
-            Try {
-                # Add site to trusted sites in internet options
-                New-Item ('HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\' + (New-Object System.Uri -ArgumentList ($path -ireplace ('@SSL', ''))).Host) -Force | New-ItemProperty -Name * -Value 1 -Type DWORD -Force | Out-Null
-
-                # Open site in new IE process
-                $oIE = New-Object -com InternetExplorer.Application
-                $oIE.Visible = $false
-                $oIE.Navigate2('https://' + ((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
-                $oIE = $null
-
-                # Wait until an IE tab with the corresponding URL is open
-                $app = New-Object -com shell.application
-                $i = 0
-                while ($i -lt 1) {
-                    $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
-                        $i = $i + 1
+            if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
+                # Connect network drives
+                '`r`n' | & net use "$path" 2>&1 | Out-Null
+                try {
+                    (Test-Path -LiteralPath $path -ErrorAction Stop) | Out-Null
+                } catch {
+                    if ($_.CategoryInfo.Category -eq 'PermissionDenied') {
+                        & net use "$path" 2>&1
                     }
-                    Start-Sleep -Milliseconds 50
                 }
+                & net use "$path" /d 2>&1 | Out-Null
+            }
 
-                # Wait until the corresponding URL is fully loaded, then close the tab
-                $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
-                    while ($_.busy) {
+            if (($path -ilike '*@ssl\*') -and (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue))) {
+                Try {
+                    # Add site to trusted sites in internet options
+                    New-Item ('HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\' + (New-Object System.Uri -ArgumentList ($path -ireplace ('@SSL', ''))).Host) -Force | New-ItemProperty -Name * -Value 1 -Type DWORD -Force | Out-Null
+
+                    # Open site in new IE process
+                    $oIE = New-Object -com InternetExplorer.Application
+                    $oIE.Visible = $false
+                    $oIE.Navigate2('https://' + ((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
+                    $oIE = $null
+
+                    # Wait until an IE tab with the corresponding URL is open
+                    $app = New-Object -com shell.application
+                    $i = 0
+                    while ($i -lt 1) {
+                        $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
+                            $i = $i + 1
+                        }
                         Start-Sleep -Milliseconds 50
                     }
-                    $_.quit()
-                }
 
-                $app = $null
-            } catch {
+                    # Wait until the corresponding URL is fully loaded, then close the tab
+                    $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
+                        while ($_.busy) {
+                            Start-Sleep -Milliseconds 50
+                        }
+                        $_.quit()
+                    }
+
+                    $app = $null
+                } catch {
+                }
             }
         }
-    }
 
-    if ((Test-Path -LiteralPath $path) -eq $false) {
-        Write-Host ": Problem connecting to or reading from folder '$path'. Exiting." -ForegroundColor Red
-        exit 1
+        if ((Test-Path -LiteralPath $path) -eq $false) {
+            if ($silent -eq $false) {
+                Write-Host ': ' -NoNewline
+                Write-Host "Problem connecting to or reading from folder '$path'. Exiting." -ForegroundColor Red
+                exit 1
+            } else {
+                return $false
+            }
+        } else {
+            if ($silent -eq $false) {
+                Write-Host
+            } else {
+                return $true
+            }
+        }
     } else {
-        Write-Host
+        if ($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
+            $path = ((([uri]::UnescapeDataString($path) -ireplace ('https://', '\\')) -replace ('(.*?)/(.*)', '${1}@SSL\$2')) -replace ('/', '\'))
+        }
+        $pathTemp = $path
+        for ($i = (($path.ToCharArray() | Where-Object { $_ -eq '\' } | Measure-Object).Count); $i -ge 0; $i--) {
+            if ((CheckPath $pathTemp -Silent) -eq $true) {
+                if (-not (Test-Path $pathTemp -PathType Container -ErrorAction SilentlyContinue)) {
+                    Write-Host ': ' -NoNewline
+                    Write-Host "'$pathTemp' is a file, '$path' not valid. Exiting." -ForegroundColor Red
+                    exit 1
+                }
+                if ($pathTemp -eq $path) {
+                    break
+                } else {
+                    New-Item -ItemType Directory -Path $path -ErrorAction SilentlyContinue | Out-Null
+                    if (Test-Path -Path $path -PathType Container) {
+                        break
+                    }
+                }
+            } else {
+                $pathTemp = Split-Path ($pathTemp -ireplace '@SSL', '') -Parent
+            }
+        }
+        if ((checkpath $path -silent) -ne $true) {
+            Write-Host ': ' -NoNewline
+            Write-Host "Problem connecting to or reading from folder '$path'. Exiting." -ForegroundColor Red
+            exit 1
+        } else {
+            Write-Host
+        }
     }
 }
+
+
+#
+# All functions have been defined above
+# Initially executed code starts here
+#
 
 
 try {

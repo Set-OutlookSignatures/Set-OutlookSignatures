@@ -155,9 +155,14 @@ WebDAV paths are supported (https only): `'https://server.domain/User/Outlook si
 
 The currently logged on user needs at least write access to the path.
 
+If the folder or folder structure does not exist, it is created.
+
 Default value: `"$([environment]::GetFolderPath("MyDocuments"))\Outlook signatures"`  
 ## 2.9. AdditionalSignaturePathFolder
-A folder or folder structure below AdditionalSignaturePath.  
+A folder or folder structure below AdditionalSignaturePath.
+
+This parameter is available for compatibility with versions before 2.2.1. Starting with 2.2.1, you can pass a full path via the parameter AdditionalSignaturePath, so AdditionalSignaturePathFolder is no longer needed.
+
 If the folder or folder structure does not exist, it is created.
 
 Default value: `'Outlook signatures'`  
