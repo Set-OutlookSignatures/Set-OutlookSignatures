@@ -889,8 +889,12 @@ function main {
 
     Write-Host
     Write-Host "Start Word background process for template editing @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the script
+    try { $script:COMWordDummy = New-Object -ComObject word.application } catch {}
+
     try {
         $script:COMWord = New-Object -ComObject word.application
+
         if ($($PSVersionTable.PSEdition) -ieq 'Core') {
             Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
         }
@@ -900,6 +904,12 @@ function main {
         exit 1
     }
 
+    try {
+        $script:COMWordDummy.Quit()
+        [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWordDummy) | Out-Null
+        Remove-Variable -Name 'COMWordDummy' -Scope 'script'
+    } catch {
+    }
 
     # Process each e-mail address only once
     for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
@@ -2071,7 +2081,7 @@ try {
     if ($script:COMWord) {
         $script:COMWord.Quit()
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWord) | Out-Null
-        Remove-Variable COMWord
+        Remove-Variable -Name 'COMWord' -Scope 'script'
     }
 
     if ((($ExecutionContext.SessionState.LanguageMode) -ieq 'FullLanguage') -and $script:dllPath) {

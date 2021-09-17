@@ -3,6 +3,10 @@
 
 # Changelog
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.x.x" target="_blank">v2.x.x</a> - YYYY-MM-DD
+### Fixed
+- fix: User could connect to hidden Word instance used for conversion of DOCX templates
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.1" target="_blank">v2.2.1</a> - 2021-09-15
 ### Fixed
 - Allow multi-relative paths (Example: 'c:\a\b\x\\..\c\y\z\\..\\..\d' -> 'c:\a\b\c\d')
