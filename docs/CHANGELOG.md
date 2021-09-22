@@ -3,7 +3,9 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.x.x" target="_blank">v2.x.x</a> - YYYY-MM-DD
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0" target="_blank">v2.3.0</a> - YYYY-MM-DD
+### Added
+- New default replacement variables: '\$CURRENT\[...\]OFFICE\$', '\$CURRENT\[...\]COMPANY\$'
 ### Fixed
 - fix: User could connect to hidden Word instance used for conversion of DOCX templates
 

@@ -55,6 +55,8 @@ $ReplaceHash['$CURRENTUSEREXTATTR12$'] = [string]$ADPropsCurrentUser.extensionat
 $ReplaceHash['$CURRENTUSEREXTATTR13$'] = [string]$ADPropsCurrentUser.extensionattribute13
 $ReplaceHash['$CURRENTUSEREXTATTR14$'] = [string]$ADPropsCurrentUser.extensionattribute14
 $ReplaceHash['$CURRENTUSEREXTATTR15$'] = [string]$ADPropsCurrentUser.extensionattribute15
+$ReplaceHash['$CURRENTUSEROFFICE$'] = [string]$ADPropsCurrentUser.physicaldeliveryofficename
+$ReplaceHash['$CURRENTUSERCOMPANY$'] = [string]$ADPropsCurrentUser.company
 
 
 # Manager of currently logged on user
@@ -87,6 +89,8 @@ $ReplaceHash['$CURRENTUSERMANAGEREXTATTR12$'] = [string]$ADPropsCurrentUserManag
 $ReplaceHash['$CURRENTUSERMANAGEREXTATTR13$'] = [string]$ADPropsCurrentUserManager.extensionattribute13
 $ReplaceHash['$CURRENTUSERMANAGEREXTATTR14$'] = [string]$ADPropsCurrentUserManager.extensionattribute14
 $ReplaceHash['$CURRENTUSERMANAGEREXTATTR15$'] = [string]$ADPropsCurrentUserManager.extensionattribute15
+$ReplaceHash['$CURRENTUSERMANAGEROFFICE$'] = [string]$ADPropsCurrentUserManager.physicaldeliveryofficename
+$ReplaceHash['$CURRENTUSERMANAGERCOMPANY$'] = [string]$ADPropsCurrentUserManager.company
 
 
 # Current mailbox
@@ -119,6 +123,8 @@ $ReplaceHash['$CURRENTMAILBOXEXTATTR12$'] = [string]$ADPropsCurrentMailbox.exten
 $ReplaceHash['$CURRENTMAILBOXEXTATTR13$'] = [string]$ADPropsCurrentMailbox.extensionattribute13
 $ReplaceHash['$CURRENTMAILBOXEXTATTR14$'] = [string]$ADPropsCurrentMailbox.extensionattribute14
 $ReplaceHash['$CURRENTMAILBOXEXTATTR15$'] = [string]$ADPropsCurrentMailbox.extensionattribute15
+$ReplaceHash['$CURRENTMAILBOXOFFICE$'] = [string]$ADPropsCurrentMailbox.physicaldeliveryofficename
+$ReplaceHash['$CURRENTMAILBOXCOMPANY$'] = [string]$ADPropsCurrentMailbox.company
 
 
 # Manager of current mailbox
@@ -151,6 +157,8 @@ $ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR12$'] = [string]$ADPropsCurrentMailbo
 $ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR13$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute13
 $ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR14$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute14
 $ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR15$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute15
+$ReplaceHash['$CURRENTMAILBOXMANAGEROFFICE$'] = [string]$ADPropsCurrentMailboxManager.physicaldeliveryofficename
+$ReplaceHash['$CURRENTMAILBOXMANAGERCOMPANY$'] = [string]$ADPropsCurrentMailboxManager.company
 
 
 # $CURRENTUSERNAMEWITHTITLES$, $CURRENTUSERMANAGERNAMEWITHTITLES$
