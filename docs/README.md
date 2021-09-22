@@ -66,7 +66,9 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [14.11. How to create a shortcut to the script with parameters?](#1411-how-to-create-a-shortcut-to-the-script-with-parameters)
   - [14.12. What is the recommended approach for implementing the software?](#1412-what-is-the-recommended-approach-for-implementing-the-software)
   - [14.13. What is the recommended approach for custom configuration files?](#1413-what-is-the-recommended-approach-for-custom-configuration-files)
-  - [14.14. What about the new signature roaming feature Microsoft announced?](#1414-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [14.14. Isn't a plural noun in the script name against PowerShell best practices?](#1414-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
+  - [What's planned for the next release, what does your roadmap look like?](#whats-planned-for-the-next-release-what-does-your-roadmap-look-like)
+  - [14.15. What about the new signature roaming feature Microsoft announced?](#1415-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -511,7 +513,19 @@ The following steps are recommended:
    ```
 3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
 4. Start Set-OutlookSignatures with the parameter `ReplacementVariableConfigFile` pointing to the new custom configuration file.
-## 14.14. What about the new signature roaming feature Microsoft announced?  
+## 14.14. Isn't a plural noun in the script name against PowerShell best practices?
+Absolutely. PowerShell best practices recommend using singular nouns, but Set-OutlookSignatures contains a plural noun.
+
+I intentionally decided not to follow the singular noun convention, as another language as PowerShell was initially used for coding and the name of the tool was already defined. If this was a commercial enterprise project, marketing would have overruled development.
+## What's planned for the next release, what does your roadmap look like?
+There is no official roadmap or timeline.
+
+Solving issues always has the highest priority.
+
+There are two big topics planned for the future:
+- Adding Microsoft Graph as a fallback for Active Directory, allowing Set-OutlookSignature to work in "cloud only" and additional hybrid scenarios
+- Evaluating the new signature roaming feature for cloud mailboxes, but there is no API yet. For details, please read the separate FAQ on this topic.
+## 14.15. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.
