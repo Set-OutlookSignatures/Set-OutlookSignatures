@@ -32,17 +32,17 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
 - [2. Parameters](#2-parameters)
   - [2.1. SignatureTemplatePath](#21-signaturetemplatepath)
   - [2.2. ReplacementVariableConfigFile](#22-replacementvariableconfigfile)
-  - [GraphConfigFile](#graphconfigfile)
-  - [2.3. DomainsToCheckForGroups](#23-domainstocheckforgroups)
-  - [2.4. DeleteUserCreatedSignatures](#24-deleteusercreatedsignatures)
-  - [2.5. SetCurrentUserOutlookWebSignature](#25-setcurrentuseroutlookwebsignature)
-  - [2.6. SetCurrentUserOOFMessage](#26-setcurrentuseroofmessage)
-  - [2.7. OOFTemplatePath](#27-ooftemplatepath)
-  - [2.8. AdditionalSignaturePath](#28-additionalsignaturepath)
-  - [2.9. AdditionalSignaturePathFolder](#29-additionalsignaturepathfolder)
-  - [2.10. UseHtmTemplates](#210-usehtmtemplates)
-  - [2.11. SimulateUser](#211-simulateuser)
-  - [2.12. SimulateMailboxes](#212-simulatemailboxes)
+  - [2.3. GraphConfigFile](#23-graphconfigfile)
+  - [2.4. DomainsToCheckForGroups](#24-domainstocheckforgroups)
+  - [2.5. DeleteUserCreatedSignatures](#25-deleteusercreatedsignatures)
+  - [2.6. SetCurrentUserOutlookWebSignature](#26-setcurrentuseroutlookwebsignature)
+  - [2.7. SetCurrentUserOOFMessage](#27-setcurrentuseroofmessage)
+  - [2.8. OOFTemplatePath](#28-ooftemplatepath)
+  - [2.9. AdditionalSignaturePath](#29-additionalsignaturepath)
+  - [2.10. AdditionalSignaturePathFolder](#210-additionalsignaturepathfolder)
+  - [2.11. UseHtmTemplates](#211-usehtmtemplates)
+  - [2.12. SimulateUser](#212-simulateuser)
+  - [2.13. SimulateMailboxes](#213-simulatemailboxes)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -72,9 +72,8 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [14.12. What is the recommended approach for implementing the software?](#1412-what-is-the-recommended-approach-for-implementing-the-software)
   - [14.13. What is the recommended approach for custom configuration files?](#1413-what-is-the-recommended-approach-for-custom-configuration-files)
   - [14.14. Isn't a plural noun in the script name against PowerShell best practices?](#1414-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
-  - [14.15. What's planned for the next release, what does your roadmap look like?](#1415-whats-planned-for-the-next-release-what-does-your-roadmap-look-like)
-  - [14.16. The script hangs at "Export to HTM format", Word shows a security warning!?](#1416-the-script-hangs-at-export-to-htm-format-word-shows-a-security-warning)
-  - [14.17. What about the new signature roaming feature Microsoft announced?](#1417-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [14.15. The script hangs at HTM/RTF export, Word shows a security warning!?](#1415-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
+  - [14.16. What about the new signature roaming feature Microsoft announced?](#1416-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -111,7 +110,7 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/c
 The currently logged on user needs at least read access to the file.
 
 Default value: `'.\config\default replacement variables.ps1'`  
-## GraphConfigFile
+## 2.3. GraphConfigFile
 The parameter GraphConfigFile tells the script where the file defining Graph connection and configuration options is located.
 
 Local and remote paths are supported. Local paths can be absolute (`'C:\config\default graph config.ps1'`) or relative to the script path (`'.\config\default graph config.ps1'`).
@@ -121,7 +120,7 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/c
 The currently logged on user needs at least read access to the file.
 
 Default value: `'.\config\default graph config.ps1'`  
-## 2.3. DomainsToCheckForGroups  
+## 2.4. DomainsToCheckForGroups  
 The parameters tells the script which domains should be used to search for mailbox and user group membership.
 
 The default value, `'\*'` tells the script to query all trusted domains in the Active Directory forest of the logged on user.
@@ -135,25 +134,25 @@ The `'\*'` entry in a custom list is only considered when it is the first entry 
 The Active Directory forest of the currently logged on user is always considered.
 
 Default value: `'*'`  
-## 2.4. DeleteUserCreatedSignatures  
+## 2.5. DeleteUserCreatedSignatures  
 Shall the script delete signatures which were created by the user itself? The default value for this parameter is `$false`.
 
 Remark: The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
 
 Default value: `$false`  
-## 2.5. SetCurrentUserOutlookWebSignature  
+## 2.6. SetCurrentUserOutlookWebSignature  
 Shall the script set the Outlook Web signature of the currently logged on user?
 
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
-## 2.6. SetCurrentUserOOFMessage  
+## 2.7. SetCurrentUserOOFMessage  
 Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?
 
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
-## 2.7. OOFTemplatePath  
+## 2.8. OOFTemplatePath  
 Path to centrally managed Out of Office (OOF) auto reply templates.
 
 Local and remote paths are supported.
@@ -165,7 +164,7 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/O
 The currently logged on user needs at least read access to the path.
 
 Default value: `'.\templates\Out of Office DOCX'`  
-## 2.8. AdditionalSignaturePath  
+## 2.9. AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
 
@@ -182,7 +181,7 @@ The currently logged on user needs at least write access to the path.
 If the folder or folder structure does not exist, it is created.
 
 Default value: `"$([environment]::GetFolderPath("MyDocuments"))\Outlook signatures"`  
-## 2.9. AdditionalSignaturePathFolder
+## 2.10. AdditionalSignaturePathFolder
 A folder or folder structure below AdditionalSignaturePath.
 
 This parameter is available for compatibility with versions before 2.2.1. Starting with 2.2.1, you can pass a full path via the parameter AdditionalSignaturePath, so AdditionalSignaturePathFolder is no longer needed.
@@ -190,19 +189,19 @@ This parameter is available for compatibility with versions before 2.2.1. Starti
 If the folder or folder structure does not exist, it is created.
 
 Default value: `'Outlook signatures'`  
-## 2.10. UseHtmTemplates  
+## 2.11. UseHtmTemplates  
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
 
 Each format has advantages and disadvantages, please see "[13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)" for a quick overview.
 
 Default value: `$false`  
-## 2.11. SimulateUser  
+## 2.12. SimulateUser  
 SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged on user.
 
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
-## 2.12. SimulateMailboxes  
+## 2.13. SimulateMailboxes  
 SimulateMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
@@ -545,15 +544,7 @@ The following steps are recommended:
 Absolutely. PowerShell best practices recommend using singular nouns, but Set-OutlookSignatures contains a plural noun.
 
 I intentionally decided not to follow the singular noun convention, as another language as PowerShell was initially used for coding and the name of the tool was already defined. If this was a commercial enterprise project, marketing would have overruled development.
-## 14.15. What's planned for the next release, what does your roadmap look like?
-There is no official roadmap or timeline.
-
-Solving issues always has the highest priority.
-
-There are two big topics planned for the future:
-- Adding Microsoft Graph as a fallback for Active Directory, allowing Set-OutlookSignature to work in "cloud only" and additional hybrid scenarios
-- Evaluating the new signature roaming feature for cloud mailboxes, but there is no API yet. For details, please read the separate FAQ on this topic.
-## 14.16. The script hangs at "Export to HTM format", Word shows a security warning!?
+## 14.15. The script hangs at HTM/RTF export, Word shows a security warning!?
 When using a signature template with account pictures (linked and embedded), conversion to HTM hangs at "Export to HTM format" or "Export to RTF format". In the background, there is a window "Microsoft Word Security Notice" with the following text:
 ```
 Microsoft Office has identified a potential security concern.
@@ -571,7 +562,7 @@ The behavior can be changed in at least two ways:
 
 Set-OutlookSignatures reads the registry key "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Security\DisableWarningOnIncludeFieldsUpdate" at start, sets it to 1 just before the conversion to HTM and RF takes place and restores the original state as soon as the conversions are finished.
 This way, the warning usually gets suppressed, while the Group Policy configured state of the setting still has higher priority and overrides the user setting.
-## 14.17. What about the new signature roaming feature Microsoft announced?  
+## 14.16. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.
