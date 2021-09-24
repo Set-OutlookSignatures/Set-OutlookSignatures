@@ -82,11 +82,14 @@ The script must run in the security context of the currently logged on user.
 
 The script must run in PowerShell Full Language mode. Constrained Language mode is not supported, as some features such as BASE64 conversions are not available in this mode or require very slow workarounds.
 
-If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell 'Set-OutlokSignatures.ps1'. It is usually not necessary to sign the variable replacement configuration files, e. g. '.\config\default replacement variables.ps1'.
+If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell 'Set-OutlokSignatures.ps1'. It is usually not necessary to sign the variable replacement configuration files, e. g. '.\config\default replacement variables.ps1'.  
+There are locked down environments, where all files matching the patterns "\*.ps\*1" and "*.dll" need to be digitially signed with a trusted certificate. 
 
 Don't forget to unblock at least 'Set-OutlookSignatures.ps1' after extracting them from the downloaded ZIP file. You can use the PowerShell commandlet 'Unblock-File' for this.
 
-The paths to the template files (SignatureTemplatePath, OOFTemplatePath) must be accessible by the currently logged on user. The template files must be at least readable for the currently logged on user.  
+The paths to the template files (SignatureTemplatePath, OOFTemplatePath) must be accessible by the currently logged on user. The template files must be at least readable for the currently logged on user.
+
+In cloud environments, you need to register Set-OutlookSignatures as app and provide admin consent for the required permissions. See '.\config\default graph config.ps1' for details.
 # 2. Parameters  
 ## 2.1. SignatureTemplatePath  
 The parameter SignatureTemplatePath tells the script where signature template files are stored.

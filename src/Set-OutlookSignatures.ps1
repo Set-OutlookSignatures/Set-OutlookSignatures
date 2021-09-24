@@ -2595,12 +2595,9 @@ try {
         Remove-Variable -Name 'COMWord' -Scope 'script'
     }
 
-    try {
-        Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
-        Remove-Item $script:dllPath -Force -ErrorAction SilentlyContinue
-        Remove-Item $script:msalPath -Recurse -Force -ErrorAction SilentlyContinue
-    } catch {
-    }
+    Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
+    Remove-Item $script:dllPath -Force -ErrorAction SilentlyContinue
+    Remove-Item $script:msalPath -Recurse -Force -ErrorAction SilentlyContinue
 
 
     Write-Host

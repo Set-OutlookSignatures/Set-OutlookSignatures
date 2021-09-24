@@ -25,6 +25,7 @@
 # 3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
 # 4. Start Set-OutlookSignatures with the parameter 'ReplacementVariableConfigFile' pointing to the new custom configuration file.
 
+
 # Currently logged on user
 $ReplaceHash['$CURRENTUSERGIVENNAME$'] = [string]$ADPropsCurrentUser.givenname
 $ReplaceHash['$CURRENTUSERSURNAME$'] = [string]$ADPropsCurrentUser.sn

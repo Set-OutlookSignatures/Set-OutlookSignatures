@@ -1,11 +1,8 @@
 ﻿# This file allows defining the default configuration for connecting to Microsoft Graph for Set-OutlookSignatures
 #
-# This script is executed as a whole once per script run.
+# This script is executed as a whole once per Set-OutlookSignatures run.
 #
 # Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to to define replacement variables and test it thoroughly.
-#
-# Replacement variable names are case sensitive.
-# It is required to use full uppercase replacement variable names.
 #
 # Active Directory property names are case sensitive.
 # It is required to use full lowercase Active Directory property names.
@@ -24,6 +21,7 @@
 # 3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
 # 4. Start Set-OutlookSignatures with the parameter 'GraphConfigFile' pointing to the new custom configuration file.
 
+
 # Client ID
 # The default client ID is defined in gruber.cc as multi-tenant, so it can be used everywhere
 # Can be replaced with a Client ID from the own tenant
@@ -31,8 +29,10 @@
 #   RedirectUri: 'http://localhost'
 $GraphClientID = 'beea8249-8c98-4c76-92f6-ce3c468a61e6'
 
-# Endpoint versoin
+
+# Endpoint version
 $GraphEndpointVersion = 'v1.0'
+
 
 # User properties to select
 # Custom Graph attributes: 'extension_<AppID owning the extension attribute>_<attribute name>'
@@ -67,8 +67,9 @@ $GraphUserProperties = @(
     'userPrincipalName'
 )
 
-# Mapping Graph use properties to on-prem Active Directory user properties
-# This way, we can have the same variable names in ".\config\default replacement variables.ps1"
+
+# Mapping Graph user properties to on-prem Active Directory user properties
+# This way, we do not need to differentiate between on-prem, hybrid and cloud in '.\config\default replacement variables.ps1'
 # Active Directory attribute names on the left, Graph attribute names on the right
 # Custom Graph attributes: 'extension_<AppID owning the extension attribute>_<attribute name>'
 $GraphUserAttributeMapping = @{
