@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Identity.Client.Desktop</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Identity.Client.Desktop.DesktopExtensions">
+            <summary>
+            MSAL extensions for desktop apps
+            </summary>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Desktop.DesktopExtensions.WithDesktopFeatures(Microsoft.Identity.Client.PublicClientApplicationBuilder)">
+            <summary>
+            Adds enhanced support for desktop applications, e.g. CLI, WinForms, WPF apps.
+            
+            Support added is around: 
+            
+            - Windows Authentication Manager (WAM) broker, the recommended authentication mechanism on Windows 10 - https://aka.ms/msal-net-wam
+            - WebView2 embedded web view, based on Microsoft Edge - https://aka.ms/msal-net-webview2
+            </summary>
+            <remarks>These extensions live in a separate package to avoid adding dependencies to MSAL</remarks>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Desktop.DesktopExtensions.AddSupportForWebView2(Microsoft.Identity.Client.PublicClientApplicationBuilder)">
+            <summary>
+            Enables Windows broker flows on older platforms, such as .NET framework, where these are not available in the box with Microsoft.Identity.Client
+            For details about Windows broker, see https://aka.ms/msal-net-wam
+            </summary>
+        </member>
+        <member name="T:Microsoft.Identity.Client.Desktop.WamExtension">
+            <summary>
+            WAM related extensions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Desktop.WamExtension.WithWindowsBroker(Microsoft.Identity.Client.PublicClientApplicationBuilder,System.Boolean)">
+            <summary>
+            Enables Windows broker flows on older platforms, such as .NET framework, where these are not available in the box with Microsoft.Identity.Client
+            For details about Windows broker, see https://aka.ms/msal-net-wam
+            </summary>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Platforms.Features.WamBroker.AadPlugin.GetAccountsAsync(System.String,Microsoft.Identity.Client.AuthorityInfo,Microsoft.Identity.Client.Cache.ICacheSessionManager,Microsoft.Identity.Client.Instance.Discovery.IInstanceDiscoveryManager)">
+            <summary>
+            The algorithm here is much more complex in order to workaround a limitation in the AAD plugin's 
+            handling of guest accounts: 
+            
+            1. Read the accounts from WAM.AADPlugin
+            2. For each account, we need to find its home_account_id as the one from WAM may not be correct
+            3. If we can find a cached account with the same LocalAccountId or UPN, use it
+            4. If not, make a simple silent token request and use the client info provided
+            </summary>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Platforms.Features.WamBroker.AccountPicker.UseSplashScreen">
+            <summary>
+            Account Picker APIs do not work well with console apps because the console
+            window belongs to a different process, which causes a security exception. 
+            In general, if the parent window handle does not belong to the current process, 
+            we need to take control over the window handle by injecting a splash screen.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Platforms.Features.WamBroker.AccountPicker.ShowPickerWithSplashScreenAsync">
+            <summary>
+            The account picker API has bug that prevent correct usage from console apps. 
+            To workaround, show a splash screen and attach to it.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Identity.Client.Platforms.Features.WamBroker.LegacyOsWamProxy">
+            <summary>
+            Some Windows APIs do not exist in all versions of Windows, such as WebAuthenticationCoreManager.FindAllAccountsAsync
+            Windows provides a mechanism to detect their presence via ApiInformation.IsMethodPresent, however, just **loading** a 
+            class that has WebAuthenticationCoreManager.FindAllAccountsAsync in the code produces a MissingMethod exception.
+            
+            This class groups all these legacy APIs and keeps them separated so as to avoid the problem - callers should ensure ApiInformation.IsMethodPresent 
+            is called before.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Platforms.Features.WamBroker.MsaPlugin.GetAccountsAsync(System.String,Microsoft.Identity.Client.AuthorityInfo,Microsoft.Identity.Client.Cache.ICacheSessionManager,Microsoft.Identity.Client.Instance.Discovery.IInstanceDiscoveryManager)">
+            <summary>
+            Generally the MSA plugin will NOT return the accounts back to the app. This is due
+            to privacy concerns. However, some test apps are allowed to do this, hence the code. 
+            Normal 1st and 3rd party apps must use AcquireTokenInteractive to login first, and then MSAL will
+            save the account for later use.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Identity.Client.Platforms.Features.WamBroker.SynchronizationContextExtensions">
+            <summary>
+            Based on https://thomaslevesque.com/2015/11/11/explicitly-switch-to-the-ui-thread-in-an-async-method/
+            Makes the synchronization context await-able
+            </summary>
+        </member>
+        <member name="T:Microsoft.Identity.Client.Platforms.Features.WamBroker.WamBroker">
+            <summary>
+            Important: all the WAM code has Win10 specific types and MUST be guarded against 
+            usage on older Windows, Mac and Linux, otherwise TypeLoadExceptions occur
+            </summary>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Platforms.Features.WamBroker.WamBroker.#ctor(Microsoft.Identity.Client.UI.CoreUIParent,Microsoft.Identity.Client.ApplicationConfiguration,Microsoft.Identity.Client.Core.ICoreLogger,Microsoft.Identity.Client.Platforms.Features.WamBroker.IWamPlugin,Microsoft.Identity.Client.Platforms.Features.WamBroker.IWamPlugin,Microsoft.Identity.Client.Platforms.Features.WamBroker.IWamProxy,Microsoft.Identity.Client.Platforms.Features.WamBroker.IWebAccountProviderFactory,Microsoft.Identity.Client.Platforms.Features.WamBroker.IAccountPickerFactory,Microsoft.Identity.Client.Platforms.Features.WamBroker.IMsaPassthroughHandler)">
+            <summary>
+            Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
+            </summary>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Platforms.Features.WamBroker.WamBroker.AcquireTokenInteractiveAsync(Microsoft.Identity.Client.Internal.Requests.AuthenticationRequestParameters,Microsoft.Identity.Client.ApiConfig.Parameters.AcquireTokenInteractiveParameters)">
+            <summary>
+            In WAM, AcquireTokenInteractive is always associated to an account. WAM also allows for an "account picker" to be displayed, 
+            which is similar to the EVO browser experience, allowing the user to add an account or use an existing one.
+            
+            MSAL does not have a concept of account picker so MSAL.AccquireTokenInteractive will: 
+            
+            1. Call WAM.AccountPicker if an IAccount (or possibly login_hint) is not configured
+            2. Figure out the WAM.AccountID associated to the MSAL.Account
+            3. Call WAM.AcquireTokenInteractive with the WAM.AccountID
+            
+            To make matters more complicated, WAM has 2 plugins - AAD and MSA. With AAD plugin, 
+            it is possible to list all WAM accounts and find the one associated to the MSAL account. 
+            However, MSA plugin does NOT allow listing of accounts, and the only way to figure out the 
+            WAM account ID is to use the account picker. This makes AcquireTokenSilent impossible for MSA, 
+            because we would not be able to map an Msal.Account to a WAM.Account. To overcome this, 
+            we save the WAM.AccountID in MSAL's cache. 
+            </summary>
+        </member>
+        <member name="T:Microsoft.Identity.Client.Platforms.Features.WamBroker.WebTokenRequestResultWrapper">
+            <summary>
+            Wrapper class to enable testing, since WebTokenRequestResult object doesn't have any ctor
+            and interface is not accessible.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Identity.Client.Platforms.Features.WamBroker.win32.Splash.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Platforms.Features.WamBroker.win32.Splash.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Platforms.Features.WamBroker.win32.Splash.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Identity.Client.Platforms.Features.WebView2WebUi.WinFormsPanelWithWebView2.InvokeHandlingOwnerWindow(System.Action)">
+            <summary>
+            Some calls need to be made on the UI thread and this is the central place to check if we have an owner
+            window and if so, ensure we invoke on that proper thread.
+            </summary>
+            <param name="action"></param>
+        </member>
+    </members>
+</doc>

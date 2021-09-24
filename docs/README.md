@@ -17,10 +17,14 @@
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
   
-The script is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). The script is **multi-client capable** by using different template paths, configuration files and script parameters.
-  
+The script is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
+
+It is **multi-client capable** by using different template paths, configuration files and script parameters.
+
+Set-OutlookSignature requires **no installation on servers or clients**. You only need a standard file share on a server, and PowerShell and Office on the client. 
+
 A **documented implementation approach**, based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.  
-It is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
+The implementatin approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The script is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `'.\docs\LICENSE.txt'` for copyright and MIT license details.
 # Table of Contents <!-- omit in toc -->
@@ -28,6 +32,7 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
 - [2. Parameters](#2-parameters)
   - [2.1. SignatureTemplatePath](#21-signaturetemplatepath)
   - [2.2. ReplacementVariableConfigFile](#22-replacementvariableconfigfile)
+  - [GraphConfigFile](#graphconfigfile)
   - [2.3. DomainsToCheckForGroups](#23-domainstocheckforgroups)
   - [2.4. DeleteUserCreatedSignatures](#24-deleteusercreatedsignatures)
   - [2.5. SetCurrentUserOutlookWebSignature](#25-setcurrentuseroutlookwebsignature)
@@ -67,8 +72,9 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [14.12. What is the recommended approach for implementing the software?](#1412-what-is-the-recommended-approach-for-implementing-the-software)
   - [14.13. What is the recommended approach for custom configuration files?](#1413-what-is-the-recommended-approach-for-custom-configuration-files)
   - [14.14. Isn't a plural noun in the script name against PowerShell best practices?](#1414-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
-  - [What's planned for the next release, what does your roadmap look like?](#whats-planned-for-the-next-release-what-does-your-roadmap-look-like)
-  - [14.15. What about the new signature roaming feature Microsoft announced?](#1415-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [14.15. What's planned for the next release, what does your roadmap look like?](#1415-whats-planned-for-the-next-release-what-does-your-roadmap-look-like)
+  - [14.16. The script hangs at "Export to HTM format", Word shows a security warning!?](#1416-the-script-hangs-at-export-to-htm-format-word-shows-a-security-warning)
+  - [14.17. What about the new signature roaming feature Microsoft announced?](#1417-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -102,6 +108,16 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/c
 The currently logged on user needs at least read access to the file.
 
 Default value: `'.\config\default replacement variables.ps1'`  
+## GraphConfigFile
+The parameter GraphConfigFile tells the script where the file defining Graph connection and configuration options is located.
+
+Local and remote paths are supported. Local paths can be absolute (`'C:\config\default graph config.ps1'`) or relative to the script path (`'.\config\default graph config.ps1'`).
+
+WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/config/default graph config.ps1'` or `'\\server.domain@SSL\SignatureSite\config\default graph config.ps1'`
+
+The currently logged on user needs at least read access to the file.
+
+Default value: `'.\config\default graph config.ps1'`  
 ## 2.3. DomainsToCheckForGroups  
 The parameters tells the script which domains should be used to search for mailbox and user group membership.
 
@@ -208,7 +224,9 @@ The script works fine with linked mailboxes in Exchange resource forest scenario
 
 Trusted domains can be modified with the DomainsToCheckForGroups parameter.
 
-Group membership is achieved by querying the tokenGroups attribute, which is not only very fast and resource saving on client and server, but also considers sIDHistory.  
+Group membership is achieved by querying the tokenGroups attribute, which is not only very fast and resource saving on client and server, but also considers sIDHistory.
+
+When no Active Directory connection is available, Microsoft Graph is queried for transitive group membership.
 # 6. Removing old signatures  
 The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository. The script marks each processed signature with a specific HTML tag, which enables this cleaning feature.
 
@@ -246,7 +264,14 @@ Examples:
     - If neither `[internal]` nor `[external]` is defined, the template is set as default OOF message for internal and external recipients  
 - `[<NETBIOS Domain> <Group SamAccountName>]`, e.g. `[EXAMPLE Domain Users]`  
     - Make this template specific for an Outlook mailbox or the currently logged on user being a member (direct or indirect) of this group  
-    - Groups must be available in Active Directory. Groups like `'Everyone'` and `'Authenticated Users'` only exist locally, not in Active Directory  
+    - Groups must be available in Active Directory. Groups like `'Everyone'` and `'Authenticated Users'` only exist locally, not in Active Directory
+
+    This tag supports alternative formats, which are of special interest if you are in a cloud only or hybrid environmonent:
+    -  `[<NETBIOS Domain> <Group SamAccountName>]` and `[<NETBIOS Domain> <Group DisplayName>]` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName.  
+    Use these formats when your environment is hybrid or on premises only.
+    -  `[AzureAD <Group e-mail address>]`, `[AzureAD <Group MailNickname>]`, `[AzureAD <Group DisplayName>]` do not work with a local Active Directory. They are queried in the order given.  
+    'AzureAD' is the literal, case-insensitive string 'AzureAD', not a variable.  
+    Use these formats when you are in a cloud only environment. 
 - `[<SMTP address>]`, e.g. `[office<area>@example.com]`  
     - Make this template specific for the assigned e-mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
 - `[yyyyMMddHHmm-yyyyMMddHHmm]`, e.g. `[202112150000-202112262359]` for the 2021 Christmas season  
@@ -517,7 +542,7 @@ The following steps are recommended:
 Absolutely. PowerShell best practices recommend using singular nouns, but Set-OutlookSignatures contains a plural noun.
 
 I intentionally decided not to follow the singular noun convention, as another language as PowerShell was initially used for coding and the name of the tool was already defined. If this was a commercial enterprise project, marketing would have overruled development.
-## What's planned for the next release, what does your roadmap look like?
+## 14.15. What's planned for the next release, what does your roadmap look like?
 There is no official roadmap or timeline.
 
 Solving issues always has the highest priority.
@@ -525,7 +550,25 @@ Solving issues always has the highest priority.
 There are two big topics planned for the future:
 - Adding Microsoft Graph as a fallback for Active Directory, allowing Set-OutlookSignature to work in "cloud only" and additional hybrid scenarios
 - Evaluating the new signature roaming feature for cloud mailboxes, but there is no API yet. For details, please read the separate FAQ on this topic.
-## 14.15. What about the new signature roaming feature Microsoft announced?  
+## 14.16. The script hangs at "Export to HTM format", Word shows a security warning!?
+When using a signature template with account pictures (linked and embedded), conversion to HTM hangs at "Export to HTM format" or "Export to RTF format". In the background, there is a window "Microsoft Word Security Notice" with the following text:
+```
+Microsoft Office has identified a potential security concern.
+
+This document contains fields that can share data with external files and websites. It is important that this file is from a trustworthy source.
+```
+
+This behavior seems new in Word versions published around August 2021. You will find several discussions regarding the message in internet forums, but I am not aware of any official statement from Microsoft.
+
+It is yet unclear if this is a new Word security feature or a bug.
+
+The behavior can be changed in at least two ways:
+- Group Policy: Enable "User Configuration\Administrative Templates\Microsoft Word 2016\Word Options\Security\Don’t ask permission before updating IncludePicture and IncludeText fields in Word"
+- Registry: Set "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Security\DisableWarningOnIncludeFieldsUpdate" (DWORD_32) to 1
+
+Set-OutlookSignatures reads the registry key "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Security\DisableWarningOnIncludeFieldsUpdate" at start, sets it to 1 just before the conversion to HTM and RF takes place and restores the original state as soon as the conversions are finished.
+This way, the warning usually gets suppressed, while the Group Policy configured state of the setting still has higher priority and overrides the user setting.
+## 14.17. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.

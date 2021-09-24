@@ -3,11 +3,14 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0" target="_blank">v2.3.0</a> - YYYY-MM-DD
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta.1" target="_blank">v2.3.0-beta.1</a> - 2021-09-24
 ### Added
-- New default replacement variables: '\$CURRENT\[...\]OFFICE\$', '\$CURRENT\[...\]COMPANY\$'
+- Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios
+- FAQs: "The script hangs at "Export to HTM format", Word shows a security warning!?", "What's planned for the next release, what does your roadmap look like?", "Isn't a plural noun in the script name against PowerShell best practices?"
+- New replacement variables OFFICE and COMPANY, including updated templates
+- Enterprise grade workaround for Word security warning when converting documents with linked images
 ### Fixed
-- fix: User could connect to hidden Word instance used for conversion of DOCX templates
+- User could connect to hidden Word instance used for conversion of DOCX templates
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.1" target="_blank">v2.2.1</a> - 2021-09-15
 ### Fixed
