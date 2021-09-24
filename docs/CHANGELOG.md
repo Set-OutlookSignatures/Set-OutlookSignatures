@@ -3,7 +3,7 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta.1" target="_blank">v2.3.0-beta.1</a> - 2021-09-24
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta1" target="_blank">v2.3.0-beta1</a> - 2021-09-24
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios
 - FAQs: "The script hangs at "Export to HTM format", Word shows a security warning!?", "What's planned for the next release, what does your roadmap look like?", "Isn't a plural noun in the script name against PowerShell best practices?"
