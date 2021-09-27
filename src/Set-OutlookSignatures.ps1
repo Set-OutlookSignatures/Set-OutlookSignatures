@@ -4,27 +4,27 @@ Centrally manage and deploy Outlook text signatures and Out of Office auto reply
 
 .DESCRIPTION
 **Signatures and OOF messages can be:**
-- Generated from templates in DOCX or HTML file format  
-- Customized with a broad range of variables, including photos, from Active Directory and other sources  
-- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles  
-- Assigned time ranges within which they are valid  
-- Set as default signature for new mails, or for replies and forwards (signatures only)  
-- Set as default OOF message for internal or external recipients (OOF messages only)  
-- Set in Outlook Web for the currently logged on user  
-- Centrally managed only or exist along user created signatures (signatures only)  
+- Generated from templates in DOCX or HTML file format
+- Customized with a broad range of variables, including photos, from Active Directory and other sources
+- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles
+- Assigned time ranges within which they are valid
+- Set as default signature for new mails, or for replies and forwards (signatures only)
+- Set as default OOF message for internal or external recipients (OOF messages only)
+- Set in Outlook Web for the currently logged on user
+- Centrally managed only or exist along user created signatures (signatures only)
 - Copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
-  
+
 **Sample templates** for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
-  
+
 The script is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
 
 It is **multi-client capable** by using different template paths, configuration files and script parameters.
 
-Set-OutlookSignature requires **no installation on servers or clients**. You only need a standard file share on a server, and PowerShell and Office on the client. 
+Set-OutlookSignature requires **no installation on servers or clients**. You only need a standard file share on a server, and PowerShell and Office on the client.
 
-A **documented implementation approach**, based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.  
+A **documented implementation approach**, based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.
 The implementatin approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The script is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see '.\docs\LICENSE.txt' for copyright and MIT license details.
@@ -38,6 +38,15 @@ Local and remote paths are supported.
 Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 Default value: '.\templates\Signatures DOCX'
+
+.PARAMETER SignatureIniPath
+Path to ini file containing signature template tags
+This is an alternative to file name tags
+See '.\templates\sample signatures ini file.ini' for a sample file with further explanations.
+Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+The currently logged on user needs at least read access to the path
+Default value: ''
 
 .PARAMETER ReplacementVariableConfigFile
 Path to a replacement variable config file.
@@ -54,7 +63,7 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/co
 The currently logged on user needs at least read access to the path
 Default value: '.\config\default graph config.ps1'
 
-    .PARAMETER DomainsToCheckForGroups
+.PARAMETER DomainsToCheckForGroups
 List of domains/forests to check for group membership across trusts.
 If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
 If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list.
@@ -82,6 +91,15 @@ Local paths can be absolute ('C:\OOF templates') or relative to the script path 
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
 The currently logged on user needs at least read access to the path.
 Default value: '.\templates\Out of Office DOCX'
+
+.PARAMETER OOFIniPath
+Path to ini file containing signature template tags
+This is an alternative to file name tags
+See '.\templates\sample OOF ini file.ini' for a sample file with further explanations.
+Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+The currently logged on user needs at least read access to the path
+Default value: ''
 
 .PARAMETER AdditionalSignaturePath
 An additional path that the signatures shall be copied to.
@@ -157,6 +175,16 @@ Param(
     #   The currently logged on user needs at least read access to the path
     [ValidateNotNullOrEmpty()][string]$SignatureTemplatePath = '.\templates\Signatures DOCX',
 
+    # Path to ini file containing signature template tags
+    # This is an alternative to file name tags
+    # See '.\templates\sample signatures ini file.ini' for a sample file with further explanations.
+    #   Local and remote paths are supported
+    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
+    #   WebDAV paths are supported (https only)
+    #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+    #   The currently logged on user needs at least read access to the path
+    [ValidateNotNullOrEmpty()][string]$SignatureIniPath = '',
+
     # Path to a replacement variable config file.
     #   Local and remote paths are supported
     #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signature')
@@ -195,6 +223,16 @@ Param(
     #     'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
     #   The currently logged on user needs at least read access to the path
     [ValidateNotNullOrEmpty()][string]$OOFTemplatePath = '.\templates\Out of Office DOCX',
+
+    # Path to ini file containing OOF template tags
+    # This is an alternative to file name tags
+    # See '.\templates\sample OOF ini file.ini' for a sample file with further explanations.
+    #   Local and remote paths are supported
+    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
+    #   WebDAV paths are supported (https only)
+    #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+    #   The currently logged on user needs at least read access to the path
+    [ValidateNotNullOrEmpty()][string]$OOFIniPath = $null,
 
     # An additional path that the signatures shall be copied to
     [string]$AdditionalSignaturePath = $(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) }catch {}),
@@ -267,6 +305,25 @@ function main {
     CheckPath $GraphConfigFile
     Write-Host "  SignatureTemplatePath: '$SignatureTemplatePath'" -NoNewline
     CheckPath $SignatureTemplatePath
+    Write-Host "  SignatureIniPath: '$SignatureIniPath'" -NoNewline
+    if ($SignatureIniPath -ne '') {
+        CheckPath $SignatureIniPath
+        $SignatureIniSettings = Get-IniContent $SignatureIniPath
+        foreach ($section in $SignatureIniSettings.GetEnumerator()) {
+            Write-Host "    File: '$($section.name)'"
+            $local:tags = @()
+            foreach ($key in $SignatureIniSettings[$($section.name)].GetEnumerator()) {
+                if ($key.value) {
+                    $local:tags += "$($key.name) = $($key.value)"
+                } else {
+                    $local:tags += "$($key.name)"
+                }
+            }
+            Write-Host "      Tags: [$($local:tags -join '] [')]"
+        }
+    } else {
+        Write-Host
+    }
     Write-Host ('  DomainsToCheckForGroups: ' + ('''' + $($DomainsToCheckForGroups -join ''', ''') + ''''))
     Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
     Write-Host "  SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
@@ -274,6 +331,25 @@ function main {
     if ($SetCurrentUserOOFMessage) {
         Write-Host "  OOFTemplatePath: '$OOFTemplatePath'" -NoNewline
         CheckPath $OOFTemplatePath
+        Write-Host "  OOFIniPath: '$OOFIniPath'" -NoNewline
+        if ($OOFIniPath -ne '') {
+            CheckPath $OOFIniPath
+            $OOFIniSettings = Get-IniContent $OOFIniPath
+            foreach ($section in $OOFIniSettings.GetEnumerator()) {
+                Write-Host "    File: '$($section.name)'"
+                $local:tags = @()
+                foreach ($key in $OOFIniSettings[$($section.name)].GetEnumerator()) {
+                    if ($key.value) {
+                        $local:tags += "$($key.name) = $($key.value)"
+                    } else {
+                        $local:tags += "$($key.name)"
+                    }
+                }
+                Write-Host "      Tags: [$($local:tags -join '] [')]"
+            }
+        } else {
+            Write-Host
+        }
     }
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'"
     Write-Host "  AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
@@ -775,17 +851,40 @@ function main {
     $script:SignatureFilesDone = @()
     $SignatureFilesGroupSIDs = @{}
 
-    foreach ($SignatureFile in ((Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)) {
-        Write-Host ("  '$($SignatureFile.Name)'")
-        $x = $SignatureFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
-        if ($x.count -ge 3) {
-            $SignatureFilePart = $x[-2]
-            $SignatureFileTargetName = ($x[($x.count * -1)..-3] -join '.') + '.' + $x[-1]
-        } else {
-            $SignatureFilePart = ''
-            $SignatureFileTargetName = $SignatureFile.Name
+    $SignatureFiles = ((Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
+    try {
+        switch ($SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortOrder']) {
+            { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $SignatureFiles = ($SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object ); continue }
+            { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $SignatureFiles = ( $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Descending ); continue }
+            { $_ -in 'AsInThisFile', 'AsListed' } {
+                $SignatureFiles = $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name }
+                $local:sortorder = @()
+                ($SignatureIniSettings.GetEnumerator().name | Where-Object { $_ -in $SignatureFiles.name }) | ForEach-Object {
+                    $local:sortorder += [array]::indexof($SignatureFiles.name, $_)
+                }
+                $SignatureFiles = $SignatureFiles[$local:sortorder]
+                continue
+            }
+            default { $SignatureFiles = ($SignatureFiles.name | Sort-Object) }
         }
+    } catch {
+    }
 
+    foreach ($SignatureFile in $SignatureFiles) {
+        Write-Host ("  '$($SignatureFile.Name)'")
+        if ($SignatureIniPath -ne '') {
+            $SignatureFilePart = '[' + ($SignatureIniSettings["$SignatureFile"].GetEnumerator().Name -join '] [') + ']'
+            $SignatureFileTargetName = $SignatureFile.Name
+        } else {
+            $x = $SignatureFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
+            if ($x.count -ge 3) {
+                $SignatureFilePart = $x[-2]
+                $SignatureFileTargetName = ($x[($x.count * -1)..-3] -join '.') + '.' + $x[-1]
+            } else {
+                $SignatureFilePart = ''
+                $SignatureFileTargetName = $SignatureFile.Name
+            }
+        }
         $SignatureFileTimeActive = $true
         if ($SignatureFilePart -match '\[\d{12}-\d{12}\]') {
             $SignatureFileTimeActive = $false
@@ -905,17 +1004,39 @@ function main {
         $script:OOFFilesDone = @()
         $OOFFilesGroupSIDs = @{}
 
-        foreach ($OOFFile in ((Get-ChildItem -LiteralPath $OOFTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)) {
-            Write-Host ("  '$($OOFFile.Name)'")
-            $x = $OOFFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
-            if ($x.count -ge 3) {
-                $OOFFilePart = $x[-2]
-                $OOFFileTargetName = ($x[($x.count * -1)..-3] -join '.') + '.' + $x[-1]
-            } else {
-                $OOFFilePart = ''
-                $OOFFileTargetName = $OOFFile.Name
+        $OOFFiles = ((Get-ChildItem -LiteralPath $OOFTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
+        try {
+            switch ($OOFIniSettings['<Set-OutlookOOFs configuration>']['SortOrder']) {
+                { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $OOFFiles = ($OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object ) }
+                { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $OOFFiles = ( $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object -Descending ) }
+                'AsInThisFile' {
+                    $OOFFiles = $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name }
+                    $local:sortorder = @()
+                    ($OOFIniSettings.GetEnumerator().name | Where-Object { $_ -in $OOFFiles.name }) | ForEach-Object {
+                        $local:sortorder += [array]::indexof($OOFFiles.name, $_)
+                    }
+                    $OOFFiles = $OOFFiles[$local:sortorder]
+                }
+                default { $OOFFiles = ($OOFFiles.name | Sort-Object) }
             }
+        } catch {
+        }
 
+        foreach ($OOFFile in $OOFFiles) {
+            Write-Host ("  '$($OOFFile.Name)'")
+            if ($OOFIniPath -ne '') {
+                $OOFFilePart = '[' + ($OOFIniSettings["$OOFFile"].GetEnumerator().Name -join '] [') + ']'
+                $OOFFileTargetName = $OOFFile.Name
+            } else {
+                $x = $OOFFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
+                if ($x.count -ge 3) {
+                    $OOFFilePart = $x[-2]
+                    $OOFFileTargetName = ($x[($x.count * -1)..-3] -join '.') + '.' + $x[-1]
+                } else {
+                    $OOFFilePart = ''
+                    $OOFFileTargetName = $OOFFile.Name
+                }
+            }
             $OOFFileTimeActive = $true
             if ($OOFFilePart -match '\[\d{12}-\d{12}\]') {
                 $OOFFileTimeActive = $false
@@ -1148,7 +1269,7 @@ function main {
                         }
                         Write-Host '    Microsoft Graph'
                         foreach ($sid in ((GraphGetUserTransitiveMemberOf $ADPropsCurrentMailbox.userPrincipalName).memberof.securityidentifier)) {
-                            $GroupsSIDs += $sid                                  
+                            $GroupsSIDs += $sid
                             Write-Host "      $sid"
                         }
                     } catch {
@@ -1521,7 +1642,7 @@ function main {
                                         Write-Host '    Error setting Outlook Web Out of Office (OOF) auto reply message(s)' -ForegroundColor Red
                                         $error[0]
                                     }
-                                } 
+                                }
                             } else {
                                 $SignaturePaths | ForEach-Object {
                                     Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF Internal.htm')) -Force
@@ -1538,7 +1659,7 @@ function main {
                                             Write-Host '    Error setting Outlook Web Out of Office (OOF) auto reply message(s)' -ForegroundColor Red
                                             $error[0]
                                         }
-                                    } 
+                                    }
                                 }
                                 if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
                                     if ($null -ne $DomainsToCheckForGroups[0]) {
@@ -1548,7 +1669,7 @@ function main {
                                             Write-Host '    Error setting Outlook Web Out of Office (OOF) auto reply message(s)' -ForegroundColor Red
                                             $error[0]
                                         }
-                                    } 
+                                    }
                                 }
                             } else {
                                 $SignaturePaths | ForEach-Object {
@@ -2369,7 +2490,7 @@ function GraphGetMe {
     } else {
         return @{
             error = $error | Out-String
-            me    = $null        
+            me    = $null
         }
     }
 }
@@ -2406,7 +2527,7 @@ function GraphGetUserProperties($user) {
     } else {
         return @{
             error      = $error | Out-String
-            properties = $null        
+            properties = $null
         }
     }
 }
@@ -2437,7 +2558,7 @@ function GraphGetUserManager($user) {
     } else {
         return @{
             error      = $error | Out-String
-            properties = $null        
+            properties = $null
         }
     }
 
@@ -2467,7 +2588,7 @@ function GraphGetUserTransitiveMemberOf($user) {
     } else {
         return @{
             error    = $error | Out-String
-            memberof = $null        
+            memberof = $null
         }
     }
 }
@@ -2499,7 +2620,7 @@ function GraphGetUserPhoto($user) {
     } else {
         return @{
             error = $error | Out-String
-            photo = $null        
+            photo = $null
         }
     }
 }
@@ -2557,8 +2678,45 @@ function GraphFilterGroups($filter) {
     } else {
         return @{
             error  = $error | Out-String
-            groups = $null        
+            groups = $null
         }
+    }
+}
+
+
+function Get-IniContent ($filePath) {
+    if ($filePath -ne '') {
+        $local:ini = [ordered]@{}
+        switch -regex -file $FilePath {
+            # Comments starting with ; or #, or empty line, whitespace(s) before are ignored
+            '(^\s*(;|#))|(^\s*$)' { continue }
+
+            # Section in square brackets, whitespace(s) before and after brackets are ignored
+            '^\s*\[(.+)\]\s*' {
+                $local:section = ($matches[1]).trim().trim('"').trim('''')
+                $local:ini[$section] = @{}
+                continue
+            }
+
+            # Key and value, whitespace(s) before and after brackets are ignored
+            '^\s*(.+?)\s*=\s*(.*)\s*' {
+                if ($null -ne $local:section) {
+                    $local:ini[$local:section][($matches[1]).trim().trim('"').trim('''')] = ($matches[2]).trim().trim('"').trim('''')
+                    continue
+                }
+            }
+
+            # Key only, whitespace(s) before and after brackets are ignored
+            '^\s*(.*)\s*' {
+                if ($null -ne $local:section) {
+                    $local:ini[$local:section][($matches[1]).trim().trim('"').trim('''')] = $null
+                    continue
+                }
+            }
+        }
+        return $local:ini
+    } else {
+        return $null
     }
 }
 
@@ -2596,8 +2754,12 @@ try {
     }
 
     Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
-    Remove-Item $script:dllPath -Force -ErrorAction SilentlyContinue
-    Remove-Item $script:msalPath -Recurse -Force -ErrorAction SilentlyContinue
+    if ($script:dllPath) {
+        Remove-Item $script:dllPath -Force -ErrorAction SilentlyContinue
+    }
+    if ($script:msalPath) {
+        Remove-Item $script:msalPath -Recurse -Force -ErrorAction SilentlyContinue
+    }
 
 
     Write-Host

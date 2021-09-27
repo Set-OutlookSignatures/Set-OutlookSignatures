@@ -90,9 +90,10 @@ function main {
     $ChangeLogLines = Get-Content $Changelog
     $ChangelogStartline = $null
     $ChangelogEndline = $null
+    $ReleaseTagDate = $(Get-Date -Format 'yyyy-MM-dd')
     for ($i = 0; $i -lt $ChangeLogLines.count; $i++) {
         if (-not $ChangelogStartline) {
-            if ($ChangeLogLines[$i] -match ("^## \t*(\[$ReleaseTag\] \t*|$ReleaseTag \t*|$ReleaseTag$)|>$ReleaseTag<")) {
+            if ($ChangeLogLines[$i] -match ("^## \t*(\[$ReleaseTag\] - $ReleaseTagDate\t*|$ReleaseTag - $ReleaseTagDate\t*|$ReleaseTag - $ReleaseTagDate$)|>$ReleaseTag - $ReleaseTagDate<")) {
                 $ChangelogStartline = $i
                 continue
             }

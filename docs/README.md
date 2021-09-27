@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally&nbsp;manage&nbsp;and&nbsp;deploy Outlook&nbsp;text&nbsp;signatures&nbsp;and Out&nbsp;of&nbsp;Office&nbsp;auto&nbsp;reply&nbsp;messages.<br><a href="https://github.com/GruberMarkus/Set-OutlookSignatures/blob/main/license.txt" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://www.paypal.com/donate?business=JBM584K3L5PX4&no_recurring=0&currency_code=EUR" target="_blank"><img src="https://img.shields.io/badge/sponsor-grey?logo=paypal" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
+# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><a href="https://github.com/GruberMarkus/Set-OutlookSignatures/blob/main/license.txt" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://www.paypal.com/donate?business=JBM584K3L5PX4&no_recurring=0&currency_code=EUR" target="_blank"><img src="https://img.shields.io/badge/sponsor-grey?logo=paypal" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
 
 # Features <!-- omit in toc -->
 **Signatures and OOF messages can be:**
@@ -31,18 +31,20 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
 - [1. Requirements](#1-requirements)
 - [2. Parameters](#2-parameters)
   - [2.1. SignatureTemplatePath](#21-signaturetemplatepath)
-  - [2.2. ReplacementVariableConfigFile](#22-replacementvariableconfigfile)
-  - [2.3. GraphConfigFile](#23-graphconfigfile)
-  - [2.4. DomainsToCheckForGroups](#24-domainstocheckforgroups)
-  - [2.5. DeleteUserCreatedSignatures](#25-deleteusercreatedsignatures)
-  - [2.6. SetCurrentUserOutlookWebSignature](#26-setcurrentuseroutlookwebsignature)
-  - [2.7. SetCurrentUserOOFMessage](#27-setcurrentuseroofmessage)
-  - [2.8. OOFTemplatePath](#28-ooftemplatepath)
-  - [2.9. AdditionalSignaturePath](#29-additionalsignaturepath)
-  - [2.10. AdditionalSignaturePathFolder](#210-additionalsignaturepathfolder)
-  - [2.11. UseHtmTemplates](#211-usehtmtemplates)
-  - [2.12. SimulateUser](#212-simulateuser)
-  - [2.13. SimulateMailboxes](#213-simulatemailboxes)
+  - [2.2. SignatureIniPath](#22-signatureinipath)
+  - [2.3. ReplacementVariableConfigFile](#23-replacementvariableconfigfile)
+  - [2.4. GraphConfigFile](#24-graphconfigfile)
+  - [2.5. DomainsToCheckForGroups](#25-domainstocheckforgroups)
+  - [2.6. DeleteUserCreatedSignatures](#26-deleteusercreatedsignatures)
+  - [2.7. SetCurrentUserOutlookWebSignature](#27-setcurrentuseroutlookwebsignature)
+  - [2.8. SetCurrentUserOOFMessage](#28-setcurrentuseroofmessage)
+  - [2.9. OOFTemplatePath](#29-ooftemplatepath)
+  - [2.10. OOFIniPath](#210-oofinipath)
+  - [2.11. AdditionalSignaturePath](#211-additionalsignaturepath)
+  - [2.12. AdditionalSignaturePathFolder](#212-additionalsignaturepathfolder)
+  - [2.13. UseHtmTemplates](#213-usehtmtemplates)
+  - [2.14. SimulateUser](#214-simulateuser)
+  - [2.15. SimulateMailboxes](#215-simulatemailboxes)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -100,7 +102,19 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/S
 The currently logged on user needs at least read access to the path.
 
 Default value: `'.\templates\Signatures DOCX'`  
-## 2.2. ReplacementVariableConfigFile  
+## 2.2. SignatureIniPath
+If you can't or don't want to use file name based tags, you can place them in an ini file.
+
+See '.\templates\sample signatures ini file.ini' for a sample file with further explanations.
+
+Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
+
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+
+The currently logged on user needs at least read access to the path
+
+Default value: ''
+## 2.3. ReplacementVariableConfigFile  
 The parameter ReplacementVariableConfigFile tells the script where the file defining replacement variables is located.
 
 Local and remote paths are supported. Local paths can be absolute (`'C:\config\default replacement variables.ps1'`) or relative to the script path (`'.\config\default replacement variables.ps1'`).
@@ -110,7 +124,7 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/c
 The currently logged on user needs at least read access to the file.
 
 Default value: `'.\config\default replacement variables.ps1'`  
-## 2.3. GraphConfigFile
+## 2.4. GraphConfigFile
 The parameter GraphConfigFile tells the script where the file defining Graph connection and configuration options is located.
 
 Local and remote paths are supported. Local paths can be absolute (`'C:\config\default graph config.ps1'`) or relative to the script path (`'.\config\default graph config.ps1'`).
@@ -120,7 +134,7 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/c
 The currently logged on user needs at least read access to the file.
 
 Default value: `'.\config\default graph config.ps1'`  
-## 2.4. DomainsToCheckForGroups  
+## 2.5. DomainsToCheckForGroups  
 The parameters tells the script which domains should be used to search for mailbox and user group membership.
 
 The default value, `'\*'` tells the script to query all trusted domains in the Active Directory forest of the logged on user.
@@ -134,25 +148,25 @@ The `'\*'` entry in a custom list is only considered when it is the first entry 
 The Active Directory forest of the currently logged on user is always considered.
 
 Default value: `'*'`  
-## 2.5. DeleteUserCreatedSignatures  
+## 2.6. DeleteUserCreatedSignatures  
 Shall the script delete signatures which were created by the user itself? The default value for this parameter is `$false`.
 
 Remark: The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
 
 Default value: `$false`  
-## 2.6. SetCurrentUserOutlookWebSignature  
+## 2.7. SetCurrentUserOutlookWebSignature  
 Shall the script set the Outlook Web signature of the currently logged on user?
 
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
-## 2.7. SetCurrentUserOOFMessage  
+## 2.8. SetCurrentUserOOFMessage  
 Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?
 
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
-## 2.8. OOFTemplatePath  
+## 2.9. OOFTemplatePath  
 Path to centrally managed Out of Office (OOF) auto reply templates.
 
 Local and remote paths are supported.
@@ -164,7 +178,19 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/O
 The currently logged on user needs at least read access to the path.
 
 Default value: `'.\templates\Out of Office DOCX'`  
-## 2.9. AdditionalSignaturePath  
+## 2.10. OOFIniPath
+If you can't or don't want to use file name based tags, you can place them in an ini file.
+
+See '.\templates\sample OOF ini file.ini' for a sample file with further explanations.
+
+Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
+
+WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+
+The currently logged on user needs at least read access to the path
+
+Default value: ''
+## 2.11. AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
 
@@ -181,7 +207,7 @@ The currently logged on user needs at least write access to the path.
 If the folder or folder structure does not exist, it is created.
 
 Default value: `"$([environment]::GetFolderPath("MyDocuments"))\Outlook signatures"`  
-## 2.10. AdditionalSignaturePathFolder
+## 2.12. AdditionalSignaturePathFolder
 A folder or folder structure below AdditionalSignaturePath.
 
 This parameter is available for compatibility with versions before 2.2.1. Starting with 2.2.1, you can pass a full path via the parameter AdditionalSignaturePath, so AdditionalSignaturePathFolder is no longer needed.
@@ -189,19 +215,19 @@ This parameter is available for compatibility with versions before 2.2.1. Starti
 If the folder or folder structure does not exist, it is created.
 
 Default value: `'Outlook signatures'`  
-## 2.11. UseHtmTemplates  
+## 2.13. UseHtmTemplates  
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
 
 Each format has advantages and disadvantages, please see "[13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)" for a quick overview.
 
 Default value: `$false`  
-## 2.12. SimulateUser  
+## 2.14. SimulateUser  
 SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged on user.
 
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
-## 2.13. SimulateMailboxes  
+## 2.15. SimulateMailboxes  
 SimulateMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
@@ -247,6 +273,10 @@ Only Word files with the extension .docx and HTML files with the extension .htm 
 The script copies every signature and OOF file as-is, with one exception: When tags are defined in the file name, these tags are removed.
 
 Tags must be placed before the file extension and be separated from the base filename with a period.
+
+If you can't or don't want to use file name based tags, you can also place them in an ini file.  
+See '.\templates\sample signatures ini file.ini' and '.\templates\sample OOF ini file.ini' for samples file with further explanations.
+
 
 Examples:  
 - `'Company external German.docx'` -> `'Company external German.htm'`, no changes  
