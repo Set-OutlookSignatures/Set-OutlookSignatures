@@ -138,13 +138,13 @@ Default value: `'.\config\default graph config.ps1'`
 ## 2.5. DomainsToCheckForGroups  
 The parameters tells the script which domains should be used to search for mailbox and user group membership.
 
-The default value, `'\*'` tells the script to query all trusted domains in the Active Directory forest of the logged on user.
+The default value, `'*'` tells the script to query all trusted domains in the Active Directory forest of the logged on user.
 
 For a custom list of domains/forests, specify them as comma-separated list of strings: `"domain-a.local", "dc=example,dc=com", "domain-b.internal"`.
 
 When a domain/forest in the custom list starts with a dash or minus (`'-domain-a.local'`), this domain is removed from the list.
 
-The `'\*'` entry in a custom list is only considered when it is the first entry of the list.
+The `'*'` entry in a custom list is only considered when it is the first entry of the list.
 
 The Active Directory forest of the currently logged on user is always considered.
 
