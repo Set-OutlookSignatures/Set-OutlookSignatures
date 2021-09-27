@@ -594,9 +594,7 @@ The behavior can be changed in at least two ways:
 Set-OutlookSignatures reads the registry key "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Security\DisableWarningOnIncludeFieldsUpdate" at start, sets it to 1 just before the conversion to HTM and RF takes place and restores the original state as soon as the conversions are finished.
 This way, the warning usually gets suppressed, while the Group Policy configured state of the setting still has higher priority and overrides the user setting.
 ## 14.16. How to avoid empty lines when replacement variables return an empty string?
-Not all users have values for all attributes, e. g. a mobile number.
-
-This can lead to empty lines in you signatures, which may not look nice.
+Not all users have values for all attributes, e. g. a mobile number. This can lead to empty lines in signatures, which may not look nice.
 
 Follow these steps to avoid empty lines:
 1. Use a custom replacement variable config file.
