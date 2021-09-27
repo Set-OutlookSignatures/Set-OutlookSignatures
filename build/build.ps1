@@ -93,7 +93,7 @@ function main {
     $ReleaseTagDate = $(Get-Date -Format 'yyyy-MM-dd')
     for ($i = 0; $i -lt $ChangeLogLines.count; $i++) {
         if (-not $ChangelogStartline) {
-            if ($ChangeLogLines[$i] -match ("^## \t*(\[$ReleaseTag\] - $ReleaseTagDate\t*|$ReleaseTag - $ReleaseTagDate\t*|$ReleaseTag - $ReleaseTagDate$)|>$ReleaseTag - $ReleaseTagDate<")) {
+            if ($ChangeLogLines[$i] -match ("^##\s*(\[$ReleaseTag\] - $ReleaseTagDate\s*|$ReleaseTag - $ReleaseTagDate\s*|$ReleaseTag - $ReleaseTagDate$)|>$ReleaseTag</a> - $ReleaseTagDate\s*")) {
                 $ChangelogStartline = $i
                 continue
             }
@@ -105,7 +105,7 @@ function main {
         }
     }
     if (-not $ChangelogStartline) {
-        $ReleaseMarkdown = "# **Tag '$ReleaseTag' not found in '$Changelog', using first entry.**`r`n"
+        $ReleaseMarkdown = "# **Tag '$ReleaseTag - $ReleaseTagDate' not found in '$Changelog', using first entry.**`r`n"
         $ChangelogStartline = $null
         $ChangelogEndline = $null
         for ($i = 0; $i -lt $ChangeLogLines.count; $i++) {
