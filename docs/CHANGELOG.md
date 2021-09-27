@@ -3,13 +3,15 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta1" target="_blank">v2.3.0-beta2</a> - 2021-09-27
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta1" target="_blank">v2.3.0-beta3</a> - YYYY-MM-DD
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios
 - Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details
-- FAQs: "The script hangs at HTM/RTF export, Word shows a security warning!?", "Isn't a plural noun in the script name against PowerShell best practices?"
 - New replacement variables '\$CURRENT\[...\]OFFICE\$' and '\$CURRENT\[...\]COMPANY\$', including updated templates
 - Enterprise grade workaround for Word security warning when converting documents with linked images
+- FAQ: The script hangs at HTM/RTF export, Word shows a security warning!?
+- FAQ: Isn't a plural noun in the script name against PowerShell best practices?
+- FAQ: How to avoid empty lines when replacement variables return an empty string?
 ### Fixed
 - User could connect to hidden Word instance used for conversion of DOCX templates
 

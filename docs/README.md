@@ -75,7 +75,8 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [14.13. What is the recommended approach for custom configuration files?](#1413-what-is-the-recommended-approach-for-custom-configuration-files)
   - [14.14. Isn't a plural noun in the script name against PowerShell best practices?](#1414-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
   - [14.15. The script hangs at HTM/RTF export, Word shows a security warning!?](#1415-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
-  - [14.16. What about the new signature roaming feature Microsoft announced?](#1416-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [14.16. How to avoid empty lines when replacement variables return an empty string?](#1416-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
+  - [14.17. What about the new signature roaming feature Microsoft announced?](#1417-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -592,7 +593,49 @@ The behavior can be changed in at least two ways:
 
 Set-OutlookSignatures reads the registry key "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Security\DisableWarningOnIncludeFieldsUpdate" at start, sets it to 1 just before the conversion to HTM and RF takes place and restores the original state as soon as the conversions are finished.
 This way, the warning usually gets suppressed, while the Group Policy configured state of the setting still has higher priority and overrides the user setting.
-## 14.16. What about the new signature roaming feature Microsoft announced?  
+## 14.16. How to avoid empty lines when replacement variables return an empty string?
+Not all users have values for all attributes, e. g. a mobile number.
+
+This can lead to empty lines in you signatures, which may not look nice.
+
+Follow these steps to avoid empty lines:
+1. Use a custom replacement variable config file.
+2. Modify the value of all attributes that should not leave an empty line when there is no text to show: When the attribute is empty, return an empty string; else, return a newline ('\`r\`n' in PowerShell) and then the attribute value.  
+When using HTML templates, use '\<br>' instead of '\`r\`n'.
+3. Place all required replacement variables on a single line, without a space between them.  
+If they are not empty, the newline creates a new paragraph; else, the replacement variable is replaced with an emtpy string.
+4. Use the ReplacementVariableConfigFile parameter when running the script.
+
+An example:
+- Custom replacement variable config file
+  ```
+  $ReplaceHash['$CURRENTUSERTELEPHONE$'] = [string]$(if (-not $($ADPropsCurrentUser.telephonenumber)) { '' } else { "`r`nT: $($ADPropsCurrentUser.telephonenumber)"} )
+  $ReplaceHash['$CURRENTUSERMOBILE$'] = [string]$(if (-not $($ADPropsCurrentUser.mobile)) { '' } else { "`r`nM: $($ADPropsCurrentUser.mobile)"} )
+  ```
+- Word template
+  ```
+  $CURRENTUSERMAIL$$CURRENTUSERTELEPHONE$$CURRENTUSERMOBILE$
+  ```
+- Results
+  - Telephone number and mobile number are set
+    ```
+    $CURRENTUSERMAIL$
+    T: $CURRENTUSERTELEPHONE$
+    M: $CURRENTUSERMOBILE$
+    ```
+  - Telephone number exists, mobile number is empty
+    ```
+    $CURRENTUSERMAIL$
+    T: $CURRENTUSERTELEPHONE$
+    ```
+  - Telephone number is empty, mobile number is set
+    ```
+    $CURRENTUSERMAIL$
+    M: $CURRENTUSERMOBILE$
+    ```
+Be aware that text replacement also happens in hyperlinks ("tel:" etc.). You may want to create two replacement variables for the very same attribute in such cases: One for the pure textual replacement (including the newline) and one for the replacement within the hyperlink.
+
+## 14.17. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.
