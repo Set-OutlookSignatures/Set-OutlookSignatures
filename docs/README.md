@@ -650,34 +650,38 @@ When using HTML templates, use
 - '\<p>' instead of '\`r\`n'
 - '\<br>' instead of '\`n'
 
+Be aware that text replacement also happens in hyperlinks ('tel:', 'mailto:' etc.).  
+Instead of altering existing replacement variables, it is recommended to create new replacement variables with modified content.  
+Use the new one for the pure textual replacement (including the newline), and the original one for the replacement within the hyperlink.  
+
+
 An example:
 - Custom replacement variable config file
   ```
-  $ReplaceHash['$CURRENTUSERTELEPHONE$'] = [string]$(if (-not $($ADPropsCurrentUser.telephonenumber)) { '' } else { "`r`nT: $($ADPropsCurrentUser.telephonenumber)"} )
-  $ReplaceHash['$CURRENTUSERMOBILE$'] = [string]$(if (-not $($ADPropsCurrentUser.mobile)) { '' } else { "`r`nM: $($ADPropsCurrentUser.mobile)"} )
+  $ReplaceHash['$CURRENTUSERTELEPHONE-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { "`r`nT: $($ReplaceHash['$CURRENTUSERTELEPHONE$'])"} )
+  $ReplaceHash['$CURRENTUSERMOBILE-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$) { '' } else { "`r`nM: $($ReplaceHash['$CURRENTUSERMOBILE$)"} )
   ```
 - Word template
   ```
-  $CURRENTUSERMAIL$$CURRENTUSERTELEPHONE$$CURRENTUSERMOBILE$
+  $CURRENTUSERMAIL$$CURRENTUSERTELEPHONE-NOEMPTY$$CURRENTUSERMOBILE-NOEMPTY$
   ```
 - Results
   - Telephone number and mobile number are set
     ```
-    $CURRENTUSERMAIL$
-    T: $CURRENTUSERTELEPHONE$
-    M: $CURRENTUSERMOBILE$
+    first.last@example.com
+    T: +43xxx
+    M: +43yyy
     ```
   - Telephone number exists, mobile number is empty
     ```
-    $CURRENTUSERMAIL$
-    T: $CURRENTUSERTELEPHONE$
+    first.last@example.com
+    T: +43xxx
     ```
   - Telephone number is empty, mobile number is set
     ```
-    $CURRENTUSERMAIL$
-    M: $CURRENTUSERMOBILE$
+    first.last@example.com
+    M: +43yyy
     ```
-Be aware that text replacement also happens in hyperlinks ("tel:" etc.). You may want to create two replacement variables for the very same attribute in such cases: One for the pure textual replacement (including the newline) and one for the replacement within the hyperlink.
 ## 14.17. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 

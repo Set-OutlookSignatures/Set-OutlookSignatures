@@ -884,7 +884,7 @@ function main {
                 $SignatureFilePart = '[' + $SignatureFilePart + ']'
                 $SignatureFilePart = $SignatureFilePart -replace '\[\]', ''
             }
-        if ($SignatureIniSettings["$SignatureFile"]['OutlookSignatureName']) {
+            if ($SignatureIniSettings["$SignatureFile"]['OutlookSignatureName']) {
                 $SignatureFileTargetName = ($SignatureIniSettings["$SignatureFile"]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
             } else { 
                 $SignatureFileTargetName = $SignatureFile.Name
@@ -1184,6 +1184,7 @@ function main {
     try {
         $script:COMWordDummy = New-Object -ComObject word.application
         $script:COMWord = New-Object -ComObject word.application
+        $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
 
         if ($($PSVersionTable.PSEdition) -ieq 'Core') {
             Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
@@ -2782,6 +2783,7 @@ try {
     }
 
     if ($script:COMWord) {
+        $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
         $script:COMWord.Quit([ref]$false)
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWord) | Out-Null
         Remove-Variable -Name 'COMWord' -Scope 'script'

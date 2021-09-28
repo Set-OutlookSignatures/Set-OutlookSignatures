@@ -3,7 +3,7 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta3" target="_blank">v2.3.0-beta3</a> - 2021-09-28
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta4" target="_blank">v2.3.0-beta4</a> - YYYY-MM-DD
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios
 - Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details
@@ -17,6 +17,7 @@
 ### Fixed
 - User could connect to hidden Word instance used for conversion of DOCX templates
 - Do no classify templates with unknown tags as common templates 
+- Restore initial Word ShowFieldCodes setting on unexpected error
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.1" target="_blank">v2.2.1</a> - 2021-09-15
 ### Fixed

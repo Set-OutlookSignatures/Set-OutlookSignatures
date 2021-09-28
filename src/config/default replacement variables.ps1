@@ -23,7 +23,8 @@
 #    # Loading default replacement variables shipped with Set-OutlookSignatures
 #    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath '\\server\share\folder\Set-OutlookSignatures\config\default replacement variables.ps1' -Raw)))
 # 3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
-# 4. Start Set-OutlookSignatures with the parameter 'ReplacementVariableConfigFile' pointing to the new custom configuration file.
+# 4. Instead of altering existing replacement variables, it is recommended to create new replacement variables with modified content.
+# 5. Start Set-OutlookSignatures with the parameter 'ReplacementVariableConfigFile' pointing to the new custom configuration file.
 
 
 # Currently logged on user
