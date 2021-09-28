@@ -598,11 +598,18 @@ Not all users have values for all attributes, e. g. a mobile number. This can le
 
 Follow these steps to avoid empty lines:
 1. Use a custom replacement variable config file.
-2. Modify the value of all attributes that should not leave an empty line when there is no text to show: When the attribute is empty, return an empty string; else, return a newline ('\`r\`n' in PowerShell) and then the attribute value.  
-When using HTML templates, use '\<br>' instead of '\`r\`n'.
+2. Modify the value of all attributes that should not leave an empty line when there is no text to show:
+    - When the attribute is empty, return an empty string
+    - Else, return a newline ('\`r\`n' in PowerShell) and then the attribute value.  
 3. Place all required replacement variables on a single line, without a space between them.  
 If they are not empty, the newline creates a new paragraph; else, the replacement variable is replaced with an emtpy string.
 4. Use the ReplacementVariableConfigFile parameter when running the script.
+
+Use '\`n' instead of '\`r\`n' to create a new line within the existing paragraph, but not a new paragraph.
+
+When using HTML templates, use
+- '\<p>' instead of '\`r\`n'
+- '\<br>' instead of '\`n'
 
 An example:
 - Custom replacement variable config file
@@ -632,7 +639,6 @@ An example:
     M: $CURRENTUSERMOBILE$
     ```
 Be aware that text replacement also happens in hyperlinks ("tel:" etc.). You may want to create two replacement variables for the very same attribute in such cases: One for the pure textual replacement (including the newline) and one for the replacement within the hyperlink.
-
 ## 14.17. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
