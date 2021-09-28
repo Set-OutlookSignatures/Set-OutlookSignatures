@@ -853,21 +853,24 @@ function main {
 
     $SignatureFiles = ((Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
     try {
-        switch ($SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortOrder']) {
-            { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $SignatureFiles = ($SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object ); continue }
-            { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $SignatureFiles = ( $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Descending ); continue }
-            { $_ -in 'AsInThisFile', 'AsListed' } {
-                $SignatureFiles = $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name }
-                $local:sortorder = @()
-                ($SignatureIniSettings.GetEnumerator().name | Where-Object { $_ -in $SignatureFiles.name }) | ForEach-Object {
-                    $local:sortorder += [array]::indexof($SignatureFiles.name, $_)
-                }
-                $SignatureFiles = $SignatureFiles[$local:sortorder]
-                continue
-            }
-            default { $SignatureFiles = ($SignatureFiles.name | Sort-Object) }
-        }
+        $local:sortculture = $SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
+        Sort-Object -Culture $local:sortculture
     } catch {
+        $local:sortculture = $null
+    }
+    switch ($SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortOrder']) {
+        { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $SignatureFiles = ($SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Culture $local:sortculture); continue }
+        { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $SignatureFiles = ( $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Descending -Culture $local:sortculture ); continue }
+        { $_ -in 'AsInThisFile', 'AsListed' } {
+            $SignatureFiles = $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name }
+            $local:sortorder = @()
+            ($SignatureIniSettings.GetEnumerator().name | Where-Object { $_ -in $SignatureFiles.name }) | ForEach-Object {
+                $local:sortorder += [array]::indexof($SignatureFiles.name, $_)
+            }
+            $SignatureFiles = $SignatureFiles[$local:sortorder]
+            continue
+        }
+        default { $SignatureFiles = ($SignatureFiles.name | Sort-Object -Culture $local:sortculture) }
     }
 
     foreach ($SignatureFile in $SignatureFiles) {
@@ -1006,22 +1009,26 @@ function main {
 
         $OOFFiles = ((Get-ChildItem -LiteralPath $OOFTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
         try {
-            switch ($OOFIniSettings['<Set-OutlookOOFs configuration>']['SortOrder']) {
-                { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $OOFFiles = ($OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object ) }
-                { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $OOFFiles = ( $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object -Descending ) }
-                'AsInThisFile' {
-                    $OOFFiles = $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name }
-                    $local:sortorder = @()
-                    ($OOFIniSettings.GetEnumerator().name | Where-Object { $_ -in $OOFFiles.name }) | ForEach-Object {
-                        $local:sortorder += [array]::indexof($OOFFiles.name, $_)
-                    }
-                    $OOFFiles = $OOFFiles[$local:sortorder]
-                }
-                default { $OOFFiles = ($OOFFiles.name | Sort-Object) }
-            }
+            $local:sortculture = $OOFIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
+            Sort-Object -Culture $local:sortculture
         } catch {
+            $local:sortculture = $null
         }
-
+        switch ($OOFIniSettings['<Set-OutlookSignatures configuration>']['SortOrder']) {
+            { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $OOFFiles = ($OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object -Culture $local:sortculture); continue }
+            { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $OOFFiles = ( $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object -Descending -Culture $local:sortculture ); continue }
+            { $_ -in 'AsInThisFile', 'AsListed' } {
+                $OOFFiles = $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name }
+                $local:sortorder = @()
+                ($OOFIniSettings.GetEnumerator().name | Where-Object { $_ -in $OOFFiles.name }) | ForEach-Object {
+                    $local:sortorder += [array]::indexof($OOFFiles.name, $_)
+                }
+                $OOFFiles = $OOFFiles[$local:sortorder]
+                continue
+            }
+            default { $OOFFiles = ($OOFFiles.name | Sort-Object -Culture $local:sortculture) }
+        }
+    
         foreach ($OOFFile in $OOFFiles) {
             Write-Host ("  '$($OOFFile.Name)'")
             if ($OOFIniPath -ne '') {

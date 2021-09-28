@@ -6,7 +6,7 @@
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta1" target="_blank">v2.3.0-beta3</a> - YYYY-MM-DD
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios
-- Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details
+- Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details, as well as '.\config\sample*.ini'
 - New replacement variables '\$CURRENT\[...\]OFFICE\$' and '\$CURRENT\[...\]COMPANY\$', including updated templates
 - Enterprise grade workaround for Word security warning when converting documents with linked images
 - FAQ: The script hangs at HTM/RTF export, Word shows a security warning!?
