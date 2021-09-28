@@ -6,7 +6,9 @@
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta1" target="_blank">v2.3.0-beta3</a> - YYYY-MM-DD
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios
-- Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details, as well as '.\config\sample*.ini'
+- Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details
+- Specify template sort order and sort culture in ini files
+- Specify custom Outlook signature names in ini files
 - New replacement variables '\$CURRENT\[...\]OFFICE\$' and '\$CURRENT\[...\]COMPANY\$', including updated templates
 - Enterprise grade workaround for Word security warning when converting documents with linked images
 - FAQ: The script hangs at HTM/RTF export, Word shows a security warning!?
@@ -14,6 +16,7 @@
 - FAQ: How to avoid empty lines when replacement variables return an empty string?
 ### Fixed
 - User could connect to hidden Word instance used for conversion of DOCX templates
+- Do no classify templates with unknown tags as common templates 
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.1" target="_blank">v2.2.1</a> - 2021-09-15
 ### Fixed

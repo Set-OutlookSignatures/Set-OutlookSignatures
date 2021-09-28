@@ -232,7 +232,7 @@ Param(
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
     #   The currently logged on user needs at least read access to the path
-    [ValidateNotNullOrEmpty()][string]$OOFIniPath = $null,
+    [ValidateNotNullOrEmpty()][string]$OOFIniPath = '',
 
     # An additional path that the signatures shall be copied to
     [string]$AdditionalSignaturePath = $(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) }catch {}),
@@ -312,7 +312,7 @@ function main {
         foreach ($section in $SignatureIniSettings.GetEnumerator()) {
             Write-Host "    File: '$($section.name)'"
             $local:tags = @()
-            foreach ($key in $SignatureIniSettings[$($section.name)].GetEnumerator()) {
+            foreach ($key in $SignatureIniSettings["$($section.name)"].GetEnumerator()) {
                 if ($key.value) {
                     $local:tags += "$($key.name) = $($key.value)"
                 } else {
@@ -338,7 +338,7 @@ function main {
             foreach ($section in $OOFIniSettings.GetEnumerator()) {
                 Write-Host "    File: '$($section.name)'"
                 $local:tags = @()
-                foreach ($key in $OOFIniSettings[$($section.name)].GetEnumerator()) {
+                foreach ($key in $OOFIniSettings["$($section.name)"].GetEnumerator()) {
                     if ($key.value) {
                         $local:tags += "$($key.name) = $($key.value)"
                     } else {
@@ -852,32 +852,43 @@ function main {
     $SignatureFilesGroupSIDs = @{}
 
     $SignatureFiles = ((Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
-    try {
-        $local:sortculture = $SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
-        Sort-Object -Culture $local:sortculture
-    } catch {
-        $local:sortculture = $null
-    }
-    switch ($SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortOrder']) {
-        { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $SignatureFiles = ($SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Culture $local:sortculture); continue }
-        { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $SignatureFiles = ( $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Descending -Culture $local:sortculture ); continue }
-        { $_ -in 'AsInThisFile', 'AsListed' } {
-            $SignatureFiles = $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name }
-            $local:sortorder = @()
-            ($SignatureIniSettings.GetEnumerator().name | Where-Object { $_ -in $SignatureFiles.name }) | ForEach-Object {
-                $local:sortorder += [array]::indexof($SignatureFiles.name, $_)
-            }
-            $SignatureFiles = $SignatureFiles[$local:sortorder]
-            continue
+    if ($SignatureIniPath -ne '') {
+        try {
+            $local:SignatureFilesSortCulture = $SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
+            Sort-Object -Culture $local:SignatureFilesSortCulture
+        } catch {
+            $local:SignatureFilesSortCulture = $null
         }
-        default { $SignatureFiles = ($SignatureFiles.name | Sort-Object -Culture $local:sortculture) }
+        switch ($SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortOrder']) {
+            { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $SignatureFiles = ($SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Culture $local:SignatureFilesSortCulture); continue }
+            { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $SignatureFiles = ( $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Descending -Culture $local:SignatureFilesSortCulture ); continue }
+            { $_ -in 'AsInThisFile', 'AsListed' } {
+                $SignatureFiles = $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name }
+                $local:SignatureFilesSortOrder = @()
+                ($SignatureIniSettings.GetEnumerator().name | Where-Object { $_ -in $SignatureFiles.name }) | ForEach-Object {
+                    $local:SignatureFilesSortOrder += [array]::indexof($SignatureFiles.name, $_)
+                }
+                $SignatureFiles = $SignatureFiles[$local:SignatureFilesSortOrder]
+                continue
+            }
+            default { $SignatureFiles = ($SignatureFiles.name | Sort-Object -Culture $local:SignatureFilesSortCulture) }
+        }
     }
-
+    
     foreach ($SignatureFile in $SignatureFiles) {
         Write-Host ("  '$($SignatureFile.Name)'")
         if ($SignatureIniPath -ne '') {
-            $SignatureFilePart = '[' + ($SignatureIniSettings["$SignatureFile"].GetEnumerator().Name -join '] [') + ']'
-            $SignatureFileTargetName = $SignatureFile.Name
+            $SignatureFilePart = ($SignatureIniSettings["$SignatureFile"].GetEnumerator().Name -join '] [')
+            if ($SignatureFilePart) {
+                $SignatureFilePart = ($SignatureFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName') }) -join '] ['
+                $SignatureFilePart = '[' + $SignatureFilePart + ']'
+                $SignatureFilePart = $SignatureFilePart -replace '\[\]', ''
+            }
+        if ($SignatureIniSettings["$SignatureFile"]['OutlookSignatureName']) {
+                $SignatureFileTargetName = ($SignatureIniSettings["$SignatureFile"]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
+            } else { 
+                $SignatureFileTargetName = $SignatureFile.Name
+            }
         } else {
             $x = $SignatureFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
             if ($x.count -ge 3) {
@@ -974,6 +985,8 @@ function main {
                 } else {
                     Write-Host "      $SignatureFilePartTag = $($NTName): Not found, please check" -ForegroundColor Yellow
                 }
+            } elseif ($SignatureFilePartTag -match '\[.*?\]') {
+                Write-Host "    Unknown tag '$SignatureFilePartTag', please check" -ForegroundColor Yellow
             } else {
                 Write-Host '    Common signature'
                 if (-not $SignatureFilesCommon.containskey($SignatureFile.FullName)) {
@@ -1008,32 +1021,44 @@ function main {
         $OOFFilesGroupSIDs = @{}
 
         $OOFFiles = ((Get-ChildItem -LiteralPath $OOFTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
-        try {
-            $local:sortculture = $OOFIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
-            Sort-Object -Culture $local:sortculture
-        } catch {
-            $local:sortculture = $null
-        }
-        switch ($OOFIniSettings['<Set-OutlookSignatures configuration>']['SortOrder']) {
-            { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $OOFFiles = ($OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object -Culture $local:sortculture); continue }
-            { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $OOFFiles = ( $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object -Descending -Culture $local:sortculture ); continue }
-            { $_ -in 'AsInThisFile', 'AsListed' } {
-                $OOFFiles = $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name }
-                $local:sortorder = @()
-                ($OOFIniSettings.GetEnumerator().name | Where-Object { $_ -in $OOFFiles.name }) | ForEach-Object {
-                    $local:sortorder += [array]::indexof($OOFFiles.name, $_)
-                }
-                $OOFFiles = $OOFFiles[$local:sortorder]
-                continue
+        if ($OOFIniPath -ne '') {
+            try {
+                $local:OOFFilesSortCulture = $OOFIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
+                Sort-Object -Culture $local:OOFFilesSortCulture
+            } catch {
+                $local:OOFFilesSortCulture = $null
             }
-            default { $OOFFiles = ($OOFFiles.name | Sort-Object -Culture $local:sortculture) }
+
+            switch ($OOFIniSettings['<Set-OutlookSignatures configuration>']['SortOrder']) {
+                { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $OOFFiles = ($OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object -Culture $local:OOFFilesSortCulture); continue }
+                { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $OOFFiles = ( $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object -Descending -Culture $local:OOFFilesSortCulture ); continue }
+                { $_ -in 'AsInThisFile', 'AsListed' } {
+                    $OOFFiles = $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name }
+                    $local:OOFFilesSortOrder = @()
+                    ($OOFIniSettings.GetEnumerator().name | Where-Object { $_ -in $OOFFiles.name }) | ForEach-Object {
+                        $local:OOFFilesSortOrder += [array]::indexof($OOFFiles.name, $_)
+                    }
+                    $OOFFiles = $OOFFiles[$local:OOFFilesSortOrder]
+                    continue
+                }
+                default { $OOFFiles = ($OOFFiles.name | Sort-Object -Culture $local:OOFFilesSortCulture) }
+            }
         }
-    
+        
         foreach ($OOFFile in $OOFFiles) {
             Write-Host ("  '$($OOFFile.Name)'")
             if ($OOFIniPath -ne '') {
                 $OOFFilePart = '[' + ($OOFIniSettings["$OOFFile"].GetEnumerator().Name -join '] [') + ']'
-                $OOFFileTargetName = $OOFFile.Name
+                if ($OOFFilePart) {
+                    $OOFFilePart = ($OOFFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName') }) -join '] ['
+                    $OOFFilePart = '[' + $OOFFilePart + ']'
+                    $OOFFilePart = $OOFFilePart -replace '\[\]', ''
+                }
+                if ($OOFIniSettings["$OOFFile"]['OutlookSignatureName']) {
+                    $OOFFileTargetName = $OOFIniSettings["$OOFFile"]['OutlookSignatureName']
+                } else { 
+                    $OOFFileTargetName = $OOFFile.Name
+                }
             } else {
                 $x = $OOFFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
                 if ($x.count -ge 3) {
@@ -1130,6 +1155,8 @@ function main {
                     } else {
                         Write-Host "      $OOFFilePartTag = $($NTName): Not found, please check" -ForegroundColor Yellow
                     }
+                } elseif ($SignatureFilePartTag -match '\[.*?\]') {
+                    Write-Host "    Unknown tag '$SignatureFilePartTag', please check" -ForegroundColor Yellow
                 } else {
                     Write-Host '    Common OOF message'
                     if (-not $OOFFilesCommon.containskey($OOFFile.FullName)) {

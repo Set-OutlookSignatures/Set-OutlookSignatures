@@ -53,7 +53,8 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
 - [8. Run script while Outlook is running](#8-run-script-while-outlook-is-running)
 - [9. Signature and OOF file format](#9-signature-and-oof-file-format)
   - [9.1. Signature and OOF file naming](#91-signature-and-oof-file-naming)
-  - [9.2. Allowed filename tags](#92-allowed-filename-tags)
+  - [9.2. Allowed tags](#92-allowed-tags)
+  - [9.3. Tags in ini files instead in file names](#93-tags-in-ini-files-instead-in-file-names)
 - [10. Signature and OOF application order](#10-signature-and-oof-application-order)
 - [11. Variable replacement](#11-variable-replacement)
   - [11.1. Photos from Active Directory](#111-photos-from-active-directory)
@@ -114,7 +115,7 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/Si
 
 The currently logged on user needs at least read access to the path
 
-Default value: ''
+Default value: `''`
 ## 2.3. ReplacementVariableConfigFile  
 The parameter ReplacementVariableConfigFile tells the script where the file defining replacement variables is located.
 
@@ -178,7 +179,7 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/O
 
 The currently logged on user needs at least read access to the path.
 
-Default value: `'.\templates\Out of Office DOCX'`  
+Default value: `'.\templates\Out of Office DOCX'`
 ## 2.10. OOFIniPath
 If you can't or don't want to use file name based tags, you can place them in an ini file.
 
@@ -190,7 +191,7 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/Si
 
 The currently logged on user needs at least read access to the path
 
-Default value: ''
+Default value: `''`
 ## 2.11. AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
@@ -276,15 +277,15 @@ The script copies every signature and OOF file as-is, with one exception: When t
 Tags must be placed before the file extension and be separated from the base filename with a period.
 
 If you can't or don't want to use file name based tags, you can also place them in an ini file.  
-See '.\templates\sample signatures ini file.ini' and '.\templates\sample OOF ini file.ini' for samples file with further explanations.
-
+See the '.\templates' folder for sample templates and configuration.  
+See the `'Tags in ini files instead in file names'` section for more details.
 
 Examples:  
 - `'Company external German.docx'` -> `'Company external German.htm'`, no changes  
 - `'Company external German.[defaultNew].docx'` -> `'Company external German.htm'`, tag(s) is/are removed  
 - `'Company external [English].docx'` -> `'Company external [English].htm'`, tag(s) is/are not removed, because there is no dot before  
 - `'Company external [English].[defaultNew] [Company-AD All Employees].docx'` -> `'Company external [English].htm'`, tag(s) is/are removed, because they are separated from base filename  
-## 9.2. Allowed filename tags  
+## 9.2. Allowed tags  
 - `[defaultNew]` (signature template files only)  
     - Set signature as default signature for new mails  
 - `[defaultReplyFwd]` (signature template files only)  
@@ -316,6 +317,44 @@ Filename tags can be combined: A template may be assigned to several groups, sev
 The number of possible tags is limited by Operating System file name and path length restrictions only.  
 On Powershell 7+, the script works with path names longer than the default Windows limit of 260 characters.  
 On Powershell 5.1, enable "LongPathsEnabled" on the Operating System level as described in <a href="https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation" target="_blank">this Microsoft article</a>.  
+## 9.3. Tags in ini files instead in file names
+Using an ini file has the following advantages:
+- shorter template file names, as tags are in the ini file and no longer in the file names
+- unlimited number of tags, as no file system restrictions apply
+- different configurations for the same templates folder by using different ini files for different audiences
+- alternative sort orders for templates within template groups (common, group specific, e-mail address specific)
+- with file name tags, the application order is always alphabetically ascending using the system culture sort order - with ini files, you can switch to alphabetically descending or as sorted in the ini file and define an other sort culture
+
+If you want to give template creators control over the ini file, place it in the same folder as the templates.
+
+How to work with ini files:
+1. Comments
+  Comment lines start with '#' or ';'
+	Whitespace(s) at the beginning and the end of a line are ignored
+  Empty lines are ignored
+2. Use the ini files in `'.\templates\Signatures DOCX with ini'` and `'.\templates\Out of Office DOCX with ini'` as templates and starting point
+3. Put file names with extensions in square brackets  
+  Example: `[Company external English formal.docx]`  
+  Putting file names in single or double quotes is possible, but not necessary.  
+  File names are case insensitive
+    `[file a.docx]` is the same as `["File A.docx"]` and `['fILE a.dOCX']`  
+  When there are two or more sections for a filename: The keys and values are not combined, only the last section is considered.  
+  File names not mentioned in this file are not considered, even if they are available in the file system.
+2. Add tags in the lines below the filename
+  Example: `defaultNew`  
+  - Do not enclose tags in square brackets. This is not allowed here, but required when you add tags directly to file names.  
+  - When an ini file is used, tags in file names are not considered as tags, but as part of the file name, so the Outlook signature name will contain them.  
+  - Only one tag per line is allowed.  
+  Adding not a single tag to file name section is valid. The signature template is then classified as a common template.
+  - Putting file names in single or double quotes is possible, but not necessary
+  - Tags are case insensitive  
+    `defaultNew` is the same as `DefaultNew` and `dEFAULTnEW`
+  - You can override the automatic Outlook signature name generation by setting OutlookSignatureName, e. g. `OutlookSignatureName = This is a custom signature name`  
+  With this option, you can have different template file names for the same Outlook signature name. Search for "Marketing external English formal" in this file for examples. Take care of signature group priorities (common, group, e-mail address) and SortOrder parameter.
+3. Remove the tags from the file names in the file system  
+Else, the file names in the ini file and the file system do not match, which will result in some templates not being applied.  
+It is recommended to create a copy of your template folder for tests
+4. Make the script use the ini file by passing the 'SignatureIniPath' and/or 'OOFIniPath' parameter
 # 10. Signature and OOF application order  
 Templates are applied in a specific order: Common tempaltes first, group templates second, e-mail address specific templates last.
 
