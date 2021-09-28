@@ -3,7 +3,7 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta1" target="_blank">v2.3.0-beta3</a> - 2021-09-28
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta3" target="_blank">v2.3.0-beta3</a> - 2021-09-28
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios
 - Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details
