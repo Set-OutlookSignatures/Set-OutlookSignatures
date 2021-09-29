@@ -59,25 +59,26 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
 - [11. Variable replacement](#11-variable-replacement)
   - [11.1. Photos from Active Directory](#111-photos-from-active-directory)
 - [12. Outlook Web](#12-outlook-web)
-- [13. Simulation mode](#13-simulation-mode)
-- [14. FAQ](#14-faq)
-  - [14.1. Where can I find the changelog?](#141-where-can-i-find-the-changelog)
-  - [14.2. How can I contribute, propose a new feature or file a bug?](#142-how-can-i-contribute-propose-a-new-feature-or-file-a-bug)
-  - [14.3. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#143-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
-  - [14.4. How is the personal mailbox of the currently logged on user identified?](#144-how-is-the-personal-mailbox-of-the-currently-logged-on-user-identified)
-  - [14.5. Which ports are required?](#145-which-ports-are-required)
-  - [14.6. Why is Out of Office abbreviated OOF and not OOO?](#146-why-is-out-of-office-abbreviated-oof-and-not-ooo)
-  - [14.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#147-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
-  - [14.8. How can I log the script output?](#148-how-can-i-log-the-script-output)
-  - [14.9. Can multiple script instances run in parallel?](#149-can-multiple-script-instances-run-in-parallel)
-  - [14.10. How do I start the script from the command line or a scheduled task?](#1410-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
-  - [14.11. How to create a shortcut to the script with parameters?](#1411-how-to-create-a-shortcut-to-the-script-with-parameters)
-  - [14.12. What is the recommended approach for implementing the software?](#1412-what-is-the-recommended-approach-for-implementing-the-software)
-  - [14.13. What is the recommended approach for custom configuration files?](#1413-what-is-the-recommended-approach-for-custom-configuration-files)
-  - [14.14. Isn't a plural noun in the script name against PowerShell best practices?](#1414-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
-  - [14.15. The script hangs at HTM/RTF export, Word shows a security warning!?](#1415-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
-  - [14.16. How to avoid empty lines when replacement variables return an empty string?](#1416-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
-  - [14.17. What about the new signature roaming feature Microsoft announced?](#1417-what-about-the-new-signature-roaming-feature-microsoft-announced)
+- [13. Hybrid and cloud-only support](#13-hybrid-and-cloud-only-support)
+- [14. Simulation mode](#14-simulation-mode)
+- [15. FAQ](#15-faq)
+  - [15.1. Where can I find the changelog?](#151-where-can-i-find-the-changelog)
+  - [15.2. How can I contribute, propose a new feature or file a bug?](#152-how-can-i-contribute-propose-a-new-feature-or-file-a-bug)
+  - [15.3. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#153-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
+  - [15.4. How is the personal mailbox of the currently logged on user identified?](#154-how-is-the-personal-mailbox-of-the-currently-logged-on-user-identified)
+  - [15.5. Which ports are required?](#155-which-ports-are-required)
+  - [15.6. Why is Out of Office abbreviated OOF and not OOO?](#156-why-is-out-of-office-abbreviated-oof-and-not-ooo)
+  - [15.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#157-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
+  - [15.8. How can I log the script output?](#158-how-can-i-log-the-script-output)
+  - [15.9. Can multiple script instances run in parallel?](#159-can-multiple-script-instances-run-in-parallel)
+  - [15.10. How do I start the script from the command line or a scheduled task?](#1510-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
+  - [15.11. How to create a shortcut to the script with parameters?](#1511-how-to-create-a-shortcut-to-the-script-with-parameters)
+  - [15.12. What is the recommended approach for implementing the software?](#1512-what-is-the-recommended-approach-for-implementing-the-software)
+  - [15.13. What is the recommended approach for custom configuration files?](#1513-what-is-the-recommended-approach-for-custom-configuration-files)
+  - [15.14. Isn't a plural noun in the script name against PowerShell best practices?](#1514-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
+  - [15.15. The script hangs at HTM/RTF export, Word shows a security warning!?](#1515-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
+  - [15.16. How to avoid empty lines when replacement variables return an empty string?](#1516-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
+  - [15.17. What about the new signature roaming feature Microsoft announced?](#1517-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -465,7 +466,39 @@ If only a default signature for replies and forwards is set, only this new signa
 If there is no default signature in Outlook, Outlook Web settings are not changed.
 
 All this happens with the credentials of the currently logged on user, without any interaction neccessary.  
-# 13. Simulation mode  
+# 13. Hybrid and cloud-only support
+Set-OutlookSignatures supports three directory environments:
+- Active Directory on premises. This requires direct connection to Active Directory Domain Controllers, which usually only works when you are connected to your company network.
+- Hybrid. This environment consists of an Active Directory on premises, which is synced with Microsoft 365 Azure Active Directory in the cloud. If the script can't make a connection to your on-prem environment, it tries to get required data from the cloud via the Microsoft Graph API.
+- Cloud-only. This environment has no Active Directory on premises, only Microsoft 365 with Azure Active Directory is used. If the script can't make a connection to your on-prem environment, it tries to get required data from the cloud via the Microsoft Graph API.
+
+To allow communication between Microsoft Graph and Set-Outlooksignatures, both need to be configured for each other.
+
+The easiest way is to once start Set-OutlookSignatures with a cloud administrator. The administrator then gets asked for admin consent for the correct permissions.  
+If you don't want to use custom Graph attributes or other advanced configurations, no more configuration in Microsoft Graph or Set-OutlookSignatures is required.
+
+If you prefer using own application IDs or need advanced configuration, follow these steps:  
+- In Microsoft Graph, with an administrative account:
+  - Create an application with a Client ID
+  - Provide admin consent (pre-approval) for the following scopes (permissions):
+    - 'https<area>://graph.microsoft.com/openid' for logging-on the use
+    - 'https<area>://graph.microsoft.com/email' for reading the logged-on user's mailbox properties
+    - 'https<area>://graph.microsoft.com/profile' for reading the logged-on user's properties
+    - 'https<area>://graph.microsoft.com/user.read.all' for reading properties of other users (manager, additional mailboxes and their managers)
+    - 'https<area>://graph.microsoft.com/group.read.all' for reading properties of all groups, required for templates restricted to groups
+    - 'https<area>://graph.microsoft.com/mailboxsettings.readwrite' for updating the user's own mailbox settings (Out of Office auto reply messages)
+    - 'https<area>://graph.microsoft.com/EWS.AccessAsUser.All' for updating the Outlook Web signature in the user's own mailbox
+  - Set the Redirect URl to 'http<area>://localhost'
+- In Set-OutlookSignature, use '.\config\default graph config.ps1' as a template for a custom Graph configuration file
+  - Set '$GraphClientID' to the application ID created by the Graph administrator before
+  - Use the 'GraphConfigFile' parameter to make the tool use the newly created Graph configuration file.
+
+The Graph configuration file allows for additional, advanced configuration:
+- '$GraphEndpointVersion': The version of the Graph REST API to use
+- '$GraphUserProperties': The properties to load for each graph user/mailbox. You can add custom attributes here.
+- '$GraphUserAttributeMapping': Graph and Active Directory attributes are not named identically. Set-OutlookSignatures therefore uses a "virtual" account. Use this hashtable to define which Graph attribute name is assigned to which attribute of the virtual account.  
+The virtual account is accessible as '\$ADPropsCurrentUser\[...\]' in '.\config\default replacement variables.ps1', and therefore has a direct impact on replacement variables.
+# 14. Simulation mode  
 Simulation mode is enabled when the parameter SimulatedUser is passed to the script. It answers the question `"What will the signatures look like for user A, when Outlook is configured for the mailboxes X, Y and Z?"`.
 
 Simulation mode is useful for content creators and admins, as it allows to simulate the behavior of the script and to inspect the resulting signature files before going live.
@@ -479,14 +512,14 @@ The template files are handled just as during a real script run, but only saved 
 `SimulateMailboxes` is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
 **Attention**: Simulation mode only works when the user starting the simulation is at least from the same Active Directory forest as the user defined in SimulateUser.  Users from other forests will not work.  
-# 14. FAQ
-## 14.1. Where can I find the changelog?
+# 15. FAQ
+## 15.1. Where can I find the changelog?
 The changelog is located in the `'.\docs'` folder, along with other documents related to Set-OutlookSignatures.
-## 14.2. How can I contribute, propose a new feature or file a bug?
+## 15.2. How can I contribute, propose a new feature or file a bug?
 If you have an idea for a new feature or have found a problem, please <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank">create an issue on GitHub</a>.
 
 If you want to contribute code, please have a look at `'.\docs\CONTRIBUTING'` for a rough overview of the proposed process.
-## 14.3. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?  
+## 15.3. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?  
 The legacyExchangeDN attribute is used to find the user behind a mailbox, because mail and proxyAddresses are not unique in certain Exchange scenarios:  
 - A separate Active Directory forest for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.  
 - One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.
@@ -494,7 +527,7 @@ The legacyExchangeDN attribute is used to find the user behind a mailbox, becaus
 If Outlook is configured to access mailbox via protocols such as POP3 or IMAP4, the script searches for the legacyExchangeDN using the e-mail address of the mailbox.
 
 Without a legacyExchangeDN, group membership information can not be retrieved. These mailboxes can still receive common and mailbox specific signatures and OOF messages.  
-## 14.4. How is the personal mailbox of the currently logged on user identified?  
+## 15.4. How is the personal mailbox of the currently logged on user identified?  
 The personal mailbox of the currently logged on user is preferred to other mailboxes, as it receives signatures first and is the only mailbox where the Outlook Web signature can be set.
 
 The personal mailbox is found by simply checking if the Active Directory mail attribute of the currently logged on user matches an SMTP address of one of the mailboxes connected in Outlook.
@@ -504,15 +537,15 @@ If the mail attribute is not set, the currently logged on user's objectSID is co
 Please consider the following caveats regarding the mail attribute:  
 - When Active Directory attributes are directly modified to create or modify users and mailboxes (instead of using Exchange Admin Center or Exchange Management Shell), the mail attribute is often not updated and does not match the primary SMTP address of a mailbox. Microsoft strongly recommends that the mail attribute matches the primary SMTP address.  
 - When using linked mailboxes, the mail attribute of the linked account is often not set or synced back from the Exchange resource forest. Technically, this is not necessary. From an organizational point of view it makes sense, as this can be used to determine if a specific user has a linked mailbox in another forest, and as some applications (such as "scan to mail") may need this attribute anyhow.  
-## 14.5. Which ports are required?  
+## 15.5. Which ports are required?  
 Ports 389 (LDAP) and 3268 (Global Catalog), both TCP and UDP, are required to communicate with Active Directory domains.
 
 The client needs the following ports to access a SMB file share on a Windows server: 137 UDP, 138 UDP, 139 TCP, 445 TCP (for details, see <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)" target="_blank">this Microsoft article</a>.
 
 The client needs port 443 to access a WebDAV share (a SharePoint document library, for example).  
-## 14.6. Why is Out of Office abbreviated OOF and not OOO?  
+## 15.6. Why is Out of Office abbreviated OOF and not OOO?  
 Back in the 1980s, Microsoft had a UNIX OS named Xenix ... but read yourself <a href="https://techcommunity.microsoft.com/t5/exchange-team-blog/why-is-oof-an-oof-and-not-an-ooo/ba-p/610191" target="_blank">here</a>.  
-## 14.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
+## 15.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
 The script uses DOCX as default template format, as this seems to be the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications:  
 - Not all Word formatting options are supported in HTML, which can lead to signatures looking a bit different than templates. For example, images may be placed at a different position in the signature compared to the template - this is because the Outlook HTML component only supports the "in line with text" text wrapping option, while Word offers more options.  
 - On the other hand, the Outlook HTML renderer works better with templates in the DOCX format: The Outlook HTML renderer does not respect the HTML image tags "width" and "height" and displays all images in their original size. When using DOCX as template format, the images are resized when exported to the HTM format.
@@ -545,16 +578,16 @@ The templates delivered with this script represent all possible formats:
 - `'.\templates\Out of Office DOCX'` and `'.\templates\signatures DOCX'` contain templates in the DOCX format  
 - `'.\templates\Out of Office HTML'` contains templates in the HTML format as Word exports them when using `"Website, filtered"` as format. Note the additional folders for each signature.  
 - `'.\templates\Signatures HTML'` contains templates in the HTML format. Note that there are no additional folders, as the Word export files have been processed with ConvertTo-SingleFileHTML function to create a single HTMl file with all local images embedded.  
-## 14.8. How can I log the script output?  
+## 15.8. How can I log the script output?  
 The script has no built-in logging option other than writing output to the host window.
 
 You can, for example, use PowerShell's `Start-Transcript` and `Stop-Transcript` commands to create a logging wrapper around Set-OutlookSignatures.ps1.  
-## 14.9. Can multiple script instances run in parallel?  
+## 15.9. Can multiple script instances run in parallel?  
 The script is designed for being run in multiple instances at the same. You can combine any of the following scenarios:  
 - One user runs multiple instances of the script in parallel  
 - One user runs multiple instances of the script in simulation mode in parallel  
 - Multiple users on the same machine (e.g. Terminal Server) run multiple instances of the script in parallel  
-## 14.10. How do I start the script from the command line or a scheduled task?  
+## 15.10. How do I start the script from the command line or a scheduled task?  
 Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. You have to be very careful about when to use single quotes or double quotes.
 
 A working example:
@@ -569,7 +602,7 @@ You will find lots of information about this topic on the internet. The followin
 If you have to use the PowerShell.exe `-Command` or `-File` parameter depends on details of your configuration, for example AppLocker in combination with PowerShell. You may also want to consider the `-EncodedCommand` parameter to start Set-OutlookSignatures.ps1 and pass parameters to it.
   
 If you provided your users a link so they can start Set-OutlookSignatures.ps1 with the correct parameters on their own, you may want to use the official icon: `'.\logo\Set-OutlookSignatures Icon.ico'`  
-## 14.11. How to create a shortcut to the script with parameters?  
+## 15.11. How to create a shortcut to the script with parameters?  
 You may want to provide a link on the desktop or in the start menu, so they can start the script on their own.
 
 The Windows user interface does not allow you to create a shortcut with a combined length of full target path and arguments greater than 259 characters.
@@ -588,7 +621,7 @@ $Shortcut.Hotkey = ''
 $Shortcut.Save()  
 ```
 **Attention**: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.  
-## 14.12. What is the recommended approach for implementing the software?  
+## 15.12. What is the recommended approach for implementing the software?  
 There is certainly no definitive generic recommendation, but the file `'.\docs\Implementation approach.html'` should be a good starting point.
 
 The content is based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes.
@@ -598,7 +631,7 @@ It contains proven procedures and recommendations for product managers, architec
 It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The document is available in English and German language.  
-## 14.13. What is the recommended approach for custom configuration files?
+## 15.13. What is the recommended approach for custom configuration files?
 You should not change the default configuration file `'.\config\default replacement variable.ps1'`, as it might be changed in a future release of Set-OutlookSignatures. In this case, you would have to sort out the changes yourself.
 
 The following steps are recommended:
@@ -610,11 +643,11 @@ The following steps are recommended:
    ```
 3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
 4. Start Set-OutlookSignatures with the parameter `ReplacementVariableConfigFile` pointing to the new custom configuration file.
-## 14.14. Isn't a plural noun in the script name against PowerShell best practices?
+## 15.14. Isn't a plural noun in the script name against PowerShell best practices?
 Absolutely. PowerShell best practices recommend using singular nouns, but Set-OutlookSignatures contains a plural noun.
 
 I intentionally decided not to follow the singular noun convention, as another language as PowerShell was initially used for coding and the name of the tool was already defined. If this was a commercial enterprise project, marketing would have overruled development.
-## 14.15. The script hangs at HTM/RTF export, Word shows a security warning!?
+## 15.15. The script hangs at HTM/RTF export, Word shows a security warning!?
 When using a signature template with account pictures (linked and embedded), conversion to HTM hangs at "Export to HTM format" or "Export to RTF format". In the background, there is a window "Microsoft Word Security Notice" with the following text:
 ```
 Microsoft Office has identified a potential security concern.
@@ -632,7 +665,7 @@ The behavior can be changed in at least two ways:
 
 Set-OutlookSignatures reads the registry key "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Security\DisableWarningOnIncludeFieldsUpdate" at start, sets it to 1 just before the conversion to HTM and RF takes place and restores the original state as soon as the conversions are finished.
 This way, the warning usually gets suppressed, while the Group Policy configured state of the setting still has higher priority and overrides the user setting.
-## 14.16. How to avoid empty lines when replacement variables return an empty string?
+## 15.16. How to avoid empty lines when replacement variables return an empty string?
 Not all users have values for all attributes, e. g. a mobile number. This can lead to empty lines in signatures, which may not look nice.
 
 Follow these steps to avoid empty lines:
@@ -682,7 +715,7 @@ An example:
     first.last@example.com
     M: +43yyy
     ```
-## 14.17. What about the new signature roaming feature Microsoft announced?  
+## 15.17. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.

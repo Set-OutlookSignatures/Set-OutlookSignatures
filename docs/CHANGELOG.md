@@ -11,6 +11,7 @@
 - Specify custom Outlook signature names in ini files
 - New replacement variables '\$CURRENT\[...\]OFFICE\$' and '\$CURRENT\[...\]COMPANY\$', including updated templates
 - Enterprise grade workaround for Word security warning when converting documents with linked images
+- README: Hybrid and cloud support
 - FAQ: The script hangs at HTM/RTF export, Word shows a security warning!?
 - FAQ: Isn't a plural noun in the script name against PowerShell best practices?
 - FAQ: How to avoid empty lines when replacement variables return an empty string?
