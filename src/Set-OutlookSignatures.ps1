@@ -729,7 +729,7 @@ function main {
                             Write-Host
                             Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches multiple Exchange mailboxes, ignoring." -ForegroundColor Red
                             $u | ForEach-Object { Write-Host "          $($_.path)" -ForegroundColor Yellow }
-                           $LegacyExchangeDNs[$AccountNumberRunning] = ''
+                            $LegacyExchangeDNs[$AccountNumberRunning] = ''
                             $MailAddresses[$AccountNumberRunning] = ''
                             $UserDomain = $null
                         } else {
@@ -884,7 +884,7 @@ function main {
                 $SignatureFilePart = '[' + $SignatureFilePart + ']'
                 $SignatureFilePart = $SignatureFilePart -replace '\[\]', ''
             }
-        if ($SignatureIniSettings["$SignatureFile"]['OutlookSignatureName']) {
+            if ($SignatureIniSettings["$SignatureFile"]['OutlookSignatureName']) {
                 $SignatureFileTargetName = ($SignatureIniSettings["$SignatureFile"]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
             } else { 
                 $SignatureFileTargetName = $SignatureFile.Name
@@ -1184,6 +1184,7 @@ function main {
     try {
         $script:COMWordDummy = New-Object -ComObject word.application
         $script:COMWord = New-Object -ComObject word.application
+        $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
 
         if ($($PSVersionTable.PSEdition) -ieq 'Core') {
             Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
@@ -1509,7 +1510,7 @@ function main {
                                     Write-Host "    Only default signature for new mails is set: '$TempNewSig'"
                                     $TempOWASigFile = $TempNewSig
                                     $TempOWASigSetNew = $true
-                                   $TempOWASigSetReply = $false
+                                    $TempOWASigSetReply = $false
                                 }
 
                                 if (($TempNewSig -eq '') -and ($TempReplySig -ne '')) {
@@ -1566,7 +1567,7 @@ function main {
                                             } else {
                                                 $UsrConfig.Dictionary.Add($OutlookWebHashKey, $OutlookWebHash.$OutlookWebHashKey)
                                             }
-                                       }
+                                        }
                                         $UsrConfig.Update() | Out-Null
                                     } catch {
                                         Write-Host '    Error setting Outlook Web signature' -ForegroundColor Red
@@ -2782,6 +2783,10 @@ try {
     }
 
     if ($script:COMWord) {
+        try {
+            $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
+        } catch {
+        }
         $script:COMWord.Quit([ref]$false)
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWord) | Out-Null
         Remove-Variable -Name 'COMWord' -Scope 'script'
