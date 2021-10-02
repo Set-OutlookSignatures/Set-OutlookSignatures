@@ -3,7 +3,7 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta4" target="_blank">v2.3.0-beta4</a> - YYYY-MM-DD
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta4" target="_blank">v2.3.0-beta4</a> - 2021-10-02
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios, see 'README' and '.\config\default graph config.ps1' for details
 - Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details (template sort order and sort culture, custom Outlook signature names)
