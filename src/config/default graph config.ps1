@@ -24,10 +24,11 @@
 
 
 # Client ID
-# The default client ID is defined in gruber.cc as multi-tenant, so it can be used everywhere
+# The default client ID is defined in the developer's Azure tenant as multi-tenant, so it can be used everywhere
 # Can be replaced with a Client ID from the own tenant
 #   Scopes (please provide admin consent): 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All'
-#   RedirectUri: 'http://localhost'
+#   Redirect URI: 'http://localhost', configure for "mobile and desktop applications"
+#   Enable 'Allow public client flows' to make Windows Integrated Authentication (SSO) work for Azure AD joined devices
 $GraphClientID = 'beea8249-8c98-4c76-92f6-ce3c468a61e6'
 
 

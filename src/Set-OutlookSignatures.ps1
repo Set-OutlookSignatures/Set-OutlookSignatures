@@ -63,10 +63,11 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/co
 The currently logged on user needs at least read access to the path
 Default value: '.\config\default graph config.ps1'
 
-.PARAMETER DomainsToCheckForGroups
-List of domains/forests to check for group membership across trusts.
+.PARAMETER TrustsToCheckForGroups
+List of trusted domains to check for group membership across trusts.
 If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
 If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list.
+Subdomains of trusted domains are always considered.
 Default value: '*'
 
 .PARAMETER DeleteUserCreatedSignatures
@@ -144,10 +145,10 @@ PS> .\Set-OutlookSignatures.ps1
 PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates'
 
 .EXAMPLE
-PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups '*', '-internal-test.example.com'
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -TrustsToCheckForGroups '*', '-internal-test.example.com'
 
 .EXAMPLE
-PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -DomainsToCheckForGroups 'internal-test.example.com', 'company.b.com'
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -TrustsToCheckForGroups 'internal-test.example.com', 'company.b.com'
 
 .EXAMPLE
 PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"
@@ -204,7 +205,8 @@ Param(
     # List of domains/forests to check for group membership across trusts
     #   If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
     #   If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list
-    [string[]]$DomainsToCheckForGroups = ('*'),
+    [Alias('DomainsToCheckForGroups')]
+    [string[]]$TrustsToCheckForGroups = ('*'),
 
     # Shall the script delete signatures which were created by the user itself?
     #   The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
@@ -324,7 +326,7 @@ function main {
     } else {
         Write-Host
     }
-    Write-Host ('  DomainsToCheckForGroups: ' + ('''' + $($DomainsToCheckForGroups -join ''', ''') + ''''))
+    Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
     Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
     Write-Host "  SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
     Write-Host "  SetCurrentUserOOFMessage: '$SetCurrentUserOOFMessage'"
@@ -468,18 +470,18 @@ function main {
 
     Write-Host
     Write-Host "Enumerate domains @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    $x = $DomainsToCheckForGroups
-    [System.Collections.ArrayList]$DomainsToCheckForGroups = @()
+    $x = $TrustsToCheckForGroups
+    [System.Collections.ArrayList]$TrustsToCheckForGroups = @()
 
     # Users own domain/forest is always included
     $y = ([ADSI]"LDAP://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
     if ($y -ne '') {
         Write-Host "  Current user forest: $y"
-        $DomainsToCheckForGroups += $y
+        $TrustsToCheckForGroups += $y
 
         # Other domains - either the list provided, or all outgoing and bidirectional trusts
         if ($x[0] -eq '*') {
-            $Search.SearchRoot = "GC://$($DomainsToCheckForGroups[0])"
+            $Search.SearchRoot = "GC://$($TrustsToCheckForGroups[0])"
             $Search.Filter = '(ObjectClass=trustedDomain)'
 
             $Search.FindAll() | ForEach-Object {
@@ -509,7 +511,7 @@ function main {
 
                 if (($($_.properties.trustattributes) -ne 32) -and (($($_.properties.trustdirection) -eq 2) -or ($($_.properties.trustdirection) -eq 3)) ) {
                     Write-Host "  Trusted domain: $($_.properties.name)"
-                    $DomainsToCheckForGroups += $_.properties.name
+                    $TrustsToCheckForGroups += $_.properties.name
                 }
             }
         }
@@ -538,16 +540,16 @@ function main {
             }
 
             if (-not ($y.StartsWith('-'))) {
-                if ($DomainsToCheckForGroups -icontains $y) {
+                if ($TrustsToCheckForGroups -icontains $y) {
                     Write-Host '    Domain already in list.' -ForegroundColor Yellow
                 } else {
-                    $DomainsToCheckForGroups += $y
+                    $TrustsToCheckForGroups += $y
                 }
             } else {
                 Write-Host '    Removing domain.'
-                for ($z = 0; $z -lt $DomainsToCheckForGroups.Count; $z++) {
-                    if ($DomainsToCheckForGroups[$z] -ilike $y.substring(1)) {
-                        $DomainsToCheckForGroups[$z] = ''
+                for ($z = 0; $z -lt $TrustsToCheckForGroups.Count; $z++) {
+                    if ($TrustsToCheckForGroups[$z] -ilike $y.substring(1)) {
+                        $TrustsToCheckForGroups[$z] = ''
                     }
                 }
             }
@@ -556,12 +558,12 @@ function main {
 
         Write-Host
         Write-Host "Check for open LDAP port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-        CheckADConnectivity $DomainsToCheckForGroups 'LDAP' '  ' | Out-Null
+        CheckADConnectivity $TrustsToCheckForGroups 'LDAP' '  ' | Out-Null
 
 
         Write-Host
         Write-Host "Check for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-        CheckADConnectivity $DomainsToCheckForGroups 'GC' '  ' | Out-Null
+        CheckADConnectivity $TrustsToCheckForGroups 'GC' '  ' | Out-Null
     } else {
         Write-Host '  Problem connecting to logged on user''s Active Directory, assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
         if (Test-Path -Path $GraphConfigFile -PathType Leaf) {
@@ -593,7 +595,7 @@ function main {
     } else {
         Write-Host "  Simulating '$SimulateUser' as currently logged on user" -ForegroundColor Yellow
     }
-    if ($null -ne $DomainsToCheckForGroups[0]) {
+    if ($null -ne $TrustsToCheckForGroups[0]) {
         try {
             if (-not $SimulateUser) {
                 $Search.SearchRoot = "GC://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
@@ -610,7 +612,7 @@ function main {
                     $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                     $ADPropsCurrentUser = $Search.FindOne().Properties
                 } catch {
-                    Write-Host "    Simulation user '$($SimulateUser)' not found in AD forest $($DomainsToCheckForGroups[0]). Exiting." -ForegroundColor REd
+                    Write-Host "    Simulation user '$($SimulateUser)' not found in AD forest $($TrustsToCheckForGroups[0]). Exiting." -ForegroundColor REd
                     exit 1
                 }
             }
@@ -668,7 +670,7 @@ function main {
     } else {
         Write-Host '  Manager of simulated currently logged on user' -ForegroundColor Yellow
     }
-    if ($null -ne $DomainsToCheckForGroups[0]) {
+    if ($null -ne $TrustsToCheckForGroups[0]) {
         try {
             $Search.SearchRoot = "GC://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
             $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
@@ -710,12 +712,12 @@ function main {
         $ADPropsMailboxesUserDomain += $null
 
         if ((($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '') -or ($($MailAddresses[$AccountNumberRunning]) -ne ''))) {
-            if ($null -ne $DomainsToCheckForGroups[0]) {
+            if ($null -ne $TrustsToCheckForGroups[0]) {
                 # Loop through domains until the first one knows the legacyExchangeDN or the proxy address
-                for ($DomainNumber = 0; (($DomainNumber -lt $DomainsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
-                    if (($DomainsToCheckForGroups[$DomainNumber] -ne '')) {
-                        Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (searching for mailbox user object) ... " -NoNewline
-                        $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
+                for ($DomainNumber = 0; (($DomainNumber -lt $TrustsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
+                    if (($TrustsToCheckForGroups[$DomainNumber] -ne '')) {
+                        Write-Host "    $($TrustsToCheckForGroups[$DomainNumber]) (searching for mailbox user object) ... " -NoNewline
+                        $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
                         if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
                             $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(msExchMailboxGuid=*)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
                         } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
@@ -737,8 +739,8 @@ function main {
                             # for example tokenGroups including domain local groups
                             $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
                             $ADPropsMailboxes[$AccountNumberRunning] = $Search.FindOne().Properties
-                            $UserDomain = $DomainsToCheckForGroups[$DomainNumber]
-                            $ADPropsMailboxesUserDomain[$AccountNumberRunning] = $DomainsToCheckForGroups[$DomainNumber]
+                            $UserDomain = $TrustsToCheckForGroups[$DomainNumber]
+                            $ADPropsMailboxesUserDomain[$AccountNumberRunning] = $TrustsToCheckForGroups[$DomainNumber]
                             $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyexchangedn
                             $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
                             Write-Host 'found'
@@ -783,7 +785,7 @@ function main {
         }
     } else {
         Write-Host '  AD mail attribute of currently logged on user is empty' -NoNewline
-        if ($null -ne $DomainsToCheckForGroups[0]) {
+        if ($null -ne $TrustsToCheckForGroups[0]) {
             Write-Host ', searching msExchMasterAccountSid'
             # No mail attribute set, check for match(es) of user's objectSID and mailbox's msExchMasterAccountSid
             for ($i = 0; $i -lt $MailAddresses.count; $i++) {
@@ -948,7 +950,7 @@ function main {
                 }
                 $NTName = ((($SignatureFilePartTag -replace '\[', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
                 if ((-not $SignatureFilesGroupSIDs.ContainsKey($SignatureFilePartTag))) {
-                    if (($null -ne $DomainsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
+                    if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
                         try {
                             $SignatureFilesGroupSIDs.add($SignatureFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
                         } catch {
@@ -1118,7 +1120,7 @@ function main {
                     }
                     $NTName = ((($OOFFilePartTag -replace '\[', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
                     if (-not $OOFFilesGroupSIDs.ContainsKey($OOFFilePartTag)) {
-                        if (($null -ne $DomainsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
+                        if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
                             try {
                                 $OOFFilesGroupSIDs.add($OOFFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
                             } catch {
@@ -1217,7 +1219,7 @@ function main {
 
             if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
                 $ADPropsCurrentMailbox = $ADPropsMailboxes[$AccountNumberRunning]
-                if ($null -ne $DomainsToCheckForGroups[0]) {
+                if ($null -ne $TrustsToCheckForGroups[0]) {
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($ADPropsMailboxesUserDomain[$AccountNumberRunning])")
                     try {
                         $Search.filter = "(distinguishedname=$($ADPropsCurrentMailbox.manager))"
@@ -1265,10 +1267,10 @@ function main {
                         $LdapFilterSIDs = ''
                     }
 
-                    for ($DomainNumber = 0; $DomainNumber -lt $DomainsToCheckForGroups.count; $DomainNumber++) {
-                        if (($DomainsToCheckForGroups[$DomainNumber] -ne '') -and ($DomainsToCheckForGroups[$DomainNumber] -ine $UserDomain) -and ($UserDomain -ne '')) {
-                            Write-Host "    $($DomainsToCheckForGroups[$DomainNumber]) (mailbox group membership across trusts, takes some time) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($DomainsToCheckForGroups[$DomainNumber])")
+                    for ($DomainNumber = 0; $DomainNumber -lt $TrustsToCheckForGroups.count; $DomainNumber++) {
+                        if (($TrustsToCheckForGroups[$DomainNumber] -ne '') -and ($TrustsToCheckForGroups[$DomainNumber] -ine $UserDomain) -and ($UserDomain -ne '')) {
+                            Write-Host "    $($TrustsToCheckForGroups[$DomainNumber]) (mailbox group membership across trusts, takes some time) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
                             $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
 
                             foreach ($fsp in $Search.FindAll()) {
@@ -1437,7 +1439,7 @@ function main {
         if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
             if ((-not $SimulateUser) ) {
                 Write-Host "  Set up environment for connection to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                # -and ($null -ne $DomainsToCheckForGroups[0])
+                # -and ($null -ne $TrustsToCheckForGroups[0])
                 $script:dllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                 try {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
@@ -1456,7 +1458,7 @@ function main {
                     Import-Module -Name $script:dllPath -Force
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
                     Write-Host "  Connect to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                    if ($null -ne $DomainsToCheckForGroups[0]) {
+                    if ($null -ne $TrustsToCheckForGroups[0]) {
                         $exchService.UseDefaultCredentials = $true
                     } else {
                         $exchService.UseDefaultCredentials = $false
@@ -1594,7 +1596,7 @@ function main {
                     if ($SimulateUser) {
                         Write-Host '    Simulation mode enabled, processing OOF templates without changing OOF settings' -ForegroundColor Yellow
                     }
-                    if ($null -ne $DomainsToCheckForGroups[0]) {
+                    if ($null -ne $TrustsToCheckForGroups[0]) {
                         $OOFSettings = $exchService.GetUserOOFSettings($PrimaryMailboxAddress)
                         if ($($PSVersionTable.PSEdition) -ieq 'Core') { $OOFSettings = $OOFSettings.result }
                         if ($OOFSettings.STATE -eq [Microsoft.Exchange.WebServices.Data.OOFState]::Disabled) { $OOFDisabled = $true }
@@ -1674,7 +1676,7 @@ function main {
                         Write-Host "  Set Out of Office (OOF) auto replies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                         if (Test-Path -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm"))) {
                             if (-not $SimulateUser) {
-                                if ($null -ne $DomainsToCheckForGroups[0]) {
+                                if ($null -ne $TrustsToCheckForGroups[0]) {
                                     $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                                     $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                                 } else {
@@ -1692,7 +1694,7 @@ function main {
                         } else {
                             if (-not $SimulateUser) {
                                 if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
-                                    if ($null -ne $DomainsToCheckForGroups[0]) {
+                                    if ($null -ne $TrustsToCheckForGroups[0]) {
                                         $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString())
                                     } else {
                                         if ((GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString()).error -ne $false) {
@@ -1702,7 +1704,7 @@ function main {
                                     }
                                 }
                                 if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
-                                    if ($null -ne $DomainsToCheckForGroups[0]) {
+                                    if ($null -ne $TrustsToCheckForGroups[0]) {
                                         $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString())
                                     } else {
                                         if ((GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString()).error -ne $false) {
@@ -1722,7 +1724,7 @@ function main {
                                 }
                             }
                         }
-                        if ((-not $SimulateUser) -and ($null -ne $DomainsToCheckForGroups[0])) {
+                        if ((-not $SimulateUser) -and ($null -ne $TrustsToCheckForGroups[0])) {
                             try {
                                 $exchService.SetUserOOFSettings($PrimaryMailboxAddress, $OOFSettings) | Out-Null
                             } catch {
@@ -2296,8 +2298,8 @@ function CheckADConnectivity {
                         $returnvalue = $true
                     } else {
                         Write-Host "$Indent  $CheckProtocolText query failed, removing domain from list." -ForegroundColor Red
-                        Write-Host "$Indent  If this error is permanent, check firewalls and AD trust. Consider using parameter DomainsToCheckForGroups." -ForegroundColor Red
-                        $DomainsToCheckForGroups.remove($data[0])
+                        Write-Host "$Indent  If this error is permanent, check firewalls and AD trust. Consider using parameter TrustsToCheckForGroups." -ForegroundColor Red
+                        $TrustsToCheckForGroups.remove($data[0])
                         $returnvalue = $false
                     }
                     $_.Done = $true

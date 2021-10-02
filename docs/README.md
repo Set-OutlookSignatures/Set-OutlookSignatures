@@ -34,7 +34,7 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [2.2. SignatureIniPath](#22-signatureinipath)
   - [2.3. ReplacementVariableConfigFile](#23-replacementvariableconfigfile)
   - [2.4. GraphConfigFile](#24-graphconfigfile)
-  - [2.5. DomainsToCheckForGroups](#25-domainstocheckforgroups)
+  - [2.5. TrustedDomainsToCheckForGroups](#25-trusteddomainstocheckforgroups)
   - [2.6. DeleteUserCreatedSignatures](#26-deleteusercreatedsignatures)
   - [2.7. SetCurrentUserOutlookWebSignature](#27-setcurrentuseroutlookwebsignature)
   - [2.8. SetCurrentUserOOFMessage](#28-setcurrentuseroofmessage)
@@ -60,6 +60,9 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [11.1. Photos from Active Directory](#111-photos-from-active-directory)
 - [12. Outlook Web](#12-outlook-web)
 - [13. Hybrid and cloud-only support](#13-hybrid-and-cloud-only-support)
+  - [13.1. Basic Configuration](#131-basic-configuration)
+  - [13.2. Advanced Configuration](#132-advanced-configuration)
+  - [13.3. Authentication](#133-authentication)
 - [14. Simulation mode](#14-simulation-mode)
 - [15. FAQ](#15-faq)
   - [15.1. Where can I find the changelog?](#151-where-can-i-find-the-changelog)
@@ -137,18 +140,20 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/c
 The currently logged on user needs at least read access to the file.
 
 Default value: `'.\config\default graph config.ps1'`  
-## 2.5. DomainsToCheckForGroups  
-The parameters tells the script which domains should be used to search for mailbox and user group membership.
+## 2.5. TrustedDomainsToCheckForGroups  
+The parameters tells the script which trusted domains should be used to search for mailbox and user group membership.
 
 The default value, `'*'` tells the script to query all trusted domains in the Active Directory forest of the logged on user.
 
-For a custom list of domains/forests, specify them as comma-separated list of strings: `"domain-a.local", "dc=example,dc=com", "domain-b.internal"`.
+For a custom list of trusted domains, specify them as comma-separated list of strings: `"domain-a.local", "dc=example,dc=com", "domain-b.internal"`.
 
-When a domain/forest in the custom list starts with a dash or minus (`'-domain-a.local'`), this domain is removed from the list.
+When a domain in the custom list starts with a dash or minus (`'-domain-a.local'`), this domain is removed from the list.
 
 The `'*'` entry in a custom list is only considered when it is the first entry of the list.
 
 The Active Directory forest of the currently logged on user is always considered.
+
+Subdomains of trusted domains are always considered.
 
 Default value: `'*'`  
 ## 2.6. DeleteUserCreatedSignatures  
@@ -253,7 +258,7 @@ For both sets of groups, group membership is evaluated against the whole Active 
 
 The script works fine with linked mailboxes in Exchange resource forest scenarios.
 
-Trusted domains can be modified with the DomainsToCheckForGroups parameter.
+Trusted domains can be modified with the TrustedDomainsToCheckForGroups parameter.
 
 Group membership is achieved by querying the tokenGroups attribute, which is not only very fast and resource saving on client and server, but also considers sIDHistory.
 
@@ -471,7 +476,7 @@ Set-OutlookSignatures supports three directory environments:
 - Active Directory on premises. This requires direct connection to Active Directory Domain Controllers, which usually only works when you are connected to your company network.
 - Hybrid. This environment consists of an Active Directory on premises, which is synced with Microsoft 365 Azure Active Directory in the cloud. If the script can't make a connection to your on-prem environment, it tries to get required data from the cloud via the Microsoft Graph API.
 - Cloud-only. This environment has no Active Directory on premises, only Microsoft 365 with Azure Active Directory is used. If the script can't make a connection to your on-prem environment, it tries to get required data from the cloud via the Microsoft Graph API.
-
+## 13.1. Basic Configuration
 To allow communication between Microsoft Graph and Set-Outlooksignatures, both need to be configured for each other.
 
 The easiest way is to once start Set-OutlookSignatures with a cloud administrator. The administrator then gets asked for admin consent for the correct permissions.  
@@ -488,16 +493,26 @@ If you prefer using own application IDs or need advanced configuration, follow t
     - 'https<area>://graph.microsoft.com/group.read.all' for reading properties of all groups, required for templates restricted to groups
     - 'https<area>://graph.microsoft.com/mailboxsettings.readwrite' for updating the user's own mailbox settings (Out of Office auto reply messages)
     - 'https<area>://graph.microsoft.com/EWS.AccessAsUser.All' for updating the Outlook Web signature in the user's own mailbox
-  - Set the Redirect URl to 'http<area>://localhost'
+  - Set the Redirect URI to 'http<area>://localhost', configure for 'mobile and desktop applications'
+  - Enable 'Allow public client flows' to make Windows Integrated Authentication (SSO) work for Azure AD joined devices
 - In Set-OutlookSignature, use '.\config\default graph config.ps1' as a template for a custom Graph configuration file
   - Set '$GraphClientID' to the application ID created by the Graph administrator before
   - Use the 'GraphConfigFile' parameter to make the tool use the newly created Graph configuration file.
-
+## 13.2. Advanced Configuration
 The Graph configuration file allows for additional, advanced configuration:
 - '$GraphEndpointVersion': The version of the Graph REST API to use
 - '$GraphUserProperties': The properties to load for each graph user/mailbox. You can add custom attributes here.
 - '$GraphUserAttributeMapping': Graph and Active Directory attributes are not named identically. Set-OutlookSignatures therefore uses a "virtual" account. Use this hashtable to define which Graph attribute name is assigned to which attribute of the virtual account.  
 The virtual account is accessible as '\$ADPropsCurrentUser\[...\]' in '.\config\default replacement variables.ps1', and therefore has a direct impact on replacement variables.
+## 13.3. Authentication
+In hybrid and cloud-only scenarios, Set-OutlookSignatures automatically tries three stages of authentication.
+1. Windows Integrated Authentication  
+  This works in hybrid scenarios. The credentials of the currently logged-on user are used to access Microsoft Graph without any further user interaction.
+2. Silent authentication  
+  If Windows Integrated Authentication fails, the User Principal Name of the currently logged-on user is determined. If an existing cached cloud credential for this UPN is found, it is used for authentication with Microsoft Graph.  
+  A default browser window with an "Authentication successful" message may open, it can be closed anytime.
+3. User interaction  
+  If the other authentication methods fail, the user is interactively asked for credentials. No custom components are used, only the official Microsoft 365 authentication site and the user's default browser. 
 # 14. Simulation mode  
 Simulation mode is enabled when the parameter SimulatedUser is passed to the script. It answers the question `"What will the signatures look like for user A, when Outlook is configured for the mailboxes X, Y and Z?"`.
 

@@ -5,10 +5,8 @@
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta4" target="_blank">v2.3.0-beta4</a> - YYYY-MM-DD
 ### Added
-- Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios
-- Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details
-- Specify template sort order and sort culture in ini files
-- Specify custom Outlook signature names in ini files
+- Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios, see 'README' and '.\config\default graph config.ps1' for details
+- Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details (template sort order and sort culture, custom Outlook signature names)
 - New replacement variables '\$CURRENT\[...\]OFFICE\$' and '\$CURRENT\[...\]COMPANY\$', including updated templates
 - Enterprise grade workaround for Word security warning when converting documents with linked images
 - README: Hybrid and cloud support
@@ -19,6 +17,9 @@
 - User could connect to hidden Word instance used for conversion of DOCX templates
 - Do no classify templates with unknown tags as common templates 
 - Restore initial Word ShowFieldCodes setting on unexpected error
+### Changed
+- The parameter DomainsToCheckForGroups is also available under the more descriptive name TrustsToCheckForGroups. Both names can be used, functionality is unchanged.
+- word settings temporarily changed by the script are now also restored to their original values when the script ends due to an unexpected error
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.1" target="_blank">v2.2.1</a> - 2021-09-15
 ### Fixed
