@@ -860,12 +860,12 @@ function main {
             $local:SignatureFilesSortCulture = $null
         }
         switch ($SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortOrder']) {
-            { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $SignatureFiles = ($SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Culture $local:SignatureFilesSortCulture); continue }
-            { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $SignatureFiles = ( $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Descending -Culture $local:SignatureFilesSortCulture ); continue }
-            { $_ -in 'AsInThisFile', 'AsListed' } {
-                $SignatureFiles = $SignatureFiles | Where-Object { $_.name -in $SignatureIniSettings.GetEnumerator().name }
+            { $_ -iin ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $SignatureFiles = ($SignatureFiles | Where-Object { $_.name -iin $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Culture $local:SignatureFilesSortCulture); continue }
+            { $_ -iin ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $SignatureFiles = ( $SignatureFiles | Where-Object { $_.name -iin $SignatureIniSettings.GetEnumerator().name } | Sort-Object -Descending -Culture $local:SignatureFilesSortCulture ); continue }
+            { $_ -iin 'AsInThisFile', 'AsListed' } {
+                $SignatureFiles = $SignatureFiles | Where-Object { $_.name -iin $SignatureIniSettings.GetEnumerator().name }
                 $local:SignatureFilesSortOrder = @()
-                ($SignatureIniSettings.GetEnumerator().name | Where-Object { $_ -in $SignatureFiles.name }) | ForEach-Object {
+                ($SignatureIniSettings.GetEnumerator().name | Where-Object { $_ -iin $SignatureFiles.name }) | ForEach-Object {
                     $local:SignatureFilesSortOrder += [array]::indexof($SignatureFiles.name, $_)
                 }
                 $SignatureFiles = $SignatureFiles[$local:SignatureFilesSortOrder]
@@ -1030,12 +1030,12 @@ function main {
             }
 
             switch ($OOFIniSettings['<Set-OutlookSignatures configuration>']['SortOrder']) {
-                { $_ -in ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $OOFFiles = ($OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object -Culture $local:OOFFilesSortCulture); continue }
-                { $_ -in ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $OOFFiles = ( $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name } | Sort-Object -Descending -Culture $local:OOFFilesSortCulture ); continue }
-                { $_ -in 'AsInThisFile', 'AsListed' } {
-                    $OOFFiles = $OOFFiles | Where-Object { $_.name -in $OOFIniSettings.GetEnumerator().name }
+                { $_ -iin ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $OOFFiles = ($OOFFiles | Where-Object { $_.name -iin $OOFIniSettings.GetEnumerator().name } | Sort-Object -Culture $local:OOFFilesSortCulture); continue }
+                { $_ -iin ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $OOFFiles = ( $OOFFiles | Where-Object { $_.name -iin $OOFIniSettings.GetEnumerator().name } | Sort-Object -Descending -Culture $local:OOFFilesSortCulture ); continue }
+                { $_ -iin 'AsInThisFile', 'AsListed' } {
+                    $OOFFiles = $OOFFiles | Where-Object { $_.name -iin $OOFIniSettings.GetEnumerator().name }
                     $local:OOFFilesSortOrder = @()
-                    ($OOFIniSettings.GetEnumerator().name | Where-Object { $_ -in $OOFFiles.name }) | ForEach-Object {
+                    ($OOFIniSettings.GetEnumerator().name | Where-Object { $_ -iin $OOFFiles.name }) | ForEach-Object {
                         $local:OOFFilesSortOrder += [array]::indexof($OOFFiles.name, $_)
                     }
                     $OOFFiles = $OOFFiles[$local:OOFFilesSortOrder]
@@ -1278,13 +1278,18 @@ function main {
                                     # member:1.2.840.113556.1.4.1941:= (LDAP_MATCHING_RULE_IN_CHAIN) returns groups containing a specific DN as member
                                     # A Foreign Security Principal ist created in each (sub)domain, in which it is granted permissions,
                                     # and it can only be member of a domain local group - so we set the searchroot to the (sub)domain of the Foreign Security Principal.
-                                    $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$((($fsp.path -split ',DC=')[1..999] -join '.'))")
-                                    $Search.filter = "(&(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname)))"
+                                    Write-Host "      $((($fsp.path -split ',DC=')[1..999] -join '.'))"
+                                    try {
+                                        $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$((($fsp.path -split ',DC=')[1..999] -join '.'))")
+                                        $Search.filter = "(&(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname)))"
 
-                                    foreach ($group in $Search.findall()) {
-                                        $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
-                                        $GroupsSIDs += $sid.tostring()
-                                        Write-Host "      $sid"
+                                        foreach ($group in $Search.findall()) {
+                                            $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
+                                            $GroupsSIDs += $sid.tostring()
+                                            Write-Host "        $sid"
+                                        }
+                                    } catch {
+                                        Write-Host "        Error: $($error[0].exception)" -ForegroundColor red                                        
                                     }
                                 }
                             }
