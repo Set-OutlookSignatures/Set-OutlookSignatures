@@ -267,10 +267,10 @@ function main {
 
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    (((Get-Help -Full $PSCommandPath).alertSet.alert.Text) -split "`r?`n").Trim() | ForEach-Object {
-        $x = ($_.split(':', 2)).trim()
-        Write-Host "  $($x[0].trim()): $($x[1].trim())"
-    }
+    write-host "  Script : Set-OutlookSignatures"
+    write-host "  Version: xxxVersionStringxxx"
+    write-host "  Web    : https://github.com/GruberMarkus/Set-OutlookSignatures"
+    write-host "  License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)"
 
 
     Write-Host
