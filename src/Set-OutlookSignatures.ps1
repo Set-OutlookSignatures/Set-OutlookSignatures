@@ -159,7 +159,7 @@ Please see '.\docs\README.html' and https://github.com/GruberMarkus/Set-OutlookS
 
 .NOTES
 Script : Set-OutlookSignatures
-Version: xxxVersionStringxxx
+Version: v2.3.0-beta3
 Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
 License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)
 #>
@@ -267,10 +267,10 @@ function main {
 
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    write-host "  Script : Set-OutlookSignatures"
-    write-host "  Version: xxxVersionStringxxx"
-    write-host "  Web    : https://github.com/GruberMarkus/Set-OutlookSignatures"
-    write-host "  License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)"
+    (((Get-Help -Full $PSCommandPath).alertSet.alert.Text) -split "`r?`n").Trim() | ForEach-Object {
+        $x = ($_.split(':', 2)).trim()
+        Write-Host "  $($x[0].trim()): $($x[1].trim())"
+    }
 
 
     Write-Host
@@ -879,7 +879,7 @@ function main {
     
     foreach ($SignatureFile in $SignatureFiles) {
         Write-Host ("  '$($SignatureFile.Name)'")
-        if ($SignatureIniSettings["$SignatureFile"]) {
+        if ($SignatureIniPath -ne '') {
             $SignatureFilePart = ($SignatureIniSettings["$SignatureFile"].GetEnumerator().Name -join '] [')
             if ($SignatureFilePart) {
                 $SignatureFilePart = ($SignatureFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName') }) -join '] ['
@@ -1049,7 +1049,7 @@ function main {
         
         foreach ($OOFFile in $OOFFiles) {
             Write-Host ("  '$($OOFFile.Name)'")
-            if ($OOFIniSettings["$OOFFile"]) {
+            if ($OOFIniPath -ne '') {
                 $OOFFilePart = ($OOFIniSettings["$OOFFile"].GetEnumerator().Name -join '] [')
                 if ($OOFFilePart) {
                     $OOFFilePart = ($OOFFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName') }) -join '] ['
