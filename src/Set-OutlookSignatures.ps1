@@ -879,7 +879,7 @@ function main {
     
     foreach ($SignatureFile in $SignatureFiles) {
         Write-Host ("  '$($SignatureFile.Name)'")
-        if ($SignatureIniPath -ne '') {
+        if ($SignatureIniSettings["$SignatureFile"]) {
             $SignatureFilePart = ($SignatureIniSettings["$SignatureFile"].GetEnumerator().Name -join '] [')
             if ($SignatureFilePart) {
                 $SignatureFilePart = ($SignatureFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName') }) -join '] ['
@@ -1049,7 +1049,7 @@ function main {
         
         foreach ($OOFFile in $OOFFiles) {
             Write-Host ("  '$($OOFFile.Name)'")
-            if ($OOFIniPath -ne '') {
+            if ($OOFIniSettings["$OOFFile"]) {
                 $OOFFilePart = ($OOFIniSettings["$OOFFile"].GetEnumerator().Name -join '] [')
                 if ($OOFFilePart) {
                     $OOFFilePart = ($OOFFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName') }) -join '] ['
