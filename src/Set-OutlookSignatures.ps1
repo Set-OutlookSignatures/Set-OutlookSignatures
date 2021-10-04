@@ -159,7 +159,7 @@ Please see '.\docs\README.html' and https://github.com/GruberMarkus/Set-OutlookS
 
 .NOTES
 Script : Set-OutlookSignatures
-Version: v2.3.0-beta3
+Version: xxxVersionStringxxx
 Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
 License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)
 #>
