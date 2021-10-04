@@ -1,9 +1,10 @@
 <#
 .SYNOPSIS
+Set-OutlookSignatures vXXXVersionStringXXX
 Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.
 
 .DESCRIPTION
-**Signatures and OOF messages can be:**
+Signatures and OOF messages can be:
 - Generated from templates in DOCX or HTML file format
 - Customized with a broad range of variables, including photos, from Active Directory and other sources
 - Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles
@@ -14,20 +15,20 @@ Centrally manage and deploy Outlook text signatures and Out of Office auto reply
 - Centrally managed only or exist along user created signatures (signatures only)
 - Copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
 
-**Sample templates** for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
+Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 
-**Simulation mode** allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
+Simulation mode allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
 
-The script is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
+The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works on premises, in hybrid and cloud-only environments.
 
-It is **multi-client capable** by using different template paths, configuration files and script parameters.
+It is multi-client capable by using different template paths, configuration files and script parameters.
 
-Set-OutlookSignature requires **no installation on servers or clients**. You only need a standard file share on a server, and PowerShell and Office on the client.
+Set-OutlookSignature requires no installation on servers or clients. You only need a standard file share on a server, and PowerShell and Office on the client.
 
-A **documented implementation approach**, based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.
-The implementatin approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
+A documented implementation approach, based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.
+The implementatin approach is suited for service providers as well as for clients, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
-The script is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see '.\docs\LICENSE.txt' for copyright and MIT license details.
+The script is Free and Open-Source Software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see '.\docs\LICENSE.txt' for copyright and MIT license details.
 
 .LINK
 Github: https://github.com/GruberMarkus/Set-OutlookSignatures
@@ -159,7 +160,7 @@ Please see '.\docs\README.html' and https://github.com/GruberMarkus/Set-OutlookS
 
 .NOTES
 Script : Set-OutlookSignatures
-Version: v2.3.0-beta3
+Version: XXXVersionStringXXX
 Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
 License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)
 #>
@@ -267,10 +268,10 @@ function main {
 
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    (((Get-Help -Full $PSCommandPath).alertSet.alert.Text) -split "`r?`n").Trim() | ForEach-Object {
-        $x = ($_.split(':', 2)).trim()
-        Write-Host "  $($x[0].trim()): $($x[1].trim())"
-    }
+    write-host "  Script : Set-OutlookSignatures"
+    write-host "  Version: XXXVersionStringXXX"
+    write-host "  Web    : https://github.com/GruberMarkus/Set-OutlookSignatures"
+    write-host "  License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)"
 
 
     Write-Host
@@ -879,7 +880,7 @@ function main {
     
     foreach ($SignatureFile in $SignatureFiles) {
         Write-Host ("  '$($SignatureFile.Name)'")
-        if ($SignatureIniPath -ne '') {
+        if ($SignatureIniSettings["$SignatureFile"]) {
             $SignatureFilePart = ($SignatureIniSettings["$SignatureFile"].GetEnumerator().Name -join '] [')
             if ($SignatureFilePart) {
                 $SignatureFilePart = ($SignatureFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName') }) -join '] ['
@@ -1049,7 +1050,7 @@ function main {
         
         foreach ($OOFFile in $OOFFiles) {
             Write-Host ("  '$($OOFFile.Name)'")
-            if ($OOFIniPath -ne '') {
+            if ($OOFIniSettings["$OOFFile"]) {
                 $OOFFilePart = ($OOFIniSettings["$OOFFile"].GetEnumerator().Name -join '] [')
                 if ($OOFFilePart) {
                     $OOFFilePart = ($OOFFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName') }) -join '] ['
