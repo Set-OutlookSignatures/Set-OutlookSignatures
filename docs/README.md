@@ -708,19 +708,19 @@ The following example describes optional preceeding text combined an optional re
   $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { "`r`nTelephone: "} )
   $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { "`r`nMobile: "} )
   ```
-- Word template
+- Word template:  
   <a href="mailto:$CURRENTUSERMAIL$">\$CURRENTUSERMAIL\$</a>\$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY\$<a href="tel:$CURRENTUSERTELEPHONE$">\$CURRENTUSERTELEPHONE\$</a>\$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$<a href="tel:$CURRENTUSERMOBILE$">\$CURRENTUSERMOBILE$</a>
 
-  Notice that not only \$CURRENTUSERMAIL\$ is configured with a hyperlink, but \$CURRENTUSERPHONE\$ and \$CURRENTUSERMOBILE\$, too: `mailto:$CURRENTUSERMAIL$`, `tel:$CURRENTUSERTELEPHONE$` and `tel:$CURRENTUSERMOBILE$`
+  Note that all variables are written on one line and that not only \$CURRENTUSERMAIL\$ is configured with a hyperlink, but \$CURRENTUSERPHONE\$ and \$CURRENTUSERMOBILE\$ too: `mailto:$CURRENTUSERMAIL$`, `tel:$CURRENTUSERTELEPHONE$` and `tel:$CURRENTUSERMOBILE$`
 - Results
-  - Telephone number and mobile number are set
+  - Telephone number and mobile number are set. The paragraph marks come from \$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY\$ and \$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$:  
     first.last@example.com  
     Telephone: <a href="tel:+43xxx">+43xxx</a>  
     Mobile: <a href="tel:+43yyy">+43yyy</a>
-  - Telephone number exists, mobile number is empty
+  - Telephone number exists, mobile number is empty. The paragraph mark comes from \$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY\$:  
     first.last@example.com  
     Telephone: <a href="tel:+43xxx">+43xxx</a>
-  - Telephone number is empty, mobile number is set
+  - Telephone number is empty, mobile number is set. The paragraph mark comes from \$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$  
     first.last@example.com  
     Mobile: <a href="tel:+43yyy">+43yyy</a>
 ## 15.17. What about the new signature roaming feature Microsoft announced?  
