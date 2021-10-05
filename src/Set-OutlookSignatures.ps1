@@ -268,10 +268,10 @@ function main {
 
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    write-host "  Script : Set-OutlookSignatures"
-    write-host "  Version: XXXVersionStringXXX"
-    write-host "  Web    : https://github.com/GruberMarkus/Set-OutlookSignatures"
-    write-host "  License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)"
+    Write-Host '  Script : Set-OutlookSignatures'
+    Write-Host '  Version: XXXVersionStringXXX'
+    Write-Host '  Web    : https://github.com/GruberMarkus/Set-OutlookSignatures'
+    Write-Host "  License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)"
 
 
     Write-Host
@@ -1979,11 +1979,8 @@ function Set-Signatures {
 
                 # Setting the values in word is very slow, so we use temporay variables
                 $tempImageAlternativeText = $image.alternativetext
-                $tempImageHyperlinkName = $image.hyperlink.Name
                 $tempImageHyperlinkAddress = $image.hyperlink.Address
-                $tempImageHyperlinkAddressOld = $image.hyperlink.AddressOld
                 $tempImageHyperlinkSubAddress = $image.hyperlink.SubAddress
-                $tempImageHyperlinkSubaddressOld = $image.hyperlink.SubAddressOld
                 $tempImageHyperlinkEmailSubject = $image.hyperlink.EmailSubject
                 $tempImageHyperlinkScreenTip = $image.hyperlink.ScreenTip
 
@@ -1992,20 +1989,11 @@ function Set-Signatures {
                         if ($null -ne $tempimagealternativetext) {
                             $tempimagealternativetext = $tempimagealternativetext.replace($replaceKey, $replaceHash.replaceKey)
                         }
-                        if ($null -ne $tempimagehyperlinkName) {
-                            $tempimagehyperlinkname = $tempimagehyperlinkname.replace($replaceKey, $replaceHash.replaceKey)
-                        }
                         if ($null -ne $tempimagehyperlinkAddress) {
                             $tempimagehyperlinkAddress = $tempimagehyperlinkAddress.replace($replaceKey, $replaceHash.replaceKey)
                         }
-                        if ($null -ne $tempimagehyperlinkAddressOld) {
-                            $tempimagehyperlinkAddressOld = $tempimagehyperlinkAddressOld.replace($replaceKey, $replaceHash.replaceKey)
-                        }
                         if ($null -ne $tempimagehyperlinkSubAddress) {
                             $tempimagehyperlinkSubAddress = $tempimagehyperlinkSubAddress.replace($replaceKey, $replaceHash.replaceKey)
-                        }
-                        if ($null -ne $tempimagehyperlinkSubAddressOld) {
-                            $tempimagehyperlinkSubAddressOld = $tempimagehyperlinkSubAddressOld.replace($replaceKey, $replaceHash.replaceKey)
                         }
                         if ($null -ne $tempimagehyperlinkEmailSubject) {
                             $tempimagehyperlinkEmailSubject = $tempimagehyperlinkEmailSubject.replace($replaceKey, $replaceHash.replaceKey)
@@ -2019,20 +2007,11 @@ function Set-Signatures {
                 if ($null -ne $tempimagealternativetext) {
                     $image.alternativetext = $tempImageAlternativeText
                 }
-                if ($null -ne $tempimagehyperlinkName) {
-                    $image.hyperlink.Name = $tempImageHyperlinkName
-                }
                 if ($null -ne $tempimagehyperlinkAddress) {
                     $image.hyperlink.Address = $tempImageHyperlinkAddress
                 }
-                if ($null -ne $tempimagehyperlinkAddressOld) {
-                    $image.hyperlink.AddressOld = $tempImageHyperlinkAddressOld
-                }
                 if ($null -ne $tempimagehyperlinkSubAddress) {
                     $image.hyperlink.SubAddress = $tempImageHyperlinkSubAddress
-                }
-                if ($null -ne $tempimagehyperlinkSubAddressOld) {
-                    $image.hyperlink.SubAddressOld = $tempImageHyperlinkSubaddressOld
                 }
                 if ($null -ne $tempimagehyperlinkEmailSubject) {
                     $image.hyperlink.EmailSubject = $tempImageHyperlinkEmailSubject

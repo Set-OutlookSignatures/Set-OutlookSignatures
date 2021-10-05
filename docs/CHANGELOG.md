@@ -16,6 +16,7 @@
 - User could connect to hidden Word instance used for conversion of DOCX templates
 - Do no classify templates with unknown tags as common templates 
 - Word settings temporarily changed by the script are now also restored to their original values when the script ends due to an unexpected error
+- Do not try to change read-only Word attributes \<image>.hyperlink.name and \<image>.hyperlink.addressold (regression bug)
 ### Changed
 - The parameter DomainsToCheckForGroups is also available under the more descriptive name TrustsToCheckForGroups. Both names can be used, functionality is unchanged.
 
