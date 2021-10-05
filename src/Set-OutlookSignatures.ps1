@@ -325,6 +325,7 @@ function main {
             Write-Host "      Tags: [$($local:tags -join '] [')]"
         }
     } else {
+        $SignatureIniSettings = @{}
         Write-Host
     }
     Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
@@ -351,6 +352,7 @@ function main {
                 Write-Host "      Tags: [$($local:tags -join '] [')]"
             }
         } else {
+            $OOFIniSettings = @{}
             Write-Host
         }
     }
@@ -2707,8 +2709,8 @@ function GraphFilterGroups($filter) {
 
 
 function Get-IniContent ($filePath) {
+    $local:ini = [ordered]@{}
     if ($filePath -ne '') {
-        $local:ini = [ordered]@{}
         switch -regex -file $FilePath {
             # Comments starting with ; or #, or empty line, whitespace(s) before are ignored
             '(^\s*(;|#))|(^\s*$)' { continue }
@@ -2736,10 +2738,9 @@ function Get-IniContent ($filePath) {
                 }
             }
         }
-        return $local:ini
-    } else {
-        return $null
     }
+
+    return $local:ini
 }
 
 
