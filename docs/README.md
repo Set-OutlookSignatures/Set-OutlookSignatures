@@ -707,7 +707,7 @@ An example:
 - Custom replacement variable config file
   ```
   $ReplaceHash['$CURRENTUSERTELEPHONE-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { "`r`nT: $($ReplaceHash['$CURRENTUSERTELEPHONE$'])"} )
-  $ReplaceHash['$CURRENTUSERMOBILE-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$) { '' } else { "`r`nM: $($ReplaceHash['$CURRENTUSERMOBILE$)"} )
+  $ReplaceHash['$CURRENTUSERMOBILE-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { "`r`nM: $($ReplaceHash['$CURRENTUSERMOBILE$'])"} )
   ```
 - Word template
   ```
