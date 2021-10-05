@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Set-OutlookSignatures vXXXVersionStringXXX
+Set-OutlookSignatures XXXVersionStringXXX
 Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.
 
 .DESCRIPTION
