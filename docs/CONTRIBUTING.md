@@ -1,18 +1,31 @@
 <!-- omit in toc -->
 # <a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><a href="https://github.com/GruberMarkus/Set-OutlookSignatures/blob/main/docs/LICENSE.txt" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://www.paypal.com/donate?business=JBM584K3L5PX4&no_recurring=0&currency_code=EUR" target="_blank"><img src="https://img.shields.io/badge/sponsor-grey?logo=paypal" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
 
-# Welcome!
+# Welcome! <!-- omit in toc -->
 Thank you very much for your interest in Set-OutlookSignatures.
 
 If you have an idea for a new feature or have found a problem, please <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank">create an issue on GitHub</a>.
 
 If you want to contribute code, this document gives you a rough overview of the proposed process.  
-I'm not a professional developer - if you are one and you notice something negative in the code or process, please let me know. 
-# Branches
+I'm not a professional developer - if you are one and you notice something negative in the code or process, please let me know.
+# Table of Contents <!-- omit in toc -->
+- [1. Branches](#1-branches)
+- [2. Development process](#2-development-process)
+- [3. Commit messages](#3-commit-messages)
+  - [3.1. Commit message format](#31-commit-message-format)
+  - [3.2. Type](#32-type)
+  - [3.3. Body](#33-body)
+  - [3.4. Footer](#34-footer)
+- [4. Build process](#4-build-process)
+- [5. Contribution opportunities](#5-contribution-opportunities)
+  - [5.1. Code refactoring](#51-code-refactoring)
+  - [5.2. New parameter: EachSignatureForEachMailbox](#52-new-parameter-eachsignatureforeachmailbox)
+  - [5.3. New feature: Central signature deployment without client-side script](#53-new-feature-central-signature-deployment-without-client-side-script)
+# 1. Branches
 The default branch is named '`main`'. It contains the source of the latest stable release.
 
 Tags in the '`main`' branch mark releases - we release on tags (and therefore commits) and not on branches.
-# Development process
+# 2. Development process
 1. Create a new branch based on '`main`'
    - Hotfix: Give the branch a name starting with '`hotfix-`', e. g. '`hotfix-1.2.3`' or '`hotfix-issue13`'
    - New feature or vNext: Give the branch a name starting with '`develop-'`, e. g. '`develop-1.3.0`' or '`develop-vNext`'
@@ -24,9 +37,9 @@ You can commit to the new branch as often as you like, and you don't have to car
 6. When applying the pull request, use `"squash and merge"` as it helps keep the commit history in the '`main`' branch clean and allows the developer to focus on, well, development.
 7. After the pull request has been committed to the '`main`' branch, delete the now obsolete '`hotfix-`' or '`develop-`' branch.
 8. If there are other '`hotfix-`' or '`develop-`' branches, they have to be rebased to the '`main`' branch which is now at least one commit ahead.
-# Commit messages
+# 3. Commit messages
 Commit messages should follow the <a href="https://www.conventionalcommits.org" target="_blank">Conventional Commits</a> standard.
-## Commit message format
+## 3.1. Commit message format
 ```
 <type>[optional scope]: <short description>
 <blank line>
@@ -34,22 +47,22 @@ Commit messages should follow the <a href="https://www.conventionalcommits.org" 
 <blank line>
 [optional footer]
 ```
-## Type
+## 3.2. Type
 - Type is mandatory. 
 - '`fix[optional scope]:`' A fix. Bumps SemVer patch version.
 - '`feat[optional scope]:`' Introduces a new feature to the codebase. Bumps SemVer minor version.
 - Other commit types other than '`fix:`' and '`feat:`' are allowed, e. g. '`build:`', '`chore:`', '`ci:`', '`docs:`', '`perf:`', '`refactor:`', '`revert:`', '`style:`' and '`test:`'.
 - A scope may be provided to a commit's type, to provide additional contextual information and is contained within parenthesis, e.g. '`feat(parser): add ability to parse arrays`'.
-## Body
+## 3.3. Body
 - Body is optional.
 - Provide additional contextual information about the code changes. The body must begin one blank line after the description.
 - '`BREAKING CHANGE:<blank>`' at the beginning of the optional body or footer section introduces a breaking API change (bumps SemVer major version). A breaking change can be part of commits of any type.
-## Footer
+## 3.4. Footer
 - Footer is optional.
 - The footer should contain additional issue references about the code changes (such as the issues it fixes, e.g. '`Fixes [#13](https://github.com/GruberMarkus/Set-OutlookSignatures/issues/13) ([@GruberMarkus](https://github.com/GruberMarkus))`'.
 - Text describing further details.
 - '`BREAKING CHANGE:<blank>`' at the beginning of the optional body or footer section introduces a breaking API change (bumpgs SemVer major version). A breaking change can be part of commits of any type.
-# Build process
+# 4. Build process
 Every single commit in any branch or setting a tag starting with '`v`' triggers a build and the creation of a draft release.
 
 The draft release includes the build artifact(s), the corresponding changelog entry and file hash information.
@@ -59,3 +72,22 @@ The build artifacts can be downloaded and go through the final test process.
 - If these final tests fail or the information in the draft release is wrong, delete the draft release and go on with with development process.
 
 The build process is built on GitHub Actions workflows and currently only works in this environment.
+# 5. Contribution opportunities
+## 5.1. Code refactoring
+I'm not a professional developer, but a hobbyist scripter, and the code looks like that.
+
+There are optimization opportunities in error handling, de-duplicating code with functions, applying PowerShell best practices, and more.
+## 5.2. New parameter: EachSignatureForEachMailbox
+- Attach " \<e-mail-address>" to each signature name
+- This seems to be the way to make signatures roam in the cloud via the Outlook client, without using a Graph API
+- API for deploying signatures directly to mailbox via EWS or Graph is not yet known
+- Don't forget to update SignatureFilesDone so that the removal process keeps working
+- How to handle group mailboxes?
+  - When roaming is enabled, this creates a big mess because script runs overwrite each others results (think about \$CURRENTUSER[...]$ replacement variables)
+- How to detect roaming feature and enable the parameter only for these mailboxes?
+## 5.3. New feature: Central signature deployment without client-side script
+- Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
+- Automate simulation mode by wrapping parallelization code around it (just as the CheckADConnectivity function does, with other timeouts)
+- Is RTF export necessary in this scenario?
+- Use simulation mode results to write to Graph with a service account
+- What about group mailboxes?
