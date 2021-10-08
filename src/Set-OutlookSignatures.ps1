@@ -882,15 +882,15 @@ function main {
     
     foreach ($SignatureFile in $SignatureFiles) {
         Write-Host ("  '$($SignatureFile.Name)'")
-        if ($SignatureIniSettings["$SignatureFile"]) {
-            $SignatureFilePart = ($SignatureIniSettings["$SignatureFile"].GetEnumerator().Name -join '] [')
+        if ($SignatureIniSettings["$($SignatureFile.name)"]) {
+            $SignatureFilePart = ($SignatureIniSettings["$($SignatureFile.name)"].GetEnumerator().Name -join '] [')
             if ($SignatureFilePart) {
                 $SignatureFilePart = ($SignatureFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName') }) -join '] ['
                 $SignatureFilePart = '[' + $SignatureFilePart + ']'
                 $SignatureFilePart = $SignatureFilePart -replace '\[\]', ''
             }
-            if ($SignatureIniSettings["$SignatureFile"]['OutlookSignatureName']) {
-                $SignatureFileTargetName = ($SignatureIniSettings["$SignatureFile"]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
+            if ($SignatureIniSettings["$($SignatureFile.name)"]['OutlookSignatureName']) {
+                $SignatureFileTargetName = ($SignatureIniSettings["$($SignatureFile.name)"]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
             } else { 
                 $SignatureFileTargetName = $SignatureFile.Name
             }
@@ -1052,15 +1052,15 @@ function main {
         
         foreach ($OOFFile in $OOFFiles) {
             Write-Host ("  '$($OOFFile.Name)'")
-            if ($OOFIniSettings["$OOFFile"]) {
-                $OOFFilePart = ($OOFIniSettings["$OOFFile"].GetEnumerator().Name -join '] [')
+            if ($OOFIniSettings["$($OOFFile.name)"]) {
+                $OOFFilePart = ($OOFIniSettings["$($OOFFile.name)"].GetEnumerator().Name -join '] [')
                 if ($OOFFilePart) {
                     $OOFFilePart = ($OOFFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName') }) -join '] ['
                     $OOFFilePart = '[' + $OOFFilePart + ']'
                     $OOFFilePart = $OOFFilePart -replace '\[\]', ''
                 }
-                if ($OOFIniSettings["$OOFFile"]['OutlookSignatureName']) {
-                    $OOFFileTargetName = $OOFIniSettings["$OOFFile"]['OutlookSignatureName']
+                if ($OOFIniSettings["$($OOFFile.name)"]['OutlookSignatureName']) {
+                    $OOFFileTargetName = $OOFIniSettings["$($OOFFile.name)"]['OutlookSignatureName']
                 } else { 
                     $OOFFileTargetName = $OOFFile.Name
                 }
