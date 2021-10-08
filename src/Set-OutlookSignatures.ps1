@@ -1598,14 +1598,15 @@ function main {
                     $OOFDisabled = $null
                     if ($SimulateUser) {
                         Write-Host '    Simulation mode enabled, processing OOF templates without changing OOF settings' -ForegroundColor Yellow
-                    }
-                    if ($null -ne $TrustsToCheckForGroups[0]) {
-                        $OOFSettings = $exchService.GetUserOOFSettings($PrimaryMailboxAddress)
-                        if ($($PSVersionTable.PSEdition) -ieq 'Core') { $OOFSettings = $OOFSettings.result }
-                        if ($OOFSettings.STATE -eq [Microsoft.Exchange.WebServices.Data.OOFState]::Disabled) { $OOFDisabled = $true }
                     } else {
-                        $OOFSettings = $ADPropsCurrentUser.mailboxsettings.automaticRepliesSetting
-                        if ($OOFSettings.status -ieq 'disabled') { $OOFDisabled = $true }
+                        if ($null -ne $TrustsToCheckForGroups[0]) {
+                            $OOFSettings = $exchService.GetUserOOFSettings($PrimaryMailboxAddress)
+                            if ($($PSVersionTable.PSEdition) -ieq 'Core') { $OOFSettings = $OOFSettings.result }
+                            if ($OOFSettings.STATE -eq [Microsoft.Exchange.WebServices.Data.OOFState]::Disabled) { $OOFDisabled = $true }
+                        } else {
+                            $OOFSettings = $ADPropsCurrentUser.mailboxsettings.automaticRepliesSetting
+                            if ($OOFSettings.status -ieq 'disabled') { $OOFDisabled = $true }
+                        }
                     }
 
                     if (($OOFDisabled -and (-not $SimulateUser)) -or ($SimulateUser)) {
