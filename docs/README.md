@@ -81,7 +81,8 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [15.14. Isn't a plural noun in the script name against PowerShell best practices?](#1514-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
   - [15.15. The script hangs at HTM/RTF export, Word shows a security warning!?](#1515-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
   - [15.16. How to avoid empty lines when replacement variables return an empty string?](#1516-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
-  - [15.17. What about the new signature roaming feature Microsoft announced?](#1517-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [15.17. Is there a roadmap for future versions?](#1517-is-there-a-roadmap-for-future-versions)
+  - [15.18. What about the new signature roaming feature Microsoft announced?](#1518-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -723,7 +724,13 @@ The following example describes optional preceeding text combined an optional re
   - Telephone number is empty, mobile number is set. The paragraph mark comes from \$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$  
     first.last@example.com  
     Mobile: <a href="tel:+43yyy">+43yyy</a>
-## 15.17. What about the new signature roaming feature Microsoft announced?  
+## 15.17. Is there a roadmap for future versions?
+There is no binding roadmap for future versions, although I maintain a list of ideas in the 'Contribution opportunities' chapter of '.\docs\CONTRIBUTING.html'.
+
+Now that Set-OutlookSignatures is cloud aware, the next big thing will probably be supporting Microsoft's signature roaming feature. I have already seen a beta version of Outlook handling the new feature, but Microsoft has not yet disclosed an API or other detailed documentation.
+
+Fixing issues has priority over new features, of course.
+## 15.18. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.

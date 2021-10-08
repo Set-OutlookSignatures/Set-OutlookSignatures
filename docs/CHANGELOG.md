@@ -3,15 +3,17 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0-beta5" target="_blank">v2.3.0-beta5</a> - YYYY-MM-DD
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0" target="_blank">v2.3.0</a> - 2021-10-08
 ### Added
-- Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios, see '.\docs\README.html' and '.\config\default graph config.ps1' for details
-- Possibility to use ini files instead of file name tags, see parameters 'SignatureIniPath' and 'OOFIniPath' for details (template sort order and sort culture, custom Outlook signature names)
-- New replacement variables '\$CURRENT\[...\]OFFICE\$' and '\$CURRENT\[...\]COMPANY\$', including updated templates
-- Enterprise grade workaround for Word security warning when converting documents with linked images
+- Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios (see '.\docs\README.html' and '.\config\default graph config.ps1' for details)
+- Possibility to use ini files instead of file name tags, including settings for template sort order, sort culture, and custom Outlook signature names (see parameters 'SignatureIniPath' and 'OOFIniPath' for details)
+- New default replacement variables '\$CURRENT\[...\]OFFICE\$' and '\$CURRENT\[...\]COMPANY\$', including updated templates
+- Enterprise ready workaround for Word security warning when converting documents with linked images
 - FAQ: The script hangs at HTM/RTF export, Word shows a security warning!?
 - FAQ: Isn't a plural noun in the script name against PowerShell best practices?
 - FAQ: How to avoid empty lines when replacement variables return an empty string?
+- FAQ: Is there a roadmap for future versions?
+- Code of Conduct (see '.\docs\CODE_OF_CONDUCT.html' for details)
 ### Fixed
 - User could connect to hidden Word instance used for conversion of DOCX templates
 - Do no classify templates with unknown tags as common templates 
@@ -19,6 +21,7 @@
 - Do not try to change read-only Word attributes \<image>.hyperlink.name and \<image>.hyperlink.addressold (regression bug)
 ### Changed
 - The parameter DomainsToCheckForGroups is also available under the more descriptive name TrustsToCheckForGroups. Both names can be used, functionality is unchanged.
+- Contribution opportunities in '.\docs\CONTRIBUTING.html'
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.1" target="_blank">v2.2.1</a> - 2021-09-15
 ### Fixed

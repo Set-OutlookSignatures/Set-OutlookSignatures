@@ -9,23 +9,45 @@ If you have an idea for a new feature or have found a problem, please <a href="h
 If you want to contribute code, this document gives you a rough overview of the proposed process.  
 I'm not a professional developer - if you are one and you notice something negative in the code or process, please let me know.
 # Table of Contents <!-- omit in toc -->
-- [1. Branches](#1-branches)
-- [2. Development process](#2-development-process)
-- [3. Commit messages](#3-commit-messages)
-  - [3.1. Commit message format](#31-commit-message-format)
-  - [3.2. Type](#32-type)
-  - [3.3. Body](#33-body)
-  - [3.4. Footer](#34-footer)
-- [4. Build process](#4-build-process)
-- [5. Contribution opportunities](#5-contribution-opportunities)
-  - [5.1. Code refactoring](#51-code-refactoring)
-  - [5.2. New parameter: EachSignatureForEachMailbox](#52-new-parameter-eachsignatureforeachmailbox)
-  - [5.3. New feature: Central signature deployment without client-side script](#53-new-feature-central-signature-deployment-without-client-side-script)
-# 1. Branches
+- [1. Code of Conduct](#1-code-of-conduct)
+- [2. Contribution opportunities](#2-contribution-opportunities)
+  - [2.1. Code refactoring](#21-code-refactoring)
+  - [2.2. New parameter: EachSignatureForEachMailbox](#22-new-parameter-eachsignatureforeachmailbox)
+  - [2.3. New feature: Central signature deployment without client-side script](#23-new-feature-central-signature-deployment-without-client-side-script)
+- [3. Branches](#3-branches)
+- [4. Development process](#4-development-process)
+- [5. Commit messages](#5-commit-messages)
+  - [5.1. Commit message format](#51-commit-message-format)
+  - [5.2. Type](#52-type)
+  - [5.3. Body](#53-body)
+  - [5.4. Footer](#54-footer)
+- [6. Build process](#6-build-process)
+# 1. Code of Conduct
+When contributing to Set-OutlookSignatures, please make sure to follow the Code of Conduct ('CODE_OF_CONDUCT.html' in the same directory as this document).
+# 2. Contribution opportunities
+## 2.1. Code refactoring
+I'm not a professional developer, but a hobbyist scripter, and the code looks like that.
+
+There are optimization opportunities in error handling, de-duplicating code with functions, applying PowerShell best practices, and more.
+## 2.2. New parameter: EachSignatureForEachMailbox
+- Attach " \<e-mail-address>" to each signature name
+- This seems to be the way to make signatures roam in the cloud via the Outlook client, without using a Graph API
+- API for deploying signatures directly to mailbox via EWS or Graph is not yet known
+- Don't forget to update SignatureFilesDone so that the removal process keeps working
+- How to handle group mailboxes?
+  - When roaming is enabled, this creates a big mess because script runs overwrite each others results (think about \$CURRENTUSER[...]$ replacement variables)
+- How to detect roaming feature and enable the parameter only for these mailboxes?
+## 2.3. New feature: Central signature deployment without client-side script
+- Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
+- Automate simulation mode by wrapping parallelization code around it (just as the CheckADConnectivity function does, with other timeouts)
+- Is RTF export necessary in this scenario?
+- Use simulation mode results to write to Graph with a service account
+- What about group mailboxes?
+# 3. Branches
 The default branch is named '`main`'. It contains the source of the latest stable release.
 
 Tags in the '`main`' branch mark releases - we release on tags (and therefore commits) and not on branches.
-# 2. Development process
+# 4. Development process
 1. Create a new branch based on '`main`'
    - Hotfix: Give the branch a name starting with '`hotfix-`', e. g. '`hotfix-1.2.3`' or '`hotfix-issue13`'
    - New feature or vNext: Give the branch a name starting with '`develop-'`, e. g. '`develop-1.3.0`' or '`develop-vNext`'
@@ -37,9 +59,9 @@ You can commit to the new branch as often as you like, and you don't have to car
 6. When applying the pull request, use `"squash and merge"` as it helps keep the commit history in the '`main`' branch clean and allows the developer to focus on, well, development.
 7. After the pull request has been committed to the '`main`' branch, delete the now obsolete '`hotfix-`' or '`develop-`' branch.
 8. If there are other '`hotfix-`' or '`develop-`' branches, they have to be rebased to the '`main`' branch which is now at least one commit ahead.
-# 3. Commit messages
+# 5. Commit messages
 Commit messages should follow the <a href="https://www.conventionalcommits.org" target="_blank">Conventional Commits</a> standard.
-## 3.1. Commit message format
+## 5.1. Commit message format
 ```
 <type>[optional scope]: <short description>
 <blank line>
@@ -47,22 +69,22 @@ Commit messages should follow the <a href="https://www.conventionalcommits.org" 
 <blank line>
 [optional footer]
 ```
-## 3.2. Type
+## 5.2. Type
 - Type is mandatory. 
 - '`fix[optional scope]:`' A fix. Bumps SemVer patch version.
 - '`feat[optional scope]:`' Introduces a new feature to the codebase. Bumps SemVer minor version.
 - Other commit types other than '`fix:`' and '`feat:`' are allowed, e. g. '`build:`', '`chore:`', '`ci:`', '`docs:`', '`perf:`', '`refactor:`', '`revert:`', '`style:`' and '`test:`'.
 - A scope may be provided to a commit's type, to provide additional contextual information and is contained within parenthesis, e.g. '`feat(parser): add ability to parse arrays`'.
-## 3.3. Body
+## 5.3. Body
 - Body is optional.
 - Provide additional contextual information about the code changes. The body must begin one blank line after the description.
 - '`BREAKING CHANGE:<blank>`' at the beginning of the optional body or footer section introduces a breaking API change (bumps SemVer major version). A breaking change can be part of commits of any type.
-## 3.4. Footer
+## 5.4. Footer
 - Footer is optional.
 - The footer should contain additional issue references about the code changes (such as the issues it fixes, e.g. '`Fixes [#13](https://github.com/GruberMarkus/Set-OutlookSignatures/issues/13) ([@GruberMarkus](https://github.com/GruberMarkus))`'.
 - Text describing further details.
 - '`BREAKING CHANGE:<blank>`' at the beginning of the optional body or footer section introduces a breaking API change (bumpgs SemVer major version). A breaking change can be part of commits of any type.
-# 4. Build process
+# 6. Build process
 Every single commit in any branch or setting a tag starting with '`v`' triggers a build and the creation of a draft release.
 
 The draft release includes the build artifact(s), the corresponding changelog entry and file hash information.
@@ -72,22 +94,3 @@ The build artifacts can be downloaded and go through the final test process.
 - If these final tests fail or the information in the draft release is wrong, delete the draft release and go on with with development process.
 
 The build process is built on GitHub Actions workflows and currently only works in this environment.
-# 5. Contribution opportunities
-## 5.1. Code refactoring
-I'm not a professional developer, but a hobbyist scripter, and the code looks like that.
-
-There are optimization opportunities in error handling, de-duplicating code with functions, applying PowerShell best practices, and more.
-## 5.2. New parameter: EachSignatureForEachMailbox
-- Attach " \<e-mail-address>" to each signature name
-- This seems to be the way to make signatures roam in the cloud via the Outlook client, without using a Graph API
-- API for deploying signatures directly to mailbox via EWS or Graph is not yet known
-- Don't forget to update SignatureFilesDone so that the removal process keeps working
-- How to handle group mailboxes?
-  - When roaming is enabled, this creates a big mess because script runs overwrite each others results (think about \$CURRENTUSER[...]$ replacement variables)
-- How to detect roaming feature and enable the parameter only for these mailboxes?
-## 5.3. New feature: Central signature deployment without client-side script
-- Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
-- Automate simulation mode by wrapping parallelization code around it (just as the CheckADConnectivity function does, with other timeouts)
-- Is RTF export necessary in this scenario?
-- Use simulation mode results to write to Graph with a service account
-- What about group mailboxes?
