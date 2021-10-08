@@ -1245,7 +1245,7 @@ function main {
                         $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
                         $SIDsToCheckInTrusts += $UserAccount.properties.tokengroupsglobalanduniversal
                     } catch {
-                        Write-Host "      Error getting group information from $((($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.'), check firewalls and AD trust" -ForegroundColor Red
+                        Write-Host "      Error getting group information from $((($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.'), check firewalls, DNS and AD trust" -ForegroundColor Red
                     }
                     # Loop through all domains to check if the mailbox account has a group membership there
                     # Across a trust, a user can only be added to a domain local group.
@@ -2285,7 +2285,7 @@ function CheckADConnectivity {
                         $returnvalue = $true
                     } else {
                         Write-Host "$Indent  $CheckProtocolText query failed, removing domain from list." -ForegroundColor Red
-                        Write-Host "$Indent  If this error is permanent, check firewalls and AD trust. Consider using parameter TrustsToCheckForGroups." -ForegroundColor Red
+                        Write-Host "$Indent  If this error is permanent, check firewalls, DNS and AD trust. Consider using parameter TrustsToCheckForGroups." -ForegroundColor Red
                         $TrustsToCheckForGroups.remove($data[0])
                         $returnvalue = $false
                     }
