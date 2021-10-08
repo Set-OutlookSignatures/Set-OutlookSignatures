@@ -46,9 +46,10 @@ function main {
     Set-Location $env:GITHUB_WORKSPACE
 
     @(
-        ('.\docs\Implementation approach.md', "$BuildDir\docs\Implementation approach.html"),
         ('.\docs\CHANGELOG.md', "$BuildDir\docs\CHANGELOG.html"),
+        ('.\docs\CODE_OF_CONDUCT.md', "$BuildDir\docs\CODE_OF_CONDUCT.html"),
         ('.\docs\CONTRIBUTING.md', "$BuildDir\docs\CONTRIBUTING.html"),
+        ('.\docs\Implementation approach.md', "$BuildDir\docs\Implementation approach.html"),
         ('.\docs\README.md', "$BuildDir\docs\README.html")
     ) | ForEach-Object {
         & pandoc.exe $($_[0]) --resource-path=".;docs" -f gfm -t html --self-contained -H .\build\pandoc_header.html --css .\build\pandoc_css_empty.css --metadata pagetitle="$(([System.IO.FileInfo]"$($_[0])").basename) - Set-OutlookSignatures" -o $($_[1])
@@ -90,9 +91,10 @@ function main {
     $ChangeLogLines = Get-Content $Changelog
     $ChangelogStartline = $null
     $ChangelogEndline = $null
+    $ReleaseTagDate = $(Get-Date -Format 'yyyy-MM-dd')
     for ($i = 0; $i -lt $ChangeLogLines.count; $i++) {
         if (-not $ChangelogStartline) {
-            if ($ChangeLogLines[$i] -match ("^## \t*(\[$ReleaseTag\] \t*|$ReleaseTag \t*|$ReleaseTag$)|>$ReleaseTag<")) {
+            if ($ChangeLogLines[$i] -match ("^##\s*(\[$ReleaseTag\] - $ReleaseTagDate\s*|$ReleaseTag - $ReleaseTagDate\s*|$ReleaseTag - $ReleaseTagDate$)|>$ReleaseTag</a> - $ReleaseTagDate\s*")) {
                 $ChangelogStartline = $i
                 continue
             }
@@ -104,7 +106,7 @@ function main {
         }
     }
     if (-not $ChangelogStartline) {
-        $ReleaseMarkdown = "# **Tag '$ReleaseTag' not found in '$Changelog', using first entry.**`r`n"
+        $ReleaseMarkdown = "# **Tag '$ReleaseTag - $ReleaseTagDate' not found in '$Changelog', using first entry.**`r`n"
         $ChangelogStartline = $null
         $ChangelogEndline = $null
         for ($i = 0; $i -lt $ChangeLogLines.count; $i++) {
