@@ -253,13 +253,11 @@ This is the same way Outlook handles mailboxes from a signature perspective: Out
 
 The script is created for Exchange environments. Non-Exchange mailboxes can not have OOF messages or group signatures, but common and mailbox specific signatures.  
 # 5. Group membership  
-The script considers all groups the currently logged on user belongs to, as well as all groups the currently processed mailbox belongs to.
+The script considers all groups the currently processed mailbox belongs to.
 
-For both sets of groups, group membership is evaluated against the whole Active Directory forest of the currently logged on user, and against all trusted domains the user has access to.
+Group membership is evaluated against the whole Active Directory forest of the currently logged on user, and against all trusted domains (and their subdomains) the user has access to.
 
-The script works fine with linked mailboxes in Exchange resource forest scenarios.
-
-Trusted domains can be modified with the TrustedDomainsToCheckForGroups parameter.
+In Exchange resource forest scenarios with linked mailboxes, the group membership of the linked account (as populated in msExchMasterAccountSID) is not considered, only the group membership of the actual mailbox.
 
 Group membership is achieved by querying the tokenGroups attribute, which is not only very fast and resource saving on client and server, but also considers sIDHistory.
 
