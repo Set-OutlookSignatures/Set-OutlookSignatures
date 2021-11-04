@@ -388,9 +388,9 @@ function main {
 
 
     Write-Host
-    Write-Host "Get Outlook version and profile @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    Write-Host "Get Outlook and Word version, default Outlook profile @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     if ($SimulateUser) {
-        Write-Host '  Simulation mode enabled, skipping task' -ForegroundColor Yellow
+        Write-Host '  Simulation mode enabled, skipping Outlook checks' -ForegroundColor Yellow
     } else {
         $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
 
@@ -415,10 +415,27 @@ function main {
         } else {
             $OutlookDefaultProfile = $null
         }
-
         Write-Host "  Outlook registry version: $OutlookRegistryVersion"
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
     }
+
+    $WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Word.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+    if ($WordRegistryVersion.major -eq 0) {
+        $WordRegistryVersion = $null
+    } elseif ($WordRegistryVersion.major -gt 16) {
+        Write-Host "Word version $WordRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exiting." -ForegroundColor Red
+        exit 1
+    } elseif ($WordRegistryVersion.major -eq 16) {
+        $WordRegistryVersion = '16.0'
+    } elseif ($WordRegistryVersion.major -eq 15) {
+        $WordRegistryVersion = '15.0'
+    } elseif ($WordRegistryVersion.major -eq 14) {
+        $WordRegistryVersion = '14.0'
+    } elseif ($WordRegistryVersion.major -lt 14) {
+        Write-Host "Word version $WordRegistryVersion is older than Word 2010 and not supported. Please inform your administrator. Exiting." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  Word registry version: $WordRegistryVersion"
 
 
     Write-Host
@@ -634,14 +651,20 @@ function main {
                 $script:CurrentUser = (GraphGetMe).me.userprincipalname
             }
 
-            $AADProps = (GraphGetUserProperties $script:CurrentUser).properties
-            $ADPropsCurrentUser = [PSCustomObject]@{}
-            foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
-                $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+            $x = (GraphGetUserProperties $script:CurrentUser)
+            if ($x.error -eq $false) {
+                $AADProps = $x.properties
+                $ADPropsCurrentUser = [PSCustomObject]@{}
+                foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
+                    $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+                }
+                $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $script:CurrentUser).photo
+                $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $script:CurrentUser).properties.userprincipalname
+            } else {
+                Write-Host "    Problem getting data for '$($script:CurrentUser)' from Microsoft Graph. Exiting." -ForegroundColor Red
+                $error[0]
+                exit 1
             }
-            $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $script:CurrentUser).photo
-            $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $script:CurrentUser).properties.userprincipalname
-
         } else {
             Write-Host '    Problem connecting to Microsoft Graph. Exiting.' -ForegroundColor Red
             $error[0]
@@ -1370,12 +1393,17 @@ function main {
             }
 
             # Export pictures if available
-            ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-                if ($null -ne $ReplaceHash[$_]) {
+            $CURRENTMAILBOXMANAGERPHOTOGUIDGUID = (New-Guid).guid
+            $CURRENTMAILBOXPHOTOGUID = (New-Guid).guid
+            $CURRENTUSERMANAGERPHOTOGUID = (New-Guid).guid
+            $CURRENTUSERPHOTOGUID = (New-Guid).guid
+
+            (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
+                if ($null -ne $ReplaceHash[$_[0]]) {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        $ReplaceHash[$_] | Set-Content -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($_ + '.jpeg')))) -AsByteStream -Force
+                        $ReplaceHash[$_[0]] | Set-Content -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')))) -AsByteStream -Force
                     } else {
-                        $ReplaceHash[$_] | Set-Content -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($_ + '.jpeg')))) -Encoding Byte -Force
+                        $ReplaceHash[$_[0]] | Set-Content -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')))) -Encoding Byte -Force
                     }
                 }
             }
@@ -1430,10 +1458,10 @@ function main {
             }
 
             # Delete photos from file system
-            ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-                Remove-Item -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($_ + '.jpeg')))) -Force -ErrorAction SilentlyContinue
-                $ReplaceHash.Remove($_)
-                $ReplaceHash.Remove(($_[-999..-2] -join '') + 'DELETEEMPTY$')
+            (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
+                Remove-Item -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')))) -Force -ErrorAction SilentlyContinue
+                $ReplaceHash.Remove($_[0])
+                $ReplaceHash.Remove(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')
             }
 
         }
@@ -1922,18 +1950,18 @@ function Set-Signatures {
             $HTML.IHTMLDocument2_write((Get-Content -LiteralPath $path -Raw -Encoding UTF8))
 
             foreach ($image in ($html.images)) {
-                ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-                    if (($image.src -clike "*$_*") -or ($image.alt -clike "*$_*")) {
-                        if ($null -ne $ReplaceHash[$_]) {
+                (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
+                    if (($image.src -clike "*$($_[0])*") -or ($image.alt -clike "*$($_[0])*")) {
+                        if ($null -ne $ReplaceHash[$_[0]]) {
                             $ImageAlternativeTextOriginal = $image.alt
-                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($_ + '.jpeg'))))))
-                            $image.alt = $ImageAlternativeTextOriginal.replace($_, '')
+                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))))))
+                            $image.alt = $ImageAlternativeTextOriginal.replace($_[0], '')
                         }
-                    } elseif (($image.src -clike "*$(($_[-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($_[-999..-2] -join '') + 'DELETEEMPTY$')*")) {
-                        if ($null -ne $ReplaceHash[$_]) {
+                    } elseif (($image.src -clike "*$(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')*")) {
+                        if ($null -ne $ReplaceHash[$_[0]]) {
                             $ImageAlternativeTextOriginal = $image.alt
-                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($_ + '.jpeg'))))))
-                            $image.alt = $ImageAlternativeTextOriginal.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))))))
+                            $image.alt = $ImageAlternativeTextOriginal.replace((($_[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
                         } else {
                             $image.removenode() | Out-Null
                         }
@@ -1963,18 +1991,18 @@ function Set-Signatures {
             foreach ($image in ($script:COMWord.ActiveDocument.Shapes + $script:COMWord.ActiveDocument.InlineShapes)) {
                 try {
                     if (($null -ne $($image.linkformat.sourcefullname)) -and ($($image.linkformat.sourcefullname) -ne '')) {
-                        ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$') | ForEach-Object {
-                            if ((((Split-Path -Path ($($image.linkformat.sourcefullname)) -Leaf).contains($_)) -or (($image.alternativetext).contains($_)))) {
-                                if ($null -ne $ReplaceHash[$_]) {
+                        (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
+                            if ((((Split-Path -Path ($($image.linkformat.sourcefullname)) -Leaf).contains($_[0])) -or (($image.alternativetext).contains($_[0])))) {
+                                if ($null -ne $ReplaceHash[$_[0]]) {
                                     $ImageAlternativeTextOriginal = $image.AlternativeText
-                                    $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($_ + '.jpeg'))
-                                    $image.alternativetext = $ImageAlternativeTextOriginal.replace($_, '')
+                                    $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))
+                                    $image.alternativetext = $ImageAlternativeTextOriginal.replace($_[0], '')
                                 }
-                            } elseif (((Split-Path -Path ($($image.linkformat.sourcefullname)) -Leaf).contains(($_[-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[-999..-2] -join '') + 'DELETEEMPTY$'))) {
-                                if ($null -ne $ReplaceHash[$_]) {
+                            } elseif (((Split-Path -Path ($($image.linkformat.sourcefullname)) -Leaf).contains(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[0][-999..-2] -join '') + 'DELETEEMPTY$'))) {
+                                if ($null -ne $ReplaceHash[$_[0]]) {
                                     $ImageAlternativeTextOriginal = $image.AlternativeText
-                                    $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($_ + '.jpeg'))
-                                    $image.alternativetext = $ImageAlternativeTextOriginal.replace((($_[-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                                    $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))
+                                    $image.alternativetext = $ImageAlternativeTextOriginal.replace((($_[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
                                 } else {
                                     $image.delete()
                                 }
@@ -2070,31 +2098,31 @@ function Set-Signatures {
 
             # Exports
             Write-Host '      Export to HTM format'
-            # Overcome Word security warning when export contains embedded pictures
-            $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-            if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
-                Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
-            }
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
             $script:COMWord.ActiveDocument.Weboptions.encoding = 65001
+            # Overcome Word security warning when export contains embedded pictures
+            $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+            if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
+                New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
+            }
             $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
             # Restore original security setting
             if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
-                Remove-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
             } else {
-                Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             }
         }
 
         if (-not $ProcessOOF) {
             Write-Host '      Export to RTF format'
             # Overcome Word security warning when export contains embedded pictures
-            $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-            if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction SilentlyContinue | Out-Null
-                Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction SilentlyContinue | Out-Null
+            $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+            if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ne 1)) {
+                New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction SilentlyContinue | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction SilentlyContinue | Out-Null
             }
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
             $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
@@ -2102,9 +2130,9 @@ function Set-Signatures {
             $script:COMWord.ActiveDocument.Close($false)
             # Restore original security setting
             if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
-                Remove-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             } else {
-                Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             }
 
             # RTF files with embedded images get really huge
@@ -2228,8 +2256,6 @@ function CheckADConnectivity {
     )
     [void][runspacefactory]::CreateRunspacePool()
     $RunspacePool = [runspacefactory]::CreateRunspacePool(1, 10)
-    $PowerShell = [powershell]::Create()
-    $PowerShell.RunspacePool = $RunspacePool
     $RunspacePool.Open()
 
     for ($DomainNumber = 0; $DomainNumber -lt $CheckDomains.count; $DomainNumber++) {
@@ -2770,9 +2796,9 @@ try {
     Write-Host "Clean-up @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     # Restore original security setting
     if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
-        Remove-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
+        Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
     } else {
-        Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security' -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
+        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
     }
 
     if ($script:COMWord) {
