@@ -3,6 +3,12 @@
 
 # Changelog
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.1" target="_blank">v2.3.1</a> - 2021-11-05
+### Fixed
+- Ignore mail-enabled users an mailbox search to avoid binding to the wrong Exchange object in migration scenarios (which would lead to wrong replacement variable data and group membership)
+- When connecting to Exchange Online, check for valid mailbox in addition to valid credentials
+- Clarify port requirements and group membership evaluation in documentation
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0" target="_blank">v2.3.0</a> - 2021-10-08
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios (see '.\docs\README.html' and '.\config\default graph config.ps1' for details)
