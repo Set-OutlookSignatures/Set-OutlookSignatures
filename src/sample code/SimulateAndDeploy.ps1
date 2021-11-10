@@ -45,7 +45,7 @@ $SimulateResultPath = $([IO.Path]::Combine([environment]::GetFolderPath('MyDocum
 $SimulateListFile = $([IO.Path]::Combine($SimulateResultPath, 'SimulateList.csv'))
 $JobsConcurrent = 2
 $SetOutlookSignaturesScriptPath = '..\Set-OutlookSignatures.ps1'
-$SetOutlookSignaturesScriptParameters = "-SignatureTemplatePath `"C:\users\grube\Downloads\`" -SignatureIniPath `"C:\users\grube\Downloads\_gruber.cc.ini`" -SetCurrentUserOOFMessage `$false" # Do not use: SimulateUser, SimulateMailbox, AdditionalSignaturePath
+$SetOutlookSignaturesScriptParameters = "-SignatureTemplatePath `"C:\temp\Signatures DOCX`" -SignatureIniPath `"C:\temp\Signatures DOCS\_.ini`" -SetCurrentUserOOFMessage `$false" # Do not use: SimulateUser, SimulateMailbox, AdditionalSignaturePath
 
 
 Set-Location $PSScriptRoot | Out-Null
@@ -376,8 +376,8 @@ if ($ConnectOnpremInsteadOfCloud) {
 
 
 Write-Host "Cleanup @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-remove-item -force $CredentialPath
-remove-item -force $GraphCredentialFile
+Remove-Item -Force $CredentialPath
+Remove-Item -Force $GraphCredentialFile
 
 
 Write-Host "End script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"

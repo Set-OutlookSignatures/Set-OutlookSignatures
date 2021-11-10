@@ -268,7 +268,8 @@ Param(
     # Path to file containing Graph credential which should be used as alternative to other token acquisition methods
     # Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
     # See '.\sample code\SimulateAndDeploy.ps1' for an example how to create this file
-    [string]$GraphCredentialFile = $null
+    [ValidateNotNullOrEmpty()]
+    [string]$GraphCredentialFile = ''
 )
 
 
@@ -322,6 +323,8 @@ function main {
     CheckPath $ReplacementVariableConfigFile
     Write-Host "  GraphConfigFile: '$GraphConfigFile'" -NoNewline
     CheckPath $GraphConfigFile
+    Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
+    if ($GrapCredentialFile) { CheckPath $GraphCredentialFile } else { Write-Host }
     Write-Host "  SignatureTemplatePath: '$SignatureTemplatePath'" -NoNewline
     CheckPath $SignatureTemplatePath
     Write-Host "  SignatureIniPath: '$SignatureIniPath'" -NoNewline
@@ -383,22 +386,23 @@ function main {
     Write-Host "  UseHtmTemplates: '$UseHtmTemplates'"
     Write-Host "  SimulateUser: '$SimulateUser'"
     Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
-    Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
-    CheckPath $GraphCredentialFile
 
-    ('ReplacementVariableConfigFile', 'GraphConfigFile', 'SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath', 'GraphCredentialFile') | ForEach-Object {
+
+    ('ReplacementVariableConfigFile', 'GraphConfigFile', 'SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath', 'GraphCredentialFile', 'SignatureIniPath', 'OOFIniPath') | ForEach-Object {
         $path = (Get-Variable -Name $_).Value
-        if (($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) -or ($path -ilike '*@ssl\*')) {
-            $path = $path -ireplace '@ssl\\', '\'
-            $path = ([uri]::UnescapeDataString($path) -ireplace ('https://', '\\'))
-            $path = ([System.URI]$path).AbsoluteURI -replace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\$2' -replace '/', '\'
-            $path = [uri]::UnescapeDataString($path)
-        } else {
-            $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
-            $path = ([System.URI]$path).absoluteuri -ireplace 'file:///', '' -ireplace 'file://', '\\' -replace '/', '\'
-            $path = [uri]::UnescapeDataString($path)
+        if ($path) {
+            if (($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) -or ($path -ilike '*@ssl\*')) {
+                $path = $path -ireplace '@ssl\\', '\'
+                $path = ([uri]::UnescapeDataString($path) -ireplace ('https://', '\\'))
+                $path = ([System.URI]$path).AbsoluteURI -replace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\$2' -replace '/', '\'
+                $path = [uri]::UnescapeDataString($path)
+            } else {
+                $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
+                $path = ([System.URI]$path).absoluteuri -ireplace 'file:///', '' -ireplace 'file://', '\\' -replace '/', '\'
+                $path = [uri]::UnescapeDataString($path)
+            }
+            Set-Variable -Name $_ -Value $path
         }
-        Set-Variable -Name $_ -Value $path
     }
 
     ('DeleteUserCreatedSignatures', 'SetCurrentUserOutlookWebSignature', 'SetCurrentUserOOFMessage') | ForEach-Object {
@@ -911,10 +915,16 @@ function main {
     if ($SignatureIniPath -ne '') {
         $SignatureIniSettings.GetEnumerator().name | ForEach-Object {
             if ( ($_.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_ -inotin $SignatureFiles.name)) {
-                Write-Host "  '$_' found in ini, but not in '$SignatureTemplatePath', please check" -ForegroundColor Yellow
+                Write-Host "  '$_' found in ini but not in signature template path, please check" -ForegroundColor Yellow
             }
         }
-    
+
+        $SignatureFiles.name | ForEach-Object {
+            if ( ($_.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_ -inotin $SignatureIniSettings.GetEnumerator().name)) {
+                Write-Host "  '$_' found in signature template path but not in ini, please check" -ForegroundColor Yellow
+            }
+        }
+
         try {
             $local:SignatureFilesSortCulture = $SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
             Sort-Object -Culture $local:SignatureFilesSortCulture
@@ -1086,10 +1096,16 @@ function main {
         if ($OOFIniPath -ne '') {
             $OOFIniSettings.GetEnumerator().name | ForEach-Object {
                 if ( ($_.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_ -inotin $OOFFiles.name)) {
-                    Write-Host "  '$_' found in ini, but not in '$OOFTemplatePath', please check" -ForegroundColor Yellow
+                    Write-Host "  '$_' found in ini but not in OOF template path, please check" -ForegroundColor Yellow
                 }
             }
 
+            $OOFFiles.name | ForEach-Object {
+                if ( ($_.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_ -inotin $OOFIniSettings.GetEnumerator().name)) {
+                    Write-Host "  '$_' found in OOF template path but not in ini, please check" -ForegroundColor Yellow
+                }
+            }
+    
             try {
                 $local:OOFFilesSortCulture = $OOFIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
                 Sort-Object -Culture $local:OOFFilesSortCulture
