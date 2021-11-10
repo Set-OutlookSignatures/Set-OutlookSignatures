@@ -45,6 +45,7 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [2.13. UseHtmTemplates](#213-usehtmtemplates)
   - [2.14. SimulateUser](#214-simulateuser)
   - [2.15. SimulateMailboxes](#215-simulatemailboxes)
+  - [2.16. GraphCredentialFile](#216-graphcredentialfile)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -238,7 +239,14 @@ Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN,
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
 ## 2.15. SimulateMailboxes  
 SimulateMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
+## 2.16. GraphCredentialFile
+Path to file containing Graph credential which should be used as alternative to other token acquisition methods.
 
+Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios.
+
+See '.\sample code\SimulateAndDeploy.ps1' for an example how to create this file.
+
+Default value: `$null`
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
 # 3. Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.

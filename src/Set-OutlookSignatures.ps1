@@ -133,6 +133,13 @@ Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN,
 SimulateMailboxes is optional for simulation mode, although highly recommended.
 It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
+
+.PARAMETER GraphCredentialFile
+Path to file containing Graph credential which should be used as alternative to other token acquisition methods
+Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
+See '.\sample code\SimulateAndDeploy.ps1' for an example how to create this file
+Default value: \$null
+
 .INPUTS
 None. You cannot pipe objects to Set-OutlookSignatures.ps1.
 
@@ -211,13 +218,16 @@ Param(
 
     # Shall the script delete signatures which were created by the user itself?
     #   The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
-    [bool]$DeleteUserCreatedSignatures = $false,
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
+    $DeleteUserCreatedSignatures = $false,
 
     # Shall the script set the Outlook Web signature of the currently logged on user?
-    [bool]$SetCurrentUserOutlookWebSignature = $true,
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
+    $SetCurrentUserOutlookWebSignature = $true,
 
     # Shall the script set the Out of Office (OOF) auto reply message(s) of the currently logged on user?
-    [bool]$SetCurrentUserOOFMessage = $true,
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
+    $SetCurrentUserOOFMessage = $true,
 
     # Path to centrally managed Out of Office (OOF, automatic reply) templates
     #   Local and remote paths are supported
@@ -253,7 +263,12 @@ Param(
     # Simulate list of mailboxes instead of mailboxes configured in Outlook
     # Works only together with SimulateUser
     [Alias('SimulationMailboxes')]
-    [string[]]$SimulateMailboxes = ('')
+    [string[]]$SimulateMailboxes = (''),
+
+    # Path to file containing Graph credential which should be used as alternative to other token acquisition methods
+    # Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
+    # See '.\sample code\SimulateAndDeploy.ps1' for an example how to create this file
+    [string]$GraphCredentialFile = $null
 )
 
 
@@ -302,6 +317,7 @@ function main {
 
     Add-Type -AssemblyName System.DirectoryServices.AccountManagement
 
+
     Write-Host "  ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
     CheckPath $ReplacementVariableConfigFile
     Write-Host "  GraphConfigFile: '$GraphConfigFile'" -NoNewline
@@ -329,8 +345,11 @@ function main {
         Write-Host
     }
     Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
+    $DeleteUserCreatedSignatures = [System.Convert]::ToBoolean($DeleteUserCreatedSignatures.tostring().trim('$'))
     Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
+    $SetCurrentUserOutlookWebSignature = [System.Convert]::ToBoolean($SetCurrentUserOutlookWebSignature.tostring().trim('$'))
     Write-Host "  SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
+    $SetCurrentUserOOFMessage = [System.Convert]::ToBoolean($SetCurrentUserOOFMessage.tostring().trim('$'))
     Write-Host "  SetCurrentUserOOFMessage: '$SetCurrentUserOOFMessage'"
     if ($SetCurrentUserOOFMessage) {
         Write-Host "  OOFTemplatePath: '$OOFTemplatePath'" -NoNewline
@@ -358,14 +377,16 @@ function main {
     }
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'"
     Write-Host "  AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
-    $AdditionalSignaturePath = [IO.Path]::Combine($AdditionalSignaturePath, $AdditionalSignaturePathFolder.trim('\'))
+    $AdditionalSignaturePath = [IO.Path]::Combine($AdditionalSignaturePath.trimend('\'), $AdditionalSignaturePathFolder.trim('\'))
     Write-Host "  AdditionalSignaturePath combined: '$AdditionalSignaturePath'" -NoNewline
     checkpath $AdditionalSignaturePath -create
     Write-Host "  UseHtmTemplates: '$UseHtmTemplates'"
     Write-Host "  SimulateUser: '$SimulateUser'"
     Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
+    Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
+    CheckPath $GraphCredentialFile
 
-    ('ReplacementVariableConfigFile', 'GraphConfigFile', 'SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath') | ForEach-Object {
+    ('ReplacementVariableConfigFile', 'GraphConfigFile', 'SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath', 'GraphCredentialFile') | ForEach-Object {
         $path = (Get-Variable -Name $_).Value
         if (($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) -or ($path -ilike '*@ssl\*')) {
             $path = $path -ireplace '@ssl\\', '\'
@@ -380,6 +401,13 @@ function main {
         Set-Variable -Name $_ -Value $path
     }
 
+    ('DeleteUserCreatedSignatures', 'SetCurrentUserOutlookWebSignature', 'SetCurrentUserOOFMessage') | ForEach-Object {
+        if ((Get-Variable -Name $_).Value -in (1, '1', 'true', '$true')) {
+            Set-Variable -Name $_ -Value $true
+        } else {
+            Set-Variable -Name $_ -Value $false
+        }
+    }
 
     if ($SimulateUser) {
         Write-Host
@@ -881,6 +909,12 @@ function main {
 
     $SignatureFiles = ((Get-ChildItem -LiteralPath $SignatureTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
     if ($SignatureIniPath -ne '') {
+        $SignatureIniSettings.GetEnumerator().name | ForEach-Object {
+            if ( ($_.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_ -inotin $SignatureFiles.name)) {
+                Write-Host "  '$_' found in ini, but not in '$SignatureTemplatePath', please check" -ForegroundColor Yellow
+            }
+        }
+    
         try {
             $local:SignatureFilesSortCulture = $SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
             Sort-Object -Culture $local:SignatureFilesSortCulture
@@ -902,7 +936,7 @@ function main {
             default { $SignatureFiles = ($SignatureFiles.name | Sort-Object -Culture $local:SignatureFilesSortCulture) }
         }
     }
-    
+
     foreach ($SignatureFile in $SignatureFiles) {
         Write-Host ("  '$($SignatureFile.Name)'")
         if ($SignatureIniSettings["$($SignatureFile.name)"]) {
@@ -914,7 +948,7 @@ function main {
             }
             if ($SignatureIniSettings["$($SignatureFile.name)"]['OutlookSignatureName']) {
                 $SignatureFileTargetName = ($SignatureIniSettings["$($SignatureFile.name)"]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
-            } else { 
+            } else {
                 $SignatureFileTargetName = $SignatureFile.Name
             }
         } else {
@@ -1050,6 +1084,12 @@ function main {
 
         $OOFFiles = ((Get-ChildItem -LiteralPath $OOFTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
         if ($OOFIniPath -ne '') {
+            $OOFIniSettings.GetEnumerator().name | ForEach-Object {
+                if ( ($_.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_ -inotin $OOFFiles.name)) {
+                    Write-Host "  '$_' found in ini, but not in '$OOFTemplatePath', please check" -ForegroundColor Yellow
+                }
+            }
+
             try {
                 $local:OOFFilesSortCulture = $OOFIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
                 Sort-Object -Culture $local:OOFFilesSortCulture
@@ -1072,7 +1112,7 @@ function main {
                 default { $OOFFiles = ($OOFFiles.name | Sort-Object -Culture $local:OOFFilesSortCulture) }
             }
         }
-        
+
         foreach ($OOFFile in $OOFFiles) {
             Write-Host ("  '$($OOFFile.Name)'")
             if ($OOFIniSettings["$($OOFFile.name)"]) {
@@ -1084,7 +1124,7 @@ function main {
                 }
                 if ($OOFIniSettings["$($OOFFile.name)"]['OutlookSignatureName']) {
                     $OOFFileTargetName = $OOFIniSettings["$($OOFFile.name)"]['OutlookSignatureName']
-                } else { 
+                } else {
                     $OOFFileTargetName = $OOFFile.Name
                 }
             } else {
@@ -1183,8 +1223,8 @@ function main {
                     } else {
                         Write-Host "      $OOFFilePartTag = $($NTName): Not found, please check" -ForegroundColor Yellow
                     }
-                } elseif ($SignatureFilePartTag -match '\[.*?\]') {
-                    Write-Host "    Unknown tag '$SignatureFilePartTag', please check" -ForegroundColor Yellow
+                } elseif ($OOFFilePartTag -match '\[.*?\]') {
+                    Write-Host "    Unknown tag '$OOFFilePartTag', please check" -ForegroundColor Yellow
                 } else {
                     Write-Host '    Common OOF message'
                     if (-not $OOFFilesCommon.containskey($OOFFile.FullName)) {
@@ -1317,7 +1357,7 @@ function main {
                                             Write-Host "        $sid"
                                         }
                                     } catch {
-                                        Write-Host "        Error: $($error[0].exception)" -ForegroundColor red                                        
+                                        Write-Host "        Error: $($error[0].exception)" -ForegroundColor red
                                     }
                                 }
                             }
@@ -2102,7 +2142,7 @@ function Set-Signatures {
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
             $script:COMWord.ActiveDocument.Weboptions.encoding = 65001
             # Overcome Word security warning when export contains embedded pictures
-            if ((test-path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
+            if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
                 New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 0 -ErrorAction Ignore | Out-Null
             }
             $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
@@ -2454,47 +2494,68 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
 
 
 function GraphGetToken {
-    $authParamsBasic = @{
-        ClientId    = $GraphClientID
-        TenantId    = 'organizations'
-        Scopes      = 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All'
-        RedirectUri = 'http://localhost'
-    }
-
-    if ($null -ne $script:CurrentUser) {
-        $authParamsBasic['LoginHint'] = $script:CurrentUser
-    }
-
-    try {
-        $authParams = $authParamsBasic + @{ IntegratedWindowsAuth = $true }
-        $auth = Get-MsalToken @authParams
-    } catch {
+    if ($GraphCredentialFile) {
         try {
-            $authParams = $authParamsBasic + @{ Silent = $true; ForceRefresh = $true }
+            $auth = Import-Clixml -Path $GraphCredentialFile
+            $script:authorizationHeader = @{
+                Authorization = $auth.authHeader
+            }
+            return @{
+                error       = $false
+                accessToken = $auth.AccessToken
+                authHeader  = $auth.authHeader
+            }
+        } catch {
+            return @{
+                error       = ($error | Out-String)
+                accessToken = $null
+                authHeader  = $null
+            }
+        }
+    } else {
+        $authParamsBasic = @{
+            ClientId    = $GraphClientID
+            TenantId    = 'organizations'
+            Scopes      = 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All'
+            RedirectUri = 'http://localhost'
+        }
+
+        if ($null -ne $script:CurrentUser) {
+            $authParamsBasic['LoginHint'] = $script:CurrentUser
+            $authParamsBasic['TenantId'] = ($script:CurrentUser -split '@')[1]
+        }
+
+        try {
+            $authParams = $authParamsBasic + @{ IntegratedWindowsAuth = $true }
             $auth = Get-MsalToken @authParams
         } catch {
             try {
-                $authParams = $authParamsBasic + @{ Interactive = $true; UseEmbeddedWebView = $false; Timeout = (New-TimeSpan -Minutes 2); Prompt = 'NoPrompt' }
+                $authParams = $authParamsBasic + @{ Silent = $true; ForceRefresh = $true }
                 $auth = Get-MsalToken @authParams
             } catch {
+                try {
+                    $authParams = $authParamsBasic + @{ Interactive = $true; UseEmbeddedWebView = $false; Timeout = (New-TimeSpan -Minutes 2); Prompt = 'NoPrompt' }
+                    $auth = Get-MsalToken @authParams
+                } catch {
+                }
             }
         }
-    }
 
-    try {
-        $script:authorizationHeader = @{
-            Authorization = $auth.CreateAuthorizationHeader()
-        }
-        return @{
-            error       = $false
-            accessToken = $auth.AccessToken
-            authHeader  = $script:authorizationHeader
-        }
-    } catch {
-        return @{
-            error       = ($error | Out-String)
-            accessToken = $null
-            authHeader  = $null
+        try {
+            $script:authorizationHeader = @{
+                Authorization = $auth.CreateAuthorizationHeader()
+            }
+            return @{
+                error       = $false
+                accessToken = $auth.AccessToken
+                authHeader  = $script:authorizationHeader
+            }
+        } catch {
+            return @{
+                error       = ($error | Out-String)
+                accessToken = $null
+                authHeader  = $null
+            }
         }
     }
 }
