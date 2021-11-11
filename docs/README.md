@@ -15,7 +15,7 @@
 
 Set-Outlooksignatures can be **executed on the client side, or on a server without end user interaction**.  
 On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.  
-Signatures and OOF messages can also be created and deployed centrally, without end user interaction.
+Signatures and OOF messages can also be created and deployed centrally, without end user or client involvement.
 
 **Sample templates** for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 

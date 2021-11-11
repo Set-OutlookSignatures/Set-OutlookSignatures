@@ -3,6 +3,19 @@
 
 # Changelog
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.4.0" target="_blank">v2.4.0</a> - YYYY-MM-DD
+### Added
+- Added sample code files, including a wrapper script for central creation and deployment of signatures and OOF messages without end user or client involvement
+- Report templates that are mentioned in the ini file but do not exist in the file system, and vice versa
+- New parameter GraphCredentialFile
+### Fixed
+- Ignore mail-enabled users an mailbox search to avoid binding to the wrong Exchange object in migration scenarios (which would lead to wrong replacement variable data and group membership)
+- When connecting to Exchange Online, check for valid mailbox in addition to valid credentials
+- Clarify port requirements and group membership evaluation in documentation
+### Changed
+- Documentation updates
+- When connecting to Microsoft Graph, the TenantID is no longer set to 'organizations', but extracted from the logged-on or simulated user name
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.1" target="_blank">v2.3.1</a> - 2021-11-05
 ### Fixed
 - Ignore mail-enabled users an mailbox search to avoid binding to the wrong Exchange object in migration scenarios (which would lead to wrong replacement variable data and group membership)
