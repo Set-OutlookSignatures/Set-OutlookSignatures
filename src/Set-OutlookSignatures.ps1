@@ -15,6 +15,10 @@ Signatures and OOF messages can be:
 - Centrally managed only or exist along user created signatures (signatures only)
 - Copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
 
+Set-Outlooksignatures can be executed on the client side, or on a server without end user interaction.  
+On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.  
+Signatures and OOF messages can also be created and deployed centrally, without end user interaction.
+
 Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 
 Simulation mode allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.

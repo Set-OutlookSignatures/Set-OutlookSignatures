@@ -12,7 +12,11 @@
 - Set in Outlook Web for the currently logged on user  
 - Centrally managed only or exist along user created signatures (signatures only)  
 - Copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
-  
+
+Set-Outlooksignatures can be **executed on the client side, or on a server without end user interaction**.  
+On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.  
+Signatures and OOF messages can also be created and deployed centrally, without end user interaction.
+
 **Sample templates** for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
@@ -21,7 +25,7 @@ The script is **designed to work in big and complex environments** (Exchange res
 
 It is **multi-client capable** by using different template paths, configuration files and script parameters.
 
-Set-OutlookSignature requires **no installation on servers or clients**. You only need a standard file share on a server, and PowerShell and Office on the client. 
+Set-OutlookSignature requires **no installation on servers or clients**. You only need a standard file share on a server, and PowerShell and Office. 
 
 A **documented implementation approach**, based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.  
 The implementatin approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
@@ -242,12 +246,11 @@ SimulateMailboxes is optional for simulation mode, although highly recommended. 
 ## 2.16. GraphCredentialFile
 Path to file containing Graph credential which should be used as alternative to other token acquisition methods.
 
-Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios.
+Makes only sense in combination with `'.\sample code\SimulateAndDeploy.ps1'`, do not use this parameter for other scenarios.
 
-See '.\sample code\SimulateAndDeploy.ps1' for an example how to create this file.
+See `'.\sample code\SimulateAndDeploy.ps1'` for an example how to create this file.
 
-Default value: `$null`
-See "[13. Simulation mode](#13-simulation-mode)" for details.  
+Default value: `$null`  
 # 3. Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.
 
@@ -620,7 +623,7 @@ The script is designed for being run in multiple instances at the same. You can 
 - One user runs multiple instances of the script in simulation mode in parallel  
 - Multiple users on the same machine (e.g. Terminal Server) run multiple instances of the script in parallel  
 
-Please see `.\sample code\SimulateAndDeploy.ps1` for an example how to run multiple instances of Set-OutlookSignatures in parallel in a controlled manner. Don't forget to adopt path names and variables to your environment.
+Please see `'.\sample code\SimulateAndDeploy.ps1'` for an example how to run multiple instances of Set-OutlookSignatures in parallel in a controlled manner. Don't forget to adopt path names and variables to your environment.
 ## 15.10. How do I start the script from the command line or a scheduled task?  
 Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. You have to be very careful about when to use single quotes or double quotes.
 
@@ -637,7 +640,7 @@ If you have to use the PowerShell.exe `-Command` or `-File` parameter depends on
   
 If you provided your users a link so they can start Set-OutlookSignatures.ps1 with the correct parameters on their own, you may want to use the official icon: `'.\logo\Set-OutlookSignatures Icon.ico'`
 
-Please see `.\sample code\Set-OutlookSignatures.cmd` for an example. Don't forget to adopt path names to your environment.
+Please see `'.\sample code\Set-OutlookSignatures.cmd'` for an example. Don't forget to adopt path names to your environment.
 ## 15.11. How to create a shortcut to the script with parameters?  
 You may want to provide a link on the desktop or in the start menu, so they can start the script on their own.
 
@@ -658,7 +661,7 @@ $Shortcut.Save()
 ```
 **Attention**: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.
 
-See `.\sample code\CreateDesktopIcon.ps1` for a code example. Don't forget to adopt path names to your environment. 
+See `'.\sample code\CreateDesktopIcon.ps1'` for a code example. Don't forget to adopt path names to your environment. 
 ## 15.12. What is the recommended approach for implementing the software?  
 There is certainly no definitive generic recommendation, but the file `'.\docs\Implementation approach.html'` should be a good starting point.
 
