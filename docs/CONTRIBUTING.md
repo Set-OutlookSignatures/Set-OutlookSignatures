@@ -13,7 +13,7 @@ I'm not a professional developer - if you are one and you notice something negat
 - [2. Contribution opportunities](#2-contribution-opportunities)
   - [2.1. Code refactoring](#21-code-refactoring)
   - [2.2. New parameter: EachSignatureForEachMailbox](#22-new-parameter-eachsignatureforeachmailbox)
-  - [2.3. New feature: Central signature deployment without client-side script](#23-new-feature-central-signature-deployment-without-client-side-script)
+  - [2.3. Enhance central signature deployment without client-side execution of script](#23-enhance-central-signature-deployment-without-client-side-execution-of-script)
 - [3. Branches](#3-branches)
 - [4. Development process](#4-development-process)
 - [5. Commit messages](#5-commit-messages)
@@ -37,12 +37,12 @@ There are optimization opportunities in error handling, de-duplicating code with
 - How to handle group mailboxes?
   - When roaming is enabled, this creates a big mess because script runs overwrite each others results (think about \$CURRENTUSER[...]$ replacement variables)
 - How to detect roaming feature and enable the parameter only for these mailboxes?
-## 2.3. New feature: Central signature deployment without client-side script
-- Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
-- Automate simulation mode by wrapping parallelization code around it (just as the CheckADConnectivity function does, with other timeouts)
-- Is RTF export necessary in this scenario?
-- Use simulation mode results to write to Graph with a service account
-- What about group mailboxes?
+## 2.3. Enhance central signature deployment without client-side execution of script
+Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
+- Automate simulation mode by wrapping parallelization code around it - done (`.\sample code\SimulateAndDeploy.ps1`)
+- Is RTF export necessary in this scenario? Yes, because the script can be used to write to signature folders redirected to a network share.
+- Use simulation mode results to write to Graph with a service account - done (`.\sample code\SimulateAndDeploy.ps1`)
+- Adopt script to Microsoft signature romaing API, when it eventually is publicly available
 # 3. Branches
 The default branch is named '`main`'. It contains the source of the latest stable release.
 

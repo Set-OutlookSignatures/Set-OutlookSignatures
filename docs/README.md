@@ -619,6 +619,8 @@ The script is designed for being run in multiple instances at the same. You can 
 - One user runs multiple instances of the script in parallel  
 - One user runs multiple instances of the script in simulation mode in parallel  
 - Multiple users on the same machine (e.g. Terminal Server) run multiple instances of the script in parallel  
+
+Please see `.\sample code\SimulateAndDeploy.ps1` for an example how to run multiple instances of Set-OutlookSignatures in parallel in a controlled manner. Don't forget to adopt path names and variables to your environment.
 ## 15.10. How do I start the script from the command line or a scheduled task?  
 Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. You have to be very careful about when to use single quotes or double quotes.
 
@@ -633,7 +635,9 @@ You will find lots of information about this topic on the internet. The followin
   
 If you have to use the PowerShell.exe `-Command` or `-File` parameter depends on details of your configuration, for example AppLocker in combination with PowerShell. You may also want to consider the `-EncodedCommand` parameter to start Set-OutlookSignatures.ps1 and pass parameters to it.
   
-If you provided your users a link so they can start Set-OutlookSignatures.ps1 with the correct parameters on their own, you may want to use the official icon: `'.\logo\Set-OutlookSignatures Icon.ico'`  
+If you provided your users a link so they can start Set-OutlookSignatures.ps1 with the correct parameters on their own, you may want to use the official icon: `'.\logo\Set-OutlookSignatures Icon.ico'`
+
+Please see `.\sample code\Set-OutlookSignatures.cmd` for an example. Don't forget to adopt path names to your environment.
 ## 15.11. How to create a shortcut to the script with parameters?  
 You may want to provide a link on the desktop or in the start menu, so they can start the script on their own.
 
@@ -652,7 +656,9 @@ $Shortcut.WindowStyle = 1 # 1 = undefined, 3 = maximized, 7 = minimized
 $Shortcut.Hotkey = ''  
 $Shortcut.Save()  
 ```
-**Attention**: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.  
+**Attention**: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.
+
+See `.\sample code\CreateDesktopIcon.ps1` for a code example. Don't forget to adopt path names to your environment. 
 ## 15.12. What is the recommended approach for implementing the software?  
 There is certainly no definitive generic recommendation, but the file `'.\docs\Implementation approach.html'` should be a good starting point.
 
