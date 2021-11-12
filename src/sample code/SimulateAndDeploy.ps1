@@ -81,6 +81,9 @@ if ($ConnectOnpremInsteadOfCloud) {
 } else {
 	Write-Host '  Microsoft Graph'
 	$GraphCredentialFile = Join-Path -Path $env:temp -ChildPath "$((New-Guid).guid).xml"
+	if ($ConnectOnpremInsteadOfCloud -eq $false) {
+		$SetOutlookSignaturesScriptParameters = $SetOutlookSignaturesScriptParameters + " -GraphCredentialFile `"$GraphCredentialFile`""
+	}
 	Import-Module $(Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath -Parent) -ChildPath '\bin\msal.ps')
 	
 	# ClientId comes from Set-OutlookSignatures 'default graph config.ps1'
@@ -137,26 +140,24 @@ if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarnin
 
 
 Write-Host "Run simulation mode for each user and his personal mailbox @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-$script:jobs = New-Object System.Collections.ArrayList
-[void][runspacefactory]::CreateRunspacePool()
-$RunspacePool = [runspacefactory]::CreateRunspacePool(1, $JobsConcurrent)
-$RunspacePool.Open()
-$script:JobsQueued = ($SimulateList | Measure-Object).count
+Get-Job | Remove-Job -Force
 
-for ($SimulateNumber = 0; $SimulateNumber -lt ($SimulateList | Measure-Object).count; $SimulateNumber++) {
-	Write-Host "  Adding job $SimulateNumber/$(($SimulateList | Measure-Object).count) (user $($SimulateList[$SimulateNumber].SimulateUser), mailbox $($SimulateList[$SimulateNumber].SimulateMailbox))"
+$JobsToStartTotal = ($SimulateList | Measure-Object).count
+$JobsToStartOpen = ($SimulateList | Measure-Object).count
+$JobsStarted = 0
+$JobsCompleted = 0
 
 
-	$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$SimulateNumber].SimulateUser)) -ChildPath '_log.txt'
-	if ((Test-Path (Split-Path $LogFilePath -Parent)) -eq $false) {
-		New-Item -ItemType Directory -Path (Split-Path $LogFilePath -Parent) | Out-Null
-	}
+Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
+while ($true) {
+	#while ((($JobsStarted -lt $JobsToStartTotal) -or ($JobsCompleted -lt $JobsToStartTotal))) {
+	while ((($JobsToStartOpen -gt 0) -and ((Get-Job -State running).count -lt $JobsConcurrent))) {
+		$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$Jobsstarted].SimulateUser)) -ChildPath '_log.txt'
+		if ((Test-Path (Split-Path $LogFilePath -Parent)) -eq $false) {
+			New-Item -ItemType Directory -Path (Split-Path $LogFilePath -Parent) | Out-Null
+		}
 
-	$PowerShell = [powershell]::Create()
-	$PowerShell.RunspacePool = $RunspacePool
-
-	[void]$PowerShell.AddScript(
-		{
+		Start-Job {
 			Param (
 				$PowershellPath,
 				$SetOutlookSignaturesScriptPath,
@@ -168,23 +169,16 @@ for ($SimulateNumber = 0; $SimulateNumber -lt ($SimulateList | Measure-Object).c
 				$SetOutlookSignaturesScriptParameters,
 				$GraphCredentialFile
 			)
-
+	
 			$PSDefaultParameterValues['out-file:width'] = 2000
-
-			$DebugPreferenceOld = $DebugPreference
-			$DebugPreference = 'Continue'
-			Write-Debug "Start(Ticks) = $((Get-Date).Ticks)"
-			$DebugPreference = $DebugPreferenceOld
-
+	
 			Remove-Item -Path $LogFilePath -Force
-
+	
 			. {
 				try {
 					Write-Host 'CREATE SIGNATURE FILES BY USING SIMULATON MODE OF SET-OUTLOOKSIGNATURES'
-					if ($ConnectOnpremInsteadOfCloud -eq $false) {
-						$SetOutlookSignaturesScriptParameters = $SetOutlookSignaturesScriptParameters + " -GraphCredentialFile `"$GraphCredentialFile`""
-					}
-					Invoke-Expression $("& `"$PowershellPath`" -executionpolicy bypass -file `"$SetOutlookSignaturesScriptPath`" -SimulateUser $SimulateUser -SimulateMailbox $SimulateMailbox -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" $SetOutlookSignaturesScriptParameters")
+					#Invoke-Expression $("& `"$PowershellPath`" -executionpolicy bypass -file `"$SetOutlookSignaturesScriptPath`" -SimulateUser `"$SimulateUser`" -SimulateMailbox `"$SimulateMailbox`" -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" $SetOutlookSignaturesScriptParameters")
+					Invoke-Expression $(". `"$SetOutlookSignaturesScriptPath`" -SimulateUser `"$SimulateUser`" -SimulateMailbox `"$SimulateMailbox`" -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" $SetOutlookSignaturesScriptParameters")
 					if ($LASTEXITCODE -eq 0) {
 						Write-Host 'xxxExitCode0xxx'
 					} else {
@@ -195,170 +189,151 @@ for ($SimulateNumber = 0; $SimulateNumber -lt ($SimulateList | Measure-Object).c
 					Write-Host 'xxxExitCode999xxx'
 				}
 			} 2>&1 3>&1 4>&1 5>&1 6>&1 | Out-File -FilePath $LogFilePath -Append -Force -Encoding utf8
-		}
-	).
-	AddArgument((Get-Process -Id $pid).Path).
-	AddArgument($SetOutlookSignaturesScriptPath).
-	AddArgument($($SimulateList[$SimulateNumber].SimulateUser)).
-	AddArgument($($SimulateList[$SimulateNumber].SimulateMailbox)).
-	AddArgument($SimulateResultPath).
-	AddArgument($CredentialPath).
-	AddArgument($LogFilePath).
-	AddArgument($SetOutlookSignaturesScriptParameters).
-	AddArgument($GraphCredentialFile)
+		} -Name ("$($Jobsstarted)_Job") -ArgumentList (Get-Process -Id $pid).Path,
+		$SetOutlookSignaturesScriptPath,
+		$($SimulateList[$Jobsstarted].SimulateUser),
+		$($SimulateList[$Jobsstarted].SimulateMailbox),
+		$SimulateResultPath,
+		$CredentialPath,
+		$LogFilePath,
+		$SetOutlookSignaturesScriptParameters,
+		$GraphCredentialFile | Out-Null
 
+		Write-Host "    User $($SimulateList[$Jobsstarted].SimulateUser) (mailbox $($SimulateList[$Jobsstarted].SimulateMailbox)) started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
 
-	$Object = New-Object 'System.Management.Automation.PSDataCollection[psobject]'
-	$Handle = $PowerShell.BeginInvoke($Object, $Object)
-	$temp = '' | Select-Object PowerShell, Handle, Object, StartTime, Done, SimulateUser, SimulateMailbox, LogFilePath
-	$temp.PowerShell = $PowerShell
-	$temp.Handle = $Handle
-	$temp.Object = $Object
-	$temp.StartTime = $null
-	$temp.Done = $false
-	$temp.SimulateUser = $($SimulateList[$SimulateNumber].SimulateUser)
-	$temp.SimulateMailbox = $($SimulateList[$SimulateNumber].SimulateMailbox)
-	$temp.LogFilePath = $LogFilePath
-	[void]$script:jobs.Add($Temp)
-}
+		$JobsToStartOpen--
+		$JobsStarted++
+	}
 
+	foreach ($x in (Get-Job -State Completed)) {
+		$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser)) -ChildPath '_log.txt'
+		if (-not (Get-Content -Path $LogFilePath -Encoding UTF8 -Raw).trim().EndsWith('xxxExitCode0xxx')) {
+			Write-Host "    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)) ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+			Write-Host "      User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)): Error creating signatures, please check log." -ForegroundColor Red
+		} else {
+			. {
+				try {
+					Write-Host
+					Write-Host
+					Write-Host 'SET SIGNATURES AND OOF MESSAGES'
 
-Write-Host "  $($script:JobsQueued)/$(($SimulateList | Measure-Object).count) jobs in queue, up to $JobsConcurrent run in parallel"
+					Set-Location (Split-Path $LogFilePath -Parent)
 
-
-while (($script:jobs | Where-Object { $_.done -eq $false }).count -ne 0) {
-	Start-Sleep -Seconds 1
-	$script:jobs | ForEach-Object {
-		if (($null -eq $_.StartTime) -and ($_.Powershell.Streams.Debug[0].Message -match 'Start')) {
-			$StartTicks = $_.powershell.Streams.Debug[0].Message -replace '[^0-9]'
-			$_.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
-			Write-Host "    User $($_.SimulateUser) (mailbox $($_.SimulateMailbox)) started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-		}
-
-		if ($null -ne $_.StartTime) {
-			if ((($_.handle.IsCompleted -eq $true) -and ($_.Done -eq $false))) {
-				$LogFilePath = $_.LogFilePath
-				$_.Done = $true
-				if (-not (Get-Content -Path $_.LogFilePath -Encoding UTF8 -Raw).trim().EndsWith('xxxExitCode0xxx')) {
-					Write-Host "      User $($_.SimulateUser) (mailbox $($_.SimulateMailbox)): Error creating signatures, please check log." -ForegroundColor Red
-				} else {
-					. {
-						try {
-							Write-Host
-							Write-Host
-							Write-Host 'SET SIGNATURES AND OOF MESSAGES'
-
-							Set-Location (Join-Path -Path $SimulateResultPath -ChildPath $_.SimulateUser)
-
-							Write-Host 'All signature names'
-							Get-ChildItem '*.htm' | ForEach-Object {
-								Write-Host "  $($_.basename)"
-							}
-
-							Write-Host 'Default signature name for new e-mails'
-							if (Test-Path ".\$($_.SimulateMailbox)\default new.htm") {
-								$hash = (Get-FileHash ".\$($_.SimulateMailbox)\default new.htm").hash
-								$SignatureFilePathDefaultNew = (Get-FileHash '*.htm' | Where-Object { $_.hash -eq $hash })[0].path
-								Write-Host "  $((Get-ChildItem $SignatureFilePathDefaultNew).basename)"
-							} else {
-								$SignatureFilePathDefaultNew = $null
-							}
-
-							Write-Host 'Default signature name for replies and forwards'
-							if (Test-Path ".\$($_.SimulateMailbox)\default reply-forward.htm") {
-								$hash = (Get-FileHash ".\$($_.SimulateMailbox)\default reply-forward.htm").hash
-								$SignatureFilePathDefaultReplyforward = (Get-FileHash '*.htm' | Where-Object { $_.hash -eq $hash })[0].path
-								Write-Host "  $((Get-ChildItem $SignatureFilePathDefaultReplyforward).basename)"
-							} else {
-								$SignatureFilePathDefaultReplyforward = $null
-							}
-
-							Write-Host 'Determine signature to use in Outlook Web'
-							if ($null -ne $SignatureFilePathDefaultNew) {
-								$WebSigHtml = Get-Content -Path $SignatureFilePathDefaultNew -Encoding UTF8 -Raw
-								$WebSigTxt = Get-Content -Path	$([System.IO.Path]::ChangeExtension($SignatureFilePathDefaultNew, '.txt')) -Encoding UTF8 -Raw
-							} else {
-								if ($null -ne $SignatureFilePathDefaultReplyforward) {
-									$WebSigHtml = Get-Content -Path $SignatureFilePathDefaultReplyforward -Encoding UTF8 -Raw
-									$WebSigTxt = Get-Content -Path	$([System.IO.Path]::ChangeExtension($SignatureFilePathDefaultReplyforward, '.txt')) -Encoding UTF8 -Raw
-								} else {
-									$WebSigHtml = $null
-									$WebSigTxt = $null
-								}
-							}
-
-							if ($WebSigHtml) {
-								Write-Host 'Set signature in Outlook Web'
-
-								# Set-MailboxMessageConfiguration requires a specific, non-standard definition for inline images
-								# With Exchange Web Services this is not necessary
-								($WebSigHtml | Select-String -Pattern '\s*src\="(data:image\/.*?"\s*>)' -AllMatches).Matches | ForEach-Object {
-									if ($_.groups.count -ge 2) {
-										if ($null -ne $_.groups[1]) {
-											$WebSigHtml = $WebSigHtml.Replace($_.groups[1].value, ('"><span id="dataURI" style="display:none">' + (($_.groups[1].value) -Replace '"\s*>', '') + '</span>'))
-										}
-									}
-								}
-
-								Set-MailboxMessageConfiguration `
-									-Identity $($_.SimulateMailbox) `
-									-SignatureHTML $WebSigHtml `
-									-SignatureText $WebSigTxt `
-									-SignatureTextOnMobile $WebSigTxt `
-									-AutoAddSignature $( if ($SignatureFilePathDefaultNew) { $true } else { $false } ) `
-									-AutoAddSignatureOnMobile $( if ($SignatureFilePathDefaultNew) { $true } else { $false } ) `
-									-AutoAddSignatureOnReply $( if ($SignatureFilePathDefaultReplyforward -eq $SignatureFilePathDefaultNew) { $true } else { $false } ) `
-									-UseDefaultSignatureOnMobile $true
-							}
-
-							Write-Host 'Determine internal Out of Office (OOF) auto reply message'
-							if (Test-Path "$SimulateResultPath\$($_.SimulateUser)\$($_.SimulateMailbox)\oof internal.htm") {
-								$OOFInternalHtml = Get-Content ".\$($_.SimulateMailbox)\oof internal.htm" -Encoding UTF8 -Raw
-							} else {
-								$OOFInternalHtml = $null
-							}
-
-							Write-Host 'Determine external Out of Office (OOF) auto reply message'
-							if (Test-Path "$SimulateResultPath\$($_.SimulateUser)\$($_.SimulateMailbox)\oof external.htm") {
-								$OOFExternalHtml = Get-Content ".\$($_.SimulateMailbox)\oof external.htm" -Encoding UTF8 -Raw
-							} else {
-								$OOFExternalHtml = $null
-							}
-
-
-							if ($OOFInternalHtml -or $OOFExternalHtml) {
-								Write-Host 'Set OOF messages'
-
-								# Set-MailboxAutoReplyConfiguration can't handle inline images, they need to be removed to avoid display errors
-								# With Exchange Web Services this is not necessary
-								$OOFInternalHtml = $OOFInternalHtml -replace '(?ms)<\s*?img.*?src\="data:image\/.*?".*?>', ''
-								$OOFExternalHtml = $OOFExternalHtml -replace '(?ms)<\s*?img.*?src\="data:image\/.*?".*?>', ''
-
-								if ((Get-MailboxAutoReplyConfiguration -Identity $($_.SimulateMailbox)).AutoReplyState -ieq 'disabled') {
-									Set-MailboxAutoReplyConfiguration -Identity $($_.SimulateMailbox) -InternalMessage $OOFInternalHtml -ExternalMessage $OOFExternalHtml
-								}
-							}
-
-							Write-Host 'xxxExitCode0xxx'
-						} catch {
-							$error[0]
-							Write-Host 'xxxExitCode999xxx'
-						}
-					} 2>&1 3>&1 4>&1 5>&1 6>&1 | Out-File -FilePath $LogFilePath -Append -Force -Encoding utf8
-
-					Write-Host "    User $($_.SimulateUser) (mailbox $($_.SimulateMailbox)) ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-					if (-not (Get-Content -Path $_.LogFilePath -Encoding UTF8 -Raw).trim().EndsWith('xxxExitCode0xxx')) {
-						Write-Host "      User $($_.SimulateUser) (mailbox $($_.SimulateMailbox)): Error setting signatures, please check log." -ForegroundColor Red
+					Write-Host 'All signature names'
+					Get-ChildItem '*.htm' | ForEach-Object {
+						Write-Host "  $($_.basename)"
 					}
 
-					Set-Location $PSScriptRoot
+					Write-Host 'Default signature name for new e-mails'
+					if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox))\default new.htm") {
+						$hash = (Get-FileHash ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\default new.htm").hash
+						$SignatureFilePathDefaultNew = (Get-FileHash '*.htm' | Where-Object { $_.hash -eq $hash })[0].path
+						Write-Host "  $((Get-ChildItem $SignatureFilePathDefaultNew).basename)"
+					} else {
+						$SignatureFilePathDefaultNew = $null
+					}
+
+					Write-Host 'Default signature name for replies and forwards'
+					if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\default reply-forward.htm") {
+						$hash = (Get-FileHash ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\default reply-forward.htm").hash
+						$SignatureFilePathDefaultReplyforward = (Get-FileHash '*.htm' | Where-Object { $_.hash -eq $hash })[0].path
+						Write-Host "  $((Get-ChildItem $SignatureFilePathDefaultReplyforward).basename)"
+					} else {
+						$SignatureFilePathDefaultReplyforward = $null
+					}
+
+					Write-Host 'Determine signature to use in Outlook Web'
+					if ($null -ne $SignatureFilePathDefaultNew) {
+						$WebSigHtml = Get-Content -Path $SignatureFilePathDefaultNew -Encoding UTF8 -Raw
+						$WebSigTxt = Get-Content -Path	$([System.IO.Path]::ChangeExtension($SignatureFilePathDefaultNew, '.txt')) -Encoding UTF8 -Raw
+					} else {
+						if ($null -ne $SignatureFilePathDefaultReplyforward) {
+							$WebSigHtml = Get-Content -Path $SignatureFilePathDefaultReplyforward -Encoding UTF8 -Raw
+							$WebSigTxt = Get-Content -Path	$([System.IO.Path]::ChangeExtension($SignatureFilePathDefaultReplyforward, '.txt')) -Encoding UTF8 -Raw
+						} else {
+							$WebSigHtml = $null
+							$WebSigTxt = $null
+						}
+					}
+
+					if ($WebSigHtml) {
+						Write-Host 'Set signature in Outlook Web'
+
+						# Set-MailboxMessageConfiguration requires a specific, non-standard definition for inline images
+						# With Exchange Web Services this is not necessary
+						($WebSigHtml | Select-String -Pattern '\s*src\="(data:image\/.*?"\s*>)' -AllMatches).Matches | ForEach-Object {
+							if ($_.groups.count -ge 2) {
+								if ($null -ne $_.groups[1]) {
+									$WebSigHtml = $WebSigHtml.Replace($_.groups[1].value, ('"><span id="dataURI" style="display:none">' + (($_.groups[1].value) -Replace '"\s*>', '') + '</span>'))
+								}
+							}
+						}
+
+						Set-MailboxMessageConfiguration `
+							-Identity $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox) `
+							-SignatureHTML $WebSigHtml `
+							-SignatureText $WebSigTxt `
+							-SignatureTextOnMobile $WebSigTxt `
+							-AutoAddSignature $( if ($SignatureFilePathDefaultNew) { $true } else { $false } ) `
+							-AutoAddSignatureOnMobile $( if ($SignatureFilePathDefaultNew) { $true } else { $false } ) `
+							-AutoAddSignatureOnReply $( if ($SignatureFilePathDefaultReplyforward -eq $SignatureFilePathDefaultNew) { $true } else { $false } ) `
+							-UseDefaultSignatureOnMobile $true
+					}
+
+					Write-Host 'Determine internal Out of Office (OOF) auto reply message'
+					if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof internal.htm") {
+						$OOFInternalHtml = Get-Content ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof internal.htm" -Encoding UTF8 -Raw
+					} else {
+						$OOFInternalHtml = $null
+					}
+
+					Write-Host 'Determine external Out of Office (OOF) auto reply message'
+					if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof external.htm") {
+						$OOFExternalHtml = Get-Content ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof external.htm" -Encoding UTF8 -Raw
+					} else {
+						$OOFExternalHtml = $null
+					}
+
+
+					if ($OOFInternalHtml -or $OOFExternalHtml) {
+						Write-Host 'Set OOF messages'
+
+						# Set-MailboxAutoReplyConfiguration can't handle inline images, they need to be removed to avoid display errors
+						# With Exchange Web Services this is not necessary
+						$OOFInternalHtml = $OOFInternalHtml -replace '(?ms)<\s*?img.*?src\="data:image\/.*?".*?>', ''
+						$OOFExternalHtml = $OOFExternalHtml -replace '(?ms)<\s*?img.*?src\="data:image\/.*?".*?>', ''
+
+						if ((Get-MailboxAutoReplyConfiguration -Identity $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)).AutoReplyState -ieq 'disabled') {
+							Set-MailboxAutoReplyConfiguration -Identity $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox) -InternalMessage $OOFInternalHtml -ExternalMessage $OOFExternalHtml
+						}
+					}
+
+					Write-Host 'xxxExitCode0xxx'
+				} catch {
+					$error[0]
+					Write-Host 'xxxExitCode999xxx'
 				}
-				$script:JobsQueued--
-				Write-Host "  $($script:JobsQueued)/$(($SimulateList | Measure-Object).count) jobs in queue, up to $JobsConcurrent run in parallel"
+			} 2>&1 3>&1 4>&1 5>&1 6>&1 | Out-File -FilePath $LogFilePath -Append -Force -Encoding utf8
+
+			Write-Host "    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)) ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+			if (-not (Get-Content -Path $LogFilePath -Encoding UTF8 -Raw).trim().EndsWith('xxxExitCode0xxx')) {
+				Write-Host "      User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)): Error setting signatures, please check log." -ForegroundColor Red
 			}
+			Set-Location $PSScriptRoot
 		}
+		$x | Remove-Job -Force
+		
+		$JobsCompleted++
+		
+		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
+	}
+
+	if (($JobsToStartTotal -eq $JobsStarted) -and ($JobsCompleted -eq $JobsToStartTotal)) {
+		break
 	}
 }
+
 
 
 Write-Host "Restore original Word security setting @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"

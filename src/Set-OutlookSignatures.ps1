@@ -2170,7 +2170,12 @@ function Set-Signatures {
                 New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
             }
-            $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            try {
+                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            } catch {
+                Start-Sleep -Seconds 2
+                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            }
             # Restore original security setting
             if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
                 Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
@@ -2189,7 +2194,12 @@ function Set-Signatures {
             }
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
             $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
-            $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            try {
+                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            } catch {
+                Start-Sleep -Seconds 2
+                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            }
             $script:COMWord.ActiveDocument.Close($false)
             # Restore original security setting
             if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
@@ -2208,7 +2218,12 @@ function Set-Signatures {
             $script:COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
                     $true, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
                     $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
-            $script:COMWord.ActiveDocument.Save()
+            try {
+                $script:COMWord.ActiveDocument.Save()
+            } catch {
+                Start-Sleep -Seconds 2
+                $script:COMWord.ActiveDocument.Save()
+            }
             $script:COMWord.ActiveDocument.Close($false)
 
 
@@ -2219,7 +2234,12 @@ function Set-Signatures {
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
             $script:COMWord.ActiveDocument.TextEncoding = 1200
             $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
-            $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            try {
+                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            } catch {
+                Start-Sleep -Seconds 2
+                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            }
             $script:COMWord.ActiveDocument.Close($false)
         } else {
             $script:COMWord.ActiveDocument.Close($false)
@@ -2863,7 +2883,6 @@ function Get-IniContent ($filePath) {
 # All functions have been defined above
 # Initially executed code starts here
 #
-
 
 try {
     Write-Host
