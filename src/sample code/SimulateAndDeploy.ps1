@@ -45,7 +45,7 @@ $SimulateResultPath = $([IO.Path]::Combine([environment]::GetFolderPath('MyDocum
 $SimulateListFile = $([IO.Path]::Combine($SimulateResultPath, 'SimulateList.csv'))
 $JobsConcurrent = 2
 $SetOutlookSignaturesScriptPath = '..\Set-OutlookSignatures.ps1'
-$SetOutlookSignaturesScriptParameters = "-SignatureTemplatePath `"C:\temp\Signatures DOCX`" -SignatureIniPath `"C:\temp\Signatures DOCS\_.ini`" -SetCurrentUserOOFMessage `$false" # Do not use: SimulateUser, SimulateMailbox, AdditionalSignaturePath
+$SetOutlookSignaturesScriptParameters = "-SignatureTemplatePath `"C:\temp\Signatures DOCX`" -SignatureIniPath `"C:\temp\Signatures DOCX\_.ini`" -SetCurrentUserOOFMessage `$false" # Do not use: SimulateUser, SimulateMailbox, AdditionalSignaturePath
 
 
 Set-Location $PSScriptRoot | Out-Null
@@ -72,23 +72,22 @@ $Credential | Export-Clixml -Path $CredentialPath
 $Credential = Import-Clixml -Path $CredentialPath
 
 
-Write-Host 'Connect to Microsoft Graph'
-$GraphCredentialFile = Join-Path -Path $env:temp -ChildPath "$((New-Guid).guid).xml"
-Import-Module $(Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath -Parent) -ChildPath '\bin\msal.ps')
-
-# ClientId comes from Set-OutlookSignatures 'default graph config.ps1'
-$auth = get-msaltoken -ClientId 'beea8249-8c98-4c76-92f6-ce3c468a61e6' -tenantid ($credential.username -split '@')[1] -RedirectUri 'http://localhost' -UserCredential $credential
-@{'accessToken' = $auth.accessToken; 'authHeader' = $($auth.createauthorizationheader()) } | Export-Clixml -Path $GraphCredentialFile
-Remove-Module msal.ps
-
-
 Write-Host "Conncect to Exchange @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 if ($ConnectOnpremInsteadOfCloud) {
 	Write-Host '  On premises'
-	$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri "http://$OnPremServerFqdn/PowerShell/" -Authentication Kerberos -Credential $Credential
+	$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri "http://$($OnPremServerFqdn)/PowerShell/" -Authentication Kerberos -Credential $Credential
 	Import-PSSession $Session -DisableNameChecking
 	Set-AdServerSettings -ViewEntireForest $True
 } else {
+	Write-Host '  Microsoft Graph'
+	$GraphCredentialFile = Join-Path -Path $env:temp -ChildPath "$((New-Guid).guid).xml"
+	Import-Module $(Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath -Parent) -ChildPath '\bin\msal.ps')
+	
+	# ClientId comes from Set-OutlookSignatures 'default graph config.ps1'
+	$auth = get-msaltoken -ClientId 'beea8249-8c98-4c76-92f6-ce3c468a61e6' -tenantid ($credential.username -split '@')[1] -RedirectUri 'http://localhost' -UserCredential $credential
+	@{'accessToken' = $auth.accessToken; 'authHeader' = $($auth.createauthorizationheader()) } | Export-Clixml -Path $GraphCredentialFile
+	Remove-Module msal.ps
+
 	Write-Host '  Exchange Online'
 	Import-Module ExchangeOnlineManagement
 	Connect-ExchangeOnline -Credential $Credential -ShowBanner:$false
@@ -145,6 +144,9 @@ $RunspacePool.Open()
 $script:JobsQueued = ($SimulateList | Measure-Object).count
 
 for ($SimulateNumber = 0; $SimulateNumber -lt ($SimulateList | Measure-Object).count; $SimulateNumber++) {
+	Write-Host "  Adding job $SimulateNumber/$(($SimulateList | Measure-Object).count) (user $($SimulateList[$SimulateNumber].SimulateUser), mailbox $($SimulateList[$SimulateNumber].SimulateMailbox))"
+
+
 	$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$SimulateNumber].SimulateUser)) -ChildPath '_log.txt'
 	if ((Test-Path (Split-Path $LogFilePath -Parent)) -eq $false) {
 		New-Item -ItemType Directory -Path (Split-Path $LogFilePath -Parent) | Out-Null
@@ -179,8 +181,10 @@ for ($SimulateNumber = 0; $SimulateNumber -lt ($SimulateList | Measure-Object).c
 			. {
 				try {
 					Write-Host 'CREATE SIGNATURE FILES BY USING SIMULATON MODE OF SET-OUTLOOKSIGNATURES'
-
-					Invoke-Expression $("& `"$PowershellPath`" -executionpolicy bypass -file `"$SetOutlookSignaturesScriptPath`" -SimulateUser $SimulateUser -SimulateMailbox $SimulateMailbox -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" -GraphCredentialFile `"$GraphCredentialFile`" $SetOutlookSignaturesScriptParameters")
+					if ($ConnectOnpremInsteadOfCloud -eq $false) {
+						$SetOutlookSignaturesScriptParameters = $SetOutlookSignaturesScriptParameters + " -GraphCredentialFile `"$GraphCredentialFile`""
+					}
+					Invoke-Expression $("& `"$PowershellPath`" -executionpolicy bypass -file `"$SetOutlookSignaturesScriptPath`" -SimulateUser $SimulateUser -SimulateMailbox $SimulateMailbox -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" $SetOutlookSignaturesScriptParameters")
 					if ($LASTEXITCODE -eq 0) {
 						Write-Host 'xxxExitCode0xxx'
 					} else {
