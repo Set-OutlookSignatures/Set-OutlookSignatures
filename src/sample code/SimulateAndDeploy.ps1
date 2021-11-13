@@ -178,8 +178,10 @@ do {
 			. {
 				try {
 					Write-Host 'CREATE SIGNATURE FILES BY USING SIMULATON MODE OF SET-OUTLOOKSIGNATURES'
-					#Invoke-Expression $("& `"$PowershellPath`" -executionpolicy bypass -file `"$SetOutlookSignaturesScriptPath`" -SimulateUser `"$SimulateUser`" -SimulateMailbox `"$SimulateMailbox`" -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" $SetOutlookSignaturesScriptParameters")
+					
+					# Need to use Invoke-Expression to be able to pass arguments stored in a string
 					Invoke-Expression $(". `"$SetOutlookSignaturesScriptPath`" -SimulateUser `"$SimulateUser`" -SimulateMailbox `"$SimulateMailbox`" -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" $SetOutlookSignaturesScriptParameters")
+					
 					if ($LASTEXITCODE -eq 0) {
 						Write-Host 'xxxExitCode0xxx'
 					} else {
@@ -213,7 +215,9 @@ do {
 			Write-Host "    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)) ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 			Write-Host "      User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)): Error creating signatures, please check log." -ForegroundColor Red
 		} else {
-			if ($SimulateButDontDeploy -eq $false) {
+			if ($SimulateButDontDeploy -eq $true) {
+				Write-Host "    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)) ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+			} else {
 				. {
 					try {
 						Write-Host
