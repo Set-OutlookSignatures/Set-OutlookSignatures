@@ -110,4 +110,6 @@ $GraphUserAttributeMapping = @{
     userprincipalname          = 'userPrincipalName'
     physicaldeliveryofficename = 'officeLocation'
     mailboxsettings            = 'mailboxsettings'
+    mailnickname               = 'mailNickname'
+    displayname                = 'displayname'
 }

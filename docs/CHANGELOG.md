@@ -8,10 +8,12 @@
 - Added sample code files, including a wrapper script for central creation and deployment of signatures and OOF messages without end user or client involvement
 - Report templates that are mentioned in the ini file but do not exist in the file system, and vice versa
 - New parameter GraphCredentialFile
+- New default replacement variables for displayName and mailNickname (a.k.a. alias)
 ### Fixed
 - Ignore mail-enabled users an mailbox search to avoid binding to the wrong Exchange object in migration scenarios (which would lead to wrong replacement variable data and group membership)
 - When connecting to Exchange Online, check for valid mailbox in addition to valid credentials
 - Clarify port requirements and group membership evaluation in documentation
+- When saving a document in Word fails, wait for two seconds and retry saving to avoid problems with virus scanners
 ### Changed
 - Documentation updates
 - When connecting to Microsoft Graph, the TenantID is no longer set to 'organizations', but extracted from the logged-on or simulated user name

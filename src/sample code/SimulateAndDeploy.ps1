@@ -149,8 +149,7 @@ $JobsCompleted = 0
 
 
 Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
-while ($true) {
-	#while ((($JobsStarted -lt $JobsToStartTotal) -or ($JobsCompleted -lt $JobsToStartTotal))) {
+do {
 	while ((($JobsToStartOpen -gt 0) -and ((Get-Job -State running).count -lt $JobsConcurrent))) {
 		$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$Jobsstarted].SimulateUser)) -ChildPath '_log.txt'
 		if ((Test-Path (Split-Path $LogFilePath -Parent)) -eq $false) {
@@ -329,10 +328,7 @@ while ($true) {
 		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
 	}
 
-	if (($JobsToStartTotal -eq $JobsStarted) -and ($JobsCompleted -eq $JobsToStartTotal)) {
-		break
-	}
-}
+} until (($JobsToStartTotal -eq $JobsStarted) -and ($JobsCompleted -eq $JobsToStartTotal))
 
 
 
