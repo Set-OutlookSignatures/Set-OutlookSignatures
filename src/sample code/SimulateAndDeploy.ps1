@@ -202,11 +202,11 @@ do {
 		$SetOutlookSignaturesScriptParameters,
 		$GraphCredentialFile | Out-Null
 
-		Write-Host "    User $($SimulateList[$Jobsstarted].SimulateUser) (mailbox $($SimulateList[$Jobsstarted].SimulateMailbox)) started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
-
 		$JobsToStartOpen--
 		$JobsStarted++
+
+		Write-Host "    User $($SimulateList[$Jobsstarted].SimulateUser) (mailbox $($SimulateList[$Jobsstarted].SimulateMailbox)) started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
 	}
 
 	foreach ($x in (Get-Job -State Completed)) {
