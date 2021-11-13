@@ -41,6 +41,7 @@ c. (Future feature) If Microsoft roaming signature API is available: Delete exis
 # Variables
 $ConnectOnpremInsteadOfCloud = $false
 $OnPremServerFqdn = 'server.exchange.example.com'
+$SimulateButDontDeploy = $true
 $SimulateResultPath = $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Set-OutlookSignatures simulation'))
 $SimulateListFile = $([IO.Path]::Combine($SimulateResultPath, 'SimulateList.csv'))
 $JobsConcurrent = 2
@@ -100,10 +101,10 @@ if ($ConnectOnpremInsteadOfCloud) {
 Write-Host "Get list of maiboxes and create CSV file @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 if ($ConnectOnpremInsteadOfCloud) {
 	Write-Host '  On premises'
-	$SimulateList = Get-Mailbox | Select-Object -Property @{name = 'SimulateUser'; expression = { $_.userprincipalname } }, @{name = 'SimulateMailbox'; expression = { $_.primarysmtpaddress } }, @{name = 'Environment'; expression = { if ($_.RecipientTypeDetails -like 'Remote*') { 'Cloud' } else { 'On-Prem' } } }
+	$SimulateList = Get-Mailbox | Where-Object { $_.recipientTypeDetails -ine 'discoverymailbox' } | Select-Object -Property @{name = 'SimulateUser'; expression = { $_.userprincipalname } }, @{name = 'SimulateMailbox'; expression = { $_.primarysmtpaddress } }, @{name = 'Environment'; expression = { if ($_.RecipientTypeDetails -like 'Remote*') { 'Cloud' } else { 'On-Prem' } } }
 } else {
 	Write-Host '  Exchange Online'
-	$SimulateList = Get-EXOMailbox | Select-Object -Property @{name = 'SimulateUser'; expression = { $_.userprincipalname } }, @{name = 'SimulateMailbox'; expression = { $_.primarysmtpaddress } }, @{name = 'Environment'; expression = { if ($_.RecipientTypeDetails -like 'Remote*') { 'On-Prem' } else { 'Cloud' } } }
+	$SimulateList = Get-EXOMailbox | Where-Object { $_.recipientTypeDetails -ine 'discoverymailbox' } | Select-Object -Property @{name = 'SimulateUser'; expression = { $_.userprincipalname } }, @{name = 'SimulateMailbox'; expression = { $_.primarysmtpaddress } }, @{name = 'Environment'; expression = { if ($_.RecipientTypeDetails -like 'Remote*') { 'On-Prem' } else { 'Cloud' } } }
 }
 
 $SimulateList | Export-Csv -Path $SimulateListFile -NoTypeInformation -Delimiter ';' -Force
@@ -132,12 +133,13 @@ if ($WordRegistryVersion.major -eq 0) {
 	exit 1
 }
 
-$WordDisableWarningOnIncludeFieldsUpdate = Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ne 1)) {
-	New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
-	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
+if ($SimulateButDontDeploy -eq $false) {
+	$WordDisableWarningOnIncludeFieldsUpdate = Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+	if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ne 1)) {
+		New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
+		Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
+	}
 }
-
 
 Write-Host "Run simulation mode for each user and his personal mailbox @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 Get-Job | Remove-Job -Force
@@ -211,115 +213,117 @@ do {
 			Write-Host "    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)) ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 			Write-Host "      User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)): Error creating signatures, please check log." -ForegroundColor Red
 		} else {
-			. {
-				try {
-					Write-Host
-					Write-Host
-					Write-Host 'SET SIGNATURES AND OOF MESSAGES'
+			if ($SimulateButDontDeploy -eq $false) {
+				. {
+					try {
+						Write-Host
+						Write-Host
+						Write-Host 'SET SIGNATURES AND OOF MESSAGES'
 
-					Set-Location (Split-Path $LogFilePath -Parent)
+						Set-Location (Split-Path $LogFilePath -Parent)
 
-					Write-Host 'All signature names'
-					Get-ChildItem '*.htm' | ForEach-Object {
-						Write-Host "  $($_.basename)"
-					}
-
-					Write-Host 'Default signature name for new e-mails'
-					if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox))\default new.htm") {
-						$hash = (Get-FileHash ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\default new.htm").hash
-						$SignatureFilePathDefaultNew = (Get-FileHash '*.htm' | Where-Object { $_.hash -eq $hash })[0].path
-						Write-Host "  $((Get-ChildItem $SignatureFilePathDefaultNew).basename)"
-					} else {
-						$SignatureFilePathDefaultNew = $null
-					}
-
-					Write-Host 'Default signature name for replies and forwards'
-					if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\default reply-forward.htm") {
-						$hash = (Get-FileHash ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\default reply-forward.htm").hash
-						$SignatureFilePathDefaultReplyforward = (Get-FileHash '*.htm' | Where-Object { $_.hash -eq $hash })[0].path
-						Write-Host "  $((Get-ChildItem $SignatureFilePathDefaultReplyforward).basename)"
-					} else {
-						$SignatureFilePathDefaultReplyforward = $null
-					}
-
-					Write-Host 'Determine signature to use in Outlook Web'
-					if ($null -ne $SignatureFilePathDefaultNew) {
-						$WebSigHtml = Get-Content -Path $SignatureFilePathDefaultNew -Encoding UTF8 -Raw
-						$WebSigTxt = Get-Content -Path	$([System.IO.Path]::ChangeExtension($SignatureFilePathDefaultNew, '.txt')) -Encoding UTF8 -Raw
-					} else {
-						if ($null -ne $SignatureFilePathDefaultReplyforward) {
-							$WebSigHtml = Get-Content -Path $SignatureFilePathDefaultReplyforward -Encoding UTF8 -Raw
-							$WebSigTxt = Get-Content -Path	$([System.IO.Path]::ChangeExtension($SignatureFilePathDefaultReplyforward, '.txt')) -Encoding UTF8 -Raw
-						} else {
-							$WebSigHtml = $null
-							$WebSigTxt = $null
+						Write-Host 'All signature names'
+						Get-ChildItem '*.htm' | ForEach-Object {
+							Write-Host "  $($_.basename)"
 						}
-					}
 
-					if ($WebSigHtml) {
-						Write-Host 'Set signature in Outlook Web'
+						Write-Host 'Default signature name for new e-mails'
+						if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox))\default new.htm") {
+							$hash = (Get-FileHash ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\default new.htm").hash
+							$SignatureFilePathDefaultNew = (Get-FileHash '*.htm' | Where-Object { $_.hash -eq $hash })[0].path
+							Write-Host "  $((Get-ChildItem $SignatureFilePathDefaultNew).basename)"
+						} else {
+							$SignatureFilePathDefaultNew = $null
+						}
 
-						# Set-MailboxMessageConfiguration requires a specific, non-standard definition for inline images
-						# With Exchange Web Services this is not necessary
-						($WebSigHtml | Select-String -Pattern '\s*src\="(data:image\/.*?"\s*>)' -AllMatches).Matches | ForEach-Object {
-							if ($_.groups.count -ge 2) {
-								if ($null -ne $_.groups[1]) {
-									$WebSigHtml = $WebSigHtml.Replace($_.groups[1].value, ('"><span id="dataURI" style="display:none">' + (($_.groups[1].value) -Replace '"\s*>', '') + '</span>'))
-								}
+						Write-Host 'Default signature name for replies and forwards'
+						if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\default reply-forward.htm") {
+							$hash = (Get-FileHash ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\default reply-forward.htm").hash
+							$SignatureFilePathDefaultReplyforward = (Get-FileHash '*.htm' | Where-Object { $_.hash -eq $hash })[0].path
+							Write-Host "  $((Get-ChildItem $SignatureFilePathDefaultReplyforward).basename)"
+						} else {
+							$SignatureFilePathDefaultReplyforward = $null
+						}
+
+						Write-Host 'Determine signature to use in Outlook Web'
+						if ($null -ne $SignatureFilePathDefaultNew) {
+							$WebSigHtml = Get-Content -Path $SignatureFilePathDefaultNew -Encoding UTF8 -Raw
+							$WebSigTxt = Get-Content -Path	$([System.IO.Path]::ChangeExtension($SignatureFilePathDefaultNew, '.txt')) -Encoding UTF8 -Raw
+						} else {
+							if ($null -ne $SignatureFilePathDefaultReplyforward) {
+								$WebSigHtml = Get-Content -Path $SignatureFilePathDefaultReplyforward -Encoding UTF8 -Raw
+								$WebSigTxt = Get-Content -Path	$([System.IO.Path]::ChangeExtension($SignatureFilePathDefaultReplyforward, '.txt')) -Encoding UTF8 -Raw
+							} else {
+								$WebSigHtml = $null
+								$WebSigTxt = $null
 							}
 						}
 
-						Set-MailboxMessageConfiguration `
-							-Identity $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox) `
-							-SignatureHTML $WebSigHtml `
-							-SignatureText $WebSigTxt `
-							-SignatureTextOnMobile $WebSigTxt `
-							-AutoAddSignature $( if ($SignatureFilePathDefaultNew) { $true } else { $false } ) `
-							-AutoAddSignatureOnMobile $( if ($SignatureFilePathDefaultNew) { $true } else { $false } ) `
-							-AutoAddSignatureOnReply $( if ($SignatureFilePathDefaultReplyforward -eq $SignatureFilePathDefaultNew) { $true } else { $false } ) `
-							-UseDefaultSignatureOnMobile $true
-					}
+						if ($WebSigHtml) {
+							Write-Host 'Set signature in Outlook Web'
 
-					Write-Host 'Determine internal Out of Office (OOF) auto reply message'
-					if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof internal.htm") {
-						$OOFInternalHtml = Get-Content ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof internal.htm" -Encoding UTF8 -Raw
-					} else {
-						$OOFInternalHtml = $null
-					}
+							# Set-MailboxMessageConfiguration requires a specific, non-standard definition for inline images
+							# With Exchange Web Services this is not necessary
+							($WebSigHtml | Select-String -Pattern '\s*src\="(data:image\/.*?"\s*>)' -AllMatches).Matches | ForEach-Object {
+								if ($_.groups.count -ge 2) {
+									if ($null -ne $_.groups[1]) {
+										$WebSigHtml = $WebSigHtml.Replace($_.groups[1].value, ('"><span id="dataURI" style="display:none">' + (($_.groups[1].value) -Replace '"\s*>', '') + '</span>'))
+									}
+								}
+							}
 
-					Write-Host 'Determine external Out of Office (OOF) auto reply message'
-					if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof external.htm") {
-						$OOFExternalHtml = Get-Content ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof external.htm" -Encoding UTF8 -Raw
-					} else {
-						$OOFExternalHtml = $null
-					}
-
-
-					if ($OOFInternalHtml -or $OOFExternalHtml) {
-						Write-Host 'Set OOF messages'
-
-						# Set-MailboxAutoReplyConfiguration can't handle inline images, they need to be removed to avoid display errors
-						# With Exchange Web Services this is not necessary
-						$OOFInternalHtml = $OOFInternalHtml -replace '(?ms)<\s*?img.*?src\="data:image\/.*?".*?>', ''
-						$OOFExternalHtml = $OOFExternalHtml -replace '(?ms)<\s*?img.*?src\="data:image\/.*?".*?>', ''
-
-						if ((Get-MailboxAutoReplyConfiguration -Identity $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)).AutoReplyState -ieq 'disabled') {
-							Set-MailboxAutoReplyConfiguration -Identity $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox) -InternalMessage $OOFInternalHtml -ExternalMessage $OOFExternalHtml
+							Set-MailboxMessageConfiguration `
+								-Identity $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox) `
+								-SignatureHTML $WebSigHtml `
+								-SignatureText $WebSigTxt `
+								-SignatureTextOnMobile $WebSigTxt `
+								-AutoAddSignature $( if ($SignatureFilePathDefaultNew) { $true } else { $false } ) `
+								-AutoAddSignatureOnMobile $( if ($SignatureFilePathDefaultNew) { $true } else { $false } ) `
+								-AutoAddSignatureOnReply $( if ($SignatureFilePathDefaultReplyforward -eq $SignatureFilePathDefaultNew) { $true } else { $false } ) `
+								-UseDefaultSignatureOnMobile $true
 						}
+
+						Write-Host 'Determine internal Out of Office (OOF) auto reply message'
+						if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof internal.htm") {
+							$OOFInternalHtml = Get-Content ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof internal.htm" -Encoding UTF8 -Raw
+						} else {
+							$OOFInternalHtml = $null
+						}
+
+						Write-Host 'Determine external Out of Office (OOF) auto reply message'
+						if (Test-Path ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof external.htm") {
+							$OOFExternalHtml = Get-Content ".\$($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)\oof external.htm" -Encoding UTF8 -Raw
+						} else {
+							$OOFExternalHtml = $null
+						}
+
+
+						if ($OOFInternalHtml -or $OOFExternalHtml) {
+							Write-Host 'Set OOF messages'
+
+							# Set-MailboxAutoReplyConfiguration can't handle inline images, they need to be removed to avoid display errors
+							# With Exchange Web Services this is not necessary
+							$OOFInternalHtml = $OOFInternalHtml -replace '(?ms)<\s*?img.*?src\="data:image\/.*?".*?>', ''
+							$OOFExternalHtml = $OOFExternalHtml -replace '(?ms)<\s*?img.*?src\="data:image\/.*?".*?>', ''
+
+							if ((Get-MailboxAutoReplyConfiguration -Identity $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)).AutoReplyState -ieq 'disabled') {
+								Set-MailboxAutoReplyConfiguration -Identity $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox) -InternalMessage $OOFInternalHtml -ExternalMessage $OOFExternalHtml
+							}
+						}
+
+						Write-Host 'xxxExitCode0xxx'
+					} catch {
+						$error[0]
+						Write-Host 'xxxExitCode999xxx'
 					}
+				} 2>&1 3>&1 4>&1 5>&1 6>&1 | Out-File -FilePath $LogFilePath -Append -Force -Encoding utf8
 
-					Write-Host 'xxxExitCode0xxx'
-				} catch {
-					$error[0]
-					Write-Host 'xxxExitCode999xxx'
+				Write-Host "    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)) ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+				if (-not (Get-Content -Path $LogFilePath -Encoding UTF8 -Raw).trim().EndsWith('xxxExitCode0xxx')) {
+					Write-Host "      User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)): Error setting signatures, please check log." -ForegroundColor Red
 				}
-			} 2>&1 3>&1 4>&1 5>&1 6>&1 | Out-File -FilePath $LogFilePath -Append -Force -Encoding utf8
-
-			Write-Host "    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)) ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-			if (-not (Get-Content -Path $LogFilePath -Encoding UTF8 -Raw).trim().EndsWith('xxxExitCode0xxx')) {
-				Write-Host "      User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) (mailbox $($SimulateList[$($x.name.trimend('_Job'))].SimulateMailbox)): Error setting signatures, please check log." -ForegroundColor Red
+				Set-Location $PSScriptRoot
 			}
-			Set-Location $PSScriptRoot
 		}
 		$x | Remove-Job -Force
 		
@@ -331,14 +335,14 @@ do {
 } until (($JobsToStartTotal -eq $JobsStarted) -and ($JobsCompleted -eq $JobsToStartTotal))
 
 
-
-Write-Host "Restore original Word security setting @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
-	Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-} else {
-	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+if ($SimulateButDontDeploy -eq $false) {
+	Write-Host "Restore original Word security setting @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+	if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
+		Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+	} else {
+		Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+	}
 }
-
 
 Write-Host "Disconncect from Exchange @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 if ($ConnectOnpremInsteadOfCloud) {
