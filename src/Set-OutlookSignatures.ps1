@@ -456,13 +456,30 @@ function main {
             exit 1
         }
 
+        $OutlookDisableRoamingSignaturesTemporaryToggle = 0
+
         if ($null -ne $OutlookRegistryVersion) {
             $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook" -ErrorAction SilentlyContinue).DefaultProfile
+
+            (
+                "registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
+                "registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
+                "registry::HKEY_CURRENT_USER\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
+                "registry::HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup"
+            ) | ForEach-Object {
+                $x = (Get-ItemProperty $_ -ErrorAction SilentlyContinue).'DisableRoamingSignaturesTemporaryToggle'
+                if ($x -in (0,1)) {
+                    $OutlookDisableRoamingSignaturesTemporaryToggle = $x
+                }
+            }
         } else {
             $OutlookDefaultProfile = $null
         }
+
         Write-Host "  Outlook registry version: $OutlookRegistryVersion"
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
+        Write-host "  Outlook file version: $OutlookFileVersin"
+        write-host "  Disable roaming signatures: $OutlookDisableRoamingSignaturesTemporaryToggle"
     }
 
     $WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Word.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
