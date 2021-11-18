@@ -669,6 +669,7 @@ function main {
         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
         Get-ChildItem $script:msalPath -Recurse | Unblock-File
         Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps')
+        Write-Host "      MSAL.PS Graph token cache file: '$([TokenCacheHelper]::CacheFilePath)'"
     }
 
     Write-Host
@@ -1686,6 +1687,7 @@ function main {
                                         $folderid = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Root, $($PrimaryMailboxAddress))
                                         $UsrConfig = [Microsoft.Exchange.WebServices.Data.UserConfiguration]::Bind($exchService, 'OWA.UserOptions', $folderid, [Microsoft.Exchange.WebServices.Data.UserConfigurationProperties]::All)
                                         if ($($PSVersionTable.PSEdition) -ieq 'Core') { $UsrConfig = $UsrConfig.result }
+                                        
                                         foreach ($OutlookWebHashKey in $OutlookWebHash.Keys) {
                                             if ($UsrConfig.Dictionary.ContainsKey($OutlookWebHashKey)) {
                                                 $UsrConfig.Dictionary[$OutlookWebHashKey] = $OutlookWebHash.$OutlookWebHashKey
@@ -2601,29 +2603,16 @@ function GraphGetToken {
             }
         }
     } else {
-        $authParamsBasic = @{
-            ClientId    = $GraphClientID
-            TenantId    = 'organizations'
-            Scopes      = 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All'
-            RedirectUri = 'http://localhost'
-        }
-
-        if ($null -ne $script:CurrentUser) {
-            $authParamsBasic['LoginHint'] = $script:CurrentUser
-            $authParamsBasic['TenantId'] = ($script:CurrentUser -split '@')[1]
-        }
-
+        $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru
+        
         try {
-            $authParams = $authParamsBasic + @{ IntegratedWindowsAuth = $true }
-            $auth = Get-MsalToken @authParams
+            $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All' -IntegratedWindowsAuth
         } catch {
             try {
-                $authParams = $authParamsBasic + @{ Silent = $true; ForceRefresh = $true }
-                $auth = Get-MsalToken @authParams
+                $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All') -Silent -ForceRefresh
             } catch {
                 try {
-                    $authParams = $authParamsBasic + @{ Interactive = $true; UseEmbeddedWebView = $false; Timeout = (New-TimeSpan -Minutes 2); Prompt = 'NoPrompt' }
-                    $auth = Get-MsalToken @authParams
+                    $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All') -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false
                 } catch {
                 }
             }
@@ -2650,16 +2639,10 @@ function GraphGetToken {
 
 
 function ExoGetToken {
-    $authParams = @{
-        ClientId    = $GraphClientID
-        LoginHint   = $script:CurrentUser
-        Scopes      = 'https://outlook.office.com/EWS.AccessAsUser.All'
-        redirecturi = 'http://localhost'
-        silent      = $true
-    }
-
     try {
-        $local:x = Get-MsalToken @authParams
+        $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(($script:CurrentUser -split '@')[1]) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru
+        $local:x = $msalClientApp | Get-MsalToken -LoginHint $script:CurrentUser -Scopes 'https://outlook.office.com/EWS.AccessAsUser.All' -Silent
+
         return @{
             error       = $false
             accessToken = $local:x.AccessToken

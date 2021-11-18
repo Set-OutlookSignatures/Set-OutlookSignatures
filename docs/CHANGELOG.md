@@ -7,6 +7,7 @@
 ### Added
 - Added sample code files, including a wrapper script for central creation and deployment of signatures and OOF messages without end user or client involvement
 - Report templates that are mentioned in the ini file but do not exist in the file system, and vice versa
+- Reduce number of required Graph authentication prompts by using a token cache file
 - New parameter GraphCredentialFile
 - New default replacement variables for displayName and mailNickname (a.k.a. alias)
 ### Fixed
