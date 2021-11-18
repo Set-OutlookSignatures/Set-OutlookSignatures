@@ -2296,10 +2296,31 @@ function Set-Signatures {
 
         if (-not $ProcessOOF) {
             $(if ($script:CurrentUserDummyMailbox -eq $true) { $SignaturePaths[0] } else { $SignaturePaths }) | ForEach-Object {
-                Write-Host "      Copy signature files to '$_'"
-                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
-                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
-                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
+                if (
+                    # Outlook is installed
+                    # and $OutlookFileVersion is high enough (exact value is unknown yet)
+                    # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
+                    # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
+                    # and the current mailbox is the personal mailbox of the currently logged-on user
+                    ($null -ne $OutlookFileVersion) `
+                        -and ($OutlookFileVersion -gt [system.version]::parse('16.0.99999.99999')) `
+                        -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
+                        -and ((($null -ne $ADPropsCurrentMailbox.recipienttypedetails) -and ($ADPropsCurrentMailbox.recipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) `
+                        -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
+                ) {
+                    # Microsoft signature roaming available
+                    Write-Host "      Copy signature files to '$_'"
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).htm"))) -Force
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).rtf"))) -Force
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).txt"))) -Force
+                    $script:SignatureFilesDone += $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).htm")
+                } else {
+                    # Microsoft signature roaming not available 
+                    Write-Host "      Copy signature files to '$_'"
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
+                }
             }
         }
 
