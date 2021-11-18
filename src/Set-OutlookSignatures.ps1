@@ -478,7 +478,7 @@ function main {
 
         Write-Host "  Outlook registry version: $OutlookRegistryVersion"
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
-        Write-host "  Outlook file version: $OutlookFileVersin"
+        Write-host "  Outlook file version: $OutlookFileVersion"
         write-host "  Disable roaming signatures: $OutlookDisableRoamingSignaturesTemporaryToggle"
     }
 
