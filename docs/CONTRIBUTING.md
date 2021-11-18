@@ -40,11 +40,47 @@ There are optimization opportunities in error handling, de-duplicating code with
 ### Approach
 Roaming signatures can only be set when one of the following condition sets is true:
 - Outlook is installed AND $OutlookFileVersion is high enough (exact value is unknown yet) AND $OutlookDisableRoamingSignaturesTemporaryToggle equals 0 AND the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*)) AND the current mailbox is the personal mailbox of the currently logged-on user
--- Most likely, the script has to add " \<e-mail address>" to the signature name and Outlook will take care of the rest
+    ```
+    if (
+        # Outlook is installed
+        # and $OutlookFileVersion is high enough (exact value is unknown yet)
+        # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
+        # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
+        # and the current mailbox is the personal mailbox of the currently logged-on user
+        ($null -ne $OutlookFileVersion) `
+            -and ($OutlookFileVersion -gt [system.version]::parse('15.0.99999.99999')) `
+            -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
+            -and (($null -ne $ADPropsCurrentMailbox.recipienttypedetails) -and ($ADPropsCurrentMailbox.recipienttypedetails -ilike "remote*")) `
+            -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
+    ) {
+        'Do roaming signature stuff here'
+    } else {
+        "Don't do roaming signature stuff here"
+    }
+    ```
+  - Most likely, the script has to add " \<e-mail address>" to the signature name and Outlook will take care of the rest. The new filenames need to be added to $script:SignatureFilesDone.
 - Outlook is not installed AND we are connected via Graph AND $GraphEndpointVersion is high enough (exact value is unknown yet) AND the mailbox is in the cloud (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*) AND the current mailbox is the personal mailbox of the currently logged-on user
--- in this case, the script first needs to download existing signatures from Graph to a temp directory
--- mailbox propably does not need to be in the cloud: https://docs.microsoft.com/en-us/graph/hybrid-rest-support
--- Alternate detection method: https://rakhesh.com/azure/graph-api-detect-if-user-has-an-o365-mailbox/
+    ```
+    if (
+        # Outlook is not installed
+        # and we are connected via Graph
+        # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
+        # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
+        # and the current mailbox is the personal mailbox of the currently logged-on user
+        ($null -eq $OutlookFileVersion) `
+            -and ($null -eq $ADPropsCurrentMailbox.recipienttypedetails) `
+            -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
+            -and ($null -ne $ADPropsCurrentMailbox.mailboxsettings) `
+            -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
+    ) {
+        'Do roaming signature stuff here'
+    } else {
+        "Don't do roaming signature stuff here"
+    }
+    ```
+  - in this case, the script first needs to download existing signatures from Graph to a temp directory
+  - mailbox propably does not need to be in the cloud: https://docs.microsoft.com/en-us/graph/hybrid-rest-support
+  - Alternate detection method: https://rakhesh.com/azure/graph-api-detect-if-user-has-an-o365-mailbox/
 ## 2.3. Enhance central signature deployment without client-side execution of script
 Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
 - Done: Automate simulation mode by wrapping parallelization code around it (`.\sample code\SimulateAndDeploy.ps1`)
