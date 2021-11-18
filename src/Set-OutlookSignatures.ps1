@@ -2303,7 +2303,7 @@ function Set-Signatures {
                     # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
                     # and the current mailbox is the personal mailbox of the currently logged-on user
                     ($null -ne $OutlookFileVersion) `
-                        -and ($OutlookFileVersion -gt [system.version]::parse('16.0.99999.99999')) `
+                        -and ($OutlookFileVersion -ge [system.version]::parse('16.0.99999.99999')) `
                         -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
                         -and ((($null -ne $ADPropsCurrentMailbox.recipienttypedetails) -and ($ADPropsCurrentMailbox.recipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) `
                         -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
