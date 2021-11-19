@@ -306,7 +306,7 @@
             The browser dialog used for user authentication
             </summary>
         </member>
-        <member name="M:Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialog.#ctor(System.Object)">
+        <member name="M:Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialog.#ctor(System.Object,Microsoft.Identity.Client.EmbeddedWebViewOptions)">
             <summary>
             Default constructor
             </summary>

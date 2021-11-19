@@ -1,38 +1,34 @@
 <#
 .SYNOPSIS
-    Clear all client applications from local session cache.
-.DESCRIPTION
-    This cmdlet clear all client application objects from the local session cache.
+    Get Azure AD Device Registration Status from current device
 .EXAMPLE
-    PS C:\>Clear-MsalTokenCache
-    Clear all client applications from local session cache.
-.EXAMPLE
-    PS C:\>Clear-MsalTokenCache -FromDisk
-    Clear all client applications from persistent cache on disk.
+    PS C:\>Get-DeviceRegistrationStatus
+    Get Azure AD Device Registration Status from current device
+.INPUTS
+    System.String
 #>
-function Clear-MsalTokenCache {
+function Get-DeviceRegistrationStatus {
     [CmdletBinding()]
-    param(
-        # Clear the token cache from disk.
-        [Parameter(Mandatory = $false)]
-        [switch] $FromDisk
-    )
+    [OutputType([hashtable])]
+    param ()
 
-    if ($FromDisk) {
-        $TokenCachePath = Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) "MSAL.PS\MSAL.PS.msalcache.bin3"
-        if (Test-Path $TokenCachePath) { Remove-Item -LiteralPath $TokenCachePath -Force }
+    ## Get Device Registration Status
+    [hashtable] $Dsreg = @{}
+    #if ([System.Environment]::OSVersion.Platform -eq 'Win32NT' -and [System.Environment]::OSVersion.Version -ge '10.0') {
+    try {
+        Dsregcmd /status | foreach { if ($_ -match '\s*(.+) : (.+)') { $Dsreg.Add($Matches[1], $Matches[2]) } }
     }
-    else {
-        $script:PublicClientApplications = New-Object 'System.Collections.Generic.List[Microsoft.Identity.Client.IPublicClientApplication]'
-        $script:ConfidentialClientApplications = New-Object 'System.Collections.Generic.List[Microsoft.Identity.Client.IConfidentialClientApplication]'
-    }
+    catch {}
+    #}
+
+    return $Dsreg
 }
 
 # SIG # Begin signature block
 # MIIjgwYJKoZIhvcNAQcCoIIjdDCCI3ACAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCBVfkPsWVldYMSy
-# w2WP3Fst3lYrsY6IAXQn1JFSKspj3qCCDYEwggX/MIID56ADAgECAhMzAAACUosz
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCAHajEUiynixWyb
+# G1LeXxmh2HnyeNnRXmkbuMYX7cKoO6CCDYEwggX/MIID56ADAgECAhMzAAACUosz
 # qviV8znbAAAAAAJSMA0GCSqGSIb3DQEBCwUAMH4xCzAJBgNVBAYTAlVTMRMwEQYD
 # VQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNy
 # b3NvZnQgQ29ycG9yYXRpb24xKDAmBgNVBAMTH01pY3Jvc29mdCBDb2RlIFNpZ25p
@@ -109,19 +105,19 @@ function Clear-MsalTokenCache {
 # HjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEoMCYGA1UEAxMfTWljcm9z
 # b2Z0IENvZGUgU2lnbmluZyBQQ0EgMjAxMQITMwAAAlKLM6r4lfM52wAAAAACUjAN
 # BglghkgBZQMEAgEFAKCBrjAZBgkqhkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgor
-# BgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQxIgQgSFw4fdoz
-# klcMuGdGvf1ndtIdTwOc/do47IK935iyYoYwQgYKKwYBBAGCNwIBDDE0MDKgFIAS
+# BgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQxIgQguJtxZkGl
+# zvsYykmpDGwK+VcRaOMgB+0ogGtOK/1Ztv8wQgYKKwYBBAGCNwIBDDE0MDKgFIAS
 # AE0AaQBjAHIAbwBzAG8AZgB0oRqAGGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbTAN
-# BgkqhkiG9w0BAQEFAASCAQBysY0EKy0AL7Diu/rJ/7xkWEASaEQCquTKOImAVqSY
-# LrTIWb/AOEIL/fYlJVqKHJ4IHtQxwmJYI0KSZ1e/VZmOzRQLSc2jHYRfnezfnWkY
-# JevBAGADlDHLUosakiXU5e57UuXV9SBl1kYJjIbluZ36L6oah4CK/WpzO0/hy/ud
-# x5JhsGDDSC5ITuTqeOtRNG7X1d1ZoYOJdPzPKCD3PuWO+VrMuYt8bzw7iW1bDl1I
-# Di42BKytkg4FN0oPQWs1Z/1SXGfelBOmoYZ0jFKyLtxQNL3y7wdjnJBjMVYvgdP2
-# dx1P+O6ULaqBR+vIOVu0WZvLBFVqfEFwgDymBIwMc7JEoYIS4jCCEt4GCisGAQQB
+# BgkqhkiG9w0BAQEFAASCAQA6eHJ6ESY0JNY9Ujgg8IvQOCAw9VE0EO4oLTQcX2k2
+# t7VQc/3gPxVVKormFzH3ANyWOATeAS/nNre5HgiAqBp0VEqwPccAbVQwVttyrv3R
+# KKkhUowvBTkX+8TVFzf2ipdg9DrGyP0pF2aACXCQzRvNBpCtZrR2vxwJN7QSx9S+
+# ZLrfhNi9vhNeBaBZg8+fEj+1XAtEemh1X2KzHxgFIsR8427mA6AHDGxQ4SWsokcI
+# NE4hblZAnl8ZfuzciwMvHEnewXTTyVKulY6K+QyOaNF8kgNTmXwHOy74OXx1Gnpd
+# xQp52eRNWZqxwSwW3NKZkn9zOrAUsB+zhFjqkbYEvh38oYIS4jCCEt4GCisGAQQB
 # gjcDAwExghLOMIISygYJKoZIhvcNAQcCoIISuzCCErcCAQMxDzANBglghkgBZQME
 # AgEFADCCAVEGCyqGSIb3DQEJEAEEoIIBQASCATwwggE4AgEBBgorBgEEAYRZCgMB
-# MDEwDQYJYIZIAWUDBAIBBQAEILJe2r+bY2D774GtltRxU9+956Sv7kjs/XBkB1Il
-# oJ+pAgZhkuE5IPsYEzIwMjExMTE5MDIzNzQ3LjgxMVowBIACAfSggdCkgc0wgcox
+# MDEwDQYJYIZIAWUDBAIBBQAEIMd8aX8z7W/uIEoRXiF+LrLZPgn3wJARVRiIcE+U
+# dCIwAgZhkuE5IN8YEzIwMjExMTE5MDIzNzQ2LjQ3NlowBIACAfSggdCkgc0wgcox
 # CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRt
 # b25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xJTAjBgNVBAsTHE1p
 # Y3Jvc29mdCBBbWVyaWNhIE9wZXJhdGlvbnMxJjAkBgNVBAsTHVRoYWxlcyBUU1Mg
@@ -206,17 +202,17 @@ function Clear-MsalTokenCache {
 # c2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBD
 # b3Jwb3JhdGlvbjEmMCQGA1UEAxMdTWljcm9zb2Z0IFRpbWUtU3RhbXAgUENBIDIw
 # MTACEzMAAAFT0oJyRWxX44sAAAAAAVMwDQYJYIZIAWUDBAIBBQCgggFKMBoGCSqG
-# SIb3DQEJAzENBgsqhkiG9w0BCRABBDAvBgkqhkiG9w0BCQQxIgQg0GjyRAvamrud
-# jkwl4YeuKA/TWhe1NHQb+BNbAXvRY7IwgfoGCyqGSIb3DQEJEAIvMYHqMIHnMIHk
+# SIb3DQEJAzENBgsqhkiG9w0BCRABBDAvBgkqhkiG9w0BCQQxIgQgnzwfaelhvF7P
+# 4sIdcPhZ5gqPIdcNttX3nrXRhkkU2dUwgfoGCyqGSIb3DQEJEAIvMYHqMIHnMIHk
 # MIG9BCBQwQqPObQgCAn8l6GQQ6aaHSyDHG9sDh9qxAVojbWPADCBmDCBgKR+MHwx
 # CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRt
 # b25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xJjAkBgNVBAMTHU1p
 # Y3Jvc29mdCBUaW1lLVN0YW1wIFBDQSAyMDEwAhMzAAABU9KCckVsV+OLAAAAAAFT
 # MCIEIFnwcRXJ/YNNoXl0mJfandOHxnrShOHLgCLIKJgJ8U73MA0GCSqGSIb3DQEB
-# CwUABIIBAIfv84w5uDdB8FxUkOGo/W52sVG30sHtB36MaYpFf3z6FMZpOvPK8Ah5
-# 9CB8wngmAP0gL6g7ueKzink1TBM4D6CmCao0cbAAfScc3lT1QUXxnnnUaTEd+f6m
-# kY+j6V9D04zx5tD3poZY0gvoSS34NHrl/iwPtnVoEub65Jf4fhPqaOqwTyE4XPd8
-# R21+324uOpUM7pzn1eqHeqb/4cvwrCEglcMjjYFZ3lo4wEMfMuT+ZQKLrtvE7ptw
-# dTmKR7BcHX9ywrmekQaQyVVZt7wCSOBjYNzaqpeHncce/xMXX8nm+1N9oUAUeqqx
-# mxsGghcxJCLw02qtLz4PFYgqNOThhhg=
+# CwUABIIBAB3/VrWxaoF+STiBFySsoyRMFYJ2WmsmyHAlA8X06RImUEd1oSUuN9wR
+# KKy5y/N7nam0luXYqif9ZL43GSs2BNqjFGbF1ml0vkwCHPQvXm/18M94vIvCH//K
+# oc86qDzeTrOaRidqwIWJFIuVsYrKQajDq0aGqavMgosDY3vYAODhR7mnBZHNn1NR
+# RX+JPXzoj8KTgdN//82DGnYzdvE8Af+xouID45fB0QpuSmnB4t081jEJXQn7FjfP
+# 9mjEoEOXd+qPwjEhbJdIOIHlOixSaOdz18bxr7f5iN5+7pB8/mOLIgudR1NQAfwO
+# /FSxkz3pweV1tcuTZ1WDbasyBz070i8=
 # SIG # End signature block
