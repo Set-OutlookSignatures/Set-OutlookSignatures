@@ -11,9 +11,7 @@
 - New parameter GraphCredentialFile
 - New default replacement variables for displayName and mailNickname (a.k.a. alias)
 ### Fixed
-- Ignore mail-enabled users an mailbox search to avoid binding to the wrong Exchange object in migration scenarios (which would lead to wrong replacement variable data and group membership)
-- When connecting to Exchange Online, check for valid mailbox in addition to valid credentials
-- Clarify port requirements and group membership evaluation in documentation
+- Do not ignore remote mailboxes when searching mailboxes in Active Directory
 - When saving a document in Word fails, wait for two seconds and retry saving to avoid problems with virus scanners
 ### Changed
 - Documentation updates
