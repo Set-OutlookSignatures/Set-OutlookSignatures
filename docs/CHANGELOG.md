@@ -9,6 +9,7 @@
 - Report templates that are mentioned in the ini file but do not exist in the file system, and vice versa
 - Reduce number of required Graph authentication prompts by using a token cache file
 - New parameter GraphCredentialFile
+- New parameter GraphOnly: Try to connect to Microsoft Graph only, ignoring any local Active Directory. The default behavior is to try Active Directory first and fall back to Graph.
 - New default replacement variables for displayName and mailNickname (a.k.a. alias)
 ### Fixed
 - Do not ignore remote mailboxes when searching mailboxes in Active Directory

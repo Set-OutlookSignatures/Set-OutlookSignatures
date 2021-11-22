@@ -152,7 +152,7 @@ $JobsCompleted = 0
 
 Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
 do {
-	while ((($JobsToStartOpen -gt 0) -and ((Get-Job -State running).count -lt $JobsConcurrent))) {
+	while ((($JobsToStartOpen -gt 0) -and ((Get-Job).count -lt $JobsConcurrent))) {
 		$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$Jobsstarted].SimulateUser)) -ChildPath '_log.txt'
 		if ((Test-Path (Split-Path $LogFilePath -Parent)) -eq $false) {
 			New-Item -ItemType Directory -Path (Split-Path $LogFilePath -Parent) | Out-Null
@@ -182,7 +182,7 @@ do {
 					# Need to use Invoke-Expression to be able to pass arguments stored in a string
 					Invoke-Expression $(". `"$SetOutlookSignaturesScriptPath`" -SimulateUser `"$SimulateUser`" -SimulateMailbox `"$SimulateMailbox`" -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" $SetOutlookSignaturesScriptParameters")
 					
-					if ($LASTEXITCODE -eq 0) {
+					if (($?) -or ($LASTEXITCODE -eq 0)) {
 						Write-Host 'xxxExitCode0xxx'
 					} else {
 						Write-Host "xxxExitCode$($LASTEXITCODE)xxx"

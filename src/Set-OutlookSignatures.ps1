@@ -127,7 +127,7 @@ Default value: ''
 .PARAMETER UseHtmTemplates
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
 Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
-Default value: \$false
+Default value: $false
 
 .PARAMETER SimulateUser
 SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged on user.
@@ -142,7 +142,12 @@ It is a comma separated list of e-mail addresses replacing the list of mailboxes
 Path to file containing Graph credential which should be used as alternative to other token acquisition methods
 Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
 See '.\sample code\SimulateAndDeploy.ps1' for an example how to create this file
-Default value: \$null
+Default value: $null
+
+.PARAMETER GraphOnly
+Try to connect to Microsoft Graph only, ignoring any local Active Directory.
+The default behavior is to try Active Directory first and fall back to Graph.
+Default value: $false
 
 .INPUTS
 None. You cannot pipe objects to Set-OutlookSignatures.ps1.
@@ -186,7 +191,8 @@ Param(
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
     #   The currently logged on user needs at least read access to the path
-    [ValidateNotNullOrEmpty()][string]$SignatureTemplatePath = '.\templates\Signatures DOCX',
+    [ValidateNotNullOrEmpty()]
+    [string]$SignatureTemplatePath = '.\templates\Signatures DOCX',
 
     # Path to ini file containing signature template tags
     # This is an alternative to file name tags
@@ -196,7 +202,8 @@ Param(
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
     #   The currently logged on user needs at least read access to the path
-    [ValidateNotNullOrEmpty()][string]$SignatureIniPath = '',
+    [ValidateNotNullOrEmpty()]
+    [string]$SignatureIniPath = '',
 
     # Path to a replacement variable config file.
     #   Local and remote paths are supported
@@ -204,7 +211,8 @@ Param(
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
     #   The currently logged on user needs at least read access to the path
-    [ValidateNotNullOrEmpty()][string]$ReplacementVariableConfigFile = '.\config\default replacement variables.ps1',
+    [ValidateNotNullOrEmpty()]
+    [string]$ReplacementVariableConfigFile = '.\config\default replacement variables.ps1',
 
     # Path to a Graph variable config file.
     #   Local and remote paths are supported
@@ -212,7 +220,8 @@ Param(
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/config/default graph config.ps1' or '\\server.domain@SSL\SignatureSite\config\default graph config.ps1'
     #   The currently logged on user needs at least read access to the path
-    [ValidateNotNullOrEmpty()][string]$GraphConfigFile = '.\config\default graph config.ps1',
+    [ValidateNotNullOrEmpty()]
+    [string]$GraphConfigFile = '.\config\default graph config.ps1',
 
     # List of domains/forests to check for group membership across trusts
     #   If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
@@ -239,7 +248,8 @@ Param(
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
     #   The currently logged on user needs at least read access to the path
-    [ValidateNotNullOrEmpty()][string]$OOFTemplatePath = '.\templates\Out of Office DOCX',
+    [ValidateNotNullOrEmpty()]
+    [string]$OOFTemplatePath = '.\templates\Out of Office DOCX',
 
     # Path to ini file containing OOF template tags
     # This is an alternative to file name tags
@@ -249,16 +259,19 @@ Param(
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
     #   The currently logged on user needs at least read access to the path
-    [ValidateNotNullOrEmpty()][string]$OOFIniPath = '',
+    [ValidateNotNullOrEmpty()]
+    [string]$OOFIniPath = '',
 
     # An additional path that the signatures shall be copied to
     [string]$AdditionalSignaturePath = $(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) }catch {}),
 
     # Subfolder to create in $AdditionalSignaturePath
-    [ValidateNotNull()][string]$AdditionalSignaturePathFolder = '',
+    [ValidateNotNull()]
+    [string]$AdditionalSignaturePathFolder = '',
 
     # Use templates in .HTM file format instead of .DOCX
-    [switch]$UseHtmTemplates = $false,
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
+    $UseHtmTemplates = $false,
 
     # Simulate another user as currently logged on user
     [Alias('SimulationUser')]
@@ -273,7 +286,12 @@ Param(
     # Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
     # See '.\sample code\SimulateAndDeploy.ps1' for an example how to create this file
     [ValidateNotNullOrEmpty()]
-    [string]$GraphCredentialFile = ''
+    [string]$GraphCredentialFile = '',
+
+    # Try to connect to Microsoft Graph only, ignoring any local Active Directory.
+    # The default behavior is to try Active Directory first and fall back to Graph.
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
+    $GraphOnly = $false
 )
 
 
@@ -329,6 +347,8 @@ function main {
     CheckPath $GraphConfigFile
     Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
     if ($GrapCredentialFile) { CheckPath $GraphCredentialFile } else { Write-Host }
+    Write-Host "  GraphOnly: '$GraphOnly'"
+    $GraphOnly = [System.Convert]::ToBoolean($GraphOnly.tostring().trim('$'))
     Write-Host "  SignatureTemplatePath: '$SignatureTemplatePath'" -NoNewline
     CheckPath $SignatureTemplatePath
     Write-Host "  SignatureIniPath: '$SignatureIniPath'" -NoNewline
@@ -388,6 +408,7 @@ function main {
     Write-Host "  AdditionalSignaturePath combined: '$AdditionalSignaturePath'" -NoNewline
     checkpath $AdditionalSignaturePath -create
     Write-Host "  UseHtmTemplates: '$UseHtmTemplates'"
+    $UseHtmTemplates = [System.Convert]::ToBoolean($UseHtmTemplates.tostring().trim('$'))
     Write-Host "  SimulateUser: '$SimulateUser'"
     Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
 
@@ -555,100 +576,106 @@ function main {
     Write-Host "Enumerate domains @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $x = $TrustsToCheckForGroups
     [System.Collections.ArrayList]$TrustsToCheckForGroups = @()
+    if ($GraphOnly -eq $false) {
+        # Users own domain/forest is always included
+        $y = ([ADSI]"LDAP://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
+        if ($y -ne '') {
+            Write-Host "  Current user forest: $y"
+            $TrustsToCheckForGroups += $y
 
-    # Users own domain/forest is always included
-    $y = ([ADSI]"LDAP://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
-    if ($y -ne '') {
-        Write-Host "  Current user forest: $y"
-        $TrustsToCheckForGroups += $y
+            # Other domains - either the list provided, or all outgoing and bidirectional trusts
+            if ($x[0] -eq '*') {
+                $Search.SearchRoot = "GC://$($TrustsToCheckForGroups[0])"
+                $Search.Filter = '(ObjectClass=trustedDomain)'
 
-        # Other domains - either the list provided, or all outgoing and bidirectional trusts
-        if ($x[0] -eq '*') {
-            $Search.SearchRoot = "GC://$($TrustsToCheckForGroups[0])"
-            $Search.Filter = '(ObjectClass=trustedDomain)'
+                $Search.FindAll() | ForEach-Object {
+                    # DNS name of this side of the trust (could be the root domain or any subdomain)
+                    # $TrustOrigin = ($_.properties.distinguishedname -split ',DC=')[1..999] -join '.'
 
-            $Search.FindAll() | ForEach-Object {
-                # DNS name of this side of the trust (could be the root domain or any subdomain)
-                # $TrustOrigin = ($_.properties.distinguishedname -split ',DC=')[1..999] -join '.'
+                    # DNS name of the other side of the trust (could be the root domain or any subdomain)
+                    # $TrustName = $_.properties.name
 
-                # DNS name of the other side of the trust (could be the root domain or any subdomain)
-                # $TrustName = $_.properties.name
+                    # Domain SID of the other side of the trust
+                    # $TrustNameSID = (New-Object system.security.principal.securityidentifier($($_.properties.securityidentifier), 0)).tostring()
 
-                # Domain SID of the other side of the trust
-                # $TrustNameSID = (New-Object system.security.principal.securityidentifier($($_.properties.securityidentifier), 0)).tostring()
+                    # Trust direction
+                    # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trustdirection?view=net-5.0
+                    # $TrustDirectionNumber = $_.properties.trustdirection
 
-                # Trust direction
-                # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trustdirection?view=net-5.0
-                # $TrustDirectionNumber = $_.properties.trustdirection
+                    # Trust type
+                    # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trusttype?view=net-5.0
+                    # $TrustTypeNumber = $_.properties.trusttype
 
-                # Trust type
-                # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trusttype?view=net-5.0
-                # $TrustTypeNumber = $_.properties.trusttype
+                    # Trust attributes
+                    # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/e9a2d23c-c31e-4a6f-88a0-6646fdb51a3c
+                    # $TrustAttributesNumber = $_.properties.trustattributes
 
-                # Trust attributes
-                # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/e9a2d23c-c31e-4a6f-88a0-6646fdb51a3c
-                # $TrustAttributesNumber = $_.properties.trustattributes
+                    # Which domains does the current user have access to?
+                    # No intra-forest trusts, only bidirectional trusts and outbound trusts
 
-                # Which domains does the current user have access to?
-                # No intra-forest trusts, only bidirectional trusts and outbound trusts
-
-                if (($($_.properties.trustattributes) -ne 32) -and (($($_.properties.trustdirection) -eq 2) -or ($($_.properties.trustdirection) -eq 3)) ) {
-                    Write-Host "  Trusted domain: $($_.properties.name)"
-                    $TrustsToCheckForGroups += $_.properties.name
-                }
-            }
-        }
-
-        for ($a = 0; $a -lt $x.Count; $a++) {
-            if (($a -eq 0) -and ($x[$a] -ieq '*')) {
-                continue
-            }
-
-            $y = ($x[$a] -replace ('DC=', '') -replace (',', '.'))
-
-            if ($y -eq $x[$a]) {
-                Write-Host "  User provided domain/forest: $y"
-            } else {
-                Write-Host "  User provided domain/forest: $($x[$a]) -> $y"
-            }
-
-            if (($a -ne 0) -and ($x[$a] -ieq '*')) {
-                Write-Host '    Skipping domain. Entry * is only allowed at first position in list.' -ForegroundColor Red
-                continue
-            }
-
-            if ($y -match '[^a-zA-Z0-9.-]') {
-                Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.' -ForegroundColor Red
-                continue
-            }
-
-            if (-not ($y.StartsWith('-'))) {
-                if ($TrustsToCheckForGroups -icontains $y) {
-                    Write-Host '    Domain already in list.' -ForegroundColor Yellow
-                } else {
-                    $TrustsToCheckForGroups += $y
-                }
-            } else {
-                Write-Host '    Removing domain.'
-                for ($z = 0; $z -lt $TrustsToCheckForGroups.Count; $z++) {
-                    if ($TrustsToCheckForGroups[$z] -ilike $y.substring(1)) {
-                        $TrustsToCheckForGroups[$z] = ''
+                    if (($($_.properties.trustattributes) -ne 32) -and (($($_.properties.trustdirection) -eq 2) -or ($($_.properties.trustdirection) -eq 3)) ) {
+                        Write-Host "  Trusted domain: $($_.properties.name)"
+                        $TrustsToCheckForGroups += $_.properties.name
                     }
                 }
             }
+
+            for ($a = 0; $a -lt $x.Count; $a++) {
+                if (($a -eq 0) -and ($x[$a] -ieq '*')) {
+                    continue
+                }
+
+                $y = ($x[$a] -replace ('DC=', '') -replace (',', '.'))
+
+                if ($y -eq $x[$a]) {
+                    Write-Host "  User provided domain/forest: $y"
+                } else {
+                    Write-Host "  User provided domain/forest: $($x[$a]) -> $y"
+                }
+
+                if (($a -ne 0) -and ($x[$a] -ieq '*')) {
+                    Write-Host '    Skipping domain. Entry * is only allowed at first position in list.' -ForegroundColor Red
+                    continue
+                }
+
+                if ($y -match '[^a-zA-Z0-9.-]') {
+                    Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.' -ForegroundColor Red
+                    continue
+                }
+
+                if (-not ($y.StartsWith('-'))) {
+                    if ($TrustsToCheckForGroups -icontains $y) {
+                        Write-Host '    Domain already in list.' -ForegroundColor Yellow
+                    } else {
+                        $TrustsToCheckForGroups += $y
+                    }
+                } else {
+                    Write-Host '    Removing domain.'
+                    for ($z = 0; $z -lt $TrustsToCheckForGroups.Count; $z++) {
+                        if ($TrustsToCheckForGroups[$z] -ilike $y.substring(1)) {
+                            $TrustsToCheckForGroups[$z] = ''
+                        }
+                    }
+                }
+            }
+
+
+            Write-Host
+            Write-Host "Check for open LDAP port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            CheckADConnectivity $TrustsToCheckForGroups 'LDAP' '  ' | Out-Null
+
+
+            Write-Host
+            Write-Host "Check for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            CheckADConnectivity $TrustsToCheckForGroups 'GC' '  ' | Out-Null
+        } else {
+            Write-Host '  Problem connecting to logged on user''s Active Directory, assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
         }
-
-
-        Write-Host
-        Write-Host "Check for open LDAP port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-        CheckADConnectivity $TrustsToCheckForGroups 'LDAP' '  ' | Out-Null
-
-
-        Write-Host
-        Write-Host "Check for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-        CheckADConnectivity $TrustsToCheckForGroups 'GC' '  ' | Out-Null
     } else {
-        Write-Host '  Problem connecting to logged on user''s Active Directory, assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
+        Write-Host "  Parameter GraphOnly set to '$GraphOnly', ignoring user's Active Directory in favor of Graph/Azure AD."
+    }
+
+    if (($GraphOnly -eq $true) -or ($y -eq '')) {
         if (Test-Path -Path $GraphConfigFile -PathType Leaf) {
             try {
                 Write-Host "    Execute content of config file '$GraphConfigFile'"
@@ -671,6 +698,7 @@ function main {
         Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps')
         Write-Host "      MSAL.PS Graph token cache file: '$([TokenCacheHelper]::CacheFilePath)'"
     }
+
 
     Write-Host
     Write-Host "Get AD properties of currently logged on user and assigned manager @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
