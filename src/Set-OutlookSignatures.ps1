@@ -15,8 +15,8 @@ Signatures and OOF messages can be:
 - Centrally managed only or exist along user created signatures (signatures only)
 - Copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
 
-Set-Outlooksignatures can be executed on the client side, or on a server without end user interaction.  
-On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.  
+Set-Outlooksignatures can be executed on the client side, or on a server without end user interaction.
+On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.
 Signatures and OOF messages can also be created and deployed centrally, without end user or client involvement.
 
 Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
@@ -696,7 +696,9 @@ function main {
         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
         Get-ChildItem $script:msalPath -Recurse | Unblock-File
         Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps')
-        Write-Host "      MSAL.PS Graph token cache file: '$([TokenCacheHelper]::CacheFilePath)'"
+        if ($($PSVersionTable.PSEdition) -ieq 'Desktop') {
+            Write-Host "      MSAL.PS Graph token cache file: '$([TokenCacheHelper]::CacheFilePath)'"
+        }
     }
 
 
@@ -1169,7 +1171,7 @@ function main {
                     Write-Host "  '$_' found in OOF template path but not in ini, please check" -ForegroundColor Yellow
                 }
             }
-    
+
             try {
                 $local:OOFFilesSortCulture = $OOFIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
                 Sort-Object -Culture $local:OOFFilesSortCulture
@@ -1721,7 +1723,7 @@ function main {
                                         $folderid = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Root, $($PrimaryMailboxAddress))
                                         $UsrConfig = [Microsoft.Exchange.WebServices.Data.UserConfiguration]::Bind($exchService, 'OWA.UserOptions', $folderid, [Microsoft.Exchange.WebServices.Data.UserConfigurationProperties]::All)
                                         if ($($PSVersionTable.PSEdition) -ieq 'Core') { $UsrConfig = $UsrConfig.result }
-                                        
+
                                         foreach ($OutlookWebHashKey in $OutlookWebHash.Keys) {
                                             if ($UsrConfig.Dictionary.ContainsKey($OutlookWebHashKey)) {
                                                 $UsrConfig.Dictionary[$OutlookWebHashKey] = $OutlookWebHash.$OutlookWebHashKey
@@ -2351,7 +2353,7 @@ function Set-Signatures {
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).txt"))) -Force
                     $script:SignatureFilesDone += $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).htm")
                 } else {
-                    # Microsoft signature roaming not available 
+                    # Microsoft signature roaming not available
                     Write-Host "      Copy signature files to '$_'"
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
@@ -2637,8 +2639,11 @@ function GraphGetToken {
             }
         }
     } else {
-        $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru
-        
+        if ($($PSVersionTable.PSEdition) -ieq 'Desktop') {
+            $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru
+        } else {
+            $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost'
+        }
         try {
             $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All' -IntegratedWindowsAuth
         } catch {
@@ -2674,7 +2679,12 @@ function GraphGetToken {
 
 function ExoGetToken {
     try {
-        $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(($script:CurrentUser -split '@')[1]) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru
+        if ($($PSVersionTable.PSEdition) -ieq 'Desktop') {
+            $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(($script:CurrentUser -split '@')[1]) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru
+        } else {
+            $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(($script:CurrentUser -split '@')[1]) -RedirectUri 'http://localhost'
+        }
+ 
         $local:x = $msalClientApp | Get-MsalToken -LoginHint $script:CurrentUser -Scopes 'https://outlook.office.com/EWS.AccessAsUser.All' -Silent
 
         return @{
@@ -2702,7 +2712,10 @@ function GraphGetMe {
             Headers     = $script:authorizationHeader
             ContentType = 'Application/Json'
         }
+        $OldProgressPreference = $ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
         $local:x = (Invoke-RestMethod @requestBody)
+        $ProgressPreference = $OldProgressPreference
     } catch {
     }
 
@@ -2739,7 +2752,10 @@ function GraphGetUserProperties($user) {
             ContentType = 'Application/Json'
         }
         $local:x = $null
+        $OldProgressPreference = $ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
         $local:x = (Invoke-RestMethod @requestBody)
+        $ProgressPreference = $OldProgressPreference
     } catch {
     }
 
@@ -2770,7 +2786,10 @@ function GraphGetUserManager($user) {
             Headers     = $script:authorizationHeader
             ContentType = 'Application/Json'
         }
+        $OldProgressPreference = $ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
         $local:x = Invoke-RestMethod @requestBody
+        $ProgressPreference = $OldProgressPreference
     } catch {
     }
 
@@ -2800,7 +2819,10 @@ function GraphGetUserTransitiveMemberOf($user) {
             Headers     = $script:authorizationHeader
             ContentType = 'Application/Json'
         }
+        $OldProgressPreference = $ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
         $x = (Invoke-RestMethod @requestBody).value
+        $ProgressPreference = $OldProgressPreference
     } catch {
     }
 
@@ -2830,7 +2852,10 @@ function GraphGetUserPhoto($user) {
             ContentType = 'image/jpg'
         }
         $local:tempFile = (Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ((New-Guid).Guid))
+        $OldProgressPreference = $ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
         Invoke-RestMethod @requestBody -OutFile $tempFile
+        $ProgressPreference = $OldProgressPreference
         $local:x = (Get-Content -Path $tempFile -Encoding Byte -Raw)
         Remove-Item $local:tempFile -Force
     } catch {
@@ -2865,7 +2890,10 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal) {
                 ContentType = 'Application/Json'
                 Body        = $body
             }
-            Invoke-WebRequest @requestBody
+            $OldProgressPreference = $ProgressPreference
+            $ProgressPreference = 'SilentlyContinue'
+            Invoke-RestMethod @requestBody
+            $ProgressPreference = $OldProgressPreference
         } else {
         }
         return @{
@@ -2890,7 +2918,10 @@ function GraphFilterGroups($filter) {
             Headers     = $script:authorizationHeader
             ContentType = 'Application/Json'
         }
+        $OldProgressPreference = $ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
         $local:x = (Invoke-RestMethod @requestBody).value
+        $ProgressPreference = $OldProgressPreference
     } catch {
     }
 
