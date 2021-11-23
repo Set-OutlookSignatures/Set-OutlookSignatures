@@ -88,7 +88,8 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [15.15. The script hangs at HTM/RTF export, Word shows a security warning!?](#1515-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
   - [15.16. How to avoid empty lines when replacement variables return an empty string?](#1516-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
   - [15.17. Is there a roadmap for future versions?](#1517-is-there-a-roadmap-for-future-versions)
-  - [15.18. What about the new signature roaming feature Microsoft announced?](#1518-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [15.18. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1518-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
+  - [15.19. What about the new signature roaming feature Microsoft announced?](#1519-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -762,7 +763,36 @@ There is no binding roadmap for future versions, although I maintain a list of i
 Now that Set-OutlookSignatures is cloud aware, the next big thing will probably be supporting Microsoft's signature roaming feature. I have already seen a beta version of Outlook handling the new feature, but Microsoft has not yet disclosed an API or other detailed documentation.
 
 Fixing issues has priority over new features, of course.
-## 15.18. What about the new signature roaming feature Microsoft announced?  
+## 15.18. How to deploy signatures for "Send As", "Send On Behalf" etc.?
+The script only considers primary mailboxes, these are mailboxes added as separate accounts. This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
+
+If you want to deploy signatures for
+- non-primary mailboxes,
+- mailboxes you don't add to Outlook but just use an assigned "Send As" or "Send on Behalf" right by choosing a different "From" address,
+- or distribution lists, for which you use an assigned "Send As" or "Send on Behalf" right by choosing a different "From" address,
+create a group or e-mail address specific signature, where the group or the e-mail-address does not refer to the mailbox or distribution group the e-mail is sent from, but rather the user or group who has the right to send from this mailbox or distribution group.
+
+An example:
+Members of the group "Example\Group" have the right to send as mailbox m<area>@example.com and as the distribution group dg<area>@example.com.
+
+You want to deploy signatures for the mailbox m<area>@example.com and the distribution group dg<area>@example.com.
+
+Problem 1: dg<area>@example.com can't be added as a mailbox to Outlook, as it is a distribution group.
+
+Problem 2: The mailbox m<area>@example.com is configured as non-primary maibox on most clients, because most of the users have the "Send as" permission, but not the "Full Access" permissions. Some users even don't connect the mailbox at all, they just choose m<area>@example.com as "From" address.
+
+Solution: Create signature templates for the mailbox m<area>@example.com and the distribution group dg<area>@example.com and **assign them to the users and groups having "send as" permissions**.
+
+When using file name based tags, the file names would be:
+```
+m@example.com external English formal.[Example Group] [u@example.com].docx
+
+dg@example.com internal German informal.[Example Group] [u@example.com].docx
+```
+This works as long as the personal mailbox of a member of "Example\Group" is connected in Outlook as primary mailbox (which usually is the case). When this personal mailbox is processed by Set-OutlookSignatures, the script recognizes the group membership and the signature assigned to it.
+
+Caveat: The \$CurrentMailbox[...]\$ replacement variables refer to the user's personal mailbox in this case, not to m<area>@example.com.
+## 15.19. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.
