@@ -839,7 +839,7 @@ function main {
                         Write-Host "    $($TrustsToCheckForGroups[$DomainNumber]) (searching for mailbox user object) ... " -NoNewline
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
                         if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msExchRecipienttypeDetails<=32)(msExchRecipienttypeDetails>=2147483648))(msExchMailboxGuid=*)(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning])))"
+                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msExchRecipienttypeDetails<=32)(msExchRecipienttypeDetails>=2147483648))(msExchMailboxGuid=*)(|(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning]))(&(legacyExchangeDN=*)(proxyaddresses=x500:$($LegacyExchangeDNs[$AccountNumberRunning])))))"
                         } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
                             $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msExchRecipienttypeDetails<=32)(msExchRecipienttypeDetails>=2147483648))(msExchMailboxGuid=*)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
                         }
