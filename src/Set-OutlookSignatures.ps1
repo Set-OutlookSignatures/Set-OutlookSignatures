@@ -845,10 +845,14 @@ function main {
                         if ($u.count -eq 0) {
                             Write-Host
                             Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches no Exchange mailbox."
+                            $LegacyExchangeDNs[$AccountNumberRunning] = ''
+                            $UserDomain = $null
                         } elseif ($u.count -gt 1) {
                             Write-Host
                             Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches multiple Exchange mailboxes, ignoring." -ForegroundColor Red
-                            $u | ForEach-Object { Write-Host "          $($_.path)" -ForegroundColor Yellow }
+                            $u | ForEach-Object {
+                                Write-Host "          $($_.path)" -ForegroundColor Yellow
+                            }
                             $LegacyExchangeDNs[$AccountNumberRunning] = ''
                             $MailAddresses[$AccountNumberRunning] = ''
                             $UserDomain = $null
