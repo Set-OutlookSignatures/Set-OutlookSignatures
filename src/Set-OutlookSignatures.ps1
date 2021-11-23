@@ -1413,31 +1413,33 @@ function main {
                         $LdapFilterSIDs = ''
                     }
 
-                    for ($DomainNumber = 0; $DomainNumber -lt $TrustsToCheckForGroups.count; $DomainNumber++) {
-                        if (($TrustsToCheckForGroups[$DomainNumber] -ne '') -and ($TrustsToCheckForGroups[$DomainNumber] -ine $UserDomain) -and ($UserDomain -ne '')) {
-                            Write-Host "    $($TrustsToCheckForGroups[$DomainNumber]) (mailbox group membership across trusts, takes some time) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
-                            $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
+                    if ($LdapFilterSids -ilike '*objectsid*') {
+                        for ($DomainNumber = 0; $DomainNumber -lt $TrustsToCheckForGroups.count; $DomainNumber++) {
+                            if (($TrustsToCheckForGroups[$DomainNumber] -ne '') -and ($TrustsToCheckForGroups[$DomainNumber] -ine $UserDomain) -and ($UserDomain -ne '')) {
+                                Write-Host "    $($TrustsToCheckForGroups[$DomainNumber]) (mailbox group membership across trusts, takes some time) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                                $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
+                                $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
 
-                            foreach ($fsp in $Search.FindAll()) {
-                                if (($fsp.path -ne '') -and ($null -ne $fsp.path)) {
-                                    # Foreign Security Principals do not have the tokengroups attribute
-                                    # We need to switch to another, slower search method
-                                    # member:1.2.840.113556.1.4.1941:= (LDAP_MATCHING_RULE_IN_CHAIN) returns groups containing a specific DN as member
-                                    # A Foreign Security Principal ist created in each (sub)domain, in which it is granted permissions,
-                                    # and it can only be member of a domain local group - so we set the searchroot to the (sub)domain of the Foreign Security Principal.
-                                    Write-Host "      Found $($fsp.properties.cn) in $((($fsp.path -split ',DC=')[1..999] -join '.'))"
-                                    try {
-                                        $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$((($fsp.path -split ',DC=')[1..999] -join '.'))")
-                                        $Search.filter = "(&(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname)))"
+                                foreach ($fsp in $Search.FindAll()) {
+                                    if (($fsp.path -ne '') -and ($null -ne $fsp.path)) {
+                                        # Foreign Security Principals do not have the tokengroups attribute
+                                        # We need to switch to another, slower search method
+                                        # member:1.2.840.113556.1.4.1941:= (LDAP_MATCHING_RULE_IN_CHAIN) returns groups containing a specific DN as member
+                                        # A Foreign Security Principal ist created in each (sub)domain, in which it is granted permissions,
+                                        # and it can only be member of a domain local group - so we set the searchroot to the (sub)domain of the Foreign Security Principal.
+                                        Write-Host "      Found $($fsp.properties.cn) in $((($fsp.path -split ',DC=')[1..999] -join '.'))"
+                                        try {
+                                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$((($fsp.path -split ',DC=')[1..999] -join '.'))")
+                                            $Search.filter = "(&(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname)))"
 
-                                        foreach ($group in $Search.findall()) {
-                                            $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
-                                            $GroupsSIDs += $sid.tostring()
-                                            Write-Host "        $sid"
+                                            foreach ($group in $Search.findall()) {
+                                                $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
+                                                $GroupsSIDs += $sid.tostring()
+                                                Write-Host "        $sid"
+                                            }
+                                        } catch {
+                                            Write-Host "        Error: $($error[0].exception)" -ForegroundColor red
                                         }
-                                    } catch {
-                                        Write-Host "        Error: $($error[0].exception)" -ForegroundColor red
                                     }
                                 }
                             }
