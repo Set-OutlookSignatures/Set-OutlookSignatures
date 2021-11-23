@@ -675,30 +675,32 @@ function main {
         Write-Host "  Parameter GraphOnly set to '$GraphOnly', ignoring user's Active Directory in favor of Graph/Azure AD."
     }
 
-    if (($GraphOnly -eq $true) -or ($y -eq '')) {
-        if (Test-Path -Path $GraphConfigFile -PathType Leaf) {
-            try {
-                Write-Host "    Execute content of config file '$GraphConfigFile'"
-                . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile -Raw)))
-            } catch {
-                Write-Host "    Problem executing content of '$GraphConfigFile'. Exiting." -ForegroundColor Red
-                Write-Host "    Error: $_" -ForegroundColor Red
-                $error[0]
-                exit 1
-            }
-        } else {
-            Write-Host "    Problem connecting to or reading from file '$GraphConfigFile'. Exiting." -ForegroundColor Red
+
+    Write-Host
+    Write-Host "Set up environment for connection to Microsoft Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    $script:CurrentUser = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\IdentityStore\Cache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)\IdentityCache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)" -Name 'UserName' -ErrorAction SilentlyContinue)
+    $script:msalPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
+    Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
+    Get-ChildItem $script:msalPath -Recurse | Unblock-File
+    Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps')
+
+    if (Test-Path -Path $GraphConfigFile -PathType Leaf) {
+        try {
+            Write-Host "  Execute content of config file '$GraphConfigFile'"
+            . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile -Raw)))
+        } catch {
+            Write-Host "    Problem executing content of '$GraphConfigFile'. Exiting." -ForegroundColor Red
+            Write-Host "    Error: $_" -ForegroundColor Red
+            $error[0]
             exit 1
         }
-        Write-Host "    Set up environment for connection to Microsoft Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-        $script:CurrentUser = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\IdentityStore\Cache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)\IdentityCache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)" -Name 'UserName' -ErrorAction SilentlyContinue)
-        $script:msalPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
-        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
-        Get-ChildItem $script:msalPath -Recurse | Unblock-File
-        Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps')
-        if ($($PSVersionTable.PSEdition) -ieq 'Desktop') {
-            Write-Host "      MSAL.PS Graph token cache file: '$([TokenCacheHelper]::CacheFilePath)'"
-        }
+    } else {
+        Write-Host "  Problem connecting to or reading from file '$GraphConfigFile'. Exiting." -ForegroundColor Red
+        exit 1
+    }
+
+    if ($($PSVersionTable.PSEdition) -ieq 'Desktop') {
+        Write-Host "  MSAL.PS Graph token cache file: '$([TokenCacheHelper]::CacheFilePath)'"
     }
 
 
@@ -1594,11 +1596,10 @@ function main {
         if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
             if ((-not $SimulateUser) ) {
                 Write-Host "  Set up environment for connection to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                # -and ($null -ne $TrustsToCheckForGroups[0])
                 $script:dllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                 try {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.NETStandard.dll')) -Destination $script:dllPath -Force -ErrorAction SilentlyContinue
+                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.NETStandard.dll')) -Destination $script:dllPath -Force
                         Unblock-File -LiteralPath $script:dllPath
                     } else {
                         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.dll')) -Destination $script:dllPath -Force
@@ -1619,7 +1620,25 @@ function main {
                         $exchService.UseDefaultCredentials = $false
                         $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$((ExoGetToken).accessToken)
                     }
-                    $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
+                    try {
+                        $x = $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true })
+                        if ($x.status -ieq 'faulted') {
+                            throw 'AutodiscoverUrl faulted'
+                        }
+                    } catch {
+                        try {
+                            if ($ADPropsCurrentUser.msExchRecipienttypeDetails -ge 2147483648) {
+                                GraphGetToken
+                                $exchService.UseDefaultCredentials = $false
+                                $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$((ExoGetToken).accessToken)
+                                $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
+                            } else {
+                                throw
+                            }
+                        } catch {
+                            throw
+                        }
+                    }
                 } catch {
                     Write-Host "    Error connecting to Outlook Web: $_" -ForegroundColor Red
 
@@ -1634,6 +1653,7 @@ function main {
             } else {
                 $error.Clear()
             }
+
             if ((!$error -and (-not $SimulateUser)) -or ($SimulateUser)) {
                 if ($SetCurrentUserOutlookWebSignature) {
                     Write-Host "  Set Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
@@ -1722,7 +1742,9 @@ function main {
                                         #Specify the Root folder where the FAI Item is
                                         $folderid = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Root, $($PrimaryMailboxAddress))
                                         $UsrConfig = [Microsoft.Exchange.WebServices.Data.UserConfiguration]::Bind($exchService, 'OWA.UserOptions', $folderid, [Microsoft.Exchange.WebServices.Data.UserConfigurationProperties]::All)
-                                        if ($($PSVersionTable.PSEdition) -ieq 'Core') { $UsrConfig = $UsrConfig.result }
+                                        if ($($PSVersionTable.PSEdition) -ieq 'Core') {
+                                            $UsrConfig = $UsrConfig.result
+                                        }
 
                                         foreach ($OutlookWebHashKey in $OutlookWebHash.Keys) {
                                             if ($UsrConfig.Dictionary.ContainsKey($OutlookWebHashKey)) {
@@ -2684,7 +2706,7 @@ function ExoGetToken {
         } else {
             $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(($script:CurrentUser -split '@')[1]) -RedirectUri 'http://localhost'
         }
- 
+
         $local:x = $msalClientApp | Get-MsalToken -LoginHint $script:CurrentUser -Scopes 'https://outlook.office.com/EWS.AccessAsUser.All' -Silent
 
         return @{
@@ -3011,6 +3033,7 @@ try {
     }
 
     Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
+    Remove-Module -Name MSAL.PS -Force -ErrorAction SilentlyContinue
     if ($script:dllPath) {
         Remove-Item $script:dllPath -Force -ErrorAction SilentlyContinue
     }
