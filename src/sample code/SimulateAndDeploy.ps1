@@ -41,7 +41,7 @@ c. (Future feature) If Microsoft roaming signature API is available: Delete exis
 # Variables
 $ConnectOnpremInsteadOfCloud = $false
 $OnPremServerFqdn = 'server.exchange.example.com'
-$SimulateButDontDeploy = $false
+$SimulateButDontDeploy = $true
 $SimulateResultPath = $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Set-OutlookSignatures simulation'))
 $SimulateListFile = $([IO.Path]::Combine($SimulateResultPath, 'SimulateList.csv'))
 $JobsConcurrent = 2
