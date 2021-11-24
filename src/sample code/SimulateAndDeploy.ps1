@@ -41,12 +41,12 @@ c. (Future feature) If Microsoft roaming signature API is available: Delete exis
 # Variables
 $ConnectOnpremInsteadOfCloud = $false
 $OnPremServerFqdn = 'server.exchange.example.com'
-$SimulateButDontDeploy = $true
+$SimulateButDontDeploy = $false
 $SimulateResultPath = $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Set-OutlookSignatures simulation'))
 $SimulateListFile = $([IO.Path]::Combine($SimulateResultPath, 'SimulateList.csv'))
 $JobsConcurrent = 2
 $SetOutlookSignaturesScriptPath = '..\Set-OutlookSignatures.ps1'
-$SetOutlookSignaturesScriptParameters = "-SignatureTemplatePath `"C:\temp\Signatures DOCX`" -SignatureIniPath `"C:\temp\Signatures DOCX\_.ini`" -SetCurrentUserOOFMessage `$false -NoRTFSignatures `$true -NoTXTSignatures `$true" # Do not use: SimulateUser, SimulateMailbox, AdditionalSignaturePath
+$SetOutlookSignaturesScriptParameters = "-SignatureTemplatePath `"C:\temp\Signatures DOCX`" -SignatureIniPath `"C:\temp\Signatures DOCX\_.ini`" -SetCurrentUserOOFMessage `$false -CreateRTFSignatures `$true -CreateTXTSignatures `$true" # Do not use: SimulateUser, SimulateMailbox, AdditionalSignaturePath, GraphCredentialFile
 
 
 Set-Location $PSScriptRoot | Out-Null
@@ -88,8 +88,12 @@ if ($ConnectOnpremInsteadOfCloud) {
 	Import-Module $(Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath -Parent) -ChildPath '\bin\msal.ps')
 	
 	# ClientId comes from Set-OutlookSignatures 'default graph config.ps1'
-	$auth = get-msaltoken -ClientId 'beea8249-8c98-4c76-92f6-ce3c468a61e6' -tenantid ($credential.username -split '@')[1] -RedirectUri 'http://localhost' -UserCredential $credential
-	@{'accessToken' = $auth.accessToken; 'authHeader' = $($auth.createauthorizationheader()) } | Export-Clixml -Path $GraphCredentialFile
+	$auth = get-msaltoken -ClientId 'beea8249-8c98-4c76-92f6-ce3c468a61e6' -tenantid ($credential.username -split '@')[1] -RedirectUri 'http://localhost' -UserCredential $credential -Scopes 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All'
+	@{
+		'accessToken'    = $auth.accessToken
+		'authHeader'     = $auth.createauthorizationheader()
+		'accessTokenExo' = (get-msaltoken -ClientId 'beea8249-8c98-4c76-92f6-ce3c468a61e6' -tenantid ($credential.username -split '@')[1] -RedirectUri 'http://localhost' -UserCredential $credential -Scopes 'https://outlook.office.com/EWS.AccessAsUser.All').accesstoken
+	} | Export-Clixml -Path $GraphCredentialFile
 	Remove-Module msal.ps
 
 	Write-Host '  Exchange Online'
@@ -180,12 +184,12 @@ do {
 					Write-Host 'CREATE SIGNATURE FILES BY USING SIMULATON MODE OF SET-OUTLOOKSIGNATURES'
 					
 					# Need to use Invoke-Expression to be able to pass arguments stored in a string
-					Invoke-Expression $(". `"$SetOutlookSignaturesScriptPath`" -SimulateUser `"$SimulateUser`" -SimulateMailbox `"$SimulateMailbox`" -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" $SetOutlookSignaturesScriptParameters")
+					Invoke-Expression ($(". `"$SetOutlookSignaturesScriptPath`" -SimulateUser `"$SimulateUser`" -SimulateMailbox `"$SimulateMailbox`" -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" $SetOutlookSignaturesScriptParameters") + '; $Success=$?')
 					
-					if (($?) -or ($LASTEXITCODE -eq 0)) {
+					if ($Success) {
 						Write-Host 'xxxExitCode0xxx'
 					} else {
-						Write-Host "xxxExitCode$($LASTEXITCODE)xxx"
+						Write-Host 'xxxExitCode999xxx'
 					}
 				} catch {
 					$error[0]

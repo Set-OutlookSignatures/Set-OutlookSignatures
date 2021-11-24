@@ -796,8 +796,13 @@ function main {
         }
 
         if (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)) {
-            $exoToken = ExoGetToken
-            if ($GraphToken.error -eq $true) {
+            if ($GraphCredentialFile) {
+                $ExoToken = $GraphToken.AccessTokenExo
+            } else {
+                $ExoToken = ($script:msalClientApp | Get-MsalToken -LoginHint $script:CurrentUser -Scopes 'https://outlook.office.com/EWS.AccessAsUser.All' -Silent).accessToken
+            }
+
+            if (-not $ExoToken) {
                 Write-Host '      Problem connecting to Exchange Online with Graph token. Exiting.' -ForegroundColor Red
                 $error[0]
                 exit 1
@@ -1368,28 +1373,31 @@ function main {
     }
 
 
-    Write-Host
-    Write-Host "Start Word background process for template editing @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the script
-    try {
-        $script:COMWordDummy = New-Object -ComObject word.application
-        $script:COMWord = New-Object -ComObject word.application
-        $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
+    if (($UseHtmTemplates -eq $true) -and (($CreateRTFSignatures -eq $false) -and ($CreateTXTSignatures -eq $false))) {
+        # No need to start Word in this constellation
+    } else {
+        Write-Host
+        Write-Host "Start Word background process for template editing @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+        # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the script
+        try {
+            $script:COMWordDummy = New-Object -ComObject word.application
+            $script:COMWord = New-Object -ComObject word.application
+            $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
 
-        if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-            Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
+            if ($($PSVersionTable.PSEdition) -ieq 'Core') {
+                Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
+            }
+            if ($script:COMWordDummy) {
+                $script:COMWordDummy.Quit([ref]$false)
+                [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWordDummy) | Out-Null
+                Remove-Variable COMWordDummy -Scope 'script'
+            }
+        } catch {
+            Write-Host 'Word not installed or not working correctly. Exiting.' -ForegroundColor Red
+            $error[0]
+            exit 1
         }
-        if ($script:COMWordDummy) {
-            $script:COMWordDummy.Quit([ref]$false)
-            [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWordDummy) | Out-Null
-            Remove-Variable COMWordDummy -Scope 'script'
-        }
-    } catch {
-        Write-Host 'Word not installed or not working correctly. Exiting.' -ForegroundColor Red
-        $error[0]
-        exit 1
     }
-
 
     # Process each e-mail address only once
     for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
@@ -2706,9 +2714,10 @@ function GraphGetToken {
                 Authorization = $auth.authHeader
             }
             return @{
-                error       = $false
-                accessToken = $auth.AccessToken
-                authHeader  = $auth.authHeader
+                error          = $false
+                accessToken    = $auth.AccessToken
+                accessTokenExo = $auth.AccessTokenExo
+                authHeader     = $auth.authHeader
             }
         } catch {
             return @{
@@ -2718,16 +2727,16 @@ function GraphGetToken {
             }
         }
     } else {
-        $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+        $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
     
         try {
-            $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All' -IntegratedWindowsAuth
+            $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All' -IntegratedWindowsAuth
         } catch {
             try {
-                $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All') -Silent -ForceRefresh
+                $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All') -Silent -ForceRefresh
             } catch {
                 try {
-                    $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All') -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false
+                    $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All') -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false
                 } catch {
                 }
             }
@@ -2748,33 +2757,6 @@ function GraphGetToken {
                 accessToken = $null
                 authHeader  = $null
             }
-        }
-    }
-}
-
-
-function ExoGetToken {
-    try {
-        $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
-        
-        try {
-            $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://outlook.office.com/EWS.AccessAsUser.All') -IntegratedWindowsAuth
-        } catch {
-            try {
-                $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://outlook.office.com/EWS.AccessAsUser.All') -Silent
-            } catch {
-                $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://outlook.office.com/EWS.AccessAsUser.All') -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false
-            }
-        }
-    
-        return @{
-            error       = $false
-            accessToken = $auth.AccessToken
-        }
-    } catch {
-        return @{
-            error       = ($error | Out-String)
-            accessToken = $null
         }
     }
 }
