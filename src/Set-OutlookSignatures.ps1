@@ -1671,7 +1671,7 @@ function main {
                         $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
                         if (-not $exchService.Url) {
                             $exchService.UseDefaultCredentials = $false
-                            $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$($ExoToken.accessToken)
+                            $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$($ExoToken)
                             $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true })
                             if (-not $exchService.Url) {
                                 $exchService.Url = 'https://outlook.office365.com/EWS/Exchange.asmx'
@@ -1680,7 +1680,7 @@ function main {
                     } else {
                         # Connected to Graph
                         $exchService.UseDefaultCredentials = $false
-                        $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$($ExoToken.accessToken)
+                        $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$($ExoToken)
                         $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
                         if (-not $exchService.Url) {
                             $exchService.Url = 'https://outlook.office365.com/EWS/Exchange.asmx'
