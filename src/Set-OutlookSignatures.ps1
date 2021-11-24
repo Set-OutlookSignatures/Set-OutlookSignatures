@@ -739,7 +739,8 @@ function main {
             exit 1
         }
     } else {
-        if ((GraphGetToken).error -eq $false) {
+        $GraphToken = GraphGetToken
+        if ($GraphToken.error -eq $false) {
             if ($SimulateUser) {
                 $script:CurrentUser = $SimulateUser
             }
@@ -841,9 +842,9 @@ function main {
                         Write-Host "    $($TrustsToCheckForGroups[$DomainNumber]) (searching for mailbox user object) ... " -NoNewline
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
                         if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msExchRecipienttypeDetails<=32)(msExchRecipienttypeDetails>=2147483648))(msExchMailboxGuid=*)(|(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning]))(&(legacyExchangeDN=*)(proxyaddresses=x500:$($LegacyExchangeDNs[$AccountNumberRunning])))))"
+                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(|(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning]))(&(legacyExchangeDN=*)(proxyaddresses=x500:$($LegacyExchangeDNs[$AccountNumberRunning])))))"
                         } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
-                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msExchRecipienttypeDetails<=32)(msExchRecipienttypeDetails>=2147483648))(msExchMailboxGuid=*)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
+                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
                         }
                         $u = $Search.FindAll()
                         if ($u.count -eq 0) {
@@ -1614,30 +1615,45 @@ function main {
                     Import-Module -Name $script:dllPath -Force
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
                     Write-Host "  Connect to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                    if ($null -ne $TrustsToCheckForGroups[0]) {
+                    if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
+                        # Connected to AD, mailbox is on-prem
                         $exchService.UseDefaultCredentials = $true
-                    } else {
-                        $exchService.UseDefaultCredentials = $false
-                        $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$((ExoGetToken).accessToken)
-                    }
-                    try {
-                        $x = $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true })
-                        if ($x.status -ieq 'faulted') {
-                            throw 'AutodiscoverUrl faulted'
-                        }
-                    } catch {
-                        try {
-                            if ($ADPropsCurrentUser.msExchRecipienttypeDetails -ge 2147483648) {
-                                GraphGetToken
-                                $exchService.UseDefaultCredentials = $false
-                                $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$((ExoGetToken).accessToken)
-                                $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
-                            } else {
-                                throw
+                        $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
+                    } elseif (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -gt 2147483648)) {
+                        # Connected to AD, mailbox is in the cloud
+                        # Try basic auth first, OAuth second, OAuth with fixed URL third
+                        $exchService.UseDefaultCredentials = $true
+                        $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
+                        if (-not $exchService.Url) {
+                            if ($null -eq $GraphToken) {
+                                GraphGetToken | Out-Null
+                                $error.clear()
                             }
-                        } catch {
-                            throw
+                            $exchService.UseDefaultCredentials = $false
+                            $ExoToken = ExoGetToken
+                            $error.clear()
+                            $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$($ExoToken.accessToken)
+                            $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true })
+                            if (-not $exchService.Url) {
+                                $exchService.Url = 'https://outlook.office365.com/EWS/Exchange.asmx'
+                            }
                         }
+                    } else {
+                        # Connected to Graph
+                        $exchService.UseDefaultCredentials = $false
+                        $ExoToken = ExoGetToken
+                        $error.clear()
+                        $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$($ExoToken.accessToken)
+                        $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
+                        if (-not $exchService.Url) {
+                            $exchService.Url = 'https://outlook.office365.com/EWS/Exchange.asmx'
+                        }
+                    }
+                    $Calendar = [Microsoft.Exchange.WebServices.Data.Folder]::Bind($exchservice, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Calendar)
+                    if ($Calendar.DisplayName) {
+                        $error.clear()
+                    } else {
+                        throw 'Could not connect to Outlook Web'
                     }
                 } catch {
                     Write-Host "    Error connecting to Outlook Web: $_" -ForegroundColor Red
@@ -2360,12 +2376,12 @@ function Set-Signatures {
                     # Outlook is installed
                     # and $OutlookFileVersion is high enough (exact value is unknown yet)
                     # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
-                    # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
+                    # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.msexchrecipienttypedetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
                     # and the current mailbox is the personal mailbox of the currently logged-on user
                     ($null -ne $OutlookFileVersion) `
                         -and ($OutlookFileVersion -ge [system.version]::parse('16.0.99999.99999')) `
                         -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
-                        -and ((($null -ne $ADPropsCurrentMailbox.recipienttypedetails) -and ($ADPropsCurrentMailbox.recipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) `
+                        -and ((($null -ne $ADPropsCurrentMailbox.msexchrecipienttypedetails) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) `
                         -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
                 ) {
                     # Microsoft signature roaming available
@@ -2661,11 +2677,8 @@ function GraphGetToken {
             }
         }
     } else {
-        if ($($PSVersionTable.PSEdition) -ieq 'Desktop') {
-            $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru
-        } else {
-            $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost'
-        }
+        $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+    
         try {
             $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All' -IntegratedWindowsAuth
         } catch {
@@ -2701,21 +2714,25 @@ function GraphGetToken {
 
 function ExoGetToken {
     try {
-        if ($($PSVersionTable.PSEdition) -ieq 'Desktop') {
-            $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(($script:CurrentUser -split '@')[1]) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru
-        } else {
-            $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(($script:CurrentUser -split '@')[1]) -RedirectUri 'http://localhost'
+        $msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+        
+        try {
+            $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://outlook.office.com/EWS.AccessAsUser.All') -IntegratedWindowsAuth
+        } catch {
+            try {
+                $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://outlook.office.com/EWS.AccessAsUser.All') -Silent
+            } catch {
+                $auth = $msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://outlook.office.com/EWS.AccessAsUser.All') -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false
+            }
         }
-
-        $local:x = $msalClientApp | Get-MsalToken -LoginHint $script:CurrentUser -Scopes 'https://outlook.office.com/EWS.AccessAsUser.All' -Silent
-
+    
         return @{
             error       = $false
-            accessToken = $local:x.AccessToken
+            accessToken = $auth.AccessToken
         }
     } catch {
         return @{
-            error       = $error | Out-String
+            error       = ($error | Out-String)
             accessToken = $null
         }
     }
