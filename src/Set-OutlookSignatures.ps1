@@ -149,6 +149,14 @@ Try to connect to Microsoft Graph only, ignoring any local Active Directory.
 The default behavior is to try Active Directory first and fall back to Graph.
 Default value: $false
 
+.PARAMETER CreateRTFSignatures
+Should signatures be created in RTF format?
+Default value: $true
+
+.PARAMETER CreateTXTSignatures
+Should signatures be created in TXT format?
+Default value: $true
+
 .INPUTS
 None. You cannot pipe objects to Set-OutlookSignatures.ps1.
 
@@ -291,7 +299,17 @@ Param(
     # Try to connect to Microsoft Graph only, ignoring any local Active Directory.
     # The default behavior is to try Active Directory first and fall back to Graph.
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
-    $GraphOnly = $false
+    $GraphOnly = $false,
+
+    # Create RTF signatures
+    # Default: $true
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
+    $CreateRTFSignatures = $true,
+
+    # Create TXT signatures
+    # Default: $true
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
+    $CreateTXTSignatures = $true
 )
 
 
@@ -371,6 +389,10 @@ function main {
         $SignatureIniSettings = @{}
         Write-Host
     }
+    Write-Host "  CreateRTFSignatures: '$CreateRTFSignatures'"
+    $CreateRTFSignatures = [System.Convert]::ToBoolean($CreateRTFSignatures.tostring().trim('$'))
+    Write-Host "  CreateTXTSignatures: '$CreateTXTSignatures'"
+    $CreateTXTSignatures = [System.Convert]::ToBoolean($CreateTXTSignatures.tostring().trim('$'))
     Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
     $DeleteUserCreatedSignatures = [System.Convert]::ToBoolean($DeleteUserCreatedSignatures.tostring().trim('$'))
     Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
@@ -674,35 +696,7 @@ function main {
     } else {
         Write-Host "  Parameter GraphOnly set to '$GraphOnly', ignoring user's Active Directory in favor of Graph/Azure AD."
     }
-
-
-    Write-Host
-    Write-Host "Set up environment for connection to Microsoft Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    $script:CurrentUser = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\IdentityStore\Cache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)\IdentityCache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)" -Name 'UserName' -ErrorAction SilentlyContinue)
-    $script:msalPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
-    Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
-    Get-ChildItem $script:msalPath -Recurse | Unblock-File
-    Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps')
-
-    if (Test-Path -Path $GraphConfigFile -PathType Leaf) {
-        try {
-            Write-Host "  Execute content of config file '$GraphConfigFile'"
-            . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile -Raw)))
-        } catch {
-            Write-Host "    Problem executing content of '$GraphConfigFile'. Exiting." -ForegroundColor Red
-            Write-Host "    Error: $_" -ForegroundColor Red
-            $error[0]
-            exit 1
-        }
-    } else {
-        Write-Host "  Problem connecting to or reading from file '$GraphConfigFile'. Exiting." -ForegroundColor Red
-        exit 1
-    }
-
-    if ($($PSVersionTable.PSEdition) -ieq 'Desktop') {
-        Write-Host "  MSAL.PS Graph token cache file: '$([TokenCacheHelper]::CacheFilePath)'"
-    }
-
+    
 
     Write-Host
     Write-Host "Get AD properties of currently logged on user and assigned manager @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
@@ -711,34 +705,67 @@ function main {
     } else {
         Write-Host "  Simulating '$SimulateUser' as currently logged on user" -ForegroundColor Yellow
     }
-    if ($null -ne $TrustsToCheckForGroups[0]) {
-        try {
-            if (-not $SimulateUser) {
-                $Search.SearchRoot = "GC://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
-                $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
-                $ADPropsCurrentUser = $Search.FindOne().Properties
-            } else {
-                try {
-                    $objTrans = New-Object -ComObject 'NameTranslate'
-                    $objNT = $objTrans.GetType()
-                    $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $null))
-                    $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (8, $SimulateUser))
-                    $SimulateUserDN = $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1)
-                    $Search.SearchRoot = "GC://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
-                    $Search.Filter = "((distinguishedname=$SimulateUserDN))"
+        
+    if ($GraphOnly -eq $false) {
+        if ($null -ne $TrustsToCheckForGroups[0]) {
+            try {
+                if (-not $SimulateUser) {
+                    $Search.SearchRoot = "GC://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
+                    $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
                     $ADPropsCurrentUser = $Search.FindOne().Properties
-                } catch {
-                    Write-Host "    Simulation user '$($SimulateUser)' not found in AD forest $($TrustsToCheckForGroups[0]). Exiting." -ForegroundColor REd
-                    exit 1
+                } else {
+                    try {
+                        $objTrans = New-Object -ComObject 'NameTranslate'
+                        $objNT = $objTrans.GetType()
+                        $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $null))
+                        $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (8, $SimulateUser))
+                        $SimulateUserDN = $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1)
+                        $Search.SearchRoot = "GC://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
+                        $Search.Filter = "((distinguishedname=$SimulateUserDN))"
+                        $ADPropsCurrentUser = $Search.FindOne().Properties
+                    } catch {
+                        Write-Host "    Simulation user '$($SimulateUser)' not found in AD forest $($TrustsToCheckForGroups[0]). Exiting." -ForegroundColor REd
+                        exit 1
+                    }
                 }
+            } catch {
+                $ADPropsCurrentUser = $null
+                Write-Host '    Problem connecting to Active Directory, or user is a local user. Exiting.' -ForegroundColor Red
+                $error[0]
+                exit 1
             }
-        } catch {
-            $ADPropsCurrentUser = $null
-            Write-Host '    Problem connecting to Active Directory, or user is a local user. Exiting.' -ForegroundColor Red
-            $error[0]
+        }
+    }
+
+    if (($GraphOnly -eq $true) -or
+        (($GraphOnly -eq $false) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true))) -or
+        (($GraphOnly -eq $false) -and ($null -eq $ADPropsCurrentUser))) {
+        Write-Host "    Set up environment for connection to Microsoft Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+        $script:CurrentUser = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\IdentityStore\Cache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)\IdentityCache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)" -Name 'UserName' -ErrorAction SilentlyContinue)
+        $script:msalPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
+        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
+        Get-ChildItem $script:msalPath -Recurse | Unblock-File
+        Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps')
+
+        if (Test-Path -Path $GraphConfigFile -PathType Leaf) {
+            try {
+                Write-Host "      Execute content of config file '$GraphConfigFile'"
+                . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile -Raw)))
+            } catch {
+                Write-Host "        Problem executing content of '$GraphConfigFile'. Exiting." -ForegroundColor Red
+                Write-Host "        Error: $_" -ForegroundColor Red
+                $error[0]
+                exit 1
+            }
+        } else {
+            Write-Host "      Problem connecting to or reading from file '$GraphConfigFile'. Exiting." -ForegroundColor Red
             exit 1
         }
-    } else {
+
+        if ($($PSVersionTable.PSEdition) -ieq 'Desktop') {
+            Write-Host "      MSAL.PS Graph token cache file: '$([TokenCacheHelper]::CacheFilePath)'"
+        }
+
         $GraphToken = GraphGetToken
         if ($GraphToken.error -eq $false) {
             if ($SimulateUser) {
@@ -758,16 +785,26 @@ function main {
                 $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $script:CurrentUser).photo
                 $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $script:CurrentUser).properties.userprincipalname
             } else {
-                Write-Host "    Problem getting data for '$($script:CurrentUser)' from Microsoft Graph. Exiting." -ForegroundColor Red
+                Write-Host "      Problem getting data for '$($script:CurrentUser)' from Microsoft Graph. Exiting." -ForegroundColor Red
                 $error[0]
                 exit 1
             }
         } else {
-            Write-Host '    Problem connecting to Microsoft Graph. Exiting.' -ForegroundColor Red
+            Write-Host '      Problem connecting to Microsoft Graph. Exiting.' -ForegroundColor Red
             $error[0]
             exit 1
         }
+
+        if (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)) {
+            $exoToken = ExoGetToken
+            if ($GraphToken.error -eq $true) {
+                Write-Host '      Problem connecting to Exchange Online with Graph token. Exiting.' -ForegroundColor Red
+                $error[0]
+                exit 1
+            }
+        }
     }
+    
 
     if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -notcontains $ADPropsCurrentUser.mail) -and (-not $SimulateUser)) {
         # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
@@ -791,7 +828,7 @@ function main {
     if (-not $SimulateUser) {
         Write-Host '  Manager of currently logged on user'
     } else {
-        Write-Host '  Manager of simulated currently logged on user' -ForegroundColor Yellow
+        Write-Host '  Manager of simulated currently logged on user'
     }
     if ($null -ne $TrustsToCheckForGroups[0]) {
         try {
@@ -1625,13 +1662,7 @@ function main {
                         $exchService.UseDefaultCredentials = $true
                         $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
                         if (-not $exchService.Url) {
-                            if ($null -eq $GraphToken) {
-                                GraphGetToken | Out-Null
-                                $error.clear()
-                            }
                             $exchService.UseDefaultCredentials = $false
-                            $ExoToken = ExoGetToken
-                            $error.clear()
                             $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$($ExoToken.accessToken)
                             $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true })
                             if (-not $exchService.Url) {
@@ -1641,8 +1672,6 @@ function main {
                     } else {
                         # Connected to Graph
                         $exchService.UseDefaultCredentials = $false
-                        $ExoToken = ExoGetToken
-                        $error.clear()
                         $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$($ExoToken.accessToken)
                         $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
                         if (-not $exchService.Url) {
@@ -1743,7 +1772,7 @@ function main {
                                         if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -PathType Leaf) {
                                             $stTextSig = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -Raw).ToString()
                                         } else {
-                                            $hsHtmlSignature = ''
+                                            $stTextSig = ''
                                             Write-Host "      Signature file '$($TempOWASigFile + '.txt')' not found. Outlook Web text signature will be blank." -ForegroundColor Yellow
                                         }
                                         $OutlookWebHash = @{}
@@ -2288,62 +2317,65 @@ function Set-Signatures {
         }
 
         if (-not $ProcessOOF) {
-            Write-Host '      Export to RTF format'
-            # Overcome Word security warning when export contains embedded pictures
-            $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-            if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction SilentlyContinue | Out-Null
-                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction SilentlyContinue | Out-Null
-            }
-            $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
-            $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
-            try {
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-            } catch {
-                Start-Sleep -Seconds 2
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+            if ($CreateRTFSignatures -eq $true) {
+                Write-Host '      Export to RTF format'
+                # Overcome Word security warning when export contains embedded pictures
+                $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ne 1)) {
+                    New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction SilentlyContinue | Out-Null
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction SilentlyContinue | Out-Null
+                }
+                $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
+                $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
+                try {
+                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                } catch {
+                    Start-Sleep -Seconds 2
+                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                }
+                $script:COMWord.ActiveDocument.Close($false)
+                # Restore original security setting
+                if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
+                    Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                } else {
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                }
+
+                # RTF files with embedded images get really huge
+                # See https://support.microsoft.com/kb/224663 for a system-wide workaround
+                # The following workaround is from https://answers.microsoft.com/en-us/msoffice/forum/msoffice_word-mso_mac-mso_mac2011/huge-rtf-files-solved-on-windows-but-searching-for/58e54b37-cfd0-4a07-ac62-1cfc2769cad5
+                $openFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatUnicodeText')
+                $script:COMWord.Documents.Open($path, $false, $false, $false, '', '', $true, '', '', $openFormat) | Out-Null
+                $FindText = '\{\\nonshppict*\}\}'
+                $ReplaceWith = ''
+                $script:COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
+                        $true, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
+                        $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
+                try {
+                    $script:COMWord.ActiveDocument.Save()
+                } catch {
+                    Start-Sleep -Seconds 2
+                    $script:COMWord.ActiveDocument.Save()
+                }
             }
             $script:COMWord.ActiveDocument.Close($false)
-            # Restore original security setting
-            if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
-                Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-            } else {
-                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-            }
 
-            # RTF files with embedded images get really huge
-            # See https://support.microsoft.com/kb/224663 for a system-wide workaround
-            # The following workaround is from https://answers.microsoft.com/en-us/msoffice/forum/msoffice_word-mso_mac-mso_mac2011/huge-rtf-files-solved-on-windows-but-searching-for/58e54b37-cfd0-4a07-ac62-1cfc2769cad5
-            $openFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatUnicodeText')
-            $script:COMWord.Documents.Open($path, $false, $false, $false, '', '', $true, '', '', $openFormat) | Out-Null
-            $FindText = '\{\\nonshppict*\}\}'
-            $ReplaceWith = ''
-            $script:COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
-                    $true, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
-                    $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
-            try {
-                $script:COMWord.ActiveDocument.Save()
-            } catch {
-                Start-Sleep -Seconds 2
-                $script:COMWord.ActiveDocument.Save()
+            if ($CreateTXTSignatures -eq $true) {
+                Write-Host '      Export to TXT format'
+                # We work with the .htm file to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
+                $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+                $script:COMWord.Documents.Open($path, $false) | Out-Null
+                $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
+                $script:COMWord.ActiveDocument.TextEncoding = 1200
+                $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
+                try {
+                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                } catch {
+                    Start-Sleep -Seconds 2
+                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                }
+                $script:COMWord.ActiveDocument.Close($false)
             }
-            $script:COMWord.ActiveDocument.Close($false)
-
-
-            Write-Host '      Export to TXT format'
-            # We work with the .htm file to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
-            $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-            $script:COMWord.Documents.Open($path, $false) | Out-Null
-            $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
-            $script:COMWord.ActiveDocument.TextEncoding = 1200
-            $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
-            try {
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-            } catch {
-                Start-Sleep -Seconds 2
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-            }
-            $script:COMWord.ActiveDocument.Close($false)
         } else {
             $script:COMWord.ActiveDocument.Close($false)
         }
@@ -2394,8 +2426,17 @@ function Set-Signatures {
                     # Microsoft signature roaming not available
                     Write-Host "      Copy signature files to '$_'"
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
-                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
-                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
+                    if ($CreateRTFSignatures -eq $true) {
+                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
+                    } else {
+                        Remove-Item ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force -ErrorAction SilentlyContinue
+                    }
+                    if ($CreateTXTSignatures -eq $true) {
+                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
+                    } else {
+                        Remove-Item ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force -ErrorAction SilentlyContinue
+
+                    }
                 }
             }
         }

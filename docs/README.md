@@ -51,6 +51,8 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [2.15. SimulateMailboxes](#215-simulatemailboxes)
   - [2.16. GraphCredentialFile](#216-graphcredentialfile)
   - [2.17. GraphOnly](#217-graphonly)
+  - [2.18. CreateRTFSignatures](#218-creatertfsignatures)
+  - [2.19. CreateTXTSignatures](#219-createtxtsignatures)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -259,6 +261,14 @@ Try to connect to Microsoft Graph only, ignoring any local Active Directory.
 The default behavior is to try Active Directory first and fall back to Graph.
 
 Default value: `$false`
+## 2.18. CreateRTFSignatures
+Should signatures be created in RTF format?
+
+Default value: `$true`
+## 2.19. CreateTXTSignatures
+Should signatures be created in TXT format?
+
+Default value: `$true`
 # 3. Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.
 

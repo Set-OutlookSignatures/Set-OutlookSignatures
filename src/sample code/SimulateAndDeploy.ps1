@@ -46,7 +46,7 @@ $SimulateResultPath = $([IO.Path]::Combine([environment]::GetFolderPath('MyDocum
 $SimulateListFile = $([IO.Path]::Combine($SimulateResultPath, 'SimulateList.csv'))
 $JobsConcurrent = 2
 $SetOutlookSignaturesScriptPath = '..\Set-OutlookSignatures.ps1'
-$SetOutlookSignaturesScriptParameters = "-SignatureTemplatePath `"C:\temp\Signatures DOCX`" -SignatureIniPath `"C:\temp\Signatures DOCX\_.ini`" -SetCurrentUserOOFMessage `$false" # Do not use: SimulateUser, SimulateMailbox, AdditionalSignaturePath
+$SetOutlookSignaturesScriptParameters = "-SignatureTemplatePath `"C:\temp\Signatures DOCX`" -SignatureIniPath `"C:\temp\Signatures DOCX\_.ini`" -SetCurrentUserOOFMessage `$false -NoRTFSignatures `$true -NoTXTSignatures `$true" # Do not use: SimulateUser, SimulateMailbox, AdditionalSignaturePath
 
 
 Set-Location $PSScriptRoot | Out-Null

@@ -12,6 +12,7 @@
 - New parameter GraphOnly: Try to connect to Microsoft Graph only, ignoring any local Active Directory. The default behavior is to try Active Directory first and fall back to Graph.
 - New default replacement variables for displayName and mailNickname (a.k.a. alias)
 - New FAQ: How to deploy signatures for "Send As", "Send On Behalf" etc.?
+- New parameters CreateRTFSignatures and CreateTXTSignatures
 ### Fixed
 - Do not ignore remote mailboxes when searching mailboxes in Active Directory
 - When saving a document in Word fails, wait for two seconds and retry saving to avoid problems with virus scanners
