@@ -816,3 +816,6 @@ Currently, there is no detailed documentation and no API available to programati
 Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensures full compatibility with this script.
 
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
+
+Since Q4 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes and in  Outlook on Windows. There is still no hint of an API, or a way to disable it on the server.
+When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can successfully set the signature in Outlook Web, but the signature is ignored. There is no programmatic way to detect or change this behavior. The same is valid for the Exchange Online PowerShell-Cmdlet Set-MailboxMessageConfiguration, so it seems different Microsoft teams work on a different development and release schedule.
