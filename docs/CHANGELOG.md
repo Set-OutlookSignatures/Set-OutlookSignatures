@@ -21,6 +21,7 @@
 - Updated FAQ: What about the new signature roaming feature Microsoft announced?
 - When connecting to Microsoft Graph, the TenantID is no longer set to 'organizations', but extracted from the logged-on or simulated user name
 - Reduce number of required Graph authentication prompts by using a token cache file
+- Switching to the EWS Managed API .Net Standard port from https://github.com/ststeiger/RedmineMailService (the official Microsoft DLL is used with Windows PowerShell, ststeiger's port when run in PowerShell 7+)
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.1" target="_blank">v2.3.1</a> - 2021-11-05
 ### Fixed

@@ -1645,10 +1645,10 @@ function main {
                 $script:dllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                 try {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.NETStandard.dll')) -Destination $script:dllPath -Force
+                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS.NetStandard\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:dllPath -Force
                         Unblock-File -LiteralPath $script:dllPath
                     } else {
-                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Microsoft.Exchange.WebServices.dll')) -Destination $script:dllPath -Force
+                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\Microsoft.Exchange.WebServices.dll')) -Destination $script:dllPath -Force
                         Unblock-File -LiteralPath $script:dllPath
                     }
                 } catch {
@@ -1695,10 +1695,6 @@ function main {
                         $error.clear()
                     } else {
                         Write-Host '    Could not connect to Outlook Web, although the EWS DLL threw no error.' -ForegroundColor Red
-                        if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                            Write-Host '    Please try Windows PowerShell instead of PowerShell Core.' -ForegroundColor Red
-                        }
-                        Write-Host '    The script will stop accessing cloud mailboxes via EWS as soon there is support for signatures in Graph.' -ForegroundColor Red
                         throw
                     }
                 } catch {
@@ -1805,9 +1801,6 @@ function main {
                                     #Specify the Root folder where the FAI Item is
                                     $folderid = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Root, $($PrimaryMailboxAddress))
                                     $UsrConfig = [Microsoft.Exchange.WebServices.Data.UserConfiguration]::Bind($exchService, 'OWA.UserOptions', $folderid, [Microsoft.Exchange.WebServices.Data.UserConfigurationProperties]::All)
-                                    if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                                        $UsrConfig = $UsrConfig.result
-                                    }
 
                                     foreach ($OutlookWebHashKey in $OutlookWebHash.Keys) {
                                         if ($UsrConfig.Dictionary.ContainsKey($OutlookWebHashKey)) {
