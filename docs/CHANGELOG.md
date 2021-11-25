@@ -7,17 +7,18 @@
 ### Added
 - Added sample code files, including a wrapper script for central creation and deployment of signatures and OOF messages without end user or client involvement
 - New default replacement variables for displayName and mailNickname (a.k.a. alias)
-- New FAQ: How to deploy signatures for "Send As", "Send On Behalf" etc.?
 - New parameter GraphOnly: Try to connect to Microsoft Graph only, ignoring any local Active Directory. The default behavior is to try Active Directory first and fall back to Graph.
 - New parameters CreateRTFSignatures and CreateTXTSignatures
 - New parameter GraphCredentialFile
+- New FAQ: How to deploy signatures for "Send As", "Send On Behalf" etc.?
+- New FAQ: Can I centrally manage and deploy Outook stationery with this script?
 - Report templates that are mentioned in the ini file but do not exist in the file system, and vice versa
 ### Fixed
 - Do not ignore remote mailboxes when searching mailboxes in Active Directory
 - When saving a document in Word fails, wait for two seconds and retry saving to avoid problems with virus scanners
 ### Changed
 - Documentation updates
-- Updated FAQ "What about the new signature roaming feature Microsoft announced?"
+- Updated FAQ: What about the new signature roaming feature Microsoft announced?
 - When connecting to Microsoft Graph, the TenantID is no longer set to 'organizations', but extracted from the logged-on or simulated user name
 - Reduce number of required Graph authentication prompts by using a token cache file
 

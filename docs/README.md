@@ -91,7 +91,8 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [15.16. How to avoid empty lines when replacement variables return an empty string?](#1516-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
   - [15.17. Is there a roadmap for future versions?](#1517-is-there-a-roadmap-for-future-versions)
   - [15.18. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1518-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
-  - [15.19. What about the new signature roaming feature Microsoft announced?](#1519-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [15.19. Can I centrally manage and deploy Outook stationery with this script?](#1519-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
+  - [15.20. What about the new signature roaming feature Microsoft announced?](#1520-what-about-the-new-signature-roaming-feature-microsoft-announced)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -802,7 +803,15 @@ dg@example.com internal German informal.[Example Group] [u@example.com].docx
 This works as long as the personal mailbox of a member of "Example\Group" is connected in Outlook as primary mailbox (which usually is the case). When this personal mailbox is processed by Set-OutlookSignatures, the script recognizes the group membership and the signature assigned to it.
 
 Caveat: The \$CurrentMailbox[...]\$ replacement variables refer to the user's personal mailbox in this case, not to m<area>@example.com.
-## 15.19. What about the new signature roaming feature Microsoft announced?  
+## 15.19. Can I centrally manage and deploy Outook stationery with this script?
+Outlook stationery describes the layout of e-mails, including font size and color for new e-mails and for replies and forwards.
+
+The default mail font, size and color are usually an integral part of corporate design and corporate identity. CI/CD typically also defines the content and layout of signatures.
+
+Set-OutlookSignatures has no features regarding deploying Outlook stationery, as there are better ways for doing this.  
+Outlook stores stationery settings in `'HKCU\Software\Microsoft\Office\<Version>\Common\MailSettings'`. You can use a logon script or group policies to deploy these keys, on-prem and for managed devices in the cloud.  
+Unfortunately, Microsoft's group policy templates (ADMX files) for Office do not seem to provide detailed settings for Outlook stationery, so you will have to deploy registry keys. 
+## 15.20. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.
