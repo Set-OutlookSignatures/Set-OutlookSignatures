@@ -391,10 +391,10 @@ function main {
 
     Write-Host "  GraphOnly: '$GraphOnly'"
     $GraphOnly = [System.Convert]::ToBoolean($GraphOnly.tostring().trim('$'))
-    
+
     Write-Host "  SignatureTemplatePath: '$SignatureTemplatePath'" -NoNewline
     CheckPath $SignatureTemplatePath
-    
+
     Write-Host "  SignatureIniPath: '$SignatureIniPath'" -NoNewline
     if ($SignatureIniPath) {
         CheckPath $SignatureIniPath
@@ -415,22 +415,22 @@ function main {
         $SignatureIniSettings = @{}
         Write-Host
     }
-    
+
     Write-Host "  CreateRTFSignatures: '$CreateRTFSignatures'"
     $CreateRTFSignatures = [System.Convert]::ToBoolean($CreateRTFSignatures.tostring().trim('$'))
-    
+
     Write-Host "  CreateTXTSignatures: '$CreateTXTSignatures'"
     $CreateTXTSignatures = [System.Convert]::ToBoolean($CreateTXTSignatures.tostring().trim('$'))
-    
+
     Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
     $DeleteUserCreatedSignatures = [System.Convert]::ToBoolean($DeleteUserCreatedSignatures.tostring().trim('$'))
-    
+
     Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
     $SetCurrentUserOutlookWebSignature = [System.Convert]::ToBoolean($SetCurrentUserOutlookWebSignature.tostring().trim('$'))
-    
+
     Write-Host "  SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
     $SetCurrentUserOOFMessage = [System.Convert]::ToBoolean($SetCurrentUserOOFMessage.tostring().trim('$'))
-    
+
     Write-Host "  SetCurrentUserOOFMessage: '$SetCurrentUserOOFMessage'"
     if ($SetCurrentUserOOFMessage) {
         Write-Host "  OOFTemplatePath: '$OOFTemplatePath'" -NoNewline
@@ -456,20 +456,20 @@ function main {
             Write-Host
         }
     }
-    
+
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'"
-    
+
     Write-Host "  AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
     $AdditionalSignaturePath = [IO.Path]::Combine($AdditionalSignaturePath.trimend('\'), $AdditionalSignaturePathFolder.trim('\'))
-    
+
     Write-Host "  AdditionalSignaturePath combined: '$AdditionalSignaturePath'" -NoNewline
     checkpath $AdditionalSignaturePath -create
-    
+
     Write-Host "  UseHtmTemplates: '$UseHtmTemplates'"
     $UseHtmTemplates = [System.Convert]::ToBoolean($UseHtmTemplates.tostring().trim('$'))
-    
+
     Write-Host "  SimulateUser: '$SimulateUser'"
-    
+
     Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
 
 
@@ -734,7 +734,7 @@ function main {
     } else {
         Write-Host "  Parameter GraphOnly set to '$GraphOnly', ignoring user's Active Directory in favor of Graph/Azure AD."
     }
-    
+
 
     Write-Host
     Write-Host "Get AD properties of currently logged on user and assigned manager @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
@@ -743,7 +743,7 @@ function main {
     } else {
         Write-Host "  Simulating '$SimulateUser' as currently logged on user" -ForegroundColor Yellow
     }
-        
+
     if ($GraphOnly -eq $false) {
         if ($null -ne $TrustsToCheckForGroups[0]) {
             try {
@@ -849,7 +849,7 @@ function main {
             }
         }
     }
-    
+
 
     if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -notcontains $ADPropsCurrentUser.mail) -and (-not $SimulateUser)) {
         # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
@@ -1947,9 +1947,10 @@ function main {
                                 $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                                 $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                             } else {
-                                if ((GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString() -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString()).error -ne $false) {
+                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString() -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString()
+                                if ($x.error -ne $false) {
                                     Write-Host '      Error setting Outlook Web Out of Office (OOF) auto reply message(s)' -ForegroundColor Red
-                                    $error[0]
+                                    $x.error
                                 }
                             }
                         } else {
@@ -1964,9 +1965,10 @@ function main {
                                 if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
                                     $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString())
                                 } else {
-                                    if ((GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString()).error -ne $false) {
+                                    $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString()
+                                    if ($x.error -ne $false) {
                                         Write-Host '      Error setting Outlook Web Out of Office (OOF) auto reply message(s)' -ForegroundColor Red
-                                        $error[0]
+                                        $x.error
                                     }
                                 }
                             }
@@ -1974,9 +1976,10 @@ function main {
                                 if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
                                     $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString())
                                 } else {
-                                    if ((GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString()).error -ne $false) {
+                                    $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString()
+                                    if ($x.error -ne $false) {
                                         Write-Host '      Error setting Outlook Web Out of Office (OOF) auto reply message(s)' -ForegroundColor Red
-                                        $error[0]
+                                        $x.error
                                     }
                                 }
                             }
@@ -2758,7 +2761,7 @@ function GraphGetToken {
         }
     } else {
         $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
-    
+
         try {
             $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All' -IntegratedWindowsAuth
         } catch {
@@ -2986,8 +2989,8 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal) {
             $ProgressPreference = 'SilentlyContinue'
             Invoke-RestMethod @requestBody
             $ProgressPreference = $OldProgressPreference
-        } else {
         }
+
         return @{
             error = $false
         }
