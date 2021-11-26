@@ -362,7 +362,7 @@ function main {
     Write-Host "  ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
     if ($ReplacementVariableConfigFile) {
         CheckPath $ReplacementVariableConfigFile
-        (Get-Content -LiteralPath $ReplacementVariableConfigFile).tostring() | ForEach-Object {
+        (Get-Content -LiteralPath $ReplacementVariableConfigFile) | ForEach-Object {
             Write-Verbose $_
         }
     } else {
@@ -372,7 +372,7 @@ function main {
     Write-Host "  GraphConfigFile: '$GraphConfigFile'" -NoNewline
     if ($GraphConfigFile) {
         CheckPath $GraphConfigFile
-        (Get-Content -LiteralPath $GraphConfigFile).tostring() | ForEach-Object {
+        (Get-Content -LiteralPath $GraphConfigFile) | ForEach-Object {
             Write-Verbose $_
         }
     } else {
@@ -382,7 +382,7 @@ function main {
     Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
     if ($GraphCredentialFile) {
         CheckPath $GraphCredentialFile
-        (Get-Content -LiteralPath $GraphCredentialFile).tostring() | ForEach-Object {
+        (Get-Content -LiteralPath $GraphCredentialFile) | ForEach-Object {
             Write-Verbose $_
         }
     } else {
