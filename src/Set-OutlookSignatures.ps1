@@ -360,21 +360,41 @@ function main {
 
 
     Write-Host "  ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
-    CheckPath $ReplacementVariableConfigFile
+    if ($ReplacementVariableConfigFile) {
+        CheckPath $ReplacementVariableConfigFile
+        Write-Verbose (Get-Content -LiteralPath $ReplacementVariableConfigFile).tostring()
+    } else {
+        Write-Host
+    }
+
     Write-Host "  GraphConfigFile: '$GraphConfigFile'" -NoNewline
-    CheckPath $GraphConfigFile
+    if ($GraphConfigFile) {
+        CheckPath $GraphConfigFile
+        Write-Verbose (Get-Content -LiteralPath $GraphConfigFile).tostring()
+    } else {
+        Write-Host
+    }
+
     Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
-    if ($GrapCredentialFile) { CheckPath $GraphCredentialFile } else { Write-Host }
+    if ($GraphCredentialFile) {
+        CheckPath $GraphCredentialFile
+        Write-Verbose (Get-Content -LiteralPath $GraphCredentialFile).tostring()
+    } else {
+        Write-Host
+    }
+
     Write-Host "  GraphOnly: '$GraphOnly'"
     $GraphOnly = [System.Convert]::ToBoolean($GraphOnly.tostring().trim('$'))
+    
     Write-Host "  SignatureTemplatePath: '$SignatureTemplatePath'" -NoNewline
     CheckPath $SignatureTemplatePath
+    
     Write-Host "  SignatureIniPath: '$SignatureIniPath'" -NoNewline
-    if ($SignatureIniPath -ne '') {
+    if ($SignatureIniPath) {
         CheckPath $SignatureIniPath
         $SignatureIniSettings = Get-IniContent $SignatureIniPath
         foreach ($section in $SignatureIniSettings.GetEnumerator()) {
-            Write-Host "    File: '$($section.name)'"
+            Write-Verbose "    File: '$($section.name)'"
             $local:tags = @()
             foreach ($key in $SignatureIniSettings["$($section.name)"].GetEnumerator()) {
                 if ($key.value) {
@@ -383,32 +403,38 @@ function main {
                     $local:tags += "$($key.name)"
                 }
             }
-            Write-Host "      Tags: [$($local:tags -join '] [')]"
+            Write-Verbose "      Tags: [$($local:tags -join '] [')]"
         }
     } else {
         $SignatureIniSettings = @{}
         Write-Host
     }
+    
     Write-Host "  CreateRTFSignatures: '$CreateRTFSignatures'"
     $CreateRTFSignatures = [System.Convert]::ToBoolean($CreateRTFSignatures.tostring().trim('$'))
+    
     Write-Host "  CreateTXTSignatures: '$CreateTXTSignatures'"
     $CreateTXTSignatures = [System.Convert]::ToBoolean($CreateTXTSignatures.tostring().trim('$'))
+    
     Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
     $DeleteUserCreatedSignatures = [System.Convert]::ToBoolean($DeleteUserCreatedSignatures.tostring().trim('$'))
+    
     Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
     $SetCurrentUserOutlookWebSignature = [System.Convert]::ToBoolean($SetCurrentUserOutlookWebSignature.tostring().trim('$'))
+    
     Write-Host "  SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
     $SetCurrentUserOOFMessage = [System.Convert]::ToBoolean($SetCurrentUserOOFMessage.tostring().trim('$'))
+    
     Write-Host "  SetCurrentUserOOFMessage: '$SetCurrentUserOOFMessage'"
     if ($SetCurrentUserOOFMessage) {
         Write-Host "  OOFTemplatePath: '$OOFTemplatePath'" -NoNewline
         CheckPath $OOFTemplatePath
         Write-Host "  OOFIniPath: '$OOFIniPath'" -NoNewline
-        if ($OOFIniPath -ne '') {
+        if ($OOFIniPath) {
             CheckPath $OOFIniPath
             $OOFIniSettings = Get-IniContent $OOFIniPath
             foreach ($section in $OOFIniSettings.GetEnumerator()) {
-                Write-Host "    File: '$($section.name)'"
+                Write-Verbose "    File: '$($section.name)'"
                 $local:tags = @()
                 foreach ($key in $OOFIniSettings["$($section.name)"].GetEnumerator()) {
                     if ($key.value) {
@@ -417,21 +443,27 @@ function main {
                         $local:tags += "$($key.name)"
                     }
                 }
-                Write-Host "      Tags: [$($local:tags -join '] [')]"
+                Write-Verbose "      Tags: [$($local:tags -join '] [')]"
             }
         } else {
             $OOFIniSettings = @{}
             Write-Host
         }
     }
+    
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'"
+    
     Write-Host "  AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
     $AdditionalSignaturePath = [IO.Path]::Combine($AdditionalSignaturePath.trimend('\'), $AdditionalSignaturePathFolder.trim('\'))
+    
     Write-Host "  AdditionalSignaturePath combined: '$AdditionalSignaturePath'" -NoNewline
     checkpath $AdditionalSignaturePath -create
+    
     Write-Host "  UseHtmTemplates: '$UseHtmTemplates'"
     $UseHtmTemplates = [System.Convert]::ToBoolean($UseHtmTemplates.tostring().trim('$'))
+    
     Write-Host "  SimulateUser: '$SimulateUser'"
+    
     Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
 
 
@@ -768,6 +800,7 @@ function main {
 
         $GraphToken = GraphGetToken
         if ($GraphToken.error -eq $false) {
+            Write-Verbose "Graph Token: $($GraphToken.AccessToken)"
             if ($SimulateUser) {
                 $script:CurrentUser = $SimulateUser
             }
@@ -801,6 +834,7 @@ function main {
             } else {
                 $ExoToken = ($script:msalClientApp | Get-MsalToken -LoginHint $script:CurrentUser -Scopes 'https://outlook.office.com/EWS.AccessAsUser.All' -Silent).accessToken
             }
+            Write-Verbose "EXO Token: $ExoToken"
 
             if (-not $ExoToken) {
                 Write-Host '      Problem connecting to Exchange Online with Graph token. Exiting.' -ForegroundColor Red
@@ -1565,7 +1599,7 @@ function main {
             }
 
             # Export pictures if available
-            $CURRENTMAILBOXMANAGERPHOTOGUIDGUID = (New-Guid).guid
+            $CURRENTMAILBOXMANAGERPHOTOGUID = (New-Guid).guid
             $CURRENTMAILBOXPHOTOGUID = (New-Guid).guid
             $CURRENTUSERMANAGERPHOTOGUID = (New-Guid).guid
             $CURRENTUSERPHOTOGUID = (New-Guid).guid
@@ -1660,32 +1694,20 @@ function main {
                     Import-Module -Name $script:dllPath -Force
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
                     Write-Host "  Connect to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                    if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
-                        # Connected to AD, mailbox is on-prem
+                    try {
+                        Write-Verbose '    Windows Integrated Auth'
                         $exchService.UseDefaultCredentials = $true
                         $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
-                    } elseif (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -ge 2147483648)) {
-                        # Connected to AD, mailbox is in the cloud
-                        # Try basic auth first, OAuth second, OAuth with fixed URL third
-                        $exchService.UseDefaultCredentials = $true
+                    } catch {
                         try {
+                            Write-Verbose '    OAuth with Autodiscover'
+                            $exchService.UseDefaultCredentials = $false
+                            $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $ExoToken
                             $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
                         } catch {
-                            try {
-                                $exchService.UseDefaultCredentials = $false
-                                $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$($ExoToken)
-                                $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true })
-                            } catch {
-                                $exchService.Url = 'https://outlook.office365.com/EWS/Exchange.asmx'
-                            }
-                        }
-                    } else {
-                        # Connected to Graph
-                        $exchService.UseDefaultCredentials = $false
-                        $exchService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$($ExoToken)
-                        try {
-                            $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
-                        } catch {
+                            Write-Verbose '    OAuth with fixed URL'
+                            $exchService.UseDefaultCredentials = $false
+                            $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $ExoToken
                             $exchService.Url = 'https://outlook.office365.com/EWS/Exchange.asmx'
                         }
                     }
