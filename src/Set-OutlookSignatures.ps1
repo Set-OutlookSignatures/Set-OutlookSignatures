@@ -1949,8 +1949,7 @@ function main {
                             } else {
                                 $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString() -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString()
                                 if ($x.error -ne $false) {
-                                    Write-Host '      Error setting Outlook Web Out of Office (OOF) auto reply message(s)' -ForegroundColor Red
-                                    $x.error
+                                    Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
                                 }
                             }
                         } else {
@@ -1967,8 +1966,7 @@ function main {
                                 } else {
                                     $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString()
                                     if ($x.error -ne $false) {
-                                        Write-Host '      Error setting Outlook Web Out of Office (OOF) auto reply message(s)' -ForegroundColor Red
-                                        $x.error
+                                        Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
                                     }
                                 }
                             }
@@ -1978,8 +1976,7 @@ function main {
                                 } else {
                                     $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString()
                                     if ($x.error -ne $false) {
-                                        Write-Host '      Error setting Outlook Web Out of Office (OOF) auto reply message(s)' -ForegroundColor Red
-                                        $x.error
+                                        Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
                                     }
                                 }
                             }
