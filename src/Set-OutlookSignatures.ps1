@@ -362,7 +362,9 @@ function main {
     Write-Host "  ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
     if ($ReplacementVariableConfigFile) {
         CheckPath $ReplacementVariableConfigFile
-        Write-Verbose (Get-Content -LiteralPath $ReplacementVariableConfigFile).tostring()
+        (Get-Content -LiteralPath $ReplacementVariableConfigFile).tostring() | ForEach-Object {
+            Write-Verbose $_
+        }
     } else {
         Write-Host
     }
@@ -370,7 +372,9 @@ function main {
     Write-Host "  GraphConfigFile: '$GraphConfigFile'" -NoNewline
     if ($GraphConfigFile) {
         CheckPath $GraphConfigFile
-        Write-Verbose (Get-Content -LiteralPath $GraphConfigFile).tostring()
+        (Get-Content -LiteralPath $GraphConfigFile).tostring() | ForEach-Object {
+            Write-Verbose $_
+        }
     } else {
         Write-Host
     }
@@ -378,7 +382,9 @@ function main {
     Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
     if ($GraphCredentialFile) {
         CheckPath $GraphCredentialFile
-        Write-Verbose (Get-Content -LiteralPath $GraphCredentialFile).tostring()
+        (Get-Content -LiteralPath $GraphCredentialFile).tostring() | ForEach-Object {
+            Write-Verbose $_
+        }
     } else {
         Write-Host
     }
@@ -1937,7 +1943,7 @@ function main {
                     }
                     if (Test-Path -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm"))) {
                         if (-not $SimulateUser) {
-                            if ($null -ne $TrustsToCheckForGroups[0]) {
+                            if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
                                 $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                                 $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
                             } else {
@@ -1955,7 +1961,7 @@ function main {
                     } else {
                         if (-not $SimulateUser) {
                             if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
-                                if ($null -ne $TrustsToCheckForGroups[0]) {
+                                if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
                                     $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString())
                                 } else {
                                     if ((GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString()).error -ne $false) {
@@ -1965,7 +1971,7 @@ function main {
                                 }
                             }
                             if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
-                                if ($null -ne $TrustsToCheckForGroups[0]) {
+                                if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
                                     $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString())
                                 } else {
                                     if ((GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString()).error -ne $false) {
