@@ -1991,7 +1991,7 @@ function main {
                             }
                         }
                     }
-                    if ((-not $SimulateUser) -and ($null -ne $TrustsToCheckForGroups[0])) {
+                    if ((-not $SimulateUser) -and (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648))) {
                         try {
                             $exchService.SetUserOOFSettings($PrimaryMailboxAddress, $OOFSettings) | Out-Null
                         } catch {
