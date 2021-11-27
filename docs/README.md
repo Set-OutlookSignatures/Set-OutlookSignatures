@@ -93,6 +93,7 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [15.18. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1518-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
   - [15.19. Can I centrally manage and deploy Outook stationery with this script?](#1519-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
   - [15.20. What about the new signature roaming feature Microsoft announced?](#1520-what-about-the-new-signature-roaming-feature-microsoft-announced)
+    - [15.20.1. Please be aware of the following problem](#15201-please-be-aware-of-the-following-problem)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -826,5 +827,27 @@ Until the feature is fully rolled out and an API is available, you can disable t
 
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
 
-Since Q4 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes and in  Outlook on Windows. There is still no hint of an API, or a way to disable it on the server.
-When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can successfully set the signature in Outlook Web, but the signature is ignored. There is no programmatic way to detect or change this behavior. The same is valid for the Exchange Online PowerShell-Cmdlet Set-MailboxMessageConfiguration, so it seems different Microsoft teams work on a different development and release schedule.
+### 15.20.1. Please be aware of the following problem
+Since Q3 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes and in  Outlook on Windows. There is still no hint of an API, or a way to disable it on the server.
+
+When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can successfully set the signature in Outlook Web, but this signature is ignored.
+
+There is no programmatic way to detect or change this behavior.  
+The built-in Exchange Online PowerShell-Cmdlet Set-MailboxMessageConfiguration has the same problem, so it seems different Microsoft teams work on a different development and release schedule.
+
+At the time of writing, the only known workaround is the following:
+1. Delete all signatures available in Outlook Web
+2. Still in Outlook Web, set the default signatures to be used for new e-mails and for replies/forwards to "(no signature)"
+3. Save the updated settings
+4. Wait a few minutes
+5. Run Set-OutlookSignatures
+6. Wait a few minutes
+7. Open a new browser tab and open Outlook Web, or fully reload an existing open Outlook Web tab (Outlook Web works with caching in the browser, so it sometimes shows old configuration data) and check your signatures.
+
+Unfortunately, further updates to the Outlook Web signature by Set-OutlookSignatures are successful but ignored by Outlook Web until all signatures are deleted manually again.
+
+Even worse, it is not yet documented or known where the new signatures are stored and how they can be access programatically - so the deletion must happen manuelly and not be automated at the moment.
+
+If you are affected, please let Microsoft know via a support case and https://github.com/MicrosoftDocs/office-docs-powershell/issues/8537.
+
+As soon as there is an official API or a scriptable workaround available, Set-OutlookSignatures will be adopted to incorporate this new feature.

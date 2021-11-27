@@ -3,18 +3,19 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.4.0" target="_blank">v2.4.0</a> - YYYY-MM-DD
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.4.0-beta1" target="_blank">v2.4.0-beta1</a> - 2021-11-27
 ### Added
-- Added sample code files, including a wrapper script for central creation and deployment of signatures and OOF messages without end user or client involvement
+- Added sample code files ('.\sample code'), including a wrapper script for central creation and deployment of signatures and OOF messages without end user or client involvement
 - New default replacement variables for displayName and mailNickname (a.k.a. alias)
-- New parameter GraphOnly: Try to connect to Microsoft Graph only, ignoring any local Active Directory. The default behavior is to try Active Directory first and fall back to Graph.
-- New parameters CreateRTFSignatures and CreateTXTSignatures
+- New parameter GraphOnly: Try to connect to Microsoft Graph only, ignoring any local Active Directory. The default behavior without GraphOnly is unchanged (try Active Directory first, fall back to Graph).
+- New parameters CreateRTFSignatures and CreateTXTSignatures allow to disable RTF/TXT signature creation
 - New parameter GraphCredentialFile
 - New FAQ: How to deploy signatures for "Send As", "Send On Behalf" etc.?
 - New FAQ: Can I centrally manage and deploy Outook stationery with this script?
 - Report templates that are mentioned in the ini file but do not exist in the file system, and vice versa
 ### Fixed
-- Do not ignore remote mailboxes when searching mailboxes in Active Directory
+- Do not ignore remote mailboxes when searching mailboxes in Active Directory (thanks to Lars Würtz Hammer, https://www.linkedin.com/in/lwhdk/)
+- Correctly handle hybrid scenarios with basic auth disabled in the cloud (thanks to Lars Würtz Hammer, https://www.linkedin.com/in/lwhdk/)
 - When saving a document in Word fails, wait for two seconds and retry saving to avoid problems with virus scanners
 ### Changed
 - Documentation updates
