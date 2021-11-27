@@ -316,11 +316,6 @@ Param(
 function main {
     Set-Location $PSScriptRoot | Out-Null
 
-    $Search = New-Object DirectoryServices.DirectorySearcher
-    $Search.PageSize = 1000
-
-    $HTMLMarkerTag = '<meta name=data-SignatureFileInfo content="Set-OutlookSignatures">'
-
 
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
@@ -335,16 +330,17 @@ function main {
     Write-Host "  Script name: '$PSCommandPath'"
     Write-Host "  Script path: '$PSScriptRoot'"
 
-    if (-not (Test-Path 'variable:IsWindows')) {
-        # Automatic variable $IsWindows not set, must be Powershell version lower than 6 running on Windows
-        $IsWindows = $true
-        $IsLinux = $IsMacOS = $false
+    if ((Test-Path 'variable:IsWindows')) {
+        # Automatic variable $IsWindows is available, must be cross-platform PowerShell version v6+
+        if ($IsWindows -eq $false) {
+            Write-Host "  Your OS: $($PSVersionTable.Platform), $($PSVersionTable.OS), $(Invoke-Expression '(lsb_release -ds || cat /etc/*release || uname -om) 2>/dev/null | head -n1')" -ForegroundColor Red
+            Write-Host '  This script is supported on Windows only. Exiting.' -ForegroundColor Red
+            exit 1
+        }
+    } else {
+        # Automatic variable $IsWindows is not available, must be PowerShell <v6 running on Windows
     }
 
-    if ($IsWindows -eq $false) {
-        Write-Host '  This script is supported on Windows, but not on Linux or macOS. Exiting.' -ForegroundColor Red
-        exit 1
-    }
 
     if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
         Write-Host "  This PowerShell session is running in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
@@ -352,11 +348,13 @@ function main {
         exit 1
     }
 
+
     $script:tempDir = [System.IO.Path]::GetTempPath()
-
     $script:jobs = New-Object System.Collections.ArrayList
-
     Add-Type -AssemblyName System.DirectoryServices.AccountManagement
+    $Search = New-Object DirectoryServices.DirectorySearcher
+    $Search.PageSize = 1000
+    $HTMLMarkerTag = '<meta name=data-SignatureFileInfo content="Set-OutlookSignatures">'
 
 
     Write-Host "  ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
