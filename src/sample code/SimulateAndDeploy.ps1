@@ -19,10 +19,14 @@ Requirements
 
 Limitations
 - Outlook signatures can be deployed to a network share, but the default signatures for new e-mails and replies/forwards can't be configured, as there is no access to the users registry settings. This will be addressed for cloud mailboxes when Microsoft makes their signature roaming API available.
-- Requires desktop interaction if Windows Integrated Authentication can not be used to connect to the cloud
+- Despitze parallelization, the script runtime can be unsuited for a higher number of users. The reason usually is the Word background process.
+  - If you require signatures in RTF and/or TXT format, Word is needed for document conversion and you can only shorten runtime by adding hardware (scale up or scale out)
+  - If you do need HTML signatures only, you can use the following workaround to avoid starting Word:
+    - Use HTM templates instead of DOCX templates (parameter '-UseHTMTemplates true')
+    - Do not created signatures in RTF format (parameter '-CreateRTFSignatures false')
+    - Do not created signatures in TXT format (parameter '-CreateTXTSignatures false')
 
 Future enhancements
-- Enhanced authentication for full non-interactive mode
 - Support for upcoming Microsoft signature roaming API (very likely cloud-only)
 
 This scripts performs the following steps
