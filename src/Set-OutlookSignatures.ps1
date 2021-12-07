@@ -558,7 +558,7 @@ function main {
         Write-Host "  Outlook registry version: $OutlookRegistryVersion"
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
         Write-Host "  Outlook file version: $OutlookFileVersion"
-        Write-Host "  Disable roaming signatures: $OutlookDisableRoamingSignaturesTemporaryToggle"
+        Write-Host "  Roaming signatures disabled in Outlook: $OutlookDisableRoamingSignaturesTemporaryToggle"
     }
 
     $WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Word.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
@@ -1155,7 +1155,10 @@ function main {
 
         [regex]::Matches((($SignatureFilePart -replace '(?i)\[DefaultNew\]', '') -replace '(?i)\[DefaultReplyFwd\]', ''), '\[(.*?)\]').captures.value | ForEach-Object {
             $SignatureFilePartTag = $_
-            if (($SignatureFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -and (-not $SignatureFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase'))) {
+
+            if ($SignatureFilePartTag -match '\[\d{12}-\d{12}\]') { 
+                # Time based tags have already been handled before, do nothing                
+            } elseif (($SignatureFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -and (-not $SignatureFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase'))) {
                 if (-not $SignatureFilesMailbox.ContainsKey($SignatureFile.FullName)) {
                     Write-Host '    Mailbox specific signature'
                     $SignatureFilesMailbox.add($SignatureFile.FullName, $SignatureFileTargetName)
@@ -1206,7 +1209,7 @@ function main {
                 } else {
                     Write-Host "      $SignatureFilePartTag = $($NTName): Not found, please check" -ForegroundColor Yellow
                 }
-            } elseif (($SignatureFilePartTag -notmatch '\[\d{12}-\d{12}\]') -and ($SignatureFilePartTag -match '\[.*?\]')) {
+            } elseif (SignatureFilePartTag -match '\[.*?\]') {
                 Write-Host "    Unknown tag '$SignatureFilePartTag', please check" -ForegroundColor Yellow
             } else {
                 Write-Host '    Common signature'
@@ -1337,7 +1340,9 @@ function main {
 
             [regex]::Matches((($OOFFilePart -replace '(?i)\[External\]', '') -replace '(?i)\[Internal\]', ''), '\[(.*?)\]').captures.value | ForEach-Object {
                 $OOFFilePartTag = $_
-                if (($OOFFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -and (-not $OOFFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase'))) {
+                if ($OOFFilePartTag -match '\[\d{12}-\d{12}\]') { 
+                    # Time based tags have already been handled before, do nothing                
+                } elseif (($OOFFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -and (-not $OOFFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase'))) {
                     if (-not $OOFFilesMailbox.ContainsKey($OOFFile.FullName)) {
                         Write-Host '    Mailbox specific OOF message'
                         $OOFFilesMailbox.add($OOFFile.FullName, $OOFFileTargetName)
@@ -1388,7 +1393,7 @@ function main {
                     } else {
                         Write-Host "      $OOFFilePartTag = $($NTName): Not found, please check" -ForegroundColor Yellow
                     }
-                } elseif (($OOFFilePartTag -notmatch '\[\d{12}-\d{12}\]') -and ($OOFFilePartTag -match '\[.*?\]')) {
+                } elseif ($OOFFilePartTag -match '\[.*?\]') {
                     Write-Host "    Unknown tag '$OOFFilePartTag', please check" -ForegroundColor Yellow
                 } else {
                     Write-Host '    Common OOF message'
@@ -2455,8 +2460,16 @@ function Set-Signatures {
                     # Microsoft signature roaming available
                     Write-Host "      Copy signature files to '$_'"
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).htm"))) -Force
-                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).rtf"))) -Force
-                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).txt"))) -Force
+                    if ($CreateRTFSignatures -eq $true) {
+                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).rtf"))) -Force
+                    } else {
+                        Remove-Item ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).rtf"))) -Force -ErrorAction SilentlyContinue
+                    }
+                    if ($CreateTXTSignatures -eq $true) {
+                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).txt"))) -Force
+                    } else {
+                        Remove-Item ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).txt"))) -Force -ErrorAction SilentlyContinue
+                    }
                     $script:SignatureFilesDone += $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).htm")
                 } else {
                     # Microsoft signature roaming not available
