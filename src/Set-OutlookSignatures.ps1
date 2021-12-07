@@ -1206,7 +1206,7 @@ function main {
                 } else {
                     Write-Host "      $SignatureFilePartTag = $($NTName): Not found, please check" -ForegroundColor Yellow
                 }
-            } elseif ($SignatureFilePartTag -match '\[.*?\]') {
+            } elseif (($SignatureFilePartTag -notmatch '\[\d{12}-\d{12}\]') -and ($SignatureFilePartTag -match '\[.*?\]')) {
                 Write-Host "    Unknown tag '$SignatureFilePartTag', please check" -ForegroundColor Yellow
             } else {
                 Write-Host '    Common signature'
@@ -1388,7 +1388,7 @@ function main {
                     } else {
                         Write-Host "      $OOFFilePartTag = $($NTName): Not found, please check" -ForegroundColor Yellow
                     }
-                } elseif ($OOFFilePartTag -match '\[.*?\]') {
+                } elseif (($OOFFilePartTag -notmatch '\[\d{12}-\d{12}\]') -and ($OOFFilePartTag -match '\[.*?\]')) {
                     Write-Host "    Unknown tag '$OOFFilePartTag', please check" -ForegroundColor Yellow
                 } else {
                     Write-Host '    Common OOF message'
