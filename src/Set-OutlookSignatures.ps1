@@ -1153,12 +1153,10 @@ function main {
             continue
         }
 
-        [regex]::Matches((($SignatureFilePart -replace '(?i)\[DefaultNew\]', '') -replace '(?i)\[DefaultReplyFwd\]', ''), '\[(.*?)\]').captures.value | ForEach-Object {
+        [regex]::Matches(((($SignatureFilePart -replace '(?i)\[DefaultNew\]', '') -replace '(?i)\[DefaultReplyFwd\]', '') -replace '\[\d{12}-\d{12}\]', ''), '\[(.*?)\]').captures.value | ForEach-Object {
             $SignatureFilePartTag = $_
 
-            if ($SignatureFilePartTag -match '\[\d{12}-\d{12}\]') { 
-                # Time based tags have already been handled before, do nothing                
-            } elseif (($SignatureFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -and (-not $SignatureFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase'))) {
+            if (($SignatureFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -and (-not $SignatureFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase'))) {
                 if (-not $SignatureFilesMailbox.ContainsKey($SignatureFile.FullName)) {
                     Write-Host '    Mailbox specific signature'
                     $SignatureFilesMailbox.add($SignatureFile.FullName, $SignatureFileTargetName)
@@ -1338,11 +1336,9 @@ function main {
                 continue
             }
 
-            [regex]::Matches((($OOFFilePart -replace '(?i)\[External\]', '') -replace '(?i)\[Internal\]', ''), '\[(.*?)\]').captures.value | ForEach-Object {
+            [regex]::Matches(((($OOFFilePart -replace '(?i)\[External\]', '') -replace '(?i)\[Internal\]', '') -replace '\[\d{12}-\d{12}\]', ''), '\[(.*?)\]').captures.value | ForEach-Object {
                 $OOFFilePartTag = $_
-                if ($OOFFilePartTag -match '\[\d{12}-\d{12}\]') { 
-                    # Time based tags have already been handled before, do nothing                
-                } elseif (($OOFFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -and (-not $OOFFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase'))) {
+                if (($OOFFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -and (-not $OOFFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase'))) {
                     if (-not $OOFFilesMailbox.ContainsKey($OOFFile.FullName)) {
                         Write-Host '    Mailbox specific OOF message'
                         $OOFFilesMailbox.add($OOFFile.FullName, $OOFFileTargetName)
