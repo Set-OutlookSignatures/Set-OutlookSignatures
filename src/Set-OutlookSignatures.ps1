@@ -1209,7 +1209,7 @@ function main {
                 } else {
                     Write-Host "      $SignatureFilePartTag = $($NTName): Not found, please check" -ForegroundColor Yellow
                 }
-            } elseif (SignatureFilePartTag -match '\[.*?\]') {
+            } elseif ($SignatureFilePartTag -match '\[.*?\]') {
                 Write-Host "    Unknown tag '$SignatureFilePartTag', please check" -ForegroundColor Yellow
             } else {
                 Write-Host '    Common signature'
