@@ -27,7 +27,7 @@
 # 5. Start Set-OutlookSignatures with the parameter 'ReplacementVariableConfigFile' pointing to the new custom configuration file.
 
 
-# Currently logged on user
+# Currently logged in user
 $ReplaceHash['$CURRENTUSERGIVENNAME$'] = [string]$ADPropsCurrentUser.givenname
 $ReplaceHash['$CURRENTUSERSURNAME$'] = [string]$ADPropsCurrentUser.sn
 $ReplaceHash['$CURRENTUSERDEPARTMENT$'] = [string]$ADPropsCurrentUser.department
@@ -63,7 +63,7 @@ $ReplaceHash['$CURRENTUSERMAILNICKNAME$'] = [string]$ADPropsCurrentUser.mailnick
 $ReplaceHash['$CURRENTUSERDISPLAYNAME$'] = [string]$ADPropsCurrentUser.displayname
 
 
-# Manager of currently logged on user
+# Manager of currently logged in user
 $ReplaceHash['$CURRENTUSERMANAGERGIVENNAME$'] = [string]$ADPropsCurrentUserManager.givenname
 $ReplaceHash['$CURRENTUSERMANAGERSURNAME$'] = [string]$ADPropsCurrentUserManager.sn
 $ReplaceHash['$CURRENTUSERMANAGERDEPARTMENT$'] = [string]$ADPropsCurrentUserManager.department

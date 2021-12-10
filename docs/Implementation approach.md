@@ -293,7 +293,7 @@ At the time of writing, other parameters were available. The following is a brie
 - ReplacementVariableConfigFile: Path to the file in which variables deviating from the standard are defined. Can be an SMB or WebDAV share.  
 - DomainsToCheckForGroups: By default, all trusts are queried for mailbox information. This parameter can be used to remove certain domains and add non-trusted domains.  
 - DeleteUserCreatedSignatures: Should signatures created by the user be deleted? This is not done by default.  
-- SetCurrentUserOutlookWebSignature: By default, a signature is set in Outlook on the web for the logged-in user. This can be prevented via this parameter.  
+- SetCurrentUserOutlookWebSignature: By default, a signature is set in Outlook on the web for the logged in user. This can be prevented via this parameter.  
 - SetCurrentUserOOFMessage: By default, the text of the out-of-office messages is set. This parameter can be used to change this behaviour.  
 - OOFTemplatePath: Path to the absence templates. Can be an SMB or WebDAV share.  
 - AdditionalSignaturePath: Path to an additional share to which all signatures are to be copied, e.g. for access from a mobile device and for simplified configuration of clients not supported by the script. Can be an SMB or WebDAV share.  

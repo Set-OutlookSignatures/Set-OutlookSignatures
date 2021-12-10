@@ -11,11 +11,11 @@ Signatures and OOF messages can be:
 - Assigned time ranges within which they are valid
 - Set as default signature for new mails, or for replies and forwards (signatures only)
 - Set as default OOF message for internal or external recipients (OOF messages only)
-- Set in Outlook Web for the currently logged on user
+- Set in Outlook Web for the currently logged in user
 - Centrally managed only or exist along user created signatures (signatures only)
 - Copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
 
-Set-Outlooksignatures can be executed on the client side, or on a server without end user interaction.
+Set-Outlooksignatures can be executed by users on clients, or on a server without end user interaction.
 On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.
 Signatures and OOF messages can also be created and deployed centrally, without end user or client involvement.
 
@@ -50,7 +50,7 @@ This is an alternative to file name tags
 See '.\templates\sample signatures ini file.ini' for a sample file with further explanations.
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-The currently logged on user needs at least read access to the path
+The currently logged in user needs at least read access to the path
 Default value: ''
 
 .PARAMETER ReplacementVariableConfigFile
@@ -65,7 +65,7 @@ Path to a Graph variable config file.
 Local and remote paths are supported
 Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signature')
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/config/default graph config.ps1' or '\\server.domain@SSL\SignatureSite\config\default graph config.ps1'
-The currently logged on user needs at least read access to the path
+The currently logged in user needs at least read access to the path
 Default value: '.\config\default graph config.ps1'
 
 .PARAMETER TrustsToCheckForGroups
@@ -81,12 +81,12 @@ The script always deletes signatures which were deployed by the script earlier, 
 Default value: $false
 
 .PARAMETER SetCurrentUserOutlookWebSignature
-Shall the script set the Outlook Web signature of the currently logged on user?
+Shall the script set the Outlook Web signature of the currently logged in user?
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used.
 Default value: $true
 
 .PARAMETER SetCurrentUserOOFMessage
-Shall the script set the Out of Office (OOF) auto reply message of the currently logged on user?
+Shall the script set the Out of Office (OOF) auto reply message of the currently logged in user?
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used.
 Default value: $true
 
@@ -95,7 +95,7 @@ Path to centrally managed signature templates.
 Local and remote paths are supported.
 Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office').
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
-The currently logged on user needs at least read access to the path.
+The currently logged in user needs at least read access to the path.
 Default value: '.\templates\Out of Office DOCX'
 
 .PARAMETER OOFIniPath
@@ -104,7 +104,7 @@ This is an alternative to file name tags
 See '.\templates\sample OOF ini file.ini' for a sample file with further explanations.
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-The currently logged on user needs at least read access to the path
+The currently logged in user needs at least read access to the path
 Default value: ''
 
 .PARAMETER AdditionalSignaturePath
@@ -114,7 +114,7 @@ This way, the user can easily copy-paste the preferred preconfigured signature f
 Local and remote paths are supported.
 Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
 WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
-The currently logged on user needs at least write access to the path.
+The currently logged in user needs at least write access to the path.
 If the folder or folder structure does not exist, it is created.
 Default value: "$([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures'))"
 
@@ -130,7 +130,7 @@ Each format has advantages and disadvantages, please see "Should I use .docx or 
 Default value: $false
 
 .PARAMETER SimulateUser
-SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged on user.
+SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged in user.
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 .PARAMETER SimulateMailboxes
@@ -198,7 +198,7 @@ Param(
     #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    #   The currently logged on user needs at least read access to the path
+    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$SignatureTemplatePath = '.\templates\Signatures DOCX',
 
@@ -209,7 +209,7 @@ Param(
     #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    #   The currently logged on user needs at least read access to the path
+    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$SignatureIniPath = '',
 
@@ -218,7 +218,7 @@ Param(
     #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signature')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    #   The currently logged on user needs at least read access to the path
+    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$ReplacementVariableConfigFile = '.\config\default replacement variables.ps1',
 
@@ -227,7 +227,7 @@ Param(
     #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signature')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/config/default graph config.ps1' or '\\server.domain@SSL\SignatureSite\config\default graph config.ps1'
-    #   The currently logged on user needs at least read access to the path
+    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$GraphConfigFile = '.\config\default graph config.ps1',
 
@@ -242,11 +242,11 @@ Param(
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
     $DeleteUserCreatedSignatures = $false,
 
-    # Shall the script set the Outlook Web signature of the currently logged on user?
+    # Shall the script set the Outlook Web signature of the currently logged in user?
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
     $SetCurrentUserOutlookWebSignature = $true,
 
-    # Shall the script set the Out of Office (OOF) auto reply message(s) of the currently logged on user?
+    # Shall the script set the Out of Office (OOF) auto reply message(s) of the currently logged in user?
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
     $SetCurrentUserOOFMessage = $true,
 
@@ -255,7 +255,7 @@ Param(
     #     Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
-    #   The currently logged on user needs at least read access to the path
+    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$OOFTemplatePath = '.\templates\Out of Office DOCX',
 
@@ -266,7 +266,7 @@ Param(
     #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
     #   WebDAV paths are supported (https only)
     #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    #   The currently logged on user needs at least read access to the path
+    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$OOFIniPath = '',
 
@@ -281,7 +281,7 @@ Param(
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
     $UseHtmTemplates = $false,
 
-    # Simulate another user as currently logged on user
+    # Simulate another user as currently logged in user
     [Alias('SimulationUser')]
     [string]$SimulateUser = $null,
 
@@ -727,7 +727,7 @@ function main {
             Write-Host "Check for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             CheckADConnectivity $TrustsToCheckForGroups 'GC' '  ' | Out-Null
         } else {
-            Write-Host '  Problem connecting to logged on user''s Active Directory, assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
+            Write-Host '  Problem connecting to logged in user''s Active Directory, assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
         }
     } else {
         Write-Host "  Parameter GraphOnly set to '$GraphOnly', ignoring user's Active Directory in favor of Graph/Azure AD."
@@ -735,11 +735,11 @@ function main {
 
 
     Write-Host
-    Write-Host "Get AD properties of currently logged on user and assigned manager @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    Write-Host "Get AD properties of currently logged in user and assigned manager @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     if (-not $SimulateUser) {
-        Write-Host '  Currently logged on user'
+        Write-Host '  Currently logged in user'
     } else {
-        Write-Host "  Simulating '$SimulateUser' as currently logged on user" -ForegroundColor Yellow
+        Write-Host "  Simulating '$SimulateUser' as currently logged in user" -ForegroundColor Yellow
     }
 
     if ($GraphOnly -eq $false) {
@@ -869,9 +869,9 @@ function main {
     }
 
     if (-not $SimulateUser) {
-        Write-Host '  Manager of currently logged on user'
+        Write-Host '  Manager of currently logged in user'
     } else {
-        Write-Host '  Manager of simulated currently logged on user'
+        Write-Host '  Manager of simulated currently logged in user'
     }
     if ($null -ne $TrustsToCheckForGroups[0]) {
         try {
@@ -978,7 +978,7 @@ function main {
     $p = $null
     # First, check if the user has a mail attribute set
     if ($ADPropsCurrentUser.mail) {
-        Write-Host "  AD mail attribute of currently logged on user: $($ADPropsCurrentUser.mail)"
+        Write-Host "  AD mail attribute of currently logged in user: $($ADPropsCurrentUser.mail)"
         for ($i = 0; $i -lt $LegacyExchangeDNs.count; $i++) {
             if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -contains $('SMTP:' + $ADPropsCurrentUser.mail))) {
                 $p = $i
@@ -991,7 +991,7 @@ function main {
             Write-Host '    No matching mailbox found' -ForegroundColor Yellow
         }
     } else {
-        Write-Host '  AD mail attribute of currently logged on user is empty' -NoNewline
+        Write-Host '  AD mail attribute of currently logged in user is empty' -NoNewline
         if ($null -ne $TrustsToCheckForGroups[0]) {
             Write-Host ', searching msExchMasterAccountSid'
             # No mail attribute set, check for match(es) of user's objectSID and mailbox's msExchMasterAccountSid
@@ -2446,7 +2446,7 @@ function Set-Signatures {
                     # and $OutlookFileVersion is high enough (exact value is unknown yet)
                     # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
                     # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.msexchrecipienttypedetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
-                    # and the current mailbox is the personal mailbox of the currently logged-on user
+                    # and the current mailbox is the personal mailbox of the currently logged in user
                     ($null -ne $OutlookFileVersion) `
                         -and ($OutlookFileVersion -ge [system.version]::parse('16.0.99999.99999')) `
                         -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `

@@ -39,16 +39,16 @@ There are optimization opportunities in error handling, de-duplicating code with
 - How to detect roaming feature and enable the parameter only for these mailboxes?
 ### Approach
 Roaming signatures can only be set when one of the following condition sets is true:
-- Outlook is installed AND $OutlookFileVersion is high enough (exact value is unknown yet) AND $OutlookDisableRoamingSignaturesTemporaryToggle equals 0 AND the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*)) AND the current mailbox is the personal mailbox of the currently logged-on user
+- Outlook is installed AND $OutlookFileVersion is high enough (exact value is unknown yet) AND $OutlookDisableRoamingSignaturesTemporaryToggle equals 0 AND the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*)) AND the current mailbox is the personal mailbox of the currently logged in user
   - Most likely, the script has to add " \<e-mail address>" to the signature name and Outlook will take care of the rest. The new filenames need to be added to $script:SignatureFilesDone.
-- Outlook is not installed AND we are connected via Graph AND $GraphEndpointVersion is high enough (exact value is unknown yet) AND the mailbox is in the cloud (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*) AND the current mailbox is the personal mailbox of the currently logged-on user
+- Outlook is not installed AND we are connected via Graph AND $GraphEndpointVersion is high enough (exact value is unknown yet) AND the mailbox is in the cloud (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*) AND the current mailbox is the personal mailbox of the currently logged in user
     ```
     if (
         # Outlook is not installed
         # and we are connected via Graph
         # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
         # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
-        # and the current mailbox is the personal mailbox of the currently logged-on user
+        # and the current mailbox is the personal mailbox of the currently logged in user
         ($null -eq $OutlookFileVersion) `
             -and ($null -eq $ADPropsCurrentMailbox.recipienttypedetails) `
             -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
