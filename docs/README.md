@@ -40,7 +40,7 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [2.4. GraphConfigFile](#24-graphconfigfile)
   - [2.5. TrustedDomainsToCheckForGroups](#25-trusteddomainstocheckforgroups)
   - [2.6. DeleteUserCreatedSignatures](#26-deleteusercreatedsignatures)
-  - [2.7. CleanScriptCreatedSignatures](#27-cleanscriptcreatedsignatures)
+  - [2.7. DeleteScriptCreatedSignaturesWithoutTemplate](#27-DeleteScriptCreatedSignaturesWithoutTemplate)
   - [2.8. SetCurrentUserOutlookWebSignature](#28-setcurrentuseroutlookwebsignature)
   - [2.9. SetCurrentUserOOFMessage](#29-setcurrentuseroofmessage)
   - [2.10. OOFTemplatePath](#210-ooftemplatepath)
@@ -94,8 +94,10 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [15.17. Is there a roadmap for future versions?](#1517-is-there-a-roadmap-for-future-versions)
   - [15.18. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1518-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
   - [15.19. Can I centrally manage and deploy Outook stationery with this script?](#1519-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
-  - [15.20. What about the new signature roaming feature Microsoft announced?](#1520-what-about-the-new-signature-roaming-feature-microsoft-announced)
-    - [15.20.1. Please be aware of the following problem](#15201-please-be-aware-of-the-following-problem)
+  - [15.20. Why is dynamic distribution group and dynamic security group membership not considered?](#1520-why-is-dynamic-distribution-group-and-dynamic-security-group-membership-not-considered)
+    - [15.20.1. What's the alternative to dynamic groups?](#15201-whats-the-alternative-to-dynamic-groups)
+  - [15.21. What about the new signature roaming feature Microsoft announced?](#1521-what-about-the-new-signature-roaming-feature-microsoft-announced)
+    - [15.21.1. Please be aware of the following problem](#15211-please-be-aware-of-the-following-problem)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -174,7 +176,7 @@ Default value: `'*'`
 Shall the script delete signatures which were created by the user itself?
 
 Default value: `$false`
-## 2.7. CleanScriptCreatedSignatures
+## 2.7. DeleteScriptCreatedSignaturesWithoutTemplate
 Shall the script delete signatures which were created by the script before but are no longer available as template?
 
 Default value: `$true`
@@ -828,7 +830,35 @@ The default mail font, size and color are usually an integral part of corporate 
 Set-OutlookSignatures has no features regarding deploying Outlook stationery, as there are better ways for doing this.  
 Outlook stores stationery settings in `'HKCU\Software\Microsoft\Office\<Version>\Common\MailSettings'`. You can use a logon script or group policies to deploy these keys, on-prem and for managed devices in the cloud.  
 Unfortunately, Microsoft's group policy templates (ADMX files) for Office do not seem to provide detailed settings for Outlook stationery, so you will have to deploy registry keys. 
-## 15.20. What about the new signature roaming feature Microsoft announced?  
+## 15.20. Why is dynamic distribution group and dynamic security group membership not considered?
+Dynamic distribution groups (DDGs) are specific groups that only work within Exchange. Group membership is evaluated just in time when an e-mail is sent to a DDG by executing the LDAP query defining a DDG.
+
+Active Directory and Graph know that a DDG is a group, but they basically do not know the members of this group.  
+In more technical words: Dynamic groups have no member attribute, and dynamic groups do not show in the on-prem user attributes memberOf and tokenGroups and the Graph user attribute transitiveMemberOf.
+
+If dynamic distribution groups would have to be considered, the only way would be to enumerate all dynamic groups, run the LDAP query defining each group and finally evaluate the resulting group membership.
+
+The LDAP queries defining dynamic groups are deemed expensive due to the potential load they put on Active Directory and their potential runtime.  
+Microsoft does not recommend against dynamic groups, only not to use them heavily.  
+This is very likely the reason why dynamic groups can not be granted permissions on Exchange mailboxes and other Exchange objects, and why each dynamic group can be assigned an expansion server executing the LDAP query (expansion times of 15 minutes or more are not rare in the field).
+
+Taking all these aspects into account, Set-OutlookSignatures will not consider membership in dynamic groups until a reliable and efficient way of querying a user's dynamic group membership is available.
+### 15.20.1. What's the alternative to dynamic groups?
+Dynamic groups have their raison d'être, especially if you use them as a tool for special and rather rarely used use cases.
+
+With the move to the cloud, where dynamic groups were introduced just not too long ago and only with a limited set of possible query parameters, I observed an ongoing trend: Replacing dynamic groups with regularly updated static groups.
+
+An Identity Management System (IDM) or a script regularly executes the LDAP query, which would otherwise define a dynamic group, and updates the member list of a static group.
+
+These updates usually happen less frequent than a dynamic group is used. The static group might not be fully up-to-date when used, but other aspects outweigh this disadvantage most of the time:
+- Reduced load on Active Directory (partially transferred to IDM system or server running a script)
+- Static groups can be used for permissions on Exchange objects
+- Changes in static group membership can be documented more easily
+- Static groups can be expanded to it's members in mail clients
+- Membership in static groups can easily be queried
+- Overcoming cloud query parameter restrictions
+- Filling a group with the combined results of multiple LDAP queries
+## 15.21. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.
@@ -843,7 +873,7 @@ Until the feature is fully rolled out and an API is available, you can disable t
 
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
 
-### 15.20.1. Please be aware of the following problem
+### 15.21.1. Please be aware of the following problem
 Since Q3 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes and in  Outlook on Windows. There is still no hint of an API, or a way to disable it on the server.
 
 When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can successfully set the signature in Outlook Web, but this signature is ignored.

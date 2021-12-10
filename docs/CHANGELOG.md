@@ -5,7 +5,8 @@
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta1</a> - YYYY-MM-DD
 ### Added
-- New parameters: CleanScriptCreatedSignatures, ConsiderDistributionGroupMembership
+- New parameters: DeleteScriptCreatedSignaturesWithoutTemplate, ConsiderDistributionGroupMembership
+- New FAQ: Why is dynamic distribution group and dynamic security group membership not considered?
 ### Fixed
 - XXX
 ### Changed

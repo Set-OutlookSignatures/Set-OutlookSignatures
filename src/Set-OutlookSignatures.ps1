@@ -79,7 +79,7 @@ Default value: '*'
 Shall the script delete signatures which were created by the user itself?
 Default value: $false
 
-.PARAMETER CleanScriptCreatedSignatures
+.PARAMETER DeleteScriptCreatedSignaturesWithoutTemplate
 Shall the script delete signatures which were created by the script before but are no longer available as template?
 default value: $true
 
@@ -254,7 +254,7 @@ Param(
 
     # Shall the script delete signatures which were created by the script before but are no longer available as template?
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
-    $CleanScriptCreatedSignatures = $true,
+    $DeleteScriptCreatedSignaturesWithoutTemplate = $true,
 
     # Shall the script set the Outlook Web signature of the currently logged in user?
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
@@ -448,8 +448,8 @@ function main {
     Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
     $DeleteUserCreatedSignatures = [System.Convert]::ToBoolean($DeleteUserCreatedSignatures.tostring().trim('$'))
 
-    Write-Host "  CleanScriptCreatedSignatures: '$CleanScriptCreatedSignatures'"
-    $CleanScriptCreatedSignatures = [System.Convert]::ToBoolean($CleanScriptCreatedSignatures.tostring().trim('$'))
+    Write-Host "  DeleteScriptCreatedSignaturesWithoutTemplate: '$DeleteScriptCreatedSignaturesWithoutTemplate'"
+    $DeleteScriptCreatedSignaturesWithoutTemplate = [System.Convert]::ToBoolean($DeleteScriptCreatedSignaturesWithoutTemplate.tostring().trim('$'))
 
     Write-Host "  SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
     $SetCurrentUserOutlookWebSignature = [System.Convert]::ToBoolean($SetCurrentUserOutlookWebSignature.tostring().trim('$'))
@@ -2051,7 +2051,7 @@ function main {
 
     # Delete old signatures created by this script, which are no longer available in $SignatureTemplatePath
     # We check all local signatures for a specific marker in HTML code, so we don't touch user created signatures
-    if ($CleanScriptCreatedSignatures -eq $true) {
+    if ($DeleteScriptCreatedSignaturesWithoutTemplate -eq $true) {
         Write-Host
         Write-Host "Remove old signatures created by this script, which are no longer centrally available @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         $SignaturePaths | ForEach-Object {
