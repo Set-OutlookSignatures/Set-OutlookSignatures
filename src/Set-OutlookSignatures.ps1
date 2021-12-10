@@ -77,8 +77,11 @@ Default value: '*'
 
 .PARAMETER DeleteUserCreatedSignatures
 Shall the script delete signatures which were created by the user itself?
-The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
 Default value: $false
+
+.PARAMETER CleanScriptCreatedSignatures
+Shall the script delete signatures which were created by the script before but are no longer available as template?
+default value: $true
 
 .PARAMETER SetCurrentUserOutlookWebSignature
 Shall the script set the Outlook Web signature of the currently logged in user?
@@ -238,9 +241,12 @@ Param(
     [string[]]$TrustsToCheckForGroups = ('*'),
 
     # Shall the script delete signatures which were created by the user itself?
-    #   The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
     $DeleteUserCreatedSignatures = $false,
+
+    # Shall the script delete signatures which were created by the script before but are no longer available as template?
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
+    $CleanScriptCreatedSignatures = $true,
 
     # Shall the script set the Outlook Web signature of the currently logged in user?
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
@@ -421,15 +427,18 @@ function main {
     $CreateTXTSignatures = [System.Convert]::ToBoolean($CreateTXTSignatures.tostring().trim('$'))
 
     Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
-    $DeleteUserCreatedSignatures = [System.Convert]::ToBoolean($DeleteUserCreatedSignatures.tostring().trim('$'))
 
     Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
-    $SetCurrentUserOutlookWebSignature = [System.Convert]::ToBoolean($SetCurrentUserOutlookWebSignature.tostring().trim('$'))
+    $DeleteUserCreatedSignatures = [System.Convert]::ToBoolean($DeleteUserCreatedSignatures.tostring().trim('$'))
+
+    Write-Host "  CleanScriptCreatedSignatures: '$CleanScriptCreatedSignatures'"
+    $CleanScriptCreatedSignatures = [System.Convert]::ToBoolean($CleanScriptCreatedSignatures.tostring().trim('$'))
 
     Write-Host "  SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
-    $SetCurrentUserOOFMessage = [System.Convert]::ToBoolean($SetCurrentUserOOFMessage.tostring().trim('$'))
+    $SetCurrentUserOutlookWebSignature = [System.Convert]::ToBoolean($SetCurrentUserOutlookWebSignature.tostring().trim('$'))
 
     Write-Host "  SetCurrentUserOOFMessage: '$SetCurrentUserOOFMessage'"
+    $SetCurrentUserOOFMessage = [System.Convert]::ToBoolean($SetCurrentUserOOFMessage.tostring().trim('$'))
     if ($SetCurrentUserOOFMessage) {
         Write-Host "  OOFTemplatePath: '$OOFTemplatePath'" -NoNewline
         CheckPath $OOFTemplatePath
@@ -2012,21 +2021,22 @@ function main {
 
     # Delete old signatures created by this script, which are no longer available in $SignatureTemplatePath
     # We check all local signatures for a specific marker in HTML code, so we don't touch user created signatures
-    Write-Host
-    Write-Host "Remove old signatures created by this script, which are no longer centrally available @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    $SignaturePaths | ForEach-Object {
-        Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
-            if ((Get-Content -LiteralPath $_.fullname -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
-                if ($_.name -notin $script:SignatureFilesDone) {
-                    Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
-                    Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
-                    Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
-                    Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
+    if ($CleanScriptCreatedSignatures -eq $true) {
+        Write-Host
+        Write-Host "Remove old signatures created by this script, which are no longer centrally available @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+        $SignaturePaths | ForEach-Object {
+            Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
+                if ((Get-Content -LiteralPath $_.fullname -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
+                    if ($_.name -notin $script:SignatureFilesDone) {
+                        Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
+                        Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
+                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
+                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
+                    }
                 }
             }
         }
     }
-
 
     # Delete user created signatures if $DeleteUserCreatedSignatures -eq $true
     if ($DeleteUserCreatedSignatures -eq $true) {

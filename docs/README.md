@@ -40,19 +40,20 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [2.4. GraphConfigFile](#24-graphconfigfile)
   - [2.5. TrustedDomainsToCheckForGroups](#25-trusteddomainstocheckforgroups)
   - [2.6. DeleteUserCreatedSignatures](#26-deleteusercreatedsignatures)
-  - [2.7. SetCurrentUserOutlookWebSignature](#27-setcurrentuseroutlookwebsignature)
-  - [2.8. SetCurrentUserOOFMessage](#28-setcurrentuseroofmessage)
-  - [2.9. OOFTemplatePath](#29-ooftemplatepath)
-  - [2.10. OOFIniPath](#210-oofinipath)
-  - [2.11. AdditionalSignaturePath](#211-additionalsignaturepath)
-  - [2.12. AdditionalSignaturePathFolder](#212-additionalsignaturepathfolder)
-  - [2.13. UseHtmTemplates](#213-usehtmtemplates)
-  - [2.14. SimulateUser](#214-simulateuser)
-  - [2.15. SimulateMailboxes](#215-simulatemailboxes)
-  - [2.16. GraphCredentialFile](#216-graphcredentialfile)
-  - [2.17. GraphOnly](#217-graphonly)
-  - [2.18. CreateRTFSignatures](#218-creatertfsignatures)
-  - [2.19. CreateTXTSignatures](#219-createtxtsignatures)
+  - [2.7. CleanScriptCreatedSignatures](#27-cleanscriptcreatedsignatures)
+  - [2.8. SetCurrentUserOutlookWebSignature](#28-setcurrentuseroutlookwebsignature)
+  - [2.9. SetCurrentUserOOFMessage](#29-setcurrentuseroofmessage)
+  - [2.10. OOFTemplatePath](#210-ooftemplatepath)
+  - [2.11. OOFIniPath](#211-oofinipath)
+  - [2.12. AdditionalSignaturePath](#212-additionalsignaturepath)
+  - [2.13. AdditionalSignaturePathFolder](#213-additionalsignaturepathfolder)
+  - [2.14. UseHtmTemplates](#214-usehtmtemplates)
+  - [2.15. SimulateUser](#215-simulateuser)
+  - [2.16. SimulateMailboxes](#216-simulatemailboxes)
+  - [2.17. GraphCredentialFile](#217-graphcredentialfile)
+  - [2.18. GraphOnly](#218-graphonly)
+  - [2.19. CreateRTFSignatures](#219-creatertfsignatures)
+  - [2.20. CreateTXTSignatures](#220-createtxtsignatures)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -169,24 +170,26 @@ Subdomains of trusted domains are always considered.
 
 Default value: `'*'`  
 ## 2.6. DeleteUserCreatedSignatures  
-Shall the script delete signatures which were created by the user itself? The default value for this parameter is `$false`.
+Shall the script delete signatures which were created by the user itself?
 
-Remark: The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository.
+Default value: `$false`
+## 2.7. CleanScriptCreatedSignatures
+Shall the script delete signatures which were created by the script before but are no longer available as template?
 
-Default value: `$false`  
-## 2.7. SetCurrentUserOutlookWebSignature  
+Default value: `$true`
+## 2.8. SetCurrentUserOutlookWebSignature  
 Shall the script set the Outlook Web signature of the currently logged in user?
 
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
-## 2.8. SetCurrentUserOOFMessage  
+## 2.9. SetCurrentUserOOFMessage  
 Shall the script set the Out of Office (OOF) auto reply message of the currently logged in user?
 
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
-## 2.9. OOFTemplatePath  
+## 2.10. OOFTemplatePath  
 Path to centrally managed Out of Office (OOF) auto reply templates.
 
 Local and remote paths are supported.
@@ -198,7 +201,7 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/O
 The currently logged in user needs at least read access to the path.
 
 Default value: `'.\templates\Out of Office DOCX'`
-## 2.10. OOFIniPath
+## 2.11. OOFIniPath
 If you can't or don't want to use file name based tags, you can place them in an ini file.
 
 See '.\templates\sample OOF ini file.ini' for a sample file with further explanations.
@@ -210,7 +213,7 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/Si
 The currently logged in user needs at least read access to the path
 
 Default value: `''`
-## 2.11. AdditionalSignaturePath  
+## 2.12. AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
 
@@ -227,7 +230,7 @@ The currently logged in user needs at least write access to the path.
 If the folder or folder structure does not exist, it is created.
 
 Default value: `"$([environment]::GetFolderPath("MyDocuments"))\Outlook signatures"`  
-## 2.12. AdditionalSignaturePathFolder
+## 2.13. AdditionalSignaturePathFolder
 A folder or folder structure below AdditionalSignaturePath.
 
 This parameter is available for compatibility with versions before 2.2.1. Starting with 2.2.1, you can pass a full path via the parameter AdditionalSignaturePath, so AdditionalSignaturePathFolder is no longer needed.
@@ -235,21 +238,21 @@ This parameter is available for compatibility with versions before 2.2.1. Starti
 If the folder or folder structure does not exist, it is created.
 
 Default value: `'Outlook signatures'`  
-## 2.13. UseHtmTemplates  
+## 2.14. UseHtmTemplates  
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
 
 Each format has advantages and disadvantages, please see "[13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)" for a quick overview.
 
 Default value: `$false`  
-## 2.14. SimulateUser  
+## 2.15. SimulateUser  
 SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged in user.
 
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
-## 2.15. SimulateMailboxes  
+## 2.16. SimulateMailboxes  
 SimulateMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
-## 2.16. GraphCredentialFile
+## 2.17. GraphCredentialFile
 Path to file containing Graph credential which should be used as alternative to other token acquisition methods.
 
 Makes only sense in combination with `'.\sample code\SimulateAndDeploy.ps1'`, do not use this parameter for other scenarios.
@@ -257,17 +260,17 @@ Makes only sense in combination with `'.\sample code\SimulateAndDeploy.ps1'`, do
 See `'.\sample code\SimulateAndDeploy.ps1'` for an example how to create this file.
 
 Default value: `$null`  
-## 2.17. GraphOnly
+## 2.18. GraphOnly
 Try to connect to Microsoft Graph only, ignoring any local Active Directory.
 
 The default behavior is to try Active Directory first and fall back to Graph.
 
 Default value: `$false`
-## 2.18. CreateRTFSignatures
+## 2.19. CreateRTFSignatures
 Should signatures be created in RTF format?
 
 Default value: `$true`
-## 2.19. CreateTXTSignatures
+## 2.20. CreateTXTSignatures
 Should signatures be created in TXT format?
 
 Default value: `$true`

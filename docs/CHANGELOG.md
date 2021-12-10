@@ -3,6 +3,16 @@
 
 # Changelog
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta1</a> - YYYY-MM-DD
+### Added
+- New parameter: CleanScriptCreatedSignatures
+### Fixed
+- XXX
+### Changed
+- XXX
+### Removed
+- XXX
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.4.0" target="_blank">v2.4.0</a> - 2021-12-10
 ### Added
 - Added sample code files ('.\sample code'), including a wrapper script for central creation and deployment of signatures and OOF messages without end user or client involvement
