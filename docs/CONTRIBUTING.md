@@ -12,8 +12,9 @@ I'm not a professional developer - if you are one and you notice something negat
 - [1. Code of Conduct](#1-code-of-conduct)
 - [2. Contribution opportunities](#2-contribution-opportunities)
   - [2.1. Code refactoring](#21-code-refactoring)
-  - [2.2. New parameter: EachSignatureForEachMailbox](#22-new-parameter-eachsignatureforeachmailbox)
-  - [2.3. New feature: Central signature deployment without client-side script](#23-new-feature-central-signature-deployment-without-client-side-script)
+  - [2.2. Support Microsoft signature roaming API](#22-support-microsoft-signature-roaming-api)
+    - [Approach](#approach)
+  - [2.3. Enhance central signature deployment without client-side execution of script](#23-enhance-central-signature-deployment-without-client-side-execution-of-script)
 - [3. Branches](#3-branches)
 - [4. Development process](#4-development-process)
 - [5. Commit messages](#5-commit-messages)
@@ -29,20 +30,45 @@ When contributing to Set-OutlookSignatures, please make sure to follow the Code 
 I'm not a professional developer, but a hobbyist scripter, and the code looks like that.
 
 There are optimization opportunities in error handling, de-duplicating code with functions, applying PowerShell best practices, and more.
-## 2.2. New parameter: EachSignatureForEachMailbox
-- Attach " \<e-mail-address>" to each signature name
+## 2.2. Support Microsoft signature roaming API
 - This seems to be the way to make signatures roam in the cloud via the Outlook client, without using a Graph API
 - API for deploying signatures directly to mailbox via EWS or Graph is not yet known
 - Don't forget to update SignatureFilesDone so that the removal process keeps working
 - How to handle group mailboxes?
   - When roaming is enabled, this creates a big mess because script runs overwrite each others results (think about \$CURRENTUSER[...]$ replacement variables)
 - How to detect roaming feature and enable the parameter only for these mailboxes?
-## 2.3. New feature: Central signature deployment without client-side script
-- Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
-- Automate simulation mode by wrapping parallelization code around it (just as the CheckADConnectivity function does, with other timeouts)
-- Is RTF export necessary in this scenario?
-- Use simulation mode results to write to Graph with a service account
-- What about group mailboxes?
+### Approach
+Roaming signatures can only be set when one of the following condition sets is true:
+- Outlook is installed AND $OutlookFileVersion is high enough (exact value is unknown yet) AND $OutlookDisableRoamingSignaturesTemporaryToggle equals 0 AND the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*)) AND the current mailbox is the personal mailbox of the currently logged in user
+  - Most likely, the script has to add " \<e-mail address>" to the signature name and Outlook will take care of the rest. The new filenames need to be added to $script:SignatureFilesDone.
+- Outlook is not installed AND we are connected via Graph AND $GraphEndpointVersion is high enough (exact value is unknown yet) AND the mailbox is in the cloud (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*) AND the current mailbox is the personal mailbox of the currently logged in user
+    ```
+    if (
+        # Outlook is not installed
+        # and we are connected via Graph
+        # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
+        # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
+        # and the current mailbox is the personal mailbox of the currently logged in user
+        ($null -eq $OutlookFileVersion) `
+            -and ($null -eq $ADPropsCurrentMailbox.recipienttypedetails) `
+            -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
+            -and ($null -ne $ADPropsCurrentMailbox.mailboxsettings) `
+            -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
+    ) {
+        'Do roaming signature stuff here'
+    } else {
+        "Don't do roaming signature stuff here"
+    }
+    ```
+  - in this case, the script first needs to download existing signatures from Graph to a temp directory
+  - mailbox propably does not need to be in the cloud: https://docs.microsoft.com/en-us/graph/hybrid-rest-support
+  - Alternate detection method: https://rakhesh.com/azure/graph-api-detect-if-user-has-an-o365-mailbox/
+## 2.3. Enhance central signature deployment without client-side execution of script
+Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
+- Done: Automate simulation mode by wrapping parallelization code around it (`.\sample code\SimulateAndDeploy.ps1`)
+- Done: Is RTF export necessary in this scenario? Yes, because the script can be used to write to signature folders redirected to a network share.
+- Done: Use simulation mode results to write to Graph with a service account (`.\sample code\SimulateAndDeploy.ps1`)
+- Open: Adopt script to Microsoft signature roaming API, when it eventually is publicly available
 # 3. Branches
 The default branch is named '`main`'. It contains the source of the latest stable release.
 

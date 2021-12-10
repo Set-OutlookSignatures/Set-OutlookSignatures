@@ -27,7 +27,7 @@
 # 5. Start Set-OutlookSignatures with the parameter 'ReplacementVariableConfigFile' pointing to the new custom configuration file.
 
 
-# Currently logged on user
+# Currently logged in user
 $ReplaceHash['$CURRENTUSERGIVENNAME$'] = [string]$ADPropsCurrentUser.givenname
 $ReplaceHash['$CURRENTUSERSURNAME$'] = [string]$ADPropsCurrentUser.sn
 $ReplaceHash['$CURRENTUSERDEPARTMENT$'] = [string]$ADPropsCurrentUser.department
@@ -59,9 +59,11 @@ $ReplaceHash['$CURRENTUSEREXTATTR14$'] = [string]$ADPropsCurrentUser.extensionat
 $ReplaceHash['$CURRENTUSEREXTATTR15$'] = [string]$ADPropsCurrentUser.extensionattribute15
 $ReplaceHash['$CURRENTUSEROFFICE$'] = [string]$ADPropsCurrentUser.physicaldeliveryofficename
 $ReplaceHash['$CURRENTUSERCOMPANY$'] = [string]$ADPropsCurrentUser.company
+$ReplaceHash['$CURRENTUSERMAILNICKNAME$'] = [string]$ADPropsCurrentUser.mailnickname
+$ReplaceHash['$CURRENTUSERDISPLAYNAME$'] = [string]$ADPropsCurrentUser.displayname
 
 
-# Manager of currently logged on user
+# Manager of currently logged in user
 $ReplaceHash['$CURRENTUSERMANAGERGIVENNAME$'] = [string]$ADPropsCurrentUserManager.givenname
 $ReplaceHash['$CURRENTUSERMANAGERSURNAME$'] = [string]$ADPropsCurrentUserManager.sn
 $ReplaceHash['$CURRENTUSERMANAGERDEPARTMENT$'] = [string]$ADPropsCurrentUserManager.department
@@ -93,6 +95,8 @@ $ReplaceHash['$CURRENTUSERMANAGEREXTATTR14$'] = [string]$ADPropsCurrentUserManag
 $ReplaceHash['$CURRENTUSERMANAGEREXTATTR15$'] = [string]$ADPropsCurrentUserManager.extensionattribute15
 $ReplaceHash['$CURRENTUSERMANAGEROFFICE$'] = [string]$ADPropsCurrentUserManager.physicaldeliveryofficename
 $ReplaceHash['$CURRENTUSERMANAGERCOMPANY$'] = [string]$ADPropsCurrentUserManager.company
+$ReplaceHash['$CURRENTUSERMANAGERMAILNICKNAME$'] = [string]$ADPropsCurrentUserManager.mailnickname
+$ReplaceHash['$CURRENTUSERMANAGERDISPLAYNAME$'] = [string]$ADPropsCurrentUserManager.displayname
 
 
 # Current mailbox
@@ -127,6 +131,8 @@ $ReplaceHash['$CURRENTMAILBOXEXTATTR14$'] = [string]$ADPropsCurrentMailbox.exten
 $ReplaceHash['$CURRENTMAILBOXEXTATTR15$'] = [string]$ADPropsCurrentMailbox.extensionattribute15
 $ReplaceHash['$CURRENTMAILBOXOFFICE$'] = [string]$ADPropsCurrentMailbox.physicaldeliveryofficename
 $ReplaceHash['$CURRENTMAILBOXCOMPANY$'] = [string]$ADPropsCurrentMailbox.company
+$ReplaceHash['$CURRENTMAILBOXMAILNICKNAME$'] = [string]$ADPropsCurrentMailbox.mailnickname
+$ReplaceHash['$CURRENTMAILBOXDISPLAYNAME$'] = [string]$ADPropsCurrentMailbox.displayname
 
 
 # Manager of current mailbox
@@ -161,6 +167,8 @@ $ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR14$'] = [string]$ADPropsCurrentMailbo
 $ReplaceHash['$CURRENTMAILBOXMANAGEREXTATTR15$'] = [string]$ADPropsCurrentMailboxManager.extensionattribute15
 $ReplaceHash['$CURRENTMAILBOXMANAGEROFFICE$'] = [string]$ADPropsCurrentMailboxManager.physicaldeliveryofficename
 $ReplaceHash['$CURRENTMAILBOXMANAGERCOMPANY$'] = [string]$ADPropsCurrentMailboxManager.company
+$ReplaceHash['$CURRENTMAILBOXMANAGERMAILNICKNAME$'] = [string]$ADPropsCurrentMailboxManager.mailnickname
+$ReplaceHash['$CURRENTMAILBOXMANAGERDISPLAYNAME$'] = [string]$ADPropsCurrentMailboxManager.displayname
 
 
 # $CURRENTUSERNAMEWITHTITLES$, $CURRENTUSERMANAGERNAMEWITHTITLES$
