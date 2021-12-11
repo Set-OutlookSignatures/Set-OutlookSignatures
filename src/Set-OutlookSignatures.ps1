@@ -1473,7 +1473,7 @@ function main {
 
                     $UserDomain = $ADPropsMailboxesUserDomain[$AccountNumberRunning]
                     $SIDsToCheckInTrusts = @()
-                    $SIDsToCheckInTrusts += $ADPropsCurrentMailbox.objectsid
+                    $SIDsToCheckInTrusts += (New-Object System.Security.Principal.SecurityIdentifier($($ADPropsCurrentMailbox.objectsid), 0)).Value
                     try {
                         # Security groups, no matter if enabled for mail or not
                         $UserAccount = [ADSI]"LDAP://$($ADPropsCurrentMailbox.distinguishedname)"
@@ -1484,8 +1484,6 @@ function main {
                             $SIDsToCheckInTrusts += $sid.tostring()
                             Write-Host "      $sid"
                         }
-                        # $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
-                        # $SIDsToCheckInTrusts += $UserAccount.properties.tokengroupsglobalanduniversal
 
                         # Distribution groups (static only)
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')")
@@ -1495,13 +1493,12 @@ function main {
                                 $sid = (New-Object System.Security.Principal.SecurityIdentifier $sidByteArray, 0).value
                                 Write-Host "      $sid"
                                 $GroupsSIDs += $sid.tostring()
-                                # if ($_.properties.grouptype -in ('2', '8')) {
                                 $SIDsToCheckInTrusts += $sid.tostring()
-                                # }
                             }
                         }
                     } catch {
                         Write-Host "      Error getting group information from $((($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.'), check firewalls, DNS and AD trust" -ForegroundColor Red
+                        $error[0]
                     }
                     # Loop through all domains to check if the mailbox account has a group membership there
                     # Across a trust, a user can only be added to a domain local group.
@@ -1511,14 +1508,17 @@ function main {
                         $SIDsToCheckInTrusts | ForEach-Object {
                             try {
                                 $SidHex = @()
-                                $ot = New-Object System.Security.Principal.SecurityIdentifier($_, 0)
+                                $ot = New-Object System.Security.Principal.SecurityIdentifier($_)
                                 $c = New-Object 'byte[]' $ot.BinaryLength
                                 $ot.GetBinaryForm($c, 0)
                                 $c | ForEach-Object {
                                     $SidHex += $('\{0:x2}' -f $_)
                                 }
                                 $LdapFilterSIDs += ('(objectsid=' + $($SidHex -join '') + ')')
+                                $LdapFilterSIDs += ('(sidhistory=' + $($SidHex -join '') + ')')
                             } catch {
+                                Write-Host '      Error creating LDAP filter for search across trusts.' -ForegroundColor Red
+                                $error[0]
                             }
                         }
                         $LdapFilterSIDs += ')'
@@ -1526,7 +1526,7 @@ function main {
                         $LdapFilterSIDs = ''
                     }
 
-                    if ($LdapFilterSids -ilike '*objectsid*') {
+                    if ($LdapFilterSids -ilike '*(objectsid=*') {
                         for ($DomainNumber = 0; $DomainNumber -lt $TrustsToCheckForGroups.count; $DomainNumber++) {
                             if (($TrustsToCheckForGroups[$DomainNumber] -ne '') -and ($TrustsToCheckForGroups[$DomainNumber] -ine $UserDomain) -and ($UserDomain -ne '')) {
                                 Write-Host "    $($TrustsToCheckForGroups[$DomainNumber]) (mailbox group membership across trusts, takes some time) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
