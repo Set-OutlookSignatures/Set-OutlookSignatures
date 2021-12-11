@@ -40,7 +40,7 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [2.4. GraphConfigFile](#24-graphconfigfile)
   - [2.5. TrustedDomainsToCheckForGroups](#25-trusteddomainstocheckforgroups)
   - [2.6. DeleteUserCreatedSignatures](#26-deleteusercreatedsignatures)
-  - [2.7. DeleteScriptCreatedSignaturesWithoutTemplate](#27-DeleteScriptCreatedSignaturesWithoutTemplate)
+  - [2.7. DeleteScriptCreatedSignaturesWithoutTemplate](#27-deletescriptcreatedsignatureswithouttemplate)
   - [2.8. SetCurrentUserOutlookWebSignature](#28-setcurrentuseroutlookwebsignature)
   - [2.9. SetCurrentUserOOFMessage](#29-setcurrentuseroofmessage)
   - [2.10. OOFTemplatePath](#210-ooftemplatepath)
@@ -54,7 +54,6 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [2.18. GraphOnly](#218-graphonly)
   - [2.19. CreateRTFSignatures](#219-creatertfsignatures)
   - [2.20. CreateTXTSignatures](#220-createtxtsignatures)
-  - [2.21. ConsiderDistributionGroupMembership](#221-considerdistributiongroupmembership)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -275,18 +274,6 @@ Should signatures be created in RTF format?
 Default value: `$true`
 ## 2.20. CreateTXTSignatures
 Should signatures be created in TXT format?
-
-Default value: `$true`
-## 2.21. ConsiderDistributionGroupMembership
-Shall the script consider membership in distribution groups or only membership in security groups?
-
-Considering security groups only is faster and puts only little load on Active Directory Domain Controllers.
-
-Considering distribution group membership is slower and puts comparatively more load on Active Director Domain Controllers.
-
-Distribution group membership is always considered when connecting to Microsoft Graph.
-
-Membership in dynamic distribution groups or dynamic security groups is never considered on-prem and in the cloud, see corresponding FAQ for details.
 
 Default value: `$true`
 # 3. Outlook signature path  

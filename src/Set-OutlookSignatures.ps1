@@ -160,14 +160,6 @@ Default value: $true
 Should signatures be created in TXT format?
 Default value: $true
 
-.PARAMETER ConsiderDistributionGroupMembership
-Shall the script consider membership in distribution groups or only membership in security groups?
-  Considering security groups only is faster and puts only little load on Active Directory Domain Controllers.
-  Considering distribution group membership is slower and puts comparatively more load on Active Director Domain Controllers.
-  Distribution group membership is always considered when connecting to Microsoft Graph.
-  Membership in dynamic distribution groups or dynamic security groups is never considered on-prem and in the cloud, see README for details.
-Default value: $true
-
 .INPUTS
 None. You cannot pipe objects to Set-OutlookSignatures.ps1.
 
@@ -323,16 +315,7 @@ Param(
     # Create TXT signatures
     # Default: $true
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
-    $CreateTXTSignatures = $true,
-
-    # Shall the script consider membership in distribution groups or only membership in security groups?
-    #   Considering security groups only is faster and puts only little load on Active Directory Domain Controllers.
-    #   Considering distribution group membership is slower and puts comparatively more load on Active Director Domain Controllers.
-    #   Distribution group membership is always considered when connecting to Microsoft Graph.
-    #   Membership in dynamic distribution groups or dynamic security groups is never considered on-prem and in the cloud, see README for details.
-    # Default: $true
-    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false')]
-    $ConsiderDistributionGroupMembership = $true
+    $CreateTXTSignatures = $true
 )
 
 
@@ -495,9 +478,6 @@ function main {
     Write-Host "  SimulateUser: '$SimulateUser'"
 
     Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
-
-    Write-Host "  ConsiderDistributionGroupMembership: '$ConsiderDistributionGroupMembership'"
-    $ConsiderDistributionGroupMembership = [System.Convert]::ToBoolean($ConsiderDistributionGroupMembership.tostring().trim('$'))
 
     ('ReplacementVariableConfigFile', 'GraphConfigFile', 'SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath', 'GraphCredentialFile', 'SignatureIniPath', 'OOFIniPath') | ForEach-Object {
         $path = (Get-Variable -Name $_).Value
@@ -1096,9 +1076,9 @@ function main {
             }
         }
 
-        $SignatureFiles.name | ForEach-Object {
-            if ( ($_.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_ -inotin $SignatureIniSettings.GetEnumerator().name)) {
-                Write-Host "  '$_' found in signature template path but not in ini, please check" -ForegroundColor Yellow
+        $SignatureFiles | ForEach-Object {
+            if ( ($_.name.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_.name -inotin $SignatureIniSettings.GetEnumerator().name)) {
+                Write-Host "  '$($_.name)' found in signature template path but not in ini, please check" -ForegroundColor Yellow
             }
         }
 
@@ -1278,9 +1258,9 @@ function main {
                 }
             }
 
-            $OOFFiles.name | ForEach-Object {
-                if ( ($_.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_ -inotin $OOFIniSettings.GetEnumerator().name)) {
-                    Write-Host "  '$_' found in OOF template path but not in ini, please check" -ForegroundColor Yellow
+            $OOFFiles | ForEach-Object {
+                if ( ($_.name.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_.name -inotin $OOFIniSettings.GetEnumerator().name)) {
+                    Write-Host "  '$($_.name)' found in OOF template path but not in ini, please check" -ForegroundColor Yellow
                 }
             }
 
@@ -1495,25 +1475,27 @@ function main {
                     $SIDsToCheckInTrusts = @()
                     $SIDsToCheckInTrusts += $ADPropsCurrentMailbox.objectsid
                     try {
-                        if ($ConsiderDistributionGroupMembership -eq $true) {
-                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')")
-                            $Search.filter = "(&(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
-                            $search.findall() | ForEach-Object {
-                                $sid = (New-Object System.Security.Principal.SecurityIdentifier $($_.properties.objectsid), 0).value
-                                Write-Host "      $sid"
-                                $GroupsSIDs += $sid.tostring()
+                        # Security groups, no matter if enabled for mail or not
+                        $UserAccount = [ADSI]"LDAP://$($ADPropsCurrentMailbox.distinguishedname)"
+                        $UserAccount.GetInfoEx(@('tokengroups'), 0)
+                        foreach ($sidBytes in $UserAccount.Properties.tokengroups) {
+                            $sid = New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)
+                            $GroupsSIDs += $sid.tostring()
+                            Write-Host "      $sid"
+                        }
+                        $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
+                        $SIDsToCheckInTrusts += $UserAccount.properties.tokengroupsglobalanduniversal
+
+                        # Distribution groups (static only)
+                        $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')")
+                        $Search.filter = "(&(objectClass=group)(!(groupType:1.2.840.113556.1.4.803:=2147483648))(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
+                        $search.findall() | ForEach-Object {
+                            $sid = (New-Object System.Security.Principal.SecurityIdentifier $($_.properties.objectsid), 0).value
+                            Write-Host "      $sid"
+                            $GroupsSIDs += $sid.tostring()
+                            if ($_.properties.grouptype -in ('2', '8')) {
                                 $SIDsToCheckInTrusts += $sid.tostring()
                             }
-                        } else {
-                            $UserAccount = [ADSI]"LDAP://$($ADPropsCurrentMailbox.distinguishedname)"
-                            $UserAccount.GetInfoEx(@('tokengroups'), 0)
-                            foreach ($sidBytes in $UserAccount.Properties.tokengroups) {
-                                $sid = New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)
-                                $GroupsSIDs += $sid.tostring()
-                                Write-Host "      $sid"
-                            }
-                            $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
-                            $SIDsToCheckInTrusts += $UserAccount.properties.tokengroupsglobalanduniversal
                         }
                     } catch {
                         Write-Host "      Error getting group information from $((($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.'), check firewalls, DNS and AD trust" -ForegroundColor Red
