@@ -1473,7 +1473,12 @@ function main {
 
                     $UserDomain = $ADPropsMailboxesUserDomain[$AccountNumberRunning]
                     $SIDsToCheckInTrusts = @()
-                    $SIDsToCheckInTrusts += (New-Object System.Security.Principal.SecurityIdentifier($($ADPropsCurrentMailbox.objectsid), 0)).Value
+
+                    foreach ($sidByteArray in (@(@($ADPropsCurrentMailbox.objectsid) + ($ADPropsCurrentMailbox.sidhistory | Where-Object { $_ })))) {
+                        $sid = (New-Object System.Security.Principal.SecurityIdentifier $sidByteArray, 0).value
+                        $SIDsToCheckInTrusts += $sid.tostring()
+                    }
+
                     try {
                         # Security groups, no matter if enabled for mail or not
                         $UserAccount = [ADSI]"LDAP://$($ADPropsCurrentMailbox.distinguishedname)"
@@ -1500,6 +1505,7 @@ function main {
                         Write-Host "      Error getting group information from $((($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.'), check firewalls, DNS and AD trust" -ForegroundColor Red
                         $error[0]
                     }
+
                     # Loop through all domains to check if the mailbox account has a group membership there
                     # Across a trust, a user can only be added to a domain local group.
                     # Domain local groups can not be used outside their own domain, so we don't need to query recursively
@@ -1514,8 +1520,8 @@ function main {
                                 $c | ForEach-Object {
                                     $SidHex += $('\{0:x2}' -f $_)
                                 }
+                                # Foreign Security Principals have an objectSID, but no sIDHistory
                                 $LdapFilterSIDs += ('(objectsid=' + $($SidHex -join '') + ')')
-                                $LdapFilterSIDs += ('(sidhistory=' + $($SidHex -join '') + ')')
                             } catch {
                                 Write-Host '      Error creating LDAP filter for search across trusts.' -ForegroundColor Red
                                 $error[0]
