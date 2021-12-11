@@ -1481,20 +1481,23 @@ function main {
                         foreach ($sidBytes in $UserAccount.Properties.tokengroups) {
                             $sid = New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)
                             $GroupsSIDs += $sid.tostring()
+                            $SIDsToCheckInTrusts += $sid.tostring()
                             Write-Host "      $sid"
                         }
-                        $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
-                        $SIDsToCheckInTrusts += $UserAccount.properties.tokengroupsglobalanduniversal
+                        # $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
+                        # $SIDsToCheckInTrusts += $UserAccount.properties.tokengroupsglobalanduniversal
 
                         # Distribution groups (static only)
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')")
                         $Search.filter = "(&(objectClass=group)(!(groupType:1.2.840.113556.1.4.803:=2147483648))(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
                         $search.findall() | ForEach-Object {
-                            $sid = (New-Object System.Security.Principal.SecurityIdentifier $($_.properties.objectsid), 0).value
-                            Write-Host "      $sid"
-                            $GroupsSIDs += $sid.tostring()
-                            if ($_.properties.grouptype -in ('2', '8')) {
+                            foreach ($sidByteArray in @(@($_.properties.objectsid) + @($_.properties.sidhistory))) {
+                                $sid = (New-Object System.Security.Principal.SecurityIdentifier $sidByteArray, 0).value
+                                Write-Host "      $sid"
+                                $GroupsSIDs += $sid.tostring()
+                                # if ($_.properties.grouptype -in ('2', '8')) {
                                 $SIDsToCheckInTrusts += $sid.tostring()
+                                # }
                             }
                         }
                     } catch {

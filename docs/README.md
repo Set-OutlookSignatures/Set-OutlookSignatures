@@ -289,15 +289,20 @@ This is the same way Outlook handles mailboxes from a signature perspective: Out
 
 The script is created for Exchange environments. Non-Exchange mailboxes can not have OOF messages or group signatures, but common and mailbox specific signatures.  
 # 5. Group membership  
-The script considers all groups the currently processed mailbox belongs to.
+The script considers all static security and distribution groups the currently processed mailbox belongs to.
 
 Group membership is evaluated against the whole Active Directory forest of the currently logged in user, and against all trusted domains (and their subdomains) the user has access to.
 
 In Exchange resource forest scenarios with linked mailboxes, the group membership of the linked account (as populated in msExchMasterAccountSID) is not considered, only the group membership of the actual mailbox.
 
-Group membership is achieved by querying the tokenGroups attribute, which is not only very fast and resource saving on client and server, but also considers sIDHistory.
+Group membership from Active Directory on-prem is retrieved by combining two queries:
+- Security groups, no matter if enabled for e-mail or not, are queried via the tokenGroups attribute. Querying this attribute is very fast, resource saving on client and server, and also considers sIDHistory.
+- Distribution groups are not covered by the tokenGroups attribute, they are retrieved with an optimized LDAP query, also sIDHistory is considered.
+- Group membership in any type of group across trusts is retrieved with an optimized LDAP query, considering the sID and sIDHistory of the group memberships retrieved in the steps before.
 
 When no Active Directory connection is available, Microsoft Graph is queried for transitive group membership.
+
+Only static groups are considered. Please see the FAQ section for detailed information why dynamic groups are not included in group membership queries.
 # 6. Removing old signatures  
 The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository. The script marks each processed signature with a specific HTML tag, which enables this cleaning feature.
 
