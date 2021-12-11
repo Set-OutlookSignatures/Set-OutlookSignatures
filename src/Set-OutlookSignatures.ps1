@@ -1491,7 +1491,7 @@ function main {
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')")
                         $Search.filter = "(&(objectClass=group)(!(groupType:1.2.840.113556.1.4.803:=2147483648))(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
                         $search.findall() | ForEach-Object {
-                            foreach ($sidByteArray in @(@($_.properties.objectsid) + @($_.properties.sidhistory))) {
+                            foreach ($sidByteArray in (@(@($_.properties.objectsid) + ($_.properties.sidhistory | Where-Object { $_ })))) {
                                 $sid = (New-Object System.Security.Principal.SecurityIdentifier $sidByteArray, 0).value
                                 Write-Host "      $sid"
                                 $GroupsSIDs += $sid.tostring()

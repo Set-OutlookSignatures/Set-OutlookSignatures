@@ -6,10 +6,10 @@
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta1</a> - YYYY-MM-DD
 ### Added
 - New parameter: DeleteScriptCreatedSignaturesWithoutTemplate
-- Consider distribution group membership in addition to security group membership.
-- New FAQ: Why is dynamic distribution group and dynamic security group membership not considered?
+- Consider distribution group membership in addition to security group membership
+- New FAQ: Why is membership in dynamic distribution groups and dynamic security groups not considered?
 ### Fixed
-- XXX
+- Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no *.htm file in OOFTemplatePath 
 ### Changed
 - XXX
 ### Removed
