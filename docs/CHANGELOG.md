@@ -8,7 +8,7 @@
 - New parameter: DeleteScriptCreatedSignaturesWithoutTemplate
 - Consider distribution group membership in addition to security group membership
 - New FAQ: Why is membership in dynamic distribution groups and dynamic security groups not considered?
-- Consider sIDHistory in searches across trusts
+- Consider sIDHistory in searches across trusts and when comparing msExchMasterAccountSid
 ### Fixed
 - Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no *.htm file in OOFTemplatePath 
 ### Changed

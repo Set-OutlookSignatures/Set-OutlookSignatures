@@ -840,6 +840,13 @@ function main {
             exit 1
         }
 
+        $CurrentUserSIDs = @()
+        foreach ($sidByteArray in (@(@($ADPropsCurrentUser.objectsid) + @($ADPropsCurrentUser.sidhistory)) | Where-Object { $_ })) {
+            $sid = (New-Object System.Security.Principal.SecurityIdentifier $sidByteArray, 0).value
+            $CurrentUserSIDs += $sid.tostring()
+        }
+        $CurrentUserSIDs
+
         if (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)) {
             if ($GraphCredentialFile) {
                 $ExoToken = $GraphToken.AccessTokenExo
@@ -1005,7 +1012,7 @@ function main {
             # No mail attribute set, check for match(es) of user's objectSID and mailbox's msExchMasterAccountSid
             for ($i = 0; $i -lt $MailAddresses.count; $i++) {
                 if ($ADPropsMailboxes[$i].msexchmasteraccountsid) {
-                    if (((New-Object System.Security.Principal.SecurityIdentifier $ADPropsMailboxes[$i].msexchmasteraccountsid[0], 0).value -ieq (New-Object System.Security.Principal.SecurityIdentifier $ADPropsCurrentUser.objectsid[0], 0).Value)) {
+                    if ((New-Object System.Security.Principal.SecurityIdentifier $ADPropsMailboxes[$i].msexchmasteraccountsid[0], 0).value -iin $CurrentUserSIDs) {
                         if ($p -ge 0) {
                             # $p already set before, there must be at least two matches, so set it to -1
                             $p = -1
@@ -1474,7 +1481,7 @@ function main {
                     $UserDomain = $ADPropsMailboxesUserDomain[$AccountNumberRunning]
                     $SIDsToCheckInTrusts = @()
 
-                    foreach ($sidByteArray in (@(@($ADPropsCurrentMailbox.objectsid) + ($ADPropsCurrentMailbox.sidhistory | Where-Object { $_ })))) {
+                    foreach ($sidByteArray in (@(@($ADPropsCurrentMailbox.objectsid) + @($ADPropsCurrentMailbox.sidhistory)) | Where-Object { $_ })) {
                         $sid = (New-Object System.Security.Principal.SecurityIdentifier $sidByteArray, 0).value
                         $SIDsToCheckInTrusts += $sid.tostring()
                     }
@@ -1494,7 +1501,7 @@ function main {
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')")
                         $Search.filter = "(&(objectClass=group)(!(groupType:1.2.840.113556.1.4.803:=2147483648))(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
                         $search.findall() | ForEach-Object {
-                            foreach ($sidByteArray in (@(@($_.properties.objectsid) + ($_.properties.sidhistory | Where-Object { $_ })))) {
+                            foreach ($sidByteArray in (@(@($_.properties.objectsid) + @($_.properties.sidhistory)) | Where-Object { $_ })) {
                                 $sid = (New-Object System.Security.Principal.SecurityIdentifier $sidByteArray, 0).value
                                 Write-Host "      $sid"
                                 $GroupsSIDs += $sid.tostring()
