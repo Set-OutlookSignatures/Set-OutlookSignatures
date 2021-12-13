@@ -431,7 +431,7 @@ Per default, `'.\config\default replacement variables.ps1'` contains the followi
     - `$CURRENTUSERGIVENNAME$`: Given name  
     - `$CURRENTUSERSURNAME$`: Surname  
     - `$CURRENTUSERDEPARTMENT$`: Department  
-    - `$CURRENTUSERTITLE$`: Title  
+    - `$CURRENTUSERTITLE$`: (Job) Title  
     - `$CURRENTUSERSTREETADDRESS$`: Street address  
     - `$CURRENTUSERPOSTALCODE$`: Postal code  
     - `$CURRENTUSERLOCATION$`: Location  
@@ -442,7 +442,10 @@ Per default, `'.\config\default replacement variables.ps1'` contains the followi
     - `$CURRENTUSERMAIL$`: E-mail address  
     - `$CURRENTUSERPHOTO$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
     - `$CURRENTUSERPHOTODELETEEMPTY$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
-    - `$CURRENTUSEREXTATTR1$` to `$CURRENTUSEREXTATTR15$`: Exchange Extension Attributes 1 to 15  
+    - `$CURRENTUSEREXTATTR1$` to `$CURRENTUSEREXTATTR15$`: Exchange extension attributes 1 to 15  
+    - `$CURRENTUSERCOMPANY`: Company  
+    - `$CURRENTUSERMAILNICKNAME`: Alias (mailNickname)  
+    - `$CURRENTUSERDISPLAYNAME`: Display Name  
 - Manager of currently logged in user  
     - Same variables as logged in user, `$CURRENTUSERMANAGER[...]$` instead of `$CURRENTUSER[...]$`  
 - Current mailbox  
