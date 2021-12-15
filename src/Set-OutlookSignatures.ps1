@@ -1093,7 +1093,6 @@ function main {
 
         try {
             $local:SignatureFilesSortCulture = $SignatureIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
-            Sort-Object -Culture $local:SignatureFilesSortCulture
         } catch {
             $local:SignatureFilesSortCulture = $null
         }
@@ -1173,7 +1172,7 @@ function main {
         [regex]::Matches(((($SignatureFilePart -replace '(?i)\[DefaultNew\]', '') -replace '(?i)\[DefaultReplyFwd\]', '') -replace '\[\d{12}-\d{12}\]', ''), '\[(.*?)\]').captures.value | ForEach-Object {
             $SignatureFilePartTag = $_
 
-            if (($SignatureFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -and (-not $SignatureFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase'))) {
+            if ((($SignatureFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -or ($SignatureFilePartTag -match '\[-:(.*?)@(.*?)\.(.*?)\]')) -and (-not $SignatureFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase')) -and (-not $SignatureFilePartTag.startswith('[-:AzureAD ', 'CurrentCultureIgnoreCase'))) {
                 if (-not $SignatureFilesMailbox.ContainsKey($SignatureFile.FullName)) {
                     Write-Host '    Mailbox specific signature'
                     $SignatureFilesMailbox.add($SignatureFile.FullName, $SignatureFileTargetName)
@@ -1185,11 +1184,15 @@ function main {
                     Write-Host '    Group specific signature'
                     $SignatureFilesGroup.add($SignatureFile.FullName, $SignatureFileTargetName)
                 }
-                $NTName = ((($SignatureFilePartTag -replace '\[', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
+                $NTName = (((($SignatureFilePartTag -replace '\[', '') -replace '\[-:', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
                 if ((-not $SignatureFilesGroupSIDs.ContainsKey($SignatureFilePartTag))) {
                     if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
                         try {
-                            $SignatureFilesGroupSIDs.add($SignatureFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
+                            if ($SignatureFilePartTag.startswith('[-:')) {
+                                $SignatureFilesGroupSIDs.add($SignatureFilePartTag, (':-' + (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier])))
+                            } else {
+                                $SignatureFilesGroupSIDs.add($SignatureFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
+                            }
                         } catch {
                             # No group with this sAMAccountName found. Maybe it's a display name?
                             try {
@@ -1197,7 +1200,11 @@ function main {
                                 $objNT = $objTrans.GetType()
                                 $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
                                 $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($NTName -split '\\')[1]))
-                                $SignatureFilesGroupSIDs.add($SignatureFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
+                                if ($SignatureFilePartTag.startswith('[-:')) {
+                                    $SignatureFilesGroupSIDs.add($SignatureFilePartTag, (':-' + ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value))
+                                } else {
+                                    $SignatureFilesGroupSIDs.add($SignatureFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
+                                }
                             } catch {
                             }
                         }
@@ -1212,7 +1219,11 @@ function main {
                         ForEach ($tempFilter in $tempFilterOrder) {
                             $tempResults = (GraphFilterGroups $tempFilter)
                             if (($tempResults.error -eq $false) -and ($tempResults.groups.count -eq 1 )) {
-                                $SignatureFilesGroupSIDs.add($SignatureFilePartTag, $tempResults.groups[0].securityidentifier)
+                                if ($SignatureFilePartTag.startswith('[-:')) {
+                                    $SignatureFilesGroupSIDs.add($SignatureFilePartTag, (':-' + $tempResults.groups[0].securityidentifier))
+                                } else {
+                                    $SignatureFilesGroupSIDs.add($SignatureFilePartTag, $tempResults.groups[0].securityidentifier)
+                                }
                                 break
                             }
                         }
@@ -1275,7 +1286,6 @@ function main {
 
             try {
                 $local:OOFFilesSortCulture = $OOFIniSettings['<Set-OutlookSignatures configuration>']['SortCulture']
-                Sort-Object -Culture $local:OOFFilesSortCulture
             } catch {
                 $local:OOFFilesSortCulture = $null
             }
@@ -1667,9 +1677,15 @@ function main {
             }
 
             Write-Host "  Process common signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-            if ($SignatureFilesCommon.count -gt 0) {
-                foreach ($Signature in ($SignatureFilesCommon.GetEnumerator() | Sort-Object -Property Name)) {
-                    Set-Signatures
+            $SignatureHash = @{}
+            foreach ($x in ($SignatureFilesCommon.GetEnumerator())) {
+                $SignatureHash.add($x.Name, $SignatureFilesCommon[$x.Name])
+            }
+            if ($SignatureHash.count -gt 0) {
+                foreach ($SignatureFile in $SignatureFiles) {
+                    foreach ($Signature in ($SignatureHash.GetEnumerator() | Where-Object { $_.value -eq $SignatureFile.name })) {
+                        Set-Signatures
+                    }
                 }
             } else {
                 Write-Host '    Found no common signatures for this mailbox'
@@ -1679,16 +1695,37 @@ function main {
             Write-Host "  Process group specific signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $SignatureHash = @{}
             if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                foreach ($x in ($SignatureFilesGroupFilePart.GetEnumerator() | Sort-Object -Property Name)) {
+                foreach ($x in ($SignatureFilesGroupFilePart.GetEnumerator())) {
+                    $count = 0
                     $GroupsSIDs | ForEach-Object {
-                        if ($x.Value.tolower().Contains('[' + $_.tolower() + ']')) {
-                            $SignatureHash.add($x.Name, $SignatureFilesGroup[$x.Name])
+                        if ($x.value -ilike "*``[$_``]*") {
+                            $count++
+                        }
+                    }
+                    if ($count -gt 0) {
+                        $count = 0
+                        $GroupsSIDs | ForEach-Object {
+                            if ($x.value -ilike "*``[-:$_``]*") {
+                                $count++
+                            }
+                        }
+                        if ($count -eq 0) {
+                            $CurrentMailboxSMTPAddresses | ForEach-Object {
+                                if ($SignatureFilesMailboxFilePart[$x.name] -ilike "*``[-:$_``]*") {
+                                    $count++
+                                }
+                            }
+                            if ($count -eq 0) {
+                                $SignatureHash.add($x.Name, $SignatureFilesGroup[$x.Name])
+                            }
                         }
                     }
                 }
                 if ($SignatureHash.count -gt 0) {
-                    foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object -Property Name)) {
-                        Set-Signatures
+                    foreach ($SignatureFile in $SignatureFiles) {
+                        foreach ($Signature in ($SignatureHash.GetEnumerator() | Where-Object { $_.value -eq $SignatureFile.name })) {
+                            Set-Signatures
+                        }
                     }
                 } else {
                     Write-Host '    Found no group specific signatures for this mailbox'
@@ -1700,16 +1737,37 @@ function main {
 
             Write-Host "  Process e-mail address specific signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $SignatureHash = @{}
-            foreach ($x in ($SignatureFilesMailboxFilePart.GetEnumerator() | Sort-Object -Property Name)) {
-                foreach ($y in $CurrentMailboxSMTPAddresses) {
-                    if ($x.Value.tolower().contains('[' + $y.tolower() + ']')) {
-                        $SignatureHash.add($x.Name, $SignatureFilesMailbox[$x.Name])
+            foreach ($x in ($SignatureFilesMailboxFilePart.GetEnumerator())) {
+                $count = 0
+                $CurrentMailboxSMTPAddresses | ForEach-Object {
+                    if ($SignatureFilesMailboxFilePart[$x.name] -ilike "*``[$_``]*") {
+                        $count++
+                    }
+                }
+                if ($count -gt 0) {
+                    $count = 0
+                    $CurrentMailboxSMTPAddresses | ForEach-Object {
+                        if ($SignatureFilesMailboxFilePart[$x.name] -ilike "*``[-:$_``]*") {
+                            $count++
+                        }
+                    }
+                    if ($count -eq 0) {
+                        $GroupsSIDs | ForEach-Object {
+                            if ($x.value -ilike "*``[-:$_``]*") {
+                                $count++
+                            }
+                        }
+                        if ($count -eq 0) {
+                            $SignatureHash.add($x.Name, $SignatureFilesMailbox[$x.Name])
+                        }
                     }
                 }
             }
             if ($SignatureHash.count -gt 0) {
-                foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object -Property Name)) {
-                    Set-Signatures
+                foreach ($SignatureFile in $SignatureFiles) {
+                    foreach ($Signature in ($SignatureHash.GetEnumerator() | Where-Object { $_.value -eq $SignatureFile.name })) {
+                        Set-Signatures
+                    }
                 }
             } else {
                 Write-Host '    Found no e-mail address specific signatures for this mailbox'
@@ -1916,41 +1974,80 @@ function main {
 
                 if (($OOFDisabled -and (-not $SimulateUser)) -or ($SimulateUser)) {
                     # First, loop through common OOF files
-                    foreach ($OOF in ($OOFFilesCommon.GetEnumerator() | Sort-Object -Property Name)) {
-                        if (($OOFFilesInternal.contains('' + $OOF.name + '')) -or (-not ($OOFFilesExternal.contains('' + $OOF.name + '')))) {
-                            $OOFInternal = $OOF.name
-                        }
-                        if (($OOFFilesExternal.contains('' + $OOF.name + '')) -or (-not ($OOFFilesInternal.contains('' + $OOF.name + '')))) {
-                            $OOFExternal = $OOF.name
+                    foreach ($OOFFile in $OOFFiles) {
+                        foreach ($OOF in ($OOFFilesCommon.GetEnumerator() | Where-Object { $_.value -eq $OOFFile.name })) {
+                            if (($OOFFilesInternal.contains('' + $OOF.name + '')) -or (-not ($OOFFilesExternal.contains('' + $OOF.name + '')))) {
+                                $OOFInternal = $OOF.name
+                            }
+                            if (($OOFFilesExternal.contains('' + $OOF.name + '')) -or (-not ($OOFFilesInternal.contains('' + $OOF.name + '')))) {
+                                $OOFExternal = $OOF.name
+                            }
                         }
                     }
-                    # Second, loop through group OOF files
+                    # Second, loop through group specific OOF files
                     if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                        foreach ($x in ($OOFFilesGroupFilePart.GetEnumerator() | Sort-Object -Property Name)) {
+                        foreach ($x in ($OOFFilesGroupFilePart.GetEnumerator())) {
+                            $count = 0
                             $GroupsSIDs | ForEach-Object {
-                                if ($x.Value.tolower().Contains('[' + $_.tolower() + ']')) {
+                                if ($x.value -ilike "*``[$_``]*") {
+                                    $count++
+                                }
+                            }
+                            if ($count -gt 0) {
+                                $count = 0
+                                $GroupsSIDs | ForEach-Object {
+                                    if ($x.value -ilike "*``[-:$_``]*") {
+                                        $count++
+                                    }
+                                }
+                                if ($count -eq 0) {
+                                    $CurrentMailboxSMTPAddresses | ForEach-Object {
+                                        if ($OOFFilesMailboxFilePart[$x.name] -ilike "*``[-:$_``]*") {
+                                            $count++
+                                        }
+                                    }
+                                    if ($count -eq 0) {
+                                        if (($OOFFilesInternal.contains('' + $x.name + '')) -or (-not ($OOFFilesExternal.contains('' + $x.name + '')))) {
+                                            $OOFInternal = $x.name
+                                        }
+                                        if (($OOFFilesExternal.contains('' + $x.name + '')) -or (-not ($OOFFilesInternal.contains('' + $x.name + '')))) {
+                                            $OOFExternal = $x.name
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor Yellow
+                    }
+                    # Third, loop through e-mail address specific OOF files
+                    foreach ($x in ($OOFFilesMailboxFilePart.GetEnumerator())) {
+                        $count = 0
+                        $CurrentMailboxSMTPAddresses | ForEach-Object {
+                            if ($OOFFilesMailboxFilePart[$x.name] -ilike "*``[$_``]*") {
+                                $count++
+                            }
+                        }
+                        if ($count -gt 0) {
+                            $count = 0
+                            $CurrentMailboxSMTPAddresses | ForEach-Object {
+                                if ($OOFFilesMailboxFilePart[$x.name] -ilike "*``[-:$_``]*") {
+                                    $count++
+                                }
+                            }
+                            if ($count -eq 0) {
+                                $GroupsSIDs | ForEach-Object {
+                                    if ($x.value -ilike "*``[-:$_``]*") {
+                                        $count++
+                                    }
+                                }
+                                if ($count -eq 0) {
                                     if (($OOFFilesInternal.contains('' + $x.name + '')) -or (-not ($OOFFilesExternal.contains('' + $x.name + '')))) {
                                         $OOFInternal = $x.name
                                     }
                                     if (($OOFFilesExternal.contains('' + $x.name + '')) -or (-not ($OOFFilesInternal.contains('' + $x.name + '')))) {
                                         $OOFExternal = $x.name
                                     }
-                                }
-                            }
-                        }
-                    } else {
-                        $CurrentMailboxSMTPAddresses += $($MailAddresses[$AccountNumberRunning])
-                        Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor Yellow
-                    }
-                    # Third, loop through e-mail address specific OOF files
-                    foreach ($x in ($OOFFilesMailboxFilePart.GetEnumerator() | Sort-Object -Property Name)) {
-                        foreach ($y in ($CurrentMailboxSMTPAddresses | Sort-Object -Property Name)) {
-                            if ($x.Value.tolower().contains('[' + $y.tolower() + ']')) {
-                                if (($OOFFilesInternal.contains('' + $x.name + '')) -or (-not ($OOFFilesExternal.contains('' + $x.name + '')))) {
-                                    $OOFInternal = $x.name
-                                }
-                                if (($OOFFilesExternal.contains('' + $x.name + '')) -or (-not ($OOFFilesInternal.contains('' + $x.name + '')))) {
-                                    $OOFExternal = $x.name
                                 }
                             }
                         }
@@ -1978,7 +2075,7 @@ function main {
                             $SignatureHash.add($OOFInternal, "$OOFCommonGUID OOFCommon.docx")
                         }
                     }
-                    foreach ($Signature in ($SignatureHash.GetEnumerator() | Sort-Object -Property Name)) {
+                    foreach ($Signature in ($SignatureHash.GetEnumerator())) {
                         Set-Signatures -ProcessOOF
                     }
 

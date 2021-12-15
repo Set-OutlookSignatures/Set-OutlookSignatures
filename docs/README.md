@@ -351,9 +351,31 @@ Examples:
     Use these formats when your environment is hybrid or on premises only.
     -  `[AzureAD <Group e-mail address>]`, `[AzureAD <Group MailNickname>]`, `[AzureAD <Group DisplayName>]` do not work with a local Active Directory. They are queried in the order given.  
     'AzureAD' is the literal, case-insensitive string 'AzureAD', not a variable.  
-    Use these formats when you are in a cloud only environment. 
+    Use these formats when you are in a cloud only environment.  
+  
+  When using an ini file instead of filename based tags, you can negate a group by prefixing it with '-:'. This deny removes previously included mailboxes. Denies are stronger than allows, no matter in which order they appear within a template section in the ini file.  
+  Denies are available for group and e-mail address specific templates, not for common templates.  
+  Example:
+  ```
+  [OOF template.docx]
+  # Valid for all mailboxes being direct or indirect members of "DOMAIN\Group", but not if they are direct or indirect members of "DOMAIN\OtherGroup" or if the mailbox has the e-mail address x@example.com
+  DOMAIN Group
+  -:DOMAIN OtherGroup
+  -:x@example.com
+  ```
 - `[<SMTP address>]`, e.g. `[office<area>@example.com]`  
     - Make this template specific for the assigned e-mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
+  
+  When using an ini file instead of filename based tags, you can negate an e-mail address by prefixing it with '-:'. This deny removes previously included mailboxes. Denies are stronger than allows, no matter in which order they appear within a template section in the ini file.  
+  Denies are available for group and e-mail address specific templates, not for common templates.  
+  Example:
+  ```
+  [Signature template.docx]
+  # Valid for the mailboxes with the SMTP address x@example.com and y@example.com, but not if they are direct or indirect members of "DOMAIN\OtherGroup"
+  x@example.com
+  y@example.com
+  -:DOMAIN OtherGroup 
+  ```
 - `[yyyyMMddHHmm-yyyyMMddHHmm]`, e.g. `[202112150000-202112262359]` for the 2021 Christmas season  
     - Make this template valid only during the specific time range (`yyyy` = year, `MM` = month, `dd` = day, `HH` = hour, `mm` = minute)  
     - If the script does not run after a template has expired, the template is still available on the client and can be used.

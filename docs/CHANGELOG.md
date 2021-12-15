@@ -5,12 +5,14 @@
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta1</a> - YYYY-MM-DD
 ### Added
+- Deny templates for specific groups and e-mail addresses (e. g. template A is for group X but not if mailbox is member of group Y and not for z@example.com), see README for details
 - New parameter: DeleteScriptCreatedSignaturesWithoutTemplate
 - Consider distribution group membership in addition to security group membership
 - New FAQ: Why is membership in dynamic distribution groups and dynamic security groups not considered?
 - Consider sIDHistory in searches across trusts and when comparing msExchMasterAccountSid
 ### Fixed
-- Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no *.htm file in OOFTemplatePath 
+- Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no *.htm file in OOFTemplatePath
+- Use correct sort order for OOF templates
 ### Changed
 - XXX
 ### Removed
