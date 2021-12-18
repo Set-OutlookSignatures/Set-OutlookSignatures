@@ -1186,10 +1186,21 @@ function main {
                 }
                 $NTName = (((($SignatureFilePartTag -replace '\[', '') -replace '\[-:', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
                 if ((-not $SignatureFilesGroupSIDs.ContainsKey($SignatureFilePartTag))) {
+                    if ($SignatureFilePartTag.startswith('[-:')) {
+                        if (($SignatureFilesGroupSIDs.ContainsKey($($SignatureFilePartTag -replace '\[-:', '\[')))) {
+                            $SignatureFilesGroupSIDs.add($SignatureFilePartTag, $SignatureFilesGroupSIDs[$($SignatureFilePartTag -replace '\[-:', '\[')])
+                        }
+                    } else {
+                        if (($SignatureFilesGroupSIDs.ContainsKey($($SignatureFilePartTag -replace '\[', '\[-:')))) {
+                            $SignatureFilesGroupSIDs.add($SignatureFilePartTag, $SignatureFilesGroupSIDs[$($SignatureFilePartTag -replace '\[', '\[-:')])
+                        }
+                    } 
+                }
+                if ((-not $SignatureFilesGroupSIDs.ContainsKey($SignatureFilePartTag))) {
                     if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
                         try {
                             if ($SignatureFilePartTag.startswith('[-:')) {
-                                $SignatureFilesGroupSIDs.add($SignatureFilePartTag, (':-' + (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier])))
+                                $SignatureFilesGroupSIDs.add($SignatureFilePartTag, ('-:' + (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier])))
                             } else {
                                 $SignatureFilesGroupSIDs.add($SignatureFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
                             }
@@ -1201,7 +1212,7 @@ function main {
                                 $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
                                 $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($NTName -split '\\')[1]))
                                 if ($SignatureFilePartTag.startswith('[-:')) {
-                                    $SignatureFilesGroupSIDs.add($SignatureFilePartTag, (':-' + ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value))
+                                    $SignatureFilesGroupSIDs.add($SignatureFilePartTag, ('-:' + ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value))
                                 } else {
                                     $SignatureFilesGroupSIDs.add($SignatureFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                 }
@@ -1220,7 +1231,7 @@ function main {
                             $tempResults = (GraphFilterGroups $tempFilter)
                             if (($tempResults.error -eq $false) -and ($tempResults.groups.count -eq 1 )) {
                                 if ($SignatureFilePartTag.startswith('[-:')) {
-                                    $SignatureFilesGroupSIDs.add($SignatureFilePartTag, (':-' + $tempResults.groups[0].securityidentifier))
+                                    $SignatureFilesGroupSIDs.add($SignatureFilePartTag, ('-:' + $tempResults.groups[0].securityidentifier))
                                 } else {
                                     $SignatureFilesGroupSIDs.add($SignatureFilePartTag, $tempResults.groups[0].securityidentifier)
                                 }
@@ -1365,7 +1376,8 @@ function main {
 
             [regex]::Matches(((($OOFFilePart -replace '(?i)\[External\]', '') -replace '(?i)\[Internal\]', '') -replace '\[\d{12}-\d{12}\]', ''), '\[(.*?)\]').captures.value | ForEach-Object {
                 $OOFFilePartTag = $_
-                if (($OOFFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -and (-not $OOFFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase'))) {
+
+                if ((($OOFFilePartTag -match '\[(.*?)@(.*?)\.(.*?)\]') -or ($OOFFilePartTag -match '\[-:(.*?)@(.*?)\.(.*?)\]')) -and (-not $OOFFilePartTag.startswith('[AzureAD ', 'CurrentCultureIgnoreCase')) -and (-not $OOFFilePartTag.startswith('[-:AzureAD ', 'CurrentCultureIgnoreCase'))) {
                     if (-not $OOFFilesMailbox.ContainsKey($OOFFile.FullName)) {
                         Write-Host '    Mailbox specific OOF message'
                         $OOFFilesMailbox.add($OOFFile.FullName, $OOFFileTargetName)
@@ -1377,11 +1389,26 @@ function main {
                         Write-Host '    Group specific OOF message'
                         $OOFFilesGroup.add($OOFFile.FullName, $OOFFileTargetName)
                     }
-                    $NTName = ((($OOFFilePartTag -replace '\[', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
+                    $NTName = (((($OOFFilePartTag -replace '\[', '') -replace '\[-:', '') -replace '\]', '') -replace '(.*?) (.*)', '$1\$2')
+                    if ((-not $OOFFilesGroupSIDs.ContainsKey($OOFFilePartTag))) {
+                        if ($OOFFilePartTag.startswith('[-:')) {
+                            if (($OOFFilesGroupSIDs.ContainsKey($($OOFFilePartTag -replace '\[-:', '\[')))) {
+                                $OOFFilesGroupSIDs.add($OOFFilePartTag, $OOFFilesGroupSIDs[$($OOFFilePartTag -replace '\[-:', '\[')])
+                            }
+                        } else {
+                            if (($OOFFilesGroupSIDs.ContainsKey($($OOFFilePartTag -replace '\[', '\[-:')))) {
+                                $OOFFilesGroupSIDs.add($OOFFilePartTag, $OOFFilesGroupSIDs[$($OOFFilePartTag -replace '\[', '\[-:')])
+                            }
+                        } 
+                    }
                     if (-not $OOFFilesGroupSIDs.ContainsKey($OOFFilePartTag)) {
                         if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
                             try {
-                                $OOFFilesGroupSIDs.add($OOFFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
+                                if ($OOFFilePartTag.startswith('[-:')) {
+                                    $OOFFilesGroupSIDs.add($OOFFilePartTag, ('-:' + (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier])))
+                                } else {
+                                    $OOFFilesGroupSIDs.add($OOFFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]))
+                                }
                             } catch {
                                 # No group with this sAMAccountName found. Maybe it's a display name?
                                 try {
@@ -1389,7 +1416,11 @@ function main {
                                     $objNT = $objTrans.GetType()
                                     $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
                                     $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($NTName -split '\\')[1]))
-                                    $OOFFilesGroupSIDs.add($OOFFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
+                                    if ($OOFFilePartTag.startswith('[-:')) {
+                                        $OOFFilesGroupSIDs.add($OOFFilePartTag, ('-:' + ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value))
+                                    } else {
+                                        $OOFFilesGroupSIDs.add($OOFFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
+                                    }
                                 } catch {
                                 }
                             }
@@ -1404,7 +1435,12 @@ function main {
                             ForEach ($tempFilter in $tempFilterOrder) {
                                 $tempResults = (GraphFilterGroups $tempFilter)
                                 if (($tempResults.error -eq $false) -and ($tempResults.groups.count -eq 1 )) {
-                                    $OOFFilesGroupSIDs.add($OOFFilePartTag, $tempResults.groups[0].securityidentifier)
+                                    if ($OOFFilePartTag.startswith('[-:')) {
+                                        $OOFFilesGroupSIDs.add($OOFFilePartTag, ('-:' + $tempResults.groups[0].securityidentifier))
+                                    } else {
+                                        $OOFFilesGroupSIDs.add($OOFFilePartTag, $tempResults.groups[0].securityidentifier)
+                                    }
+    
                                     break
                                 }
                             }
