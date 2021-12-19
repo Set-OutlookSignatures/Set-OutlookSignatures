@@ -1194,7 +1194,7 @@ function main {
                         if (($SignatureFilesGroupSIDs.ContainsKey($($SignatureFilePartTag -replace '\[', '\[-:')))) {
                             $SignatureFilesGroupSIDs.add($SignatureFilePartTag, $SignatureFilesGroupSIDs[$($SignatureFilePartTag -replace '\[', '\[-:')])
                         }
-                    } 
+                    }
                 }
                 if ((-not $SignatureFilesGroupSIDs.ContainsKey($SignatureFilePartTag))) {
                     if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
@@ -1399,7 +1399,7 @@ function main {
                             if (($OOFFilesGroupSIDs.ContainsKey($($OOFFilePartTag -replace '\[', '\[-:')))) {
                                 $OOFFilesGroupSIDs.add($OOFFilePartTag, $OOFFilesGroupSIDs[$($OOFFilePartTag -replace '\[', '\[-:')])
                             }
-                        } 
+                        }
                     }
                     if (-not $OOFFilesGroupSIDs.ContainsKey($OOFFilePartTag)) {
                         if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
@@ -1440,7 +1440,7 @@ function main {
                                     } else {
                                         $OOFFilesGroupSIDs.add($OOFFilePartTag, $tempResults.groups[0].securityidentifier)
                                     }
-    
+
                                     break
                                 }
                             }
@@ -1712,6 +1712,24 @@ function main {
                 }
             }
 
+            if (
+                # Outlook is installed
+                # and $OutlookFileVersion is high enough (exact value is unknown yet) or it is a suiting beta version (-or (($OutlookFileVersion -ge '16.0.13430.20000') -and ($OutlookFileVersion.revision -in 20000..20199)))
+                # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
+                # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.msexchrecipienttypedetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
+                # and the current mailbox is the personal mailbox of the currently logged in user
+                ($null -ne $OutlookFileVersion) `
+                    -and (($OutlookFileVersion -ge [system.version]::parse('99.0.99999.99999'))) `
+                    -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
+                    -and ((($null -ne $ADPropsCurrentMailbox.msexchrecipienttypedetails) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) `
+                    -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
+            ) {
+                # Microsoft signature roaming available
+                $CurrentMailboxUseSignatureRoaming = $true
+            } else {
+                $CurrentMailboxUseSignatureRoaming = $false
+            }
+
             Write-Host "  Process common signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $SignatureHash = @{}
             foreach ($x in ($SignatureFilesCommon.GetEnumerator())) {
@@ -1819,7 +1837,7 @@ function main {
         }
 
         # Set OOF message and Outlook Web signature
-        if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
+        if (((($SetCurrentUserOutlookWebSignature -eq $true) -and ($CurrentMailboxUseSignatureRoaming -eq $false)) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
             if ((-not $SimulateUser) ) {
                 Write-Host "  Set up environment for connection to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                 $script:dllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
@@ -1882,7 +1900,7 @@ function main {
                 $error.Clear()
             }
 
-            if ($SetCurrentUserOutlookWebSignature) {
+            if ($SetCurrentUserOutlookWebSignature -and ($CurrentMailboxUseSignatureRoaming -eq $false)) {
                 Write-Host "  Set Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                 if ($SimulateUser) {
                     Write-Host '    Simulation mode enabled, skipping task' -ForegroundColor Yellow
@@ -1946,13 +1964,13 @@ function main {
                             if (($null -ne $TempOWASigFile) -and ($TempOWASigFile -ne '')) {
                                 try {
                                     if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -PathType Leaf) {
-                                        $hsHtmlSignature = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -Raw).ToString()
+                                        $hsHtmlSignature = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -Raw -Encoding UTF8).ToString()
                                     } else {
                                         $hsHtmlSignature = ''
                                         Write-Host "      Signature file '$($TempOWASigFile + '.htm')' not found. Outlook Web HTML signature will be blank." -ForegroundColor Yellow
                                     }
                                     if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -PathType Leaf) {
-                                        $stTextSig = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -Raw).ToString()
+                                        $stTextSig = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -Raw -Encoding UTF8).ToString()
                                     } else {
                                         $stTextSig = ''
                                         Write-Host "      Signature file '$($TempOWASigFile + '.txt')' not found. Outlook Web text signature will be blank." -ForegroundColor Yellow
@@ -2301,7 +2319,7 @@ Function ConvertTo-SingleFileHTML([string]$inputfile, [string]$outputfile) {
         }
     }
 
-    $tempFileContent | Out-File -LiteralPath $outputfile -Encoding UTF8 -Force
+    [System.IO.File]::WriteAllLines($outputfile, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
 }
 
 
@@ -2611,43 +2629,32 @@ function Set-Signatures {
             }
         }
 
-        $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
+        [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
 
         if (-not $ProcessOOF) {
             ConvertTo-SingleFileHTML $path $path
         } else {
-            ConvertTo-SingleFileHTML $path ((Join-Path -Path $script:tempDir -ChildPath $Signature.Value)) -Encoding UTF8 -Force
+            ConvertTo-SingleFileHTML $path ((Join-Path -Path $script:tempDir -ChildPath $Signature.Value))
         }
 
 
         if (-not $ProcessOOF) {
             $(if ($script:CurrentUserDummyMailbox -eq $true) { $SignaturePaths[0] } else { $SignaturePaths }) | ForEach-Object {
-                if (
-                    # Outlook is installed
-                    # and $OutlookFileVersion is high enough (exact value is unknown yet)
-                    # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
-                    # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.msexchrecipienttypedetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
-                    # and the current mailbox is the personal mailbox of the currently logged in user
-                    ($null -ne $OutlookFileVersion) `
-                        -and ($OutlookFileVersion -ge [system.version]::parse('16.0.99999.99999')) `
-                        -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
-                        -and ((($null -ne $ADPropsCurrentMailbox.msexchrecipienttypedetails) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) `
-                        -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
-                ) {
+                if ($CurrentMailboxUseSignatureRoaming -eq $true) {
                     # Microsoft signature roaming available
                     Write-Host "      Copy signature files to '$_'"
-                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).htm"))) -Force
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " ($($MailAddresses[$AccountNumberRunning])).htm"))) -Force
                     if ($CreateRTFSignatures -eq $true) {
-                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).rtf"))) -Force
+                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " ($($MailAddresses[$AccountNumberRunning])).rtf"))) -Force
                     } else {
-                        Remove-Item ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).rtf"))) -Force -ErrorAction SilentlyContinue
+                        Remove-Item ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " ($($MailAddresses[$AccountNumberRunning])).rtf"))) -Force -ErrorAction SilentlyContinue
                     }
                     if ($CreateTXTSignatures -eq $true) {
-                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).txt"))) -Force
+                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " ($($MailAddresses[$AccountNumberRunning])).txt"))) -Force
                     } else {
-                        Remove-Item ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).txt"))) -Force -ErrorAction SilentlyContinue
+                        Remove-Item ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " ($($MailAddresses[$AccountNumberRunning])).txt"))) -Force -ErrorAction SilentlyContinue
                     }
-                    $script:SignatureFilesDone += $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " $($MailAddresses[$AccountNumberRunning]).htm")
+                    $script:SignatureFilesDone += $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " ($($MailAddresses[$AccountNumberRunning])).htm")
                 } else {
                     # Microsoft signature roaming not available
                     Write-Host "      Copy signature files to '$_'"
@@ -2686,7 +2693,7 @@ function Set-Signatures {
                     if (-not $SimulateUser) {
                         Write-Host '      Set signature as default for new messages'
                         if ($script:CurrentUserDummyMailbox -ne $true) {
-                            Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                            Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force
                         } else {
                             $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                         }
