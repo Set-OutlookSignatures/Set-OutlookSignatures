@@ -802,7 +802,7 @@ function main {
 
         if (Test-Path -Path $GraphConfigFile -PathType Leaf) {
             try {
-                Write-Host "      Execute content of config file '$GraphConfigFile'"
+                Write-Host "      Execute config file '$GraphConfigFile'"
                 . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile -Raw)))
             } catch {
                 Write-Host "        Problem executing content of '$GraphConfigFile'. Exiting." -ForegroundColor Red
@@ -816,7 +816,7 @@ function main {
         }
 
         if ($($PSVersionTable.PSEdition) -ieq 'Desktop') {
-            Write-Host "      MSAL.PS Graph token cache file: '$([TokenCacheHelper]::CacheFilePath)'"
+            Write-Host "      MSAL.PS Graph token cache: '$([TokenCacheHelper]::CacheFilePath)'"
         }
 
         $GraphToken = GraphGetToken
@@ -1244,9 +1244,8 @@ function main {
                                 }
                                 $TemplateFilesGroup.add($TemplateFile.FullName, $TemplateFileTargetName)
                             }
-                            Write-Host "      $TemplateFilePartTag = " -NoNewline
+                            Write-Host "      $($TemplateFilePartTag) = " -NoNewline
                             $NTName = (((($TemplateFilePartTag -replace '\[', '') -replace '^-:', '') -replace '\]$', '') -replace '(.*?) (.*)', '$1\$2')
-                            Write-Host "$NTName = " -NoNewline
 
                             # Check cache (only contains [xxx], not [-:xxx])
                             if ($TemplateFilePartTag.startswith('[-:')) {
@@ -1592,7 +1591,7 @@ function main {
             $ReplaceHash = @{}
             if (Test-Path -Path $ReplacementVariableConfigFile -PathType Leaf) {
                 try {
-                    Write-Host "    Execute content of config file '$ReplacementVariableConfigFile'"
+                    Write-Host "    Execute config file '$ReplacementVariableConfigFile'"
                     . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $ReplacementVariableConfigFile -Raw)))
                 } catch {
                     Write-Host "    Problem executing content of '$ReplacementVariableConfigFile'. Exiting." -ForegroundColor Red
@@ -1834,12 +1833,11 @@ function main {
             }
 
             if ($SetCurrentUserOOFMessage) {
-                $OOFCommonGUID = (New-Guid).guid
+                Write-Host "  Process Out of Office (OOF) auto replies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                 $OOFInternalGUID = (New-Guid).guid
                 $OOFExternalGUID = (New-Guid).guid
-
-                Write-Host "  Process Out of Office (OOF) auto replies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                 $OOFDisabled = $null
+
                 if ($SimulateUser) {
                     Write-Host '    Simulation mode enabled, processing OOF templates without changing OOF settings' -ForegroundColor Yellow
                 } else {
@@ -1854,167 +1852,45 @@ function main {
                 }
 
                 if (($OOFDisabled -and (-not $SimulateUser)) -or ($SimulateUser)) {
-                    # First, loop through common OOF files
-                    foreach ($OOFFile in $OOFFiles) {
-                        foreach ($OOF in ($OOFFilesCommon.GetEnumerator() | Where-Object { $_.value -eq $OOFFile.name })) {
-                            if (($OOFFilesInternal.contains('' + $OOF.name + '')) -or (-not ($OOFFilesExternal.contains('' + $OOF.name + '')))) {
-                                $OOFInternal = $OOF.name
-                            }
-                            if (($OOFFilesExternal.contains('' + $OOF.name + '')) -or (-not ($OOFFilesInternal.contains('' + $OOF.name + '')))) {
-                                $OOFExternal = $OOF.name
-                            }
-                        }
-                    }
-                    # Second, loop through group specific OOF files
-                    if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                        foreach ($x in ($OOFFilesGroupFilePart.GetEnumerator())) {
-                            $count = 0
-                            $GroupsSIDs | ForEach-Object {
-                                if ($x.value -ilike "*``[$_``]*") {
-                                    $count++
-                                }
-                            }
-                            if ($count -gt 0) {
-                                $count = 0
-                                $GroupsSIDs | ForEach-Object {
-                                    if ($x.value -ilike "*``[-:$_``]*") {
-                                        $count++
-                                    }
-                                }
-                                if ($count -eq 0) {
-                                    $CurrentMailboxSMTPAddresses | ForEach-Object {
-                                        if ($OOFFilesMailboxFilePart[$x.name] -ilike "*``[-:$_``]*") {
-                                            $count++
-                                        }
-                                    }
-                                    if ($count -eq 0) {
-                                        if (($OOFFilesInternal.contains('' + $x.name + '')) -or (-not ($OOFFilesExternal.contains('' + $x.name + '')))) {
-                                            $OOFInternal = $x.name
-                                        }
-                                        if (($OOFFilesExternal.contains('' + $x.name + '')) -or (-not ($OOFFilesInternal.contains('' + $x.name + '')))) {
-                                            $OOFExternal = $x.name
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor Yellow
-                    }
-                    # Third, loop through e-mail address specific OOF files
-                    foreach ($x in ($OOFFilesMailboxFilePart.GetEnumerator())) {
-                        $count = 0
-                        $CurrentMailboxSMTPAddresses | ForEach-Object {
-                            if ($OOFFilesMailboxFilePart[$x.name] -ilike "*``[$_``]*") {
-                                $count++
-                            }
-                        }
-                        if ($count -gt 0) {
-                            $count = 0
-                            $CurrentMailboxSMTPAddresses | ForEach-Object {
-                                if ($OOFFilesMailboxFilePart[$x.name] -ilike "*``[-:$_``]*") {
-                                    $count++
-                                }
-                            }
-                            if ($count -eq 0) {
-                                $GroupsSIDs | ForEach-Object {
-                                    if ($x.value -ilike "*``[-:$_``]*") {
-                                        $count++
-                                    }
-                                }
-                                if ($count -eq 0) {
-                                    if (($OOFFilesInternal.contains('' + $x.name + '')) -or (-not ($OOFFilesExternal.contains('' + $x.name + '')))) {
-                                        $OOFInternal = $x.name
-                                    }
-                                    if (($OOFFilesExternal.contains('' + $x.name + '')) -or (-not ($OOFFilesInternal.contains('' + $x.name + '')))) {
-                                        $OOFExternal = $x.name
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    $SignatureHash = @{}
-                    if ($OOFInternal -ine $OOFExternal) {
-                        Write-Host "    Message template for internal recpients: '$OOFInternal'"
-                        if (($UseHtmTemplates -eq $false) -and $OOFInternal) {
-                            $SignatureHash.add($OOFInternal, "$OOFInternalGUID OOFInternal.htm")
-                        } elseif (($UseHtmTemplates -eq $true) -and $OOFInternal) {
-                            $SignatureHash.add($OOFInternal, "$OOFInternalGUID OOFInternal.docx")
-                        }
-                        Write-Host "    Message template for external recpients: '$OOFExternal'"
-                        if (($UseHtmTemplates -eq $true) -and $OOFExternal) {
-                            $SignatureHash.add($OOFExternal, "$OOFExternalGUID OOFExternal.htm")
-                        } elseif (($UseHtmTemplates -eq $false) -and $OOFExternal) {
-                            $SignatureHash.add($OOFExternal, "$OOFExternalGUID OOFExternal.docx")
-                        }
-                    } else {
-                        Write-Host "    Common template for internal and external recpients: '$OOFInternal'"
-                        if (($UseHtmTemplates -eq $true) -and $OOFInternal) {
-                            $SignatureHash.add($OOFInternal, "$OOFCommonGUID OOFCommon.htm")
-                        } elseif (($UseHtmTemplates -eq $false) -and $OOFInternal) {
-                            $SignatureHash.add($OOFInternal, "$OOFCommonGUID OOFCommon.docx")
-                        }
-                    }
-                    foreach ($Signature in ($SignatureHash.GetEnumerator())) {
-                        Set-Signatures -ProcessOOF
-                    }
+                    EvaluateAndSetSignatures -ProcessOOF:$true
 
                     if (-not $SimulateUser) {
                         Write-Host "    Set Out of Office (OOF) auto replies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                     } else {
                         Write-Host "    Copy Out of Office (OOF) auto replies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                     }
-                    if (Test-Path -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm"))) {
-                        if (-not $SimulateUser) {
+                    if (-not $SimulateUser) {
+                        if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
                             if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
-                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
-                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString())
+                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw -Encoding utf8).tostring())
                             } else {
-                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString() -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Raw).ToString()
+                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw -Encoding UTF8).tostring()
                                 if ($x.error -ne $false) {
                                     Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
                                 }
                             }
-                        } else {
-                            $SignaturePaths | ForEach-Object {
-                                Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF Internal.htm')) -Force
-                                Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFCommonGUID OOFCommon.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF External.htm')) -Force
+                        }
+                        if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
+                            if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
+                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw -Encoding utf8).tostring())
+                            } else {
+                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw -Encoding utf8).tostring()
+                                if ($x.error -ne $false) {
+                                    Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
+                                }
                             }
                         }
                     } else {
-                        if (-not $SimulateUser) {
+                        $SignaturePaths | ForEach-Object {
                             if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
-                                if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
-                                    $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString())
-                                } else {
-                                    $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw).ToString()
-                                    if ($x.error -ne $false) {
-                                        Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
-                                    }
-                                }
+                                Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF Internal.htm')) -Force
                             }
-                            if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
-                                if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
-                                    $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString())
-                                } else {
-                                    $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw).ToString()
-                                    if ($x.error -ne $false) {
-                                        Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
-                                    }
-                                }
-                            }
-                        } else {
-                            $SignaturePaths | ForEach-Object {
-                                if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
-                                    Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF Internal.htm')) -Force
-                                }
-                                if (Test-Path (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
-                                    Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF External.htm')) -Force
-                                }
+                            if (Test-Path (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
+                                Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF External.htm')) -Force
                             }
                         }
                     }
+
                     if ((-not $SimulateUser) -and (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648))) {
                         try {
                             $exchService.SetUserOOFSettings($PrimaryMailboxAddress, $OOFSettings) | Out-Null
@@ -2157,38 +2033,40 @@ function EvaluateAndSetSignatures {
 
     if ($ProcessOOF -eq $true) {
         $SigOrOOF = 'OOF'
+        $Indent = '  '
     } else {
         $SigOrOOF = 'Signature'
+        $Indent = ''
     }
 
     foreach ($TemplateGroup in ('common', 'group', 'mailbox')) {
-        Write-Host "  Process $TemplateGroup signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+        Write-Host "$Indent  Process $TemplateGroup signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
         foreach ($TemplateFile in (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)) {
             # this is the correctly sorted hashtable
             foreach ($Template in ((Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly).GetEnumerator() | Where-Object { ($_.value -eq $TemplateFile.name) })) {
-                Write-Host "    '$($Template.Name)' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                Write-Host '      Permissions'
+                Write-Host "$Indent    '$($Template.value)' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                Write-Host "$Indent      Checking permissions"
                 $TemplateAllowed = $false
 
                 # check for allow entries
                 if ($TemplateGroup -ieq 'common') {
                     $TemplateAllowed = $true
-                    Write-Host '        allowed because of common template classification'
+                    Write-Host "$Indent        Allow: Classified as common template"
                 } elseif ($TemplateGroup -ieq 'group') {
                     $GroupsSIDs | ForEach-Object {
                         if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$Template.name] -ilike "*``[$_``]*") {
                             $TemplateAllowed = $true
-                            Write-Host "        allowed because of group SID $_" -NoNewline
+                            Write-Host "$Indent        Allow: Group" -NoNewline
                             $tempSearchSting = $_
-                            Write-Host " ($(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting } | Select-Object -First 1).name))"
+                            Write-Host " $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting } | Select-Object -First 1).name) = $_"
                         }
                     }
                 } elseif ($TemplateGroup -ieq 'mailbox') {
                     $CurrentMailboxSMTPAddresses | ForEach-Object {
                         if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$Template.name] -ilike "*``[$_``]*") {
                             $TemplateAllowed = $true
-                            Write-Host "        allowed because of e-mail address $_"
+                            Write-Host "$Indent        Allow: E-mail address $_"
                         }
                     }
                 }
@@ -2197,9 +2075,9 @@ function EvaluateAndSetSignatures {
                 $GroupsSIDs | ForEach-Object {
                     if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$Template.name] -ilike "*``[-:$_``]*") {
                         $TemplateAllowed = $false
-                        Write-Host "        denied because of group SID $_" -NoNewline
+                        Write-Host "$Indent        Deny: Group" -NoNewline
                         $tempSearchSting = $_
-                        Write-Host " ($(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting } | Select-Object -First 1).name))"
+                        Write-Host " $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting } | Select-Object -First 1).name -replace '^\[', '[-:') = $_"
                     }
                 }
 
@@ -2207,15 +2085,55 @@ function EvaluateAndSetSignatures {
                 $CurrentMailboxSMTPAddresses | ForEach-Object {
                     if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$Template.name] -ilike "*``[-:$_``]*") {
                         $TemplateAllowed = $false
-                        Write-Host "        denied because of e-mail address $_"
+                        Write-Host "$Indent        Deny: E-mail address $_"
                     }
                 }
 
-                if ($TemplateAllowed -eq $true) {
-                    $Signature = $Template
-                    SetSignatures -ProcessOOF:$ProcessOOF
+                if ($Template -and ($TemplateAllowed -eq $true)) {
+                    if ($ProcessOOF) {
+                        if ($OOFFilesInternal.contains($Template.name)) {
+                            $OOFInternal = $Template
+                        }
+                        if ($OOFFilesExternal.contains($Template.name)) {
+                            $OOFExternal = $Template
+                        }
+                    } else {
+                        $Signature = $Template
+                        SetSignatures -ProcessOOF:$ProcessOOF
+                    }
+                } else {
+                    Write-Host "$Indent      Not using template as there is at least one deny for this mailbox"
                 }
             }
+        }
+    }
+
+    if ($ProcessOOF) {
+        # Internal OOF message
+        if ($OOFInternal -or $OOFExternal) {
+            Write-Host "$Indent  Converting final OOF templates to HTM format @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+        }
+        if ($OOFInternal) {
+            $Signature = $OOFInternal
+            Write-Host "$Indent    '$($Signature.value)' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            if ($UseHtmTemplates) {
+                $Signature.value = "$OOFInternalGUID OOFInternal.htm"
+            } else {
+                $Signature.value = "$OOFInternalGUID OOFInternal.docx"
+            }
+            SetSignatures -ProcessOOF:$ProcessOOF 
+        }
+
+        # External OOF message
+        if ($OOFExternal) {
+            $Signature = $OOFExternal
+            Write-Host "$Indent    '$($Signature.value)' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            if ($UseHtmTemplates) {
+                $Signature.value = "$OOFExternalGUID OOFExternal.htm"
+            } else {
+                $Signature.value = "$OOFExternalGUID OOFExternal.docx"
+            }
+            SetSignatures -ProcessOOF:$ProcessOOF
         }
     }
 }
@@ -2225,6 +2143,10 @@ function SetSignatures {
         [switch]$ProcessOOF = $false
     )
 
+    if ($ProcessOOF) {
+        $Indent = '  '
+    }
+
     if (-not $ProcessOOF) {
         Write-Host "      Outlook signature name: '$([System.IO.Path]::ChangeExtension($($Signature.value), $null) -replace '.$')'"
     }
@@ -2232,13 +2154,13 @@ function SetSignatures {
     if (-not $ProcessOOF) {
         $SignatureFileAlreadyDone = ($script:SignatureFilesDone -contains $($Signature.Name))
         if ($SignatureFileAlreadyDone) {
-            Write-Host '      Template already processed before (higher priority mailbox or within this mailbox), skipping' -ForegroundColor Yellow
+            Write-Host "$Indent      Template already processed before, skipping" -ForegroundColor Yellow
         } else {
             $script:SignatureFilesDone += $($Signature.Name)
         }
     }
     if (($SignatureFileAlreadyDone -eq $false) -or $ProcessOOF) {
-        Write-Host '      Create temporary file copy'
+        Write-Host "$Indent      Create temporary file copy"
 
         if ($UseHtmTemplates) {
             # use .html for temporary file, .htm for final file
@@ -2246,7 +2168,7 @@ function SetSignatures {
             try {
                 ConvertTo-SingleFileHTML $Signature.Name $path
             } catch {
-                Write-Host '        Error copying file. Skipping signature.' -ForegroundColor Red
+                Write-Host "$Indent        Error copying file. Skipping signature." -ForegroundColor Red
                 continue
             }
         } else {
@@ -2254,7 +2176,7 @@ function SetSignatures {
             try {
                 Copy-Item -LiteralPath $Signature.Name -Destination $path -Force
             } catch {
-                Write-Host '        Error copying file. Skipping signature.' -ForegroundColor Red
+                Write-Host "$Indent        Error copying file. Skipping signature." -ForegroundColor Red
                 continue
             }
         }
@@ -2265,7 +2187,7 @@ function SetSignatures {
         }
 
         if ($UseHtmTemplates) {
-            Write-Host '      Replace picture variables'
+            Write-Host "$Indent      Replace picture variables"
             $html = New-Object -ComObject 'HTMLFile'
             $HTML.IHTMLDocument2_write((Get-Content -LiteralPath $path -Raw -Encoding UTF8))
 
@@ -2289,7 +2211,7 @@ function SetSignatures {
                 }
             }
 
-            Write-Host '      Replace non-picture variables'
+            Write-Host "$Indent      Replace non-picture variables"
             $tempFileContent = $html.documentelement.outerhtml
             foreach ($replaceKey in $replaceHash.Keys) {
                 if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
@@ -2307,18 +2229,18 @@ function SetSignatures {
         $script:COMWord.Documents.Open($path, $false) | Out-Null
 
         if (-not $UseHtmTemplates) {
-            Write-Host '      Replace picture variables'
+            Write-Host "$Indent      Replace picture variables"
             foreach ($image in ($script:COMWord.ActiveDocument.Shapes + $script:COMWord.ActiveDocument.InlineShapes)) {
                 try {
-                    if (($null -ne $($image.linkformat.sourcefullname)) -and ($($image.linkformat.sourcefullname) -ne '')) {
+                    if ($image.linkformat.sourcefullname) {
                         (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
-                            if ((((Split-Path -Path ($($image.linkformat.sourcefullname)) -Leaf).contains($_[0])) -or (($image.alternativetext).contains($_[0])))) {
+                            if (([System.IO.Path]::GetFileName($image.linkformat.sourcefullname).contains($_[0])) -or $(if ($image.alternativetext) { (($image.alternativetext).contains($_[0])) })) {
                                 if ($null -ne $ReplaceHash[$_[0]]) {
                                     $ImageAlternativeTextOriginal = $image.AlternativeText
                                     $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))
                                     $image.alternativetext = $ImageAlternativeTextOriginal.replace($_[0], '')
                                 }
-                            } elseif (((Split-Path -Path ($($image.linkformat.sourcefullname)) -Leaf).contains(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')) -or ($image.alternativetext.contains(($_[0][-999..-2] -join '') + 'DELETEEMPTY$'))) {
+                            } elseif (([System.IO.Path]::GetFileName($image.linkformat.sourcefullname).contains(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')) -or $(if ($image.alternativetext) { ($image.alternativetext.contains(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')) })) {
                                 if ($null -ne $ReplaceHash[$_[0]]) {
                                     $ImageAlternativeTextOriginal = $image.AlternativeText
                                     $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))
@@ -2376,7 +2298,7 @@ function SetSignatures {
                 }
             }
 
-            Write-Host '      Replace non-picture variables'
+            Write-Host "$Indent      Replace non-picture variables"
             $wdFindContinue = 1
             $MatchCase = $true
             $MatchWholeWord = $true
@@ -2417,7 +2339,7 @@ function SetSignatures {
             $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
 
             # Exports
-            Write-Host '      Export to HTM format'
+            Write-Host "$Indent      Export to HTM format"
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
             $script:COMWord.ActiveDocument.Weboptions.encoding = 65001
@@ -2446,7 +2368,7 @@ function SetSignatures {
 
         if (-not $ProcessOOF) {
             if ($CreateRTFSignatures -eq $true) {
-                Write-Host '      Export to RTF format'
+                Write-Host "$Indent      Export to RTF format"
                 # Overcome Word security warning when export contains embedded pictures
                 $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
                 if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ne 1)) {
@@ -2489,7 +2411,7 @@ function SetSignatures {
             $script:COMWord.ActiveDocument.Close($false)
 
             if ($CreateTXTSignatures -eq $true) {
-                Write-Host '      Export to TXT format'
+                Write-Host "$Indent      Export to TXT format"
                 # We work with the .htm file to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
                 $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
                 $script:COMWord.Documents.Open($path, $false) | Out-Null
@@ -2508,7 +2430,7 @@ function SetSignatures {
             $script:COMWord.ActiveDocument.Close($false)
         }
 
-        Write-Host '      Embed local files in HTM format and add marker'
+        Write-Host "$Indent      Embed local files in HTM format and add marker"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
         $tempFileContent = Get-Content -LiteralPath $path -Raw -Encoding UTF8
@@ -2534,7 +2456,7 @@ function SetSignatures {
             $SignaturePaths | ForEach-Object {
                 if ($CurrentMailboxUseSignatureRoaming -eq $true) {
                     # Microsoft signature roaming available
-                    Write-Host "      Copy signature files to '$_'"
+                    Write-Host "$Indent      Copy signature files to '$_'"
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " ($($MailAddresses[$AccountNumberRunning])).htm"))) -Force
                     if ($CreateRTFSignatures -eq $true) {
                         Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " ($($MailAddresses[$AccountNumberRunning])).rtf"))) -Force
@@ -2549,7 +2471,7 @@ function SetSignatures {
                     $script:SignatureFilesDone += $([System.IO.Path]::GetFileNameWithoutExtension($Signature.Value) + " ($($MailAddresses[$AccountNumberRunning])).htm")
                 } else {
                     # Microsoft signature roaming not available
-                    Write-Host "      Copy signature files to '$_'"
+                    Write-Host "$Indent      Copy signature files to '$_'"
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
                     if ($CreateRTFSignatures -eq $true) {
                         Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($_) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
@@ -2566,7 +2488,7 @@ function SetSignatures {
             }
         }
 
-        Write-Host '      Remove temporary files'
+        Write-Host "$Indent      Remove temporary files"
         @('.docx', '.htm', '.rtf', '.txt') | ForEach-Object {
             if (Test-Path $([System.IO.Path]::ChangeExtension($path, $_))) {
                 Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, $_)) -ErrorAction SilentlyContinue | Out-Null
@@ -2583,7 +2505,7 @@ function SetSignatures {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if (-not $SimulateUser) {
-                        Write-Host '      Set signature as default for new messages'
+                        Write-Host "$Indent      Set signature as default for new messages"
                         if ($script:CurrentUserDummyMailbox -ne $true) {
                             Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force
                         } else {
@@ -2603,7 +2525,7 @@ function SetSignatures {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if (-not $SimulateUser) {
-                        Write-Host '      Set signature as default for reply/forward messages'
+                        Write-Host "$Indent      Set signature as default for reply/forward messages"
                         if ($script:CurrentUserDummyMailbox -ne $true) {
                             Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
                         } else {
@@ -2889,7 +2811,7 @@ function GraphGetMe {
             Method      = 'Get'
             Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/me`?`$select=" + [System.Web.HttpUtility]::UrlEncode(($GraphUserProperties -join ', '))
             Headers     = $script:authorizationHeader
-            ContentType = 'Application/Json'
+            ContentType = 'Application/Json; charset=utf-8'
         }
         $OldProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
@@ -2928,7 +2850,7 @@ function GraphGetUserProperties($user) {
             Method      = 'Get'
             Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users/$user`?`$select=" + [System.Web.HttpUtility]::UrlEncode($local:x)
             Headers     = $script:authorizationHeader
-            ContentType = 'Application/Json'
+            ContentType = 'Application/Json; charset=utf-8'
         }
         $local:x = $null
         $OldProgressPreference = $ProgressPreference
@@ -2963,7 +2885,7 @@ function GraphGetUserManager($user) {
             Method      = 'Get'
             Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users/$user/manager"
             Headers     = $script:authorizationHeader
-            ContentType = 'Application/Json'
+            ContentType = 'Application/Json; charset=utf-8'
         }
         $OldProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
@@ -2996,7 +2918,7 @@ function GraphGetUserTransitiveMemberOf($user) {
             Method      = 'Get'
             Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users/$user/transitiveMemberOf"
             Headers     = $script:authorizationHeader
-            ContentType = 'Application/Json'
+            ContentType = 'Application/Json; charset=utf-8'
         }
         $OldProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
@@ -3066,7 +2988,7 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal) {
                 Method      = 'Patch'
                 Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users/$user/mailboxsettings"
                 Headers     = $script:authorizationHeader
-                ContentType = 'Application/Json'
+                ContentType = 'Application/Json; charset=utf-8'
                 Body        = $body
             }
             $OldProgressPreference = $ProgressPreference
@@ -3095,7 +3017,7 @@ function GraphFilterGroups($filter) {
             Method      = 'Get'
             Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/groups`?`$filter=" + [System.Web.HttpUtility]::UrlEncode($filter)
             Headers     = $script:authorizationHeader
-            ContentType = 'Application/Json'
+            ContentType = 'Application/Json; charset=utf-8'
         }
         $OldProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
