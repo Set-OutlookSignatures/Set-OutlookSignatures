@@ -354,7 +354,7 @@ Examples:
     Use these formats when you are in a cloud only environment.  
   
   When using an ini file instead of filename based tags, you can negate a group by prefixing it with '-:'. This deny removes previously included mailboxes. Denies are stronger than allows, no matter in which order they appear within a template section in the ini file.  
-  Denies are available for group and e-mail address specific templates, not for common templates.  
+  Denies are available for all kinds of templates: Time based, common, group specific and e-mail address specific.  
   Example:
   ```
   [OOF template.docx]
@@ -367,7 +367,7 @@ Examples:
     - Make this template specific for the assigned e-mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
   
   When using an ini file instead of filename based tags, you can negate an e-mail address by prefixing it with '-:'. This deny removes previously included mailboxes. Denies are stronger than allows, no matter in which order they appear within a template section in the ini file.  
-  Denies are available for group and e-mail address specific templates, not for common templates.  
+  Denies are available for all kinds of templates: Time based, common, group specific and e-mail address specific.  
   Example:
   ```
   [Signature template.docx]

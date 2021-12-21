@@ -5,7 +5,7 @@
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta1</a> - YYYY-MM-DD
 ### Added
-- Deny templates for specific groups and e-mail addresses (e. g. template A is for group X but not if mailbox is member of group Y and not for z@example.com), see README for details
+- Deny templates for specific groups and e-mail addresses (e. g.: Template A is for group X but not if mailbox is member of group Y and not for z@example.com; Template B is for everyone but not for group G; Template C applies anytime but not in February), see README for details
 - New parameter: DeleteScriptCreatedSignaturesWithoutTemplate
 - Consider distribution group membership in addition to security group membership
 - New FAQ: Why is membership in dynamic distribution groups and dynamic security groups not considered?
@@ -13,8 +13,12 @@
 ### Fixed
 - Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no *.htm file in OOFTemplatePath
 - Use correct sort order for OOF templates
+- Correct mapping of Graph businessPhones attribute, so the replacement variable \$CURRENT[...]TELEPHONE\$ is populated (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/26" target="_blank">#26</a>)  (<a href="https://github.com/vitorpereira" target="_blank">@vitorpereira</a>)
+- Correctly detect Outlook 2013 mailboxes and fix signature creation in environments without Outlook (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/27" target="_blank">#26</a>)  (<a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>)
 ### Changed
-- XXX
+- SID cache for groups across all types of templates reduces network load and increases script speed
+- Categorizing signature and OOF templates now shares the same code
+- Processing signature and OOF templates now shares the same code
 ### Removed
 - XXX
 
