@@ -625,8 +625,12 @@ function main {
             $LegacyExchangeDNs += ''
         }
     } else {
-        Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'Account Name' -like '*@*.*') } | ForEach-Object {
-            $MailAddresses += ($_.'Account Name').tolower()
+        Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'Account Name' -like '*@*.*') -or (($_.'Account Name' -join ',') -like '*,64,*,46,*') } | ForEach-Object {
+            if ($_.'Account Name' -like '*@*.*') {
+                $MailAddresses += ($_.'Account Name').tolower()
+            } else {
+                $MailAddresses += (($_.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' } | ForEach-Object { [char][int]"$($_)" }) -join ''
+            }
             $RegistryPaths += $_.PSPath
             if ($_.'Identity Eid') {
                 $LegacyExchangeDN = ('/O=' + (((($_.'Identity Eid' | ForEach-Object { [char]$_ }) -join '' -replace [char]0) -split '/O=')[-1]).ToString().trim())
@@ -638,7 +642,7 @@ function main {
             }
             $LegacyExchangeDNs += $LegacyExchangeDN
             Write-Host "  $($_.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $_.PSDrive)"
-            Write-Host "    $($_.'Account Name')"
+            Write-Host "    $($MailAddresses[-1])"
         }
     }
 
@@ -1243,7 +1247,7 @@ function main {
                             Write-Host "      $TemplateFilePartTag = " -NoNewline
                             $NTName = (((($TemplateFilePartTag -replace '\[', '') -replace '^-:', '') -replace '\]$', '') -replace '(.*?) (.*)', '$1\$2')
                             Write-Host "$NTName = " -NoNewline
-                       
+
                             # Check cache (only contains [xxx], not [-:xxx])
                             if ($TemplateFilePartTag.startswith('[-:')) {
                                 if ($TemplateFilesGroupSIDsOverall.ContainsKey(($TemplateFilePartTag -replace '^\[-:', '['))) {
@@ -1305,7 +1309,7 @@ function main {
                                     }
                                 }
                             }
-                            
+
                             if ($TemplateFilesGroupSIDs.containskey($TemplateFilePartTag)) {
                                 if ($null -ne $TemplateFilesGroupSIDs[$TemplateFilePartTag]) {
                                     Write-Host "$($TemplateFilesGroupSIDs[$TemplateFilePartTag] -replace '^-:', '')"
@@ -1320,7 +1324,7 @@ function main {
                                 } else {
                                     $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, $null)
                                 }
-                                
+
                             }
                         }
                     }

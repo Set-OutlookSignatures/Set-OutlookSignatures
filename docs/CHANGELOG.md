@@ -14,7 +14,7 @@
 - Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no *.htm file in OOFTemplatePath
 - Use correct sort order for OOF templates
 - Correct mapping of Graph businessPhones attribute, so the replacement variable \$CURRENT[...]TELEPHONE\$ is populated (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/26" target="_blank">#26</a>)  (<a href="https://github.com/vitorpereira" target="_blank">@vitorpereira</a>)
-- Correctly detect Outlook 2013 mailboxes and fix signature creation in environments without Outlook (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/27" target="_blank">#26</a>)  (<a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>)
+- Fix Outlook 2013 registry entry handling as well as temporary folder handling in environments without Outlook (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/27" target="_blank">#26</a>)  (<a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>)
 ### Changed
 - SID cache for groups across all types of templates reduces network load and increases script speed
 - Categorizing signature and OOF templates now shares the same code
