@@ -7,7 +7,7 @@
 - Customized with a broad range of variables, including photos, from Active Directory and other sources  
 - Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles  
 - Assigned time ranges within which they are valid  
-- Set as default signature for new mails, or for replies and forwards (signatures only)  
+- Set as default signature for new e-mails, or for replies and forwards (signatures only)  
 - Set as default OOF message for internal or external recipients (OOF messages only)  
 - Set in Outlook Web for the currently logged in user  
 - Centrally managed only or exist along user created signatures (signatures only)  
@@ -315,7 +315,7 @@ Outlook and the script can run simultaneously.
 
 New and changed signatures can be used instantly in Outlook.
 
-Changing which signature is to be used as default signature for new mails or for replies and forwards requires restarting Outlook.   
+Changing which signature is to be used as default signature for new e-mails or for replies and forwards requires restarting Outlook.   
 # 9. Signature and OOF file format  
 Only Word files with the extension .docx and HTML files with the extension .htm are supported as signature and OOF template files.  
 ## 9.1. Signature and OOF file naming  
@@ -441,7 +441,7 @@ Variables are case sensitive.
 
 Variables are replaced everywhere, including links, QuickTips and alternative text of images.
 
-With this feature, you can not only show e-mail addresses and telephone numbers in the signature and OOF message, but show them as links which open a new mail message (`"mailto:"`) or dial the number (`"tel:"`) via a locally installed softphone when clicked.
+With this feature, you can not only show e-mail addresses and telephone numbers in the signature and OOF message, but show them as links which open a new e-mail message (`"mailto:"`) or dial the number (`"tel:"`) via a locally installed softphone when clicked.
 
 Custom Active directory attributes are supported as well as custom replacement variables, see `'.\config\default replacement variables.ps1'` for details.
 
@@ -526,7 +526,7 @@ If the link is not working, please visit the <a href="https://web.archive.org/we
 # 13. Outlook Web  
 If the currently logged in user has configured his personal mailbox in Outlook, the default signature for new emails is configured in Outlook Web automatically.
 
-If the default signature for new mails matches the one used for replies and forwarded mail, this is also set in Outlook.
+If the default signature for new mails matches the one used for replies and forwarded e-mail, this is also set in Outlook.
 
 If different signatures for new and reply/forward are set, only the new signature is copied to Outlook Web.
 
@@ -586,7 +586,7 @@ In simulation mode, Outlook registry entries are not considered and nothing is c
 
 The template files are handled just as during a real script run, but only saved to the folder passed by the parameters AdditionalSignaturePath and AdditionalSignaturePath folder.
   
-`SimulateUser` is a mandatory parameter for simulation mode. This value replaces the currently logged in user. Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
+`SimulateUser` is a mandatory parameter for simulation mode. This value replaces the currently logged in user. Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail address, but is not neecessarily one).
 
 `SimulateMailboxes` is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
 
@@ -601,7 +601,7 @@ If you want to contribute code, please have a look at `'.\docs\CONTRIBUTING'` fo
 ## 16.3. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?  
 The legacyExchangeDN attribute is used to find the user behind a mailbox, because mail and proxyAddresses are not unique in certain Exchange scenarios:  
 - A separate Active Directory forest for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.  
-- One common mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.
+- One common e-mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.
 
 If Outlook is configured to access mailbox via protocols such as POP3 or IMAP4, the script searches for the legacyExchangeDN using the e-mail address of the mailbox.
 
@@ -615,7 +615,7 @@ If the mail attribute is not set, the currently logged in user's objectSID is co
   
 Please consider the following caveats regarding the mail attribute:  
 - When Active Directory attributes are directly modified to create or modify users and mailboxes (instead of using Exchange Admin Center or Exchange Management Shell), the mail attribute is often not updated and does not match the primary SMTP address of a mailbox. Microsoft strongly recommends that the mail attribute matches the primary SMTP address.  
-- When using linked mailboxes, the mail attribute of the linked account is often not set or synced back from the Exchange resource forest. Technically, this is not necessary. From an organizational point of view it makes sense, as this can be used to determine if a specific user has a linked mailbox in another forest, and as some applications (such as "scan to mail") may need this attribute anyhow.  
+- When using linked mailboxes, the mail attribute of the linked account is often not set or synced back from the Exchange resource forest. Technically, this is not necessary. From an organizational point of view it makes sense, as this can be used to determine if a specific user has a linked mailbox in another forest, and as some applications (such as "scan to e-mail") may need this attribute anyhow.  
 ## 16.5. Which ports are required?  
 For communication with the user's own Active Directory forest, trusted domains, and their sub-domains, the following ports are usually required:
 - 88 TCP/UDP (Kerberos authentication)
@@ -816,7 +816,7 @@ If you want to deploy signatures for
 - non-primary mailboxes,
 - mailboxes you don't add to Outlook but just use an assigned "Send As" or "Send on Behalf" right by choosing a different "From" address,
 - or distribution lists, for which you use an assigned "Send As" or "Send on Behalf" right by choosing a different "From" address,
-create a group or e-mail address specific signature, where the group or the e-mail-address does not refer to the mailbox or distribution group the e-mail is sent from, but rather the user or group who has the right to send from this mailbox or distribution group.
+create a group or e-mail address specific signature, where the group or the e-mail address does not refer to the mailbox or distribution group the e-mail is sent from, but rather the user or group who has the right to send from this mailbox or distribution group.
 
 An example:
 Members of the group "Example\Group" have the right to send as mailbox m<area>@example.com and as the distribution group dg<area>@example.com.
@@ -841,7 +841,7 @@ Caveat: The \$CurrentMailbox[...]\$ replacement variables refer to the user's pe
 ## 16.19. Can I centrally manage and deploy Outook stationery with this script?
 Outlook stationery describes the layout of e-mails, including font size and color for new e-mails and for replies and forwards.
 
-The default mail font, size and color are usually an integral part of corporate design and corporate identity. CI/CD typically also defines the content and layout of signatures.
+The default e-mail font, size and color are usually an integral part of corporate design and corporate identity. CI/CD typically also defines the content and layout of signatures.
 
 Set-OutlookSignatures has no features regarding deploying Outlook stationery, as there are better ways for doing this.  
 Outlook stores stationery settings in `'HKCU\Software\Microsoft\Office\<Version>\Common\MailSettings'`. You can use a logon script or group policies to deploy these keys, on-prem and for managed devices in the cloud.  
@@ -870,7 +870,7 @@ These updates usually happen less frequent than a dynamic group is used. The sta
 - Reduced load on Active Directory (partially transferred to IDM system or server running a script)
 - Static groups can be used for permissions
 - Changes in static group membership can be documented more easily
-- Static groups can be expanded to it's members in mail clients
+- Static groups can be expanded to it's members in e-mail clients
 - Membership in static groups can easily be queried
 - Overcoming query parameter restrictions, such as combing the results of multiple LDAP queries
 ## 16.21. What about the new signature roaming feature Microsoft announced?  

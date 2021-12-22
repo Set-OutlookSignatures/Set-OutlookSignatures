@@ -9,7 +9,7 @@ Signatures and OOF messages can be:
 - Customized with a broad range of variables, including photos, from Active Directory and other sources
 - Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles
 - Assigned time ranges within which they are valid
-- Set as default signature for new mails, or for replies and forwards (signatures only)
+- Set as default signature for new e-mails, or for replies and forwards (signatures only)
 - Set as default OOF message for internal or external recipients (OOF messages only)
 - Set in Outlook Web for the currently logged in user
 - Centrally managed only or exist along user created signatures (signatures only)
@@ -555,7 +555,7 @@ function main {
                 "registry::HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup"
             ) | ForEach-Object {
                 $x = (Get-ItemProperty $_ -ErrorAction SilentlyContinue).'DisableRoamingSignaturesTemporaryToggle'
-                if ($x -in (0, 1)) {
+                if (($x -in (0, 1)) -and ($OutlookFileVersion -ge '16.0.0.0')) {
                     $OutlookDisableRoamingSignaturesTemporaryToggle = $x
                 }
             }
@@ -595,7 +595,7 @@ function main {
         $SignaturePaths += $AdditionalSignaturePath
         Write-Host '  Simulation mode enabled, skipping task, using AdditionalSignaturePath instead' -ForegroundColor Yellow
     } else {
-        $x = (Get-ItemProperty 'hkcu:\software\microsoft\office\*\common\general' -ErrorAction SilentlyContinue).'Signatures'
+        $x = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\common\general" -ErrorAction SilentlyContinue).'Signatures'
         if ($x) {
             Push-Location ((Join-Path -Path ($env:AppData) -ChildPath 'Microsoft'))
             $x = ($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($x))
@@ -625,15 +625,15 @@ function main {
             $LegacyExchangeDNs += ''
         }
     } else {
-        Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'Account Name' -like '*@*.*') -or (($_.'Account Name' -join ',') -like '*,64,*,46,*') } | ForEach-Object {
-            if ($_.'Account Name' -like '*@*.*') {
+        Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } } | ForEach-Object {
+            if ($OutlookFileVersion -ge '16.0.0.0') {
                 $MailAddresses += ($_.'Account Name').tolower()
             } else {
                 $MailAddresses += (($_.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' } | ForEach-Object { [char][int]"$($_)" }) -join ''
             }
             $RegistryPaths += $_.PSPath
             if ($_.'Identity Eid') {
-                $LegacyExchangeDN = ('/O=' + (((($_.'Identity Eid' | ForEach-Object { [char]$_ }) -join '' -replace [char]0) -split '/O=')[-1]).ToString().trim())
+                $LegacyExchangeDN = ('/O=' + (((($_.'Identity Eid' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' } | ForEach-Object { [char][int]"$($_)" }) -join '') -split '/O=')[-1]).ToString().trim()
                 if ($LegacyExchangeDN.length -le 3) {
                     $LegacyExchangeDN = ''
                 }
@@ -1351,7 +1351,7 @@ function main {
                 $TemplateFilesDefaultnewOrInternal.add($TemplateFile.FullName, $TemplateFileTargetName)
                 foreach ($TemplateFilePartTag in (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultneworinternal).captures.value) | Where-Object { $_ })) {
                     if ($SigOrOOF -ieq 'signature') {
-                        Write-Host '    Default signature for new mails'
+                        Write-Host '    Default signature for new e-mails'
                         Write-Host "      $($TemplateFilePartTag)"
                     } else {
                         Write-Host '    Default internal OOF message'
@@ -1752,6 +1752,9 @@ function main {
                             try {
                                 if ($script:CurrentUserDummyMailbox -ne $true) {
                                     $TempNewSig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'New Signature'
+                                    if ($OutlookFileVersion -lt '16.0.0.0') {
+                                        $TempNewSig = (($TempNewSig -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' } | ForEach-Object { [char][int]"$($_)" }) -join ''
+                                    }
                                 } else {
                                     $TempNewSig = $script:CurrentUserDummyMailboxDefaultSigNew
                                 }
@@ -1761,6 +1764,9 @@ function main {
                             try {
                                 if ($script:CurrentUserDummyMailbox -ne $true) {
                                     $TempReplySig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature'
+                                    if ($OutlookFileVersion -lt '16.0.0.0') {
+                                        $TempReplySig = (($TempReplySig -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' } | ForEach-Object { [char][int]"$($_)" }) -join ''
+                                    }
                                 } else {
                                     $TempReplySig = $script:CurrentUserDummyMailboxDefaultSigReply
                                 }
@@ -1775,7 +1781,7 @@ function main {
                             }
 
                             if (($TempNewSig -ne '') -and ($TempReplySig -eq '')) {
-                                Write-Host "    Only default signature for new mails is set: '$TempNewSig'"
+                                Write-Host "    Only default signature for new e-mails is set: '$TempNewSig'"
                                 $TempOWASigFile = $TempNewSig
                                 $TempOWASigSetNew = $true
                                 $TempOWASigSetReply = $false
@@ -2530,14 +2536,18 @@ function SetSignatures {
     }
 
     if ((-not $ProcessOOF)) {
-        # Set default signature for new mails
+        # Set default signature for new e-mails
         if ($SignatureFilesDefaultNew.contains('' + $Signature.name + '')) {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if (-not $SimulateUser) {
                         Write-Host "$Indent      Set signature as default for new messages"
                         if ($script:CurrentUserDummyMailbox -ne $true) {
-                            Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force
+                            if ($OutlookFileVersion -ge '16.0.0.0') {
+                                Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force
+                            } else {
+                                Set-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -Type Binary -Value (([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) + "`0"))) -Force
+                            }
                         } else {
                             $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                         }
@@ -2550,14 +2560,18 @@ function SetSignatures {
             }
         }
 
-        # Set default signature for replies and forwarded mails
+        # Set default signature for replies and forwarded e-mails
         if ($SignatureFilesDefaultReplyFwd.contains($Signature.name)) {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if (-not $SimulateUser) {
                         Write-Host "$Indent      Set signature as default for reply/forward messages"
                         if ($script:CurrentUserDummyMailbox -ne $true) {
-                            Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force
+                            if ($OutlookFileVersion -ge '16.0.0.0') {
+                                Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force
+                            } else {
+                                Set-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -Type Binary -Value (([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) + "`0"))) -Force
+                            }
                         } else {
                             $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                         }
