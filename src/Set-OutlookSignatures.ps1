@@ -2109,7 +2109,7 @@ function EvaluateAndSetSignatures {
                         SetSignatures -ProcessOOF:$ProcessOOF
                     }
                 } else {
-                    Write-Host "$Indent      Not using template as there is at least one deny for this mailbox"
+                    Write-Host "$Indent      Not using template as there is no allow or at least one deny for this mailbox" -ForegroundColor Yellow
                 }
             }
         }
