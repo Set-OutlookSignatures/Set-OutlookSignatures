@@ -1156,8 +1156,8 @@ function main {
 
             $TemplateFilePartRegexTimeAllow = '\[(?!-:)\d{12}-\d{12}\]'
             $TemplateFilePartRegexTimeDeny = '\[-:\d{12}-\d{12}\]'
-            $TemplateFilePartRegexGroupAllow = '\[(?!-:)\S+?(?<!]) \S+?\]'
-            $TemplateFilePartRegexGroupDeny = '\[-:\S+?(?<!]) \S+?\]'
+            $TemplateFilePartRegexGroupAllow = '\[(?!-:)\S+?(?<!]) .+?\]'
+            $TemplateFilePartRegexGroupDeny = '\[-:\S+?(?<!]) .+?\]'
             $TemplateFilePartRegexMailaddressAllow = '\[(?!-:)(\S+?)@(\S+?)\.(\S+?)\]'
             $TemplateFilePartRegexMailaddressDeny = '\[-:(\S+?)@(\S+?)\.(\S+?)\]'
             if ($SigOrOOF -ieq 'signature') {
@@ -2057,7 +2057,7 @@ function EvaluateAndSetSignatures {
                             $TemplateAllowed = $true
                             Write-Host "$Indent        Allow: Group" -NoNewline
                             $tempSearchSting = $_
-                            Write-Host " $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting } | Select-Object -First 1).name) = $_"
+                            Write-Host " $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -join '/') = $_"
                         }
                     }
                 } elseif ($TemplateGroup -ieq 'mailbox') {
@@ -2075,7 +2075,7 @@ function EvaluateAndSetSignatures {
                         $TemplateAllowed = $false
                         Write-Host "$Indent        Deny: Group" -NoNewline
                         $tempSearchSting = $_
-                        Write-Host " $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting } | Select-Object -First 1).name -replace '^\[', '[-:') = $_"
+                        Write-Host " $((($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -replace '^\[', '[-:') -join '/') = $_"
                     }
                 }
 
@@ -2119,7 +2119,7 @@ function EvaluateAndSetSignatures {
             } else {
                 $Signature.value = "$OOFInternalGUID OOFInternal.docx"
             }
-            SetSignatures -ProcessOOF:$ProcessOOF 
+            SetSignatures -ProcessOOF:$ProcessOOF
         }
 
         # External OOF message

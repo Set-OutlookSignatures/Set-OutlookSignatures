@@ -5,7 +5,7 @@
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta1</a> - YYYY-MM-DD
 ### Added
-- Deny templates for specific groups and e-mail addresses (e. g.: Template A is for group X but not if mailbox is member of group Y and not for z@example.com; Template B is for everyone but not for group G; Template C applies anytime but not in February), see README for details
+- Tags can now be used to allow access to a template, but also to deny access. Denies are available for time, group and e-mail based tags (e. g.: Template A is for group X but not if mailbox is member of group Y and not for z@example.com; Template B is for everyone but not for group G; Template C applies anytime but not in February), see README for details
 - New parameter: DeleteScriptCreatedSignaturesWithoutTemplate
 - Consider distribution group membership in addition to security group membership
 - New FAQ: Why is membership in dynamic distribution groups and dynamic security groups not considered?
@@ -19,6 +19,7 @@
 - SID cache for groups across all types of templates reduces network load and increases script speed
 - Categorizing signature and OOF templates now shares the same code
 - Processing signature and OOF templates now shares the same code
+- Deprecate file name based tags. They work as-is, no new features will be added, and support for file name based tags will be removed completely in the next months. Please switch to ini files, see README for details.
 ### Removed
 - XXX
 

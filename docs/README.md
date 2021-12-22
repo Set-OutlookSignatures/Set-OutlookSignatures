@@ -322,9 +322,9 @@ The script copies every signature and OOF file as-is, with one exception: When t
 
 Tags must be placed before the file extension and be separated from the base filename with a period.
 
-If you can't or don't want to use file name based tags, you can also place them in an ini file.  
+If possible, do not use file name based tags,but place them an ini file. File name based tags will no longer be supported in a future release.  
+See the `'Tags in ini files instead in file names'` section for more details.  
 See the '.\templates' folder for sample templates and configuration.  
-See the `'Tags in ini files instead in file names'` section for more details.
 
 Examples:  
 - `'Company external German.docx'` -> `'Company external German.htm'`, no changes  
@@ -353,7 +353,7 @@ Examples:
     'AzureAD' is the literal, case-insensitive string 'AzureAD', not a variable.  
     Use these formats when you are in a cloud only environment.  
   
-  When using an ini file instead of filename based tags, you can negate a group by prefixing it with '-:'. This deny removes previously included mailboxes. Denies are stronger than allows, no matter in which order they appear within a template section in the ini file.  
+  When using an ini file instead of file name based tags, you can deny a group by prefixing it with '-:'. This deny removes previously included mailboxes. Denies are stronger than allows, no matter in which order they appear within a template section in the ini file.  
   Denies are available for all kinds of templates: Time based, common, group specific and e-mail address specific.  
   Example:
   ```
@@ -366,7 +366,7 @@ Examples:
 - `[<SMTP address>]`, e.g. `[office<area>@example.com]`  
     - Make this template specific for the assigned e-mail address (all SMTP addresses of a mailbox are considered, not only the primary one)  
   
-  When using an ini file instead of filename based tags, you can negate an e-mail address by prefixing it with '-:'. This deny removes previously included mailboxes. Denies are stronger than allows, no matter in which order they appear within a template section in the ini file.  
+  When using an ini file instead of file name based tags, you can negate an e-mail address by prefixing it with '-:'. This deny removes previously included mailboxes. Denies are stronger than allows, no matter in which order they appear within a template section in the ini file.  
   Denies are available for all kinds of templates: Time based, common, group specific and e-mail address specific.  
   Example:
   ```
@@ -378,7 +378,18 @@ Examples:
   ```
 - `[yyyyMMddHHmm-yyyyMMddHHmm]`, e.g. `[202112150000-202112262359]` for the 2021 Christmas season  
     - Make this template valid only during the specific time range (`yyyy` = year, `MM` = month, `dd` = day, `HH` = hour, `mm` = minute)  
-    - If the script does not run after a template has expired, the template is still available on the client and can be used.
+    - If the script does not run after a template has expired, the template is still available on the client and can be used.  
+  
+  When using an ini file instead of file name based tags, you can negate an time range by prefixing it with '-:'. This deny only allows the use of a certain template outside a specific time range. Denies are stronger than allows, no matter in which order they appear within a template section in the ini file.  
+  Denies are available for all kinds of templates: Time based, common, group specific and e-mail address specific.  
+  Example:
+  ```
+  [Signature template.docx]
+  # Valid for everyone in 2002, but not in February 2022
+  202201010000-202212312359
+  -:202202010000-202202282359
+  ```
+
 
 Filename tags can be combined: A template may be assigned to several groups, several e-mail addresses and several time ranges, be used as default signature for new e-mails and as default signature for replies and forwards at the same time.
 
