@@ -1914,7 +1914,7 @@ function main {
                         }
                     }
                 } else {
-                    Write-Host '    Out of Office (OOF) auto reply currently active or scheduled, not changing settings' -ForegroundColor Yellow
+                    Write-Host '    Out of Office (OOF) auto reply currently active or scheduled, not changing settings'
                 }
 
                 # Delete temporary OOF files from file system
