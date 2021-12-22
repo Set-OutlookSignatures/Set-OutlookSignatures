@@ -1501,6 +1501,7 @@ function main {
                                     $SidHex += $('\{0:x2}' -f $_)
                                 }
                                 # Foreign Security Principals have an objectSID, but no sIDHistory
+                                # The sIDHistory of the current mailbox is part of $SIDsToCheckInTrusts and therefore also considered in $LdapFilterSIDs
                                 $LdapFilterSIDs += ('(objectsid=' + $($SidHex -join '') + ')')
                             } catch {
                                 Write-Host '      Error creating LDAP filter for search across trusts.' -ForegroundColor Red

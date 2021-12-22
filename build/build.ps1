@@ -52,6 +52,10 @@ function main {
         ('.\docs\Implementation approach.md', "$BuildDir\docs\Implementation approach.html"),
         ('.\docs\README.md', "$BuildDir\docs\README.html")
     ) | ForEach-Object {
+        # update version number
+        ((Get-Content $($_[0]) -Raw) -replace 'XXXVersionStringXXX', ($ReleaseTag.replace('-', '--').replace('_', '__').replace(' ', '_'))) | Set-Content $($_[0])
+
+        # convert to HTML
         & pandoc.exe $($_[0]) --resource-path=".;docs" -f gfm -t html --self-contained -H .\build\pandoc_header.html --css .\build\pandoc_css_empty.css --metadata pagetitle="$(([System.IO.FileInfo]"$($_[0])").basename) - Set-OutlookSignatures" -o $($_[1])
     }
 
@@ -61,7 +65,7 @@ function main {
 
     Set-Location $BuildDir
 
-    ((Get-Content Set-OutlookSignatures.ps1 -Raw) -replace 'xxxVersionStringxxx', $ReleaseTag) | Set-Content Set-OutlookSignatures.ps1
+    ((Get-Content Set-OutlookSignatures.ps1 -Raw) -replace 'XXXVersionStringXXX', $ReleaseTag) | Set-Content Set-OutlookSignatures.ps1
 
 
     Write-Output 'Create file hashes and place them in file hashes.txt'
