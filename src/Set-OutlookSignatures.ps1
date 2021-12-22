@@ -1218,7 +1218,7 @@ function main {
 
             # common template
             if (($TemplateFilePart -notmatch $TemplateFilePartRegexGroupAllow) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexMailaddressAllow)) {
-                Write-Host '    Common template'
+                Write-Host '    Common template (no group or e-mail address allow tags specified)'
                 if (-not $TemplateFilesCommon.containskey($TemplateFile.FullName)) {
                     $TemplateFilesCommon.add($TemplateFile.FullName, $TemplateFileTargetName)
                 }
@@ -1339,7 +1339,7 @@ function main {
                                 }
                                 $TemplateFilesMailbox.add($TemplateFile.FullName, $TemplateFileTargetName)
                             }
-                            Write-Host "      $($TemplateFilePartTag -replace '\[' -replace '\]')"
+                            Write-Host "      $($TemplateFilePartTag)"
                             $TemplateFilesMailboxFilePart[$TemplateFile.FullName] = ($TemplateFilesMailboxFilePart[$TemplateFile.FullName] + $TemplateFilePartTag)
                         }
                     }
@@ -1349,28 +1349,36 @@ function main {
             # DefaultNew, DefaultReplyFwd, Internal, External
             if ($TemplateFilePart -match $TemplateFilePartRegexDefaultneworinternal) {
                 $TemplateFilesDefaultnewOrInternal.add($TemplateFile.FullName, $TemplateFileTargetName)
-                if ($SigOrOOF -ieq 'signature') {
-                    Write-Host '    Default signature for new mails'
-                } else {
-                    Write-Host '    Default internal OOF message'
+                foreach ($TemplateFilePartTag in (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultneworinternal).captures.value) | Where-Object { $_ })) {
+                    if ($SigOrOOF -ieq 'signature') {
+                        Write-Host '    Default signature for new mails'
+                        Write-Host "      $($TemplateFilePartTag)"
+                    } else {
+                        Write-Host '    Default internal OOF message'
+                        Write-Host "      $($TemplateFilePartTag)"
+                    }
                 }
             }
 
             if ($TemplateFilePart -match $TemplateFilePartRegexDefaultreplyfwdorexternal) {
                 $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateFile.FullName, $TemplateFileTargetName)
-                if ($SigOrOOF -ieq 'signature') {
-                    Write-Host '    Default signature for replies and forwards'
-                } else {
-                    Write-Host '    Default external OOF message'
+                foreach ($TemplateFilePartTag in (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultreplyfwdorexternal).captures.value) | Where-Object { $_ })) {
+                    if ($SigOrOOF -ieq 'signature') {
+                        Write-Host '    Default signature for replies and forwards'
+                        Write-Host "      $($TemplateFilePartTag)"
+                    } else {
+                        Write-Host '    Default external OOF message'
+                        Write-Host "      $($TemplateFilePartTag)"
+                    }
                 }
             }
 
             if ($SigOrOOF -ieq 'OOF') {
                 if (($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultreplyfwdorexternal) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultneworinternal)) {
                     $TemplateFilesDefaultnewOrInternal.add($TemplateFile.FullName, $TemplateFileTargetName)
-                    Write-Host '    Default internal OOF message'
+                    Write-Host '    Default internal OOF message (neither internal nor external tag specified)'
                     $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateFile.FullName, $TemplateFileTargetName)
-                    Write-Host '    Default external OOF message'
+                    Write-Host '    Default external OOF message (neither internal nor external tag specified)'
                 }
             }
 
