@@ -1854,7 +1854,7 @@ function main {
                 $OOFDisabled = $null
 
                 if ($SimulateUser) {
-                    Write-Host '    Simulation mode enabled, processing OOF templates without changing OOF settings' -ForegroundColor Yellow
+                    Write-Host '    Simulation mode enabled, process OOF templates without changing OOF settings' -ForegroundColor Yellow
                 } else {
                     if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
                         $OOFSettings = $exchService.GetUserOOFSettings($PrimaryMailboxAddress)
@@ -1914,7 +1914,7 @@ function main {
                         }
                     }
                 } else {
-                    Write-Host '      Out of Office (OOF) auto reply currently active or scheduled, not changing settings' -ForegroundColor Yellow
+                    Write-Host '    Out of Office (OOF) auto reply currently active or scheduled, not changing settings' -ForegroundColor Yellow
                 }
 
                 # Delete temporary OOF files from file system
@@ -2055,7 +2055,7 @@ function EvaluateAndSetSignatures {
     }
 
     foreach ($TemplateGroup in ('common', 'group', 'mailbox')) {
-        Write-Host "$Indent  Process $TemplateGroup signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+        Write-Host "$Indent  Process $TemplateGroup $(if($TemplateGroup -iin ('group', 'mailbox')){'specific '})signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
         foreach ($TemplateFile in (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)) {
             # this is the correctly sorted hashtable

@@ -5,22 +5,20 @@
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta1</a> - 2021-12-22
 ### Added
-- Tags can now be used to allow access to a template, but also to deny access. Denies are available for time, group and e-mail based tags (e. g.: Template A is for group X but not if mailbox is member of group Y and not for z<area>@example.com; Template B is for everyone but not for group G; Template C applies anytime but not in February), see README for details
-- For each mailbox/template combination, show all matching allow and deny tags
 - New parameter: DeleteScriptCreatedSignaturesWithoutTemplate
+- Tags can now not only be used to allow access to a template, but also to deny access. Denies are available for time, group and e-mail based tags. See README for details.
 - Consider distribution group membership in addition to security group membership
+- Consider sIDHistory in searches across trusts and when comparing msExchMasterAccountSid, which adds support for scenarios in which a mailbox or a linked account has been migrated between Active Directory domains/forests
+- Show matching allow and deny tags for each mailbox-template-combination. This makes it easy to find out why a certain template is applied for a certain mailbox and why not.
+- Show which tags lead to a classification as time based, common, group based or e-mail address specific template
 - New FAQ: Why is membership in dynamic distribution groups and dynamic security groups not considered?
-- Consider sIDHistory in searches across trusts and when comparing msExchMasterAccountSid, which adds support for probably all scenarios in which a mailbox or a linked account is migrated between Active Directory domains or forests
 ### Fixed
-- Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no *.htm file in OOFTemplatePath
-- Use correct sort order for OOF templates
+- Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no \*.htm file in OOFTemplatePath
 - Correct mapping of Graph businessPhones attribute, so the replacement variable \$CURRENT[...]TELEPHONE\$ is populated (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/26" target="_blank">#26</a>)  (<a href="https://github.com/vitorpereira" target="_blank">@vitorpereira</a>)
-- Fix Outlook 2013 registry entry handling as well as temporary folder handling in environments without Outlook (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/27" target="_blank">#26</a>)  (<a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>)
+- Fix Outlook 2013 registry key handling and temporary folder handling in environments without Outlook or Outlook profile (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/27" target="_blank">#27</a>)  (<a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>)
 ### Changed
-- SID cache for groups across all types of templates reduces network load and increases script speed
-- Categorizing signature and OOF templates now shares the same code
-- Processing signature and OOF templates now shares the same code
-- Deprecate file name based tags. They work as-is, no new features will be added, and support for file name based tags will be removed completely in the next months. Please switch to ini files, see README for details.
+- Cache group SIDs across all types of templates to reduce network load and increase script speed
+- Deprecate file name based tags. They work as-is, no new features will be added and support for file name based tags will be removed completely in the next months. Please switch to ini files, see README for details.
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.4.0" target="_blank">v2.4.0</a> - 2021-12-10
 ### Added
