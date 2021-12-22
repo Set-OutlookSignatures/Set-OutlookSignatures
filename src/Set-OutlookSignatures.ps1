@@ -2117,7 +2117,7 @@ function EvaluateAndSetSignatures {
                         SetSignatures -ProcessOOF:$ProcessOOF
                     }
                 } else {
-                    Write-Host "$Indent      Not using template as there is no allow or at least one deny for this mailbox" -ForegroundColor Yellow
+                    Write-Host "$Indent      Not using template as there is no allow or at least one deny for this mailbox"
                 }
             }
         }
@@ -2184,7 +2184,7 @@ function SetSignatures {
     if (-not $ProcessOOF) {
         $SignatureFileAlreadyDone = ($script:SignatureFilesDone -contains $($Signature.Name))
         if ($SignatureFileAlreadyDone) {
-            Write-Host "$Indent      Template already processed before, skipping" -ForegroundColor Yellow
+            Write-Host "$Indent      Template already processed before with higher priority, no need to update signature"
         } else {
             $script:SignatureFilesDone += $($Signature.Name)
         }
