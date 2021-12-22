@@ -1365,6 +1365,14 @@ function main {
                 }
             }
 
+            if ($SigOrOOF -ieq 'OOF') {
+                if (($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultreplyfwdorexternal) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultneworinternal)) {
+                    $TemplateFilesDefaultnewOrInternal.add($TemplateFile.FullName, $TemplateFileTargetName)
+                    Write-Host '    Default internal OOF message'
+                    $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateFile.FullName, $TemplateFileTargetName)
+                    Write-Host '    Default external OOF message'
+                }
+            }
 
             # unknown tags
             $x = ($TemplateFilePart -replace $TemplateFilePartRegexKnown, '').trim()
@@ -1902,7 +1910,7 @@ function main {
                 }
 
                 # Delete temporary OOF files from file system
-                ("$OOFCommonGUID OOFCommon", "$OOFInternalGUID OOFInternal", "$OOFExternalGUID OOFExternal") | ForEach-Object {
+                ("$OOFInternalGUID OOFInternal", "$OOFExternalGUID OOFExternal") | ForEach-Object {
                     Remove-Item ((Join-Path -Path $script:tempDir -ChildPath ($_ + '.*'))) -Force -ErrorAction SilentlyContinue
                 }
             }
@@ -2112,30 +2120,45 @@ function EvaluateAndSetSignatures {
         if ($OOFInternal -or $OOFExternal) {
             Write-Host "$Indent  Converting final OOF templates to HTM format @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         }
+
         if ($OOFInternal) {
             $Signature = $OOFInternal
-            Write-Host "$Indent    '$($Signature.value)' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+
+            if ($OOFExternal -eq $OOFInternal) {
+                Write-Host "$Indent    Common OOF message: '$($Signature.value)' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            } else {
+                Write-Host "$Indent    Internal OOF message: '$($Signature.value)' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            }
             if ($UseHtmTemplates) {
                 $Signature.value = "$OOFInternalGUID OOFInternal.htm"
             } else {
                 $Signature.value = "$OOFInternalGUID OOFInternal.docx"
             }
-            SetSignatures -ProcessOOF:$ProcessOOF
-        }
 
-        # External OOF message
-        if ($OOFExternal) {
-            $Signature = $OOFExternal
-            Write-Host "$Indent    '$($Signature.value)' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-            if ($UseHtmTemplates) {
-                $Signature.value = "$OOFExternalGUID OOFExternal.htm"
-            } else {
-                $Signature.value = "$OOFExternalGUID OOFExternal.docx"
-            }
             SetSignatures -ProcessOOF:$ProcessOOF
+
+            if ($OOFExternal -eq $OOFInternal) {
+                Copy-Item -Path (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm") -Destination (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")
+            }
         }
     }
+
+    # External OOF message
+    if ($OOFExternal -and ($OOFExternal -ne $OOFInternal)) {
+        $Signature = $OOFExternal
+
+        Write-Host "$Indent    External OOF message: '$($Signature.value)' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+
+        if ($UseHtmTemplates) {
+            $Signature.value = "$OOFExternalGUID OOFExternal.htm"
+        } else {
+            $Signature.value = "$OOFExternalGUID OOFExternal.docx"
+        }
+
+        SetSignatures -ProcessOOF:$ProcessOOF
+    }
 }
+
 
 function SetSignatures {
     Param(
