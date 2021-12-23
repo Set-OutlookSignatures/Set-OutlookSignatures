@@ -629,6 +629,7 @@ function main {
         if (($OutlookFileVersion -lt '16.0.0.0') -and (-not $DoNotEmbedImagesInHTML)) {
             Write-Host '    Outlook 2013 or earlier detected.' -ForegroundColor Yellow
             Write-Host '    Consider using parameter DoNotEmbedImagesInHTML to avoid problems with images in templates.' -ForegroundColor Yellow
+            Write-Host '    Outlook 2013 is supported by Microsoft until April 2023, older version are already out of support.' -ForegroundColor Yellow
         }
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
         Write-Host "  Outlook file version: $OutlookFileVersion"
