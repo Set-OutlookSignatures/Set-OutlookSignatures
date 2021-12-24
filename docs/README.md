@@ -284,8 +284,6 @@ Outlook 2013 and earlier can't handle images directly embedded in HTML signature
 While Outlook 2013 and earlier can't handle embedded images when composing HTML e-mails, there is no problem when composing e-mails in RTF format (and TXT, of course).  
 There is also no problem receiving e-mails containing signatures with embedded images.
 
-Setting DoNotEmbedImagesInHTML as well as UseHTMTemplates to true is currently not supported. If you have a need for this scenario, please open a new issue on GitHub.
-
 Default value: `$false`
 # 3. Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.

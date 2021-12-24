@@ -3,10 +3,10 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta1</a> - 2021-12-22
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta2</a> - YYYY-MM-DD
 ### Added
-- New parameter: DeleteScriptCreatedSignaturesWithoutTemplate
-- New parameter: DoNotEmbedImagesInHTML
+- New parameter DeleteScriptCreatedSignaturesWithoutTemplate, see README for details
+- New parameter DoNotEmbedImagesInHTML, see README for details
 - Tags can now not only be used to allow access to a template, but also to deny access. Denies are available for time, group and e-mail based tags. See README for details.
 - Consider distribution group membership in addition to security group membership
 - Consider sIDHistory in searches across trusts and when comparing msExchMasterAccountSid, which adds support for scenarios in which a mailbox or a linked account has been migrated between Active Directory domains/forests

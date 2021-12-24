@@ -164,7 +164,6 @@ Default value: $true
 Outlook 2013 and earlier can't handle images directly embedded in HTML signatures ('<img src="data:image/[...]"'). A separate folder containing the images is required in this case.
 While Outlook 2013 and earlier can't handle embedded images when composing HTML e-mails, there is no problem when composing e-mails in RTF format (and TXT, of course).
 There is also no problem receiving e-mails containing signatures with embedded images.
-Setting DoNotEmbedImagesInHTML as well as UseHTMTemplates to true is currently not supported. If you have a need for this scenario, please open a new issue on GitHub.
 Default value: $false
 
 .INPUTS
@@ -328,7 +327,6 @@ Param(
     # Outlook 2013 and earlier can't handle images directly embedded in HTML signatures ('<img src="data:image/[...]"'). A separate folder containing the images is required in this case.
     # While Outlook 2013 and earlier can't handle embedded images when composing HTML e-mails, there is no problem when composing e-mails in RTF format (and TXT, of course).
     # There is also no problem receiving e-mails containing signatures with embedded images.
-    # Setting DoNotEmbedImagesInHTML as well as UseHTMTemplates to true is currently not supported. If you have a need for this scenario, please open a new issue on GitHub.
     # Default value: $false
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
     $DoNotEmbedImagesInHTML = $false
@@ -558,15 +556,6 @@ function main {
     }
 
 
-    if (($DoNotEmbedImagesInHTML) -and ($UseHTMTemplates)) {
-        Write-Host
-        Write-Host 'Setting DoNotEmbedImagesInHTML as well as UseHTMTemplates to true is currently not supported.' -ForegroundColor Red
-        Write-Host 'If you have a need for this scenario, please open a new issue on GitHub.' -ForegroundColor Red
-        Write-Host 'Setting DoNotEmbedImagesInHTML to false.' -ForegroundColor red
-        $DoNotEmbedImagesInHTML = $false
-    }
-
-
     if ($SimulateUser) {
         Write-Host
         Write-Host 'Simulation mode enabled' -ForegroundColor Yellow
@@ -629,7 +618,7 @@ function main {
         if (($OutlookFileVersion -lt '16.0.0.0') -and (-not $DoNotEmbedImagesInHTML)) {
             Write-Host '    Outlook 2013 or earlier detected.' -ForegroundColor Yellow
             Write-Host '    Consider using parameter DoNotEmbedImagesInHTML to avoid problems with images in templates.' -ForegroundColor Yellow
-            Write-Host '    Outlook 2013 is supported by Microsoft until April 2023, older version are already out of support.' -ForegroundColor Yellow
+            Write-Host '    Outlook 2013 is supported by Microsoft until April 2023, older versions are already out of support.' -ForegroundColor Yellow
         }
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
         Write-Host "  Outlook file version: $OutlookFileVersion"
@@ -1473,11 +1462,11 @@ function main {
     }
 
 
+    Write-Host
+    Write-Host "Start Word background process for template editing @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     if (($UseHtmTemplates -eq $true) -and (($CreateRTFSignatures -eq $false) -and ($CreateTXTSignatures -eq $false))) {
-        # No need to start Word in this constellation
+        Write-Host '  Not starting Word because: UseHTMTemplates = $true, CreateRTFSignatures = $false, CreateTXTSignatures = $false'
     } else {
-        Write-Host
-        Write-Host "Start Word background process for template editing @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the script
         try {
             $script:COMWordDummy = New-Object -ComObject word.application
@@ -1492,7 +1481,7 @@ function main {
                 Remove-Variable COMWordDummy -Scope 'script'
             }
         } catch {
-            Write-Host 'Word not installed or not working correctly. Exiting.' -ForegroundColor Red
+            Write-Host '  Word not installed or not working correctly. Exiting.' -ForegroundColor Red
             $error[0]
             exit 1
         }
@@ -2284,9 +2273,20 @@ function SetSignatures {
         if ($UseHtmTemplates) {
             # use .html for temporary file, .htm for final file
             try {
-                ConvertTo-SingleFileHTML $Signature.Name $path
+                if ($DoNotEmbedImagesInHTML) {
+                    Copy-Item -LiteralPath $Signature.name -Destination $path
+                    $ConnectedFilesFolderNames | ForEach-Object {
+                        if (Test-Path (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$_")) {
+                            Copy-Item (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$_") (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files") -Recurse -Force
+                            return
+                        }
+                    }
+                } else {
+                    ConvertTo-SingleFileHTML $Signature.Name $path
+                }
             } catch {
                 Write-Host "$Indent        Error copying file. Skipping signature." -ForegroundColor Red
+                Write-Host $error[0]
                 continue
             }
         } else {
@@ -2313,16 +2313,39 @@ function SetSignatures {
                 (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
                     if (($image.src -clike "*$($_[0])*") -or ($image.alt -clike "*$($_[0])*")) {
                         if ($null -ne $ReplaceHash[$_[0]]) {
-                            $ImageAlternativeTextOriginal = $image.alt
-                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))))))
-                            $image.alt = $ImageAlternativeTextOriginal.replace($_[0], '')
+                            if ($DoNotEmbedImagesInHTML) {
+                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
+                                Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($_[0]).jpeg") -Force
+                                $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($_[0]).jpeg")
+                                if ($image.alt) {
+                                    $image.alt = $($image.alt).replace($_[0], '')
+                                }
+                            } else {
+                                $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))))))
+                                if ($image.alt) {
+                                    $image.alt = $($image.alt).replace($_[0], '')
+                                }
+                            }
+                        } else {
+                            $image.src = "$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))"
                         }
                     } elseif (($image.src -clike "*$(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')*")) {
                         if ($null -ne $ReplaceHash[$_[0]]) {
-                            $ImageAlternativeTextOriginal = $image.alt
-                            $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))))))
-                            $image.alt = $ImageAlternativeTextOriginal.replace((($_[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                            if ($DoNotEmbedImagesInHTML) {
+                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
+                                Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($_[0]).jpeg") -Force
+                                $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($_[0]).jpeg")
+                                if ($image.alt) {
+                                    $image.alt = $($image.alt).replace((($_[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                                }
+                            } else {
+                                $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))))))
+                                if ($image.alt) {
+                                    $image.alt = $($image.alt).replace((($_[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                                }
+                            }
                         } else {
+                            Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                             $image.removenode() | Out-Null
                         }
                     }
@@ -2344,7 +2367,9 @@ function SetSignatures {
             }
         }
 
-        $script:COMWord.Documents.Open($path, $false) | Out-Null
+        if ($CreateRTFSignatures -or $CreateTXTSignatures) {
+            $script:COMWord.Documents.Open($path, $false) | Out-Null
+        }
 
         if (-not $UseHtmTemplates) {
             Write-Host "$Indent      Replace picture variables"
@@ -2354,15 +2379,17 @@ function SetSignatures {
                         (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
                             if (([System.IO.Path]::GetFileName($image.linkformat.sourcefullname).contains($_[0])) -or $(if ($image.alternativetext) { (($image.alternativetext).contains($_[0])) })) {
                                 if ($null -ne $ReplaceHash[$_[0]]) {
-                                    $ImageAlternativeTextOriginal = $image.AlternativeText
                                     $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))
-                                    $image.alternativetext = $ImageAlternativeTextOriginal.replace($_[0], '')
+                                    if ($image.alternativetext) {
+                                        $image.alternativetext = $($image.alternativetext).replace($_[0], '')
+                                    }
                                 }
                             } elseif (([System.IO.Path]::GetFileName($image.linkformat.sourcefullname).contains(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')) -or $(if ($image.alternativetext) { ($image.alternativetext.contains(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')) })) {
                                 if ($null -ne $ReplaceHash[$_[0]]) {
-                                    $ImageAlternativeTextOriginal = $image.AlternativeText
                                     $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))
-                                    $image.alternativetext = $ImageAlternativeTextOriginal.replace((($_[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                                    if ($image.alternativetext) {
+                                        $image.alternativetext = $($image.alternativetext).replace((($_[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                                    }
                                 } else {
                                     $image.delete()
                                 }
@@ -2525,7 +2552,10 @@ function SetSignatures {
                     $script:COMWord.ActiveDocument.Save()
                 }
             }
-            $script:COMWord.ActiveDocument.Close($false)
+
+            if ($CreateRTFSignatures -or $CreateTXTSignatures) {
+                $script:COMWord.ActiveDocument.Close($false)
+            }
 
             if ($CreateTXTSignatures -eq $true) {
                 Write-Host "$Indent      Export to TXT format"
@@ -2544,7 +2574,9 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.Close($false)
             }
         } else {
-            $script:COMWord.ActiveDocument.Close($false)
+            if ($CreateRTFSignatures -or $CreateTXTSignatures) {
+                $script:COMWord.ActiveDocument.Close($false)
+            }
         }
 
         Write-Host "$Indent      Embed local files in HTM format and add marker"
@@ -2563,8 +2595,11 @@ function SetSignatures {
         if (-not $ProcessOOF) {
             if ($DoNotEmbedImagesInHTML) {
                 $pathConnectedFolderNames | ForEach-Object {
-                    $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $_ + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
-                    Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($_)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
+                    if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($_))) {
+                        $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $_ + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
+                        Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($_)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
+                        return
+                    }
                 }
                 [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
             } else {
@@ -2587,7 +2622,9 @@ function SetSignatures {
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
                     Remove-Item -LiteralPath (Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Recurse -Force -ErrorAction SilentlyContinue
                     if ($DoNotEmbedImagesInHTML) {
-                        Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse -ErrorAction SilentlyContinue
+                        if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))")) {
+                            Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse
+                        }
                     }
                     if ($CreateRTFSignatures -eq $true) {
                         Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
