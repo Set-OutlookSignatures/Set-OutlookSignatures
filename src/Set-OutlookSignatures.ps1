@@ -160,11 +160,11 @@ Default value: $true
 Should signatures be created in TXT format?
 Default value: $true
 
-.PARAMETER DoNotEmbedImagesInHTML
-Outlook 2013 and earlier can't handle images directly embedded in HTML signatures ('<img src="data:image/[...]"'). A separate folder containing the images is required in this case.
-While Outlook 2013 and earlier can't handle embedded images when composing HTML e-mails, there is no problem when composing e-mails in RTF format (and TXT, of course).
-There is also no problem receiving e-mails containing signatures with embedded images.
-Default value: $false
+.PARAMETER EmbedImagesInHTML
+Should images be embedded into HTML files?
+Outlook 2016 and new can handle images embedded directly into an HTML file as BASE64 string ('<img src="data:image/[...]"').
+Outlook 2013 and earlier can't handle these embedded images when composing HTML e-mails (there is no problem receiving such e-mails, or when composing RTF or TXT e-mails).
+Default value: $true
 
 .INPUTS
 None. You cannot pipe objects to Set-OutlookSignatures.ps1.
@@ -203,46 +203,22 @@ License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)
 
 Param(
     # Path to centrally managed signature templates
-    #   Local and remote paths are supported
-    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
-    #   WebDAV paths are supported (https only)
-    #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$SignatureTemplatePath = '.\templates\Signatures DOCX',
 
     # Path to ini file containing signature template tags
-    # This is an alternative to file name tags
-    # See '.\templates\sample signatures ini file.ini' for a sample file with further explanations.
-    #   Local and remote paths are supported
-    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
-    #   WebDAV paths are supported (https only)
-    #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$SignatureIniPath = '',
 
     # Path to a replacement variable config file.
-    #   Local and remote paths are supported
-    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signature')
-    #   WebDAV paths are supported (https only)
-    #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$ReplacementVariableConfigFile = '.\config\default replacement variables.ps1',
 
     # Path to a Graph variable config file.
-    #   Local and remote paths are supported
-    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signature')
-    #   WebDAV paths are supported (https only)
-    #     'https://server.domain/SignatureSite/config/default graph config.ps1' or '\\server.domain@SSL\SignatureSite\config\default graph config.ps1'
-    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$GraphConfigFile = '.\config\default graph config.ps1',
 
     # List of domains/forests to check for group membership across trusts
-    #   If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered
-    #   If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list
     [Alias('DomainsToCheckForGroups')]
     [string[]]$TrustsToCheckForGroups = ('*'),
 
@@ -263,22 +239,10 @@ Param(
     $SetCurrentUserOOFMessage = $true,
 
     # Path to centrally managed Out of Office (OOF, automatic reply) templates
-    #   Local and remote paths are supported
-    #     Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\templates\Out of Office')
-    #   WebDAV paths are supported (https only)
-    #     'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
-    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$OOFTemplatePath = '.\templates\Out of Office DOCX',
 
     # Path to ini file containing OOF template tags
-    # This is an alternative to file name tags
-    # See '.\templates\sample OOF ini file.ini' for a sample file with further explanations.
-    #   Local and remote paths are supported
-    #     Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
-    #   WebDAV paths are supported (https only)
-    #     'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-    #   The currently logged in user needs at least read access to the path
     [ValidateNotNullOrEmpty()]
     [string]$OOFIniPath = '',
 
@@ -298,38 +262,28 @@ Param(
     [string]$SimulateUser = $null,
 
     # Simulate list of mailboxes instead of mailboxes configured in Outlook
-    # Works only together with SimulateUser
     [Alias('SimulationMailboxes')]
     [string[]]$SimulateMailboxes = (''),
 
     # Path to file containing Graph credential which should be used as alternative to other token acquisition methods
-    # Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
-    # See '.\sample code\SimulateAndDeploy.ps1' for an example how to create this file
     [ValidateNotNullOrEmpty()]
     [string]$GraphCredentialFile = '',
 
     # Try to connect to Microsoft Graph only, ignoring any local Active Directory.
-    # The default behavior is to try Active Directory first and fall back to Graph.
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
     $GraphOnly = $false,
 
     # Create RTF signatures
-    # Default: $true
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
     $CreateRTFSignatures = $true,
 
     # Create TXT signatures
-    # Default: $true
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
     $CreateTXTSignatures = $true,
 
-    # DoNotEmbedImagesInHTML
-    # Outlook 2013 and earlier can't handle images directly embedded in HTML signatures ('<img src="data:image/[...]"'). A separate folder containing the images is required in this case.
-    # While Outlook 2013 and earlier can't handle embedded images when composing HTML e-mails, there is no problem when composing e-mails in RTF format (and TXT, of course).
-    # There is also no problem receiving e-mails containing signatures with embedded images.
-    # Default value: $false
+    # Embed images in HTML
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
-    $DoNotEmbedImagesInHTML = $false
+    $EmbedImagesInHTML = $true
 )
 
 
@@ -458,11 +412,11 @@ function main {
         $CreateTXTSignatures = $false
     }
 
-    Write-Host "  DoNotEmbedImagesInHTML: '$DoNotEmbedImagesInHTML'"
-    if ($DoNotEmbedImagesInHTML -in (1, '1', 'true', '$true', 'yes')) {
-        $DoNotEmbedImagesInHTML = $true
+    Write-Host "  EmbedImagesInHTML: '$EmbedImagesInHTML'"
+    if ($EmbedImagesInHTML -in (1, '1', 'true', '$true', 'yes')) {
+        $EmbedImagesInHTML = $true
     } else {
-        $DoNotEmbedImagesInHTML = $false
+        $EmbedImagesInHTML = $false
     }
 
     Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
@@ -615,10 +569,10 @@ function main {
         }
 
         Write-Host "  Outlook registry version: $OutlookRegistryVersion"
-        if (($OutlookFileVersion -lt '16.0.0.0') -and (-not $DoNotEmbedImagesInHTML)) {
+        if (($OutlookFileVersion -lt '16.0.0.0') -and ($EmbedImagesInHTML -eq $true)) {
             Write-Host '    Outlook 2013 or earlier detected.' -ForegroundColor Yellow
-            Write-Host '    Consider using parameter DoNotEmbedImagesInHTML to avoid problems with images in templates.' -ForegroundColor Yellow
-            Write-Host '    Outlook 2013 is supported by Microsoft until April 2023, older versions are already out of support.' -ForegroundColor Yellow
+            Write-Host '    Consider seting script parameter EmbedImagesInHTML to false to avoid problems with images in templates.' -ForegroundColor Yellow
+            Write-Host '    Microsft supports Outlook 2013 until April 2023, older versions are already out of support.' -ForegroundColor Yellow
         }
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
         Write-Host "  Outlook file version: $OutlookFileVersion"
@@ -1866,7 +1820,7 @@ function main {
                             if (($null -ne $TempOWASigFile) -and ($TempOWASigFile -ne '')) {
                                 try {
                                     if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -PathType Leaf) {
-                                        if ($DoNotEmbedImagesInHTML) {
+                                        if ($EmbedImagesInHTML -eq $false) {
                                             $x = (New-Guid).guid.tostring()
                                             ConvertTo-SingleFileHTML ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) (Join-Path -Path $script:tempDir -ChildPath $x)
                                             $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $x) -Raw -Encoding UTF8).ToString()
@@ -2273,7 +2227,7 @@ function SetSignatures {
         if ($UseHtmTemplates) {
             # use .html for temporary file, .htm for final file
             try {
-                if ($DoNotEmbedImagesInHTML) {
+                if ($EmbedImagesInHTML -eq $false) {
                     Copy-Item -LiteralPath $Signature.name -Destination $path
                     $ConnectedFilesFolderNames | ForEach-Object {
                         if (Test-Path (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$_")) {
@@ -2313,7 +2267,7 @@ function SetSignatures {
                 (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
                     if (($image.src -clike "*$($_[0])*") -or ($image.alt -clike "*$($_[0])*")) {
                         if ($null -ne $ReplaceHash[$_[0]]) {
-                            if ($DoNotEmbedImagesInHTML) {
+                            if ($EmbedImagesInHTML -eq $false) {
                                 Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                 Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($_[0]).jpeg") -Force
                                 $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($_[0]).jpeg")
@@ -2331,7 +2285,7 @@ function SetSignatures {
                         }
                     } elseif (($image.src -clike "*$(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')*")) {
                         if ($null -ne $ReplaceHash[$_[0]]) {
-                            if ($DoNotEmbedImagesInHTML) {
+                            if ($EmbedImagesInHTML -eq $false) {
                                 Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                 Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($_[0]).jpeg") -Force
                                 $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($_[0]).jpeg")
@@ -2593,7 +2547,7 @@ function SetSignatures {
         }
 
         if (-not $ProcessOOF) {
-            if ($DoNotEmbedImagesInHTML) {
+            if ($EmbedImagesInHTML -eq $false) {
                 $pathConnectedFolderNames | ForEach-Object {
                     if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($_))) {
                         $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $_ + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
@@ -2621,7 +2575,7 @@ function SetSignatures {
                     Write-Host "$Indent      Copy signature files to '$SignaturePath'"
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
                     Remove-Item -LiteralPath (Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Recurse -Force -ErrorAction SilentlyContinue
-                    if ($DoNotEmbedImagesInHTML) {
+                    if ($EmbedImagesInHTML -eq $false) {
                         if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))")) {
                             Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse
                         }
