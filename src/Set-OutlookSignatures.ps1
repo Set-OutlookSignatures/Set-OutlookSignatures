@@ -994,13 +994,19 @@ function main {
             } else {
                 $AADProps = (GraphGetUserProperties $($MailAddresses[$AccountNumberRunning])).properties
                 $ADPropsMailboxes[$AccountNumberRunning] = [PSCustomObject]@{}
-                foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
-                    $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+                if ($AADProps) {
+                    foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
+                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+                    }
+                    $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).photo
+                    $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).properties.userprincipalname
+                    $LegacyExchangeDNs[$AccountNumberRunning] = 'dummy'
+                    $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
+                } else {
+                    $LegacyExchangeDNs[$AccountNumberRunning] = ''
+                    $UserDomain = $null
+
                 }
-                $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).photo
-                $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).properties.userprincipalname
-                $LegacyExchangeDNs[$AccountNumberRunning] = 'dummy'
-                $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
             }
         } else {
             $ADPropsMailboxes[$AccountNumberRunning] = $null
@@ -1064,13 +1070,13 @@ function main {
     }
 
     for ($i = 0; $i -le $RegistryPaths.length - 1; $i++) {
-        if (($RegistryPaths[$i] -ilike "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\*") -and ($i -ne $p) -and ($LegacyExchangeDNs[$i])) {
+        if (($RegistryPaths[$i] -ilike "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\*") -and ($i -ne $p)) {
             $MailboxNewOrder += $i
         }
     }
 
     for ($i = 0; $i -le $RegistryPaths.length - 1; $i++) {
-        if (($RegistryPaths[$i] -notlike "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\*") -and ($i -ne $p) -and ($LegacyExchangeDNs[$i])) {
+        if (($RegistryPaths[$i] -notlike "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\*") -and ($i -ne $p)) {
             $MailboxNewOrder += $i
         }
     }
