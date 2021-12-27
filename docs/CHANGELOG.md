@@ -3,7 +3,7 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta2</a> - YYYY-MM-DD
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta2</a> - 2021-12-27
 ### Added
 - New parameter DeleteScriptCreatedSignaturesWithoutTemplate, see README for details
 - New parameter EmbedImagesInHTML, see README for details
