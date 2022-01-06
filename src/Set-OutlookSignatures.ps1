@@ -1348,7 +1348,7 @@ function main {
                     if (($TemplateFilePart -match $TemplateFilePartRegexMailaddressAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexMailaddressDeny)) {
                         foreach ($TemplateFilePartTag in ((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexMailaddressAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexMailaddressDeny).captures.value)) | Where-Object { $_ })) {
                             if (-not $TemplateFilesMailbox.ContainsKey($TemplateFile.FullName)) {
-                                if ($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) {
+                                if ($TemplateFilePart -match $TemplateFilePartRegexmailaddressAllow) {
                                     Write-Host '    Mailbox specific template'
                                 } else {
                                     Write-Host '    Mailbox specific exclusions'
