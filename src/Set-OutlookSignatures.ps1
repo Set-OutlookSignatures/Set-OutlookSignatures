@@ -162,8 +162,9 @@ Default value: $true
 
 .PARAMETER EmbedImagesInHTML
 Should images be embedded into HTML files?
-Outlook 2016 and new can handle images embedded directly into an HTML file as BASE64 string ('<img src="data:image/[...]"').
+Outlook 2016 and newer can handle images embedded directly into an HTML file as BASE64 string ('<img src="data:image/[...]"').
 Outlook 2013 and earlier can't handle these embedded images when composing HTML e-mails (there is no problem receiving such e-mails, or when composing RTF or TXT e-mails).
+When setting EmbedimagesInHTML to $false, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 Default value: $true
 
 .INPUTS
