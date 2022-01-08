@@ -78,7 +78,7 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
 - [16. FAQ](#16-faq)
   - [16.1. Where can I find the changelog?](#161-where-can-i-find-the-changelog)
   - [16.2. How can I contribute, propose a new feature or file a bug?](#162-how-can-i-contribute-propose-a-new-feature-or-file-a-bug)
-  - [16.3. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?](#163-why-use-legacyexchangedn-to-find-the-user-behind-a-mailbox-and-not-mail-or-proxyaddresses)
+  - [16.3. How is the account of a mailbox identified?](#163-how-is-the-account-of-a-mailbox-identified)
   - [16.4. How is the personal mailbox of the currently logged in user identified?](#164-how-is-the-personal-mailbox-of-the-currently-logged-in-user-identified)
   - [16.5. Which ports are required?](#165-which-ports-are-required)
   - [16.6. Why is Out of Office abbreviated OOF and not OOO?](#166-why-is-out-of-office-abbreviated-oof-and-not-ooo)
@@ -609,14 +609,17 @@ The changelog is located in the `'.\docs'` folder, along with other documents re
 If you have an idea for a new feature or have found a problem, please <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank">create an issue on GitHub</a>.
 
 If you want to contribute code, please have a look at `'.\docs\CONTRIBUTING'` for a rough overview of the proposed process.
-## 16.3. Why use legacyExchangeDN to find the user behind a mailbox, and not mail or proxyAddresses?  
-The legacyExchangeDN attribute is used to find the user behind a mailbox, because mail and proxyAddresses are not unique in certain Exchange scenarios:  
-- A separate Active Directory forest for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.  
+## 16.3. How is the account of a mailbox identified?
+The legacyExchangeDN attribute is the preferred method to find the account of a mailbox, as this also works in specific scenarios where the mail and proxyAddresses attribute is not sufficient:
+- Separate Active Directory forests for users and Exchange mailboxes: In this case, the mail attribute is usually set in the user forest, although there are no mailboxes in this forest.
 - One common e-mail domain across multiple Exchange organizations: In this case, the address book is very like synchronized between Active Directory forests by using contacts or mail-enabled users, which both will have the SMTP address of the mailbox in the proxyAddresses attribute.
 
-If Outlook is configured to access mailbox via protocols such as POP3 or IMAP4, the script searches for the legacyExchangeDN using the e-mail address of the mailbox.
+The legacyExchangeDN search considers migration scenarios where the original legacyExchangeDN is only available as X500 address in the proxyAddresses attribute of the migrated mailbox, or where the the mailbox in the source system has been converted to a mail enabled user still having the old legacyExchangeDN attribute.
 
-Without a legacyExchangeDN, group membership information can not be retrieved. These mailboxes can still receive common and mailbox specific signatures and OOF messages.  
+If Outlook does not have information about the legacyExchangeDN of a mailbox (for example, when accessing a mailbox via protocols such as POP3 or IMAP4), the account behind a mailbox is searched by checking if the e-mail address of the mailbox can be found in the proxyAddresses attribute of an account in Active Directory/Graph.
+
+If the account behind a mailbox is found, group membership information be retrieved and group specific templates can be applied.
+If the account behind a mailbox is not found, group membership can not be retrieved and group specific templates can not be applied. Such mailboxes can still receive common and mailbox specific signatures and OOF messages.  
 ## 16.4. How is the personal mailbox of the currently logged in user identified?  
 The personal mailbox of the currently logged in user is preferred to other mailboxes, as it receives signatures first and is the only mailbox where the Outlook Web signature can be set.
 
