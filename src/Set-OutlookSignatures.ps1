@@ -174,20 +174,24 @@ None. You cannot pipe objects to Set-OutlookSignatures.ps1.
 Set-OutlookSignatures.ps1 writes the current activities, warnings and error messages to the standard output stream.
 
 .EXAMPLE
+Run Set-OutlookSignatures with default values and sample templates
 PS> .\Set-OutlookSignatures.ps1
 
 .EXAMPLE
+Use custom signature templates
 PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates'
 
 .EXAMPLE
+Use custom signature templates, ignore trust to internal-test.example.com
 PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -TrustsToCheckForGroups '*', '-internal-test.example.com'
 
 .EXAMPLE
+Use custom signature templates, only check domains/trusts internal-test.example.com and company.b.com
 PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -TrustsToCheckForGroups 'internal-test.example.com', 'company.b.com'
 
 .EXAMPLE
-PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"
-Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. See readme for details.
+Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. See '.\docs\README.html' for details.
+PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1' "
 
 .EXAMPLE
 Please see '.\docs\README.html' and https://github.com/GruberMarkus/Set-OutlookSignatures for more details.

@@ -3,7 +3,7 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta1" target="_blank">v2.5.0-beta2</a> - 2021-12-27
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0-beta3" target="_blank">v2.5.0-beta3</a> - YYYY-MM-DD
 ### Added
 - New parameter DeleteScriptCreatedSignaturesWithoutTemplate, see README for details
 - New parameter EmbedImagesInHTML, see README for details
@@ -20,6 +20,7 @@
 ### Changed
 - Cache group SIDs across all types of templates to reduce network load and increase script speed
 - Deprecate file name based tags. They work as-is, no new features will be added and support for file name based tags will be removed completely in the next months. Please switch to ini files, see README for details.
+- Update usage examples in script
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.4.0" target="_blank">v2.4.0</a> - 2021-12-10
 ### Added
