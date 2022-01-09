@@ -890,13 +890,22 @@ These updates usually happen less frequent than a dynamic group is used. The sta
 ## 16.21. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
-This is a good idea, as it makes signatures available across devices and avoids file naming conflicts which may appear in current solutions.
+This is a good idea, as it makes signatures available across devices and apps.
 
 Based on currently available information, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature).
 
-Microsoft has stated that only cloud mailboxes support the new feature and that Outlook for Windows will be the only client supporting the new feature for now. I am confident more e-mail clients will follow soon. Future will tell if the feature will be made available for mailboxes on premises, too.
+Microsoft has stated that only cloud mailboxes support the new feature and that Outlook for Windows will be the only client supporting the new feature for now. I am confident more e-mail clients will follow soon. The feature will probably not be available for mailboxes on premises.
 
 Currently, there is no detailed documentation and no API available to programatically access the new feature.
+
+Some personal educated guesses based on Outlook for Windows beta versions and several Exchange Online tenants:
+- The feature has first been annount by Microsoft in 2020, but has been postponed multiple times. At the time of writing this, the feature shall be released publicly in July 2022 according to the Office 365 roadmap. Microsoft has not yet published a public API. 
+- Microsoft is already making available multiple signatures in Outlook Web for more and more Exchange Online tenants. Currently, this breaks PowerShell commands such as Set-MailboxMessageConfiguration and there is no public API available.
+  - Set-OutlookSignatures can set one Outlook Web signature, but an Exchange Online tenant with multiple signatures feature enabled just ignores this signature (see the next chapter for a workaround).
+- Outlook for Windows beta versions already support multiple signatures
+  - With the DisableRoamingSignaturesTemporaryToggle registry value being absent or set to 0, file based signatures created by tools such as Set-OutlookSignatures are regularly deleted and replaced with signatures stored directly in the mailbox.
+  - With the DisableRoamingSignaturesTemporaryToggle registry value set to 1, the file based approach continues to work as known. Outlook does not synchronize signatures to the mailbox.
+- The multiple signature roaming feature will probably be only available for mailboxes in the cloud. Mailboxes on on-prem servers will not support this feature, no matter if in pure on-prem or in hybrid scenarios.
 
 Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensures full compatibility with this script.
 
@@ -910,19 +919,17 @@ When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can s
 There is no programmatic way to detect or change this behavior.  
 The built-in Exchange Online PowerShell-Cmdlet Set-MailboxMessageConfiguration has the same problem, so it seems different Microsoft teams work on a different development and release schedule.
 
-At the time of writing, the only known workaround is the following:
-1. Delete all signatures available in Outlook Web
-2. Still in Outlook Web, set the default signatures to be used for new e-mails and for replies/forwards to "(no signature)"
-3. Save the updated settings
-4. Wait a few minutes
-5. Run Set-OutlookSignatures
-6. Wait a few minutes
-7. Open a new browser tab and open Outlook Web, or fully reload an existing open Outlook Web tab (Outlook Web works with caching in the browser, so it sometimes shows old configuration data) and check your signatures.
-
-Unfortunately, further updates to the Outlook Web signature by Set-OutlookSignatures are successful but ignored by Outlook Web until all signatures are deleted manually again.
-
-Even worse, it is not yet documented or known where the new signatures are stored and how they can be access programatically - so the deletion must happen manuelly and not be automated at the moment.
-
-If you are affected, please let Microsoft know via a support case and https://github.com/MicrosoftDocs/office-docs-powershell/issues/8537.
+At the time of writing, there are two workarounds:
+- Manual approach
+  1. Delete all signatures available in Outlook Web
+  2. Still in Outlook Web, set the default signatures to be used for new e-mails and for replies/forwards to "(no signature)"
+  3. Save the updated settings
+  4. Wait a few minutes
+  5. Run Set-OutlookSignatures
+  6. Wait a few minutes
+  7. Open a new browser tab and open Outlook Web, or fully reload an existing open Outlook Web tab (Outlook Web works with caching in the browser, so it sometimes shows old configuration data) and check your signatures.
+  8. Unfortunately, further updates to the Outlook Web signature by Set-OutlookSignatures are successful but ignored by Outlook Web until all signatures are deleted manually again. Even worse, it is not yet documented or known where the new signatures are stored and how they can be access programatically - so the deletion must happen manuelly and can not be automated at the moment.
+- Disable the feature in your tenant
+  - Only Microsoft can do this. Let Microsoft know via a support case and https://github.com/MicrosoftDocs/office-docs-powershell/issues/8537.
 
 As soon as there is an official API or a scriptable workaround available, Set-OutlookSignatures will be adopted to incorporate this new feature.
