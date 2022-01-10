@@ -2116,7 +2116,7 @@ function EvaluateAndSetSignatures {
                         }
                     }
                     if ($tempAllowCount -eq 0) {
-                        Write-Host "$Indent          Mailbox is not member of any allowed group"
+                        Write-Host "$Indent          Group: Mailbox is not member of any allowed group"
                     }
                 } elseif ($TemplateGroup -ieq 'mailbox') {
                     $tempAllowCount = 0
@@ -2128,11 +2128,12 @@ function EvaluateAndSetSignatures {
                         }
                     }
                     if ($tempAllowCount -eq 0) {
-                        Write-Host "$Indent          Mailbox does not have any allowed e-mail address"
+                        Write-Host "$Indent          E-mail address: Mailbox does not have any allowed e-mail address"
                     }
                 }
 
 
+                # check for allow entries
                 Write-Host "$Indent        Denies"
                 # check for group deny
                 $tempDenyCount = 0
@@ -2145,7 +2146,7 @@ function EvaluateAndSetSignatures {
                     }
                 }
                 if ($tempDenyCount -eq 0) {
-                    Write-Host "$Indent          Mailbox is not member of any denied group"
+                    Write-Host "$Indent          Group: Mailbox is not member of any denied group"
                 }
 
                 # check for mail address deny
@@ -2158,7 +2159,7 @@ function EvaluateAndSetSignatures {
                     }
                 }
                 if ($tempDenyCount -eq 0) {
-                    Write-Host "$Indent          Mailbox does not have any denied e-mail address"
+                    Write-Host "$Indent          E-Mail address: Mailbox does not have any denied e-mail address"
                 }
 
                 if ($Template -and ($TemplateAllowed -eq $true)) {
