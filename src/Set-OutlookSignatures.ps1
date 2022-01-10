@@ -2092,7 +2092,7 @@ function EvaluateAndSetSignatures {
     }
 
     foreach ($TemplateGroup in ('common', 'group', 'mailbox')) {
-        Write-Host "$Indent  Process $TemplateGroup $(if($TemplateGroup -iin ('group', 'mailbox')){'specific '})signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+        Write-Host "$Indent  Process $TemplateGroup $(if($TemplateGroup -iin ('group', 'mailbox')){'specific '})templatess @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         foreach ($TemplateFile in (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)) {
             # this is the correctly sorted hashtable
             foreach ($Template in ((Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly).GetEnumerator() | Where-Object { ($_.key -eq $TemplateFile.fullname) })) {
