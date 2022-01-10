@@ -2101,43 +2101,64 @@ function EvaluateAndSetSignatures {
                 $TemplateAllowed = $false
 
                 # check for allow entries
+                Write-Host "$Indent        Allows"
                 if ($TemplateGroup -ieq 'common') {
                     $TemplateAllowed = $true
-                    Write-Host "$Indent        Allow: Classified as common template"
+                    Write-Host "$Indent          Template classified as common template"
                 } elseif ($TemplateGroup -ieq 'group') {
+                    $tempAllowCount = 0
                     $GroupsSIDs | ForEach-Object {
                         if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$Template.name] -ilike "*``[$_``]*") {
                             $TemplateAllowed = $true
-                            Write-Host "$Indent        Allow: Group" -NoNewline
+                            $tempAllowCount++
                             $tempSearchSting = $_
-                            Write-Host " $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -join '/') = $_"
+                            Write-Host "$Indent          Group: $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -join '/') = $_"
                         }
                     }
+                    if ($tempAllowCount -eq 0) {
+                        Write-Host "$Indent          Mailbox is not member of any allowed group"
+                    }
                 } elseif ($TemplateGroup -ieq 'mailbox') {
+                    $tempAllowCount = 0
                     $CurrentMailboxSMTPAddresses | ForEach-Object {
                         if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$Template.name] -ilike "*``[$_``]*") {
                             $TemplateAllowed = $true
-                            Write-Host "$Indent        Allow: E-mail address $_"
+                            $tempAllowCount++
+                            Write-Host "$Indent          E-mail address: $_"
                         }
+                    }
+                    if ($tempAllowCount -eq 0) {
+                        Write-Host "$Indent          Mailbox does not have any allowed e-mail address"
                     }
                 }
 
+
+                Write-Host "$Indent        Denies"
                 # check for group deny
+                $tempDenyCount = 0
                 $GroupsSIDs | ForEach-Object {
                     if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$Template.name] -ilike "*``[-:$_``]*") {
                         $TemplateAllowed = $false
-                        Write-Host "$Indent        Deny: Group" -NoNewline
+                        $tempDenyCount++
                         $tempSearchSting = $_
-                        Write-Host " $((($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -replace '^\[', '[-:') -join '/') = $_"
+                        Write-Host "$Indent          Group: $((($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -replace '^\[', '[-:') -join '/') = $_"
                     }
+                }
+                if ($tempDenyCount -eq 0) {
+                    Write-Host "$Indent          Mailbox is not member of any denied group"
                 }
 
                 # check for mail address deny
+                $tempDenyCount = 0
                 $CurrentMailboxSMTPAddresses | ForEach-Object {
                     if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$Template.name] -ilike "*``[-:$_``]*") {
                         $TemplateAllowed = $false
-                        Write-Host "$Indent        Deny: E-mail address $_"
+                        $tempDenyCount++
+                        Write-Host "$Indent          E-mail address: $_"
                     }
+                }
+                if ($tempDenyCount -eq 0) {
+                    Write-Host "$Indent          Mailbox does not have any denied e-mail address"
                 }
 
                 if ($Template -and ($TemplateAllowed -eq $true)) {
