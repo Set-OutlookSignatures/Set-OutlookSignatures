@@ -31,7 +31,6 @@ I'm not a professional developer, but a hobbyist scripter, and the code looks li
 
 There are optimization opportunities in error handling, de-duplicating code with functions, applying PowerShell best practices, and more.
 ## 2.2. Support Microsoft signature roaming API
-- This seems to be the way to make signatures roam in the cloud via the Outlook client, without using a Graph API
 - API for deploying signatures directly to mailbox via EWS or Graph is not yet known
 - Don't forget to update SignatureFilesDone so that the removal process keeps working
 - How to handle group mailboxes?
@@ -61,7 +60,6 @@ Roaming signatures can only be set when one of the following condition sets is t
     }
     ```
   - in this case, the script first needs to download existing signatures from Graph to a temp directory
-  - mailbox propably does not need to be in the cloud: https://docs.microsoft.com/en-us/graph/hybrid-rest-support
   - Alternate detection method: https://rakhesh.com/azure/graph-api-detect-if-user-has-an-o365-mailbox/
 ## 2.3. Enhance central signature deployment without client-side execution of script
 Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
