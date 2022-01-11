@@ -2519,13 +2519,14 @@ function SetSignatures {
                     Start-Sleep -Seconds 2
                     $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
                 }
-                $script:COMWord.ActiveDocument.Close($false)
                 # Restore original security setting
                 if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
                     Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
                 } else {
                     Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
                 }
+
+                $script:COMWord.ActiveDocument.Close($false)
 
                 # RTF files with embedded images get really huge
                 # See https://support.microsoft.com/kb/224663 for a system-wide workaround
