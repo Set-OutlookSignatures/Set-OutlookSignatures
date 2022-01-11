@@ -2104,7 +2104,7 @@ function EvaluateAndSetSignatures {
                 Write-Host "$Indent        Allows"
                 if ($TemplateGroup -ieq 'common') {
                     $TemplateAllowed = $true
-                    Write-Host "$Indent          Template classified as common template"
+                    Write-Host "$Indent          Common: Template is classified as common template valid for all mailboxes"
                 } elseif ($TemplateGroup -ieq 'group') {
                     $tempAllowCount = 0
                     $GroupsSIDs | ForEach-Object {
@@ -2163,6 +2163,7 @@ function EvaluateAndSetSignatures {
                 }
 
                 if ($Template -and ($TemplateAllowed -eq $true)) {
+                    Write-Host "$Indent        Using template as there is at least one allow and no deny for this mailbox"
                     if ($ProcessOOF) {
                         if ($OOFFilesInternal.contains($Template.name)) {
                             $OOFInternal = $Template
@@ -2175,7 +2176,7 @@ function EvaluateAndSetSignatures {
                         SetSignatures -ProcessOOF:$ProcessOOF
                     }
                 } else {
-                    Write-Host "$Indent      Not using template as there is no allow or at least one deny for this mailbox"
+                    Write-Host "$Indent        Not using template as there is no allow or at least one deny for this mailbox"
                 }
             }
         }
