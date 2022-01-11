@@ -27,7 +27,7 @@ It is **multi-client capable** by using different template paths, configuration 
 
 Set-OutlookSignature requires **no installation on servers or clients**. You only need a standard file share on a server, and PowerShell and Office. 
 
-A **documented implementation approach**, based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.  
+A **documented implementation approach**, based on real life experiences implementing the script in a multi-client environment with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.  
 The implementatin approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The script is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `'.\docs\LICENSE.txt'` for copyright and MIT license details.
@@ -97,8 +97,9 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
   - [16.19. Can I centrally manage and deploy Outook stationery with this script?](#1619-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
   - [16.20. Why is membership in dynamic distribution groups and dynamic security groups not considered?](#1620-why-is-membership-in-dynamic-distribution-groups-and-dynamic-security-groups-not-considered)
     - [16.20.1. What's the alternative to dynamic groups?](#16201-whats-the-alternative-to-dynamic-groups)
-  - [16.21. What about the new signature roaming feature Microsoft announced?](#1621-what-about-the-new-signature-roaming-feature-microsoft-announced)
-    - [16.21.1. Please be aware of the following problem](#16211-please-be-aware-of-the-following-problem)
+  - [16.21. Why is no admin or user GUI available?](#1621-why-is-no-admin-or-user-gui-available)
+  - [16.22. What about the new signature roaming feature Microsoft announced?](#1622-what-about-the-new-signature-roaming-feature-microsoft-announced)
+    - [16.22.1. Please be aware of the following problem](#16221-please-be-aware-of-the-following-problem)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -733,7 +734,7 @@ See `'.\sample code\CreateDesktopIcon.ps1'` for a code example. Don't forget to 
 ## 16.12. What is the recommended approach for implementing the software?  
 There is certainly no definitive generic recommendation, but the file `'.\docs\Implementation approach.html'` should be a good starting point.
 
-The content is based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes.
+The content is based on real life experiences implementing the script in a multi-client environment with a five-digit number of mailboxes.
 
 It contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators. It is suited for service providers as well as for clients.
 
@@ -874,7 +875,7 @@ This is very likely the reason why dynamic groups can not be granted permissions
 
 Taking all these aspects into account, Set-OutlookSignatures will not consider membership in dynamic groups until a reliable and efficient way of querying a user's dynamic group membership is available.
 ### 16.20.1. What's the alternative to dynamic groups?
-Dynamic groups have their raison d'être, especially if you use them as a tool for special and rather rare use cases.
+Dynamic groups have their reason to exist, especially if you use them as a tool for special and rather rare use cases.
 
 With the move to the cloud, where dynamic groups were introduced just not too long ago and only with a limited set of possible query parameters, an ongoing trend can be observed: Replacing dynamic groups with regularly updated static groups.
 
@@ -887,7 +888,25 @@ These updates usually happen less frequent than a dynamic group is used. The sta
 - Static groups can be expanded to it's members in e-mail clients
 - Membership in static groups can easily be queried
 - Overcoming query parameter restrictions, such as combing the results of multiple LDAP queries
-## 16.21. What about the new signature roaming feature Microsoft announced?  
+## 16.21. Why is no admin or user GUI available?
+From an admin perspective, Set-OutlookSignature has been designed to work with on-board tools wherever possible and to make managing and deploying signatures intuitive.
+
+This "easy to set up, easy to understand, easy to maintain" approach is why
+- there is no need for a dedicated server, a database or a setup program
+- Word documents are supported as templates in addition to HTML templates
+- there is the clear hierarchy of common, group specific and e-mail address specific template application order
+
+For an admin, the most complicated part is bringing Set-OutlookSignatures to his users by integrating it into the logon script, deploy a desktop icon or start menu entry, or creating a scheduled task. Alternatively, an admin can use a signature deployment method without user or client involvement.  
+Both tasks are usually neccessary only once, sample code and documentation based on real life experiences are available.
+
+For a template creator/maintainer, maintaining the INI files defining template application order and permissions is this main task, in combination with tests using simulation mode.  
+These tasks typically happen multiple times a year. A graphical user interface might make them more intuitive and easier; until then, documentation and examples based on real life experiences are available.
+<br>
+<br>
+<br>
+From a user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
+
+## 16.22. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and apps.
@@ -911,7 +930,7 @@ Until the feature is fully rolled out and an API is available, you can disable t
 
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
 
-### 16.21.1. Please be aware of the following problem
+### 16.22.1. Please be aware of the following problem
 Since Q3 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes and in  Outlook on Windows. There is still no hint of an API, or a way to disable it on the server.
 
 When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can successfully set the signature in Outlook Web, but this signature is ignored.

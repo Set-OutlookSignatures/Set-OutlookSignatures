@@ -13,6 +13,7 @@
 - Show matching allow and deny tags for each mailbox-template-combination. This makes it easy to find out why a certain template is applied for a certain mailbox and why not.
 - Show which tags lead to a classification as time based, common, group based or e-mail address specific template
 - New FAQ: Why is membership in dynamic distribution groups and dynamic security groups not considered?
+- New FAQ: Why is no admin or user GUI available?
 ### Fixed
 - Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no \*.htm file in OOFTemplatePath
 - Correct mapping of Graph businessPhones attribute, so the replacement variable \$CURRENT[...]TELEPHONE\$ is populated (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/26" target="_blank">#26</a>)  (<a href="https://github.com/vitorpereira" target="_blank">@vitorpereira</a>)
