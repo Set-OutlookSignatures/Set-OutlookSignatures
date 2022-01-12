@@ -307,18 +307,11 @@ function main {
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     
-    Write-Host "  Host process command line: " -NoNewline
-    if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-        Write-Host "'$((Get-Process -Id $pid).commandline)'"
-    } else {
-        Write-Host "'$((Get-WmiObject win32_process -Filter ProcessId=$PID -Property CommandLine).CommandLine)'"
-    }
+    Write-Host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.OS), $($PSVersionTable.Platform)) | Where-Object {$_}) -join "', '")'"
 
-    Write-Host "  Host process parameters: '$ScriptPassedParameters'"
+    Write-Host "  PowerShell parameters: '$ScriptPassedParameters'"
     
-    Write-Host "  Script path: '$PSScriptRoot'"
-
-    Write-Host "  Script name: '$PSCommandPath'"
+    Write-Host "  Script path: '$PSCommandPath'"
 
     if ((Test-Path 'variable:IsWindows')) {
         # Automatic variable $IsWindows is available, must be cross-platform PowerShell version v6+
