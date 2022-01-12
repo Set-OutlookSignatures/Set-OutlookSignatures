@@ -940,6 +940,8 @@ function main {
         } else {
             Write-Host "    $($ADPropsCurrentUserManager.userprincipalname)"
         }
+    } else {
+        Write-Host "    No manager found"
     }
 
 
