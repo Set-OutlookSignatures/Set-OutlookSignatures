@@ -306,8 +306,19 @@ function main {
 
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    Write-Host "  Script name: '$PSCommandPath'"
+    
+    Write-Host "  Host process command line: " -NoNewline
+    if ($($PSVersionTable.PSEdition) -ieq 'Core') {
+        Write-Host "'$((Get-Process -Id $pid).commandline)'"
+    } else {
+        Write-Host "'$((Get-WmiObject win32_process -Filter ProcessId=$PID -Property CommandLine).CommandLine)'"
+    }
+
+    Write-Host "  Host process parameters: '$ScriptPassedParameters'"
+    
     Write-Host "  Script path: '$PSScriptRoot'"
+
+    Write-Host "  Script name: '$PSCommandPath'"
 
     if ((Test-Path 'variable:IsWindows')) {
         # Automatic variable $IsWindows is available, must be cross-platform PowerShell version v6+
@@ -320,13 +331,11 @@ function main {
         # Automatic variable $IsWindows is not available, must be PowerShell <v6 running on Windows
     }
 
-
     if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
         Write-Host "  This PowerShell session is running in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
         Write-Host '  Required features are only available in FullLanguage mode. Exiting.' -ForegroundColor Red
         exit 1
     }
-
 
     $script:tempDir = [System.IO.Path]::GetTempPath()
     $script:jobs = New-Object System.Collections.ArrayList
@@ -342,42 +351,7 @@ function main {
     $ConnectedFilesFolderNames = ('.files', '_archivos', '_arquivos', '_bestanden', '_bylos', '_datoteke', '_dosyalar', '_elemei', '_failid', '_fails', '_fajlovi', '_ficheiros', '_fichiers', '_file', '_files', '_fitxategiak', '_fitxers', '_pliki', '_soubory', '_tiedostot', '-Dateien', '-filer')
 
 
-    Write-Host "  ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
-    if ($ReplacementVariableConfigFile) {
-        CheckPath $ReplacementVariableConfigFile
-        (Get-Content -LiteralPath $ReplacementVariableConfigFile) | ForEach-Object {
-            Write-Verbose $_
-        }
-    } else {
-        Write-Host
-    }
-
-    Write-Host "  GraphConfigFile: '$GraphConfigFile'" -NoNewline
-    if ($GraphConfigFile) {
-        CheckPath $GraphConfigFile
-        (Get-Content -LiteralPath $GraphConfigFile) | ForEach-Object {
-            Write-Verbose $_
-        }
-    } else {
-        Write-Host
-    }
-
-    Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
-    if ($GraphCredentialFile) {
-        CheckPath $GraphCredentialFile
-        (Get-Content -LiteralPath $GraphCredentialFile) | ForEach-Object {
-            Write-Verbose $_
-        }
-    } else {
-        Write-Host
-    }
-
-    Write-Host "  GraphOnly: '$GraphOnly'"
-    if ($GraphOnly -in (1, '1', 'true', '$true', 'yes')) {
-        $GraphOnly = $true
-    } else {
-        $GraphOnly = $false
-    }
+    Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
 
     Write-Host "  SignatureTemplatePath: '$SignatureTemplatePath'" -NoNewline
     CheckPath $SignatureTemplatePath
@@ -401,43 +375,6 @@ function main {
     } else {
         $SignatureIniSettings = @{}
         Write-Host
-    }
-
-    Write-Host "  CreateRTFSignatures: '$CreateRTFSignatures'"
-    if ($CreateRTFSignatures -in (1, '1', 'true', '$true', 'yes')) {
-        $CreateRTFSignatures = $true
-    } else {
-        $CreateRTFSignatures = $false
-    }
-
-    Write-Host "  CreateTXTSignatures: '$CreateTXTSignatures'"
-    if ($CreateTXTSignatures -in (1, '1', 'true', '$true', 'yes')) {
-        $CreateTXTSignatures = $true
-    } else {
-        $CreateTXTSignatures = $false
-    }
-
-    Write-Host "  EmbedImagesInHTML: '$EmbedImagesInHTML'"
-    if ($EmbedImagesInHTML -in (1, '1', 'true', '$true', 'yes')) {
-        $EmbedImagesInHTML = $true
-    } else {
-        $EmbedImagesInHTML = $false
-    }
-
-    Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
-
-    Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
-    if ($DeleteUserCreatedSignatures -in (1, '1', 'true', '$true', 'yes')) {
-        $DeleteUserCreatedSignatures = $true
-    } else {
-        $DeleteUserCreatedSignatures = $false
-    }
-
-    Write-Host "  DeleteScriptCreatedSignaturesWithoutTemplate: '$DeleteScriptCreatedSignaturesWithoutTemplate'"
-    if ($DeleteScriptCreatedSignaturesWithoutTemplate -in (1, '1', 'true', '$true', 'yes')) {
-        $DeleteScriptCreatedSignaturesWithoutTemplate = $true
-    } else {
-        $DeleteScriptCreatedSignaturesWithoutTemplate = $false
     }
 
     Write-Host "  SetCurrentUserOutlookWebSignature: '$SetCurrentUserOutlookWebSignature'"
@@ -478,6 +415,85 @@ function main {
         }
     }
 
+    Write-Host "  UseHtmTemplates: '$UseHtmTemplates'"
+    if ($UseHtmTemplates -in (1, '1', 'true', '$true', 'yes')) {
+        $UseHtmTemplates = $true
+    } else {
+        $UseHtmTemplates = $false
+    }
+
+    Write-Host "  GraphOnly: '$GraphOnly'"
+    if ($GraphOnly -in (1, '1', 'true', '$true', 'yes')) {
+        $GraphOnly = $true
+    } else {
+        $GraphOnly = $false
+    }
+
+    Write-Host "  GraphConfigFile: '$GraphConfigFile'" -NoNewline
+    if ($GraphConfigFile) {
+        CheckPath $GraphConfigFile
+        (Get-Content -LiteralPath $GraphConfigFile) | ForEach-Object {
+            Write-Verbose $_
+        }
+    } else {
+        Write-Host
+    }
+
+    Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
+    if ($GraphCredentialFile) {
+        CheckPath $GraphCredentialFile
+        (Get-Content -LiteralPath $GraphCredentialFile) | ForEach-Object {
+            Write-Verbose $_
+        }
+    } else {
+        Write-Host
+    }
+
+    Write-Host "  ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
+    if ($ReplacementVariableConfigFile) {
+        CheckPath $ReplacementVariableConfigFile
+        (Get-Content -LiteralPath $ReplacementVariableConfigFile) | ForEach-Object {
+            Write-Verbose $_
+        }
+    } else {
+        Write-Host
+    }
+
+    Write-Host "  EmbedImagesInHTML: '$EmbedImagesInHTML'"
+    if ($EmbedImagesInHTML -in (1, '1', 'true', '$true', 'yes')) {
+        $EmbedImagesInHTML = $true
+    } else {
+        $EmbedImagesInHTML = $false
+    }
+
+    Write-Host "  CreateRTFSignatures: '$CreateRTFSignatures'"
+    if ($CreateRTFSignatures -in (1, '1', 'true', '$true', 'yes')) {
+        $CreateRTFSignatures = $true
+    } else {
+        $CreateRTFSignatures = $false
+    }
+
+    Write-Host "  CreateTXTSignatures: '$CreateTXTSignatures'"
+    if ($CreateTXTSignatures -in (1, '1', 'true', '$true', 'yes')) {
+        $CreateTXTSignatures = $true
+    } else {
+        $CreateTXTSignatures = $false
+    }
+
+    Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
+    if ($DeleteUserCreatedSignatures -in (1, '1', 'true', '$true', 'yes')) {
+        $DeleteUserCreatedSignatures = $true
+    } else {
+        $DeleteUserCreatedSignatures = $false
+    }
+
+    Write-Host "  DeleteScriptCreatedSignaturesWithoutTemplate: '$DeleteScriptCreatedSignaturesWithoutTemplate'"
+    if ($DeleteScriptCreatedSignaturesWithoutTemplate -in (1, '1', 'true', '$true', 'yes')) {
+        $DeleteScriptCreatedSignaturesWithoutTemplate = $true
+    } else {
+        $DeleteScriptCreatedSignaturesWithoutTemplate = $false
+    }
+
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'"
 
     Write-Host "  AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
@@ -485,13 +501,6 @@ function main {
 
     Write-Host "  AdditionalSignaturePath combined: '$AdditionalSignaturePath'" -NoNewline
     checkpath $AdditionalSignaturePath -create
-
-    Write-Host "  UseHtmTemplates: '$UseHtmTemplates'"
-    if ($UseHtmTemplates -in (1, '1', 'true', '$true', 'yes')) {
-        $UseHtmTemplates = $true
-    } else {
-        $UseHtmTemplates = $false
-    }
 
     Write-Host "  SimulateUser: '$SimulateUser'"
 
@@ -3239,6 +3248,8 @@ function Get-IniContent ($filePath) {
 try {
     Write-Host
     Write-Host "Start script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+
+    $ScriptPassedParameters = $MyInvocation.Line
 
     main
 } catch {
