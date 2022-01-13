@@ -306,13 +306,13 @@ function main {
 
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    
+
     Write-Host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.Platform), $($PSVersionTable.OS)) | Where-Object {$_}) -join "', '")'"
 
     Write-Host "  PowerShell bitness: $(if ([Environment]::Is64BitProcess -eq $false) {"Non-"})64-bit process on a $(if ([Environment]::Is64OperatingSystem -eq $false) {"Non-"})64-bit operating system"
 
     Write-Host "  PowerShell parameters: '$ScriptPassedParameters'"
-    
+
     Write-Host "  Script path: '$PSCommandPath'"
 
     if ((Test-Path 'variable:IsWindows')) {
@@ -817,7 +817,13 @@ function main {
         $script:msalPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
         Get-ChildItem $script:msalPath -Recurse | Unblock-File
-        Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps')
+        try {
+            Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -ErrorAction Stop
+        } catch {
+            Write-Host "        Problem importing MSAL.PS module. Exiting." -ForegroundColor Red
+            $error[0]
+            exit 1
+        }
 
         if (Test-Path -Path $GraphConfigFile -PathType Leaf) {
             try {
@@ -825,7 +831,6 @@ function main {
                 . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile -Raw)))
             } catch {
                 Write-Host "        Problem executing content of '$GraphConfigFile'. Exiting." -ForegroundColor Red
-                Write-Host "        Error: $_" -ForegroundColor Red
                 $error[0]
                 exit 1
             }
@@ -1636,7 +1641,6 @@ function main {
                     . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $ReplacementVariableConfigFile -Raw)))
                 } catch {
                     Write-Host "    Problem executing content of '$ReplacementVariableConfigFile'. Exiting." -ForegroundColor Red
-                    Write-Host "    Error: $_" -ForegroundColor Red
                     $error[0]
                     exit 1
                 }
@@ -1722,7 +1726,7 @@ function main {
                 $error.clear()
 
                 try {
-                    Import-Module -Name $script:dllPath -Force
+                    Import-Module -Name $script:dllPath -Force -ErrorAction Stop
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
                     Write-Host "  Connect to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                     try {
