@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><a href="https://github.com/GruberMarkus/Set-OutlookSignatures/blob/main/docs/LICENSE.txt" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://www.paypal.com/donate/?business=JBM584K3L5PX4&item_name=Set-OutlookSignatures&no_recurring=0&currency_code=EUR" target="_blank"><img src="https://img.shields.io/badge/sponsor-grey?logo=paypal" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
+# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt=""></a> XXXRemoveWhenBuildingXXX--><a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a><br><a href="https://www.paypal.com/donate/?business=JBM584K3L5PX4&item_name=Set-OutlookSignatures&no_recurring=0&currency_code=EUR" target="_blank"><img src="https://img.shields.io/badge/sponsor-grey?logo=paypal" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
 
 # Welcome! <!-- omit in toc -->
 Thank you very much for your interest in Set-OutlookSignatures.
@@ -31,38 +31,32 @@ I'm not a professional developer, but a hobbyist scripter, and the code looks li
 
 There are optimization opportunities in error handling, de-duplicating code with functions, applying PowerShell best practices, and more.
 ## 2.2. Support Microsoft signature roaming API
-- This seems to be the way to make signatures roam in the cloud via the Outlook client, without using a Graph API
 - API for deploying signatures directly to mailbox via EWS or Graph is not yet known
 - Don't forget to update SignatureFilesDone so that the removal process keeps working
-- How to handle group mailboxes?
+- How to handle shared mailboxes?
   - When roaming is enabled, this creates a big mess because script runs overwrite each others results (think about \$CURRENTUSER[...]$ replacement variables)
 - How to detect roaming feature and enable the parameter only for these mailboxes?
 ### Approach
-Roaming signatures can only be set when one of the following condition sets is true:
-- Outlook is installed AND $OutlookFileVersion is high enough (exact value is unknown yet) AND $OutlookDisableRoamingSignaturesTemporaryToggle equals 0 AND the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*)) AND the current mailbox is the personal mailbox of the currently logged in user
-  - Most likely, the script has to add " \<e-mail address>" to the signature name and Outlook will take care of the rest. The new filenames need to be added to $script:SignatureFilesDone.
-- Outlook is not installed AND we are connected via Graph AND $GraphEndpointVersion is high enough (exact value is unknown yet) AND the mailbox is in the cloud (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*) AND the current mailbox is the personal mailbox of the currently logged in user
-    ```
-    if (
-        # Outlook is not installed
-        # and we are connected via Graph
-        # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
-        # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.RecipientTypeDetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
-        # and the current mailbox is the personal mailbox of the currently logged in user
-        ($null -eq $OutlookFileVersion) `
-            -and ($null -eq $ADPropsCurrentMailbox.recipienttypedetails) `
-            -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
-            -and ($null -ne $ADPropsCurrentMailbox.mailboxsettings) `
-            -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
-    ) {
-        'Do roaming signature stuff here'
-    } else {
-        "Don't do roaming signature stuff here"
-    }
-    ```
-  - in this case, the script first needs to download existing signatures from Graph to a temp directory
-  - mailbox propably does not need to be in the cloud: https://docs.microsoft.com/en-us/graph/hybrid-rest-support
-  - Alternate detection method: https://rakhesh.com/azure/graph-api-detect-if-user-has-an-o365-mailbox/
+```
+if (
+  # Outlook is installed
+  # and $OutlookFileVersion is high enough (exact value is unknown yet) or it is a suiting beta version (-or (($OutlookFileVersion -ge '16.0.13430.20000') -and ($OutlookFileVersion.revision -in 20000..20199)))
+  # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
+  # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.msexchrecipienttypedetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
+  # and the current mailbox is the personal mailbox of the currently logged in user
+  ($null -ne $OutlookFileVersion) `
+      -and (($OutlookFileVersion -ge [system.version]::parse('99.0.99999.99999'))) `
+      -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
+      -and ((($null -ne $ADPropsCurrentMailbox.msexchrecipienttypedetails) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) `
+      -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
+) {
+    # Microsoft signature roaming available
+    $CurrentMailboxUseSignatureRoaming = $true
+} else {
+    $CurrentMailboxUseSignatureRoaming = $false
+}
+```
+- in this case, the script first needs to download existing signatures from Graph to a temp directory
 ## 2.3. Enhance central signature deployment without client-side execution of script
 Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
 - Done: Automate simulation mode by wrapping parallelization code around it (`.\sample code\SimulateAndDeploy.ps1`)
@@ -109,7 +103,7 @@ Commit messages should follow the <a href="https://www.conventionalcommits.org" 
 - Footer is optional.
 - The footer should contain additional issue references about the code changes (such as the issues it fixes, e.g. '`Fixes [#13](https://github.com/GruberMarkus/Set-OutlookSignatures/issues/13) ([@GruberMarkus](https://github.com/GruberMarkus))`'.
 - Text describing further details.
-- '`BREAKING CHANGE:<blank>`' at the beginning of the optional body or footer section introduces a breaking API change (bumpgs SemVer major version). A breaking change can be part of commits of any type.
+- '`BREAKING CHANGE:<blank>`' at the beginning of the optional body or footer section introduces a breaking API change (bumpgs SemVer major version). A commit of any type can contain a breaking change.
 # 6. Build process
 Every single commit in any branch or setting a tag starting with '`v`' triggers a build and the creation of a draft release.
 

@@ -1,7 +1,27 @@
 <!-- omit in toc -->
-# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><a href="https://github.com/GruberMarkus/Set-OutlookSignatures/blob/main/docs/LICENSE.txt" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://www.paypal.com/donate/?business=JBM584K3L5PX4&item_name=Set-OutlookSignatures&no_recurring=0&currency_code=EUR" target="_blank"><img src="https://img.shields.io/badge/sponsor-grey?logo=paypal" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
+# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt=""></a> XXXRemoveWhenBuildingXXX--><a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a><br><a href="https://www.paypal.com/donate/?business=JBM584K3L5PX4&item_name=Set-OutlookSignatures&no_recurring=0&currency_code=EUR" target="_blank"><img src="https://img.shields.io/badge/sponsor-grey?logo=paypal" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
 
 # Changelog
+
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0" target="_blank">v2.5.0</a> - 2022-01-14
+### Added
+- New parameter DeleteScriptCreatedSignaturesWithoutTemplate, see README for details
+- New parameter EmbedImagesInHTML, see README for details
+- Tags can now not only be used to allow access to a template, but also to deny access. Denies are available for time, group and e-mail based tags. See README for details.
+- Consider distribution group membership in addition to security group membership
+- Consider sIDHistory in searches across trusts and when comparing msExchMasterAccountSid, which adds support for scenarios in which a mailbox or a linked account has been migrated between Active Directory domains/forests
+- Show matching allow and deny tags for each mailbox-template-combination. This makes it easy to find out why a certain template is applied for a certain mailbox and why not.
+- Show which tags lead to a classification as time based, common, group based or e-mail address specific template
+- New FAQ: Why is membership in dynamic distribution groups and dynamic security groups not considered?
+- New FAQ: Why is no admin or user GUI available?
+### Fixed
+- Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no \*.htm file in OOFTemplatePath
+- Correct mapping of Graph businessPhones attribute, so the replacement variable \$CURRENT[...]TELEPHONE\$ is populated (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/26" target="_blank">#26</a>)  (Thanks <a href="https://github.com/vitorpereira" target="_blank">@vitorpereira</a>!)
+- Fix Outlook 2013 registry key handling and temporary folder handling in environments without Outlook or Outlook profile (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/27" target="_blank">#27</a>)  (Thanks <a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>!)
+### Changed
+- Cache group SIDs across all types of templates to reduce network load and increase script speed
+- Deprecate file name based tags. They work as-is, no new features will be added and support for file name based tags will be removed completely in the next months. Please switch to ini files, see README for details.
+- Update usage examples in script
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.4.0" target="_blank">v2.4.0</a> - 2021-12-10
 ### Added
@@ -14,15 +34,15 @@
 - New FAQ: Can I centrally manage and deploy Outook stationery with this script?
 - Report templates that are mentioned in the ini file but do not exist in the file system, and vice versa
 ### Fixed
-- Do not ignore remote mailboxes when searching mailboxes in Active Directory (thanks to Lars Würtz Hammer, https://www.linkedin.com/in/lwhdk/)
-- Correctly handle hybrid scenarios with basic auth disabled in the cloud (thanks to Lars Würtz Hammer, https://www.linkedin.com/in/lwhdk/)
+- Do not ignore remote mailboxes when searching mailboxes in Active Directory (Thanks <a href="https://www.linkedin.com/in/lwhdk/" target="_blank">Lars Würtz Hammer</a>!)
+- Correctly handle hybrid scenarios with basic auth disabled in the cloud (Thanks <a href="https://www.linkedin.com/in/lwhdk/" target="_blank">Lars Würtz Hammer</a>!)
 - Correctly handle time based tags, so they are not checked twice (the first check is positive, the second one returns 'unknown tag')
 ### Changed
 - Documentation updates
 - Updated FAQ: What about the new signature roaming feature Microsoft announced?
 - When connecting to Microsoft Graph, the TenantID is no longer set to 'organizations', but extracted from the logged in or simulated user name
 - Reduce number of required Graph authentication prompts by using a token cache file
-- Switching to the EWS Managed API .Net Standard port from https://github.com/ststeiger/RedmineMailService (the official Microsoft DLL is used with Windows PowerShell, ststeiger's port when run in PowerShell 7+)
+- Switching to the EWS Managed API .Net Standard port from https://github.com/ststeiger/RedmineMailService (the official Microsoft DLL is used with Windows PowerShell, ststeiger's port when run in PowerShell 7+) (Thanks <a href="https://github.com/ststeiger" target="_blank">@ststeiger</a>!)
 - When saving a document in Word fails, wait for two seconds and retry saving to avoid problems with virus scanners
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.1" target="_blank">v2.3.1</a> - 2021-11-05
@@ -75,7 +95,7 @@
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.2" target="_blank">v2.1.2</a> - 2021-09-03
 ### Fixed
-- Correct extension attributes being shown as empty in replacement variables (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/11" target="_blank">#11</a>) (<a href="https://github.com/goranko73" target="_blank">@goranko73</a>)
+- Correct extension attributes being shown as empty in replacement variables (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/11" target="_blank">#11</a>) (Thanks <a href="https://github.com/goranko73" target="_blank">@goranko73</a>!)
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.1" target="_blank">v2.1.1</a> - 2021-08-26
 ### Changed
@@ -103,7 +123,7 @@
 ### Added
 - Readme FAQ "Can multiple script instances run in parallel?"
 ### Fixed
-- Readme link about MS Word ExportPictureWithMetafile registry key to avoid huge RTF files supplemented by alternate link to Internet Archive Wayback Machine (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/9" target="_blank">#9</a>) (<a href="https://github.com/nitishkanu820" target="_blank">@nitishkanu820</a>)
+- Readme link about MS Word ExportPictureWithMetafile registry key to avoid huge RTF files supplemented by alternate link to Internet Archive Wayback Machine (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/9" target="_blank">#9</a>) (Thanks <a href="https://github.com/nitishkanu820" target="_blank">@nitishkanu820</a>!)
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.0.1" target="_blank">v2.0.1</a> - 2021-07-22
 _Do not use this release. It was withdrawn due to a severe problem._
