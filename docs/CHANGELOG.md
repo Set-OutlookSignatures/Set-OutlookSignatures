@@ -34,15 +34,15 @@
 - New FAQ: Can I centrally manage and deploy Outook stationery with this script?
 - Report templates that are mentioned in the ini file but do not exist in the file system, and vice versa
 ### Fixed
-- Do not ignore remote mailboxes when searching mailboxes in Active Directory (thanks to Lars Würtz Hammer, https://www.linkedin.com/in/lwhdk/)
-- Correctly handle hybrid scenarios with basic auth disabled in the cloud (thanks to Lars Würtz Hammer, https://www.linkedin.com/in/lwhdk/)
+- Do not ignore remote mailboxes when searching mailboxes in Active Directory (Thanks <a href="https://www.linkedin.com/in/lwhdk/" target="_blank">Lars Würtz Hammer</a>!)
+- Correctly handle hybrid scenarios with basic auth disabled in the cloud (Thanks <a href="https://www.linkedin.com/in/lwhdk/" target="_blank">Lars Würtz Hammer</a>!)
 - Correctly handle time based tags, so they are not checked twice (the first check is positive, the second one returns 'unknown tag')
 ### Changed
 - Documentation updates
 - Updated FAQ: What about the new signature roaming feature Microsoft announced?
 - When connecting to Microsoft Graph, the TenantID is no longer set to 'organizations', but extracted from the logged in or simulated user name
 - Reduce number of required Graph authentication prompts by using a token cache file
-- Switching to the EWS Managed API .Net Standard port from https://github.com/ststeiger/RedmineMailService (the official Microsoft DLL is used with Windows PowerShell, ststeiger's port when run in PowerShell 7+)
+- Switching to the EWS Managed API .Net Standard port from https://github.com/ststeiger/RedmineMailService (the official Microsoft DLL is used with Windows PowerShell, ststeiger's port when run in PowerShell 7+) (Thanks <a href="https://github.com/ststeiger" target="_blank">@ststeiger</a>!)
 - When saving a document in Word fails, wait for two seconds and retry saving to avoid problems with virus scanners
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.1" target="_blank">v2.3.1</a> - 2021-11-05
