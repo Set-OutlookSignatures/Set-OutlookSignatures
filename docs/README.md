@@ -31,6 +31,12 @@ A **documented implementation approach**, based on real life experiences impleme
 The implementatin approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The script is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `'.\docs\LICENSE.txt'` for copyright and MIT license details.
+<br><br>
+**Dear companies using Set-OutlookSignatures:**
+- As Free and Open-Source Software, Set-OutlookSignatures can save you thousands or even tens of thousand Euros/US-Dollars per year in comparison to commercial software.  
+Please consider sponsoring this project to ensure continued support, testing and enhancements.
+- Invest in the open source projects you depend on. Contributors are working behind the scenes to make open source better for everyone - give them the help and recognition they deserve.
+- Sponsor the open source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
 # Table of Contents <!-- omit in toc -->
 - [1. Requirements](#1-requirements)
 - [2. Parameters](#2-parameters)

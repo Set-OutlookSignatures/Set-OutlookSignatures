@@ -11,6 +11,12 @@ It contains proven procedures and recommendations for product managers, architec
 It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The document is available in English and German language.
+<br><br>
+**Dear companies using Set-OutlookSignatures:**
+- As Free and Open-Source Software, Set-OutlookSignatures can save you thousands or even tens of thousand Euros/US-Dollars per year in comparison to commercial software.  
+Please consider sponsoring this project to ensure continued support, testing and enhancements.
+- Invest in the open source projects you depend on. Contributors are working behind the scenes to make open source better for everyone - give them the help and recognition they deserve.
+- Sponsor the open source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
 # Table of Contents  <!-- omit in toc -->
 - [1. English](#1-english)
   - [1.1. Overview](#11-overview)
