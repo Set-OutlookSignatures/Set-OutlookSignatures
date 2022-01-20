@@ -35,8 +35,8 @@ The script is **Free and Open-Source Software (FOSS)**. It is published under th
 **Dear businesses using Set-OutlookSignatures:**
 - Being Free and Open-Source Software, Set-OutlookSignatures can save you thousands or even tens of thousand Euros/US-Dollars per year in comparison to commercial software.  
 Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blank">sponsoring this project</a> to ensure continued support, testing and enhancements.
-- Invest in the open source projects you depend on. Contributors are working behind the scenes to make open source better for everyone - give them the help and recognition they deserve.
-- Sponsor the open source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
+- Invest in the open-source projects you depend on. Contributors are working behind the scenes to make open-source better for everyone - give them the help and recognition they deserve.
+- Sponsor the open-source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
 # Table of Contents <!-- omit in toc -->
 - [1. Requirements](#1-requirements)
 - [2. Parameters](#2-parameters)

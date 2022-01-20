@@ -15,8 +15,8 @@ The document is available in English and German language.
 **Dear businesses using Set-OutlookSignatures:**
 - Being Free and Open-Source Software, Set-OutlookSignatures can save you thousands or even tens of thousand Euros/US-Dollars per year in comparison to commercial software.  
 Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blank">sponsoring this project</a> to ensure continued support, testing and enhancements.
-- Invest in the open source projects you depend on. Contributors are working behind the scenes to make open source better for everyone - give them the help and recognition they deserve.
-- Sponsor the open source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
+- Invest in the open-source projects you depend on. Contributors are working behind the scenes to make open-source better for everyone - give them the help and recognition they deserve.
+- Sponsor the open-source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
 # Table of Contents  <!-- omit in toc -->
 - [1. English](#1-english)
   - [1.1. Overview](#11-overview)
@@ -185,7 +185,7 @@ When evaluating server-based products, the following aspects, among others, shou
 - Can the administration of the products be delegated? Can customers be authorised separately from each other?  
 - How high are the acquisition and maintenance costs? Are these above the tender limit?
   
-Due to the costs and the fulfilled requirements for functionality and maintainability, the service provider recommends the use of the open source product Set-OutlookSignatures and offers its customers support for implementation and operation.  
+Due to the costs and the fulfilled requirements for functionality and maintainability, the service provider recommends the use of the open-source product Set-OutlookSignatures and offers its customers support for implementation and operation.  
 ## 1.4. Synchronization of signatures between different devices
 The signatures in Outlook, Outlook on the Web and other clients (e.g. in smartphone apps) are not synchronised and must therefore be set up separately.
 
@@ -198,12 +198,12 @@ The service provider recommends the free open-source software Set-OutlookSignatu
 This document provides an overview of the functional scope and administration of the recommended solution, support of the service provider during implementation and operation, as well as associated expenses.  
 ### 1.5.1. Scope of functions  
 #### 1.5.1.1. General description, licence model  
-<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank">Set-OutlookSignatures</a> is a free open source product.  
+<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank">Set-OutlookSignatures</a> is a free open-source product.  
 The product is used for the central administration and local distribution of textual signatures and out-of-office messages to clients. Outlook on Windows is supported as the target platform.
 
 By using the MIT licence, there are virtually no restrictions on the use or modification of the existing code, even for commercial use.
 
-The script is written in PowerShell. PowerShell has been a fixed component of Windows since Windows 7, is actively developed further by Microsoft and is now open source itself. PowerShell is designed to make it as easy as possible to read and create code.
+The script is written in PowerShell. PowerShell has been a fixed component of Windows since Windows 7, is actively developed further by Microsoft and is now open-source itself. PowerShell is designed to make it as easy as possible to read and create code.
 
 Since virtually every Microsoft product is administered via PowerShell (even many graphical user interfaces issue PowerShell commands in the background), there is extensive skill and knowledge of this language at the service provider, including in the mail and client product teams.
 
@@ -474,7 +474,7 @@ In the event of fundamental technical problems, Mail Product Management provides
 #### 1.6.7.8. Adjustments to the code of the product
 If adaptations to the code of the product are desired, the associated expenses will be estimated and charged separately after commissioning.
 
-In line with the open source spirit of the product, code adaptations are submitted to the product's developers as suggestions for improvement.
+In line with the open-source spirit of the product, code adaptations are submitted to the product's developers as suggestions for improvement.
 
 To ensure the maintainability of the product, the service provider can only support code that is officially included in the product. Each customer is free to adapt the code of the product itself, but in this case the service provider can no longer offer support. For details, see "Supported versions".  
 # 2. German (Deutsch)  
@@ -560,7 +560,7 @@ Das Produkt dient der zentralen Verwaltung und lokalen Verteilung textueller Sig
 
 Durch die Verwendung der MIT-Lizenz gibt es auch bei kommerzieller Nutzung praktisch keine Einschränkungen in Bezug auf Nutzung oder Veränderung des bestehenden Codes.
 
-Das Script ist in PowerShell geschrieben. PowerShell ist seit Windows 7 fixer Bestandteil von Windows, wird von Microsoft aktiv weiterentwickelt und ist mittlerweile selbst Open Source. PowerShell ist darauf ausgelegt, den Code möglichst einfach lesen und erstellen zu können.
+Das Script ist in PowerShell geschrieben. PowerShell ist seit Windows 7 fixer Bestandteil von Windows, wird von Microsoft aktiv weiterentwickelt und ist mittlerweile selbst Open-Source-Software. PowerShell ist darauf ausgelegt, den Code möglichst einfach lesen und erstellen zu können.
 
 Da praktisch jedes Microsoft-Produkt über PowerShell administriert wird (selbst viele grafische Oberflächen setzen im Hintergrund PowerShell-Befehle ab), gibt es beim Service-Provider umfangreiches Können und Wissen zu dieser Sprache, auch in den Mail- und Client-Produktteams.
 

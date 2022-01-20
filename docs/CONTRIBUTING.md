@@ -32,8 +32,8 @@ Being Free and Open-Source Software, Set-OutlookSignatures can save a business t
 Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blank">sponsoring this project</a> to ensure continued support, testing and enhancements.
 
 Dear businesses, please don't forget:
-- Invest in the open source projects you depend on. Contributors are working behind the scenes to make open source better for everyone - give them the help and recognition they deserve.
-- Sponsor the open source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
+- Invest in the open-source projects you depend on. Contributors are working behind the scenes to make open-source better for everyone - give them the help and recognition they deserve.
+- Sponsor the open-source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
 ## 2.2. Code refactoring
 I'm not a professional developer, but a hobbyist scripter, and the code looks like that.
 
