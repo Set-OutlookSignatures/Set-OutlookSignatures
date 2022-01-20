@@ -39,7 +39,7 @@ function main {
     Set-Location $env:GITHUB_WORKSPACE
 
     Copy-Item '.\src\*' $BuildDir -Recurse
-    Copy-Item '.\LICENSE.txt' "$BuildDir\docs\LICENSE.txt" -Force
+    Copy-Item '.\LICENSE.txt' "$BuildDir\LICENSE.txt" -Force
 
 
     Write-Output 'Convert markdown files to HTML and copy them'

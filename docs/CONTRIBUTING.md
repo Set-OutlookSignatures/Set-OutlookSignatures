@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt=""></a> XXXRemoveWhenBuildingXXX--><a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a><br><a href="https://www.paypal.com/donate/?business=JBM584K3L5PX4&item_name=Set-OutlookSignatures&no_recurring=0&currency_code=EUR" target="_blank"><img src="https://img.shields.io/badge/sponsor-grey?logo=paypal" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
+# <a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a><br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt=""></a> XXXRemoveWhenBuildingXXX--><a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/sponsor-white?logo=githubsponsors" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
 
 # Welcome! <!-- omit in toc -->
 Thank you very much for your interest in Set-OutlookSignatures.
@@ -11,10 +11,11 @@ I'm not a professional developer - if you are one and you notice something negat
 # Table of Contents <!-- omit in toc -->
 - [1. Code of Conduct](#1-code-of-conduct)
 - [2. Contribution opportunities](#2-contribution-opportunities)
-  - [2.1. Code refactoring](#21-code-refactoring)
-  - [2.2. Support Microsoft signature roaming API](#22-support-microsoft-signature-roaming-api)
-    - [Approach](#approach)
-  - [2.3. Enhance central signature deployment without client-side execution of script](#23-enhance-central-signature-deployment-without-client-side-execution-of-script)
+  - [2.1. Sponsoring](#21-sponsoring)
+  - [2.2. Code refactoring](#22-code-refactoring)
+  - [2.3. Support Microsoft signature roaming API](#23-support-microsoft-signature-roaming-api)
+    - [2.3.1. Approach](#231-approach)
+  - [2.4. Enhance central signature deployment without client-side execution of script](#24-enhance-central-signature-deployment-without-client-side-execution-of-script)
 - [3. Branches](#3-branches)
 - [4. Development process](#4-development-process)
 - [5. Commit messages](#5-commit-messages)
@@ -26,17 +27,24 @@ I'm not a professional developer - if you are one and you notice something negat
 # 1. Code of Conduct
 When contributing to Set-OutlookSignatures, please make sure to follow the Code of Conduct ('CODE_OF_CONDUCT.html' in the same directory as this document).
 # 2. Contribution opportunities
-## 2.1. Code refactoring
+## 2.1. Sponsoring
+Being Free and Open-Source Software, Set-OutlookSignatures can save a business thousands or even tens of thousand Euros/US-Dollars per year in comparison to commercial software.  
+Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blank">sponsoring this project</a> to ensure continued support, testing and enhancements.
+
+Dear businesses, please don't forget:
+- Invest in the open source projects you depend on. Contributors are working behind the scenes to make open source better for everyone - give them the help and recognition they deserve.
+- Sponsor the open source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
+## 2.2. Code refactoring
 I'm not a professional developer, but a hobbyist scripter, and the code looks like that.
 
 There are optimization opportunities in error handling, de-duplicating code with functions, applying PowerShell best practices, and more.
-## 2.2. Support Microsoft signature roaming API
+## 2.3. Support Microsoft signature roaming API
 - API for deploying signatures directly to mailbox via EWS or Graph is not yet known
 - Don't forget to update SignatureFilesDone so that the removal process keeps working
 - How to handle shared mailboxes?
   - When roaming is enabled, this creates a big mess because script runs overwrite each others results (think about \$CURRENTUSER[...]$ replacement variables)
 - How to detect roaming feature and enable the parameter only for these mailboxes?
-### Approach
+### 2.3.1. Approach
 ```
 if (
   # Outlook is installed
@@ -57,7 +65,7 @@ if (
 }
 ```
 - in this case, the script first needs to download existing signatures from Graph to a temp directory
-## 2.3. Enhance central signature deployment without client-side execution of script
+## 2.4. Enhance central signature deployment without client-side execution of script
 Sort of a server version of Set-OutlookSignatures, only possible for cloud mailboxes when roaming API is available
 - Done: Automate simulation mode by wrapping parallelization code around it (`.\sample code\SimulateAndDeploy.ps1`)
 - Done: Is RTF export necessary in this scenario? Yes, because the script can be used to write to signature folders redirected to a network share.

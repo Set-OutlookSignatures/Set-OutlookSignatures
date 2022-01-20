@@ -971,7 +971,7 @@ function main {
                 # Loop through domains until the first one knows the legacyExchangeDN or the proxy address
                 for ($DomainNumber = 0; (($DomainNumber -lt $TrustsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
                     if (($TrustsToCheckForGroups[$DomainNumber] -ne '')) {
-                        Write-Host "    $($TrustsToCheckForGroups[$DomainNumber]) (searching for mailbox user object) ... " -NoNewline
+                        Write-Host "    Search for mailbox user object in domain/forest '$($TrustsToCheckForGroups[$DomainNumber])': " -NoNewline
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
                         if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
                             $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(|(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning]))(&(legacyExchangeDN=*)(proxyaddresses=x500:$($LegacyExchangeDNs[$AccountNumberRunning])))))"
@@ -980,15 +980,11 @@ function main {
                         }
                         $u = $Search.FindAll()
                         if ($u.count -eq 0) {
-                            Write-Host
-                            Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches no Exchange mailbox."
-                            $LegacyExchangeDNs[$AccountNumberRunning] = ''
-                            $UserDomain = $null
+                            Write-Host "Not found"
                         } elseif ($u.count -gt 1) {
-                            Write-Host
-                            Write-Host "      '$($MailAddresses[$AccountNumberRunning])' matches multiple Exchange mailboxes, ignoring." -ForegroundColor Red
+                            Write-Host "Ignoring due to multiple matches" -ForegroundColor Red
                             $u | ForEach-Object {
-                                Write-Host "          $($_.path)" -ForegroundColor Yellow
+                                Write-Host "      $($_.path)" -ForegroundColor Yellow
                             }
                             $LegacyExchangeDNs[$AccountNumberRunning] = ''
                             $MailAddresses[$AccountNumberRunning] = ''
@@ -1002,10 +998,14 @@ function main {
                             $ADPropsMailboxesUserDomain[$AccountNumberRunning] = $TrustsToCheckForGroups[$DomainNumber]
                             $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyexchangedn
                             $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
-                            Write-Host 'found'
+                            Write-Host 'Found'
                             Write-Host "      $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
                         }
                     }
+                }
+                if (-not $ADPropsMailboxes[$AccountNumberRunning]) {
+                    $LegacyExchangeDNs[$AccountNumberRunning] = ''
+                    $UserDomain = $null
                 }
             } else {
                 $AADProps = (GraphGetUserProperties $($MailAddresses[$AccountNumberRunning])).properties
@@ -1021,7 +1021,6 @@ function main {
                 } else {
                     $LegacyExchangeDNs[$AccountNumberRunning] = ''
                     $UserDomain = $null
-
                 }
             }
         } else {
