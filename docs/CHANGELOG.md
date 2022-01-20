@@ -3,6 +3,10 @@
 
 # Changelog
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.1" target="_blank">v2.5.1</a> - 2022-01-20
+### Fixed
+- Fix search for mailbox user object across trusts
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0" target="_blank">v2.5.0</a> - 2022-01-14
 ### Added
 - New parameter DeleteScriptCreatedSignaturesWithoutTemplate, see README for details
