@@ -27,7 +27,7 @@ The script is designed to work in big and complex environments (Exchange resourc
 
 It is multi-client capable by using different template paths, configuration files and script parameters.
 
-Set-OutlookSignature requires no installation on servers or clients. You only need a standard file share on a server, and PowerShell and Office on the client.
+Set-OutlookSignatures requires no installation on servers or clients. You only need a standard file share on a server, and PowerShell and Office on the client.
 
 A documented implementation approach, based on real-life experience implementing the script in a multi-client environment with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.
 The implementatin approach is suited for service providers as well as for clients, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
