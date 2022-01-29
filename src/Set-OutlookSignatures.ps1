@@ -264,11 +264,20 @@ Param(
 
     # Simulate another user as currently logged in user
     [Alias('SimulationUser')]
+    [validatescript( {
+            $tempSimulateUser = $_
+            if ($tempSimulateUser -match '^\S+@\S+$|^\S+\\\S+$') {
+                $true
+            } else {
+                throw "'$tempSimulateUser' does not match the required format 'User@Domain' (UPN) or 'Domain\User'."
+            }
+        }
+    )]
     [string]$SimulateUser = $null,
 
     # Simulate list of mailboxes instead of mailboxes configured in Outlook
     [Alias('SimulationMailboxes')]
-    [mailaddress[]]$SimulateMailboxes = (''),
+    [mailaddress[]]$SimulateMailboxes = ($null),
 
     # Path to file containing Graph credential which should be used as alternative to other token acquisition methods
     [ValidateNotNullOrEmpty()]
@@ -799,7 +808,7 @@ function main {
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                         $ADPropsCurrentUser = $Search.FindOne().Properties
                     } catch {
-                        Write-Host "    Simulation user '$($SimulateUser)' not found in AD forest $($TrustsToCheckForGroups[0]). Exiting." -ForegroundColor REd
+                        Write-Host "    Simulation user '$($SimulateUser)' not found. Exiting." -ForegroundColor REd
                         exit 1
                     }
                 }
