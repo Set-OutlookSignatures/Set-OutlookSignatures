@@ -268,7 +268,7 @@ Param(
 
     # Simulate list of mailboxes instead of mailboxes configured in Outlook
     [Alias('SimulationMailboxes')]
-    [string[]]$SimulateMailboxes = (''),
+    [mailaddress[]]$SimulateMailboxes = (''),
 
     # Path to file containing Graph credential which should be used as alternative to other token acquisition methods
     [ValidateNotNullOrEmpty()]
@@ -309,7 +309,7 @@ function main {
 
     Write-Host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.Platform), $($PSVersionTable.OS)) | Where-Object {$_}) -join "', '")'"
 
-    Write-Host "  PowerShell bitness: $(if ([Environment]::Is64BitProcess -eq $false) {"Non-"})64-bit process on a $(if ([Environment]::Is64OperatingSystem -eq $false) {"Non-"})64-bit operating system"
+    Write-Host "  PowerShell bitness: $(if ([Environment]::Is64BitProcess -eq $false) {'Non-'})64-bit process on a $(if ([Environment]::Is64OperatingSystem -eq $false) {'Non-'})64-bit operating system"
 
     Write-Host "  PowerShell parameters: '$ScriptPassedParameters'"
 
@@ -499,6 +499,9 @@ function main {
 
     Write-Host "  SimulateUser: '$SimulateUser'"
 
+    $tempSimulateMailboxes = $SimulateMailboxes
+    [string[]]$SimulateMailboxes = $null
+    $tempSimulateMailboxes | ForEach-Object { $SimulateMailboxes += $_.Address }
     Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
 
     ('ReplacementVariableConfigFile', 'GraphConfigFile', 'SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath', 'GraphCredentialFile', 'SignatureIniPath', 'OOFIniPath') | ForEach-Object {
@@ -820,7 +823,7 @@ function main {
         try {
             Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -ErrorAction Stop
         } catch {
-            Write-Host "        Problem importing MSAL.PS module. Exiting." -ForegroundColor Red
+            Write-Host '        Problem importing MSAL.PS module. Exiting.' -ForegroundColor Red
             $error[0]
             exit 1
         }
@@ -950,7 +953,7 @@ function main {
             Write-Host "    $($ADPropsCurrentUserManager.userprincipalname)"
         }
     } else {
-        Write-Host "    No manager found"
+        Write-Host '    No manager found'
     }
 
 
@@ -980,9 +983,9 @@ function main {
                         }
                         $u = $Search.FindAll()
                         if ($u.count -eq 0) {
-                            Write-Host "Not found"
+                            Write-Host 'Not found'
                         } elseif ($u.count -gt 1) {
-                            Write-Host "Ignoring due to multiple matches" -ForegroundColor Red
+                            Write-Host 'Ignoring due to multiple matches' -ForegroundColor Red
                             $u | ForEach-Object {
                                 Write-Host "      $($_.path)" -ForegroundColor Yellow
                             }
