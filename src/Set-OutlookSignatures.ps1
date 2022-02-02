@@ -776,6 +776,7 @@ function main {
             CheckADConnectivity $TrustsToCheckForGroups 'GC' '  ' | Out-Null
         } else {
             Write-Host '  Problem connecting to logged in user''s Active Directory, assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
+            $GraphOnly = $true
         }
     } else {
         Write-Host "  Parameter GraphOnly set to '$GraphOnly', ignoring user's Active Directory in favor of Graph/Azure AD."
