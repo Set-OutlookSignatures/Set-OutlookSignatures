@@ -924,11 +924,18 @@ function main {
 
     $CurrentUserSIDs = @()
     if ($ADPropsCurrentUser.objectsid) {
-        $CurrentUserSIDs += (New-Object System.Security.Principal.SecurityIdentifier $($ADPropsCurrentUser.objectsid), 0).value.tostring()
-
+        if ($GraphOnly) {
+            $CurrentUserSIDs += $ADPropsCurrentUser.objectsid.tostring()
+        } else {
+            $CurrentUserSIDs += (New-Object System.Security.Principal.SecurityIdentifier $($ADPropsCurrentUser.objectsid), 0).value.tostring()
+        }
     }
     $ADPropsCurrentUser.sidhistory | Where-Object { $_ } | ForEach-Object {
-        $CurrentUserSIDs += (New-Object System.Security.Principal.SecurityIdentifier $_, 0).value.tostring()
+        if ($GraphOnly) {
+            $CurrentUserSIDs += $_.tostring()
+        } else {
+            $CurrentUserSIDs += (New-Object System.Security.Principal.SecurityIdentifier $_, 0).value.tostring()
+        }
     }
 
     if (-not $SimulateUser) {
