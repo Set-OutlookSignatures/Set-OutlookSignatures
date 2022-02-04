@@ -923,14 +923,14 @@ function main {
     }
 
     $CurrentUserSIDs = @()
-    if ($ADPropsCurrentUser.objectsid) {
+    if (($ADPropsCurrentUser.objectsid -ne '') -and ($null -ne $ADPropsCurrentUser.objectsid)) {
         if ($GraphOnly) {
             $CurrentUserSIDs += $ADPropsCurrentUser.objectsid.tostring()
         } else {
             $CurrentUserSIDs += (New-Object System.Security.Principal.SecurityIdentifier $($ADPropsCurrentUser.objectsid), 0).value.tostring()
         }
     }
-    $ADPropsCurrentUser.sidhistory | Where-Object { $_ } | ForEach-Object {
+    $ADPropsCurrentUser.sidhistory | Where-Object { ($_ -ne '') -and ($null -ne $_ ) } | ForEach-Object {
         if ($GraphOnly) {
             $CurrentUserSIDs += $_.tostring()
         } else {
