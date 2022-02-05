@@ -684,98 +684,111 @@ function main {
     [System.Collections.ArrayList]$TrustsToCheckForGroups = @()
     if ($GraphOnly -eq $false) {
         # Users own domain/forest is always included
-        $y = ([ADSI]"LDAP://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
-        if ($y -ne '') {
-            Write-Host "  Current user forest: $y"
-            $TrustsToCheckForGroups += $y
+        try {
+            $objTrans = New-Object -ComObject 'NameTranslate'
+            $objNT = $objTrans.GetType()
+            $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $Null)) # 3 = ADS_NAME_INITTYPE_GC
+            $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (12, $(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value))) # 12 = ADS_NAME_TYPE_SID_OR_SID_HISTORY_NAME
+            $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1) # 1 = ADS_NAME_TYPE_1779 (DistinguishedName)
+            $y = ([ADSI]"LDAP://$(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1) -split ',DC=')[1..999] -join '.')/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
 
-            # Other domains - either the list provided, or all outgoing and bidirectional trusts
-            if ($x[0] -eq '*') {
-                $Search.SearchRoot = "GC://$($TrustsToCheckForGroups[0])"
-                $Search.Filter = '(ObjectClass=trustedDomain)'
+            if ($y -ne '') {
+                Write-Host "  Current user forest: $y"
+                $TrustsToCheckForGroups += $y
 
-                $Search.FindAll() | ForEach-Object {
-                    # DNS name of this side of the trust (could be the root domain or any subdomain)
-                    # $TrustOrigin = ($_.properties.distinguishedname -split ',DC=')[1..999] -join '.'
+                # Other domains - either the list provided, or all outgoing and bidirectional trusts
+                if ($x[0] -eq '*') {
+                    $Search.SearchRoot = "GC://$($TrustsToCheckForGroups[0])"
+                    $Search.Filter = '(ObjectClass=trustedDomain)'
 
-                    # DNS name of the other side of the trust (could be the root domain or any subdomain)
-                    # $TrustName = $_.properties.name
+                    $Search.FindAll() | ForEach-Object {
+                        # DNS name of this side of the trust (could be the root domain or any subdomain)
+                        # $TrustOrigin = ($_.properties.distinguishedname -split ',DC=')[1..999] -join '.'
 
-                    # Domain SID of the other side of the trust
-                    # $TrustNameSID = (New-Object system.security.principal.securityidentifier($($_.properties.securityidentifier), 0)).tostring()
+                        # DNS name of the other side of the trust (could be the root domain or any subdomain)
+                        # $TrustName = $_.properties.name
 
-                    # Trust direction
-                    # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trustdirection?view=net-5.0
-                    # $TrustDirectionNumber = $_.properties.trustdirection
+                        # Domain SID of the other side of the trust
+                        # $TrustNameSID = (New-Object system.security.principal.securityidentifier($($_.properties.securityidentifier), 0)).tostring()
 
-                    # Trust type
-                    # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trusttype?view=net-5.0
-                    # $TrustTypeNumber = $_.properties.trusttype
+                        # Trust direction
+                        # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trustdirection?view=net-5.0
+                        # $TrustDirectionNumber = $_.properties.trustdirection
 
-                    # Trust attributes
-                    # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/e9a2d23c-c31e-4a6f-88a0-6646fdb51a3c
-                    # $TrustAttributesNumber = $_.properties.trustattributes
+                        # Trust type
+                        # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trusttype?view=net-5.0
+                        # $TrustTypeNumber = $_.properties.trusttype
 
-                    # Which domains does the current user have access to?
-                    # No intra-forest trusts, only bidirectional trusts and outbound trusts
+                        # Trust attributes
+                        # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/e9a2d23c-c31e-4a6f-88a0-6646fdb51a3c
+                        # $TrustAttributesNumber = $_.properties.trustattributes
 
-                    if (($($_.properties.trustattributes) -ne 32) -and (($($_.properties.trustdirection) -eq 2) -or ($($_.properties.trustdirection) -eq 3)) ) {
-                        Write-Host "  Trusted domain: $($_.properties.name)"
-                        $TrustsToCheckForGroups += $_.properties.name
-                    }
-                }
-            }
+                        # Which domains does the current user have access to?
+                        # No intra-forest trusts, only bidirectional trusts and outbound trusts
 
-            for ($a = 0; $a -lt $x.Count; $a++) {
-                if (($a -eq 0) -and ($x[$a] -ieq '*')) {
-                    continue
-                }
-
-                $y = ($x[$a] -replace ('DC=', '') -replace (',', '.'))
-
-                if ($y -eq $x[$a]) {
-                    Write-Host "  User provided domain/forest: $y"
-                } else {
-                    Write-Host "  User provided domain/forest: $($x[$a]) -> $y"
-                }
-
-                if (($a -ne 0) -and ($x[$a] -ieq '*')) {
-                    Write-Host '    Skipping domain. Entry * is only allowed at first position in list.' -ForegroundColor Red
-                    continue
-                }
-
-                if ($y -match '[^a-zA-Z0-9.-]') {
-                    Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.' -ForegroundColor Red
-                    continue
-                }
-
-                if (-not ($y.StartsWith('-'))) {
-                    if ($TrustsToCheckForGroups -icontains $y) {
-                        Write-Host '    Domain already in list.' -ForegroundColor Yellow
-                    } else {
-                        $TrustsToCheckForGroups += $y
-                    }
-                } else {
-                    Write-Host '    Removing domain.'
-                    for ($z = 0; $z -lt $TrustsToCheckForGroups.Count; $z++) {
-                        if ($TrustsToCheckForGroups[$z] -ilike $y.substring(1)) {
-                            $TrustsToCheckForGroups[$z] = ''
+                        if (($($_.properties.trustattributes) -ne 32) -and (($($_.properties.trustdirection) -eq 2) -or ($($_.properties.trustdirection) -eq 3)) ) {
+                            Write-Host "  Trusted domain: $($_.properties.name)"
+                            $TrustsToCheckForGroups += $_.properties.name
                         }
                     }
                 }
+
+                for ($a = 0; $a -lt $x.Count; $a++) {
+                    if (($a -eq 0) -and ($x[$a] -ieq '*')) {
+                        continue
+                    }
+
+                    $y = ($x[$a] -replace ('DC=', '') -replace (',', '.'))
+
+                    if ($y -eq $x[$a]) {
+                        Write-Host "  User provided domain/forest: $y"
+                    } else {
+                        Write-Host "  User provided domain/forest: $($x[$a]) -> $y"
+                    }
+
+                    if (($a -ne 0) -and ($x[$a] -ieq '*')) {
+                        Write-Host '    Skipping domain. Entry * is only allowed at first position in list.' -ForegroundColor Red
+                        continue
+                    }
+
+                    if ($y -match '[^a-zA-Z0-9.-]') {
+                        Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.' -ForegroundColor Red
+                        continue
+                    }
+
+                    if (-not ($y.StartsWith('-'))) {
+                        if ($TrustsToCheckForGroups -icontains $y) {
+                            Write-Host '    Domain already in list.' -ForegroundColor Yellow
+                        } else {
+                            $TrustsToCheckForGroups += $y
+                        }
+                    } else {
+                        Write-Host '    Removing domain.'
+                        for ($z = 0; $z -lt $TrustsToCheckForGroups.Count; $z++) {
+                            if ($TrustsToCheckForGroups[$z] -ilike $y.substring(1)) {
+                                $TrustsToCheckForGroups[$z] = ''
+                            }
+                        }
+                    }
+                }
+
+
+                Write-Host
+                Write-Host "Check for open LDAP port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                CheckADConnectivity $TrustsToCheckForGroups 'LDAP' '  ' | Out-Null
+
+
+                Write-Host
+                Write-Host "Check for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                CheckADConnectivity $TrustsToCheckForGroups 'GC' '  ' | Out-Null
+            } else {
+                Write-Host '  Problem connecting to logged in user''s Active Directory (no error message, but forest root domain name is empty), assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
+                $GraphOnly = $true
             }
-
-
-            Write-Host
-            Write-Host "Check for open LDAP port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-            CheckADConnectivity $TrustsToCheckForGroups 'LDAP' '  ' | Out-Null
-
-
-            Write-Host
-            Write-Host "Check for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-            CheckADConnectivity $TrustsToCheckForGroups 'GC' '  ' | Out-Null
-        } else {
-            Write-Host '  Problem connecting to logged in user''s Active Directory, assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
+        } catch {
+            $y = ''
+            Write-Debug $error[0]
+            Write-Host '  Problem connecting to logged in user''s Active Directory (see debug stream for error message), assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
             $GraphOnly = $true
         }
     } else {
