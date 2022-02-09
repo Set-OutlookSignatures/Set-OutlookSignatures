@@ -3,10 +3,10 @@
 
 # Changelog
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.2" target="_blank">v2.5.2</a> - YYYY-MM-DD
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.2" target="_blank">v2.5.2</a> - 2022-02-09
 ### Fixed
-- Use another Windows API to get DN of logged in user. The API used before does not work when 'CN=Computers,DC=...' does not exist or the logged in user does not have read access to it.
-- Correct handle objectSid and SidHistory returned from Graph. The format is no longer a byte array as from on-prem Active Directory, but a clear text string ('S-1-...').
+- Use another Windows API to get the Active Directory object of the logged in user. This API also works when 'CN=Computers,DC=[...]' does not exist or the logged in user does not have read access to it. (Thanks <a href="https://www.linkedin.com/in/mariandanisek/" target="_blank">Marián Daníšek</a>!)
+- Correct handle objectSid and SidHistory returned from Graph. The format is no longer a byte array as from on-prem Active Directory, but a list of clear text strings ('S-1-[...]').
 - Validate SimulateUser and SimulateMailboxes input
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.1" target="_blank">v2.5.1</a> - 2022-01-20

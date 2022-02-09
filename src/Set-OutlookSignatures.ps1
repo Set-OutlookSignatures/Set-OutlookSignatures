@@ -807,13 +807,8 @@ function main {
         if ($null -ne $TrustsToCheckForGroups[0]) {
             try {
                 if (-not $SimulateUser) {
-                    $objTrans = New-Object -ComObject 'NameTranslate'
-                    $objNT = $objTrans.GetType()
-                    $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $Null)) # 3 = ADS_NAME_INITTYPE_GC
-                    $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (12, $(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value))) # 12 = ADS_NAME_TYPE_SID_OR_SID_HISTORY_NAME
-                    $temp = $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1)
-                    $Search.SearchRoot = "GC://$(($temp -split ',DC=')[1..999] -join '.')"
-                    $Search.Filter = "(distinguishedname=$($temp))"
+                    $Search.SearchRoot = "GC://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
+                    $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
                     $ADPropsCurrentUser = $Search.FindOne().Properties
                 } else {
                     try {
