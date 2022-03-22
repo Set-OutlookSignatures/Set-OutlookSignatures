@@ -436,7 +436,7 @@ function main {
     Write-Host "  GraphConfigFile: '$GraphConfigFile'" -NoNewline
     if ($GraphConfigFile) {
         CheckPath $GraphConfigFile
-        (Get-Content -LiteralPath $GraphConfigFile) | ForEach-Object {
+        (Get-Content -LiteralPath $GraphConfigFile -Encoding UTF8) | ForEach-Object {
             Write-Verbose $_
         }
     } else {
@@ -446,7 +446,7 @@ function main {
     Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
     if ($GraphCredentialFile) {
         CheckPath $GraphCredentialFile
-        (Get-Content -LiteralPath $GraphCredentialFile) | ForEach-Object {
+        (Get-Content -LiteralPath $GraphCredentialFile -Encoding UTF8) | ForEach-Object {
             Write-Verbose $_
         }
     } else {
@@ -456,7 +456,7 @@ function main {
     Write-Host "  ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
     if ($ReplacementVariableConfigFile) {
         CheckPath $ReplacementVariableConfigFile
-        (Get-Content -LiteralPath $ReplacementVariableConfigFile) | ForEach-Object {
+        (Get-Content -LiteralPath $ReplacementVariableConfigFile -Encoding UTF8) | ForEach-Object {
             Write-Verbose $_
         }
     } else {
@@ -853,7 +853,7 @@ function main {
         if (Test-Path -Path $GraphConfigFile -PathType Leaf) {
             try {
                 Write-Host "      Execute config file '$GraphConfigFile'"
-                . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile -Raw)))
+                . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile  -Encoding UTF8 -Raw)))
             } catch {
                 Write-Host "        Problem executing content of '$GraphConfigFile'. Exiting." -ForegroundColor Red
                 $error[0]
@@ -1669,7 +1669,7 @@ function main {
             if (Test-Path -Path $ReplacementVariableConfigFile -PathType Leaf) {
                 try {
                     Write-Host "    Execute config file '$ReplacementVariableConfigFile'"
-                    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $ReplacementVariableConfigFile -Raw)))
+                    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $ReplacementVariableConfigFile  -Encoding UTF8 -Raw)))
                 } catch {
                     Write-Host "    Problem executing content of '$ReplacementVariableConfigFile'. Exiting." -ForegroundColor Red
                     $error[0]
@@ -1875,17 +1875,17 @@ function main {
                                         if ($EmbedImagesInHTML -eq $false) {
                                             $x = (New-Guid).guid.tostring()
                                             ConvertTo-SingleFileHTML ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) (Join-Path -Path $script:tempDir -ChildPath $x)
-                                            $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $x) -Raw -Encoding UTF8).ToString()
+                                            $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $x)  -Encoding UTF8 -Raw).ToString()
                                             Remove-Item (Join-Path -Path $script:tempDir -ChildPath $x) -Force
                                         } else {
-                                            $hsHtmlSignature = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -Raw -Encoding UTF8).ToString()
+                                            $hsHtmlSignature = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm')))  -Encoding UTF8 -Raw).ToString()
                                         }
                                     } else {
                                         $hsHtmlSignature = ''
                                         Write-Host "      Signature file '$($TempOWASigFile + '.htm')' not found. Outlook Web HTML signature will be blank." -ForegroundColor Yellow
                                     }
                                     if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -PathType Leaf) {
-                                        $stTextSig = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -Raw -Encoding UTF8).ToString()
+                                        $stTextSig = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt')))  -Encoding UTF8 -Raw).ToString()
                                     } else {
                                         $stTextSig = ''
                                         Write-Host "      Signature file '$($TempOWASigFile + '.txt')' not found. Outlook Web text signature will be blank." -ForegroundColor Yellow
@@ -1951,9 +1951,9 @@ function main {
                     if (-not $SimulateUser) {
                         if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
                             if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
-                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw -Encoding utf8).tostring())
+                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm"))  -Encoding UTF8 -Raw).tostring())
                             } else {
-                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Raw -Encoding UTF8).tostring()
+                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm"))  -Encoding UTF8 -Raw).tostring()
                                 if ($x.error -ne $false) {
                                     Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
                                 }
@@ -1961,9 +1961,9 @@ function main {
                         }
                         if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
                             if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
-                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw -Encoding utf8).tostring())
+                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm"))  -Encoding UTF8 -Raw).tostring())
                             } else {
-                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Raw -Encoding utf8).tostring()
+                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm"))  -Encoding UTF8 -Raw).tostring()
                                 if ($x.error -ne $false) {
                                     Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
                                 }
@@ -2007,7 +2007,7 @@ function main {
         Write-Host "Remove old signatures created by this script, which are no longer centrally available @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         $SignaturePaths | ForEach-Object {
             Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
-                if ((Get-Content -LiteralPath $_.fullname -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
+                if ((Get-Content -LiteralPath $_.fullname  -Encoding UTF8 -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
                     if ($_.name -notin $script:SignatureFilesDone) {
                         Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
                         Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
@@ -2026,7 +2026,7 @@ function main {
         Write-Host "Remove user created signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         $SignaturePaths | ForEach-Object {
             Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
-                if ((Get-Content -LiteralPath $_.fullname -Raw) -notlike ('*' + $HTMLMarkerTag + '*')) {
+                if ((Get-Content -LiteralPath $_.fullname  -Encoding UTF8 -Raw) -notlike ('*' + $HTMLMarkerTag + '*')) {
                     Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
                     Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
                     Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
@@ -2069,7 +2069,7 @@ function main {
 
 
 Function ConvertTo-SingleFileHTML([string]$inputfile, [string]$outputfile) {
-    $tempFileContent = Get-Content -LiteralPath $inputfile -Raw -Encoding UTF8
+    $tempFileContent = Get-Content -LiteralPath $inputfile  -Encoding UTF8 -Raw
 
     $src = @()
     ([regex]'(?i)src="(.*?)"').Matches($tempFileContent) | ForEach-Object {
@@ -2336,7 +2336,7 @@ function SetSignatures {
         if ($UseHtmTemplates) {
             Write-Host "$Indent      Replace picture variables"
             $html = New-Object -ComObject 'HTMLFile'
-            $HTML.IHTMLDocument2_write((Get-Content -LiteralPath $path -Raw -Encoding UTF8))
+            $HTML.IHTMLDocument2_write((Get-Content -LiteralPath $path  -Encoding UTF8 -Raw))
 
             foreach ($image in ($html.images)) {
                 (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
@@ -2616,7 +2616,7 @@ function SetSignatures {
         Write-Host "$Indent      Embed local files in HTM format and add marker"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
-        $tempFileContent = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+        $tempFileContent = Get-Content -LiteralPath $path  -Encoding UTF8 -Raw
 
         if ($tempFileContent -notlike "*$HTMLMarkerTag*") {
             if ($tempFileContent -like '*<head>*') {
@@ -3149,9 +3149,15 @@ function GraphGetUserPhoto($user) {
         $local:tempFile = (Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ((New-Guid).Guid))
         $OldProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
-        Invoke-RestMethod @requestBody -OutFile $tempFile
+        Invoke-RestMethod @requestBody -OutFile $local:tempFile
         $ProgressPreference = $OldProgressPreference
-        $local:x = (Get-Content -Path $tempFile -Encoding Byte -Raw)
+
+        if ($($PSVersionTable.PSEdition) -ieq 'Core') {
+            $local:x = (Get-Content -LiteralPath $local:tempFile -AsByteStream -Raw)
+        } else {
+            $local:x = (Get-Content -LiteralPath $local:tempFile -Encoding Byte -Raw)
+        }
+
         Remove-Item $local:tempFile -Force
     } catch {
     }
@@ -3237,30 +3243,32 @@ function GraphFilterGroups($filter) {
 function Get-IniContent ($filePath) {
     $local:ini = [ordered]@{}
     if ($filePath -ne '') {
-        switch -regex -file $FilePath {
-            # Comments starting with ; or #, or empty line, whitespace(s) before are ignored
-            '(^\s*(;|#))|(^\s*$)' { continue }
+        Get-Content -LiteralPath $FilePath -Encoding UTF8 | ForEach-Object {
+            switch -regex ($_) {
+                # Comments starting with ; or #, or empty line, whitespace(s) before are ignored
+                '(^\s*(;|#))|(^\s*$)' { continue }
 
-            # Section in square brackets, whitespace(s) before and after brackets are ignored
-            '^\s*\[(.+)\]\s*' {
-                $local:section = ($matches[1]).trim().trim('"').trim('''')
-                $local:ini[$section] = @{}
-                continue
-            }
-
-            # Key and value, whitespace(s) before and after brackets are ignored
-            '^\s*(.+?)\s*=\s*(.*)\s*' {
-                if ($null -ne $local:section) {
-                    $local:ini[$local:section][($matches[1]).trim().trim('"').trim('''')] = ($matches[2]).trim().trim('"').trim('''')
+                # Section in square brackets, whitespace(s) before and after brackets are ignored
+                '^\s*\[(.+)\]\s*' {
+                    $local:section = ($matches[1]).trim().trim('"').trim('''')
+                    $local:ini[$section] = @{}
                     continue
                 }
-            }
 
-            # Key only, whitespace(s) before and after brackets are ignored
-            '^\s*(.*)\s*' {
-                if ($null -ne $local:section) {
-                    $local:ini[$local:section][($matches[1]).trim().trim('"').trim('''')] = $null
-                    continue
+                # Key and value, whitespace(s) before and after brackets are ignored
+                '^\s*(.+?)\s*=\s*(.*)\s*' {
+                    if ($null -ne $local:section) {
+                        $local:ini[$local:section][($matches[1]).trim().trim('"').trim('''')] = ($matches[2]).trim().trim('"').trim('''')
+                        continue
+                    }
+                }
+
+                # Key only, whitespace(s) before and after brackets are ignored
+                '^\s*(.*)\s*' {
+                    if ($null -ne $local:section) {
+                        $local:ini[$local:section][($matches[1]).trim().trim('"').trim('''')] = $null
+                        continue
+                    }
                 }
             }
         }
