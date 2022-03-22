@@ -400,13 +400,15 @@ If you want to give template creators control over the ini file, place it in the
   - Groups must be available in Active Directory. Groups like `'Everyone'` and `'Authenticated Users'` only exist locally, not in Active Directory
   - This tag supports alternative formats, which are of special interest if you are in a cloud only or hybrid environmonent:
     - `NETBIOSDomain GroupSamAccountName` and `NETBIOSDomain Group DisplayName` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName. Use these formats when your environment is hybrid or on premises only.
-    - `AzureAD e-mail-address-of-group@example.com`, `AzureAD GroupMailNickname`, `AzureAD GroupDisplayName` do not work with a local Active Directory, only with Microsoft Graph. They are queried in the order given. 'AzureAD' is the literal, case-insensitive string 'AzureAD', not a variable. Use these formats when you are in a cloud only environment.  
-- `SMTPaddress`, `-:SMTPaddress`
+    - `AzureAD e-mail-address-of-group@example.com`, `AzureAD GroupMailNickname`, `AzureAD GroupDisplayName` do not work with a local Active Directory, only with Microsoft Graph. They are queried in the order given. 'AzureAD' is the literal, case-insensitive string 'AzureAD', not a variable. Use these formats when you are in a cloud only environment.
+  - 'NETBIOSDomain' and 'EXAMPLE' are just examples. You need to replace them with the actual NetBIOS domain name of the Active Director domain containing the group.
+  - 'AzureAD' is not an example. If you want to assign a template to a group stored in Azure Active Directory, you have to use 'AzureAD' as domain name.  
+- `SmtpAddress`, `-:SmtpAddress`
   - Make this template specific for the assigned e-mail address (all SMTP addresses of a mailbox are considered, not only the primary one)
   - The `'-:'` prefix makes this template invalid for the specified e-mail address.
   - Examples: `office@example.com`, `-:test@example.com`
 - `yyyyMMddHHmm-yyyyMMddHHmm`, `-:yyyyMMddHHmm-yyyyMMddHHmm`
-  - Make this template valid only during the specific time range (`yyyy` = year, `MM` = month, `dd` = day, `HH` = hour, `mm` = minute).
+  - Make this template valid only during the specific time range (`yyyy` = year, `MM` = month, `dd` = day, `HH` = hour (00-24), `mm` = minute).
   - The `'-:'` prefix makes this template invalid during the specified time range.
   - Examples: `202112150000-202112262359` for the 2021 Christmas season, `-:202202010000-202202282359` for a deny in February 2022
   - If the script does not run after a template has expired, the template is still available on the client and can be used.  
