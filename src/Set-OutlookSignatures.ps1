@@ -1209,14 +1209,8 @@ function main {
                     $TemplateFileTargetName = $TemplateFile.Name
                 }
             } else {
-                $x = $TemplateFile.name -split '\.(?![\w\s\d]*\[*(\]|@))'
-                if ($x.count -ge 3) {
-                    $TemplateFilePart = $x[-2]
-                    $TemplateFileTargetName = ($x[($x.count * -1)..-3] -join '.') + '.' + $x[-1]
-                } else {
                     $TemplateFilePart = ''
                     $TemplateFileTargetName = $TemplateFile.Name
-                }
             }
 
             $TemplateFilePartRegexTimeAllow = '\[(?!-:)\d{12}-\d{12}\]'
