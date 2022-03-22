@@ -4,9 +4,9 @@
 # Changelog
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.0.0" target="_blank">v3.0.0</a> - YYYY-MM-DD
-_BREAKING CHANGE: File name based tags are no longer supported. Use ini files instead._
+_**Breaking:** File name based tags are no longer supported. Use ini files instead._
 ### Removed
-- File name based tags are no longer supported. Use ini files instead.
+- **Breaking:** File name based tags are no longer supported. Use ini files instead.
 - All sample files with tags based on file names have been removed
 ### Changed
 - All input files of type .htm, .ini and .ps1 are now expected to be UTF8 encoded
