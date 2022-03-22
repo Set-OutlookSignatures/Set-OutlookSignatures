@@ -68,8 +68,8 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
 - [7. Error handling](#7-error-handling)
 - [8. Run script while Outlook is running](#8-run-script-while-outlook-is-running)
 - [9. Signature and OOF file format](#9-signature-and-oof-file-format)
-  - [9.1. Signature and OOF file naming](#91-signature-and-oof-file-naming)
-- [10. Tags and ini files](#10-tags-and-ini-files)
+  - [9.1. Signature template file naming](#91-signature-template-file-naming)
+- [10. Template tags and ini files](#10-template-tags-and-ini-files)
   - [10.1. Allowed tags](#101-allowed-tags)
   - [10.2. How to work with ini files](#102-how-to-work-with-ini-files)
 - [11. Signature and OOF application order](#11-signature-and-oof-application-order)
@@ -133,9 +133,11 @@ The currently logged in user needs at least read access to the path.
 
 Default value: `'.\templates\Signatures DOCX'`  
 ## 2.2. SignatureIniPath
-If you can't or don't want to use file name based tags, you can place them in an ini file.
+Template tags are placed in an ini file.
 
-See '.\templates\sample signatures ini file.ini' for a sample file with further explanations.
+The file must be UTF8 encoded.
+
+See '.\templates\Signatures DOCX\_Signatures.ini' for a sample file with further explanations.
 
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
 
@@ -143,9 +145,11 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/Si
 
 The currently logged in user needs at least read access to the path
 
-Default value: `''`
+Default value: `'.\templates\Signatures DOCX\_Signatures.ini'`
 ## 2.3. ReplacementVariableConfigFile  
 The parameter ReplacementVariableConfigFile tells the script where the file defining replacement variables is located.
+
+The file must be UTF8 encoded.
 
 Local and remote paths are supported. Local paths can be absolute (`'C:\config\default replacement variables.ps1'`) or relative to the script path (`'.\config\default replacement variables.ps1'`).
 
@@ -156,6 +160,8 @@ The currently logged in user needs at least read access to the file.
 Default value: `'.\config\default replacement variables.ps1'`  
 ## 2.4. GraphConfigFile
 The parameter GraphConfigFile tells the script where the file defining Graph connection and configuration options is located.
+
+The file must be UTF8 encoded.
 
 Local and remote paths are supported. Local paths can be absolute (`'C:\config\default graph config.ps1'`) or relative to the script path (`'.\config\default graph config.ps1'`).
 
@@ -213,9 +219,11 @@ The currently logged in user needs at least read access to the path.
 
 Default value: `'.\templates\Out of Office DOCX'`
 ## 2.11. OOFIniPath
-If you can't or don't want to use file name based tags, you can place them in an ini file.
+Template tags are placed in an ini file.
 
-See '.\templates\sample OOF ini file.ini' for a sample file with further explanations.
+The file must be UTF8 encoded.
+
+See '.\templates\Out of Office DOCX\_OOF.ini' for a sample file with further explanations.
 
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
 
@@ -223,7 +231,7 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/Si
 
 The currently logged in user needs at least read access to the path
 
-Default value: `''`
+Default value: `'.\templates\Out of Office DOCX\_OOF.ini'`
 ## 2.12. AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
@@ -251,6 +259,8 @@ If the folder or folder structure does not exist, it is created.
 Default value: `'Outlook signatures'`  
 ## 2.14. UseHtmTemplates  
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
+
+Templates in .htm format must be UTF8 encoded.
 
 Each format has advantages and disadvantages, please see "[13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)" for a quick overview.
 
@@ -336,33 +346,17 @@ New and changed signatures can be used instantly in Outlook.
 Changing which signature is to be used as default signature for new e-mails or for replies and forwards requires restarting Outlook.   
 # 9. Signature and OOF file format  
 Only Word files with the extension .docx and HTML files with the extension .htm are supported as signature and OOF template files.  
-## 9.1. Signature and OOF file naming  
-The script copies every signature and OOF file as-is, with one exception: When tags are defined in the file name, these tags are removed.
+## 9.1. Signature template file naming  
+The name of the signature template file without extension is the name of the signature in Outlook.
+Example: The template "Test signature.docx" will create a signature named "Test signature" in Outlook.
 
-Tags must be placed before the file extension and be separated from the base filename with a period.
-
-Examples:  
-- `'Company external German.docx'` -> `'Company external German.htm'`, no changes  
-- `'Company external German.[defaultNew].docx'` -> `'Company external German.htm'`, tag(s) is/are removed  
-- `'Company external [English].docx'` -> `'Company external [English].htm'`, tag(s) is/are not removed, because there is no dot before  
-- `'Company external [English].[defaultNew] [Company-AD All Employees].docx'` -> `'Company external [English].htm'`, tag(s) is/are removed, because they are separated from base filename  
-
-If possible, do not use file name based tags,but place them an ini file. File name based tags are deprecated since v2.5.0 and will no longer be supported at all in a future release.  
-
-Using an ini file has the following advantages:
-- shorter template file names, as tags are in the ini file and no longer in the file names
-- unlimited number of tags, as no file system restrictions apply
-- different configurations for the same templates folder by using different ini files for different audiences
-- alternative sort orders for templates within template groups (common, group specific, e-mail address specific)
-- with file name tags, the application order is always alphabetically ascending using the system culture sort order - with ini files, you can switch to alphabetically descending or as sorted in the ini file and define an other sort culture
-
-See the '.\templates' folder for sample templates and configuration.  
-
-The number of possible file name based tags and template file name length in general is limited by operating system file name and path length restrictions.  
-On Powershell 7+, the script works with path names longer than the default Windows limit of 260 characters.  
-On Powershell 5.1, enable "LongPathsEnabled" on the operating system level as described in <a href="https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation" target="_blank">this Microsoft article</a>.  
-
-# 10. Tags and ini files
+This can be overridden in the ini file with the 'OutlookSignatureName' parameter.
+Example: The template "Test signature.htm" with the following ini file configuration will create a signature named "Test signature, do not use".
+```
+[Test signature.htm]
+OutlookSignatureName = Test signature, do not use
+```
+# 10. Template tags and ini files
 Tags define properties for templates, such as
 - time ranges during which a template shall be applied or not applied
 - groups whose direct or indirect members are allowed or denied application of a template
@@ -374,12 +368,6 @@ Tags define properties for templates, such as
 There are additional tags which are not template specific, but change the behavior of Set-OutlookSignatures:
 - specific sort order for templates (ascending, descending, as listed in the file)
 - specific sort culture used for sorting ascendingly or descendingly (de-AT or en-US, for example)
-
-Using an ini file has several advantages compared to file name based tags:
-- shorter template file names, as tags are in the ini file and no longer in the file names
-- unlimited number of tags, as no file system restrictions apply
-- different configurations for the same templates folder by using different ini files for different audiences
-- additional options which can't be handled by file name based tags (sort order, sort culture, differing signature names, deny tags, etc.)
 
 If you want to give template creators control over the ini file, place it in the same folder as the templates.
 ## 10.1. Allowed tags
@@ -413,7 +401,7 @@ If you want to give template creators control over the ini file, place it in the
   - Examples: `202112150000-202112262359` for the 2021 Christmas season, `-:202202010000-202202282359` for a deny in February 2022
   - If the script does not run after a template has expired, the template is still available on the client and can be used.  
 
-<br>Tags can be combined: A template may be assigned to several groups, e-mail addresses and time ranges, be denied for several groups, e-mail adresses and time ranges, be used as default signature for new e-mails and as default signature for replies and forwards - all at the same time.
+<br>Tags can be combined: A template may be assigned to several groups, e-mail addresses and time ranges, be denied for several groups, e-mail adresses and time ranges, be used as default signature for new e-mails and as default signature for replies and forwards - all at the same time. Simple add different tags below a file name, separated by line breaks (each tag needs to be on a separate line).
 
 ## 10.2. How to work with ini files
 1. Comments

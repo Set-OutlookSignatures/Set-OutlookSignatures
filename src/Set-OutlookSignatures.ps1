@@ -45,16 +45,17 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/Si
 Default value: '.\templates\Signatures DOCX'
 
 .PARAMETER SignatureIniPath
-Path to ini file containing signature template tags
-This is an alternative to file name tags
-See '.\templates\sample signatures ini file.ini' for a sample file with further explanations.
+Path to ini file containing signature template tags.
+Must be UTF8 encoded.
+See '.\templates\Signatures DOCX\_Signatures.ini' for a sample file with further explanations.
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 The currently logged in user needs at least read access to the path
-Default value: ''
+Default value: '.\templates\Signatures DOCX\_Signatures.ini'
 
 .PARAMETER ReplacementVariableConfigFile
 Path to a replacement variable config file.
+Must be UTF8 encoded.
 Local and remote paths are supported.
 Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures').
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
@@ -62,7 +63,8 @@ Default value: '.\config\default replacement variables.txt'
 
 .PARAMETER GraphConfigFile
 Path to a Graph variable config file.
-Local and remote paths are supported
+Must be UTF8 encoded.
+Local and remote paths are supported.
 Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signature')
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/config/default graph config.ps1' or '\\server.domain@SSL\SignatureSite\config\default graph config.ps1'
 The currently logged in user needs at least read access to the path
@@ -102,13 +104,13 @@ The currently logged in user needs at least read access to the path.
 Default value: '.\templates\Out of Office DOCX'
 
 .PARAMETER OOFIniPath
-Path to ini file containing signature template tags
-This is an alternative to file name tags
-See '.\templates\sample OOF ini file.ini' for a sample file with further explanations.
+Path to ini file containing signature template tags.
+Must be UTF8 encoded.
+See '.\templates\Out of Office DOCX\_OOF.ini' for a sample file with further explanations.
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 The currently logged in user needs at least read access to the path
-Default value: ''
+Default value: '.\templates\Out of Office DOCX\_OOF.ini'
 
 .PARAMETER AdditionalSignaturePath
 An additional path that the signatures shall be copied to.
@@ -130,6 +132,7 @@ Default value: ''
 .PARAMETER UseHtmTemplates
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
 Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
+Templates in .htm format must be UTF8 encoded.
 Default value: $false
 
 .PARAMETER SimulateUser
@@ -139,7 +142,6 @@ Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN,
 .PARAMETER SimulateMailboxes
 SimulateMailboxes is optional for simulation mode, although highly recommended.
 It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
-
 
 .PARAMETER GraphCredentialFile
 Path to file containing Graph credential which should be used as alternative to other token acquisition methods
@@ -178,20 +180,20 @@ Run Set-OutlookSignatures with default values and sample templates
 PS> .\Set-OutlookSignatures.ps1
 
 .EXAMPLE
-Use custom signature templates
-PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates'
+Use custom signature templates and custom ini file
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -SignatureIniPath '\\internal.example.com\share\Signature Templates\_Signatures.ini'
 
 .EXAMPLE
 Use custom signature templates, ignore trust to internal-test.example.com
-PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -TrustsToCheckForGroups '*', '-internal-test.example.com'
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -SignatureTemplatePath '\\internal.example.com\share\Signature Templates\_Signatures.ini' -TrustsToCheckForGroups '*', '-internal-test.example.com'
 
 .EXAMPLE
 Use custom signature templates, only check domains/trusts internal-test.example.com and company.b.com
-PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -TrustsToCheckForGroups 'internal-test.example.com', 'company.b.com'
+PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -SignatureTemplatePath '\\internal.example.com\share\Signature Templates\_Signatures.ini' -TrustsToCheckForGroups 'internal-test.example.com', 'company.b.com'
 
 .EXAMPLE
 Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. See '.\docs\README.html' for details.
-PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1' "
+PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -SignatureTemplatePath '\\internal.example.com\share\Signature Templates\_Signatures.ini' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -OOFTemplatePath '\\internal.example.com\share\Signature Templates\_OOF.ini' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1' "
 
 .EXAMPLE
 Please see '.\docs\README.html' and https://github.com/GruberMarkus/Set-OutlookSignatures for more details.
@@ -213,7 +215,7 @@ Param(
 
     # Path to ini file containing signature template tags
     [ValidateNotNullOrEmpty()]
-    [string]$SignatureIniPath = '',
+    [string]$SignatureIniPath = '.\templates\Signatures DOCX\_Signatures.ini',
 
     # Path to a replacement variable config file.
     [ValidateNotNullOrEmpty()]
@@ -249,7 +251,7 @@ Param(
 
     # Path to ini file containing OOF template tags
     [ValidateNotNullOrEmpty()]
-    [string]$OOFIniPath = '',
+    [string]$OOFIniPath = '.\templates\Out of Office DOCX\_OOF.ini',
 
     # An additional path that the signatures shall be copied to
     [string]$AdditionalSignaturePath = $(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) }catch {}),

@@ -1,4 +1,4 @@
-﻿# This file allows defining custom replacement variables for Set-OutlookSignatures
+# This file allows defining custom replacement variables for Set-OutlookSignatures
 #
 # This script is executed as a whole once for each mailbox.
 # It allows for complex replacement variable handling (complex string transformations, retrieving information from web services and databases, etc.).
