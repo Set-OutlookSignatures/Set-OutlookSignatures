@@ -390,7 +390,8 @@ If you want to give template creators control over the ini file, place it in the
     - `NETBIOSDomain GroupSamAccountName` and `NETBIOSDomain Group DisplayName` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName. Use these formats when your environment is hybrid or on premises only.
     - `AzureAD e-mail-address-of-group@example.com`, `AzureAD GroupMailNickname`, `AzureAD GroupDisplayName` do not work with a local Active Directory, only with Microsoft Graph. They are queried in the order given. 'AzureAD' is the literal, case-insensitive string 'AzureAD', not a variable. Use these formats when you are in a cloud only environment.
   - 'NETBIOSDomain' and 'EXAMPLE' are just examples. You need to replace them with the actual NetBIOS domain name of the Active Director domain containing the group.
-  - 'AzureAD' is not an example. If you want to assign a template to a group stored in Azure Active Directory, you have to use 'AzureAD' as domain name.  
+  - 'AzureAD' is not an example. If you want to assign a template to a group stored in Azure Active Directory, you have to use 'AzureAD' as domain name.
+  - When multiple groups are defined, membership in a single group is sufficient to be assigned the template - it is not required to be a member of all the defined groups.  
 - `SmtpAddress`, `-:SmtpAddress`
   - Make this template specific for the assigned e-mail address (all SMTP addresses of a mailbox are considered, not only the primary one)
   - The `'-:'` prefix makes this template invalid for the specified e-mail address.
