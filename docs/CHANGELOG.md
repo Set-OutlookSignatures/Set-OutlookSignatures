@@ -3,6 +3,15 @@
 
 # Changelog
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.0.0" target="_blank">v3.0.0</a> - YYYY-MM-DD
+_BREAKING CHANGE: File name based tags are no longer supported. Use ini files instead._
+### Removed
+- File name based tags are no longer supported. Use ini files instead.
+- All sample files with tags based on file names have been removed
+### Changed
+- All input files of type .htm, .ini and .ps1 are now expected to be UTF8 encoded
+- Documentation has been updated to make clear that 'NetBIOSDomain' and 'EXAMPLE' are just examples for domain names in ini files, but 'AzureAD' ist not
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.2" target="_blank">v2.5.2</a> - 2022-02-09
 ### Fixed
 - Use another Windows API to get the Active Directory object of the logged in user. This API also works when 'CN=Computers,DC=[...]' does not exist or the logged in user does not have read access to it. (Thanks <a href="https://www.linkedin.com/in/mariandanisek/" target="_blank">Marián Daníšek</a>!)
