@@ -297,14 +297,14 @@ powershell.exe -file '\netlogon\set-outlooksignatures\set-outlooksignatures.ps1'
 At the time of writing, other parameters were available. The following is a brief overview of the possibilities, for details please refer to the documentation of the script in the file "readme.html":  
 - SignatureTemplatePath: Path to the signature templates. Can be an SMB or WebDAV share.  
 - ReplacementVariableConfigFile: Path to the file in which variables deviating from the standard are defined. Can be an SMB or WebDAV share.  
-- DomainsToCheckForGroups: By default, all trusts are queried for mailbox information. This parameter can be used to remove certain domains and add non-trusted domains.  
+- TrustsToCheckForGroups: By default, all trusts are queried for mailbox information. This parameter can be used to remove certain domains and add non-trusted domains.  
 - DeleteUserCreatedSignatures: Should signatures created by the user be deleted? This is not done by default.  
 - SetCurrentUserOutlookWebSignature: By default, a signature is set in Outlook on the web for the logged in user. This can be prevented via this parameter.  
 - SetCurrentUserOOFMessage: By default, the text of the out-of-office messages is set. This parameter can be used to change this behaviour.  
 - OOFTemplatePath: Path to the absence templates. Can be an SMB or WebDAV share.  
 - AdditionalSignaturePath: Path to an additional share to which all signatures are to be copied, e.g. for access from a mobile device and for simplified configuration of clients not supported by the script. Can be an SMB or WebDAV share.  
-- AdditionalSignaturePathFolder: Folder structure to be created under AdditionalSignaturePath.  
 - UseHtmTemplates: By default, templates are processed in DOCX format. This button can be used to switch to HTML (. htm).  
+See '.\docs\README.htm' for more parameters.
 #### 1.6.5.2. Runtime and visibility of the script  
 The script is designed for fast turnaround time and minimal network load, but the runtime of the script still depends on many parameters:  
 - General speed of the client (CPU, RAM, HDD)  
@@ -657,14 +657,14 @@ powershell.exe -file '\\example.com\netlogon\set-outlooksignatures\set-outlooksi
 Zum Zeitpunkt der Erstellung dieses Dokuments waren noch weitere Parameter verfügbar. Folgend eine kurze Übersicht der Möglichkeit, für Details sei auf die Dokumentation des Scripts in der Datei „readme.html“ verwiesen:  
 - SignatureTemplatePath: Pfad zu den Signatur-Vorlagen. Kann ein SMB- oder WebDAV-Share sein.  
 - ReplacementVariableConfigFile: Pfad zur Datei, in der vom Standard abweichende Variablen definiert werden. Kann ein SMB- oder WebDAV-Share sein.  
-- DomainsToCheckForGroups: Standardmäßig werden alle Trusts nach Postfachinformationen abgefragt. Über diesen Parameter können bestimmte Domains entfernt und nicht-getrustete Domains hinzugefügt werden.  
+- TrustsToCheckForGroups: Standardmäßig werden alle Trusts nach Postfachinformationen abgefragt. Über diesen Parameter können bestimmte Domains entfernt und nicht-getrustete Domains hinzugefügt werden.  
 - DeleteUserCreatedSignatures: Sollen vom Benutzer selbst erstelle Signaturen gelöscht werden? Standardmäßig erfolgt dies nicht.  
 - SetCurrentUserOutlookWebSignature: Standardmäßig wird für den angemeldeten Benutzer eine Signatur in Outlook im Web gesetzt. Über diesen Parameter kann das verhindert werden.  
 - SetCurrentUserOOFMessage: Standardmäßig wird der Text der Abwesenheits-Nachrichten gesetzt. Über diesen Parameter kann dieses Verhalten geändert werden.  
 - OOFTemplatePath: Pfad zu den Abwesenheits-Vorlagen. Kann ein SMB- oder WebDAV-Share sein.  
 - AdditionalSignaturePath: Pfad zu einem zusätzlichen Share, in den alle Signaturen kopiert werden sollen, z. B. für den Zugriff von einem mobilen Gerät aus und zur vereinfachten Konfiguration nicht vom Script unterstützter Clients. Kann ein SMB- oder WebDAV-Share sein.  
-- AdditionalSignaturePathFolder: Zu erstellende Ordnerstruktur unter AdditionalSignaturePath.  
 - UseHtmTemplates: Standardmäßig werden Vorlagen im DOCX-Format verarbeitet. Über diesen Schalter kann auf HTML (.htm) umgeschaltet werden.  
+Die Datei '.\docs\README.htm' enthält weitere Parameter.
 #### 2.6.5.2. Laufzeit und Sichtbarkeit des Scripts  
 Das Script ist auf schnelle Durchlaufzeit und minimale Netzwerkbelastung ausgelegt, die Laufzeit des Scripts hängt dennoch von vielen Parametern ab:  
 - allgemeine Geschwindigkeit des Clients (CPU, RAM, HDD)  

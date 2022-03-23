@@ -2,15 +2,27 @@
 # **<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt=""></a> XXXRemoveWhenBuildingXXX--><a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/sponsor-white?logo=githubsponsors" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
 
 # Changelog
+<!--
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
+_Put Notice here_
+_**Breaking:** Notice about breaking change_  
+### Changed
+- **Breaking:** XXX
+### Added
+### Removed
+### Fixed
+-->
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.0.0" target="_blank">v3.0.0</a> - YYYY-MM-DD
-_**Breaking:** File name based tags are no longer supported. Use ini files instead._
+_**Breaking:** File name based tags are no longer supported. Use ini files instead._  
+_**Breaking:** Parameter AdditionalSignaturePathFolder is no longer supported. Just append the folder to the AdditionalSignaturePath parameter._
+### Changed
+- **Breaking:** All input files of type .htm, .ini and .ps1 are now expected to be UTF8 encoded
+- Documentation has been updated to make clear that 'NetBiosDomain' and 'EXAMPLE' are just examples for domain names in ini files, but 'AzureAD' ist not
 ### Removed
 - **Breaking:** File name based tags are no longer supported. Use ini files instead.
+- **Breaking:** Parameter AdditionalSignaturePathFolder is no longer supported. Just append the folder to the AdditionalSignaturePath parameter.
 - All sample files with tags based on file names have been removed
-### Changed
-- All input files of type .htm, .ini and .ps1 are now expected to be UTF8 encoded
-- Documentation has been updated to make clear that 'NetBIOSDomain' and 'EXAMPLE' are just examples for domain names in ini files, but 'AzureAD' ist not
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.2" target="_blank">v2.5.2</a> - 2022-02-09
 ### Fixed
@@ -25,7 +37,7 @@ _**Breaking:** File name based tags are no longer supported. Use ini files inste
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0" target="_blank">v2.5.0</a> - 2022-01-14
 ### Added
 - New parameter DeleteScriptCreatedSignaturesWithoutTemplate, see README for details
-- New parameter EmbedImagesInHTML, see README for details
+- New parameter EmbedImagesInHtml, see README for details
 - Tags can now not only be used to allow access to a template, but also to deny access. Denies are available for time, group and e-mail based tags. See README for details.
 - Consider distribution group membership in addition to security group membership
 - Consider sIDHistory in searches across trusts and when comparing msExchMasterAccountSid, which adds support for scenarios in which a mailbox or a linked account has been migrated between Active Directory domains/forests
@@ -34,7 +46,7 @@ _**Breaking:** File name based tags are no longer supported. Use ini files inste
 - New FAQ: Why is membership in dynamic distribution groups and dynamic security groups not considered?
 - New FAQ: Why is no admin or user GUI available?
 ### Fixed
-- Don't throw an error when UseHTMTemplates is set to true and OOFIniFile is used, but there is no \*.htm file in OOFTemplatePath
+- Don't throw an error when UseHtmTemplates is set to true and OOFIniFile is used, but there is no \*.htm file in OOFTemplatePath
 - Correct mapping of Graph businessPhones attribute, so the replacement variable \$CURRENT[...]TELEPHONE\$ is populated (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/26" target="_blank">#26</a>)  (Thanks <a href="https://github.com/vitorpereira" target="_blank">@vitorpereira</a>!)
 - Fix Outlook 2013 registry key handling and temporary folder handling in environments without Outlook or Outlook profile (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/27" target="_blank">#27</a>)  (Thanks <a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>!)
 ### Changed
@@ -43,11 +55,18 @@ _**Breaking:** File name based tags are no longer supported. Use ini files inste
 - Update usage examples in script
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.4.0" target="_blank">v2.4.0</a> - 2021-12-10
+### Changed
+- Documentation updates
+- Updated FAQ: What about the new signature roaming feature Microsoft announced?
+- When connecting to Microsoft Graph, the TenantID is no longer set to 'organizations', but extracted from the logged in or simulated user name
+- Reduce number of required Graph authentication prompts by using a token cache file
+- Switching to the EWS Managed API .Net Standard port from https://github.com/ststeiger/RedmineMailService (the official Microsoft DLL is used with Windows PowerShell, ststeiger's port when run in PowerShell 7+) (Thanks <a href="https://github.com/ststeiger" target="_blank">@ststeiger</a>!)
+- When saving a document in Word fails, wait for two seconds and retry saving to avoid problems with virus scanners
 ### Added
 - Added sample code files ('.\sample code'), including a wrapper script for central creation and deployment of signatures and OOF messages without end user or client involvement
 - New default replacement variables for displayName and mailNickname (a.k.a. alias)
 - New parameter GraphOnly: Try to connect to Microsoft Graph only, ignoring any local Active Directory. The default behavior without GraphOnly is unchanged (try Active Directory first, fall back to Graph).
-- New parameters CreateRTFSignatures and CreateTXTSignatures allow to disable RTF/TXT signature creation
+- New parameters CreateRtfSignatures and CreateTxtSignatures allow to disable RTF/TXT signature creation
 - New parameter GraphCredentialFile
 - New FAQ: How to deploy signatures for "Send As", "Send On Behalf" etc.?
 - New FAQ: Can I centrally manage and deploy Outook stationery with this script?
@@ -56,13 +75,6 @@ _**Breaking:** File name based tags are no longer supported. Use ini files inste
 - Do not ignore remote mailboxes when searching mailboxes in Active Directory (Thanks <a href="https://www.linkedin.com/in/lwhdk/" target="_blank">Lars Würtz Hammer</a>!)
 - Correctly handle hybrid scenarios with basic auth disabled in the cloud (Thanks <a href="https://www.linkedin.com/in/lwhdk/" target="_blank">Lars Würtz Hammer</a>!)
 - Correctly handle time based tags, so they are not checked twice (the first check is positive, the second one returns 'unknown tag')
-### Changed
-- Documentation updates
-- Updated FAQ: What about the new signature roaming feature Microsoft announced?
-- When connecting to Microsoft Graph, the TenantID is no longer set to 'organizations', but extracted from the logged in or simulated user name
-- Reduce number of required Graph authentication prompts by using a token cache file
-- Switching to the EWS Managed API .Net Standard port from https://github.com/ststeiger/RedmineMailService (the official Microsoft DLL is used with Windows PowerShell, ststeiger's port when run in PowerShell 7+) (Thanks <a href="https://github.com/ststeiger" target="_blank">@ststeiger</a>!)
-- When saving a document in Word fails, wait for two seconds and retry saving to avoid problems with virus scanners
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.1" target="_blank">v2.3.1</a> - 2021-11-05
 ### Fixed
@@ -71,6 +83,9 @@ _**Breaking:** File name based tags are no longer supported. Use ini files inste
 - Clarify port requirements and group membership evaluation in documentation
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0" target="_blank">v2.3.0</a> - 2021-10-08
+### Changed
+- The parameter TrustsToCheckForGroups is also available under the more descriptive name TrustsToCheckForGroups. Both names can be used, functionality is unchanged.
+- Contribution opportunities in '.\docs\CONTRIBUTING.html'
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios (see '.\docs\README.html' and '.\config\default graph config.ps1' for details)
 - Possibility to use ini files instead of file name tags, including settings for template sort order, sort culture, and custom Outlook signature names (see parameters 'SignatureIniPath' and 'OOFIniPath' for details)
@@ -86,9 +101,6 @@ _**Breaking:** File name based tags are no longer supported. Use ini files inste
 - Do no classify templates with unknown tags as common templates 
 - Word settings temporarily changed by the script are now also restored to their original values when the script ends due to an unexpected error
 - Do not try to change read-only Word attributes \<image>.hyperlink.name and \<image>.hyperlink.addressold (regression bug)
-### Changed
-- The parameter DomainsToCheckForGroups is also available under the more descriptive name TrustsToCheckForGroups. Both names can be used, functionality is unchanged.
-- Contribution opportunities in '.\docs\CONTRIBUTING.html'
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.1" target="_blank">v2.2.1</a> - 2021-09-15
 ### Fixed

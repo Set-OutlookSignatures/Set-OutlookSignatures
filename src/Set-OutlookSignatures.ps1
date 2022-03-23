@@ -123,12 +123,6 @@ The currently logged in user needs at least write access to the path.
 If the folder or folder structure does not exist, it is created.
 Default value: "$([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures'))"
 
-.PARAMETER AdditionalSignaturePathFolder
-An optional folder or folder structure below AdditionalSignaturePath.
-This parameter is available for compatibility with versions before 2.2.1. Starting with 2.2.1, you can pass a full path via the parameter AdditionalSignaturePath, so AdditionalSignaturePathFolder is no longer needed.
-If the folder or folder structure does not exist, it is created.
-Default value: ''
-
 .PARAMETER UseHtmTemplates
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
 Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
@@ -154,19 +148,19 @@ Try to connect to Microsoft Graph only, ignoring any local Active Directory.
 The default behavior is to try Active Directory first and fall back to Graph.
 Default value: $false
 
-.PARAMETER CreateRTFSignatures
+.PARAMETER CreateRtfSignatures
 Should signatures be created in RTF format?
 Default value: $true
 
-.PARAMETER CreateTXTSignatures
+.PARAMETER CreateTxtSignatures
 Should signatures be created in TXT format?
 Default value: $true
 
-.PARAMETER EmbedImagesInHTML
+.PARAMETER EmbedImagesInHtml
 Should images be embedded into HTML files?
 Outlook 2016 and newer can handle images embedded directly into an HTML file as BASE64 string ('<img src="data:image/[...]"').
 Outlook 2013 and earlier can't handle these embedded images when composing HTML e-mails (there is no problem receiving such e-mails, or when composing RTF or TXT e-mails).
-When setting EmbedimagesInHTML to $false, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
+When setting EmbedImagesInHtml to $false, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 Default value: $true
 
 .INPUTS
@@ -226,7 +220,7 @@ Param(
     [string]$GraphConfigFile = '.\config\default graph config.ps1',
 
     # List of domains/forests to check for group membership across trusts
-    [Alias('DomainsToCheckForGroups')]
+    [Alias('TrustsToCheckForGroups')]
     [string[]]$TrustsToCheckForGroups = ('*'),
 
     # Shall the script delete signatures which were created by the user itself?
@@ -255,10 +249,6 @@ Param(
 
     # An additional path that the signatures shall be copied to
     [string]$AdditionalSignaturePath = $(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) }catch {}),
-
-    # Subfolder to create in $AdditionalSignaturePath
-    [ValidateNotNull()]
-    [string]$AdditionalSignaturePathFolder = '',
 
     # Use templates in .HTM file format instead of .DOCX
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
@@ -291,15 +281,15 @@ Param(
 
     # Create RTF signatures
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
-    $CreateRTFSignatures = $true,
+    $CreateRtfSignatures = $true,
 
     # Create TXT signatures
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
-    $CreateTXTSignatures = $true,
+    $CreateTxtSignatures = $true,
 
     # Embed images in HTML
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
-    $EmbedImagesInHTML = $true
+    $EmbedImagesInHtml = $true
 )
 
 
@@ -465,25 +455,25 @@ function main {
         Write-Host
     }
 
-    Write-Host "  EmbedImagesInHTML: '$EmbedImagesInHTML'"
-    if ($EmbedImagesInHTML -in (1, '1', 'true', '$true', 'yes')) {
-        $EmbedImagesInHTML = $true
+    Write-Host "  EmbedImagesInHtml: '$EmbedImagesInHtml'"
+    if ($EmbedImagesInHtml -in (1, '1', 'true', '$true', 'yes')) {
+        $EmbedImagesInHtml = $true
     } else {
-        $EmbedImagesInHTML = $false
+        $EmbedImagesInHtml = $false
     }
 
-    Write-Host "  CreateRTFSignatures: '$CreateRTFSignatures'"
-    if ($CreateRTFSignatures -in (1, '1', 'true', '$true', 'yes')) {
-        $CreateRTFSignatures = $true
+    Write-Host "  CreateRtfSignatures: '$CreateRtfSignatures'"
+    if ($CreateRtfSignatures -in (1, '1', 'true', '$true', 'yes')) {
+        $CreateRtfSignatures = $true
     } else {
-        $CreateRTFSignatures = $false
+        $CreateRtfSignatures = $false
     }
 
-    Write-Host "  CreateTXTSignatures: '$CreateTXTSignatures'"
-    if ($CreateTXTSignatures -in (1, '1', 'true', '$true', 'yes')) {
-        $CreateTXTSignatures = $true
+    Write-Host "  CreateTxtSignatures: '$CreateTxtSignatures'"
+    if ($CreateTxtSignatures -in (1, '1', 'true', '$true', 'yes')) {
+        $CreateTxtSignatures = $true
     } else {
-        $CreateTXTSignatures = $false
+        $CreateTxtSignatures = $false
     }
 
     Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
@@ -501,11 +491,6 @@ function main {
     }
 
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'"
-
-    Write-Host "  AdditionalSignaturePathFolder: '$AdditionalSignaturePathFolder'"
-    $AdditionalSignaturePath = [IO.Path]::Combine($AdditionalSignaturePath.trimend('\'), $AdditionalSignaturePathFolder.trim('\'))
-
-    Write-Host "  AdditionalSignaturePath combined: '$AdditionalSignaturePath'" -NoNewline
     checkpath $AdditionalSignaturePath -create
 
     Write-Host "  SimulateUser: '$SimulateUser'"
@@ -592,9 +577,9 @@ function main {
         }
 
         Write-Host "  Outlook registry version: $OutlookRegistryVersion"
-        if (($OutlookFileVersion -lt '16.0.0.0') -and ($EmbedImagesInHTML -eq $true)) {
+        if (($OutlookFileVersion -lt '16.0.0.0') -and ($EmbedImagesInHtml -eq $true)) {
             Write-Host '    Outlook 2013 or earlier detected.' -ForegroundColor Yellow
-            Write-Host '    Consider seting script parameter EmbedImagesInHTML to false to avoid problems with images in templates.' -ForegroundColor Yellow
+            Write-Host '    Consider seting script parameter EmbedImagesInHtml to false to avoid problems with images in templates.' -ForegroundColor Yellow
             Write-Host '    Microsoft supports Outlook 2013 until April 2023, older versions are already out of support.' -ForegroundColor Yellow
         }
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
@@ -1209,8 +1194,8 @@ function main {
                     $TemplateFileTargetName = $TemplateFile.Name
                 }
             } else {
-                    $TemplateFilePart = ''
-                    $TemplateFileTargetName = $TemplateFile.Name
+                $TemplateFilePart = ''
+                $TemplateFileTargetName = $TemplateFile.Name
             }
 
             $TemplateFilePartRegexTimeAllow = '\[(?!-:)\d{12}-\d{12}\]'
@@ -1467,8 +1452,8 @@ function main {
 
     Write-Host
     Write-Host "Start Word background process for template editing @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    if (($UseHtmTemplates -eq $true) -and (($CreateRTFSignatures -eq $false) -and ($CreateTXTSignatures -eq $false))) {
-        Write-Host '  Not starting Word because: UseHTMTemplates = $true, CreateRTFSignatures = $false, CreateTXTSignatures = $false'
+    if (($UseHtmTemplates -eq $true) -and (($CreateRtfSignatures -eq $false) -and ($CreateTxtSignatures -eq $false))) {
+        Write-Host '  Not starting Word because: UseHtmTemplates = $true, CreateRtfSignatures = $false, CreateTxtSignatures = $false'
     } else {
         # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the script
         try {
@@ -1868,7 +1853,7 @@ function main {
                             if (($null -ne $TempOWASigFile) -and ($TempOWASigFile -ne '')) {
                                 try {
                                     if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -PathType Leaf) {
-                                        if ($EmbedImagesInHTML -eq $false) {
+                                        if ($EmbedImagesInHtml -eq $false) {
                                             $x = (New-Guid).guid.tostring()
                                             ConvertTo-SingleFileHTML ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) (Join-Path -Path $script:tempDir -ChildPath $x)
                                             $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $x)  -Encoding UTF8 -Raw).ToString()
@@ -2298,7 +2283,7 @@ function SetSignatures {
         if ($UseHtmTemplates) {
             # use .html for temporary file, .htm for final file
             try {
-                if ($EmbedImagesInHTML -eq $false) {
+                if ($EmbedImagesInHtml -eq $false) {
                     Copy-Item -LiteralPath $Signature.name -Destination $path
                     $ConnectedFilesFolderNames | ForEach-Object {
                         if (Test-Path (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$_")) {
@@ -2338,7 +2323,7 @@ function SetSignatures {
                 (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
                     if (($image.src -clike "*$($_[0])*") -or ($image.alt -clike "*$($_[0])*")) {
                         if ($null -ne $ReplaceHash[$_[0]]) {
-                            if ($EmbedImagesInHTML -eq $false) {
+                            if ($EmbedImagesInHtml -eq $false) {
                                 Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                 Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($_[0]).jpeg") -Force
                                 $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($_[0]).jpeg")
@@ -2356,7 +2341,7 @@ function SetSignatures {
                         }
                     } elseif (($image.src -clike "*$(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')*")) {
                         if ($null -ne $ReplaceHash[$_[0]]) {
-                            if ($EmbedImagesInHTML -eq $false) {
+                            if ($EmbedImagesInHtml -eq $false) {
                                 Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                 Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($_[0]).jpeg") -Force
                                 $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($_[0]).jpeg")
@@ -2392,7 +2377,7 @@ function SetSignatures {
             }
         }
 
-        if ($CreateRTFSignatures -or $CreateTXTSignatures) {
+        if ($CreateRtfSignatures -or $CreateTxtSignatures) {
             $script:COMWord.Documents.Open($path, $false) | Out-Null
         }
 
@@ -2537,7 +2522,7 @@ function SetSignatures {
         }
 
         if (-not $ProcessOOF) {
-            if ($CreateRTFSignatures -eq $true) {
+            if ($CreateRtfSignatures -eq $true) {
                 Write-Host "$Indent      Export to RTF format"
                 $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
                 $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
@@ -2583,11 +2568,11 @@ function SetSignatures {
                 }
             }
 
-            if ($CreateRTFSignatures -or $CreateTXTSignatures) {
+            if ($CreateRtfSignatures -or $CreateTxtSignatures) {
                 $script:COMWord.ActiveDocument.Close($false)
             }
 
-            if ($CreateTXTSignatures -eq $true) {
+            if ($CreateTxtSignatures -eq $true) {
                 Write-Host "$Indent      Export to TXT format"
                 # We work with the .htm file to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
                 $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
@@ -2604,7 +2589,7 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.Close($false)
             }
         } else {
-            if ($CreateRTFSignatures -or $CreateTXTSignatures) {
+            if ($CreateRtfSignatures -or $CreateTxtSignatures) {
                 $script:COMWord.ActiveDocument.Close($false)
             }
         }
@@ -2623,7 +2608,7 @@ function SetSignatures {
         }
 
         if (-not $ProcessOOF) {
-            if ($EmbedImagesInHTML -eq $false) {
+            if ($EmbedImagesInHtml -eq $false) {
                 $pathConnectedFolderNames | ForEach-Object {
                     if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($_))) {
                         $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $_ + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
@@ -2651,17 +2636,17 @@ function SetSignatures {
                     Write-Host "$Indent      Copy signature files to '$SignaturePath'"
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
                     Remove-Item -LiteralPath (Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Recurse -Force -ErrorAction SilentlyContinue
-                    if ($EmbedImagesInHTML -eq $false) {
+                    if ($EmbedImagesInHtml -eq $false) {
                         if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))")) {
                             Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse
                         }
                     }
-                    if ($CreateRTFSignatures -eq $true) {
+                    if ($CreateRtfSignatures -eq $true) {
                         Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
                     } else {
                         Remove-Item ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force -ErrorAction SilentlyContinue
                     }
-                    if ($CreateTXTSignatures -eq $true) {
+                    if ($CreateTxtSignatures -eq $true) {
                         Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
                     } else {
                         Remove-Item ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force -ErrorAction SilentlyContinue

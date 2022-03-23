@@ -44,7 +44,7 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [2.2. SignatureIniPath](#22-signatureinipath)
   - [2.3. ReplacementVariableConfigFile](#23-replacementvariableconfigfile)
   - [2.4. GraphConfigFile](#24-graphconfigfile)
-  - [2.5. TrustedDomainsToCheckForGroups](#25-trusteddomainstocheckforgroups)
+  - [2.5. TrustsToCheckForGroups](#25-truststocheckforgroups)
   - [2.6. DeleteUserCreatedSignatures](#26-deleteusercreatedsignatures)
   - [2.7. DeleteScriptCreatedSignaturesWithoutTemplate](#27-deletescriptcreatedsignatureswithouttemplate)
   - [2.8. SetCurrentUserOutlookWebSignature](#28-setcurrentuseroutlookwebsignature)
@@ -52,15 +52,14 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [2.10. OOFTemplatePath](#210-ooftemplatepath)
   - [2.11. OOFIniPath](#211-oofinipath)
   - [2.12. AdditionalSignaturePath](#212-additionalsignaturepath)
-  - [2.13. AdditionalSignaturePathFolder](#213-additionalsignaturepathfolder)
-  - [2.14. UseHtmTemplates](#214-usehtmtemplates)
-  - [2.15. SimulateUser](#215-simulateuser)
-  - [2.16. SimulateMailboxes](#216-simulatemailboxes)
-  - [2.17. GraphCredentialFile](#217-graphcredentialfile)
-  - [2.18. GraphOnly](#218-graphonly)
-  - [2.19. CreateRTFSignatures](#219-creatertfsignatures)
-  - [2.20. CreateTXTSignatures](#220-createtxtsignatures)
-  - [2.21. EmbedImagesInHTML](#221-embedimagesinhtml)
+  - [2.13. UseHtmTemplates](#213-usehtmtemplates)
+  - [2.14. SimulateUser](#214-simulateuser)
+  - [2.15. SimulateMailboxes](#215-simulatemailboxes)
+  - [2.16. GraphCredentialFile](#216-graphcredentialfile)
+  - [2.17. GraphOnly](#217-graphonly)
+  - [2.18. CreateRtfSignatures](#218-creatertfsignatures)
+  - [2.19. CreateTxtSignatures](#219-createtxtsignatures)
+  - [2.20. EmbedImagesInHtml](#220-embedimagesinhtml)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -170,7 +169,7 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/c
 The currently logged in user needs at least read access to the file.
 
 Default value: `'.\config\default graph config.ps1'`  
-## 2.5. TrustedDomainsToCheckForGroups  
+## 2.5. TrustsToCheckForGroups  
 The parameters tells the script which trusted domains should be used to search for mailbox and user group membership.
 
 The default value, `'*'` tells the script to query all trusted domains in the Active Directory forest of the logged in user.
@@ -249,15 +248,7 @@ The currently logged in user needs at least write access to the path.
 If the folder or folder structure does not exist, it is created.
 
 Default value: `"$([environment]::GetFolderPath("MyDocuments"))\Outlook signatures"`  
-## 2.13. AdditionalSignaturePathFolder
-A folder or folder structure below AdditionalSignaturePath.
-
-This parameter is available for compatibility with versions before 2.2.1. Starting with 2.2.1, you can pass a full path via the parameter AdditionalSignaturePath, so AdditionalSignaturePathFolder is no longer needed.
-
-If the folder or folder structure does not exist, it is created.
-
-Default value: `'Outlook signatures'`  
-## 2.14. UseHtmTemplates  
+## 2.13. UseHtmTemplates  
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
 
 Templates in .htm format must be UTF8 encoded.
@@ -265,15 +256,15 @@ Templates in .htm format must be UTF8 encoded.
 Each format has advantages and disadvantages, please see "[13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)" for a quick overview.
 
 Default value: `$false`  
-## 2.15. SimulateUser  
+## 2.14. SimulateUser  
 SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged in user.
 
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
-## 2.16. SimulateMailboxes  
+## 2.15. SimulateMailboxes  
 SimulateMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
-## 2.17. GraphCredentialFile
+## 2.16. GraphCredentialFile
 Path to file containing Graph credential which should be used as alternative to other token acquisition methods.
 
 Makes only sense in combination with `'.\sample code\SimulateAndDeploy.ps1'`, do not use this parameter for other scenarios.
@@ -281,28 +272,28 @@ Makes only sense in combination with `'.\sample code\SimulateAndDeploy.ps1'`, do
 See `'.\sample code\SimulateAndDeploy.ps1'` for an example how to create this file.
 
 Default value: `$null`  
-## 2.18. GraphOnly
+## 2.17. GraphOnly
 Try to connect to Microsoft Graph only, ignoring any local Active Directory.
 
 The default behavior is to try Active Directory first and fall back to Graph.
 
 Default value: `$false`
-## 2.19. CreateRTFSignatures
+## 2.18. CreateRtfSignatures
 Should signatures be created in RTF format?
 
 Default value: `$true`
-## 2.20. CreateTXTSignatures
+## 2.19. CreateTxtSignatures
 Should signatures be created in TXT format?
 
 Default value: `$true`
-## 2.21. EmbedImagesInHTML
+## 2.20. EmbedImagesInHtml
 Should images be embedded into HTML files?
 
 Outlook 2016 and newer can handle images embedded directly into an HTML file as BASE64 string (`'<img src="data:image/[...]"'`).
 
 Outlook 2013 and earlier can't handle these embedded images when composing HTML e-mails (there is no problem receiving such e-mails, or when composing RTF or TXT e-mails).
 
-When setting EmbedimagesInHTML to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
+When setting EmbedImagesInHtml to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 
 Default value: `$true`
 # 3. Outlook signature path  
@@ -381,15 +372,15 @@ If you want to give template creators control over the ini file, place it in the
 - `external` (OOF template files only)  
     - Set template as default OOF message for external recipients  
     - If neither `internal` nor `external` is defined, the template is set as default OOF message for internal and external recipients  
-- `NETBIOSDomain GroupSamAccountName`, `NETBIOSDomain Display name of Group`, `-:NETBIOSDomain GroupSamAccountName`, `-:NETBIOSDomain Display name of Group`
+- `NetBiosDomain GroupSamAccountName`, `NetBiosDomain Display name of Group`, `-:NetBiosDomain GroupSamAccountName`, `-:NetBiosDomain Display name of Group`
   - Make this template specific for an Outlook mailbox being a direct or indirect member of this group or distribution list
   - The `'-:'` prefix makes this template invalid for the specified group.
   - Examples: `EXAMPLE Domain Users`, `-:Example GroupA`  
   - Groups must be available in Active Directory. Groups like `'Everyone'` and `'Authenticated Users'` only exist locally, not in Active Directory
   - This tag supports alternative formats, which are of special interest if you are in a cloud only or hybrid environmonent:
-    - `NETBIOSDomain GroupSamAccountName` and `NETBIOSDomain Group DisplayName` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName. Use these formats when your environment is hybrid or on premises only.
+    - `NetBiosDomain GroupSamAccountName` and `NetBiosDomain Group DisplayName` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName. Use these formats when your environment is hybrid or on premises only.
     - `AzureAD e-mail-address-of-group@example.com`, `AzureAD GroupMailNickname`, `AzureAD GroupDisplayName` do not work with a local Active Directory, only with Microsoft Graph. They are queried in the order given. 'AzureAD' is the literal, case-insensitive string 'AzureAD', not a variable. Use these formats when you are in a cloud only environment.
-  - 'NETBIOSDomain' and 'EXAMPLE' are just examples. You need to replace them with the actual NetBIOS domain name of the Active Director domain containing the group.
+  - 'NetBiosDomain' and 'EXAMPLE' are just examples. You need to replace them with the actual NetBios domain name of the Active Director domain containing the group.
   - 'AzureAD' is not an example. If you want to assign a template to a group stored in Azure Active Directory, you have to use 'AzureAD' as domain name.
   - When multiple groups are defined, membership in a single group is sufficient to be assigned the template - it is not required to be a member of all the defined groups.  
 - `SmtpAddress`, `-:SmtpAddress`
