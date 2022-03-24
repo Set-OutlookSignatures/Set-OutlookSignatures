@@ -308,19 +308,19 @@ function main {
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
-    write-host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.Platform), $($PSVersionTable.OS)) | Where-Object {$_}) -join "', '")'"
+    Write-Host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.Platform), $($PSVersionTable.OS)) | Where-Object {$_}) -join "', '")'"
 
-    write-host "  PowerShell bitness: $(if ([Environment]::Is64BitProcess -eq $false) {'Non-'})64-bit process on a $(if ([Environment]::Is64OperatingSystem -eq $false) {'Non-'})64-bit operating system"
+    Write-Host "  PowerShell bitness: $(if ([Environment]::Is64BitProcess -eq $false) {'Non-'})64-bit process on a $(if ([Environment]::Is64OperatingSystem -eq $false) {'Non-'})64-bit operating system"
 
-    write-host "  PowerShell parameters: '$ScriptPassedParameters'"
+    Write-Host "  PowerShell parameters: '$ScriptPassedParameters'"
 
-    write-host "  Script path: '$PSCommandPath'"
+    Write-Host "  Script path: '$PSCommandPath'"
 
     if ((Test-Path 'variable:IsWindows')) {
         # Automatic variable $IsWindows is available, must be cross-platform PowerShell version v6+
         if ($IsWindows -eq $false) {
             Write-Host "  Your OS: $($PSVersionTable.Platform), $($PSVersionTable.OS), $(Invoke-Expression '(lsb_release -ds || cat /etc/*release || uname -om) 2>/dev/null | head -n1')" -ForegroundColor Red
-            Write-Host '  This script is supported on Windows only. Exiting.' -ForegroundColor Red
+            Write-Host '  This script is supported on Windows only. Exit.' -ForegroundColor Red
             exit 1
         }
     } else {
@@ -328,8 +328,8 @@ function main {
     }
 
     if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-        Write-Host "  This PowerShell session is running in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
-        Write-Host '  Required features are only available in FullLanguage mode. Exiting.' -ForegroundColor Red
+        Write-Host "  This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+        Write-Host '  Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
         exit 1
     }
 
@@ -527,7 +527,7 @@ function main {
     Write-Host
     Write-Host "Get Outlook and Word version, default Outlook profile @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     if ($SimulateUser) {
-        Write-Host '  Simulation mode enabled, skipping Outlook checks' -ForegroundColor Yellow
+        Write-Host '  Simulation mode enabled, skip Outlook checks' -ForegroundColor Yellow
     } else {
         try {
             $OutlookFileVersion = [system.version]::parse((Get-ChildItem (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction SilentlyContinue).'(default)')\LocalServer32" -ErrorAction SilentlyContinue).'(default)').versioninfo.fileversion)
@@ -543,7 +543,7 @@ function main {
         if ($OutlookRegistryVersion.major -eq 0) {
             $OutlookRegistryVersion = $null
         } elseif ($OutlookRegistryVersion.major -gt 16) {
-            Write-Host "  Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exiting." -ForegroundColor Red
+            Write-Host "  Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
             exit 1
         } elseif ($OutlookRegistryVersion.major -eq 16) {
             $OutlookRegistryVersion = '16.0'
@@ -552,7 +552,7 @@ function main {
         } elseif ($OutlookRegistryVersion.major -eq 14) {
             $OutlookRegistryVersion = '14.0'
         } elseif ($OutlookRegistryVersion.major -lt 14) {
-            Write-Host "  Outlook version $OutlookRegistryVersion is older than Outlook 2010 and not supported. Please inform your administrator. Exiting." -ForegroundColor Red
+            Write-Host "  Outlook version $OutlookRegistryVersion is older than Outlook 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
             exit 1
         }
 
@@ -579,7 +579,7 @@ function main {
         Write-Host "  Outlook registry version: $OutlookRegistryVersion"
         if (($OutlookFileVersion -lt '16.0.0.0') -and ($EmbedImagesInHtml -eq $true)) {
             Write-Host '    Outlook 2013 or earlier detected.' -ForegroundColor Yellow
-            Write-Host '    Consider seting script parameter EmbedImagesInHtml to false to avoid problems with images in templates.' -ForegroundColor Yellow
+            Write-Host '    Consider parameter ''EmbedImagesInHtml false'' to avoid problems with images in templates.' -ForegroundColor Yellow
             Write-Host '    Microsoft supports Outlook 2013 until April 2023, older versions are already out of support.' -ForegroundColor Yellow
         }
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
@@ -591,7 +591,7 @@ function main {
     if ($WordRegistryVersion.major -eq 0) {
         $WordRegistryVersion = $null
     } elseif ($WordRegistryVersion.major -gt 16) {
-        Write-Host "Word version $WordRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exiting." -ForegroundColor Red
+        Write-Host "Word version $WordRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
         exit 1
     } elseif ($WordRegistryVersion.major -eq 16) {
         $WordRegistryVersion = '16.0'
@@ -600,7 +600,7 @@ function main {
     } elseif ($WordRegistryVersion.major -eq 14) {
         $WordRegistryVersion = '14.0'
     } elseif ($WordRegistryVersion.major -lt 14) {
-        Write-Host "Word version $WordRegistryVersion is older than Word 2010 and not supported. Please inform your administrator. Exiting." -ForegroundColor Red
+        Write-Host "Word version $WordRegistryVersion is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
         exit 1
     }
     Write-Host "  Word registry version: $WordRegistryVersion"
@@ -611,7 +611,7 @@ function main {
     $SignaturePaths = @()
     if ($SimulateUser) {
         $SignaturePaths += $AdditionalSignaturePath
-        Write-Host '  Simulation mode enabled, skipping task, using AdditionalSignaturePath instead' -ForegroundColor Yellow
+        Write-Host '  Simulation mode enabled. Skip task, use AdditionalSignaturePath instead' -ForegroundColor Yellow
     } else {
         $x = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\common\general" -ErrorAction SilentlyContinue).'Signatures'
         if ($x) {
@@ -636,7 +636,7 @@ function main {
     $LegacyExchangeDNs = @()
 
     if ($SimulateUser) {
-        Write-Host '  Simulation mode enabled, skipping task, using SimulateMailboxes instead' -ForegroundColor Yellow
+        Write-Host '  Simulation mode enabled. Skip task, use SimulateMailboxes instead' -ForegroundColor Yellow
         for ($i = 0; $i -lt $SimulateMailboxes.count; $i++) {
             $MailAddresses += $SimulateMailboxes[$i]
             $RegistryPaths += ''
@@ -733,12 +733,12 @@ function main {
                     }
 
                     if (($a -ne 0) -and ($x[$a] -ieq '*')) {
-                        Write-Host '    Skipping domain. Entry * is only allowed at first position in list.' -ForegroundColor Red
+                        Write-Host '    Entry * is only allowed at first position in list. Skip domain.' -ForegroundColor Red
                         continue
                     }
 
                     if ($y -match '[^a-zA-Z0-9.-]') {
-                        Write-Host '    Skipping domain. Allowed characters are a-z, A-Z, ., -.' -ForegroundColor Red
+                        Write-Host '    Allowed characters are a-z, A-Z, ., -. Skip domain.' -ForegroundColor Red
                         continue
                     }
 
@@ -749,7 +749,7 @@ function main {
                             $TrustsToCheckForGroups += $y
                         }
                     } else {
-                        Write-Host '    Removing domain.'
+                        Write-Host '    Remove domain.'
                         for ($z = 0; $z -lt $TrustsToCheckForGroups.Count; $z++) {
                             if ($TrustsToCheckForGroups[$z] -ilike $y.substring(1)) {
                                 $TrustsToCheckForGroups[$z] = ''
@@ -778,7 +778,7 @@ function main {
             $GraphOnly = $true
         }
     } else {
-        Write-Host "  Parameter GraphOnly set to '$GraphOnly', ignoring user's Active Directory in favor of Graph/Azure AD."
+        Write-Host "  Parameter GraphOnly set to '$GraphOnly', ignore user's Active Directory in favor of Graph/Azure AD."
     }
 
 
@@ -787,7 +787,7 @@ function main {
     if (-not $SimulateUser) {
         Write-Host '  Currently logged in user'
     } else {
-        Write-Host "  Simulating '$SimulateUser' as currently logged in user" -ForegroundColor Yellow
+        Write-Host "  Simulate '$SimulateUser' as currently logged in user" -ForegroundColor Yellow
     }
 
     if ($GraphOnly -eq $false) {
@@ -809,13 +809,13 @@ function main {
                         $ADPropsCurrentUser = $Search.FindOne().Properties
                     } catch {
                         Write-Debug $error[0]
-                        Write-Host "    Simulation user '$($SimulateUser)' not found. Exiting." -ForegroundColor REd
+                        Write-Host "    Simulation user '$($SimulateUser)' not found. Exit." -ForegroundColor REd
                         exit 1
                     }
                 }
             } catch {
                 $ADPropsCurrentUser = $null
-                Write-Host '    Problem connecting to Active Directory, or user is a local user. Exiting.' -ForegroundColor Red
+                Write-Host '    Problem connecting to Active Directory, or user is a local user. Exit.' -ForegroundColor Red
                 $error[0]
                 exit 1
             }
@@ -833,7 +833,7 @@ function main {
         try {
             Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -ErrorAction Stop
         } catch {
-            Write-Host '        Problem importing MSAL.PS module. Exiting.' -ForegroundColor Red
+            Write-Host '        Problem importing MSAL.PS module. Exit.' -ForegroundColor Red
             $error[0]
             exit 1
         }
@@ -843,12 +843,12 @@ function main {
                 Write-Host "      Execute config file '$GraphConfigFile'"
                 . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile  -Encoding UTF8 -Raw)))
             } catch {
-                Write-Host "        Problem executing content of '$GraphConfigFile'. Exiting." -ForegroundColor Red
+                Write-Host "        Problem executing content of '$GraphConfigFile'. Exit." -ForegroundColor Red
                 $error[0]
                 exit 1
             }
         } else {
-            Write-Host "      Problem connecting to or reading from file '$GraphConfigFile'. Exiting." -ForegroundColor Red
+            Write-Host "      Problem connecting to or reading from file '$GraphConfigFile'. Exit." -ForegroundColor Red
             exit 1
         }
 
@@ -876,12 +876,12 @@ function main {
                 $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $script:CurrentUser).photo
                 $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $script:CurrentUser).properties.userprincipalname
             } else {
-                Write-Host "      Problem getting data for '$($script:CurrentUser)' from Microsoft Graph. Exiting." -ForegroundColor Red
+                Write-Host "      Problem getting data for '$($script:CurrentUser)' from Microsoft Graph. Exit." -ForegroundColor Red
                 $error[0]
                 exit 1
             }
         } else {
-            Write-Host '      Problem connecting to Microsoft Graph. Exiting.' -ForegroundColor Red
+            Write-Host '      Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
             $error[0]
             exit 1
         }
@@ -895,7 +895,7 @@ function main {
             Write-Verbose "EXO Token: $ExoToken"
 
             if (-not $ExoToken) {
-                Write-Host '      Problem connecting to Exchange Online with Graph token. Exiting.' -ForegroundColor Red
+                Write-Host '      Problem connecting to Exchange Online with Graph token. Exit.' -ForegroundColor Red
                 $error[0]
                 exit 1
             }
@@ -907,7 +907,7 @@ function main {
         # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
         # Maybe this is a pure Outlook Web user, so we will add a helper entry
         # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
-        Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Adding Mailbox dummy entry." -ForegroundColor Yellow
+        Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Add dummy mailbox entry." -ForegroundColor Yellow
         $script:CurrentUserDummyMailbox = $true
         $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
         $MailAddresses = @($ADPropsCurrentUser.mail) + $MailAddresses
@@ -1002,7 +1002,7 @@ function main {
                         if ($u.count -eq 0) {
                             Write-Host 'Not found'
                         } elseif ($u.count -gt 1) {
-                            Write-Host 'Ignoring due to multiple matches' -ForegroundColor Red
+                            Write-Host 'Ignore due to multiple matches' -ForegroundColor Red
                             $u | ForEach-Object {
                                 Write-Host "      $($_.path)" -ForegroundColor Yellow
                             }
@@ -1248,13 +1248,13 @@ function main {
                             }
                         }
                     } catch {
-                        Write-Host 'Invalid DateTime, ignoring tag' -ForegroundColor Red
+                        Write-Host 'Invalid DateTime, ignore tag' -ForegroundColor Red
                     }
                 }
                 if ($TemplateFileTimeActive -eq $true) {
-                    Write-Host "      Current DateTime is in allowed time ranges, using $SigOrOOF template"
+                    Write-Host "      Current DateTime is in allowed time ranges, use $SigOrOOF template"
                 } else {
-                    Write-Host "      Current DateTime is not in allowed time ranges, ignoring $SigOrOOF template" -ForegroundColor Yellow
+                    Write-Host "      Current DateTime is not in allowed time ranges, ignore $SigOrOOF template" -ForegroundColor Yellow
                 }
             }
             if ($TemplateFileTimeActive -ne $true) {
@@ -1454,9 +1454,9 @@ function main {
 
 
     Write-Host
-    Write-Host "Start Word background process for template editing @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    Write-Host "Start Word background process @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     if (($UseHtmTemplates -eq $true) -and (($CreateRtfSignatures -eq $false) -and ($CreateTxtSignatures -eq $false))) {
-        Write-Host '  Not starting Word because: UseHtmTemplates = $true, CreateRtfSignatures = $false, CreateTxtSignatures = $false'
+        Write-Host '  Do not start Word: UseHtmTemplates = $true, CreateRtfSignatures = $false, CreateTxtSignatures = $false'
     } else {
         # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the script
         try {
@@ -1472,7 +1472,7 @@ function main {
                 Remove-Variable COMWordDummy -Scope 'script'
             }
         } catch {
-            Write-Host '  Word not installed or not working correctly. Exiting.' -ForegroundColor Red
+            Write-Host '  Word not installed or not working correctly. Exit.' -ForegroundColor Red
             $error[0]
             exit 1
         }
@@ -1633,7 +1633,7 @@ function main {
                 Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor yellow
             }
 
-            Write-Host "  SMTP addresses @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            Write-Host "  Get SMTP addresses @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $CurrentMailboxSMTPAddresses = @()
             if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
                 $ADPropsCurrentMailbox.proxyaddresses | ForEach-Object {
@@ -1645,22 +1645,22 @@ function main {
             } else {
                 $CurrentMailboxSMTPAddresses += $($MailAddresses[$AccountNumberRunning])
                 Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor Yellow
-                Write-Host '    Using mailbox name as single known SMTP address' -ForegroundColor Yellow
+                Write-Host '    Use mailbox name as single known SMTP address' -ForegroundColor Yellow
             }
 
-            Write-Host "  Data for replacement variables @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            Write-Host "  Get data for replacement variables @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $ReplaceHash = @{}
             if (Test-Path -Path $ReplacementVariableConfigFile -PathType Leaf) {
                 try {
                     Write-Host "    Execute config file '$ReplacementVariableConfigFile'"
                     . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $ReplacementVariableConfigFile  -Encoding UTF8 -Raw)))
                 } catch {
-                    Write-Host "    Problem executing content of '$ReplacementVariableConfigFile'. Exiting." -ForegroundColor Red
+                    Write-Host "    Problem executing content of '$ReplacementVariableConfigFile'. Exit." -ForegroundColor Red
                     $error[0]
                     exit 1
                 }
             } else {
-                Write-Host "    Problem connecting to or reading from file '$ReplacementVariableConfigFile'. Exiting." -ForegroundColor Red
+                Write-Host "    Problem connecting to or reading from file '$ReplacementVariableConfigFile'. Exit." -ForegroundColor Red
                 exit 1
             }
             foreach ($replaceKey in ($replaceHash.Keys | Sort-Object)) {
@@ -1789,7 +1789,7 @@ function main {
             if ($SetCurrentUserOutlookWebSignature -and ($CurrentMailboxUseSignatureRoaming -eq $false)) {
                 Write-Host "  Set Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                 if ($SimulateUser) {
-                    Write-Host '    Simulation mode enabled, skipping task' -ForegroundColor Yellow
+                    Write-Host '    Simulation mode enabled, skip task' -ForegroundColor Yellow
                 } else {
                     # If this is the primary mailbox, set OWA signature
                     for ($j = 0; $j -lt $MailAddresses.count; $j++) {
@@ -1841,7 +1841,7 @@ function main {
 
 
                             if ((($TempNewSig -ne '') -and ($TempReplySig -ne '')) -and ($TempNewSig -ine $TempReplySig)) {
-                                Write-Host "    Different default signatures for new and reply/forward set, using new one: '$TempNewSig'"
+                                Write-Host "    Different default signatures for new and reply/forward set, use new one: '$TempNewSig'"
                                 $TempOWASigFile = $TempNewSig
                                 $TempOWASigSetNew = $true
                                 $TempOWASigSetReply = $false
@@ -1972,7 +1972,7 @@ function main {
                         }
                     }
                 } else {
-                    Write-Host '    Out of Office (OOF) auto reply currently active or scheduled, not changing settings'
+                    Write-Host '    Out of Office (OOF) auto reply currently active or scheduled, do not change settings'
                 }
 
                 # Delete temporary OOF files from file system
@@ -2035,7 +2035,7 @@ function main {
             if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
                 New-Item -Path $AdditionalSignaturePath -ItemType Directory -Force | Out-Null
                 if (-not (Test-Path $AdditionalSignaturePath -PathType Container -ErrorAction SilentlyContinue)) {
-                    Write-Host '  Path could not be accessed or created, ignoring path.' -ForegroundColor Yellow
+                    Write-Host '  Path could not be accessed or created. Ignore path.' -ForegroundColor Yellow
                 } else {
                     Copy-Item -Path (Join-Path -Path $SignaturePaths[0] -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
                 }
@@ -2122,7 +2122,7 @@ function EvaluateAndSetSignatures {
             # this is the correctly sorted hashtable
             foreach ($Template in ((Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly).GetEnumerator() | Where-Object { ($_.key -eq $TemplateFile.fullname) })) {
                 Write-Host "$Indent    '$([System.IO.Path]::GetFileName($Template.key))' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                Write-Host "$Indent      Checking permissions"
+                Write-Host "$Indent      Check permissions"
                 $TemplateAllowed = $false
 
                 # check for allow entries
@@ -2188,7 +2188,7 @@ function EvaluateAndSetSignatures {
                 }
 
                 if ($Template -and ($TemplateAllowed -eq $true)) {
-                    Write-Host "$Indent        Using template as there is at least one allow and no deny for this mailbox"
+                    Write-Host "$Indent        Use template as there is at least one allow and no deny for this mailbox"
                     if ($ProcessOOF) {
                         if ($OOFFilesInternal.contains($Template.name)) {
                             $OOFInternal = $Template
@@ -2201,7 +2201,7 @@ function EvaluateAndSetSignatures {
                         SetSignatures -ProcessOOF:$ProcessOOF
                     }
                 } else {
-                    Write-Host "$Indent        Not using template as there is no allow or at least one deny for this mailbox"
+                    Write-Host "$Indent        Do not use template as there is no allow or at least one deny for this mailbox"
                 }
             }
         }
@@ -2210,7 +2210,7 @@ function EvaluateAndSetSignatures {
     if ($ProcessOOF) {
         # Internal OOF message
         if ($OOFInternal -or $OOFExternal) {
-            Write-Host "$Indent  Converting final OOF templates to HTM format @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            Write-Host "$Indent  Convert final OOF templates to HTM format @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         }
 
         if ($OOFInternal) {
@@ -2298,7 +2298,7 @@ function SetSignatures {
                     ConvertTo-SingleFileHTML $Signature.Name $path
                 }
             } catch {
-                Write-Host "$Indent        Error copying file. Skipping signature." -ForegroundColor Red
+                Write-Host "$Indent        Error copying file. Skip template." -ForegroundColor Red
                 Write-Host $error[0]
                 continue
             }
@@ -2307,7 +2307,7 @@ function SetSignatures {
             try {
                 Copy-Item -LiteralPath $Signature.Name -Destination $path -Force
             } catch {
-                Write-Host "$Indent        Error copying file. Skipping signature." -ForegroundColor Red
+                Write-Host "$Indent        Error copying file. Skip template." -ForegroundColor Red
                 continue
             }
         }
@@ -2783,8 +2783,8 @@ function CheckADConnectivity {
                         Write-Host "$Indent  $CheckProtocolText query successful"
                         $returnvalue = $true
                     } else {
-                        Write-Host "$Indent  $CheckProtocolText query failed, removing domain from list." -ForegroundColor Red
-                        Write-Host "$Indent  If this error is permanent, check firewalls, DNS and AD trust. Consider using parameter TrustsToCheckForGroups." -ForegroundColor Red
+                        Write-Host "$Indent  $CheckProtocolText query failed, remove domain from list." -ForegroundColor Red
+                        Write-Host "$Indent  If this error is permanent, check firewalls, DNS and AD trust. Consider parameter TrustsToCheckForGroups." -ForegroundColor Red
                         $TrustsToCheckForGroups.remove($data[0])
                         $returnvalue = $false
                     }
@@ -2812,7 +2812,7 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
             } catch {
                 if ($silent -eq $false) {
                     Write-Host ': ' -NoNewline
-                    Write-Host "Problem connecting to or reading from folder '$path'. Exiting." -ForegroundColor Red
+                    Write-Host "Problem connecting to or reading from folder '$path'. Exit." -ForegroundColor Red
                     exit 1
                 }
             }
@@ -2876,7 +2876,7 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
         if ((Test-Path -LiteralPath $path) -eq $false) {
             if ($silent -eq $false) {
                 Write-Host ': ' -NoNewline
-                Write-Host "Problem connecting to or reading from folder '$path'. Exiting." -ForegroundColor Red
+                Write-Host "Problem connecting to or reading from folder '$path'. Exit." -ForegroundColor Red
                 exit 1
             } else {
                 return $false
@@ -2897,7 +2897,7 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
             if ((CheckPath $pathTemp -Silent) -eq $true) {
                 if (-not (Test-Path $pathTemp -PathType Container -ErrorAction SilentlyContinue)) {
                     Write-Host ': ' -NoNewline
-                    Write-Host "'$pathTemp' is a file, '$path' not valid. Exiting." -ForegroundColor Red
+                    Write-Host "'$pathTemp' is a file, '$path' not valid. Exit." -ForegroundColor Red
                     exit 1
                 }
                 if ($pathTemp -eq $path) {
@@ -2914,7 +2914,7 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
         }
         if ((checkpath $path -silent) -ne $true) {
             Write-Host ': ' -NoNewline
-            Write-Host "Problem connecting to or reading from folder '$path'. Exiting." -ForegroundColor Red
+            Write-Host "Problem connecting to or reading from folder '$path'. Exit." -ForegroundColor Red
             exit 1
         } else {
             Write-Host
@@ -3276,7 +3276,7 @@ try {
     main
 } catch {
     Write-Host
-    Write-Host 'Unexpected error. Exiting.' -ForegroundColor red
+    Write-Host 'Unexpected error. Exit.' -ForegroundColor red
     $Error[0]
     exit 1
 } finally {
