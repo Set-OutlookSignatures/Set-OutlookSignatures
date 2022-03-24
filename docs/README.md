@@ -89,22 +89,23 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [16.6. Why is Out of Office abbreviated OOF and not OOO?](#166-why-is-out-of-office-abbreviated-oof-and-not-ooo)
   - [16.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#167-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
   - [16.8. How can I log the script output?](#168-how-can-i-log-the-script-output)
-  - [16.9. Can multiple script instances run in parallel?](#169-can-multiple-script-instances-run-in-parallel)
-  - [16.10. How do I start the script from the command line or a scheduled task?](#1610-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
-  - [16.11. How to create a shortcut to the script with parameters?](#1611-how-to-create-a-shortcut-to-the-script-with-parameters)
-  - [16.12. What is the recommended approach for implementing the software?](#1612-what-is-the-recommended-approach-for-implementing-the-software)
-  - [16.13. What is the recommended approach for custom configuration files?](#1613-what-is-the-recommended-approach-for-custom-configuration-files)
-  - [16.14. Isn't a plural noun in the script name against PowerShell best practices?](#1614-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
-  - [16.15. The script hangs at HTM/RTF export, Word shows a security warning!?](#1615-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
-  - [16.16. How to avoid empty lines when replacement variables return an empty string?](#1616-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
-  - [16.17. Is there a roadmap for future versions?](#1617-is-there-a-roadmap-for-future-versions)
-  - [16.18. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1618-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
-  - [16.19. Can I centrally manage and deploy Outook stationery with this script?](#1619-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
-  - [16.20. Why is membership in dynamic distribution groups and dynamic security groups not considered?](#1620-why-is-membership-in-dynamic-distribution-groups-and-dynamic-security-groups-not-considered)
-    - [16.20.1. What's the alternative to dynamic groups?](#16201-whats-the-alternative-to-dynamic-groups)
-  - [16.21. Why is no admin or user GUI available?](#1621-why-is-no-admin-or-user-gui-available)
-  - [16.22. What about the new signature roaming feature Microsoft announced?](#1622-what-about-the-new-signature-roaming-feature-microsoft-announced)
-    - [16.22.1. Please be aware of the following problem](#16221-please-be-aware-of-the-following-problem)
+  - [16.9. How can I get more script output for troubleshooting?](#169-how-can-i-get-more-script-output-for-troubleshooting)
+  - [16.10. Can multiple script instances run in parallel?](#1610-can-multiple-script-instances-run-in-parallel)
+  - [16.11. How do I start the script from the command line or a scheduled task?](#1611-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
+  - [16.12. How to create a shortcut to the script with parameters?](#1612-how-to-create-a-shortcut-to-the-script-with-parameters)
+  - [16.13. What is the recommended approach for implementing the software?](#1613-what-is-the-recommended-approach-for-implementing-the-software)
+  - [16.14. What is the recommended approach for custom configuration files?](#1614-what-is-the-recommended-approach-for-custom-configuration-files)
+  - [16.15. Isn't a plural noun in the script name against PowerShell best practices?](#1615-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
+  - [16.16. The script hangs at HTM/RTF export, Word shows a security warning!?](#1616-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
+  - [16.17. How to avoid empty lines when replacement variables return an empty string?](#1617-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
+  - [16.18. Is there a roadmap for future versions?](#1618-is-there-a-roadmap-for-future-versions)
+  - [16.19. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1619-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
+  - [16.20. Can I centrally manage and deploy Outook stationery with this script?](#1620-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
+  - [16.21. Why is membership in dynamic distribution groups and dynamic security groups not considered?](#1621-why-is-membership-in-dynamic-distribution-groups-and-dynamic-security-groups-not-considered)
+    - [16.21.1. What's the alternative to dynamic groups?](#16211-whats-the-alternative-to-dynamic-groups)
+  - [16.22. Why is no admin or user GUI available?](#1622-why-is-no-admin-or-user-gui-available)
+  - [16.23. What about the new signature roaming feature Microsoft announced?](#1623-what-about-the-new-signature-roaming-feature-microsoft-announced)
+    - [16.23.1. Please be aware of the following problem](#16231-please-be-aware-of-the-following-problem)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -674,14 +675,16 @@ The templates delivered with this script represent all possible formats:
 The script has no built-in logging option other than writing output to the host window.
 
 You can, for example, use PowerShell's `Start-Transcript` and `Stop-Transcript` commands to create a logging wrapper around Set-OutlookSignatures.ps1.  
-## 16.9. Can multiple script instances run in parallel?  
+## 16.9. How can I get more script output for troubleshooting?
+Start the script with the '-debug' and '-verbose' parameters to get the maximum output for troubleshooting.
+## 16.10. Can multiple script instances run in parallel?  
 The script is designed for being run in multiple instances at the same. You can combine any of the following scenarios:  
 - One user runs multiple instances of the script in parallel  
 - One user runs multiple instances of the script in simulation mode in parallel  
 - Multiple users on the same machine (e.g. Terminal Server) run multiple instances of the script in parallel  
 
 Please see `'.\sample code\SimulateAndDeploy.ps1'` for an example how to run multiple instances of Set-OutlookSignatures in parallel in a controlled manner. Don't forget to adopt path names and variables to your environment.
-## 16.10. How do I start the script from the command line or a scheduled task?  
+## 16.11. How do I start the script from the command line or a scheduled task?  
 Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. You have to be very careful about when to use single quotes or double quotes.
 
 A working example:
@@ -698,7 +701,7 @@ If you have to use the PowerShell.exe `-Command` or `-File` parameter depends on
 If you provided your users a link so they can start Set-OutlookSignatures.ps1 with the correct parameters on their own, you may want to use the official icon: `'.\logo\Set-OutlookSignatures Icon.ico'`
 
 Please see `'.\sample code\Set-OutlookSignatures.cmd'` for an example. Don't forget to adopt path names to your environment.
-## 16.11. How to create a shortcut to the script with parameters?  
+## 16.12. How to create a shortcut to the script with parameters?  
 You may want to provide a link on the desktop or in the start menu, so they can start the script on their own.
 
 The Windows user interface does not allow you to create a shortcut with a combined length of full target path and arguments greater than 259 characters.
@@ -719,7 +722,7 @@ $Shortcut.Save()
 **Attention**: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.
 
 See `'.\sample code\CreateDesktopIcon.ps1'` for a code example. Don't forget to adopt path names to your environment. 
-## 16.12. What is the recommended approach for implementing the software?  
+## 16.13. What is the recommended approach for implementing the software?  
 There is certainly no definitive generic recommendation, but the file `'.\docs\Implementation approach.html'` should be a good starting point.
 
 The content is based on real life experiences implementing the script in a multi-client environment with a five-digit number of mailboxes.
@@ -729,7 +732,7 @@ It contains proven procedures and recommendations for product managers, architec
 It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The document is available in English and German language.  
-## 16.13. What is the recommended approach for custom configuration files?
+## 16.14. What is the recommended approach for custom configuration files?
 You should not change the default configuration file `'.\config\default replacement variable.ps1'`, as it might be changed in a future release of Set-OutlookSignatures. In this case, you would have to sort out the changes yourself.
 
 The following steps are recommended:
@@ -741,11 +744,11 @@ The following steps are recommended:
    ```
 3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
 4. Start Set-OutlookSignatures with the parameter `ReplacementVariableConfigFile` pointing to the new custom configuration file.
-## 16.14. Isn't a plural noun in the script name against PowerShell best practices?
+## 16.15. Isn't a plural noun in the script name against PowerShell best practices?
 Absolutely. PowerShell best practices recommend using singular nouns, but Set-OutlookSignatures contains a plural noun.
 
 I intentionally decided not to follow the singular noun convention, as another language as PowerShell was initially used for coding and the name of the tool was already defined. If this was a commercial enterprise project, marketing would have overruled development.
-## 16.15. The script hangs at HTM/RTF export, Word shows a security warning!?
+## 16.16. The script hangs at HTM/RTF export, Word shows a security warning!?
 When using a signature template with account pictures (linked and embedded), conversion to HTM hangs at "Export to HTM format" or "Export to RTF format". In the background, there is a window "Microsoft Word Security Notice" with the following text:
 ```
 Microsoft Office has identified a potential security concern.
@@ -763,7 +766,7 @@ The behavior can be changed in at least two ways:
 
 Set-OutlookSignatures reads the registry key "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Security\DisableWarningOnIncludeFieldsUpdate" at start, sets it to 1 just before the conversion to HTM and RF takes place and restores the original state as soon as the conversions are finished.
 This way, the warning usually gets suppressed, while the Group Policy configured state of the setting still has higher priority and overrides the user setting.
-## 16.16. How to avoid empty lines when replacement variables return an empty string?
+## 16.17. How to avoid empty lines when replacement variables return an empty string?
 Not all users have values for all attributes, e. g. a mobile number. This can lead to empty lines in signatures, which may not look nice.
 
 Follow these steps to avoid empty lines:
@@ -806,11 +809,11 @@ The following example describes optional preceeding text combined an optional re
   - Telephone number is empty, mobile number is set. The paragraph mark comes from \$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$  
     first.last@example.com  
     Mobile: <a href="tel:+43yyy">+43yyy</a>
-## 16.17. Is there a roadmap for future versions?
+## 16.18. Is there a roadmap for future versions?
 There is no binding roadmap for future versions, although I maintain a list of ideas in the 'Contribution opportunities' chapter of '.\docs\CONTRIBUTING.html'.
 
 Fixing issues has priority over new features, of course.
-## 16.18. How to deploy signatures for "Send As", "Send On Behalf" etc.?
+## 16.19. How to deploy signatures for "Send As", "Send On Behalf" etc.?
 The script only considers primary mailboxes, these are mailboxes added as separate accounts. This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
 
 If you want to deploy signatures for
@@ -839,7 +842,7 @@ dg@example.com internal German informal.[Example Group] [u@example.com].docx
 This works as long as the personal mailbox of a member of "Example\Group" is connected in Outlook as primary mailbox (which usually is the case). When this personal mailbox is processed by Set-OutlookSignatures, the script recognizes the group membership and the signature assigned to it.
 
 Caveat: The \$CurrentMailbox[...]\$ replacement variables refer to the user's personal mailbox in this case, not to m<area>@example.com.
-## 16.19. Can I centrally manage and deploy Outook stationery with this script?
+## 16.20. Can I centrally manage and deploy Outook stationery with this script?
 Outlook stationery describes the layout of e-mails, including font size and color for new e-mails and for replies and forwards.
 
 The default e-mail font, size and color are usually an integral part of corporate design and corporate identity. CI/CD typically also defines the content and layout of signatures.
@@ -847,7 +850,7 @@ The default e-mail font, size and color are usually an integral part of corporat
 Set-OutlookSignatures has no features regarding deploying Outlook stationery, as there are better ways for doing this.  
 Outlook stores stationery settings in `'HKCU\Software\Microsoft\Office\<Version>\Common\MailSettings'`. You can use a logon script or group policies to deploy these keys, on-prem and for managed devices in the cloud.  
 Unfortunately, Microsoft's group policy templates (ADMX files) for Office do not seem to provide detailed settings for Outlook stationery, so you will have to deploy registry keys. 
-## 16.20. Why is membership in dynamic distribution groups and dynamic security groups not considered?
+## 16.21. Why is membership in dynamic distribution groups and dynamic security groups not considered?
 Dynamic distribution groups (DDGs) are specific groups that only work within Exchange. Group membership is evaluated just in time when an e-mail is sent to a DDG by executing the LDAP query defining a DDG.
 
 Active Directory and Graph know that a DDG is a group, but they basically do not know the members of this group. The same is valid for dynamic security groups, which are available in the cloud only.  
@@ -860,7 +863,7 @@ Microsoft does not recommend against dynamic groups, only not to use them heavil
 This is very likely the reason why dynamic groups can not be granted permissions on Exchange mailboxes and other Exchange objects, and why each dynamic group can be assigned an expansion server executing the LDAP query (expansion times of 15 minutes or more are not rare in the field).
 
 Taking all these aspects into account, Set-OutlookSignatures will not consider membership in dynamic groups until a reliable and efficient way of querying a user's dynamic group membership is available.
-### 16.20.1. What's the alternative to dynamic groups?
+### 16.21.1. What's the alternative to dynamic groups?
 Dynamic groups have their reason to exist, especially if you use them as a tool for special and rather rare use cases.
 
 With the move to the cloud, where dynamic groups were introduced just not too long ago and only with a limited set of possible query parameters, an ongoing trend can be observed: Replacing dynamic groups with regularly updated static groups.
@@ -874,7 +877,7 @@ These updates usually happen less frequent than a dynamic group is used. The sta
 - Static groups can be expanded to it's members in e-mail clients
 - Membership in static groups can easily be queried
 - Overcoming query parameter restrictions, such as combing the results of multiple LDAP queries
-## 16.21. Why is no admin or user GUI available?
+## 16.22. Why is no admin or user GUI available?
 From an admin perspective, Set-OutlookSignatures has been designed to work with on-board tools wherever possible and to make managing and deploying signatures intuitive.
 
 This "easy to set up, easy to understand, easy to maintain" approach is why
@@ -892,7 +895,7 @@ These tasks typically happen multiple times a year. A graphical user interface m
 <br>
 From a user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
 
-## 16.22. What about the new signature roaming feature Microsoft announced?  
+## 16.23. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and apps.
@@ -912,7 +915,7 @@ Until the feature is fully rolled out and an API is available, you can disable t
 
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
 
-### 16.22.1. Please be aware of the following problem
+### 16.23.1. Please be aware of the following problem
 Since Q3 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes and in  Outlook on Windows. There is still no hint of an API, or a way to disable it on the server.
 
 When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can successfully set the signature in Outlook Web, but this signature is ignored.

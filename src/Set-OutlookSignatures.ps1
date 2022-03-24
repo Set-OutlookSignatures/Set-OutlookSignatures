@@ -308,13 +308,13 @@ function main {
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
-    Write-Host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.Platform), $($PSVersionTable.OS)) | Where-Object {$_}) -join "', '")'"
+    write-host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.Platform), $($PSVersionTable.OS)) | Where-Object {$_}) -join "', '")'"
 
-    Write-Host "  PowerShell bitness: $(if ([Environment]::Is64BitProcess -eq $false) {'Non-'})64-bit process on a $(if ([Environment]::Is64OperatingSystem -eq $false) {'Non-'})64-bit operating system"
+    write-host "  PowerShell bitness: $(if ([Environment]::Is64BitProcess -eq $false) {'Non-'})64-bit process on a $(if ([Environment]::Is64OperatingSystem -eq $false) {'Non-'})64-bit operating system"
 
-    Write-Host "  PowerShell parameters: '$ScriptPassedParameters'"
+    write-host "  PowerShell parameters: '$ScriptPassedParameters'"
 
-    Write-Host "  Script path: '$PSCommandPath'"
+    write-host "  Script path: '$PSCommandPath'"
 
     if ((Test-Path 'variable:IsWindows')) {
         # Automatic variable $IsWindows is available, must be cross-platform PowerShell version v6+
@@ -490,7 +490,7 @@ function main {
         $DeleteScriptCreatedSignaturesWithoutTemplate = $false
     }
 
-    Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewLine
+    Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
     checkpath $AdditionalSignaturePath -create
 
     Write-Host "  SimulateUser: '$SimulateUser'"
@@ -808,6 +808,7 @@ function main {
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                         $ADPropsCurrentUser = $Search.FindOne().Properties
                     } catch {
+                        Write-Debug $error[0]
                         Write-Host "    Simulation user '$($SimulateUser)' not found. Exiting." -ForegroundColor REd
                         exit 1
                     }
@@ -1313,6 +1314,7 @@ function main {
                                     } catch {
                                         # No group with this sAMAccountName found. Maybe it's a display name?
                                         try {
+                                            Write-Debug $error[0]
                                             $objTrans = New-Object -ComObject 'NameTranslate'
                                             $objNT = $objTrans.GetType()
                                             $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
@@ -1325,6 +1327,7 @@ function main {
                                                 $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                             }
                                         } catch {
+                                            Write-Debug $error[0]
                                         }
                                     }
                                 } else {
@@ -1520,7 +1523,7 @@ function main {
                             $sid = New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)
                             $GroupsSIDs += $sid.tostring()
                             $SIDsToCheckInTrusts += $sid.tostring()
-                            Write-Host "      $sid"
+                            Write-Verbose "      $sid"
                         }
 
                         # Distribution groups (static only)
@@ -1529,13 +1532,13 @@ function main {
                         $search.findall() | ForEach-Object {
                             if ($_.properties.objectsid) {
                                 $sid = (New-Object System.Security.Principal.SecurityIdentifier $($_.properties.objectsid), 0).value.tostring()
-                                Write-Host "      $sid"
+                                Write-Verbose "      $sid"
                                 $GroupsSIDs += $sid.tostring()
                                 $SIDsToCheckInTrusts += $sid.tostring()
                             }
                             $_.properties.sidhistory | Where-Object { $_ } | ForEach-Object {
                                 $sid = (New-Object System.Security.Principal.SecurityIdentifier $_, 0).value.tostring()
-                                Write-Host "      $sid"
+                                Write-Verbose "      $sid"
                                 $GroupsSIDs += $sid.tostring()
                                 $SIDsToCheckInTrusts += $sid.tostring()
                             }
@@ -1594,7 +1597,7 @@ function main {
                                             foreach ($group in $Search.findall()) {
                                                 $sid = New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)
                                                 $GroupsSIDs += $sid.tostring()
-                                                Write-Host "        $sid"
+                                                Write-Verbose "        $sid"
                                             }
                                         } catch {
                                             Write-Host "        Error: $($error[0].exception)" -ForegroundColor red
@@ -1619,7 +1622,7 @@ function main {
                         Write-Host '    Microsoft Graph'
                         foreach ($sid in ((GraphGetUserTransitiveMemberOf $ADPropsCurrentMailbox.userPrincipalName).memberof.securityidentifier)) {
                             $GroupsSIDs += $sid
-                            Write-Host "      $sid"
+                            Write-Verbose "      $sid"
                         }
                     } catch {
                         $ADPropsCurrentMailboxManager = @()
@@ -1636,7 +1639,7 @@ function main {
                 $ADPropsCurrentMailbox.proxyaddresses | ForEach-Object {
                     if ([string]$_ -ilike 'smtp:*') {
                         $CurrentMailboxSMTPAddresses += [string]$_ -ireplace 'smtp:', ''
-                        Write-Host ('    ' + ([string]$_ -ireplace 'smtp:', ''))
+                        Write-Verbose ('    ' + ([string]$_ -ireplace 'smtp:', ''))
                     }
                 }
             } else {
@@ -1663,11 +1666,11 @@ function main {
             foreach ($replaceKey in ($replaceHash.Keys | Sort-Object)) {
                 if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
                     if ($($replaceHash[$replaceKey])) {
-                        Write-Host "    $($replaceKey): $($replaceHash[$replaceKey])"
+                        Write-Verbose "    $($replaceKey): $($replaceHash[$replaceKey])"
                     }
                 } else {
                     if ($null -ne $($replaceHash[$replaceKey])) {
-                        Write-Host "    $($replaceKey): Photo available"
+                        Write-Verbose "    $($replaceKey): Photo available"
                     }
                 }
             }

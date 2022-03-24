@@ -14,13 +14,20 @@ _**Breaking:** Notice about breaking change_
 -->
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.0.0" target="_blank">v3.0.0</a> - YYYY-MM-DD
-_**Breaking:** File name based tags are no longer supported. Use ini files instead._  
-_**Breaking:** Parameter AdditionalSignaturePathFolder is no longer supported. Just append the folder to the AdditionalSignaturePath parameter._
+_This major release brings several changes which can make it incompatible with previous versions. Pay special attention to the changes marked '**Breaking:**' to find out if your environment is affected and what to do._
+### Added
+- New FAQ: How can I get more script output for troubleshooting?
 ### Changed
-- **Breaking:** All input files of type .htm, .ini and .ps1 are now expected to be UTF8 encoded
-- Documentation has been updated to make clear that 'NetBiosDomain' and 'EXAMPLE' are just examples for domain names in ini files, but 'AzureAD' ist not
+- **Breaking:** All input files of type .htm, .ini and .ps1 are now expected to be UTF8 encoded.  
+If you copied and/or modified the sample files delivered with earlier versions of Set-OutlookSignatures, no changes should be necessary as these were delivered in UTF8 already. Please check the encoding anyway.
+- The following data of the currently processed mailbox is no longer displayed in the standard output stream but in the verbose output stream: 
+  - List of group membership security identifiers (SIDs)
+  - List of SMTP addresses
+  - Final data of replacement variables
+- Update documentation to make clear that 'NetBiosDomain' and 'Example' are just examples which need to be replaced with actual NetBIOS domain names, but 'AzureAD' is not an example
 ### Removed
-- **Breaking:** File name based tags are no longer supported. Use ini files instead.
+- **Breaking:** File name based tags are no longer supported. Use ini files instead.  
+This change has been announced with the release of v2.5.0 on 2022-01-14.
 - **Breaking:** Parameter AdditionalSignaturePathFolder is no longer supported. Just append the folder to the AdditionalSignaturePath parameter.
 - All sample files with tags based on file names have been removed
 
