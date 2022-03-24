@@ -220,7 +220,7 @@ Param(
     [string]$GraphConfigFile = '.\config\default graph config.ps1',
 
     # List of domains/forests to check for group membership across trusts
-    [Alias('TrustsToCheckForGroups')]
+    [Alias('DomainsToCheckForGroups')]
     [string[]]$TrustsToCheckForGroups = ('*'),
 
     # Shall the script delete signatures which were created by the user itself?
