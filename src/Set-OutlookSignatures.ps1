@@ -490,7 +490,7 @@ function main {
         $DeleteScriptCreatedSignaturesWithoutTemplate = $false
     }
 
-    Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'"
+    Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewLine
     checkpath $AdditionalSignaturePath -create
 
     Write-Host "  SimulateUser: '$SimulateUser'"
