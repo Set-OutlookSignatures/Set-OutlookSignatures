@@ -3,14 +3,16 @@
 
 # Changelog
 <!--
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
-_Put Notice here_
-_**Breaking:** Notice about breaking change_  
-### Changed
-- **Breaking:** XXX
-### Added
-### Removed
-### Fixed
+  Sample changelog entry
+  Remove leading spaces after pasting
+  ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
+  _Put Notice here_
+  _**Breaking:** Notice about breaking change_  
+  ### Changed
+  - **Breaking:** XXX
+  ### Added
+  ### Removed
+  ### Fixed
 -->
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.0.0" target="_blank">v3.0.0</a> - YYYY-MM-DD
