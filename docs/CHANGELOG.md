@@ -15,7 +15,7 @@
   ### Fixed
 -->
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.0.0-beta1" target="_blank">v3.0.0-beta1</a> - 2022-03-29
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.0.0" target="_blank">v3.0.0</a> - 2022-04-20
 _This major release brings several changes which can make it incompatible with previous versions. Pay special attention to the changes marked '**Breaking:**' to find out if your environment is affected and what to do._
 ### Added
 - New FAQ: How can I get more script output for troubleshooting?
