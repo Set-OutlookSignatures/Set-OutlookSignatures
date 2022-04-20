@@ -44,7 +44,7 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [2.2. SignatureIniPath](#22-signatureinipath)
   - [2.3. ReplacementVariableConfigFile](#23-replacementvariableconfigfile)
   - [2.4. GraphConfigFile](#24-graphconfigfile)
-  - [2.5. TrustedDomainsToCheckForGroups](#25-trusteddomainstocheckforgroups)
+  - [2.5. TrustsToCheckForGroups](#25-truststocheckforgroups)
   - [2.6. DeleteUserCreatedSignatures](#26-deleteusercreatedsignatures)
   - [2.7. DeleteScriptCreatedSignaturesWithoutTemplate](#27-deletescriptcreatedsignatureswithouttemplate)
   - [2.8. SetCurrentUserOutlookWebSignature](#28-setcurrentuseroutlookwebsignature)
@@ -52,15 +52,14 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [2.10. OOFTemplatePath](#210-ooftemplatepath)
   - [2.11. OOFIniPath](#211-oofinipath)
   - [2.12. AdditionalSignaturePath](#212-additionalsignaturepath)
-  - [2.13. AdditionalSignaturePathFolder](#213-additionalsignaturepathfolder)
-  - [2.14. UseHtmTemplates](#214-usehtmtemplates)
-  - [2.15. SimulateUser](#215-simulateuser)
-  - [2.16. SimulateMailboxes](#216-simulatemailboxes)
-  - [2.17. GraphCredentialFile](#217-graphcredentialfile)
-  - [2.18. GraphOnly](#218-graphonly)
-  - [2.19. CreateRTFSignatures](#219-creatertfsignatures)
-  - [2.20. CreateTXTSignatures](#220-createtxtsignatures)
-  - [2.21. EmbedImagesInHTML](#221-embedimagesinhtml)
+  - [2.13. UseHtmTemplates](#213-usehtmtemplates)
+  - [2.14. SimulateUser](#214-simulateuser)
+  - [2.15. SimulateMailboxes](#215-simulatemailboxes)
+  - [2.16. GraphCredentialFile](#216-graphcredentialfile)
+  - [2.17. GraphOnly](#217-graphonly)
+  - [2.18. CreateRtfSignatures](#218-creatertfsignatures)
+  - [2.19. CreateTxtSignatures](#219-createtxtsignatures)
+  - [2.20. EmbedImagesInHtml](#220-embedimagesinhtml)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -68,8 +67,8 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
 - [7. Error handling](#7-error-handling)
 - [8. Run script while Outlook is running](#8-run-script-while-outlook-is-running)
 - [9. Signature and OOF file format](#9-signature-and-oof-file-format)
-  - [9.1. Signature and OOF file naming](#91-signature-and-oof-file-naming)
-- [10. Tags and ini files](#10-tags-and-ini-files)
+  - [9.1. Signature template file naming](#91-signature-template-file-naming)
+- [10. Template tags and ini files](#10-template-tags-and-ini-files)
   - [10.1. Allowed tags](#101-allowed-tags)
   - [10.2. How to work with ini files](#102-how-to-work-with-ini-files)
 - [11. Signature and OOF application order](#11-signature-and-oof-application-order)
@@ -90,22 +89,23 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [16.6. Why is Out of Office abbreviated OOF and not OOO?](#166-why-is-out-of-office-abbreviated-oof-and-not-ooo)
   - [16.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#167-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
   - [16.8. How can I log the script output?](#168-how-can-i-log-the-script-output)
-  - [16.9. Can multiple script instances run in parallel?](#169-can-multiple-script-instances-run-in-parallel)
-  - [16.10. How do I start the script from the command line or a scheduled task?](#1610-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
-  - [16.11. How to create a shortcut to the script with parameters?](#1611-how-to-create-a-shortcut-to-the-script-with-parameters)
-  - [16.12. What is the recommended approach for implementing the software?](#1612-what-is-the-recommended-approach-for-implementing-the-software)
-  - [16.13. What is the recommended approach for custom configuration files?](#1613-what-is-the-recommended-approach-for-custom-configuration-files)
-  - [16.14. Isn't a plural noun in the script name against PowerShell best practices?](#1614-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
-  - [16.15. The script hangs at HTM/RTF export, Word shows a security warning!?](#1615-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
-  - [16.16. How to avoid empty lines when replacement variables return an empty string?](#1616-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
-  - [16.17. Is there a roadmap for future versions?](#1617-is-there-a-roadmap-for-future-versions)
-  - [16.18. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1618-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
-  - [16.19. Can I centrally manage and deploy Outook stationery with this script?](#1619-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
-  - [16.20. Why is membership in dynamic distribution groups and dynamic security groups not considered?](#1620-why-is-membership-in-dynamic-distribution-groups-and-dynamic-security-groups-not-considered)
-    - [16.20.1. What's the alternative to dynamic groups?](#16201-whats-the-alternative-to-dynamic-groups)
-  - [16.21. Why is no admin or user GUI available?](#1621-why-is-no-admin-or-user-gui-available)
-  - [16.22. What about the new signature roaming feature Microsoft announced?](#1622-what-about-the-new-signature-roaming-feature-microsoft-announced)
-    - [16.22.1. Please be aware of the following problem](#16221-please-be-aware-of-the-following-problem)
+  - [16.9. How can I get more script output for troubleshooting?](#169-how-can-i-get-more-script-output-for-troubleshooting)
+  - [16.10. Can multiple script instances run in parallel?](#1610-can-multiple-script-instances-run-in-parallel)
+  - [16.11. How do I start the script from the command line or a scheduled task?](#1611-how-do-i-start-the-script-from-the-command-line-or-a-scheduled-task)
+  - [16.12. How to create a shortcut to the script with parameters?](#1612-how-to-create-a-shortcut-to-the-script-with-parameters)
+  - [16.13. What is the recommended approach for implementing the software?](#1613-what-is-the-recommended-approach-for-implementing-the-software)
+  - [16.14. What is the recommended approach for custom configuration files?](#1614-what-is-the-recommended-approach-for-custom-configuration-files)
+  - [16.15. Isn't a plural noun in the script name against PowerShell best practices?](#1615-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
+  - [16.16. The script hangs at HTM/RTF export, Word shows a security warning!?](#1616-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
+  - [16.17. How to avoid empty lines when replacement variables return an empty string?](#1617-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
+  - [16.18. Is there a roadmap for future versions?](#1618-is-there-a-roadmap-for-future-versions)
+  - [16.19. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1619-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
+  - [16.20. Can I centrally manage and deploy Outook stationery with this script?](#1620-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
+  - [16.21. Why is membership in dynamic distribution groups and dynamic security groups not considered?](#1621-why-is-membership-in-dynamic-distribution-groups-and-dynamic-security-groups-not-considered)
+    - [16.21.1. What's the alternative to dynamic groups?](#16211-whats-the-alternative-to-dynamic-groups)
+  - [16.22. Why is no admin or user GUI available?](#1622-why-is-no-admin-or-user-gui-available)
+  - [16.23. What about the new signature roaming feature Microsoft announced?](#1623-what-about-the-new-signature-roaming-feature-microsoft-announced)
+    - [16.23.1. Please be aware of the following problem](#16231-please-be-aware-of-the-following-problem)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -133,9 +133,11 @@ The currently logged in user needs at least read access to the path.
 
 Default value: `'.\templates\Signatures DOCX'`  
 ## 2.2. SignatureIniPath
-If you can't or don't want to use file name based tags, you can place them in an ini file.
+Template tags are placed in an ini file.
 
-See '.\templates\sample signatures ini file.ini' for a sample file with further explanations.
+The file must be UTF8 encoded.
+
+See '.\templates\Signatures DOCX\_Signatures.ini' for a sample file with further explanations.
 
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
 
@@ -143,9 +145,11 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/Si
 
 The currently logged in user needs at least read access to the path
 
-Default value: `''`
+Default value: `'.\templates\Signatures DOCX\_Signatures.ini'`
 ## 2.3. ReplacementVariableConfigFile  
 The parameter ReplacementVariableConfigFile tells the script where the file defining replacement variables is located.
+
+The file must be UTF8 encoded.
 
 Local and remote paths are supported. Local paths can be absolute (`'C:\config\default replacement variables.ps1'`) or relative to the script path (`'.\config\default replacement variables.ps1'`).
 
@@ -157,6 +161,8 @@ Default value: `'.\config\default replacement variables.ps1'`
 ## 2.4. GraphConfigFile
 The parameter GraphConfigFile tells the script where the file defining Graph connection and configuration options is located.
 
+The file must be UTF8 encoded.
+
 Local and remote paths are supported. Local paths can be absolute (`'C:\config\default graph config.ps1'`) or relative to the script path (`'.\config\default graph config.ps1'`).
 
 WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/config/default graph config.ps1'` or `'\\server.domain@SSL\SignatureSite\config\default graph config.ps1'`
@@ -164,7 +170,7 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/c
 The currently logged in user needs at least read access to the file.
 
 Default value: `'.\config\default graph config.ps1'`  
-## 2.5. TrustedDomainsToCheckForGroups  
+## 2.5. TrustsToCheckForGroups  
 The parameters tells the script which trusted domains should be used to search for mailbox and user group membership.
 
 The default value, `'*'` tells the script to query all trusted domains in the Active Directory forest of the logged in user.
@@ -213,9 +219,11 @@ The currently logged in user needs at least read access to the path.
 
 Default value: `'.\templates\Out of Office DOCX'`
 ## 2.11. OOFIniPath
-If you can't or don't want to use file name based tags, you can place them in an ini file.
+Template tags are placed in an ini file.
 
-See '.\templates\sample OOF ini file.ini' for a sample file with further explanations.
+The file must be UTF8 encoded.
+
+See '.\templates\Out of Office DOCX\_OOF.ini' for a sample file with further explanations.
 
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\templates\Signatures')
 
@@ -223,7 +231,7 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/Si
 
 The currently logged in user needs at least read access to the path
 
-Default value: `''`
+Default value: `'.\templates\Out of Office DOCX\_OOF.ini'`
 ## 2.12. AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
@@ -241,29 +249,23 @@ The currently logged in user needs at least write access to the path.
 If the folder or folder structure does not exist, it is created.
 
 Default value: `"$([environment]::GetFolderPath("MyDocuments"))\Outlook signatures"`  
-## 2.13. AdditionalSignaturePathFolder
-A folder or folder structure below AdditionalSignaturePath.
-
-This parameter is available for compatibility with versions before 2.2.1. Starting with 2.2.1, you can pass a full path via the parameter AdditionalSignaturePath, so AdditionalSignaturePathFolder is no longer needed.
-
-If the folder or folder structure does not exist, it is created.
-
-Default value: `'Outlook signatures'`  
-## 2.14. UseHtmTemplates  
+## 2.13. UseHtmTemplates  
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
+
+Templates in .htm format must be UTF8 encoded.
 
 Each format has advantages and disadvantages, please see "[13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)" for a quick overview.
 
 Default value: `$false`  
-## 2.15. SimulateUser  
+## 2.14. SimulateUser  
 SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged in user.
 
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
-## 2.16. SimulateMailboxes  
+## 2.15. SimulateMailboxes  
 SimulateMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
-## 2.17. GraphCredentialFile
+## 2.16. GraphCredentialFile
 Path to file containing Graph credential which should be used as alternative to other token acquisition methods.
 
 Makes only sense in combination with `'.\sample code\SimulateAndDeploy.ps1'`, do not use this parameter for other scenarios.
@@ -271,28 +273,28 @@ Makes only sense in combination with `'.\sample code\SimulateAndDeploy.ps1'`, do
 See `'.\sample code\SimulateAndDeploy.ps1'` for an example how to create this file.
 
 Default value: `$null`  
-## 2.18. GraphOnly
+## 2.17. GraphOnly
 Try to connect to Microsoft Graph only, ignoring any local Active Directory.
 
 The default behavior is to try Active Directory first and fall back to Graph.
 
 Default value: `$false`
-## 2.19. CreateRTFSignatures
+## 2.18. CreateRtfSignatures
 Should signatures be created in RTF format?
 
 Default value: `$true`
-## 2.20. CreateTXTSignatures
+## 2.19. CreateTxtSignatures
 Should signatures be created in TXT format?
 
 Default value: `$true`
-## 2.21. EmbedImagesInHTML
+## 2.20. EmbedImagesInHtml
 Should images be embedded into HTML files?
 
 Outlook 2016 and newer can handle images embedded directly into an HTML file as BASE64 string (`'<img src="data:image/[...]"'`).
 
 Outlook 2013 and earlier can't handle these embedded images when composing HTML e-mails (there is no problem receiving such e-mails, or when composing RTF or TXT e-mails).
 
-When setting EmbedimagesInHTML to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
+When setting EmbedImagesInHtml to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 
 Default value: `$true`
 # 3. Outlook signature path  
@@ -336,33 +338,17 @@ New and changed signatures can be used instantly in Outlook.
 Changing which signature is to be used as default signature for new e-mails or for replies and forwards requires restarting Outlook.   
 # 9. Signature and OOF file format  
 Only Word files with the extension .docx and HTML files with the extension .htm are supported as signature and OOF template files.  
-## 9.1. Signature and OOF file naming  
-The script copies every signature and OOF file as-is, with one exception: When tags are defined in the file name, these tags are removed.
+## 9.1. Signature template file naming  
+The name of the signature template file without extension is the name of the signature in Outlook.
+Example: The template "Test signature.docx" will create a signature named "Test signature" in Outlook.
 
-Tags must be placed before the file extension and be separated from the base filename with a period.
-
-Examples:  
-- `'Company external German.docx'` -> `'Company external German.htm'`, no changes  
-- `'Company external German.[defaultNew].docx'` -> `'Company external German.htm'`, tag(s) is/are removed  
-- `'Company external [English].docx'` -> `'Company external [English].htm'`, tag(s) is/are not removed, because there is no dot before  
-- `'Company external [English].[defaultNew] [Company-AD All Employees].docx'` -> `'Company external [English].htm'`, tag(s) is/are removed, because they are separated from base filename  
-
-If possible, do not use file name based tags,but place them an ini file. File name based tags are deprecated since v2.5.0 and will no longer be supported at all in a future release.  
-
-Using an ini file has the following advantages:
-- shorter template file names, as tags are in the ini file and no longer in the file names
-- unlimited number of tags, as no file system restrictions apply
-- different configurations for the same templates folder by using different ini files for different audiences
-- alternative sort orders for templates within template groups (common, group specific, e-mail address specific)
-- with file name tags, the application order is always alphabetically ascending using the system culture sort order - with ini files, you can switch to alphabetically descending or as sorted in the ini file and define an other sort culture
-
-See the '.\templates' folder for sample templates and configuration.  
-
-The number of possible file name based tags and template file name length in general is limited by operating system file name and path length restrictions.  
-On Powershell 7+, the script works with path names longer than the default Windows limit of 260 characters.  
-On Powershell 5.1, enable "LongPathsEnabled" on the operating system level as described in <a href="https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation" target="_blank">this Microsoft article</a>.  
-
-# 10. Tags and ini files
+This can be overridden in the ini file with the 'OutlookSignatureName' parameter.
+Example: The template "Test signature.htm" with the following ini file configuration will create a signature named "Test signature, do not use".
+```
+[Test signature.htm]
+OutlookSignatureName = Test signature, do not use
+```
+# 10. Template tags and ini files
 Tags define properties for templates, such as
 - time ranges during which a template shall be applied or not applied
 - groups whose direct or indirect members are allowed or denied application of a template
@@ -374,12 +360,6 @@ Tags define properties for templates, such as
 There are additional tags which are not template specific, but change the behavior of Set-OutlookSignatures:
 - specific sort order for templates (ascending, descending, as listed in the file)
 - specific sort culture used for sorting ascendingly or descendingly (de-AT or en-US, for example)
-
-Using an ini file has several advantages compared to file name based tags:
-- shorter template file names, as tags are in the ini file and no longer in the file names
-- unlimited number of tags, as no file system restrictions apply
-- different configurations for the same templates folder by using different ini files for different audiences
-- additional options which can't be handled by file name based tags (sort order, sort culture, differing signature names, deny tags, etc.)
 
 If you want to give template creators control over the ini file, place it in the same folder as the templates.
 ## 10.1. Allowed tags
@@ -393,25 +373,28 @@ If you want to give template creators control over the ini file, place it in the
 - `external` (OOF template files only)  
     - Set template as default OOF message for external recipients  
     - If neither `internal` nor `external` is defined, the template is set as default OOF message for internal and external recipients  
-- `NETBIOSDomain GroupSamAccountName`, `NETBIOSDomain Display name of Group`, `-:NETBIOSDomain GroupSamAccountName`, `-:NETBIOSDomain Display name of Group`
+- `NetBiosDomain GroupSamAccountName`, `NetBiosDomain Display name of Group`, `-:NetBiosDomain GroupSamAccountName`, `-:NetBiosDomain Display name of Group`
   - Make this template specific for an Outlook mailbox being a direct or indirect member of this group or distribution list
   - The `'-:'` prefix makes this template invalid for the specified group.
   - Examples: `EXAMPLE Domain Users`, `-:Example GroupA`  
   - Groups must be available in Active Directory. Groups like `'Everyone'` and `'Authenticated Users'` only exist locally, not in Active Directory
   - This tag supports alternative formats, which are of special interest if you are in a cloud only or hybrid environmonent:
-    - `NETBIOSDomain GroupSamAccountName` and `NETBIOSDomain Group DisplayName` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName. Use these formats when your environment is hybrid or on premises only.
-    - `AzureAD e-mail-address-of-group@example.com`, `AzureAD GroupMailNickname`, `AzureAD GroupDisplayName` do not work with a local Active Directory, only with Microsoft Graph. They are queried in the order given. 'AzureAD' is the literal, case-insensitive string 'AzureAD', not a variable. Use these formats when you are in a cloud only environment.  
-- `SMTPaddress`, `-:SMTPaddress`
+    - `NetBiosDomain GroupSamAccountName` and `NetBiosDomain Group DisplayName` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName. Use these formats when your environment is hybrid or on premises only.
+    - `AzureAD e-mail-address-of-group@example.com`, `AzureAD GroupMailNickname`, `AzureAD GroupDisplayName` do not work with a local Active Directory, only with Microsoft Graph. They are queried in the order given. 'AzureAD' is the literal, case-insensitive string 'AzureAD', not a variable. Use these formats when you are in a cloud only environment.
+  - 'NetBiosDomain' and 'EXAMPLE' are just examples. You need to replace them with the actual NetBios domain name of the Active Director domain containing the group.
+  - 'AzureAD' is not an example. If you want to assign a template to a group stored in Azure Active Directory, you have to use 'AzureAD' as domain name.
+  - When multiple groups are defined, membership in a single group is sufficient to be assigned the template - it is not required to be a member of all the defined groups.  
+- `SmtpAddress`, `-:SmtpAddress`
   - Make this template specific for the assigned e-mail address (all SMTP addresses of a mailbox are considered, not only the primary one)
   - The `'-:'` prefix makes this template invalid for the specified e-mail address.
   - Examples: `office@example.com`, `-:test@example.com`
 - `yyyyMMddHHmm-yyyyMMddHHmm`, `-:yyyyMMddHHmm-yyyyMMddHHmm`
-  - Make this template valid only during the specific time range (`yyyy` = year, `MM` = month, `dd` = day, `HH` = hour, `mm` = minute).
+  - Make this template valid only during the specific time range (`yyyy` = year, `MM` = month, `dd` = day, `HH` = hour (00-24), `mm` = minute).
   - The `'-:'` prefix makes this template invalid during the specified time range.
   - Examples: `202112150000-202112262359` for the 2021 Christmas season, `-:202202010000-202202282359` for a deny in February 2022
   - If the script does not run after a template has expired, the template is still available on the client and can be used.  
 
-<br>Tags can be combined: A template may be assigned to several groups, e-mail addresses and time ranges, be denied for several groups, e-mail adresses and time ranges, be used as default signature for new e-mails and as default signature for replies and forwards - all at the same time.
+<br>Tags can be combined: A template may be assigned to several groups, e-mail addresses and time ranges, be denied for several groups, e-mail adresses and time ranges, be used as default signature for new e-mails and as default signature for replies and forwards - all at the same time. Simple add different tags below a file name, separated by line breaks (each tag needs to be on a separate line).
 
 ## 10.2. How to work with ini files
 1. Comments
@@ -692,14 +675,16 @@ The templates delivered with this script represent all possible formats:
 The script has no built-in logging option other than writing output to the host window.
 
 You can, for example, use PowerShell's `Start-Transcript` and `Stop-Transcript` commands to create a logging wrapper around Set-OutlookSignatures.ps1.  
-## 16.9. Can multiple script instances run in parallel?  
+## 16.9. How can I get more script output for troubleshooting?
+Start the script with the '-debug' and '-verbose' parameters to get the maximum output for troubleshooting.
+## 16.10. Can multiple script instances run in parallel?  
 The script is designed for being run in multiple instances at the same. You can combine any of the following scenarios:  
 - One user runs multiple instances of the script in parallel  
 - One user runs multiple instances of the script in simulation mode in parallel  
 - Multiple users on the same machine (e.g. Terminal Server) run multiple instances of the script in parallel  
 
 Please see `'.\sample code\SimulateAndDeploy.ps1'` for an example how to run multiple instances of Set-OutlookSignatures in parallel in a controlled manner. Don't forget to adopt path names and variables to your environment.
-## 16.10. How do I start the script from the command line or a scheduled task?  
+## 16.11. How do I start the script from the command line or a scheduled task?  
 Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. You have to be very careful about when to use single quotes or double quotes.
 
 A working example:
@@ -716,7 +701,7 @@ If you have to use the PowerShell.exe `-Command` or `-File` parameter depends on
 If you provided your users a link so they can start Set-OutlookSignatures.ps1 with the correct parameters on their own, you may want to use the official icon: `'.\logo\Set-OutlookSignatures Icon.ico'`
 
 Please see `'.\sample code\Set-OutlookSignatures.cmd'` for an example. Don't forget to adopt path names to your environment.
-## 16.11. How to create a shortcut to the script with parameters?  
+## 16.12. How to create a shortcut to the script with parameters?  
 You may want to provide a link on the desktop or in the start menu, so they can start the script on their own.
 
 The Windows user interface does not allow you to create a shortcut with a combined length of full target path and arguments greater than 259 characters.
@@ -737,7 +722,7 @@ $Shortcut.Save()
 **Attention**: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.
 
 See `'.\sample code\CreateDesktopIcon.ps1'` for a code example. Don't forget to adopt path names to your environment. 
-## 16.12. What is the recommended approach for implementing the software?  
+## 16.13. What is the recommended approach for implementing the software?  
 There is certainly no definitive generic recommendation, but the file `'.\docs\Implementation approach.html'` should be a good starting point.
 
 The content is based on real life experiences implementing the script in a multi-client environment with a five-digit number of mailboxes.
@@ -747,7 +732,7 @@ It contains proven procedures and recommendations for product managers, architec
 It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The document is available in English and German language.  
-## 16.13. What is the recommended approach for custom configuration files?
+## 16.14. What is the recommended approach for custom configuration files?
 You should not change the default configuration file `'.\config\default replacement variable.ps1'`, as it might be changed in a future release of Set-OutlookSignatures. In this case, you would have to sort out the changes yourself.
 
 The following steps are recommended:
@@ -759,11 +744,11 @@ The following steps are recommended:
    ```
 3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
 4. Start Set-OutlookSignatures with the parameter `ReplacementVariableConfigFile` pointing to the new custom configuration file.
-## 16.14. Isn't a plural noun in the script name against PowerShell best practices?
+## 16.15. Isn't a plural noun in the script name against PowerShell best practices?
 Absolutely. PowerShell best practices recommend using singular nouns, but Set-OutlookSignatures contains a plural noun.
 
 I intentionally decided not to follow the singular noun convention, as another language as PowerShell was initially used for coding and the name of the tool was already defined. If this was a commercial enterprise project, marketing would have overruled development.
-## 16.15. The script hangs at HTM/RTF export, Word shows a security warning!?
+## 16.16. The script hangs at HTM/RTF export, Word shows a security warning!?
 When using a signature template with account pictures (linked and embedded), conversion to HTM hangs at "Export to HTM format" or "Export to RTF format". In the background, there is a window "Microsoft Word Security Notice" with the following text:
 ```
 Microsoft Office has identified a potential security concern.
@@ -781,7 +766,7 @@ The behavior can be changed in at least two ways:
 
 Set-OutlookSignatures reads the registry key "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Security\DisableWarningOnIncludeFieldsUpdate" at start, sets it to 1 just before the conversion to HTM and RF takes place and restores the original state as soon as the conversions are finished.
 This way, the warning usually gets suppressed, while the Group Policy configured state of the setting still has higher priority and overrides the user setting.
-## 16.16. How to avoid empty lines when replacement variables return an empty string?
+## 16.17. How to avoid empty lines when replacement variables return an empty string?
 Not all users have values for all attributes, e. g. a mobile number. This can lead to empty lines in signatures, which may not look nice.
 
 Follow these steps to avoid empty lines:
@@ -824,11 +809,11 @@ The following example describes optional preceeding text combined an optional re
   - Telephone number is empty, mobile number is set. The paragraph mark comes from \$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$  
     first.last@example.com  
     Mobile: <a href="tel:+43yyy">+43yyy</a>
-## 16.17. Is there a roadmap for future versions?
+## 16.18. Is there a roadmap for future versions?
 There is no binding roadmap for future versions, although I maintain a list of ideas in the 'Contribution opportunities' chapter of '.\docs\CONTRIBUTING.html'.
 
 Fixing issues has priority over new features, of course.
-## 16.18. How to deploy signatures for "Send As", "Send On Behalf" etc.?
+## 16.19. How to deploy signatures for "Send As", "Send On Behalf" etc.?
 The script only considers primary mailboxes, these are mailboxes added as separate accounts. This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
 
 If you want to deploy signatures for
@@ -857,7 +842,7 @@ dg@example.com internal German informal.[Example Group] [u@example.com].docx
 This works as long as the personal mailbox of a member of "Example\Group" is connected in Outlook as primary mailbox (which usually is the case). When this personal mailbox is processed by Set-OutlookSignatures, the script recognizes the group membership and the signature assigned to it.
 
 Caveat: The \$CurrentMailbox[...]\$ replacement variables refer to the user's personal mailbox in this case, not to m<area>@example.com.
-## 16.19. Can I centrally manage and deploy Outook stationery with this script?
+## 16.20. Can I centrally manage and deploy Outook stationery with this script?
 Outlook stationery describes the layout of e-mails, including font size and color for new e-mails and for replies and forwards.
 
 The default e-mail font, size and color are usually an integral part of corporate design and corporate identity. CI/CD typically also defines the content and layout of signatures.
@@ -865,7 +850,7 @@ The default e-mail font, size and color are usually an integral part of corporat
 Set-OutlookSignatures has no features regarding deploying Outlook stationery, as there are better ways for doing this.  
 Outlook stores stationery settings in `'HKCU\Software\Microsoft\Office\<Version>\Common\MailSettings'`. You can use a logon script or group policies to deploy these keys, on-prem and for managed devices in the cloud.  
 Unfortunately, Microsoft's group policy templates (ADMX files) for Office do not seem to provide detailed settings for Outlook stationery, so you will have to deploy registry keys. 
-## 16.20. Why is membership in dynamic distribution groups and dynamic security groups not considered?
+## 16.21. Why is membership in dynamic distribution groups and dynamic security groups not considered?
 Dynamic distribution groups (DDGs) are specific groups that only work within Exchange. Group membership is evaluated just in time when an e-mail is sent to a DDG by executing the LDAP query defining a DDG.
 
 Active Directory and Graph know that a DDG is a group, but they basically do not know the members of this group. The same is valid for dynamic security groups, which are available in the cloud only.  
@@ -878,7 +863,7 @@ Microsoft does not recommend against dynamic groups, only not to use them heavil
 This is very likely the reason why dynamic groups can not be granted permissions on Exchange mailboxes and other Exchange objects, and why each dynamic group can be assigned an expansion server executing the LDAP query (expansion times of 15 minutes or more are not rare in the field).
 
 Taking all these aspects into account, Set-OutlookSignatures will not consider membership in dynamic groups until a reliable and efficient way of querying a user's dynamic group membership is available.
-### 16.20.1. What's the alternative to dynamic groups?
+### 16.21.1. What's the alternative to dynamic groups?
 Dynamic groups have their reason to exist, especially if you use them as a tool for special and rather rare use cases.
 
 With the move to the cloud, where dynamic groups were introduced just not too long ago and only with a limited set of possible query parameters, an ongoing trend can be observed: Replacing dynamic groups with regularly updated static groups.
@@ -892,7 +877,7 @@ These updates usually happen less frequent than a dynamic group is used. The sta
 - Static groups can be expanded to it's members in e-mail clients
 - Membership in static groups can easily be queried
 - Overcoming query parameter restrictions, such as combing the results of multiple LDAP queries
-## 16.21. Why is no admin or user GUI available?
+## 16.22. Why is no admin or user GUI available?
 From an admin perspective, Set-OutlookSignatures has been designed to work with on-board tools wherever possible and to make managing and deploying signatures intuitive.
 
 This "easy to set up, easy to understand, easy to maintain" approach is why
@@ -910,7 +895,7 @@ These tasks typically happen multiple times a year. A graphical user interface m
 <br>
 From a user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
 
-## 16.22. What about the new signature roaming feature Microsoft announced?  
+## 16.23. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
 
 This is a good idea, as it makes signatures available across devices and apps.
@@ -930,7 +915,7 @@ Until the feature is fully rolled out and an API is available, you can disable t
 
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
 
-### 16.22.1. Please be aware of the following problem
+### 16.23.1. Please be aware of the following problem
 Since Q3 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes and in  Outlook on Windows. There is still no hint of an API, or a way to disable it on the server.
 
 When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can successfully set the signature in Outlook Web, but this signature is ignored.

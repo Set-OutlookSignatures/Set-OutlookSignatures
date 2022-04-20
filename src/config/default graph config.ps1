@@ -1,4 +1,4 @@
-﻿# This file allows defining the default configuration for connecting to Microsoft Graph for Set-OutlookSignatures
+# This file allows defining the default configuration for connecting to Microsoft Graph for Set-OutlookSignatures
 #
 # This script is executed as a whole once per Set-OutlookSignatures run.
 #

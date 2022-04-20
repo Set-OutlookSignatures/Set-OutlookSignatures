@@ -22,9 +22,9 @@ Limitations
 - Despitze parallelization, the script runtime can be unsuited for a higher number of users. The reason usually is the Word background process.
   - If you require signatures in RTF and/or TXT format, Word is needed for document conversion and you can only shorten runtime by adding hardware (scale up or scale out)
   - If you do need HTML signatures only, you can use the following workaround to avoid starting Word:
-    - Use HTM templates instead of DOCX templates (parameter '-UseHTMTemplates true')
-    - Do not created signatures in RTF format (parameter '-CreateRTFSignatures false')
-    - Do not created signatures in TXT format (parameter '-CreateTXTSignatures false')
+    - Use HTM templates instead of DOCX templates (parameter '-UseHtmTemplates true')
+    - Do not created signatures in RTF format (parameter '-CreateRtfSignatures false')
+    - Do not created signatures in TXT format (parameter '-CreateTxtSignatures false')
 
 Future enhancements
 - Support for upcoming Microsoft signature roaming API (very likely cloud-only)
@@ -50,7 +50,7 @@ $SimulateResultPath = $([IO.Path]::Combine([environment]::GetFolderPath('MyDocum
 $SimulateListFile = $([IO.Path]::Combine($SimulateResultPath, 'SimulateList.csv'))
 $JobsConcurrent = 2
 $SetOutlookSignaturesScriptPath = '..\Set-OutlookSignatures.ps1'
-$SetOutlookSignaturesScriptParameters = "-SignatureTemplatePath `"C:\temp\Signatures DOCX`" -SignatureIniPath `"C:\temp\Signatures DOCX\_.ini`" -SetCurrentUserOOFMessage `$false -CreateRTFSignatures `$true -CreateTXTSignatures `$true" # Do not use: SimulateUser, SimulateMailbox, AdditionalSignaturePath, GraphCredentialFile
+$SetOutlookSignaturesScriptParameters = "-SignatureTemplatePath `"C:\temp\Signatures DOCX`" -SignatureIniPath `"C:\temp\Signatures DOCX\_.ini`" -SetCurrentUserOOFMessage `$false -CreateRtfSignatures `$true -CreateTxtSignatures `$true" # Do not use: SimulateUser, SimulateMailbox, AdditionalSignaturePath, GraphCredentialFile
 
 
 Set-Location $PSScriptRoot | Out-Null
