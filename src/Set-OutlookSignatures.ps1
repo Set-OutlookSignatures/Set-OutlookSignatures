@@ -2016,7 +2016,7 @@ function main {
                     Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
                     Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
                     foreach ($x in $ConnectedFilesFolderNames) {
-                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '$x'))) -Recurse -Force -ErrorAction silentlycontinue
+                        Remove-Item -LiteralPath ($([System.IO.Path]::GetFileNameWithoutExtension($_.fullname)) + $x) -Recurse -Force -ErrorAction SilentlyContinue
                     }
                 }
             }
@@ -2637,8 +2637,10 @@ function SetSignatures {
                 } else {
                     # Microsoft signature roaming not available
                     Write-Host "$Indent      Copy signature files to '$SignaturePath'"
+                    foreach ($x in $ConnectedFilesFolderNames) {
+                        Remove-Item -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $x) -Recurse -Force -ErrorAction SilentlyContinue
+                    }
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
-                    Remove-Item -LiteralPath (Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Recurse -Force -ErrorAction SilentlyContinue
                     if ($EmbedImagesInHtml -eq $false) {
                         if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))")) {
                             Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse
