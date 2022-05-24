@@ -886,7 +886,11 @@ This "easy to set up, easy to understand, easy to maintain" approach is why
 - there is the clear hierarchy of common, group specific and e-mail address specific template application order
 
 For an admin, the most complicated part is bringing Set-OutlookSignatures to his users by integrating it into the logon script, deploy a desktop icon or start menu entry, or creating a scheduled task. Alternatively, an admin can use a signature deployment method without user or client involvement.  
-Both tasks are usually neccessary only once, sample code and documentation based on real life experiences are available.
+Both tasks are usually neccessary only once, sample code and documentation based on real life experiences are available.  
+Anyhow, a basic GUI for configuring the script is accessible via the following built-in PowerShell command:
+```
+Show-Command .\Set-OutlookSignatures.ps1
+```
 
 For a template creator/maintainer, maintaining the INI files defining template application order and permissions is this main task, in combination with tests using simulation mode.  
 These tasks typically happen multiple times a year. A graphical user interface might make them more intuitive and easier; until then, documentation and examples based on real life experiences are available.
