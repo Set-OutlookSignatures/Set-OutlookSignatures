@@ -300,7 +300,7 @@ function main {
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     Write-Host '  Script : Set-OutlookSignatures'
-    Write-Host '  Version: v3.1.0-alpha.4'
+    Write-Host '  Version: XXXVersionStringXXX'
     Write-Host '  Web    : https://github.com/GruberMarkus/Set-OutlookSignatures'
     Write-Host "  License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)"
 
