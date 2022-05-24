@@ -300,7 +300,7 @@ function main {
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     Write-Host '  Script : Set-OutlookSignatures'
-    Write-Host '  Version: XXXVersionStringXXX'
+    Write-Host '  Version: v3.1.0-alpha.4'
     Write-Host '  Web    : https://github.com/GruberMarkus/Set-OutlookSignatures'
     Write-Host "  License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)"
 
@@ -2746,7 +2746,8 @@ function CheckADConnectivity {
                     [string]$CheckDomain,
                     [string]$CheckProtocolText
                 )
-                Write-Verbose "Start(Ticks) = $((Get-Date).Ticks)"
+                $DebugPreference = 'Continue'
+                Write-Debug "Start(Ticks) = $((Get-Date).Ticks)"
                 Write-Output "$CheckDomain"
                 $Search = New-Object DirectoryServices.DirectorySearcher
                 $Search.PageSize = 1000
@@ -2771,8 +2772,8 @@ function CheckADConnectivity {
     }
     while (($script:jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
         $script:jobs | ForEach-Object {
-            if (($null -eq $_.StartTime) -and ($_.Powershell.Streams.Verbose[0].Message -match 'Start')) {
-                $StartTicks = $_.powershell.Streams.Verbose[0].Message -replace '[^0-9]'
+            if (($null -eq $_.StartTime) -and ($_.Powershell.Streams.Debug[0].Message -match 'Start')) {
+                $StartTicks = $_.powershell.Streams.Debug[0].Message -replace '[^0-9]'
                 $_.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
             }
 
