@@ -676,7 +676,7 @@ The script has no built-in logging option other than writing output to the host 
 
 You can, for example, use PowerShell's `Start-Transcript` and `Stop-Transcript` commands to create a logging wrapper around Set-OutlookSignatures.ps1.  
 ## 16.9. How can I get more script output for troubleshooting?
-Start the script with the '-debug' and '-verbose' parameters to get the maximum output for troubleshooting.
+Start the script with the '-verbose' parameter to get the maximum output for troubleshooting.
 ## 16.10. Can multiple script instances run in parallel?  
 The script is designed for being run in multiple instances at the same. You can combine any of the following scenarios:  
 - One user runs multiple instances of the script in parallel  

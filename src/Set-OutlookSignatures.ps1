@@ -773,8 +773,8 @@ function main {
             }
         } catch {
             $y = ''
-            Write-Debug $error[0]
-            Write-Host '  Problem connecting to logged in user''s Active Directory (see debug stream for error message), assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
+            Write-Verbose $error[0]
+            Write-Host '  Problem connecting to logged in user''s Active Directory (see verbose stream for error message), assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
             $GraphOnly = $true
         }
     } else {
@@ -808,7 +808,7 @@ function main {
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                         $ADPropsCurrentUser = $Search.FindOne().Properties
                     } catch {
-                        Write-Debug $error[0]
+                        Write-Verbose $error[0]
                         Write-Host "    Simulation user '$($SimulateUser)' not found. Exit." -ForegroundColor REd
                         exit 1
                     }
@@ -1314,7 +1314,7 @@ function main {
                                     } catch {
                                         # No group with this sAMAccountName found. Maybe it's a display name?
                                         try {
-                                            Write-Debug $error[0]
+                                            Write-Verbose $error[0]
                                             $objTrans = New-Object -ComObject 'NameTranslate'
                                             $objNT = $objTrans.GetType()
                                             $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
@@ -1327,7 +1327,7 @@ function main {
                                                 $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                             }
                                         } catch {
-                                            Write-Debug $error[0]
+                                            Write-Verbose $error[0]
                                         }
                                     }
                                 } else {
@@ -2746,8 +2746,7 @@ function CheckADConnectivity {
                     [string]$CheckDomain,
                     [string]$CheckProtocolText
                 )
-                $DebugPreference = 'Continue'
-                Write-Debug "Start(Ticks) = $((Get-Date).Ticks)"
+                Write-Verbose "Start(Ticks) = $((Get-Date).Ticks)"
                 Write-Output "$CheckDomain"
                 $Search = New-Object DirectoryServices.DirectorySearcher
                 $Search.PageSize = 1000
@@ -2772,8 +2771,8 @@ function CheckADConnectivity {
     }
     while (($script:jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
         $script:jobs | ForEach-Object {
-            if (($null -eq $_.StartTime) -and ($_.Powershell.Streams.Debug[0].Message -match 'Start')) {
-                $StartTicks = $_.powershell.Streams.Debug[0].Message -replace '[^0-9]'
+            if (($null -eq $_.StartTime) -and ($_.Powershell.Streams.Verbose[0].Message -match 'Start')) {
+                $StartTicks = $_.powershell.Streams.Verbose[0].Message -replace '[^0-9]'
                 $_.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
             }
 
