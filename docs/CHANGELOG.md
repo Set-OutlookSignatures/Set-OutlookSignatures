@@ -15,8 +15,9 @@
   ### Fixed
 -->
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.1.0-alpha7" target="_blank">v3.1.0-alpha7</a> - 2022-06-09
 ### Changed
+- Each template reference in an INI file is now considered individually, not just the last entry. See 'How to work with ini files' in README for a usecase example.
 - Additional output is now fully available in the verbose stream, and no longer scattered around the debug and the verbose streams
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.0.0" target="_blank">v3.0.0</a> - 2022-04-20

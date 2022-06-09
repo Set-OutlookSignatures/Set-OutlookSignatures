@@ -407,8 +407,54 @@ If you want to give template creators control over the ini file, place it in the
   Putting file names in single or double quotes is possible, but not necessary.  
   File names are case insensitive
     `[file a.docx]` is the same as `["File A.docx"]` and `['fILE a.dOCX']`  
-  When there are two or more sections for a filename: The keys and values are not combined, only the last section is considered.  
-  File names not mentioned in this file are not considered, even if they are available in the file system. Set-OutlookSignatures will report files which are in the file system but not mentioned in the current ini, and vice versa.
+  File names not mentioned in this file are not considered, even if they are available in the file system. Set-OutlookSignatures will report files which are in the file system but not mentioned in the current ini, and vice versa.<br>  
+  When there are two or more sections for a filename: The keys and values are not combined, each section is considered individually (SortCulture and SortOrder still apply).  
+  This can be useful in the following scenario: Multiple shared mailboxes shall use the same template, individualized by using \$CURRENTMAILBOX[...] variables. A user can have multiple of these shared mailboxes in his Outlook configuration.
+    - Solution A: Use multiple templates (possible in all versions)
+      - Instructions
+        - Create a copy of the initial template for each shared mailbox.
+        - For each template copy, create a corresponding INI entry which assigns the template copy to a specific e-mail address.
+      - Result
+        - Templates<br>One template file for each shared mailbox
+          ```
+          template shared mailbox A.docx
+          template shared mailbox B.docx
+          template shared mailbox C.docx
+          ```
+        - INI file
+          ```
+          [template shared mailbox A.docx]
+          SharedMailboxA@example.com
+
+          [template shared mailbox B.docx]
+          SharedMailboxB@example.com
+
+          [template shared mailbox C.docx]
+          SharedMailboxC@example.com
+          ``` 
+    - Solution B: Use only one template (possible with v3.1.0 and newer)
+      - Instructions
+        - Create a single initial template.
+        - For each shared mailbox, create a corresponding INI entry which assigns the template to a specific e-mail address and defines a separate Outlook signature name.
+      - Result
+        - Templates<br>One template file for all shared mailboxes
+          ```
+          template shared mailboxes.docx
+          ```
+        - INI file
+          ```
+          [template shared mailboxes.docx]
+          SharedMailboxA@example.com
+          OutlookSignatureName = template SharedMailboxA
+
+          [template shared mailboxes.docx]
+          SharedMailboxB@example.com
+          OutlookSignatureName = template SharedMailboxB
+
+          [template shared mailboxes.docx]
+          SharedMailboxC@example.com
+          OutlookSignatureName = template SharedMailboxC
+          ``` 
 4. Add tags in the lines below the filename
   Example: `defaultNew`
     - Do not enclose tags in square brackets. This is not allowed here, but required when you add tags directly to file names.    - When an ini file is used, tags in file names are not considered as tags, but as part of the file name, so the Outlook signature name will contain them.  
