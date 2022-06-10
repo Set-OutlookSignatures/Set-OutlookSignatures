@@ -841,7 +841,7 @@ The following example describes optional preceeding text combined an optional re
   $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { "`r`nMobile: "} )
   ```
 - Word template:  
-  [\$CURRENTUSERMAIL\$](mailto:\$CURRENTUSERMAIL\$)\$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY\$ [\$CURRENTUSERTELEPHONE\$](tel:\$CURRENTUSERTELEPHONE\$)\$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$[\$CURRENTUSERMOBILE\$](tel:\$CURRENTUSERMOBILE\$)
+  [\$CURRENTUSERMAIL\$](mailto:\$CURRENTUSERMAIL\$) \$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY\$  [\$CURRENTUSERTELEPHONE\$](tel:\$CURRENTUSERTELEPHONE\$) \$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$ [\$CURRENTUSERMOBILE\$](tel:\$CURRENTUSERMOBILE\$)
 
   Note that all variables are written on one line and that not only '`$CURRENTUSERMAIL$`' is configured with a hyperlink, but '`$CURRENTUSERPHONE$`' and '`$CURRENTUSERMOBILE$`' too: `mailto:$CURRENTUSERMAIL$`, `tel:$CURRENTUSERTELEPHONE$` and `tel:$CURRENTUSERMOBILE$`
 - Results
