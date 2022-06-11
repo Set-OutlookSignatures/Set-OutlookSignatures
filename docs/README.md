@@ -843,7 +843,7 @@ The following example describes optional preceeding text combined an optional re
 - Word template:  
   <pre><code><a href="mailto:$CURRENTUSERMAIL$">$CURRENTUSERMAIL$</a>$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERTELEPHONE$">$CURRENTUSERTELEPHONE$</a>$CURRENTUSERMOBILE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERMOBILE$">$CURRENTUSERMOBILE$</a></code></pre>
 
-  Note that all variables are written on one line and that not only '`$CURRENTUSERMAIL$`' is configured with a hyperlink, but '`$CURRENTUSERPHONE$`' and '`$CURRENTUSERMOBILE$`' too: `mailto:$CURRENTUSERMAIL$`, `tel:$CURRENTUSERTELEPHONE$` and `tel:$CURRENTUSERMOBILE$`
+  Note that all variables are written on one line and that not only `$CURRENTUSERMAIL$` is configured with a hyperlink, but `$CURRENTUSERPHONE$` and `$CURRENTUSERMOBILE$` too: `mailto:$CURRENTUSERMAIL$`, `tel:$CURRENTUSERTELEPHONE$` and `tel:$CURRENTUSERMOBILE$`
 - Results
   - Telephone number and mobile number are set. The paragraph marks come from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$` and `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`:  
     first.last@example.com  
