@@ -877,17 +877,17 @@ Problem 1: dg<area>@example.com can't be added as a mailbox to Outlook, as it is
 
 Problem 2: The mailbox m<area>@example.com is configured as non-primary maibox on most clients, because most of the users have the "Send as" permission, but not the "Full Access" permissions. Some users even don't connect the mailbox at all, they just choose m<area>@example.com as "From" address.
 
-Solution: Create signature templates for the mailbox m<area>@example.com and the distribution group dg<area>@example.com and **assign them to the users and groups having "send as" permissions**.
-
-When using file name based tags, the file names would be:
+Solution: Create signature templates for the mailbox m<area>@example.com and the distribution group dg<area>@example.com and **assign them to the group that has been granted the "send as" permission**:
 ```
-m@example.com external English formal.[Example Group] [u@example.com].docx
+[External English formal m@example.com.docx]
+Example Group
 
-dg@example.com internal German informal.[Example Group] [u@example.com].docx
+[External English formal dg@example.com.docx]
+Example Group
 ```
 This works as long as the personal mailbox of a member of "Example\Group" is connected in Outlook as primary mailbox (which usually is the case). When this personal mailbox is processed by Set-OutlookSignatures, the script recognizes the group membership and the signature assigned to it.
 
-Caveat: The \$CurrentMailbox[...]\$ replacement variables refer to the user's personal mailbox in this case, not to m<area>@example.com.
+Caveat: The `$CurrentMailbox[...]$` replacement variables refer to the user's personal mailbox in this case, not to m<area>@example.com.
 ## 16.20. Can I centrally manage and deploy Outook stationery with this script?
 Outlook stationery describes the layout of e-mails, including font size and color for new e-mails and for replies and forwards.
 
