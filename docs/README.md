@@ -827,8 +827,8 @@ If they are not empty, the newline creates a new paragraph; else, the replacemen
 Use '\`n' instead of '\`r\`n' to create a new line within the existing paragraph, but not a new paragraph.
 
 When using HTML templates, use
-- '\<p>' instead of '\`r\`n'
-- '\<br>' instead of '\`n'
+- `<p>` instead of `` `r`n ``
+- `<br>` instead of `` `n ``
 
 Be aware that text replacement also happens in hyperlinks ('tel:', 'mailto:' etc.).  
 Instead of altering existing replacement variables, it is recommended to create new replacement variables with modified content.  
@@ -837,8 +837,8 @@ Use the new one for the pure textual replacement (including the newline), and th
 The following example describes optional preceeding text combined an optional replacement variable containing a hyperlink:
 - Custom replacement variable config file
   ```
-  $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { "`r`nTelephone: "} )
-  $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { "`r`nMobile: "} )
+  $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { "`nTelephone: "} )
+  $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { "`nMobile: "} )
   ```
 - Word template:  
   <pre><code><a href="mailto:$CURRENTUSERMAIL$">$CURRENTUSERMAIL$</a>$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERTELEPHONE$">$CURRENTUSERTELEPHONE$</a>$CURRENTUSERMOBILE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERMOBILE$">$CURRENTUSERMOBILE$</a></code></pre>
@@ -848,21 +848,21 @@ The following example describes optional preceeding text combined an optional re
   - Telephone number and mobile number are set. The paragraph marks come from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$` and `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
     <pre><code>
     <a href="mailto:first.last@example.com">first.last@example.com</a>
-    <p>
+    <br>
     Telephone: <a href="tel:+43xxx">+43xxx</a>
-    <p>
+    <br>
     Mobile: <a href="tel:+43yyy">+43yyy</a>
     </code></pre>
   - Telephone number exists, mobile number is empty. The paragraph mark comes from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$`.  
     <pre><code>
     <a href="mailto:first.last@example.com">first.last@example.com</a>
-    <p>
+    <br>
     Telephone: <a href="tel:+43xxx">+43xxx</a>
     </code></pre>
   - Telephone number is empty, mobile number is set. The paragraph mark comes from `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
     <pre><code>
     E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
-    <p>
+    <br>
     Mobile: <a href="tel:+43yyy">+43yyy</a>
     </code></pre>
 ## 16.18. Is there a roadmap for future versions?
