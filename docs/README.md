@@ -837,8 +837,8 @@ Use the new one for the pure textual replacement (including the newline), and th
 The following example describes optional preceeding text combined an optional replacement variable containing a hyperlink:
 - Custom replacement variable config file
   ```
-  $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { "`r`nTelephone: "} )
-  $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { "`r`nMobile: "} )
+  $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { "`nTelephone: "} )
+  $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { "`nMobile: "} )
   ```
 - Word template:  
   <pre><code><a href="mailto:$CURRENTUSERMAIL$">$CURRENTUSERMAIL$</a>$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERTELEPHONE$">$CURRENTUSERTELEPHONE$</a>$CURRENTUSERMOBILE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERMOBILE$">$CURRENTUSERMOBILE$</a></code></pre>
@@ -846,21 +846,15 @@ The following example describes optional preceeding text combined an optional re
   Note that all variables are written on one line and that not only `$CURRENTUSERMAIL$` is configured with a hyperlink, but `$CURRENTUSERPHONE$` and `$CURRENTUSERMOBILE$` too: `mailto:$CURRENTUSERMAIL$`, `tel:$CURRENTUSERTELEPHONE$` and `tel:$CURRENTUSERMOBILE$`
 - Results
   - Telephone number and mobile number are set. The paragraph marks come from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$` and `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
-    <pre><code>
-    E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
+    <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
     Telephone: <a href="tel:+43xxx">+43xxx</a>
-    Mobile: <a href="tel:+43yyy">+43yyy</a>
-    </code></pre>
+    Mobile: <a href="tel:+43yyy">+43yyy</a></code></pre>
   - Telephone number exists, mobile number is empty. The paragraph mark comes from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$`.  
-    <pre><code>
-    E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
-    Telephone: <a href="tel:+43xxx">+43xxx</a>
-    </code></pre>
+    <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
+    Telephone: <a href="tel:+43xxx">+43xxx</a></code></pre>
   - Telephone number is empty, mobile number is set. The paragraph mark comes from `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
-    <pre><code>
-    E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
-    Mobile: <a href="tel:+43yyy">+43yyy</a>
-    </code></pre>
+    <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
+    Mobile: <a href="tel:+43yyy">+43yyy</a></code></pre>
 ## 16.18. Is there a roadmap for future versions?
 There is no binding roadmap for future versions, although I maintain a list of ideas in the 'Contribution opportunities' chapter of '.\docs\CONTRIBUTING.html'.
 
