@@ -861,7 +861,7 @@ The following example describes optional preceeding text combined an optional re
     </code></pre>
   - Telephone number is empty, mobile number is set. The paragraph mark comes from `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
     <pre><code>
-    <a href="mailto:first.last@example.com">first.last@example.com</a>
+    E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
     <p>
     Mobile: <a href="tel:+43yyy">+43yyy</a>
     </code></pre>
