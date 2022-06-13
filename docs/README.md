@@ -819,18 +819,18 @@ Follow these steps to avoid empty lines:
 1. Use a custom replacement variable config file.
 2. Modify the value of all attributes that should not leave an empty line when there is no text to show:
     - When the attribute is empty, return an empty string
-    - Else, return a newline ('\`r\`n' in PowerShell) and then the attribute value.  
+    - Else, return a newline (`` `n `` in PowerShell, Shift+Enter in Word, `<br>` in HTML) and then the attribute value.  
 3. Place all required replacement variables on a single line, without a space between them.  
-If they are not empty, the newline creates a new paragraph; else, the replacement variable is replaced with an emtpy string.
+If they are not empty, the newline creates a new line within the existing paragraph; else, the replacement variable is replaced with an emtpy string.
 4. Use the ReplacementVariableConfigFile parameter when running the script.
 
-Use '\`n' instead of '\`r\`n' to create a new line within the existing paragraph, but not a new paragraph.
+Use `` `r`n `` instead of `` `n `` to create a new paragraph instead of a new line within the existing paragraph.
 
 When using HTML templates, use
 - `<p>` instead of `` `r`n ``
 - `<br>` instead of `` `n ``
 
-Be aware that text replacement also happens in hyperlinks ('tel:', 'mailto:' etc.).  
+Be aware that text replacement also happens in hyperlinks (`tel:`, `mailto:` etc.).  
 Instead of altering existing replacement variables, it is recommended to create new replacement variables with modified content.  
 Use the new one for the pure textual replacement (including the newline), and the original one for the replacement within the hyperlink.  
 
