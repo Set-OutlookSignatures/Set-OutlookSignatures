@@ -845,16 +845,12 @@ The following example describes optional preceeding text combined an optional re
 
   Note that all variables are written on one line and that not only `$CURRENTUSERMAIL$` is configured with a hyperlink, but `$CURRENTUSERPHONE$` and `$CURRENTUSERMOBILE$` too: `mailto:$CURRENTUSERMAIL$`, `tel:$CURRENTUSERTELEPHONE$` and `tel:$CURRENTUSERMOBILE$`
 - Results
-  - Telephone number and mobile number are set. The paragraph marks come from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$` and `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`:  
-    first.last@example.com  
-    Telephone: <a href="tel:+43xxx">+43xxx</a>  
-    Mobile: <a href="tel:+43yyy">+43yyy</a>
-  - Telephone number exists, mobile number is empty. The paragraph mark comes from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$`:  
-    first.last@example.com  
-    Telephone: <a href="tel:+43xxx">+43xxx</a>
-  - Telephone number is empty, mobile number is set. The paragraph mark comes from `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`  
-    first.last@example.com  
-    Mobile: <a href="tel:+43yyy">+43yyy</a>
+  - Telephone number and mobile number are set. The paragraph marks come from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$` and `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
+    <pre><code><a href="mailto:first.last@example.com">first.last@example.com</a><p>Telephone: <a href="tel:+43xxx">+43xxx</a><p>Mobile: <a href="tel:+43yyy">+43yyy</a></code></pre>  
+  - Telephone number exists, mobile number is empty. The paragraph mark comes from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$`.  
+    <pre><code><a href="mailto:first.last@example.com">first.last@example.com</a><p>Telephone: <a href="tel:+43xxx">+43xxx</a></code></pre>  
+  - Telephone number is empty, mobile number is set. The paragraph mark comes from `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
+    <pre><code><a href="mailto:first.last@example.com">first.last@example.com</a><p>Mobile: <a href="tel:+43yyy">+43yyy</a></code></pre>  
 ## 16.18. Is there a roadmap for future versions?
 There is no binding roadmap for future versions, although I maintain a list of ideas in the 'Contribution opportunities' chapter of '.\docs\CONTRIBUTING.html'.
 
