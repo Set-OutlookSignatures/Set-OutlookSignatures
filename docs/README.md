@@ -114,7 +114,7 @@ The script must run in the security context of the currently logged in user.
 The script must run in PowerShell Full Language mode. Constrained Language mode is not supported, as some features such as BASE64 conversions are not available in this mode or require very slow workarounds.
 
 If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell 'Set-OutlokSignatures.ps1'. It is usually not necessary to sign the variable replacement configuration files, e. g. '.\config\default replacement variables.ps1'.  
-There are locked down environments, where all files matching the patterns "\*.ps\*1" and "*.dll" need to be digitially signed with a trusted certificate. 
+There are locked down environments, where all files matching the patterns `'*.ps*1'` and `'*.dll'` need to be digitially signed with a trusted certificate. 
 
 Don't forget to unblock at least 'Set-OutlookSignatures.ps1' after extracting them from the downloaded ZIP file. You can use the PowerShell commandlet 'Unblock-File' for this.
 
@@ -409,7 +409,7 @@ If you want to give template creators control over the ini file, place it in the
     `[file a.docx]` is the same as `["File A.docx"]` and `['fILE a.dOCX']`  
   File names not mentioned in this file are not considered, even if they are available in the file system. Set-OutlookSignatures will report files which are in the file system but not mentioned in the current ini, and vice versa.<br>  
   When there are two or more sections for a filename: The keys and values are not combined, each section is considered individually (SortCulture and SortOrder still apply).  
-  This can be useful in the following scenario: Multiple shared mailboxes shall use the same template, individualized by using \$CURRENTMAILBOX[...] variables. A user can have multiple of these shared mailboxes in his Outlook configuration.
+  This can be useful in the following scenario: Multiple shared mailboxes shall use the same template, individualized by using `$CURRENTMAILBOX[...]$` variables. A user can have multiple of these shared mailboxes in his Outlook configuration.
     - Solution A: Use multiple templates (possible in all versions)
       - Instructions
         - Create a copy of the initial template for each shared mailbox.
@@ -614,7 +614,7 @@ The Graph configuration file allows for additional, advanced configuration:
 - '$GraphEndpointVersion': The version of the Graph REST API to use
 - '$GraphUserProperties': The properties to load for each graph user/mailbox. You can add custom attributes here.
 - '$GraphUserAttributeMapping': Graph and Active Directory attributes are not named identically. Set-OutlookSignatures therefore uses a "virtual" account. Use this hashtable to define which Graph attribute name is assigned to which attribute of the virtual account.  
-The virtual account is accessible as '\$ADPropsCurrentUser\[...\]' in '.\config\default replacement variables.ps1', and therefore has a direct impact on replacement variables.
+The virtual account is accessible as `$ADPropsCurrentUser[...]` in `'.\config\default replacement variables.ps1'`, and therefore has a direct impact on replacement variables.
 ## 14.3. Authentication
 In hybrid and cloud-only scenarios, Set-OutlookSignatures automatically tries three stages of authentication.
 1. Windows Integrated Authentication  
@@ -959,7 +959,7 @@ Some personal educated guesses based on available documentation, Outlook for Win
 - Outlook for Windows beta versions already support multiple signatures
   - With the DisableRoamingSignaturesTemporaryToggle registry value being absent or set to 0, file based signatures created by tools such as Set-OutlookSignatures are regularly deleted and replaced with signatures stored directly in the mailbox.
   - With the DisableRoamingSignaturesTemporaryToggle registry value set to 1, the file based approach continues to work as known. Outlook does not synchronize signatures to the mailbox.
-- It is yet unclear if this feature will be available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about \$CURRENTUSER[...]$ replacement variables).
+- It is yet unclear if this feature will be available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about `$CURRENTUSER[...]$` replacement variables).
 
 Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensures full compatibility with this script.
 
