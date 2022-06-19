@@ -350,10 +350,12 @@ function main {
     Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
 
     Write-Host "  SignatureTemplatePath: '$SignatureTemplatePath'" -NoNewline
+    ConvertPath ([ref]$SignatureTemplatePath)
     CheckPath $SignatureTemplatePath
 
     Write-Host "  SignatureIniPath: '$SignatureIniPath'" -NoNewline
     if ($SignatureIniPath) {
+        ConvertPath ([ref]$SignatureIniPath)
         CheckPath $SignatureIniPath
         $SignatureIniSettings = Get-IniContent $SignatureIniPath
         foreach ($section in $SignatureIniSettings.GetEnumerator()) {
@@ -388,9 +390,11 @@ function main {
     }
     if ($SetCurrentUserOOFMessage) {
         Write-Host "  OOFTemplatePath: '$OOFTemplatePath'" -NoNewline
+        ConvertPath ([ref]$OOFTemplatePath)
         CheckPath $OOFTemplatePath
         Write-Host "  OOFIniPath: '$OOFIniPath'" -NoNewline
         if ($OOFIniPath) {
+            ConvertPath ([ref]$OOFIniPath)
             CheckPath $OOFIniPath
             $OOFIniSettings = Get-IniContent $OOFIniPath
             foreach ($section in $OOFIniSettings.GetEnumerator()) {
@@ -427,6 +431,7 @@ function main {
 
     Write-Host "  GraphConfigFile: '$GraphConfigFile'" -NoNewline
     if ($GraphConfigFile) {
+        ConvertPath ([ref]$GraphConfigFile)
         CheckPath $GraphConfigFile
         (Get-Content -LiteralPath $GraphConfigFile -Encoding UTF8) | ForEach-Object {
             Write-Verbose $_
@@ -437,6 +442,7 @@ function main {
 
     Write-Host "  GraphCredentialFile: '$GraphCredentialFile'" -NoNewline
     if ($GraphCredentialFile) {
+        ConvertPath ([ref]$GraphCredentialFile)
         CheckPath $GraphCredentialFile
         (Get-Content -LiteralPath $GraphCredentialFile -Encoding UTF8) | ForEach-Object {
             Write-Verbose $_
@@ -447,6 +453,7 @@ function main {
 
     Write-Host "  ReplacementVariableConfigFile: '$ReplacementVariableConfigFile'" -NoNewline
     if ($ReplacementVariableConfigFile) {
+        ConvertPath ([ref]$ReplacementVariableConfigFile)
         CheckPath $ReplacementVariableConfigFile
         (Get-Content -LiteralPath $ReplacementVariableConfigFile -Encoding UTF8) | ForEach-Object {
             Write-Verbose $_
@@ -491,6 +498,7 @@ function main {
     }
 
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
+    ConvertPath ([ref]$AdditionalSignaturePath)
     checkpath $AdditionalSignaturePath -create
 
     Write-Host "  SimulateUser: '$SimulateUser'"
@@ -499,23 +507,6 @@ function main {
     [string[]]$SimulateMailboxes = $null
     $tempSimulateMailboxes | ForEach-Object { $SimulateMailboxes += $_.Address }
     Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
-
-    ('ReplacementVariableConfigFile', 'GraphConfigFile', 'SignatureTemplatePath', 'OOFTemplatePath', 'AdditionalSignaturePath', 'GraphCredentialFile', 'SignatureIniPath', 'OOFIniPath') | ForEach-Object {
-        $path = (Get-Variable -Name $_).Value
-        if ($path) {
-            if (($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) -or ($path -ilike '*@ssl\*')) {
-                $path = $path -ireplace '@ssl\\', '\'
-                $path = ([uri]::UnescapeDataString($path) -ireplace ('https://', '\\'))
-                $path = ([System.URI]$path).AbsoluteURI -replace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\$2' -replace '/', '\'
-                $path = [uri]::UnescapeDataString($path)
-            } else {
-                $path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
-                $path = ([System.URI]$path).absoluteuri -ireplace 'file:///', '' -ireplace 'file://', '\\' -replace '/', '\'
-                $path = [uri]::UnescapeDataString($path)
-            }
-            Set-Variable -Name $_ -Value $path
-        }
-    }
 
 
     if ($SimulateUser) {
@@ -3265,41 +3256,63 @@ function Get-IniContent ($filePath) {
     $local:ini = [ordered]@{}
     $local:SectionIndex = -1
     if ($filePath -ne '') {
-        Get-Content -LiteralPath $FilePath -Encoding UTF8 | ForEach-Object {
-            switch -regex ($_) {
-                # Comments starting with ; or #, or empty line, whitespace(s) before are ignored
-                '(^\s*(;|#))|(^\s*$)' { continue }
+        try {
+            Get-Content -LiteralPath $FilePath -Encoding UTF8 -ErrorAction Stop | ForEach-Object {
+                switch -regex ($_) {
+                    # Comments starting with ; or #, or empty line, whitespace(s) before are ignored
+                    '(^\s*(;|#))|(^\s*$)' { continue }
 
-                # Section in square brackets, whitespace(s) before and after brackets are ignored
-                '^\s*\[(.+)\]\s*' {
-                    $local:section = ($matches[1]).trim().trim('"').trim('''')
-                    if ($null -ne $local:section) {
-                        $local:SectionIndex++
-                        $local:ini["$($local:SectionIndex)"] = @{ '<Set-OutlookSignatures template>' = $local:section }
-                    }
-                    continue
-                }
-
-                # Key and value, whitespace(s) before and after brackets are ignored
-                '^\s*(.+?)\s*=\s*(.*)\s*' {
-                    if ($null -ne $local:section) {
-                        $local:ini["$($local:SectionIndex)"][($matches[1]).trim().trim('"').trim('''')] = ($matches[2]).trim().trim('"').trim('''')
+                    # Section in square brackets, whitespace(s) before and after brackets are ignored
+                    '^\s*\[(.+)\]\s*' {
+                        $local:section = ($matches[1]).trim().trim('"').trim('''')
+                        if ($null -ne $local:section) {
+                            $local:SectionIndex++
+                            $local:ini["$($local:SectionIndex)"] = @{ '<Set-OutlookSignatures template>' = $local:section }
+                        }
                         continue
                     }
-                }
 
-                # Key only, whitespace(s) before and after brackets are ignored
-                '^\s*(.*)\s*' {
-                    if ($null -ne $local:section) {
-                        $local:ini["$($local:SectionIndex)"][($matches[1]).trim().trim('"').trim('''')] = $null
-                        continue
+                    # Key and value, whitespace(s) before and after brackets are ignored
+                    '^\s*(.+?)\s*=\s*(.*)\s*' {
+                        if ($null -ne $local:section) {
+                            $local:ini["$($local:SectionIndex)"][($matches[1]).trim().trim('"').trim('''')] = ($matches[2]).trim().trim('"').trim('''')
+                            continue
+                        }
+                    }
+
+                    # Key only, whitespace(s) before and after brackets are ignored
+                    '^\s*(.*)\s*' {
+                        if ($null -ne $local:section) {
+                            $local:ini["$($local:SectionIndex)"][($matches[1]).trim().trim('"').trim('''')] = $null
+                            continue
+                        }
                     }
                 }
             }
+        } catch {
+            Write-Host
+            Write-Host "Error accessing '$FilePath'. Exit." -ForegroundColor red
+            $Error[0]
+            exit 1
         }
     }
-
     return $local:ini
+}
+
+
+function ConvertPath ([ref]$path) {
+    if ($path) {
+        if (($path.value.StartsWith('https://', 'CurrentCultureIgnoreCase')) -or ($path.value -ilike '*@ssl\*')) {
+            $path.value = $path.value -ireplace '@ssl\\', '\'
+            $path.value = ([uri]::UnescapeDataString($path.value) -ireplace ('https://', '\\'))
+            $path.value = ([System.URI]$path.value).AbsoluteURI -replace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\$2' -replace '/', '\'
+            $path.value = [uri]::UnescapeDataString($path.value)
+        } else {
+            $path.value = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path.value)
+            $path.value = ([System.URI]$path.value).absoluteuri -ireplace 'file:///', '' -ireplace 'file://', '\\' -replace '/', '\'
+            $path.value = [uri]::UnescapeDataString($path.value)
+        }
+    }
 }
 
 

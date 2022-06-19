@@ -15,10 +15,12 @@
   ### Fixed
 -->
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.1.0-alpha.10" target="_blank">v3.1.0-alpha.10</a> - 2022-06-09
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.1.0-alpha.10" target="_blank">v3.1.0-alpha.42</a> - 2022-06-19
 ### Changed
 - Each template reference in an INI file is now considered individually, not just the last entry. See 'How to work with ini files' in README for a usecase example.
 - Additional output is now fully available in the verbose stream, and no longer scattered around the debug and the verbose streams
+### Fixed
+- Convert WebDAV paths to a PowerShell compatible format before accessing them. (Thanks <a href="https://github.com/Johan-Claesson" target="_blank">Johan Claesson</a>!)
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.0.0" target="_blank">v3.0.0</a> - 2022-04-20
 _This major release brings several changes which can make it incompatible with previous versions. Pay special attention to the changes marked '**Breaking:**' to find out if your environment is affected and what to do._
