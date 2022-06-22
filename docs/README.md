@@ -593,23 +593,23 @@ If you prefer using own application IDs or need advanced configuration, follow t
 - In Microsoft Graph, with an administrative account:
   - Create an application with a Client ID
   - Provide admin consent (pre-approval) for the following scopes (permissions):
-    - 'https<area>://graph.microsoft.com/openid' for logging-on the use
-    - 'https<area>://graph.microsoft.com/email' for reading the logged in user's mailbox properties
-    - 'https<area>://graph.microsoft.com/profile' for reading the logged in user's properties
-    - 'https<area>://graph.microsoft.com/user.read.all' for reading properties of other users (manager, additional mailboxes and their managers)
-    - 'https<area>://graph.microsoft.com/group.read.all' for reading properties of all groups, required for templates restricted to groups
-    - 'https<area>://graph.microsoft.com/mailboxsettings.readwrite' for updating the user's own mailbox settings (Out of Office auto reply messages)
-    - 'https<area>://graph.microsoft.com/EWS.AccessAsUser.All' for updating the Outlook Web signature in the user's own mailbox
-  - Set the Redirect URI to 'http<area>://localhost', configure for 'mobile and desktop applications'
-  - Enable 'Allow public client flows' to make Windows Integrated Authentication (SSO) work for Azure AD joined devices
-- In Set-OutlookSignature, use '.\config\default graph config.ps1' as a template for a custom Graph configuration file
-  - Set '$GraphClientID' to the application ID created by the Graph administrator before
-  - Use the 'GraphConfigFile' parameter to make the tool use the newly created Graph configuration file.
+    - '`https://graph.microsoft.com/openid`' for logging-on the user
+    - '`https://graph.microsoft.com/email`' for reading the logged-on user's mailbox properties
+    - '`https://graph.microsoft.com/profile`' for reading the logged-on user's properties
+    - '`https://graph.microsoft.com/user.read.all`' for reading properties of other users (manager, additional mailboxes and their managers)
+    - '`https://graph.microsoft.com/group.read.all`' for reading properties of all groups, required for templates restricted to groups
+    - '`https://graph.microsoft.com/mailboxsettings.readwrite`' for updating the logged-on user's Out of Office auto reply messages
+    - '`https://graph.microsoft.com/EWS.AccessAsUser.All`' for updating the logged-on user's Outlook Web signature
+  - Set the Redirect URI to '`https://localhost`' and configure it for '`mobile and desktop applications`'
+  - Enable '`Allow public client flows`' to make Windows Integrated Authentication (SSO) work for Azure AD joined devices
+- In Set-OutlookSignature, use '`.\config\default graph config.ps1`' as a template for a custom Graph configuration file
+  - Set '`$GraphClientID`' to the application ID created by the Graph administrator before
+  - Use the '`GraphConfigFile`' parameter to make the tool use the newly created Graph configuration file.
 ## 14.2. Advanced Configuration
 The Graph configuration file allows for additional, advanced configuration:
-- '$GraphEndpointVersion': The version of the Graph REST API to use
-- '$GraphUserProperties': The properties to load for each graph user/mailbox. You can add custom attributes here.
-- '$GraphUserAttributeMapping': Graph and Active Directory attributes are not named identically. Set-OutlookSignatures therefore uses a "virtual" account. Use this hashtable to define which Graph attribute name is assigned to which attribute of the virtual account.  
+- `$GraphEndpointVersion`: The version of the Graph REST API to use
+- `$GraphUserProperties`: The properties to load for each graph user/mailbox. You can add custom attributes here.
+- `$GraphUserAttributeMapping`: Graph and Active Directory attributes are not named identically. Set-OutlookSignatures therefore uses a "virtual" account. Use this hashtable to define which Graph attribute name is assigned to which attribute of the virtual account.  
 The virtual account is accessible as `$ADPropsCurrentUser[...]` in `'.\config\default replacement variables.ps1'`, and therefore has a direct impact on replacement variables.
 ## 14.3. Authentication
 In hybrid and cloud-only scenarios, Set-OutlookSignatures automatically tries three stages of authentication.
