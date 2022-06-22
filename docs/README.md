@@ -344,7 +344,7 @@ Example: The template "Test signature.docx" will create a signature named "Test 
 
 This can be overridden in the ini file with the 'OutlookSignatureName' parameter.
 Example: The template "Test signature.htm" with the following ini file configuration will create a signature named "Test signature, do not use".
-```INI
+```
 [Test signature.htm]
 OutlookSignatureName = Test signature, do not use
 ```
@@ -420,7 +420,7 @@ If you want to give template creators control over the ini file, place it in the
           - `template shared mailbox B.docx`
           - `template shared mailbox C.docx`
         - INI file
-          ```INI
+          ```
           [template shared mailbox A.docx]
           SharedMailboxA@example.com
 
@@ -429,7 +429,7 @@ If you want to give template creators control over the ini file, place it in the
 
           [template shared mailbox C.docx]
           SharedMailboxC@example.com
-          ``` 
+          ```
     - Solution B: Use only one template (possible with v3.1.0 and newer)
       - Instructions
         - Create a single initial template.
@@ -438,7 +438,7 @@ If you want to give template creators control over the ini file, place it in the
         - Templates<br>One template file for all shared mailboxes
           - `template shared mailboxes.docx`
         - INI file
-          ```INI
+          ```
           [template shared mailboxes.docx]
           SharedMailboxA@example.com
           OutlookSignatureName = template SharedMailboxA
@@ -450,7 +450,7 @@ If you want to give template creators control over the ini file, place it in the
           [template shared mailboxes.docx]
           SharedMailboxC@example.com
           OutlookSignatureName = template SharedMailboxC
-          ``` 
+          ```
 4. Add tags in the lines below the filename
   Example: `defaultNew`
     - Do not enclose tags in square brackets. This is not allowed here, but required when you add tags directly to file names.    - When an ini file is used, tags in file names are not considered as tags, but as part of the file name, so the Outlook signature name will contain them.  
@@ -702,7 +702,7 @@ Possible approaches for fulfilling these requirements are:
   - Run the resulting file through a script that converts the Word output to a single UTF8 encoded HTML file. Alternatively, but not recommended, you can copy the .htm file and the associated folder containing images and other HTML information into the template folder.
 
 You can use the script function ConvertTo-SingleFileHTML for embedding:
-```PowerShell
+```
 Get-ChildItem '.\templates\Signatures HTML' -File | ForEach-Object {
     $_.FullName  
     ConvertTo-SingleFileHTML $_.FullName ($_.FullName -replace '.htm$', ' embedded.htm')
@@ -730,7 +730,7 @@ Please see `'.\sample code\SimulateAndDeploy.ps1'` for an example how to run mul
 Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. You have to be very careful about when to use single quotes or double quotes.
 
 A working example:
-```Batch
+```
 PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"
 ```
 You will find lots of information about this topic on the internet. The following links provide a first starting point:  
@@ -749,7 +749,7 @@ You may want to provide a link on the desktop or in the start menu, so they can 
 The Windows user interface does not allow you to create a shortcut with a combined length of full target path and arguments greater than 259 characters.
 
 You can overcome this user interface limitation by using PowerShell to create a shortcut (.lnk file):  
-```PowerShell
+```
 $WshShell = New-Object -ComObject WScript.Shell  
 $Shortcut = $WshShell.CreateShortcut((Join-Path -Path $([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Desktop)) -ChildPath 'Set Outlook signatures.lnk'))  
 $Shortcut.WorkingDirectory = '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Set-OutlookSignatures'  
@@ -780,7 +780,7 @@ You should not change the default configuration file `'.\config\default replacem
 The following steps are recommended:
 1. Create a new custom configuration file in a separate folder.
 2. The first step in the new custom configuration file should be to load the default configuration file:
-   ```PowerShell
+   ```
    # Loading default replacement variables shipped with Set-OutlookSignatures
    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath '\\server\share\folder\Set-OutlookSignatures\config\default replacement variables.ps1' -Raw)))
    ```
@@ -826,7 +826,7 @@ Use the new one for the pure textual replacement (including the newline), and th
 The following example describes optional preceeding text combined with an optional replacement variable containing a hyperlink.  
 The internal variable `$UseHtmTemplates` is used to automatically differentiate between DOCX and HTM line breaks.
 - Custom replacement variable config file
-  ```powershell
+  ```
   $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Telephone: ' } )
   $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Mobile: ' } )
   ```
@@ -874,7 +874,7 @@ Problem 1: dg<area>@example.com can't be added as a mailbox to Outlook, as it is
 Problem 2: The mailbox m<area>@example.com is configured as non-primary maibox on most clients, because most of the users have the "Send as" permission, but not the "Full Access" permissions. Some users even don't connect the mailbox at all, they just choose m<area>@example.com as "From" address.
 
 Solution: Create signature templates for the mailbox m<area>@example.com and the distribution group dg<area>@example.com and **assign them to the group that has been granted the "send as" permission**:
-```INI
+```
 [External English formal m@example.com.docx]
 Example Group
 
@@ -930,7 +930,7 @@ This "easy to set up, easy to understand, easy to maintain" approach is why
 For an admin, the most complicated part is bringing Set-OutlookSignatures to his users by integrating it into the logon script, deploy a desktop icon or start menu entry, or creating a scheduled task. Alternatively, an admin can use a signature deployment method without user or client involvement.  
 Both tasks are usually neccessary only once, sample code and documentation based on real life experiences are available.  
 Anyhow, a basic GUI for configuring the script is accessible via the following built-in PowerShell command:
-```Powershell
+```
 Show-Command .\Set-OutlookSignatures.ps1
 ```
 

@@ -284,14 +284,14 @@ The script can be executed via any mechanism, for example
 - through a client management tool
 
 Since Set-OutlookSignatures is a pure PowerShell script, it is called like any other script of this file type:
-```batch
+```
 powershell.exe <PowerShell parameter> -file <path to Set-OutlookSignatures.ps1> <Script parameter>  
-```  
+```
 #### 1.6.5.1. Parameters
 The behaviour of the script can be controlled via parameters. Particularly relevant are SignatureTemplatePath and OOFTemplatePath, which are used to specify the path to the signature and absence templates.
 
 The following is an example where the signature templates are on an SMB file share and the out-of-office service provider templates are on a WebDAV share:
-```batch
+```
 powershell.exe -file '\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' -SignatureTemplatePath '\netlogon\set-outlooksignatures\set-outlooksignatures Outlook' -OOFTemplatePath 'https://webdav.example.com/CorporateCommunications/Templates/Out of Office templates'.  
 ```
 At the time of writing, other parameters were available. The following is a brief overview of the possibilities, for details please refer to the documentation of the script in the file "readme.html":  
@@ -643,14 +643,14 @@ Das Script kann über einen beliebigen Mechanismus ausgeführt werden, beispiels
 - durch ein Werkzeug zur Client-Verwaltung
 
 Da es sich bei Set-OutlookSignatures um ein reines PowerShell-Script handelt, erfolgt der Aufruf wie bei jedem anderen Script dieses Dateityps:  
-```Batch
+```
 powershell.exe <PowerShell-Parameter> -file <Pfad zu Set-OutlookSignatures.ps1> <Script-Parameter>  
-```  
+```
 #### 2.6.5.1. Parameter  
 Das Verhalten des Scripts kann über Parameter gesteuert werden. Besonders relevant sind dabei SignatureTemplatePath und OOFTemplatePath, über die der Pfad zu den Signatur- und Abwesenheits-Vorlagen angegeben wird.
 
 Folgend ein Beispiel, bei dem die Signatur-Vorlagen auf einem SMB-File-Share und die AbwesenheService-Providerorlagen auf einem WebDAV-Share liegen:  
-```Batch
+```
 powershell.exe -file '\\example.com\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' –SignatureTemplatePath '\\example.com\DFS-Share\Common\Templates\Signatures Outlook' –OOFTemplatePath 'https://webdav.example.com/CorporateCommunications/Templates/Out of Office templates'  
 ```
 
