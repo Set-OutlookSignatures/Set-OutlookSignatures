@@ -15,13 +15,13 @@
   ### Fixed
 -->
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.1.0-alpha.48" target="_blank">v3.1.0-alpha.48</a> - 2022-06-22
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.1.0-alpha.48" target="_blank">v3.1.0-alpha.49</a> - 2022-06-22
 ### Changed
 - Each template reference in an INI file is now considered individually, not just the last entry. See 'How to work with ini files' in README for a usecase example.
 - Additional output is now fully available in the verbose stream, and no longer scattered around the debug and the verbose streams
 - Rewrite FAQ "Why is dynamic group membership not considered on premises?" to reflect recent substantial changes in Microsoft Graph, which make Set-OutlookSignatures automatically support dynamic groups in the cloud. See the FAQ for more details and the reason why dynamic groups are not supported on premises.
-### Added
 - Extend FAQ "How to avoid blank lines when replacement variables return an empty string?" with new examples and sample code that automatically differentiates between DOCX and HTM templates
+- Optimized format of 'hashes.txt'
 ### Fixed
 - Convert WebDAV paths to a PowerShell compatible format before accessing them. (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/discussions/38" target="_blank">#38</a>) (Thanks <a href="https://github.com/Johan-Claesson" target="_blank">@Johan-Claesson</a>!)
 
