@@ -15,11 +15,11 @@
   ### Fixed
 -->
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.1.0-alpha.47" target="_blank">v3.1.0-alpha.47</a> - 2022-06-22
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.1.0-alpha.48" target="_blank">v3.1.0-alpha.48</a> - 2022-06-22
 ### Changed
 - Each template reference in an INI file is now considered individually, not just the last entry. See 'How to work with ini files' in README for a usecase example.
 - Additional output is now fully available in the verbose stream, and no longer scattered around the debug and the verbose streams
-- Rewrite FAQ "Why is dynamic group membership not considered on premises?" to reflect recent substantial changes in Microsoft Graph. TL;DR: As Graph queries now report dynamic group memberships just like static ones, Set-OutlookSignatures automatically supports dynamic groups (Graph only, on-prem dynamic groups are still not supported due to technical reasons).
+- Rewrite FAQ "Why is dynamic group membership not considered on premises?" to reflect recent substantial changes in Microsoft Graph, which make Set-OutlookSignatures automatically support dynamic groups in the cloud. See the FAQ for more details and the reason why dynamic groups are not supported on premises.
 ### Added
 - Extend FAQ "How to avoid blank lines when replacement variables return an empty string?" with new examples and sample code that automatically differentiates between DOCX and HTM templates
 ### Fixed

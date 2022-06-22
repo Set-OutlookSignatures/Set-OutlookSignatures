@@ -79,7 +79,7 @@ function main {
     Remove-Item 'hashes.txt' -Force
 
     $Hashes = ForEach ($File in (Get-ChildItem -File -Recurse)) {
-        Get-FileHash -LiteralPath $File.FullName -Algorithm SHA256 | Select-Object @{N = 'PathRelative'; E = { Resolve-Path -LiteralPath $file.FullName -Relative } }, Algorithm, Hash
+        Get-FileHash -LiteralPath $File.FullName -Algorithm SHA256 | Select-Object @{N = 'File'; E = { Resolve-Path -LiteralPath $_.Path -Relative } }, Algorithm, Hash
     }
 
     $Hashes | Export-Csv hashes.txt
