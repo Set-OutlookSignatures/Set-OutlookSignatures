@@ -101,8 +101,9 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [16.18. Is there a roadmap for future versions?](#1618-is-there-a-roadmap-for-future-versions)
   - [16.19. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1619-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
   - [16.20. Can I centrally manage and deploy Outook stationery with this script?](#1620-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
-  - [16.21. Why is membership in dynamic distribution groups and dynamic security groups not considered?](#1621-why-is-membership-in-dynamic-distribution-groups-and-dynamic-security-groups-not-considered)
-    - [16.21.1. What's the alternative to dynamic groups?](#16211-whats-the-alternative-to-dynamic-groups)
+  - [16.21. Why is dynamic group membership not considered on premises?](#1621-why-is-dynamic-group-membership-not-considered-on-premises)
+    - [16.21.1. Graph](#16211-graph)
+    - [16.21.2. Active Directory on premises](#16212-active-directory-on-premises)
   - [16.22. Why is no admin or user GUI available?](#1622-why-is-no-admin-or-user-gui-available)
   - [16.23. What about the new signature roaming feature Microsoft announced?](#1623-what-about-the-new-signature-roaming-feature-microsoft-announced)
     - [16.23.1. Please be aware of the following problem](#16231-please-be-aware-of-the-following-problem)
@@ -892,11 +893,24 @@ The default e-mail font, size and color are usually an integral part of corporat
 Set-OutlookSignatures has no features regarding deploying Outlook stationery, as there are better ways for doing this.  
 Outlook stores stationery settings in `'HKCU\Software\Microsoft\Office\<Version>\Common\MailSettings'`. You can use a logon script or group policies to deploy these keys, on-prem and for managed devices in the cloud.  
 Unfortunately, Microsoft's group policy templates (ADMX files) for Office do not seem to provide detailed settings for Outlook stationery, so you will have to deploy registry keys. 
-## 16.21. Why is membership in dynamic distribution groups and dynamic security groups not considered?
-Dynamic distribution groups (DDGs) are specific groups that only work within Exchange. Group membership is evaluated just in time when an e-mail is sent to a DDG by executing the LDAP query defining a DDG.
+## 16.21. Why is dynamic group membership not considered on premises?
+Membership in dynamic groups, no matter if they are of the security or distribution type, is considered only when using Microsoft Graph.
 
-Active Directory and Graph know that a DDG is a group, but they basically do not know the members of this group. The same is valid for dynamic security groups, which are available in the cloud only.  
-In more technical words: Dynamic groups have no member attribute, and dynamic groups neither appear in the on-prem user attributes memberOf and tokenGroups nor in the Graph transitiveMemberOf query.
+Dynamic group membership is not considered when using an on premises Active Directory. 
+
+The reason for this is that Graph and on-prem AD handle dynamic group membership differently:
+### 16.21.1. Graph
+Microsoft Graph caches information about dynamic group membership at the group as well as at the user level.  
+
+Graph regularly executes the LDAP queries defining dynamic groups and updates existing attributes with member information.  
+Dynamic groups in Graph are therefore not strictly dynamic in terms of running the defining LDAP query every time a dynamic group is used and thus providing near real-time member information - they behave more like regularly updated static groups, which makes handling for scripts and applications much easier.
+
+For the usecases of Set-OutlookSignatures, there is no difference between a static and a dynamic group in Graph:
+- Querying the '`transitiveMemberOf`' attribute of a user returns static as well as dynamic group membership.
+- Querying the '`members`' attribute of a group returns the group's members, no matter if the group is static or dynamic.
+### 16.21.2. Active Directory on premises
+Active Directory on premises does not cache any information about membership in dynamic groups at the user level, so dynamic groups do not appear in attributes such as '`memberOf`' and '`tokenGroups`'.  
+Active Directory on premises also does not cache any information about members of dynamic groups at the group level, so the group attribute '`members`' is always empty. 
 
 If dynamic groups would have to be considered, the only way would be to enumerate all dynamic groups, to run the LDAP query that defines each group, and to finally evaluate the resulting group membership.
 
@@ -904,21 +918,17 @@ The LDAP queries defining dynamic groups are deemed expensive due to the potenti
 Microsoft does not recommend against dynamic groups, only not to use them heavily.  
 This is very likely the reason why dynamic groups can not be granted permissions on Exchange mailboxes and other Exchange objects, and why each dynamic group can be assigned an expansion server executing the LDAP query (expansion times of 15 minutes or more are not rare in the field).
 
-Taking all these aspects into account, Set-OutlookSignatures will not consider membership in dynamic groups until a reliable and efficient way of querying a user's dynamic group membership is available.
-### 16.21.1. What's the alternative to dynamic groups?
-Dynamic groups have their reason to exist, especially if you use them as a tool for special and rather rare use cases.
+Taking all these aspects into account, Set-OutlookSignatures will not consider membership in dynamic groups on premises until a reliable and efficient way of querying a user's dynamic group membership is available.
 
-With the move to the cloud, where dynamic groups were introduced just not too long ago and only with a limited set of possible query parameters, an ongoing trend can be observed: Replacing dynamic groups with regularly updated static groups.
-
-An Identity Management System (IDM) or a script regularly executes the LDAP query, which would otherwise define a dynamic group, and updates the member list of a static group.
-
-These updates usually happen less frequent than a dynamic group is used. The static group might not be fully up-to-date when used, but other aspects outweigh this disadvantage most of the time:
-- Reduced load on Active Directory (partially transferred to IDM system or server running a script)
-- Static groups can be used for permissions
-- Changes in static group membership can be documented more easily
-- Static groups can be expanded to it's members in e-mail clients
-- Membership in static groups can easily be queried
-- Overcoming query parameter restrictions, such as combing the results of multiple LDAP queries
+A possible way around this restriction is replacing dynamic groups with regularly updated static groups (which is what Microsoft Graph does automatically in the background):
+- An Identity Management System (IDM) or a script regularly executes the LDAP query, which would otherwise define a dynamic group, and updates the member list of a static group.
+- These updates usually happen less frequent than a dynamic group is used. The static group might not be fully up-to-date when used, but other aspects outweigh this disadvantage most of the time:
+  - Reduced load on Active Directory (partially transferred to IDM system or server running a script)
+  - Static groups can be used for permissions
+  - Changes in static group membership can be documented more easily
+  - Static groups can be expanded to it's members in e-mail clients
+  - Membership in static groups can easily be queried
+  - Overcoming query parameter restrictions, such as combining the results of multiple LDAP queries
 ## 16.22. Why is no admin or user GUI available?
 From an admin perspective, Set-OutlookSignatures has been designed to work with on-board tools wherever possible and to make managing and deploying signatures intuitive.
 
