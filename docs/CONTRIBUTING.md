@@ -45,7 +45,7 @@ There are optimization opportunities in error handling, de-duplicating code with
   - When roaming is enabled, this creates a big mess because script runs overwrite each others results (think about `$CURRENTUSER[...]$` replacement variables)
 - How to detect roaming feature and enable the parameter only for these mailboxes?
 ### 2.3.1. Approach
-```
+```PowerShell
 if (
   # Outlook is installed
   # and $OutlookFileVersion is high enough (exact value is unknown yet) or it is a suiting beta version (-or (($OutlookFileVersion -ge '16.0.13430.20000') -and ($OutlookFileVersion.revision -in 20000..20199)))

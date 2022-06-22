@@ -97,7 +97,7 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [16.14. What is the recommended approach for custom configuration files?](#1614-what-is-the-recommended-approach-for-custom-configuration-files)
   - [16.15. Isn't a plural noun in the script name against PowerShell best practices?](#1615-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
   - [16.16. The script hangs at HTM/RTF export, Word shows a security warning!?](#1616-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
-  - [16.17. How to avoid empty lines when replacement variables return an empty string?](#1617-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
+  - [16.17. How to avoid blank lines when replacement variables return an empty string?](#1617-how-to-avoid-blank-lines-when-replacement-variables-return-an-empty-string)
   - [16.18. Is there a roadmap for future versions?](#1618-is-there-a-roadmap-for-future-versions)
   - [16.19. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1619-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
   - [16.20. Can I centrally manage and deploy Outook stationery with this script?](#1620-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
@@ -344,7 +344,7 @@ Example: The template "Test signature.docx" will create a signature named "Test 
 
 This can be overridden in the ini file with the 'OutlookSignatureName' parameter.
 Example: The template "Test signature.htm" with the following ini file configuration will create a signature named "Test signature, do not use".
-```
+```INI
 [Test signature.htm]
 OutlookSignatureName = Test signature, do not use
 ```
@@ -416,13 +416,11 @@ If you want to give template creators control over the ini file, place it in the
         - For each template copy, create a corresponding INI entry which assigns the template copy to a specific e-mail address.
       - Result
         - Templates<br>One template file for each shared mailbox
-          ```
-          template shared mailbox A.docx
-          template shared mailbox B.docx
-          template shared mailbox C.docx
-          ```
+          - `template shared mailbox A.docx`
+          - `template shared mailbox B.docx`
+          - `template shared mailbox C.docx`
         - INI file
-          ```
+          ```INI
           [template shared mailbox A.docx]
           SharedMailboxA@example.com
 
@@ -438,11 +436,9 @@ If you want to give template creators control over the ini file, place it in the
         - For each shared mailbox, create a corresponding INI entry which assigns the template to a specific e-mail address and defines a separate Outlook signature name.
       - Result
         - Templates<br>One template file for all shared mailboxes
-          ```
-          template shared mailboxes.docx
-          ```
+          - `template shared mailboxes.docx`
         - INI file
-          ```
+          ```INI
           [template shared mailboxes.docx]
           SharedMailboxA@example.com
           OutlookSignatureName = template SharedMailboxA
@@ -706,11 +702,11 @@ Possible approaches for fulfilling these requirements are:
   - Run the resulting file through a script that converts the Word output to a single UTF8 encoded HTML file. Alternatively, but not recommended, you can copy the .htm file and the associated folder containing images and other HTML information into the template folder.
 
 You can use the script function ConvertTo-SingleFileHTML for embedding:
-```
-get-childitem ".\templates\Signatures HTML" -File | foreach-object {
+```PowerShell
+Get-ChildItem '.\templates\Signatures HTML' -File | ForEach-Object {
     $_.FullName  
-    ConvertTo-SingleFileHTML $_.FullName ($_.FullName -replace ".htm$", " embedded.htm")
-} 
+    ConvertTo-SingleFileHTML $_.FullName ($_.FullName -replace '.htm$', ' embedded.htm')
+}
 ```
 
 The templates delivered with this script represent all possible formats:  
@@ -734,7 +730,7 @@ Please see `'.\sample code\SimulateAndDeploy.ps1'` for an example how to run mul
 Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. You have to be very careful about when to use single quotes or double quotes.
 
 A working example:
-```
+```Batch
 PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"
 ```
 You will find lots of information about this topic on the internet. The following links provide a first starting point:  
@@ -753,7 +749,7 @@ You may want to provide a link on the desktop or in the start menu, so they can 
 The Windows user interface does not allow you to create a shortcut with a combined length of full target path and arguments greater than 259 characters.
 
 You can overcome this user interface limitation by using PowerShell to create a shortcut (.lnk file):  
-```
+```PowerShell
 $WshShell = New-Object -ComObject WScript.Shell  
 $Shortcut = $WshShell.CreateShortcut((Join-Path -Path $([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Desktop)) -ChildPath 'Set Outlook signatures.lnk'))  
 $Shortcut.WorkingDirectory = '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Set-OutlookSignatures'  
@@ -784,7 +780,7 @@ You should not change the default configuration file `'.\config\default replacem
 The following steps are recommended:
 1. Create a new custom configuration file in a separate folder.
 2. The first step in the new custom configuration file should be to load the default configuration file:
-   ```
+   ```PowerShell
    # Loading default replacement variables shipped with Set-OutlookSignatures
    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath '\\server\share\folder\Set-OutlookSignatures\config\default replacement variables.ps1' -Raw)))
    ```
@@ -812,47 +808,47 @@ The behavior can be changed in at least two ways:
 
 Set-OutlookSignatures reads the registry key "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Security\DisableWarningOnIncludeFieldsUpdate" at start, sets it to 1 just before the conversion to HTM and RF takes place and restores the original state as soon as the conversions are finished.
 This way, the warning usually gets suppressed, while the Group Policy configured state of the setting still has higher priority and overrides the user setting.
-## 16.17. How to avoid empty lines when replacement variables return an empty string?
-Not all users have values for all attributes, e. g. a mobile number. This can lead to empty lines in signatures, which may not look nice.
+## 16.17. How to avoid blank lines when replacement variables return an empty string?
+Not all users have values for all attributes, e. g. a mobile number. These empty attributes can lead to blank lines in signatures, which may not look nice.
 
-Follow these steps to avoid empty lines:
+Follow these steps to avoid blank lines:
 1. Use a custom replacement variable config file.
-2. Modify the value of all attributes that should not leave an empty line when there is no text to show:
+2. Modify the value of all attributes that should not leave an blank line when there is no text to show:
     - When the attribute is empty, return an empty string
-    - Else, return a newline (`` `n `` in PowerShell, Shift+Enter in Word, `<br>` in HTML) and then the attribute value.  
-3. Place all required replacement variables on a single line, without a space between them.  
-If they are not empty, the newline creates a new line within the existing paragraph; else, the replacement variable is replaced with an emtpy string.
+    - Else, return a newline (`Shift+Enter` in Word, `` `n `` in PowerShell, `<br>` in HTML) or a paragraph mark (`Enter` in Word, `` `r`n `` in PowerShell, `<p>` in HTML), and then the attribute value.  
+3. Place all required replacement variables on a single line, without a space between them. The replacement variables themselves contain the requires newline or paragraph marks.
 4. Use the ReplacementVariableConfigFile parameter when running the script.
-
-Use `` `r`n `` instead of `` `n `` to create a new paragraph instead of a new line within the existing paragraph.
-
-When using HTML templates, use
-- `<p>` instead of `` `r`n ``
-- `<br>` instead of `` `n ``
 
 Be aware that text replacement also happens in hyperlinks (`tel:`, `mailto:` etc.).  
 Instead of altering existing replacement variables, it is recommended to create new replacement variables with modified content.  
 Use the new one for the pure textual replacement (including the newline), and the original one for the replacement within the hyperlink.  
 
-The following example describes optional preceeding text combined an optional replacement variable containing a hyperlink:
+The following example describes optional preceeding text combined with an optional replacement variable containing a hyperlink.  
+The internal variable `$UseHtmTemplates` is used to automatically differentiate between DOCX and HTM line breaks.
 - Custom replacement variable config file
-  ```
-  $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { "`nTelephone: "} )
-  $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { "`nMobile: "} )
+  ```powershell
+  $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Telephone: ' } )
+  $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Mobile: ' } )
   ```
 - Word template:  
-  <pre><code><a href="mailto:$CURRENTUSERMAIL$">$CURRENTUSERMAIL$</a>$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERTELEPHONE$">$CURRENTUSERTELEPHONE$</a>$CURRENTUSERMOBILE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERMOBILE$">$CURRENTUSERMOBILE$</a></code></pre>
+  <pre><code>E-Mail: <a href="mailto:$CURRENTUSERMAIL$">$CURRENTUSERMAIL$</a>$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERTELEPHONE$">$CURRENTUSERTELEPHONE$</a>$CURRENTUSERMOBILE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERMOBILE$">$CURRENTUSERMOBILE$</a></code></pre>
 
-  Note that all variables are written on one line and that not only `$CURRENTUSERMAIL$` is configured with a hyperlink, but `$CURRENTUSERPHONE$` and `$CURRENTUSERMOBILE$` too: `mailto:$CURRENTUSERMAIL$`, `tel:$CURRENTUSERTELEPHONE$` and `tel:$CURRENTUSERMOBILE$`
+  Note that all variables are written on one line and that not only `$CURRENTUSERMAIL$` is configured with a hyperlink, but `$CURRENTUSERPHONE$` and `$CURRENTUSERMOBILE$` too:
+  - `mailto:$CURRENTUSERMAIL$`
+  - `tel:$CURRENTUSERTELEPHONE$`
+  - `tel:$CURRENTUSERMOBILE$`
 - Results
-  - Telephone number and mobile number are set. The paragraph marks come from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$` and `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
+  - Telephone number and mobile number are set.  
+  The paragraph marks come from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$` and `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
     <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
     Telephone: <a href="tel:+43xxx">+43xxx</a>
     Mobile: <a href="tel:+43yyy">+43yyy</a></code></pre>
-  - Telephone number exists, mobile number is empty. The paragraph mark comes from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$`.  
+  - Telephone number is set, mobile number is empty.  
+  The paragraph mark comes from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$`.  
     <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
     Telephone: <a href="tel:+43xxx">+43xxx</a></code></pre>
-  - Telephone number is empty, mobile number is set. The paragraph mark comes from `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
+  - Telephone number is empty, mobile number is set.  
+  The paragraph mark comes from `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
     <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
     Mobile: <a href="tel:+43yyy">+43yyy</a></code></pre>
 ## 16.18. Is there a roadmap for future versions?
@@ -878,7 +874,7 @@ Problem 1: dg<area>@example.com can't be added as a mailbox to Outlook, as it is
 Problem 2: The mailbox m<area>@example.com is configured as non-primary maibox on most clients, because most of the users have the "Send as" permission, but not the "Full Access" permissions. Some users even don't connect the mailbox at all, they just choose m<area>@example.com as "From" address.
 
 Solution: Create signature templates for the mailbox m<area>@example.com and the distribution group dg<area>@example.com and **assign them to the group that has been granted the "send as" permission**:
-```
+```INI
 [External English formal m@example.com.docx]
 Example Group
 
@@ -934,7 +930,7 @@ This "easy to set up, easy to understand, easy to maintain" approach is why
 For an admin, the most complicated part is bringing Set-OutlookSignatures to his users by integrating it into the logon script, deploy a desktop icon or start menu entry, or creating a scheduled task. Alternatively, an admin can use a signature deployment method without user or client involvement.  
 Both tasks are usually neccessary only once, sample code and documentation based on real life experiences are available.  
 Anyhow, a basic GUI for configuring the script is accessible via the following built-in PowerShell command:
-```
+```Powershell
 Show-Command .\Set-OutlookSignatures.ps1
 ```
 

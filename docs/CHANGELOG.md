@@ -19,6 +19,9 @@
 ### Changed
 - Each template reference in an INI file is now considered individually, not just the last entry. See 'How to work with ini files' in README for a usecase example.
 - Additional output is now fully available in the verbose stream, and no longer scattered around the debug and the verbose streams
+### Added
+- Update FAQ "How to avoid blank lines when replacement variables return an empty string?" with new examples and sample code that automatically differentiates between DOCX and HTM templates
+- Language formatting for code blocks
 ### Fixed
 - Convert WebDAV paths to a PowerShell compatible format before accessing them. (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/discussions/38" target="_blank">#38</a>) (Thanks <a href="https://github.com/Johan-Claesson" target="_blank">@Johan-Claesson</a>!)
 
