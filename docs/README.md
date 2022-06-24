@@ -944,12 +944,10 @@ Anyhow, a basic GUI for configuring the script is accessible via the following b
 Show-Command .\Set-OutlookSignatures.ps1
 ```
 
-For a template creator/maintainer, maintaining the INI files defining template application order and permissions is this main task, in combination with tests using simulation mode.  
+For a template creator/maintainer, maintaining the INI files defining template application order and permissions is the main task, in combination with tests using simulation mode.  
 These tasks typically happen multiple times a year. A graphical user interface might make them more intuitive and easier; until then, documentation and examples based on real life experiences are available.
-<br>
-<br>
-<br>
-From a user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
+
+From an end user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
 
 ## 16.23. What about the new signature roaming feature Microsoft announced?  
 Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
@@ -957,15 +955,15 @@ Microsoft announced a change in how and where signatures are stored. Basically, 
 This is a good idea, as it makes signatures available across devices and apps.
 
 Some personal educated guesses based on available documentation, Outlook for Windows beta versions and several Exchange Online tenants:
-- The feature has first been annount by Microsoft in 2020, but has been postponed multiple times. At the time of writing this, the feature shall be released publicly in July 2022 according to the Office 365 roadmap. Microsoft has not yet published a public API. 
-- Outlook for Windows is the only client mentioned as supporting the new feature for now. I am confident more e-mail clients - especially Outlook for Mac, iOS and Android - will follow soon.
-- The multiple signature roaming feature will probably be only available for mailboxes in the cloud. Mailboxes on on-prem servers will not support this feature, no matter if in pure on-prem or in hybrid scenarios.
+- The feature has first been annount by Microsoft in 2020, but has been postponed multiple times. At the time of writing this, the feature shall be released publicly in October 2022 according to the Office 365 roadmap. Microsoft has not yet published a public API. 
+- Outlook for Windows is the only client mentioned as supporting the new feature for now. I am confident more e-mail clients - especially Outlook for Mac, iOS and Android - will follow (the sooner, the better).
+- The multiple signature roaming feature will very likely only be available for mailboxes in the cloud. Mailboxes on on-prem servers will not support this feature, no matter if in pure on-prem or in hybrid scenarios.
 - Microsoft is already making available multiple signatures in Outlook Web for more and more Exchange Online tenants. Currently, this breaks PowerShell commands such as Set-MailboxMessageConfiguration and there is no public API available.
   - Set-OutlookSignatures can set one Outlook Web signature, but an Exchange Online tenant with multiple signatures feature enabled just ignores this signature (see the next chapter for workarounds).
 - Outlook for Windows beta versions already support multiple signatures
-  - With the DisableRoamingSignaturesTemporaryToggle registry value being absent or set to 0, file based signatures created by tools such as Set-OutlookSignatures are regularly deleted and replaced with signatures stored directly in the mailbox.
-  - With the DisableRoamingSignaturesTemporaryToggle registry value set to 1, the file based approach continues to work as known. Outlook does not synchronize signatures to the mailbox.
-- It is yet unclear if this feature will be available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about `$CURRENTUSER[...]$` replacement variables).
+  - With the '`DisableRoamingSignaturesTemporaryToggle`' registry value being absent or set to 0, file based signatures created by tools such as Set-OutlookSignatures are regularly deleted and replaced with signatures stored directly in the mailbox.
+  - With the '`DisableRoamingSignaturesTemporaryToggle`' registry value set to 1, the file based approach continues to work as known. Outlook does not synchronize signatures to the mailbox.
+- It is yet unclear if this feature will be available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about '`$CURRENTUSER[...]$`' replacement variables).
 
 Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensures full compatibility with this script.
 

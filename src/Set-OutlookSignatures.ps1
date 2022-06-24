@@ -832,7 +832,7 @@ function main {
         if (Test-Path -Path $GraphConfigFile -PathType Leaf) {
             try {
                 Write-Host "      Execute config file '$GraphConfigFile'"
-                . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile  -Encoding UTF8 -Raw)))
+                . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile -Encoding UTF8 -Raw)))
             } catch {
                 Write-Host "        Problem executing content of '$GraphConfigFile'. Exit." -ForegroundColor Red
                 $error[0]
@@ -1680,7 +1680,7 @@ function main {
             if (Test-Path -Path $ReplacementVariableConfigFile -PathType Leaf) {
                 try {
                     Write-Host "    Execute config file '$ReplacementVariableConfigFile'"
-                    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $ReplacementVariableConfigFile  -Encoding UTF8 -Raw)))
+                    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $ReplacementVariableConfigFile -Encoding UTF8 -Raw)))
                 } catch {
                     Write-Host "    Problem executing content of '$ReplacementVariableConfigFile'. Exit." -ForegroundColor Red
                     $error[0]
@@ -1886,17 +1886,17 @@ function main {
                                         if ($EmbedImagesInHtml -eq $false) {
                                             $x = (New-Guid).guid.tostring()
                                             ConvertTo-SingleFileHTML ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) (Join-Path -Path $script:tempDir -ChildPath $x)
-                                            $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $x)  -Encoding UTF8 -Raw).ToString()
+                                            $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $x) -Encoding UTF8 -Raw).ToString()
                                             Remove-Item (Join-Path -Path $script:tempDir -ChildPath $x) -Force
                                         } else {
-                                            $hsHtmlSignature = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm')))  -Encoding UTF8 -Raw).ToString()
+                                            $hsHtmlSignature = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -Encoding UTF8 -Raw).ToString()
                                         }
                                     } else {
                                         $hsHtmlSignature = ''
                                         Write-Host "      Signature file '$($TempOWASigFile + '.htm')' not found. Outlook Web HTML signature will be blank." -ForegroundColor Yellow
                                     }
                                     if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -PathType Leaf) {
-                                        $stTextSig = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt')))  -Encoding UTF8 -Raw).ToString()
+                                        $stTextSig = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.txt'))) -Encoding UTF8 -Raw).ToString()
                                     } else {
                                         $stTextSig = ''
                                         Write-Host "      Signature file '$($TempOWASigFile + '.txt')' not found. Outlook Web text signature will be blank." -ForegroundColor Yellow
@@ -1962,9 +1962,9 @@ function main {
                     if (-not $SimulateUser) {
                         if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
                             if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
-                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm"))  -Encoding UTF8 -Raw).tostring())
+                                $OOFSettings.InternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Encoding UTF8 -Raw).tostring())
                             } else {
-                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm"))  -Encoding UTF8 -Raw).tostring()
+                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFInternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Encoding UTF8 -Raw).tostring()
                                 if ($x.error -ne $false) {
                                     Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
                                 }
@@ -1972,9 +1972,9 @@ function main {
                         }
                         if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
                             if (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648)) {
-                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm"))  -Encoding UTF8 -Raw).tostring())
+                                $OOFSettings.ExternalReply = New-Object Microsoft.Exchange.WebServices.Data.OOFReply((Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Encoding UTF8 -Raw).tostring())
                             } else {
-                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm"))  -Encoding UTF8 -Raw).tostring()
+                                $x = GraphPatchUserMailboxsettings -user $PrimaryMailboxAddress -OOFExternal (Get-Content -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Encoding UTF8 -Raw).tostring()
                                 if ($x.error -ne $false) {
                                     Write-Host "      Error setting Outlook Web Out of Office (OOF) auto reply message(s): $($x.error)" -ForegroundColor Red
                                 }
@@ -2018,7 +2018,7 @@ function main {
         Write-Host "Remove old signatures created by this script, which are no longer centrally available @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         $SignaturePaths | ForEach-Object {
             Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
-                if ((Get-Content -LiteralPath $_.fullname  -Encoding UTF8 -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
+                if ((Get-Content -LiteralPath $_.fullname -Encoding UTF8 -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
                     if ($_.name -notin $script:SignatureFilesDone) {
                         Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
                         Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
@@ -2037,7 +2037,7 @@ function main {
         Write-Host "Remove user created signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         $SignaturePaths | ForEach-Object {
             Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
-                if ((Get-Content -LiteralPath $_.fullname  -Encoding UTF8 -Raw) -notlike ('*' + $HTMLMarkerTag + '*')) {
+                if ((Get-Content -LiteralPath $_.fullname -Encoding UTF8 -Raw) -notlike ('*' + $HTMLMarkerTag + '*')) {
                     Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
                     Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
                     Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
@@ -2080,7 +2080,7 @@ function main {
 
 
 Function ConvertTo-SingleFileHTML([string]$inputfile, [string]$outputfile) {
-    $tempFileContent = Get-Content -LiteralPath $inputfile  -Encoding UTF8 -Raw
+    $tempFileContent = Get-Content -LiteralPath $inputfile -Encoding UTF8 -Raw
 
     $src = @()
     ([regex]'(?i)src="(.*?)"').Matches($tempFileContent) | ForEach-Object {
@@ -2364,7 +2364,7 @@ function SetSignatures {
         if ($UseHtmTemplates) {
             Write-Host "$Indent      Replace picture variables"
             $html = New-Object -ComObject 'HTMLFile'
-            $HTML.IHTMLDocument2_write((Get-Content -LiteralPath $path  -Encoding UTF8 -Raw))
+            $HTML.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
 
             foreach ($image in ($html.images)) {
                 (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
@@ -2644,7 +2644,7 @@ function SetSignatures {
         Write-Host "$Indent      Embed local files in HTM format and add marker"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
-        $tempFileContent = Get-Content -LiteralPath $path  -Encoding UTF8 -Raw
+        $tempFileContent = Get-Content -LiteralPath $path -Encoding UTF8 -Raw
 
         if ($tempFileContent -notlike "*$HTMLMarkerTag*") {
             if ($tempFileContent -like '*<head>*') {
