@@ -1157,19 +1157,36 @@ function main {
                 $TemplateFilesSortCulture = $null
             }
 
-            switch ((@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortOrder']) {
-                { $_ -iin ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } { $TemplateFiles = ($TemplateFiles | Where-Object { $_.name -iin @($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }) } | Sort-Object -Culture $TemplateFilesSortCulture); continue }
-                { $_ -iin ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } { $TemplateFiles = ( $TemplateFiles | Where-Object { $_.name -iin @($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }) } | Sort-Object -Descending -Culture $TemplateFilesSortCulture ); continue }
-                { $_ -iin 'AsInThisFile', 'AsListed' } {
-                    $TemplateFiles = $TemplateFiles | Where-Object { $_.name -iin @($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }) }
-                    $TemplateFilesSortOrder = @()
+            # Populate template files in the most complicated way first: SortOrder 'AsInThisFile'
+            # This also considers that templates can be referenced multiple times in the INI file
+            # If the setting in the ini file is different, we only need to sort $TemplateFiles
+            $TemplateFiles = $TemplateFiles | Where-Object { $_.name -iin @($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }) }
+            $TemplateFilesSortOrder = @()
                     (@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }) | Where-Object { $_ -iin $TemplateFiles.name }) | ForEach-Object {
-                        $TemplateFilesSortOrder += [array]::indexof($TemplateFiles.name, $_)
-                    }
-                    $TemplateFiles = $TemplateFiles[$TemplateFilesSortOrder]
+                $TemplateFilesSortOrder += [array]::indexof($TemplateFiles.name, $_)
+            }
+            $TemplateFiles = $TemplateFiles[$TemplateFilesSortOrder]
+
+            switch ((@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortOrder']) {
+                { $_ -iin 'AsInThisFile', 'AsListed' } {
+                    # nothing to do, $TemplateFiles is already correctly populated and sorted
                     continue
                 }
-                default { $TemplateFiles = ($TemplateFiles.name | Sort-Object -Culture $TemplateFilesSortCulture) }
+
+                { $_ -iin ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } {
+                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture
+                    continue
+                }
+
+                { $_ -iin ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } {
+                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Descending
+                    continue
+                }
+
+                default {
+                    # same as 'ascending'
+                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture
+                }
             }
         }
 
@@ -2135,8 +2152,9 @@ function EvaluateAndSetSignatures {
             $TemplateFileUniqueAppearenceCount = @((Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)[0..$TemplateFileIndex] | Where-Object { $_.fullname -eq $TemplateFile.fullname }).count
 
             $TemplateIniSettingsIndex = ((Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly).GetEnumerator() | Where-Object { (Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly)[$_.name].containskey($TemplateFile.fullname) } | Select-Object -Skip (((0, ($TemplateFileUniqueAppearenceCount - 1)) | Measure-Object -Maximum).maximum) | Select-Object -First 1).name
-            #write-host "$($templatefile.fullname) = $($TemplateIniSettingsIndex) = $TemplateFileUniqueAppearenceCount"
+            #Write-Host "$($templatefile.fullname) = $($TemplateIniSettingsIndex) = $TemplateFileUniqueAppearenceCount"
             #continue
+            
             if (-not $TemplateIniSettingsIndex) {
                 continue
             }
