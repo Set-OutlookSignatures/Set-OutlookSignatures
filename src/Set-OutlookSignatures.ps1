@@ -1140,7 +1140,7 @@ function main {
             $TemplateIniSettings.GetEnumerator().name | ForEach-Object {
                 if ($TemplateIniSettings[$_]['<Set-OutlookSignatures template>']) {
                     if ( ($TemplateIniSettings[$_]['<Set-OutlookSignatures template>'].endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $TemplateIniSettings[$_]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
-                        Write-Host "  '$($_['<Set-OutlookSignatures template>'])' found in ini but not in signature template path, please check" -ForegroundColor Yellow
+                        Write-Host "  '$($TemplateIniSettings[$_]['<Set-OutlookSignatures template>'])' found in ini but not in signature template path, please check" -ForegroundColor Yellow
                     }
                 }
             }
