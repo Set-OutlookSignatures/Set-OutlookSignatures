@@ -1,3 +1,5 @@
+#Requires -Version 7 
+
 function main {
     Write-Output 'Basics'
     Set-Location $env:GITHUB_WORKSPACE
@@ -79,10 +81,10 @@ function main {
     Remove-Item 'hashes.txt' -Force
 
     $Hashes = ForEach ($File in (Get-ChildItem -File -Recurse)) {
-        Get-FileHash -LiteralPath $File.FullName -Algorithm SHA256 | Select-Object @{N = 'PathRelative'; E = { Resolve-Path -LiteralPath $file.FullName -Relative } }, Algorithm, Hash
+        Get-FileHash -LiteralPath $File.FullName -Algorithm SHA256 | Select-Object @{N = 'File'; E = { Resolve-Path -LiteralPath $_.Path -Relative } }, @{N = 'Hash (SHA256)'; E = { $_.Hash } }
     }
 
-    $Hashes | Export-Csv hashes.txt
+    $Hashes | Export-Csv hashes.txt -Encoding utf8NoBOM -Delimiter ";" -Force
 
 
     Write-Output 'Create release file'

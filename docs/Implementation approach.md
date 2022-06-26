@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-# **<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt=""></a> XXXRemoveWhenBuildingXXX--><a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/sponsor-white?logo=githubsponsors" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
+# **<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt=""></a> XXXRemoveWhenBuildingXXX--><a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/sponsor-white?logo=githubsponsors" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
 
 # What is the recommended approach for implementing the software? <!-- omit in toc -->
 There is certainly no definitive generic recommendation, but this document should be a good starting point.
@@ -284,14 +284,14 @@ The script can be executed via any mechanism, for example
 - through a client management tool
 
 Since Set-OutlookSignatures is a pure PowerShell script, it is called like any other script of this file type:
-```  
+```
 powershell.exe <PowerShell parameter> -file <path to Set-OutlookSignatures.ps1> <Script parameter>  
-```  
+```
 #### 1.6.5.1. Parameters
 The behaviour of the script can be controlled via parameters. Particularly relevant are SignatureTemplatePath and OOFTemplatePath, which are used to specify the path to the signature and absence templates.
 
 The following is an example where the signature templates are on an SMB file share and the out-of-office service provider templates are on a WebDAV share:
-```  
+```
 powershell.exe -file '\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' -SignatureTemplatePath '\netlogon\set-outlooksignatures\set-outlooksignatures Outlook' -OOFTemplatePath 'https://webdav.example.com/CorporateCommunications/Templates/Out of Office templates'.  
 ```
 At the time of writing, other parameters were available. The following is a brief overview of the possibilities, for details please refer to the documentation of the script in the file "readme.html":  
@@ -643,14 +643,14 @@ Das Script kann über einen beliebigen Mechanismus ausgeführt werden, beispiels
 - durch ein Werkzeug zur Client-Verwaltung
 
 Da es sich bei Set-OutlookSignatures um ein reines PowerShell-Script handelt, erfolgt der Aufruf wie bei jedem anderen Script dieses Dateityps:  
-```  
+```
 powershell.exe <PowerShell-Parameter> -file <Pfad zu Set-OutlookSignatures.ps1> <Script-Parameter>  
-```  
+```
 #### 2.6.5.1. Parameter  
 Das Verhalten des Scripts kann über Parameter gesteuert werden. Besonders relevant sind dabei SignatureTemplatePath und OOFTemplatePath, über die der Pfad zu den Signatur- und Abwesenheits-Vorlagen angegeben wird.
 
 Folgend ein Beispiel, bei dem die Signatur-Vorlagen auf einem SMB-File-Share und die AbwesenheService-Providerorlagen auf einem WebDAV-Share liegen:  
-```  
+```
 powershell.exe -file '\\example.com\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' –SignatureTemplatePath '\\example.com\DFS-Share\Common\Templates\Signatures Outlook' –OOFTemplatePath 'https://webdav.example.com/CorporateCommunications/Templates/Out of Office templates'  
 ```
 

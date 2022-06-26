@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-# **<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt=""></a> XXXRemoveWhenBuildingXXX--><a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/sponsor-white?logo=githubsponsors" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
+# **<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="../src/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.<br><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt=""></a> XXXRemoveWhenBuildingXXX--><a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/GruberMarkus/Set-OutlookSignatures" alt=""></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/sponsor-white?logo=githubsponsors" alt=""></a> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/views.svg" alt="" data-external="1"> <img src="https://raw.githubusercontent.com/GruberMarkus/my-traffic2badge/traffic/traffic-Set-OutlookSignatures/clones.svg" alt="" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/GruberMarkus/Set-OutlookSignatures/total" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/network/members" target="_blank"><img src="https://img.shields.io/github/forks/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures" alt="" data-external="1"></a>  
 
 # Features <!-- omit in toc -->
 **Signatures and OOF messages can be:**
@@ -97,14 +97,15 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [16.14. What is the recommended approach for custom configuration files?](#1614-what-is-the-recommended-approach-for-custom-configuration-files)
   - [16.15. Isn't a plural noun in the script name against PowerShell best practices?](#1615-isnt-a-plural-noun-in-the-script-name-against-powershell-best-practices)
   - [16.16. The script hangs at HTM/RTF export, Word shows a security warning!?](#1616-the-script-hangs-at-htmrtf-export-word-shows-a-security-warning)
-  - [16.17. How to avoid empty lines when replacement variables return an empty string?](#1617-how-to-avoid-empty-lines-when-replacement-variables-return-an-empty-string)
+  - [16.17. How to avoid blank lines when replacement variables return an empty string?](#1617-how-to-avoid-blank-lines-when-replacement-variables-return-an-empty-string)
   - [16.18. Is there a roadmap for future versions?](#1618-is-there-a-roadmap-for-future-versions)
   - [16.19. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1619-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
   - [16.20. Can I centrally manage and deploy Outook stationery with this script?](#1620-can-i-centrally-manage-and-deploy-outook-stationery-with-this-script)
-  - [16.21. Why is membership in dynamic distribution groups and dynamic security groups not considered?](#1621-why-is-membership-in-dynamic-distribution-groups-and-dynamic-security-groups-not-considered)
-    - [16.21.1. What's the alternative to dynamic groups?](#16211-whats-the-alternative-to-dynamic-groups)
+  - [16.21. Why is dynamic group membership not considered on premises?](#1621-why-is-dynamic-group-membership-not-considered-on-premises)
+    - [16.21.1. Graph](#16211-graph)
+    - [16.21.2. Active Directory on premises](#16212-active-directory-on-premises)
   - [16.22. Why is no admin or user GUI available?](#1622-why-is-no-admin-or-user-gui-available)
-  - [16.23. What about the new signature roaming feature Microsoft announced?](#1623-what-about-the-new-signature-roaming-feature-microsoft-announced)
+  - [16.23. What about the roaming signatures feature announced by Microsoft?](#1623-what-about-the-roaming-signatures-feature-announced-by-microsoft)
     - [16.23.1. Please be aware of the following problem](#16231-please-be-aware-of-the-following-problem)
   
 # 1. Requirements  
@@ -114,7 +115,7 @@ The script must run in the security context of the currently logged in user.
 The script must run in PowerShell Full Language mode. Constrained Language mode is not supported, as some features such as BASE64 conversions are not available in this mode or require very slow workarounds.
 
 If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell 'Set-OutlokSignatures.ps1'. It is usually not necessary to sign the variable replacement configuration files, e. g. '.\config\default replacement variables.ps1'.  
-There are locked down environments, where all files matching the patterns "\*.ps\*1" and "*.dll" need to be digitially signed with a trusted certificate. 
+There are locked down environments, where all files matching the patterns `'*.ps*1'` and `'*.dll'` need to be digitially signed with a trusted certificate. 
 
 Don't forget to unblock at least 'Set-OutlookSignatures.ps1' after extracting them from the downloaded ZIP file. You can use the PowerShell commandlet 'Unblock-File' for this.
 
@@ -407,8 +408,50 @@ If you want to give template creators control over the ini file, place it in the
   Putting file names in single or double quotes is possible, but not necessary.  
   File names are case insensitive
     `[file a.docx]` is the same as `["File A.docx"]` and `['fILE a.dOCX']`  
-  When there are two or more sections for a filename: The keys and values are not combined, only the last section is considered.  
-  File names not mentioned in this file are not considered, even if they are available in the file system. Set-OutlookSignatures will report files which are in the file system but not mentioned in the current ini, and vice versa.
+  File names not mentioned in this file are not considered, even if they are available in the file system. Set-OutlookSignatures will report files which are in the file system but not mentioned in the current ini, and vice versa.<br>  
+  When there are two or more sections for a filename: The keys and values are not combined, each section is considered individually (SortCulture and SortOrder still apply).  
+  This can be useful in the following scenario: Multiple shared mailboxes shall use the same template, individualized by using `$CURRENTMAILBOX[...]$` variables. A user can have multiple of these shared mailboxes in his Outlook configuration.
+    - Solution A: Use multiple templates (possible in all versions)
+      - Instructions
+        - Create a copy of the initial template for each shared mailbox.
+        - For each template copy, create a corresponding INI entry which assigns the template copy to a specific e-mail address.
+      - Result
+        - Templates<br>One template file for each shared mailbox
+          - `template shared mailbox A.docx`
+          - `template shared mailbox B.docx`
+          - `template shared mailbox C.docx`
+        - INI file
+          ```
+          [template shared mailbox A.docx]
+          SharedMailboxA@example.com
+
+          [template shared mailbox B.docx]
+          SharedMailboxB@example.com
+
+          [template shared mailbox C.docx]
+          SharedMailboxC@example.com
+          ```
+    - Solution B: Use only one template (possible with v3.1.0 and newer)
+      - Instructions
+        - Create a single initial template.
+        - For each shared mailbox, create a corresponding INI entry which assigns the template to a specific e-mail address and defines a separate Outlook signature name.
+      - Result
+        - Templates<br>One template file for all shared mailboxes
+          - `template shared mailboxes.docx`
+        - INI file
+          ```
+          [template shared mailboxes.docx]
+          SharedMailboxA@example.com
+          OutlookSignatureName = template SharedMailboxA
+
+          [template shared mailboxes.docx]
+          SharedMailboxB@example.com
+          OutlookSignatureName = template SharedMailboxB
+
+          [template shared mailboxes.docx]
+          SharedMailboxC@example.com
+          OutlookSignatureName = template SharedMailboxC
+          ```
 4. Add tags in the lines below the filename
   Example: `defaultNew`
     - Do not enclose tags in square brackets. This is not allowed here, but required when you add tags directly to file names.    - When an ini file is used, tags in file names are not considered as tags, but as part of the file name, so the Outlook signature name will contain them.  
@@ -551,24 +594,24 @@ If you prefer using own application IDs or need advanced configuration, follow t
 - In Microsoft Graph, with an administrative account:
   - Create an application with a Client ID
   - Provide admin consent (pre-approval) for the following scopes (permissions):
-    - 'https<area>://graph.microsoft.com/openid' for logging-on the use
-    - 'https<area>://graph.microsoft.com/email' for reading the logged in user's mailbox properties
-    - 'https<area>://graph.microsoft.com/profile' for reading the logged in user's properties
-    - 'https<area>://graph.microsoft.com/user.read.all' for reading properties of other users (manager, additional mailboxes and their managers)
-    - 'https<area>://graph.microsoft.com/group.read.all' for reading properties of all groups, required for templates restricted to groups
-    - 'https<area>://graph.microsoft.com/mailboxsettings.readwrite' for updating the user's own mailbox settings (Out of Office auto reply messages)
-    - 'https<area>://graph.microsoft.com/EWS.AccessAsUser.All' for updating the Outlook Web signature in the user's own mailbox
-  - Set the Redirect URI to 'http<area>://localhost', configure for 'mobile and desktop applications'
-  - Enable 'Allow public client flows' to make Windows Integrated Authentication (SSO) work for Azure AD joined devices
-- In Set-OutlookSignature, use '.\config\default graph config.ps1' as a template for a custom Graph configuration file
-  - Set '$GraphClientID' to the application ID created by the Graph administrator before
-  - Use the 'GraphConfigFile' parameter to make the tool use the newly created Graph configuration file.
+    - '`https://graph.microsoft.com/openid`' for logging-on the user
+    - '`https://graph.microsoft.com/email`' for reading the logged-on user's mailbox properties
+    - '`https://graph.microsoft.com/profile`' for reading the logged-on user's properties
+    - '`https://graph.microsoft.com/user.read.all`' for reading properties of other users (manager, additional mailboxes and their managers)
+    - '`https://graph.microsoft.com/group.read.all`' for reading properties of all groups, required for templates restricted to groups
+    - '`https://graph.microsoft.com/mailboxsettings.readwrite`' for updating the logged-on user's Out of Office auto reply messages
+    - '`https://graph.microsoft.com/EWS.AccessAsUser.All`' for updating the logged-on user's Outlook Web signature
+  - Set the Redirect URI to '`https://localhost`' and configure it for '`mobile and desktop applications`'
+  - Enable '`Allow public client flows`' to make Windows Integrated Authentication (SSO) work for Azure AD joined devices
+- In Set-OutlookSignature, use '`.\config\default graph config.ps1`' as a template for a custom Graph configuration file
+  - Set '`$GraphClientID`' to the application ID created by the Graph administrator before
+  - Use the '`GraphConfigFile`' parameter to make the tool use the newly created Graph configuration file.
 ## 14.2. Advanced Configuration
 The Graph configuration file allows for additional, advanced configuration:
-- '$GraphEndpointVersion': The version of the Graph REST API to use
-- '$GraphUserProperties': The properties to load for each graph user/mailbox. You can add custom attributes here.
-- '$GraphUserAttributeMapping': Graph and Active Directory attributes are not named identically. Set-OutlookSignatures therefore uses a "virtual" account. Use this hashtable to define which Graph attribute name is assigned to which attribute of the virtual account.  
-The virtual account is accessible as '\$ADPropsCurrentUser\[...\]' in '.\config\default replacement variables.ps1', and therefore has a direct impact on replacement variables.
+- `$GraphEndpointVersion`: The version of the Graph REST API to use
+- `$GraphUserProperties`: The properties to load for each graph user/mailbox. You can add custom attributes here.
+- `$GraphUserAttributeMapping`: Graph and Active Directory attributes are not named identically. Set-OutlookSignatures therefore uses a "virtual" account. Use this hashtable to define which Graph attribute name is assigned to which attribute of the virtual account.  
+The virtual account is accessible as `$ADPropsCurrentUser[...]` in `'.\config\default replacement variables.ps1'`, and therefore has a direct impact on replacement variables.
 ## 14.3. Authentication
 In hybrid and cloud-only scenarios, Set-OutlookSignatures automatically tries three stages of authentication.
 1. Windows Integrated Authentication  
@@ -661,10 +704,10 @@ Possible approaches for fulfilling these requirements are:
 
 You can use the script function ConvertTo-SingleFileHTML for embedding:
 ```
-get-childitem ".\templates\Signatures HTML" -File | foreach-object {
+Get-ChildItem '.\templates\Signatures HTML' -File | ForEach-Object {
     $_.FullName  
-    ConvertTo-SingleFileHTML $_.FullName ($_.FullName -replace ".htm$", " embedded.htm")
-} 
+    ConvertTo-SingleFileHTML $_.FullName ($_.FullName -replace '.htm$', ' embedded.htm')
+}
 ```
 
 The templates delivered with this script represent all possible formats:  
@@ -676,7 +719,7 @@ The script has no built-in logging option other than writing output to the host 
 
 You can, for example, use PowerShell's `Start-Transcript` and `Stop-Transcript` commands to create a logging wrapper around Set-OutlookSignatures.ps1.  
 ## 16.9. How can I get more script output for troubleshooting?
-Start the script with the '-debug' and '-verbose' parameters to get the maximum output for troubleshooting.
+Start the script with the '-verbose' parameter to get the maximum output for troubleshooting.
 ## 16.10. Can multiple script instances run in parallel?  
 The script is designed for being run in multiple instances at the same. You can combine any of the following scenarios:  
 - One user runs multiple instances of the script in parallel  
@@ -766,49 +809,49 @@ The behavior can be changed in at least two ways:
 
 Set-OutlookSignatures reads the registry key "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Security\DisableWarningOnIncludeFieldsUpdate" at start, sets it to 1 just before the conversion to HTM and RF takes place and restores the original state as soon as the conversions are finished.
 This way, the warning usually gets suppressed, while the Group Policy configured state of the setting still has higher priority and overrides the user setting.
-## 16.17. How to avoid empty lines when replacement variables return an empty string?
-Not all users have values for all attributes, e. g. a mobile number. This can lead to empty lines in signatures, which may not look nice.
+## 16.17. How to avoid blank lines when replacement variables return an empty string?
+Not all users have values for all attributes, e. g. a mobile number. These empty attributes can lead to blank lines in signatures, which may not look nice.
 
-Follow these steps to avoid empty lines:
+Follow these steps to avoid blank lines:
 1. Use a custom replacement variable config file.
-2. Modify the value of all attributes that should not leave an empty line when there is no text to show:
+2. Modify the value of all attributes that should not leave an blank line when there is no text to show:
     - When the attribute is empty, return an empty string
-    - Else, return a newline ('\`r\`n' in PowerShell) and then the attribute value.  
-3. Place all required replacement variables on a single line, without a space between them.  
-If they are not empty, the newline creates a new paragraph; else, the replacement variable is replaced with an emtpy string.
+    - Else, return a newline (`Shift+Enter` in Word, `` `n `` in PowerShell, `<br>` in HTML) or a paragraph mark (`Enter` in Word, `` `r`n `` in PowerShell, `<p>` in HTML), and then the attribute value.  
+3. Place all required replacement variables on a single line, without a space between them. The replacement variables themselves contain the requires newline or paragraph marks.
 4. Use the ReplacementVariableConfigFile parameter when running the script.
 
-Use '\`n' instead of '\`r\`n' to create a new line within the existing paragraph, but not a new paragraph.
-
-When using HTML templates, use
-- '\<p>' instead of '\`r\`n'
-- '\<br>' instead of '\`n'
-
-Be aware that text replacement also happens in hyperlinks ('tel:', 'mailto:' etc.).  
+Be aware that text replacement also happens in hyperlinks (`tel:`, `mailto:` etc.).  
 Instead of altering existing replacement variables, it is recommended to create new replacement variables with modified content.  
 Use the new one for the pure textual replacement (including the newline), and the original one for the replacement within the hyperlink.  
 
-The following example describes optional preceeding text combined an optional replacement variable containing a hyperlink:
+The following example describes optional preceeding text combined with an optional replacement variable containing a hyperlink.  
+The internal variable `$UseHtmTemplates` is used to automatically differentiate between DOCX and HTM line breaks.
 - Custom replacement variable config file
   ```
-  $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { "`r`nTelephone: "} )
-  $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { "`r`nMobile: "} )
+  $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Telephone: ' } )
+  $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Mobile: ' } )
   ```
 - Word template:  
-  <a href="mailto:$CURRENTUSERMAIL$">\$CURRENTUSERMAIL\$</a>\$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY\$<a href="tel:$CURRENTUSERTELEPHONE$">\$CURRENTUSERTELEPHONE\$</a>\$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$<a href="tel:$CURRENTUSERMOBILE$">\$CURRENTUSERMOBILE$</a>
+  <pre><code>E-Mail: <a href="mailto:$CURRENTUSERMAIL$">$CURRENTUSERMAIL$</a>$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERTELEPHONE$">$CURRENTUSERTELEPHONE$</a>$CURRENTUSERMOBILE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERMOBILE$">$CURRENTUSERMOBILE$</a></code></pre>
 
-  Note that all variables are written on one line and that not only \$CURRENTUSERMAIL\$ is configured with a hyperlink, but \$CURRENTUSERPHONE\$ and \$CURRENTUSERMOBILE\$ too: `mailto:$CURRENTUSERMAIL$`, `tel:$CURRENTUSERTELEPHONE$` and `tel:$CURRENTUSERMOBILE$`
+  Note that all variables are written on one line and that not only `$CURRENTUSERMAIL$` is configured with a hyperlink, but `$CURRENTUSERPHONE$` and `$CURRENTUSERMOBILE$` too:
+  - `mailto:$CURRENTUSERMAIL$`
+  - `tel:$CURRENTUSERTELEPHONE$`
+  - `tel:$CURRENTUSERMOBILE$`
 - Results
-  - Telephone number and mobile number are set. The paragraph marks come from \$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY\$ and \$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$:  
-    first.last@example.com  
-    Telephone: <a href="tel:+43xxx">+43xxx</a>  
-    Mobile: <a href="tel:+43yyy">+43yyy</a>
-  - Telephone number exists, mobile number is empty. The paragraph mark comes from \$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY\$:  
-    first.last@example.com  
+  - Telephone number and mobile number are set.  
+  The paragraph marks come from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$` and `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
+    <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
     Telephone: <a href="tel:+43xxx">+43xxx</a>
-  - Telephone number is empty, mobile number is set. The paragraph mark comes from \$CURRENTUSERMOBILE-PREFIX-NOEMPTY\$  
-    first.last@example.com  
-    Mobile: <a href="tel:+43yyy">+43yyy</a>
+    Mobile: <a href="tel:+43yyy">+43yyy</a></code></pre>
+  - Telephone number is set, mobile number is empty.  
+  The paragraph mark comes from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$`.  
+    <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
+    Telephone: <a href="tel:+43xxx">+43xxx</a></code></pre>
+  - Telephone number is empty, mobile number is set.  
+  The paragraph mark comes from `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
+    <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
+    Mobile: <a href="tel:+43yyy">+43yyy</a></code></pre>
 ## 16.18. Is there a roadmap for future versions?
 There is no binding roadmap for future versions, although I maintain a list of ideas in the 'Contribution opportunities' chapter of '.\docs\CONTRIBUTING.html'.
 
@@ -831,17 +874,17 @@ Problem 1: dg<area>@example.com can't be added as a mailbox to Outlook, as it is
 
 Problem 2: The mailbox m<area>@example.com is configured as non-primary maibox on most clients, because most of the users have the "Send as" permission, but not the "Full Access" permissions. Some users even don't connect the mailbox at all, they just choose m<area>@example.com as "From" address.
 
-Solution: Create signature templates for the mailbox m<area>@example.com and the distribution group dg<area>@example.com and **assign them to the users and groups having "send as" permissions**.
-
-When using file name based tags, the file names would be:
+Solution: Create signature templates for the mailbox m<area>@example.com and the distribution group dg<area>@example.com and **assign them to the group that has been granted the "send as" permission**:
 ```
-m@example.com external English formal.[Example Group] [u@example.com].docx
+[External English formal m@example.com.docx]
+Example Group
 
-dg@example.com internal German informal.[Example Group] [u@example.com].docx
+[External English formal dg@example.com.docx]
+Example Group
 ```
 This works as long as the personal mailbox of a member of "Example\Group" is connected in Outlook as primary mailbox (which usually is the case). When this personal mailbox is processed by Set-OutlookSignatures, the script recognizes the group membership and the signature assigned to it.
 
-Caveat: The \$CurrentMailbox[...]\$ replacement variables refer to the user's personal mailbox in this case, not to m<area>@example.com.
+Caveat: The `$CurrentMailbox[...]$` replacement variables refer to the user's personal mailbox in this case, not to m<area>@example.com.
 ## 16.20. Can I centrally manage and deploy Outook stationery with this script?
 Outlook stationery describes the layout of e-mails, including font size and color for new e-mails and for replies and forwards.
 
@@ -850,11 +893,24 @@ The default e-mail font, size and color are usually an integral part of corporat
 Set-OutlookSignatures has no features regarding deploying Outlook stationery, as there are better ways for doing this.  
 Outlook stores stationery settings in `'HKCU\Software\Microsoft\Office\<Version>\Common\MailSettings'`. You can use a logon script or group policies to deploy these keys, on-prem and for managed devices in the cloud.  
 Unfortunately, Microsoft's group policy templates (ADMX files) for Office do not seem to provide detailed settings for Outlook stationery, so you will have to deploy registry keys. 
-## 16.21. Why is membership in dynamic distribution groups and dynamic security groups not considered?
-Dynamic distribution groups (DDGs) are specific groups that only work within Exchange. Group membership is evaluated just in time when an e-mail is sent to a DDG by executing the LDAP query defining a DDG.
+## 16.21. Why is dynamic group membership not considered on premises?
+Membership in dynamic groups, no matter if they are of the security or distribution type, is considered only when using Microsoft Graph.
 
-Active Directory and Graph know that a DDG is a group, but they basically do not know the members of this group. The same is valid for dynamic security groups, which are available in the cloud only.  
-In more technical words: Dynamic groups have no member attribute, and dynamic groups neither appear in the on-prem user attributes memberOf and tokenGroups nor in the Graph transitiveMemberOf query.
+Dynamic group membership is not considered when using an on premises Active Directory. 
+
+The reason for this is that Graph and on-prem AD handle dynamic group membership differently:
+### 16.21.1. Graph
+Microsoft Graph caches information about dynamic group membership at the group as well as at the user level.  
+
+Graph regularly executes the LDAP queries defining dynamic groups and updates existing attributes with member information.  
+Dynamic groups in Graph are therefore not strictly dynamic in terms of running the defining LDAP query every time a dynamic group is used and thus providing near real-time member information - they behave more like regularly updated static groups, which makes handling for scripts and applications much easier.
+
+For the usecases of Set-OutlookSignatures, there is no difference between a static and a dynamic group in Graph:
+- Querying the '`transitiveMemberOf`' attribute of a user returns static as well as dynamic group membership.
+- Querying the '`members`' attribute of a group returns the group's members, no matter if the group is static or dynamic.
+### 16.21.2. Active Directory on premises
+Active Directory on premises does not cache any information about membership in dynamic groups at the user level, so dynamic groups do not appear in attributes such as '`memberOf`' and '`tokenGroups`'.  
+Active Directory on premises also does not cache any information about members of dynamic groups at the group level, so the group attribute '`members`' is always empty. 
 
 If dynamic groups would have to be considered, the only way would be to enumerate all dynamic groups, to run the LDAP query that defines each group, and to finally evaluate the resulting group membership.
 
@@ -862,21 +918,17 @@ The LDAP queries defining dynamic groups are deemed expensive due to the potenti
 Microsoft does not recommend against dynamic groups, only not to use them heavily.  
 This is very likely the reason why dynamic groups can not be granted permissions on Exchange mailboxes and other Exchange objects, and why each dynamic group can be assigned an expansion server executing the LDAP query (expansion times of 15 minutes or more are not rare in the field).
 
-Taking all these aspects into account, Set-OutlookSignatures will not consider membership in dynamic groups until a reliable and efficient way of querying a user's dynamic group membership is available.
-### 16.21.1. What's the alternative to dynamic groups?
-Dynamic groups have their reason to exist, especially if you use them as a tool for special and rather rare use cases.
+Taking all these aspects into account, Set-OutlookSignatures will not consider membership in dynamic groups on premises until a reliable and efficient way of querying a user's dynamic group membership is available.
 
-With the move to the cloud, where dynamic groups were introduced just not too long ago and only with a limited set of possible query parameters, an ongoing trend can be observed: Replacing dynamic groups with regularly updated static groups.
-
-An Identity Management System (IDM) or a script regularly executes the LDAP query, which would otherwise define a dynamic group, and updates the member list of a static group.
-
-These updates usually happen less frequent than a dynamic group is used. The static group might not be fully up-to-date when used, but other aspects outweigh this disadvantage most of the time:
-- Reduced load on Active Directory (partially transferred to IDM system or server running a script)
-- Static groups can be used for permissions
-- Changes in static group membership can be documented more easily
-- Static groups can be expanded to it's members in e-mail clients
-- Membership in static groups can easily be queried
-- Overcoming query parameter restrictions, such as combing the results of multiple LDAP queries
+A possible way around this restriction is replacing dynamic groups with regularly updated static groups (which is what Microsoft Graph does automatically in the background):
+- An Identity Management System (IDM) or a script regularly executes the LDAP query, which would otherwise define a dynamic group, and updates the member list of a static group.
+- These updates usually happen less frequent than a dynamic group is used. The static group might not be fully up-to-date when used, but other aspects outweigh this disadvantage most of the time:
+  - Reduced load on Active Directory (partially transferred to IDM system or server running a script)
+  - Static groups can be used for permissions
+  - Changes in static group membership can be documented more easily
+  - Static groups can be expanded to it's members in e-mail clients
+  - Membership in static groups can easily be queried
+  - Overcoming query parameter restrictions, such as combining the results of multiple LDAP queries
 ## 16.22. Why is no admin or user GUI available?
 From an admin perspective, Set-OutlookSignatures has been designed to work with on-board tools wherever possible and to make managing and deploying signatures intuitive.
 
@@ -886,42 +938,43 @@ This "easy to set up, easy to understand, easy to maintain" approach is why
 - there is the clear hierarchy of common, group specific and e-mail address specific template application order
 
 For an admin, the most complicated part is bringing Set-OutlookSignatures to his users by integrating it into the logon script, deploy a desktop icon or start menu entry, or creating a scheduled task. Alternatively, an admin can use a signature deployment method without user or client involvement.  
-Both tasks are usually neccessary only once, sample code and documentation based on real life experiences are available.
+Both tasks are usually neccessary only once, sample code and documentation based on real life experiences are available.  
+Anyhow, a basic GUI for configuring the script is accessible via the following built-in PowerShell command:
+```
+Show-Command .\Set-OutlookSignatures.ps1
+```
 
-For a template creator/maintainer, maintaining the INI files defining template application order and permissions is this main task, in combination with tests using simulation mode.  
+For a template creator/maintainer, maintaining the INI files defining template application order and permissions is the main task, in combination with tests using simulation mode.  
 These tasks typically happen multiple times a year. A graphical user interface might make them more intuitive and easier; until then, documentation and examples based on real life experiences are available.
-<br>
-<br>
-<br>
-From a user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
 
-## 16.23. What about the new signature roaming feature Microsoft announced?  
-Microsoft announced a change in how and where signatures are stored. Basically, signatures are no longer stored in the file system, but in the mailbox itself.
+From an end user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
+
+## 16.23. What about the roaming signatures feature announced by Microsoft?  
+Microsoft announced a future change in how and where signatures are stored. Basically, signatures will no longer stored in the file system, but in the mailbox itself.  
+For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
 
 This is a good idea, as it makes signatures available across devices and apps.
 
 Some personal educated guesses based on available documentation, Outlook for Windows beta versions and several Exchange Online tenants:
-- The feature has first been annount by Microsoft in 2020, but has been postponed multiple times. At the time of writing this, the feature shall be released publicly in July 2022 according to the Office 365 roadmap. Microsoft has not yet published a public API. 
-- Outlook for Windows is the only client mentioned as supporting the new feature for now. I am confident more e-mail clients - especially Outlook for Mac, iOS and Android - will follow soon.
-- The multiple signature roaming feature will probably be only available for mailboxes in the cloud. Mailboxes on on-prem servers will not support this feature, no matter if in pure on-prem or in hybrid scenarios.
-- Microsoft is already making available multiple signatures in Outlook Web for more and more Exchange Online tenants. Currently, this breaks PowerShell commands such as Set-MailboxMessageConfiguration and there is no public API available.
+- The feature has first been annount by Microsoft in 2020, but has been postponed multiple times. At the time of writing this, the feature shall be released publicly in October 2022 according to the Office 365 roadmap.
+- Microsoft has not yet published a public API. 
+- Outlook for Windows is the only client mentioned to support the new feature for now. I am confident more e-mail clients - especially Outlook for Mac, iOS and Android - will follow (the sooner, the better).
+- The roaming signatures feature will very likely only be available for mailboxes in the cloud. Mailboxes on on-prem servers will not support this feature, no matter if in pure on-prem or in hybrid scenarios.
+- It is yet unclear if this feature will be available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about '`$CURRENTUSER[...]$`' replacement variables).
+
+Outlook for Windows beta versions already support the roaming signatures feature. Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensure full compatibility with Set-OutlookSignatures, until a public API is released and incorporated into the script.
+  - With the '`DisableRoamingSignaturesTemporaryToggle`' registry value being absent or set to 0, file based signatures created by tools such as Set-OutlookSignatures are regularly deleted and replaced with signatures stored directly in the mailbox.
+  - With the '`DisableRoamingSignaturesTemporaryToggle`' registry value set to 1, the file based approach continues to work as known. Outlook does not synchronize signatures to the mailbox.
+
+Microsoft is already supporting the feature in Outlook Web for more and more Exchange Online tenants. Currently, this breaks PowerShell commands such as Set-MailboxMessageConfiguration and there is no public API available.
   - Set-OutlookSignatures can set one Outlook Web signature, but an Exchange Online tenant with multiple signatures feature enabled just ignores this signature (see the next chapter for workarounds).
-- Outlook for Windows beta versions already support multiple signatures
-  - With the DisableRoamingSignaturesTemporaryToggle registry value being absent or set to 0, file based signatures created by tools such as Set-OutlookSignatures are regularly deleted and replaced with signatures stored directly in the mailbox.
-  - With the DisableRoamingSignaturesTemporaryToggle registry value set to 1, the file based approach continues to work as known. Outlook does not synchronize signatures to the mailbox.
-- It is yet unclear if this feature will be available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about \$CURRENTUSER[...]$ replacement variables).
-
-Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensures full compatibility with this script.
-
-For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
-
 ### 16.23.1. Please be aware of the following problem
-Since Q3 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes and in  Outlook on Windows. There is still no hint of an API, or a way to disable it on the server.
+Since Q3 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes. There is still no hint of an API, or a way to disable it on the server.
 
 When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can successfully set the signature in Outlook Web, but this signature is ignored.
 
 There is no programmatic way to detect or change this behavior.  
-The built-in Exchange Online PowerShell-Cmdlet Set-MailboxMessageConfiguration has the same problem, so it seems different Microsoft teams work on a different development and release schedule.
+The built-in Exchange Online PowerShell-Cmdlet '`Set-MailboxMessageConfiguration`' has the same problem, so it seems different Microsoft teams work on a different development and release schedule.
 
 At the time of writing, there are two workarounds:
 - Manual approach
@@ -934,6 +987,6 @@ At the time of writing, there are two workarounds:
   7. Open a new browser tab and open Outlook Web, or fully reload an existing open Outlook Web tab (Outlook Web works with caching in the browser, so it sometimes shows old configuration data) and check your signatures.
   8. Unfortunately, further updates to the Outlook Web signature by Set-OutlookSignatures are successful but ignored by Outlook Web until all signatures are deleted manually again. Even worse, it is not yet documented or known where the new signatures are stored and how they can be access programatically - so the deletion must happen manuelly and can not be automated at the moment.
 - Disable the feature in your tenant
-  - Only Microsoft can do this. Let Microsoft know via a support case and https://github.com/MicrosoftDocs/office-docs-powershell/issues/8537.
+  - Only Microsoft can do this. Let Microsoft know via a support case.
 
 As soon as there is an official API or a scriptable workaround available, it will be evaluated for support in Set-OutlookSignatures.
