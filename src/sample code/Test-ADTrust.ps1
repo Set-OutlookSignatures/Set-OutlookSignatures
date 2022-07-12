@@ -1,5 +1,9 @@
+# This script assumes that the trust to check is either a cross-forest trust,
+# or that the trusted domain is the only domain in it's forest
+
+
 param (
-    [string]$ADDomain = 'example.com',
+    [string]$CrossForestTrustRootDomain = 'example.com',
     [string[]]$DcPorts = (88, 389, 636),
     [string[]]$GcPorts = (3268, 3269),
     [string[]]$DcProtocols = ('LDAP'),
@@ -63,14 +67,26 @@ try {
 
 
     Write-Host
-    Write-Host "Get FQDN of all Global Catalog servers via DNS query @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-    $ADForestRootDomain = ([ADSI]"LDAP://$($ADDomain)/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
+    Write-Host "Check forest root domain via LDAP @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    $ADForestRootDomain = ([ADSI]"LDAP://$($CrossForestTrustRootDomain)/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
 
-    if ($ADForestRootDomain -ine $ADDomain) {
-        Write-Host "  '$($ADDomain)' is not the forest root domain, using '' for Global Catalog search."
+    if (-not $ADForestRootDomain) {
+        write-host "  Could not connect to '$($CrossForestTrustRootDomain)' via LDAP to query RootDSE. Exiting."
+        exit 1
+    }
+    
+    if ($ADForestRootDomain -ine $CrossForestTrustRootDomain) {
+        Write-Host "  '$($CrossForestTrustRootDomain)' is not the forest root domain, using '$($ADForestRootDomain)' from now on."
+        $CrossForestTrustRootDomain = $ADForestRootDomain
+    } else {
+        Write-Host "  '$($CrossForestTrustRootDomain)' is the forest root domain, continue using this name."
     }
 
-    $AllGCs = @((Resolve-DnsName -Name "_gc._tcp.$($ADForestRootDomain)" -Type srv).nametarget)
+
+    Write-Host
+    Write-Host "Get FQDN of all Global Catalog servers via DNS query @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+
+    $AllGCs = @((Resolve-DnsName -Name "_gc._tcp.$($CrossForestTrustRootDomain)" -Type srv).nametarget)
 
     Write-Host "  $($AllGCs.count) found"
 
@@ -84,7 +100,9 @@ try {
     Write-Host "Get FQDN of all Domain Controller servers via DNS query @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $AllDCs = @()
 
-    $AllDCs = @((Resolve-DnsName -Name "_ldap._tcp.dc._msdcs.$($ADDomain)" -Type srv).nametarget)
+    $AllGCs | foreach { ($_ -split '\.', 2)[1] } | select -unique | foreach {
+	    $AllDCs += (Resolve-DnsName -name "_ldap._tcp.$($_)" -type srv).nametarget
+    }
 
     Write-Host "  $($AllDCs.count) found"
 
