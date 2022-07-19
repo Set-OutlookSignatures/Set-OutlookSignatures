@@ -15,7 +15,7 @@
   ### Fixed
 -->
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.0-beta1" target="_blank">v3.2.0-beta1</a> - 2022-07-11
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.0" target="_blank">v3.2.0</a> - 2022-07-19
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Added
 - Workaround for Word ignoring manual line breaks ('`` `n ``') and paragraph marks ('`` `r`n ``') in replacement variables when converting a template to a signature in RTF format (signatures in HTM and TXT formats are not affected).
