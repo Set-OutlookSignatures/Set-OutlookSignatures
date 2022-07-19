@@ -2154,7 +2154,7 @@ function EvaluateAndSetSignatures {
             $TemplateIniSettingsIndex = ((Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly).GetEnumerator() | Where-Object { (Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly)[$_.name].containskey($TemplateFile.fullname) } | Select-Object -Skip (((0, ($TemplateFileUniqueAppearenceCount - 1)) | Measure-Object -Maximum).maximum) | Select-Object -First 1).name
             #Write-Host "$($templatefile.fullname) = $($TemplateIniSettingsIndex) = $TemplateFileUniqueAppearenceCount"
             #continue
-            
+
             if (-not $TemplateIniSettingsIndex) {
                 continue
             }
@@ -2517,7 +2517,7 @@ function SetSignatures {
             foreach ($replaceKey in $replaceHash.Keys) {
                 if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
                     $FindText = $replaceKey
-                    $ReplaceWith = $replaceHash.$replaceKey
+                    $ReplaceWith = (($replaceHash.$replaceKey -replace "`r`n", '^p') -replace "`n", '^l')
                     $script:COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
                             $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
                             $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
@@ -2530,7 +2530,7 @@ function SetSignatures {
             foreach ($replaceKey in $replaceHash.Keys) {
                 if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
                     $FindText = $replaceKey
-                    $ReplaceWith = $replaceHash.$replaceKey
+                    $ReplaceWith = (($replaceHash.$replaceKey -replace "`r`n", '^p') -replace "`n", '^l')
                     $script:COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
                             $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
                             $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
