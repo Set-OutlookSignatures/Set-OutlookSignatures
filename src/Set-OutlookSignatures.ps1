@@ -1190,7 +1190,7 @@ function main {
             }
         }
 
-        foreach ($TemplateFile in $TemplateFiles) {
+        foreach ($TemplateFile in ($TemplateFiles | Select-Object -Unique)) {
             foreach ($TemplateIniSettingsIndex in @(($TemplateIniSettings.GetEnumerator() | Where-Object { $TemplateIniSettings[$_.name]['<Set-OutlookSignatures template>'] -ieq $TemplateFile.name }).name)) {
                 $TemplateFilesGroupSIDs = @{}
                 Write-Host ("  '$($TemplateFile.Name)'")
@@ -2152,8 +2152,6 @@ function EvaluateAndSetSignatures {
             $TemplateFileUniqueAppearenceCount = @((Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)[0..$TemplateFileIndex] | Where-Object { $_.fullname -eq $TemplateFile.fullname }).count
 
             $TemplateIniSettingsIndex = ((Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly).GetEnumerator() | Where-Object { (Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly)[$_.name].containskey($TemplateFile.fullname) } | Select-Object -Skip (((0, ($TemplateFileUniqueAppearenceCount - 1)) | Measure-Object -Maximum).maximum) | Select-Object -First 1).name
-            #Write-Host "$($templatefile.fullname) = $($TemplateIniSettingsIndex) = $TemplateFileUniqueAppearenceCount"
-            #continue
 
             if (-not $TemplateIniSettingsIndex) {
                 continue
@@ -2169,6 +2167,7 @@ function EvaluateAndSetSignatures {
             Write-Host "$Indent      Check permissions"
             $TemplateAllowed = $false
 
+
             # check for allow entries
             Write-Host "$Indent        Allows"
             if ($TemplateGroup -ieq 'common') {
@@ -2176,67 +2175,83 @@ function EvaluateAndSetSignatures {
                 Write-Host "$Indent          Common: Template is classified as common template valid for all mailboxes"
             } elseif ($TemplateGroup -ieq 'group') {
                 $tempAllowCount = 0
-                $GroupsSIDs | ForEach-Object {
-                    if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[$_``]*") {
+
+                foreach ($GroupsSid in $GroupsSIDs) {
+                    if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[$($GroupsSid)``]*") {
                         $TemplateAllowed = $true
                         $tempAllowCount++
-                        $tempSearchSting = $_
-                        Write-Host "$Indent          Group: $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -join '/') = $_"
+                        $tempSearchSting = $GroupsSid
+                        Write-Host "$Indent          First group match: $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -join '/') = $($GroupsSid)"
+                        break
                     }
                 }
+
                 if ($tempAllowCount -eq 0) {
                     Write-Host "$Indent          Group: Mailbox is not member of any allowed group"
                 }
             } elseif ($TemplateGroup -ieq 'mailbox') {
                 $tempAllowCount = 0
-                $CurrentMailboxSMTPAddresses | ForEach-Object {
-                    if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[$_``]*") {
+
+                foreach ($CurrentMailboxSmtpAddress in $CurrentMailboxSmtpAddresses) {
+                    if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[$($CurrentMailboxSmtpAddress)``]*") {
                         $TemplateAllowed = $true
                         $tempAllowCount++
-                        Write-Host "$Indent          E-mail address: $_"
+                        Write-Host "$Indent          First e-mail address match: $($CurrentMailboxSmtpAddress)"
+                        break
                     }
                 }
+
                 if ($tempAllowCount -eq 0) {
                     Write-Host "$Indent          E-mail address: Mailbox does not have any allowed e-mail address"
                 }
             }
 
+                
+            # check for deny entries
+            if ($TemplateAllowed -eq $true) {
+                Write-Host "$Indent        Denies"
+                # check for group deny
+                $tempDenyCount = 0
 
-            # check for allow entries
-            Write-Host "$Indent        Denies"
-            # check for group deny
-            $tempDenyCount = 0
-            $GroupsSIDs | ForEach-Object {
-                if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-:$_``]*") {
-                    $TemplateAllowed = $false
-                    $tempDenyCount++
-                    $tempSearchSting = $_
-                    Write-Host "$Indent          Group: $((($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -replace '^\[', '[-:') -join '/') = $_"
+                foreach ($GroupsSid in $GroupsSIDs) {
+                    if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-:$($GroupsSid)``]*") {
+                        $TemplateAllowed = $false
+                        $tempDenyCount++
+                        $tempSearchSting = $($GroupsSid)
+                        Write-Host "$Indent          First group match: $((($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -replace '^\[', '[-:') -join '/') = $($GroupsSid)"
+                        break
+                    }
+                }
+
+                if ($tempDenyCount -eq 0) {
+                    Write-Host "$Indent          Group: Mailbox is not member of any denied group"
+                }
+
+                # check for mail address deny
+                $tempDenyCount = 0
+
+                foreach ($CurrentMailboxSmtpAddress in $CurrentMailboxSmtpAddresses) {
+                    if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-:$($CurrentMailboxSmtpAddress)``]*") {
+                        $TemplateAllowed = $false
+                        $tempDenyCount++
+                        Write-Host "$Indent          First e-mail address match: $($CurrentMailboxSmtpAddress)"
+                        break
+                    }
+                }
+
+                if ($tempDenyCount -eq 0) {
+                    Write-Host "$Indent          E-Mail address: Mailbox does not have any denied e-mail address"
                 }
             }
-            if ($tempDenyCount -eq 0) {
-                Write-Host "$Indent          Group: Mailbox is not member of any denied group"
-            }
 
-            # check for mail address deny
-            $tempDenyCount = 0
-            $CurrentMailboxSMTPAddresses | ForEach-Object {
-                if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-:$_``]*") {
-                    $TemplateAllowed = $false
-                    $tempDenyCount++
-                    Write-Host "$Indent          E-mail address: $_"
-                }
-            }
-            if ($tempDenyCount -eq 0) {
-                Write-Host "$Indent          E-Mail address: Mailbox does not have any denied e-mail address"
-            }
-
+            # result
             if ($Template -and ($TemplateAllowed -eq $true)) {
                 Write-Host "$Indent        Use template as there is at least one allow and no deny for this mailbox"
                 if ($ProcessOOF) {
                     if ($OOFFilesInternal.contains($TemplateIniSettingsIndex)) {
                         $OOFInternal = $Template
                     }
+
                     if ($OOFFilesExternal.contains($TemplateIniSettingsIndex)) {
                         $OOFExternal = $Template
                     }
