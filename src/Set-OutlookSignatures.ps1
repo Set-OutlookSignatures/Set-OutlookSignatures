@@ -361,7 +361,7 @@ function main {
         foreach ($section in $SignatureIniSettings.GetEnumerator()) {
             Write-Verbose "    File: '$($section.name)'"
             $local:tags = @()
-            foreach ($key in $SignatureIniSettings["$($section.name)"].GetEnumerator()) {
+            foreach ($key in $SignatureIniSettings[$($section.name)].GetEnumerator()) {
                 if ($key.value) {
                     $local:tags += "$($key.name) = $($key.value)"
                 } else {
@@ -400,7 +400,7 @@ function main {
             foreach ($section in $OOFIniSettings.GetEnumerator()) {
                 Write-Verbose "    File: '$($section.name)'"
                 $local:tags = @()
-                foreach ($key in $OOFIniSettings["$($section.name)"].GetEnumerator()) {
+                foreach ($key in $OOFIniSettings[$($section.name)].GetEnumerator()) {
                     if ($key.value) {
                         $local:tags += "$($key.name) = $($key.value)"
                     } else {
@@ -1140,7 +1140,7 @@ function main {
             $TemplateIniSettings.GetEnumerator().name | ForEach-Object {
                 if ($TemplateIniSettings[$_]['<Set-OutlookSignatures template>']) {
                     if ( ($TemplateIniSettings[$_]['<Set-OutlookSignatures template>'].endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $TemplateIniSettings[$_]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
-                        Write-Host "  '$($TemplateIniSettings[$_]['<Set-OutlookSignatures template>'])' found in ini but not in signature template path, please check" -ForegroundColor Yellow
+                        Write-Host "  '$($TemplateIniSettings[$_]['<Set-OutlookSignatures template>'])' (ini index #$($_)) found in ini but not in signature template path, please check" -ForegroundColor Yellow
                     }
                 }
             }
@@ -1160,307 +1160,317 @@ function main {
             # Populate template files in the most complicated way first: SortOrder 'AsInThisFile'
             # This also considers that templates can be referenced multiple times in the INI file
             # If the setting in the ini file is different, we only need to sort $TemplateFiles
-            $TemplateFiles = $TemplateFiles | Where-Object { $_.name -iin @($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }) }
+            $TemplateFiles = $TemplateFiles | Where-Object { $_.name -iin @($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }) } | Select-Object *, TemplateIniSettingsIndex
             $TemplateFilesSortOrder = @()
-                    (@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }) | Where-Object { $_ -iin $TemplateFiles.name }) | ForEach-Object {
-                $TemplateFilesSortOrder += [array]::indexof($TemplateFiles.name, $_)
+            $TemplateFilesIniIndex = @()
+
+
+            $TemplateIniSettings.GetEnumerator().name | ForEach-Object {
+                if ($TemplateIniSettings[$_]['<Set-OutlookSignatures template>'] -iin $TemplateFiles.name) {
+                    $TemplateFilesSortOrder += [array]::indexof($TemplateFiles.name, $TemplateIniSettings[$_]['<Set-OutlookSignatures template>'])
+                    $TemplateFilesIniIndex += $_
+                }
             }
-            $TemplateFiles = $TemplateFiles[$TemplateFilesSortOrder]
+
+            $TemplateFiles = @($TemplateFiles[$TemplateFilesSortOrder] | Select-Object *)
+
+            0..($TemplateFiles.Count - 1) | ForEach-Object {
+                $TemplateFiles[$_].TemplateIniSettingsIndex = $TemplateFilesIniIndex[$_]
+            }
 
             switch ((@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortOrder']) {
                 { $_ -iin 'AsInThisFile', 'AsListed' } {
                     # nothing to do, $TemplateFiles is already correctly populated and sorted
-                    continue
+                    break
                 }
 
                 { $_ -iin ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } {
-                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture
-                    continue
+                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } }
+                    break
                 }
 
                 { $_ -iin ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } {
-                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Descending
-                    continue
+                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } } -Descending
+                    break
                 }
 
                 default {
                     # same as 'ascending'
-                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture
+                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } }
                 }
             }
         }
 
-        foreach ($TemplateFile in ($TemplateFiles | Select-Object -Unique)) {
-            foreach ($TemplateIniSettingsIndex in @(($TemplateIniSettings.GetEnumerator() | Where-Object { $TemplateIniSettings[$_.name]['<Set-OutlookSignatures template>'] -ieq $TemplateFile.name }).name)) {
-                $TemplateFilesGroupSIDs = @{}
-                Write-Host ("  '$($TemplateFile.Name)'")
-                if ($TemplateIniSettings[$TemplateIniSettingsIndex]['<Set-OutlookSignatures template>'] -ieq $TemplateFile.name) {
-                    $TemplateFilePart = ($TemplateIniSettings[$TemplateIniSettingsIndex].GetEnumerator().Name -join '] [')
-                    if ($TemplateFilePart) {
-                        $TemplateFilePart = ($TemplateFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName', '<Set-OutlookSignatures template>') }) -join '] ['
-                        $TemplateFilePart = '[' + $TemplateFilePart + ']'
-                        $TemplateFilePart = $TemplateFilePart -replace '\[\]', ''
-                    }
-                    if ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']) {
-                        $TemplateFileTargetName = ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
-                    } else {
-                        $TemplateFileTargetName = $TemplateFile.Name
-                    }
+        foreach ($TemplateFile in $TemplateFiles) {
+            $TemplateIniSettingsIndex = $TemplateFile.TemplateIniSettingsIndex
+            $TemplateFilesGroupSIDs = @{}
+            Write-Host ("  '$($TemplateFile.Name)' (ini index #$($TemplateIniSettingsIndex))")
+            if ($TemplateIniSettings[$TemplateIniSettingsIndex]['<Set-OutlookSignatures template>'] -ieq $TemplateFile.name) {
+                $TemplateFilePart = ($TemplateIniSettings[$TemplateIniSettingsIndex].GetEnumerator().Name -join '] [')
+                if ($TemplateFilePart) {
+                    $TemplateFilePart = ($TemplateFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName', '<Set-OutlookSignatures template>') }) -join '] ['
+                    $TemplateFilePart = '[' + $TemplateFilePart + ']'
+                    $TemplateFilePart = $TemplateFilePart -replace '\[\]', ''
+                }
+                if ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']) {
+                    $TemplateFileTargetName = ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
                 } else {
-                    $TemplateFilePart = ''
                     $TemplateFileTargetName = $TemplateFile.Name
                 }
+            } else {
+                $TemplateFilePart = ''
+                $TemplateFileTargetName = $TemplateFile.Name
+            }
 
-                Write-Host "    Outlook signature name: '$([System.IO.Path]::ChangeExtension($TemplateFileTargetName, $null) -replace '\.$')'"
+            Write-Host "    Outlook signature name: '$([System.IO.Path]::ChangeExtension($TemplateFileTargetName, $null) -replace '\.$')'"
 
-                $TemplateFilePartRegexTimeAllow = '\[(?!-:)\d{12}-\d{12}\]'
-                $TemplateFilePartRegexTimeDeny = '\[-:\d{12}-\d{12}\]'
-                $TemplateFilePartRegexGroupAllow = '\[(?!-:)\S+?(?<!]) .+?\]'
-                $TemplateFilePartRegexGroupDeny = '\[-:\S+?(?<!]) .+?\]'
-                $TemplateFilePartRegexMailaddressAllow = '\[(?!-:)(\S+?)@(\S+?)\.(\S+?)\]'
-                $TemplateFilePartRegexMailaddressDeny = '\[-:(\S+?)@(\S+?)\.(\S+?)\]'
-                if ($SigOrOOF -ieq 'signature') {
-                    $TemplateFilePartRegexDefaultneworinternal = '(?i)\[DefaultNew\]'
-                    $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[DefaultReplyFwd\]'
+            $TemplateFilePartRegexTimeAllow = '\[(?!-:)\d{12}-\d{12}\]'
+            $TemplateFilePartRegexTimeDeny = '\[-:\d{12}-\d{12}\]'
+            $TemplateFilePartRegexGroupAllow = '\[(?!-:)\S+?(?<!]) .+?\]'
+            $TemplateFilePartRegexGroupDeny = '\[-:\S+?(?<!]) .+?\]'
+            $TemplateFilePartRegexMailaddressAllow = '\[(?!-:)(\S+?)@(\S+?)\.(\S+?)\]'
+            $TemplateFilePartRegexMailaddressDeny = '\[-:(\S+?)@(\S+?)\.(\S+?)\]'
+            if ($SigOrOOF -ieq 'signature') {
+                $TemplateFilePartRegexDefaultneworinternal = '(?i)\[DefaultNew\]'
+                $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[DefaultReplyFwd\]'
+            } else {
+                $TemplateFilePartRegexDefaultneworinternal = '(?i)\[internal\]'
+                $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[external\]'
+            }
+            $TemplateFilePartRegexKnown = '(' + (($TemplateFilePartRegexTimeAllow, $TemplateFilePartRegexTimeDeny, $TemplateFilePartRegexGroupAllow, $TemplateFilePartRegexGroupDeny, $TemplateFilePartRegexMailaddressAllow, $TemplateFilePartRegexMailaddressDeny, $TemplateFilePartRegexDefaultneworinternal, $TemplateFilePartRegexDefaultreplyfwdorexternal) -join '|') + ')'
+
+            # time based template
+            $TemplateFileTimeActive = $true
+            if (($TemplateFilePart -match $TemplateFilePartRegexTimeAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexTimeDeny)) {
+                Write-Host '    Time based template'
+                if (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeAllow).captures.value).count -gt 0) {
+                    $TemplateFileTimeActive = $false
                 } else {
-                    $TemplateFilePartRegexDefaultneworinternal = '(?i)\[internal\]'
-                    $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[external\]'
+                    $TemplateFileTimeActive = $true
                 }
-                $TemplateFilePartRegexKnown = '(' + (($TemplateFilePartRegexTimeAllow, $TemplateFilePartRegexTimeDeny, $TemplateFilePartRegexGroupAllow, $TemplateFilePartRegexGroupDeny, $TemplateFilePartRegexMailaddressAllow, $TemplateFilePartRegexMailaddressDeny, $TemplateFilePartRegexDefaultneworinternal, $TemplateFilePartRegexDefaultreplyfwdorexternal) -join '|') + ')'
+                foreach ($TemplateFilePartTag in ((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeDeny).captures.value)) | Where-Object { $_ })) {
+                    Write-Host "      $($TemplateFilePartTag): " -NoNewline
+                    try {
+                        if (-not ($TemplateFilePartTag.startswith('[-:'))) {
+                            $DateTimeTagStart = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(1, 12)), 'yyyyMMddHHmm', $null)
+                            $DateTimeTagEnd = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(14, 12)), 'yyyyMMddHHmm', $null)
 
-                # time based template
-                $TemplateFileTimeActive = $true
-                if (($TemplateFilePart -match $TemplateFilePartRegexTimeAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexTimeDeny)) {
-                    Write-Host '    Time based template'
-                    if (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeAllow).captures.value).count -gt 0) {
-                        $TemplateFileTimeActive = $false
-                    } else {
-                        $TemplateFileTimeActive = $true
+                            if (((Get-Date) -ge $DateTimeTagStart) -and ((Get-Date) -le $DateTimeTagEnd)) {
+                                Write-Host 'Current DateTime is in allowed range'
+                                $TemplateFileTimeActive = $true
+                            } else {
+                                Write-Host 'Current DateTime is not in allowed range'
+                            }
+                        } else {
+                            $DateTimeTagStart = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(3, 12)), 'yyyyMMddHHmm', $null)
+                            $DateTimeTagEnd = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(16, 12)), 'yyyyMMddHHmm', $null)
+
+                            if (((Get-Date) -ge $DateTimeTagStart) -and ((Get-Date) -le $DateTimeTagEnd)) {
+                                Write-Host 'Current DateTime is in denied range'
+                                $TemplateFileTimeActive = $false
+                            } else {
+                                Write-Host 'Current DateTime is not in denied range'
+                            }
+                        }
+                    } catch {
+                        Write-Host 'Invalid DateTime, ignore tag' -ForegroundColor Red
                     }
-                    foreach ($TemplateFilePartTag in ((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeDeny).captures.value)) | Where-Object { $_ })) {
-                        Write-Host "      $($TemplateFilePartTag): " -NoNewline
-                        try {
-                            if (-not ($TemplateFilePartTag.startswith('[-:'))) {
-                                $DateTimeTagStart = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(1, 12)), 'yyyyMMddHHmm', $null)
-                                $DateTimeTagEnd = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(14, 12)), 'yyyyMMddHHmm', $null)
+                }
+                if ($TemplateFileTimeActive -eq $true) {
+                    Write-Host "      Current DateTime is in allowed time ranges, use $SigOrOOF template"
+                } else {
+                    Write-Host "      Current DateTime is not in allowed time ranges, ignore $SigOrOOF template" -ForegroundColor Yellow
+                }
+            }
+            if ($TemplateFileTimeActive -ne $true) {
+                continue
+            }
 
-                                if (((Get-Date) -ge $DateTimeTagStart) -and ((Get-Date) -le $DateTimeTagEnd)) {
-                                    Write-Host 'Current DateTime is in allowed range'
-                                    $TemplateFileTimeActive = $true
+            # common template
+            if (($TemplateFilePart -notmatch $TemplateFilePartRegexGroupAllow) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexMailaddressAllow)) {
+                Write-Host '    Common template (no group or e-mail address allow tags specified)'
+                if (-not $TemplateFilesCommon.containskey($TemplateIniSettingsIndex)) {
+                    $TemplateFilesCommon.add($TemplateIniSettingsIndex, @{})
+                    $TemplateFilesCommon[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
+                }
+                $TemplateClassificationDisplayOrder = ('group', 'mail')
+            } elseif ($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) {
+                $TemplateClassificationDisplayOrder = ('group', 'mail')
+            } elseif ($TemplateFilePart -match $TemplateFilePartRegexMailaddressAllow) {
+                $TemplateClassificationDisplayOrder = ('mail', 'group')
+            }
+
+            $TemplateClassificationDisplayOrder | ForEach-Object {
+                # group specific template
+                if ($_ -ieq 'group') {
+                    if (($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexGroupDeny)) {
+                        foreach ($TemplateFilePartTag in ((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexGroupAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexGroupDeny).captures.value)) | Where-Object { $_ })) {
+                            if (-not $TemplateFilesGroup.ContainsKey($TemplateIniSettingsIndex)) {
+                                if ($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) {
+                                    Write-Host '    Group specific template'
                                 } else {
-                                    Write-Host 'Current DateTime is not in allowed range'
+                                    Write-Host '    Group specific exclusions'
+                                }
+                                $TemplateFilesGroup.add($TemplateIniSettingsIndex, @{})
+                                $TemplateFilesGroup[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
+                            }
+                            Write-Host "      $($TemplateFilePartTag) = " -NoNewline
+                            $NTName = (((($TemplateFilePartTag -replace '\[', '') -replace '^-:', '') -replace '\]$', '') -replace '(.*?) (.*)', '$1\$2')
+
+                            # Check cache (only contains [xxx], not [-:xxx])
+                            if ($TemplateFilePartTag.startswith('[-:')) {
+                                if ($TemplateFilesGroupSIDsOverall.ContainsKey(($TemplateFilePartTag -replace '^\[-:', '['))) {
+                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + $TemplateFilesGroupSIDsOverall[($TemplateFilePartTag -replace '^\[-:', '[')]))
                                 }
                             } else {
-                                $DateTimeTagStart = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(3, 12)), 'yyyyMMddHHmm', $null)
-                                $DateTimeTagEnd = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(16, 12)), 'yyyyMMddHHmm', $null)
-
-                                if (((Get-Date) -ge $DateTimeTagStart) -and ((Get-Date) -le $DateTimeTagEnd)) {
-                                    Write-Host 'Current DateTime is in denied range'
-                                    $TemplateFileTimeActive = $false
-                                } else {
-                                    Write-Host 'Current DateTime is not in denied range'
+                                if ($TemplateFilesGroupSIDsOverall.ContainsKey($TemplateFilePartTag)) {
+                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, $TemplateFilesGroupSIDsOverall[$TemplateFilePartTag])
                                 }
                             }
-                        } catch {
-                            Write-Host 'Invalid DateTime, ignore tag' -ForegroundColor Red
-                        }
-                    }
-                    if ($TemplateFileTimeActive -eq $true) {
-                        Write-Host "      Current DateTime is in allowed time ranges, use $SigOrOOF template"
-                    } else {
-                        Write-Host "      Current DateTime is not in allowed time ranges, ignore $SigOrOOF template" -ForegroundColor Yellow
-                    }
-                }
-                if ($TemplateFileTimeActive -ne $true) {
-                    continue
-                }
 
-                # common template
-                if (($TemplateFilePart -notmatch $TemplateFilePartRegexGroupAllow) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexMailaddressAllow)) {
-                    Write-Host '    Common template (no group or e-mail address allow tags specified)'
-                    if (-not $TemplateFilesCommon.containskey($TemplateIniSettingsIndex)) {
-                        $TemplateFilesCommon.add($TemplateIniSettingsIndex, @{})
-                        $TemplateFilesCommon[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
-                    }
-                    $TemplateClassificationDisplayOrder = ('group', 'mail')
-                } elseif ($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) {
-                    $TemplateClassificationDisplayOrder = ('group', 'mail')
-                } elseif ($TemplateFilePart -match $TemplateFilePartRegexMailaddressAllow) {
-                    $TemplateClassificationDisplayOrder = ('mail', 'group')
-                }
-
-                $TemplateClassificationDisplayOrder | ForEach-Object {
-                    # group specific template
-                    if ($_ -ieq 'group') {
-                        if (($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexGroupDeny)) {
-                            foreach ($TemplateFilePartTag in ((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexGroupAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexGroupDeny).captures.value)) | Where-Object { $_ })) {
-                                if (-not $TemplateFilesGroup.ContainsKey($TemplateIniSettingsIndex)) {
-                                    if ($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) {
-                                        Write-Host '    Group specific template'
-                                    } else {
-                                        Write-Host '    Group specific exclusions'
-                                    }
-                                    $TemplateFilesGroup.add($TemplateIniSettingsIndex, @{})
-                                    $TemplateFilesGroup[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
-                                }
-                                Write-Host "      $($TemplateFilePartTag) = " -NoNewline
-                                $NTName = (((($TemplateFilePartTag -replace '\[', '') -replace '^-:', '') -replace '\]$', '') -replace '(.*?) (.*)', '$1\$2')
-
-                                # Check cache (only contains [xxx], not [-:xxx])
-                                if ($TemplateFilePartTag.startswith('[-:')) {
-                                    if ($TemplateFilesGroupSIDsOverall.ContainsKey(($TemplateFilePartTag -replace '^\[-:', '['))) {
-                                        $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + $TemplateFilesGroupSIDsOverall[($TemplateFilePartTag -replace '^\[-:', '[')]))
-                                    }
-                                } else {
-                                    if ($TemplateFilesGroupSIDsOverall.ContainsKey($TemplateFilePartTag)) {
-                                        $TemplateFilesGroupSIDs.add($TemplateFilePartTag, $TemplateFilesGroupSIDsOverall[$TemplateFilePartTag])
-                                    }
-                                }
-
-                                if ((-not $TemplateFilesGroupSIDs.ContainsKey($TemplateFilePartTag))) {
-                                    if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
+                            if ((-not $TemplateFilesGroupSIDs.ContainsKey($TemplateFilePartTag))) {
+                                if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
+                                    try {
+                                        if ($TemplateFilePartTag.startswith('[-:')) {
+                                            $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value))
+                                            $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
+                                        } else {
+                                            $TemplateFilesGroupSIDs.add($TemplateFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
+                                            $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
+                                        }
+                                    } catch {
+                                        # No group with this sAMAccountName found. Maybe it's a display name?
                                         try {
+                                            Write-Verbose $error[0]
+                                            $objTrans = New-Object -ComObject 'NameTranslate'
+                                            $objNT = $objTrans.GetType()
+                                            $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
+                                            $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($NTName -split '\\')[1]))
                                             if ($TemplateFilePartTag.startswith('[-:')) {
-                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value))
-                                                $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
+                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value))
+                                                $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                             } else {
-                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
-                                                $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
+                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
+                                                $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                             }
                                         } catch {
-                                            # No group with this sAMAccountName found. Maybe it's a display name?
-                                            try {
-                                                Write-Verbose $error[0]
-                                                $objTrans = New-Object -ComObject 'NameTranslate'
-                                                $objNT = $objTrans.GetType()
-                                                $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
-                                                $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($NTName -split '\\')[1]))
-                                                if ($TemplateFilePartTag.startswith('[-:')) {
-                                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value))
-                                                    $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
-                                                } else {
-                                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
-                                                    $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
-                                                }
-                                            } catch {
-                                                Write-Verbose $error[0]
-                                            }
+                                            Write-Verbose $error[0]
                                         }
-                                    } else {
-                                        $tempFilterOrder = @(
-                                            "((onPremisesNetBiosName eq '$($NTName.Split('\')[0])') and (onPremisesSamAccountName eq '$($NTName.Split('\')[1])'))"
-                                            "((onPremisesNetBiosName eq '$($NTName.Split('\')[0])') and (displayName eq '$($NTName.Split('\')[1])'))"
-                                            "(proxyAddresses/any(x:x eq 'smtp:$($NTName.Split('\')[1])'))"
-                                            "(mailNickname eq '$($NTName.Split('\')[1])')"
-                                            "(displayName eq '$($NTName.Split('\')[1])')"
-                                        )
-                                        ForEach ($tempFilter in $tempFilterOrder) {
-                                            $tempResults = (GraphFilterGroups $tempFilter)
-                                            if (($tempResults.error -eq $false) -and ($tempResults.groups.count -eq 1 )) {
-                                                if ($TemplateFilePartTag.startswith('[-:')) {
-                                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + $tempResults.groups[0].securityidentifier))
-                                                    $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), $tempResults.groups[0].securityidentifier)
-                                                } else {
-                                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, $tempResults.groups[0].securityidentifier)
-                                                    $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, $tempResults.groups[0].securityidentifier)
-                                                }
-                                                break
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if ($TemplateFilesGroupSIDs.containskey($TemplateFilePartTag)) {
-                                    if ($null -ne $TemplateFilesGroupSIDs[$TemplateFilePartTag]) {
-                                        Write-Host "$($TemplateFilesGroupSIDs[$TemplateFilePartTag] -replace '^-:', '')"
-                                        $TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] = ($TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] + '[' + $TemplateFilesGroupSIDs[$TemplateFilePartTag] + ']')
-                                    } else {
-                                        Write-Host 'Not found, please check' -ForegroundColor Yellow
                                     }
                                 } else {
+                                    $tempFilterOrder = @(
+                                        "((onPremisesNetBiosName eq '$($NTName.Split('\')[0])') and (onPremisesSamAccountName eq '$($NTName.Split('\')[1])'))"
+                                        "((onPremisesNetBiosName eq '$($NTName.Split('\')[0])') and (displayName eq '$($NTName.Split('\')[1])'))"
+                                        "(proxyAddresses/any(x:x eq 'smtp:$($NTName.Split('\')[1])'))"
+                                        "(mailNickname eq '$($NTName.Split('\')[1])')"
+                                        "(displayName eq '$($NTName.Split('\')[1])')"
+                                    )
+                                    ForEach ($tempFilter in $tempFilterOrder) {
+                                        $tempResults = (GraphFilterGroups $tempFilter)
+                                        if (($tempResults.error -eq $false) -and ($tempResults.groups.count -eq 1 )) {
+                                            if ($TemplateFilePartTag.startswith('[-:')) {
+                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + $tempResults.groups[0].securityidentifier))
+                                                $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), $tempResults.groups[0].securityidentifier)
+                                            } else {
+                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, $tempResults.groups[0].securityidentifier)
+                                                $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, $tempResults.groups[0].securityidentifier)
+                                            }
+                                            break
+                                        }
+                                    }
+                                }
+                            }
+
+                            if ($TemplateFilesGroupSIDs.containskey($TemplateFilePartTag)) {
+                                if ($null -ne $TemplateFilesGroupSIDs[$TemplateFilePartTag]) {
+                                    Write-Host "$($TemplateFilesGroupSIDs[$TemplateFilePartTag] -replace '^-:', '')"
+                                    $TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] = ($TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] + '[' + $TemplateFilesGroupSIDs[$TemplateFilePartTag] + ']')
+                                } else {
                                     Write-Host 'Not found, please check' -ForegroundColor Yellow
-                                    if ($TemplateFilePartTag.startswith('[-:')) {
-                                        $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), $null)
-                                    } else {
-                                        $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, $null)
-                                    }
-
                                 }
-                            }
-                        }
-                    }
-
-                    # mailbox specific template
-                    if ($_ -ieq 'mail') {
-                        if (($TemplateFilePart -match $TemplateFilePartRegexMailaddressAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexMailaddressDeny)) {
-                            foreach ($TemplateFilePartTag in ((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexMailaddressAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexMailaddressDeny).captures.value)) | Where-Object { $_ })) {
-                                if (-not $TemplateFilesMailbox.ContainsKey($TemplateIniSettingsIndex)) {
-                                    if ($TemplateFilePart -match $TemplateFilePartRegexmailaddressAllow) {
-                                        Write-Host '    Mailbox specific template'
-                                    } else {
-                                        Write-Host '    Mailbox specific exclusions'
-                                    }
-                                    $TemplateFilesMailbox.add($TemplateIniSettingsIndex, @{})
-                                    $TemplateFilesMailbox[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
+                            } else {
+                                Write-Host 'Not found, please check' -ForegroundColor Yellow
+                                if ($TemplateFilePartTag.startswith('[-:')) {
+                                    $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), $null)
+                                } else {
+                                    $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, $null)
                                 }
-                                Write-Host "      $($TemplateFilePartTag)"
-                                $TemplateFilesMailboxFilePart[$TemplateIniSettingsIndex] = ($TemplateFilesMailboxFilePart[$TemplateIniSettingsIndex] + $TemplateFilePartTag)
+
                             }
                         }
                     }
                 }
 
-                # DefaultNew, DefaultReplyFwd, Internal, External
-                if ($TemplateFilePart -match $TemplateFilePartRegexDefaultneworinternal) {
-                    foreach ($TemplateFilePartTag in (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultneworinternal).captures.value) | Where-Object { $_ })) {
-                        if ($SigOrOOF -ieq 'signature') {
-                            Write-Host '    Default signature for new e-mails'
+                # mailbox specific template
+                if ($_ -ieq 'mail') {
+                    if (($TemplateFilePart -match $TemplateFilePartRegexMailaddressAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexMailaddressDeny)) {
+                        foreach ($TemplateFilePartTag in ((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexMailaddressAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexMailaddressDeny).captures.value)) | Where-Object { $_ })) {
+                            if (-not $TemplateFilesMailbox.ContainsKey($TemplateIniSettingsIndex)) {
+                                if ($TemplateFilePart -match $TemplateFilePartRegexmailaddressAllow) {
+                                    Write-Host '    Mailbox specific template'
+                                } else {
+                                    Write-Host '    Mailbox specific exclusions'
+                                }
+                                $TemplateFilesMailbox.add($TemplateIniSettingsIndex, @{})
+                                $TemplateFilesMailbox[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
+                            }
                             Write-Host "      $($TemplateFilePartTag)"
-                        } else {
-                            Write-Host '    Default internal OOF message'
-                            Write-Host "      $($TemplateFilePartTag)"
+                            $TemplateFilesMailboxFilePart[$TemplateIniSettingsIndex] = ($TemplateFilesMailboxFilePart[$TemplateIniSettingsIndex] + $TemplateFilePartTag)
                         }
                     }
+                }
+            }
 
-                    if (-not $TemplateFilesDefaultnewOrInternal.containskey($TemplateIniSettingsIndex)) {
-                        $TemplateFilesDefaultnewOrInternal.add($TemplateIniSettingsIndex, @{})
-                        $TemplateFilesDefaultnewOrInternal[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
+            # DefaultNew, DefaultReplyFwd, Internal, External
+            if ($TemplateFilePart -match $TemplateFilePartRegexDefaultneworinternal) {
+                foreach ($TemplateFilePartTag in (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultneworinternal).captures.value) | Where-Object { $_ })) {
+                    if ($SigOrOOF -ieq 'signature') {
+                        Write-Host '    Default signature for new e-mails'
+                        Write-Host "      $($TemplateFilePartTag)"
+                    } else {
+                        Write-Host '    Default internal OOF message'
+                        Write-Host "      $($TemplateFilePartTag)"
                     }
                 }
 
-                if ($TemplateFilePart -match $TemplateFilePartRegexDefaultreplyfwdorexternal) {
-                    foreach ($TemplateFilePartTag in (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultreplyfwdorexternal).captures.value) | Where-Object { $_ })) {
-                        if ($SigOrOOF -ieq 'signature') {
-                            Write-Host '    Default signature for replies and forwards'
-                            Write-Host "      $($TemplateFilePartTag)"
-                        } else {
-                            Write-Host '    Default external OOF message'
-                            Write-Host "      $($TemplateFilePartTag)"
-                        }
-                    }
-
-                    if (-not $TemplateFilesDefaultreplyfwdOrExternal.containskey($TemplateIniSettingsIndex)) {
-                        $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateIniSettingsIndex, @{})
-                        $TemplateFilesDefaultreplyfwdOrExternal[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
-                    }
+                if (-not $TemplateFilesDefaultnewOrInternal.containskey($TemplateIniSettingsIndex)) {
+                    $TemplateFilesDefaultnewOrInternal.add($TemplateIniSettingsIndex, @{})
+                    $TemplateFilesDefaultnewOrInternal[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
                 }
+            }
 
-                if ($SigOrOOF -ieq 'OOF') {
-                    if (($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultreplyfwdorexternal) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultneworinternal)) {
-                        $TemplateFilesDefaultnewOrInternal.add($TemplateIniSettingsIndex, @{})
-                        $TemplateFilesDefaultnewOrInternal[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
-                        Write-Host '    Default internal OOF message (neither internal nor external tag specified)'
-                        $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateFile.FullName, $TemplateFileTargetName)
-                        Write-Host '    Default external OOF message (neither internal nor external tag specified)'
+            if ($TemplateFilePart -match $TemplateFilePartRegexDefaultreplyfwdorexternal) {
+                foreach ($TemplateFilePartTag in (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultreplyfwdorexternal).captures.value) | Where-Object { $_ })) {
+                    if ($SigOrOOF -ieq 'signature') {
+                        Write-Host '    Default signature for replies and forwards'
+                        Write-Host "      $($TemplateFilePartTag)"
+                    } else {
+                        Write-Host '    Default external OOF message'
+                        Write-Host "      $($TemplateFilePartTag)"
                     }
                 }
 
-                # unknown tags
-                $x = ($TemplateFilePart -replace $TemplateFilePartRegexKnown, '').trim()
-                if ($x) {
-                    Write-Host '    Unknown tags, please check' -ForegroundColor yellow
-                    Write-Host "      $x"
+                if (-not $TemplateFilesDefaultreplyfwdOrExternal.containskey($TemplateIniSettingsIndex)) {
+                    $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateIniSettingsIndex, @{})
+                    $TemplateFilesDefaultreplyfwdOrExternal[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
                 }
+            }
+
+            if ($SigOrOOF -ieq 'OOF') {
+                if (($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultreplyfwdorexternal) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultneworinternal)) {
+                    $TemplateFilesDefaultnewOrInternal.add($TemplateIniSettingsIndex, @{})
+                    $TemplateFilesDefaultnewOrInternal[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
+                    Write-Host '    Default internal OOF message (neither internal nor external tag specified)'
+                    $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateFile.FullName, $TemplateFileTargetName)
+                    Write-Host '    Default external OOF message (neither internal nor external tag specified)'
+                }
+            }
+
+            # unknown tags
+            $x = ($TemplateFilePart -replace $TemplateFilePartRegexKnown, '').trim()
+            if ($x) {
+                Write-Host '    Unknown tags, please check' -ForegroundColor yellow
+                Write-Host "      $x"
             }
 
             Set-Variable -Name "$($SigOrOOF)Files" -Value $TemplateFiles
@@ -2148,10 +2158,7 @@ function EvaluateAndSetSignatures {
 
         for ($TemplateFileIndex = 0; $TemplateFileIndex -lt (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly).count; $TemplateFileIndex++) {
             $TemplateFile = (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)[$TemplateFileIndex]
-
-            $TemplateFileUniqueAppearenceCount = @((Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)[0..$TemplateFileIndex] | Where-Object { $_.fullname -eq $TemplateFile.fullname }).count
-
-            $TemplateIniSettingsIndex = ((Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly).GetEnumerator() | Where-Object { (Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly)[$_.name].containskey($TemplateFile.fullname) } | Select-Object -Skip (((0, ($TemplateFileUniqueAppearenceCount - 1)) | Measure-Object -Maximum).maximum) | Select-Object -First 1).name
+            $TemplateIniSettingsIndex = $TemplateFile.TemplateIniSettingsIndex
 
             if (-not $TemplateIniSettingsIndex) {
                 continue
@@ -2163,7 +2170,7 @@ function EvaluateAndSetSignatures {
                 $Template = (Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly)[$TemplateIniSettingsIndex].GetEnumerator() | Select-Object -First 1
             }
 
-            Write-Host "$Indent    '$([System.IO.Path]::GetFileName($Template.key))' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            Write-Host "$Indent    '$([System.IO.Path]::GetFileName($Template.key))' (ini index #$($TemplateIniSettingsIndex)) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             Write-Host "$Indent      Check permissions"
             $TemplateAllowed = $false
 
@@ -2206,7 +2213,7 @@ function EvaluateAndSetSignatures {
                 }
             }
 
-                
+
             # check for deny entries
             if ($TemplateAllowed -eq $true) {
                 Write-Host "$Indent        Denies"

@@ -224,7 +224,6 @@ try {
 
             if ($null -ne $_.StartTime) {
                 if ((($_.handle.IsCompleted -eq $true) -and ($_.Done -eq $false)) -or (($_.Done -eq $false) -and ((New-TimeSpan -Start $_.StartTime -End (Get-Date)).TotalSeconds -gt $JobTimeoutSeconds))) {
-                    Write-Host "$("`b" * 100)" -NoNewline
                     $_.object
                     $_.Done = $true
                 }
