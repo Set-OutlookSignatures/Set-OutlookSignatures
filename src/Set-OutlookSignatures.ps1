@@ -682,25 +682,25 @@ function main {
 
                     foreach ($TrustedDomain in $Search.FindAll()) {
                         # DNS name of this side of the trust (could be the root domain or any subdomain)
-                        # $TrustOrigin = ($_.properties.distinguishedname -split ',DC=')[1..999] -join '.'
+                        # $TrustOrigin = ($TrustedDomain.properties.distinguishedname -split ',DC=')[1..999] -join '.'
 
                         # DNS name of the other side of the trust (could be the root domain or any subdomain)
-                        # $TrustName = $_.properties.name
+                        # $TrustName = $TrustedDomain.properties.name
 
                         # Domain SID of the other side of the trust
-                        # $TrustNameSID = (New-Object system.security.principal.securityidentifier($($_.properties.securityidentifier), 0)).tostring()
+                        # $TrustNameSID = (New-Object system.security.principal.securityidentifier($($TrustedDomain.properties.securityidentifier), 0)).tostring()
 
                         # Trust direction
                         # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trustdirection?view=net-5.0
-                        # $TrustDirectionNumber = $_.properties.trustdirection
+                        # $TrustDirectionNumber = $TrustedDomain.properties.trustdirection
 
                         # Trust type
                         # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trusttype?view=net-5.0
-                        # $TrustTypeNumber = $_.properties.trusttype
+                        # $TrustTypeNumber = $TrustedDomain.properties.trusttype
 
                         # Trust attributes
                         # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/e9a2d23c-c31e-4a6f-88a0-6646fdb51a3c
-                        # $TrustAttributesNumber = $_.properties.trustattributes
+                        # $TrustAttributesNumber = $TrustedDomain.properties.trustattributes
 
                         # Which domains does the current user have access to?
                         # No intra-forest trusts, only bidirectional trusts and outbound trusts
@@ -1851,7 +1851,7 @@ function main {
                                 if ($script:CurrentUserDummyMailbox -ne $true) {
                                     $TempReplySig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature'
                                     if ($OutlookFileVersion -lt '16.0.0.0') {
-                                        $TempReplySig = @(foreach ($char in @(($TempReplySig -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($_)" }) -join ''
+                                        $TempReplySig = @(foreach ($char in @(($TempReplySig -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$(char)" }) -join ''
                                     }
                                 } else {
                                     $TempReplySig = $script:CurrentUserDummyMailboxDefaultSigReply
@@ -2895,7 +2895,7 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
             # Reconnect already connected network drives at the OS level
             # New-PSDrive is not enough for this
             foreach ($NetworkConnection in @(Get-CimInstance Win32_NetworkConnection)) {
-                & net use $NetworkConnection.LocalName $_.RemoteName 2>&1 | Out-Null
+                & net use $NetworkConnection.LocalName $NetworkConnection.RemoteName 2>&1 | Out-Null
             }
 
             if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
