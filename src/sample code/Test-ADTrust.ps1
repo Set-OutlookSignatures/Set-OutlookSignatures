@@ -71,10 +71,10 @@ try {
     $ADForestRootDomain = ([ADSI]"LDAP://$($CrossForestTrustRootDomain)/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')
 
     if (-not $ADForestRootDomain) {
-        write-host "  Could not connect to '$($CrossForestTrustRootDomain)' via LDAP to query RootDSE. Exiting."
+        Write-Host "  Could not connect to '$($CrossForestTrustRootDomain)' via LDAP to query RootDSE. Exiting."
         exit 1
     }
-    
+
     if ($ADForestRootDomain -ine $CrossForestTrustRootDomain) {
         Write-Host "  '$($CrossForestTrustRootDomain)' is not the forest root domain, using '$($ADForestRootDomain)' from now on."
         $CrossForestTrustRootDomain = $ADForestRootDomain
@@ -100,8 +100,8 @@ try {
     Write-Host "Get FQDN of all Domain Controller servers via DNS query @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $AllDCs = @()
 
-    $AllGCs | foreach { ($_ -split '\.', 2)[1] } | select -unique | foreach {
-	    $AllDCs += (Resolve-DnsName -name "_ldap._tcp.$($_)" -type srv).nametarget
+    foreach ($DomainName in @(@(foreach ($GC in $AllGCs) { ($GC -split '\.', 2)[1] }) | Select-Object -Unique)) {
+        $AllDCs += (Resolve-DnsName -Name "_ldap._tcp.$($DomainName)" -Type srv).nametarget
     }
 
     Write-Host "  $($AllDCs.count) found"
@@ -216,16 +216,16 @@ try {
 
 
     while (($script:jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
-        $script:jobs | ForEach-Object {
-            if (($null -eq $_.StartTime) -and ($_.Powershell.Streams.Debug[0].Message -match 'Start')) {
-                $StartTicks = $_.powershell.Streams.Debug[0].Message -replace '[^0-9]'
-                $_.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
+        foreach ($job in $script:jobs) {
+            if (($null -eq $job.StartTime) -and ($job.Powershell.Streams.Debug[0].Message -match 'Start')) {
+                $StartTicks = $job.powershell.Streams.Debug[0].Message -replace '[^0-9]'
+                $job.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
             }
 
-            if ($null -ne $_.StartTime) {
-                if ((($_.handle.IsCompleted -eq $true) -and ($_.Done -eq $false)) -or (($_.Done -eq $false) -and ((New-TimeSpan -Start $_.StartTime -End (Get-Date)).TotalSeconds -gt $JobTimeoutSeconds))) {
-                    $_.object
-                    $_.Done = $true
+            if ($null -ne $job.StartTime) {
+                if ((($job.handle.IsCompleted -eq $true) -and ($job.Done -eq $false)) -or (($job.Done -eq $false) -and ((New-TimeSpan -Start $job.StartTime -End (Get-Date)).TotalSeconds -gt $JobTimeoutSeconds))) {
+                    $job.object
+                    $job.Done = $true
                 }
             }
         }
