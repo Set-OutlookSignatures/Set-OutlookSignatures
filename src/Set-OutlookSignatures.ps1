@@ -652,7 +652,7 @@ function main {
                 $LegacyExchangeDN = ''
             }
             $LegacyExchangeDNs += $LegacyExchangeDN
-            Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $_.PSDrive)"
+            Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
             Write-Host "    $($MailAddresses[-1])"
         }
     }
@@ -1499,17 +1499,19 @@ function main {
     } else {
         # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the script
         try {
-            $script:COMWordDummy = New-Object -ComObject word.application
-            $script:COMWord = New-Object -ComObject word.application
-            $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
+            $script:COMWordDummy = New-Object -ComObject Word.Application
 
-            Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
+            $script:COMWord = New-Object -ComObject Word.Application
 
             if ($script:COMWordDummy) {
                 $script:COMWordDummy.Quit([ref]$false)
                 [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWordDummy) | Out-Null
                 Remove-Variable COMWordDummy -Scope 'script'
             }
+
+            $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
+
+            Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
         } catch {
             Write-Host '  Word not installed or not working correctly. Exit.' -ForegroundColor Red
             $error[0]
@@ -2845,7 +2847,7 @@ function CheckADConnectivity {
         foreach ($job in $script:jobs) {
             if (($null -eq $job.StartTime) -and ($job.Powershell.Streams.Debug[0].Message -match 'Start')) {
                 $StartTicks = $job.powershell.Streams.Debug[0].Message -replace '[^0-9]'
-                $_.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
+                $job.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
             }
 
             if ($null -ne $job.StartTime) {
