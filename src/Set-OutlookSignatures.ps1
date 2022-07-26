@@ -863,11 +863,20 @@ function main {
             if ($x.error -eq $false) {
                 $AADProps = $x.properties
                 $ADPropsCurrentUser = [PSCustomObject]@{}
-                foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
-                    $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+
+                foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                    $z = $AADProps
+
+                    foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                        $z = $z.$y
+                    }
+
+                    $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
                 }
+
                 $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $script:CurrentUser).photo
                 $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $script:CurrentUser).properties.userprincipalname
+
             } else {
                 Write-Host "      Problem getting data for '$($script:CurrentUser)' from Microsoft Graph. Exit." -ForegroundColor Red
                 $error[0]
@@ -948,9 +957,17 @@ function main {
         if ($ADPropsCurrentUser.manager) {
             $AADProps = (GraphGetUserProperties $ADPropsCurrentUser.manager).properties
             $ADPropsCurrentUserManager = [PSCustomObject]@{}
-            foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
-                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+
+            foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                $z = $AADProps
+
+                foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                    $z = $z.$y
+                }
+
+                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
             }
+
             $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentUserManager.userprincipalname).photo
             $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null
         }
@@ -1022,11 +1039,20 @@ function main {
                 }
             } else {
                 $AADProps = (GraphGetUserProperties $($MailAddresses[$AccountNumberRunning])).properties
+
                 $ADPropsMailboxes[$AccountNumberRunning] = [PSCustomObject]@{}
+
                 if ($AADProps) {
-                    foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
-                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+                    foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                        $z = $AADProps
+
+                        foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                            $z = $z.$y
+                        }
+
+                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
                     }
+
                     $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).photo
                     $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).properties.userprincipalname
                     $LegacyExchangeDNs[$AccountNumberRunning] = 'dummy'
@@ -1653,10 +1679,19 @@ function main {
                         $AADProps = $null
                         if ($ADPropsCurrentMailbox.manager) {
                             $AADProps = (GraphGetUserProperties $ADPropsCurrentMailbox.manager).properties
+
                             $ADPropsCurrentMailboxManager = [PSCustomObject]@{}
-                            foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
-                                $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+
+                            foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                                $z = $AADProps
+
+                                foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                                    $z = $z.$y
+                                }
+
+                                $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
                             }
+
                             $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentMailboxManager.userprincipalname).photo
                             $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null
                         }
