@@ -359,7 +359,7 @@ function main {
         CheckPath $SignatureIniPath
         $SignatureIniSettings = Get-IniContent $SignatureIniPath
         foreach ($section in $SignatureIniSettings.GetEnumerator()) {
-            Write-Verbose "    File: '$($section.name)'"
+            Write-Verbose "    Ini index #: '$($section.name)'"
             $local:tags = @()
             foreach ($key in $SignatureIniSettings[$($section.name)].GetEnumerator()) {
                 if ($key.value) {
@@ -1167,14 +1167,14 @@ function main {
         if ($TemplateIniPath -ne '') {
             foreach ($Enumerator in $TemplateIniSettings.GetEnumerator().name) {
                 if ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>']) {
-                    if ( ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'].endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
+                    if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
                         Write-Host "  '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' (ini index #$($Enumerator)) found in ini but not in signature template path, please check" -ForegroundColor Yellow
                     }
                 }
             }
 
             foreach ($TemplateFile in $TemplateFiles) {
-                if ( ($TemplateFile.name.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $TemplateFile.name -inotin @(foreach ($Enumerator in $TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)]) { $Enumerator['<Set-OutlookSignatures template>'] }))) {
+                if ($TemplateFile.name -inotin @(foreach ($Enumerator in $TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)]) { $Enumerator['<Set-OutlookSignatures template>'] })) {
                     Write-Host "  '$($TemplateFile.name)' found in signature template path but not in ini, please check" -ForegroundColor Yellow
                 }
             }
@@ -1193,38 +1193,40 @@ function main {
             $TemplateFilesIniIndex = @()
 
 
-            foreach ($Enumerator in $TemplateIniSettings.GetEnumerator().name) {
-                if ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -iin $TemplateFiles.name) {
-                    $TemplateFilesSortOrder += [array]::indexof($TemplateFiles.name, $TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])
-                    $TemplateFilesIniIndex += $Enumerator
-                }
-            }
-
-            $TemplateFiles = @($TemplateFiles[$TemplateFilesSortOrder] | Select-Object *)
-
-            foreach ($index In 0..($TemplateFiles.Count - 1)) {
-                $TemplateFiles[$index].TemplateIniSettingsIndex = $TemplateFilesIniIndex[$index]
-            }
-
-            switch ((@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortOrder']) {
-                { $_ -iin 'AsInThisFile', 'AsListed' } {
-                    # nothing to do, $TemplateFiles is already correctly populated and sorted
-                    break
+            if ($TemplateFiles) {
+                foreach ($Enumerator in $TemplateIniSettings.GetEnumerator().name) {
+                    if ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -iin $TemplateFiles.name) {
+                        $TemplateFilesSortOrder += [array]::indexof($TemplateFiles.name, $TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])
+                        $TemplateFilesIniIndex += $Enumerator
+                    }
                 }
 
-                { $_ -iin ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } {
-                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } }
-                    break
+                $TemplateFiles = @($TemplateFiles[$TemplateFilesSortOrder] | Select-Object *)
+            
+                foreach ($index In 0..($TemplateFiles.Count - 1)) {
+                    $TemplateFiles[$index].TemplateIniSettingsIndex = $TemplateFilesIniIndex[$index]
                 }
 
-                { $_ -iin ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } {
-                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } } -Descending
-                    break
-                }
+                switch ((@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortOrder']) {
+                    { $_ -iin 'AsInThisFile', 'AsListed' } {
+                        # nothing to do, $TemplateFiles is already correctly populated and sorted
+                        break
+                    }
 
-                default {
-                    # same as 'ascending'
-                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } }
+                    { $_ -iin ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } {
+                        $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } }
+                        break
+                    }
+
+                    { $_ -iin ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } {
+                        $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } } -Descending
+                        break
+                    }
+
+                    default {
+                        # same as 'ascending'
+                        $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } }
+                    }
                 }
             }
         }
@@ -2197,6 +2199,10 @@ function EvaluateAndSetSignatures {
     foreach ($TemplateGroup in ('common', 'group', 'mailbox')) {
         Write-Host "$Indent  Process $TemplateGroup $(if($TemplateGroup -iin ('group', 'mailbox')){'specific '})templates @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
+        if (-not (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly -ErrorAction SilentlyContinue)) {
+            continue
+        }
+        
         for ($TemplateFileIndex = 0; $TemplateFileIndex -lt (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly).count; $TemplateFileIndex++) {
             $TemplateFile = (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)[$TemplateFileIndex]
             $TemplateIniSettingsIndex = $TemplateFile.TemplateIniSettingsIndex
