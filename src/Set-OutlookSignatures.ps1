@@ -527,14 +527,15 @@ function main {
         Write-Host '  Simulation mode enabled, skip Outlook checks' -ForegroundColor Yellow
     } else {
         try {
-            $OutlookFileVersion = [system.version]::parse((Get-ChildItem (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction SilentlyContinue).'(default)')\LocalServer32" -ErrorAction SilentlyContinue).'(default)').versioninfo.fileversion)
+            $OutlookFileVersion = [System.Version]::Parse((((((Get-ChildItem (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction SilentlyContinue).'(default)')\LocalServer32" -ErrorAction SilentlyContinue).'(default)').versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
         } catch {
             try {
-                $OutlookFileVersion = [system.version]::parse((Get-ChildItem (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction SilentlyContinue).'(default)')\LocalServer32" -ErrorAction SilentlyContinue).'(default)').versioninfo.fileversion)
+                $OutlookFileVersion = [System.Version]::Parse((((((Get-ChildItem (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction SilentlyContinue).'(default)')\LocalServer32" -ErrorAction SilentlyContinue).'(default)').versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
             } catch {
                 $OutlookFileVersion = $null
             }
         }
+
         $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
 
         if ($OutlookRegistryVersion.major -eq 0) {
@@ -579,6 +580,7 @@ function main {
             Write-Host '    Consider parameter ''EmbedImagesInHtml false'' to avoid problems with images in templates.' -ForegroundColor Yellow
             Write-Host '    Microsoft supports Outlook 2013 until April 2023, older versions are already out of support.' -ForegroundColor Yellow
         }
+
         Write-Host "  Outlook default profile: $OutlookDefaultProfile"
         Write-Host "  Outlook file version: $OutlookFileVersion"
         Write-Host "  Roaming signatures disabled in Outlook: $OutlookDisableRoamingSignaturesTemporaryToggle"
