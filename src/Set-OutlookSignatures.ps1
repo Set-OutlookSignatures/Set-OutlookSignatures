@@ -358,8 +358,10 @@ function main {
         ConvertPath ([ref]$SignatureIniPath)
         CheckPath $SignatureIniPath
         $SignatureIniSettings = Get-IniContent $SignatureIniPath
+
+        Write-Verbose '    Parsed ini content'
         foreach ($section in $SignatureIniSettings.GetEnumerator()) {
-            Write-Verbose "    Ini index #: '$($section.name)'"
+            Write-Verbose "      Ini index #: '$($section.name)'"
             $local:tags = @()
             foreach ($key in $SignatureIniSettings[$($section.name)].GetEnumerator()) {
                 if ($key.value) {
@@ -368,7 +370,7 @@ function main {
                     $local:tags += "$($key.name)"
                 }
             }
-            Write-Verbose "      Tags: [$($local:tags -join '] [')]"
+            Write-Verbose "        Tags: [$($local:tags -join '] [')]"
         }
     } else {
         $SignatureIniSettings = @{}
@@ -397,8 +399,10 @@ function main {
             ConvertPath ([ref]$OOFIniPath)
             CheckPath $OOFIniPath
             $OOFIniSettings = Get-IniContent $OOFIniPath
+
+            Write-Verbose '    Parsed ini content'
             foreach ($section in $OOFIniSettings.GetEnumerator()) {
-                Write-Verbose "    File: '$($section.name)'"
+                Write-Verbose "      Ini index #: '$($section.name)'"
                 $local:tags = @()
                 foreach ($key in $OOFIniSettings[$($section.name)].GetEnumerator()) {
                     if ($key.value) {
@@ -407,7 +411,7 @@ function main {
                         $local:tags += "$($key.name)"
                     }
                 }
-                Write-Verbose "      Tags: [$($local:tags -join '] [')]"
+                Write-Verbose "        Tags: [$($local:tags -join '] [')]"
             }
         } else {
             $OOFIniSettings = @{}
@@ -1202,7 +1206,7 @@ function main {
                 }
 
                 $TemplateFiles = @($TemplateFiles[$TemplateFilesSortOrder] | Select-Object *)
-            
+
                 foreach ($index In 0..($TemplateFiles.Count - 1)) {
                     $TemplateFiles[$index].TemplateIniSettingsIndex = $TemplateFilesIniIndex[$index]
                 }
@@ -2202,7 +2206,7 @@ function EvaluateAndSetSignatures {
         if (-not (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly -ErrorAction SilentlyContinue)) {
             continue
         }
-        
+
         for ($TemplateFileIndex = 0; $TemplateFileIndex -lt (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly).count; $TemplateFileIndex++) {
             $TemplateFile = (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)[$TemplateFileIndex]
             $TemplateIniSettingsIndex = $TemplateFile.TemplateIniSettingsIndex
@@ -3343,7 +3347,10 @@ function Get-IniContent ($filePath) {
     $local:SectionIndex = -1
     if ($filePath -ne '') {
         try {
+            Write-Verbose '    Original ini content'
+
             foreach ($line in @(Get-Content -LiteralPath $FilePath -Encoding UTF8 -ErrorAction Stop)) {
+                Write-Verbose "      $line"
                 switch -regex ($line) {
                     # Comments starting with ; or #, or empty line, whitespace(s) before are ignored
                     '(^\s*(;|#))|(^\s*$)' { continue }
