@@ -522,26 +522,31 @@ function main {
 
 
     Write-Host
-    Write-Host "Get Outlook and Word version, default Outlook profile @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    Write-Host "Get basic Outlook and Word information @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     if ($SimulateUser) {
         Write-Host '  Simulation mode enabled, skip Outlook checks' -ForegroundColor Yellow
     } else {
+        Write-Host '  Outlook'
+       
+        $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+
         try {
-            $OutlookFileVersion = [System.Version]::Parse((((((Get-ChildItem (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction SilentlyContinue).'(default)')\LocalServer32" -ErrorAction SilentlyContinue).'(default)').versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+            $OutlookFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+            $OutlookBitness = 32
         } catch {
             try {
-                $OutlookFileVersion = [System.Version]::Parse((((((Get-ChildItem (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction SilentlyContinue).'(default)')\LocalServer32" -ErrorAction SilentlyContinue).'(default)').versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+                $OutlookFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+                $OutlookBitness = 64
             } catch {
                 $OutlookFileVersion = $null
+                $OutlookBitness = $null
             }
         }
-
-        $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
 
         if ($OutlookRegistryVersion.major -eq 0) {
             $OutlookRegistryVersion = $null
         } elseif ($OutlookRegistryVersion.major -gt 16) {
-            Write-Host "  Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+            Write-Host "    Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
             exit 1
         } elseif ($OutlookRegistryVersion.major -eq 16) {
             $OutlookRegistryVersion = '16.0'
@@ -550,7 +555,7 @@ function main {
         } elseif ($OutlookRegistryVersion.major -eq 14) {
             $OutlookRegistryVersion = '14.0'
         } elseif ($OutlookRegistryVersion.major -lt 14) {
-            Write-Host "  Outlook version $OutlookRegistryVersion is older than Outlook 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+            Write-Host "    Outlook version $OutlookRegistryVersion is older than Outlook 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
             exit 1
         }
 
@@ -574,23 +579,24 @@ function main {
             $OutlookDefaultProfile = $null
         }
 
-        Write-Host "  Outlook registry version: $OutlookRegistryVersion"
+        Write-Host "    Registry version: $OutlookRegistryVersion"
+        Write-Host "    File version: $OutlookFileVersion"
         if (($OutlookFileVersion -lt '16.0.0.0') -and ($EmbedImagesInHtml -eq $true)) {
-            Write-Host '    Outlook 2013 or earlier detected.' -ForegroundColor Yellow
-            Write-Host '    Consider parameter ''EmbedImagesInHtml false'' to avoid problems with images in templates.' -ForegroundColor Yellow
-            Write-Host '    Microsoft supports Outlook 2013 until April 2023, older versions are already out of support.' -ForegroundColor Yellow
+            Write-Host '      Outlook 2013 or earlier detected.' -ForegroundColor Yellow
+            Write-Host '      Consider parameter ''EmbedImagesInHtml false'' to avoid problems with images in templates.' -ForegroundColor Yellow
+            Write-Host '      Microsoft supports Outlook 2013 until April 2023, older versions are already out of support.' -ForegroundColor Yellow
         }
-
-        Write-Host "  Outlook default profile: $OutlookDefaultProfile"
-        Write-Host "  Outlook file version: $OutlookFileVersion"
-        Write-Host "  Roaming signatures disabled in Outlook: $OutlookDisableRoamingSignaturesTemporaryToggle"
+        Write-Host "    Bitness: $OutlookBitness"
+        Write-Host "    Default profile: $OutlookDefaultProfile"
+        Write-Host "    Roaming signature toggle: $OutlookDisableRoamingSignaturesTemporaryToggle"
     }
 
+    write-host "  Word"
     $WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Word.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
     if ($WordRegistryVersion.major -eq 0) {
         $WordRegistryVersion = $null
     } elseif ($WordRegistryVersion.major -gt 16) {
-        Write-Host "Word version $WordRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+        Write-Host "    Word version $WordRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
         exit 1
     } elseif ($WordRegistryVersion.major -eq 16) {
         $WordRegistryVersion = '16.0'
@@ -599,10 +605,26 @@ function main {
     } elseif ($WordRegistryVersion.major -eq 14) {
         $WordRegistryVersion = '14.0'
     } elseif ($WordRegistryVersion.major -lt 14) {
-        Write-Host "Word version $WordRegistryVersion is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+        Write-Host "    Word version $WordRegistryVersion is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
         exit 1
     }
-    Write-Host "  Word registry version: $WordRegistryVersion"
+
+    try {
+        $WordFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+        $WordBitness = 32
+    } catch {
+        try {
+            $WordFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+            $WordBitness = 64
+        } catch {
+            $WordFileVersion = $null
+            $WordBitness = $null
+        }
+    }
+
+    Write-Host "    Registry version: $WordRegistryVersion"
+    Write-Host "    File version: $WordFileVersion"
+    Write-Host "    Bitness: $WordBitness"
 
 
     Write-Host
