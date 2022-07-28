@@ -357,7 +357,7 @@ function main {
     if ($SignatureIniPath) {
         ConvertPath ([ref]$SignatureIniPath)
         CheckPath $SignatureIniPath
-        $SignatureIniSettings = Get-IniContent $SignatureIniPath
+        $SignatureIniSettings = GetIniContent $SignatureIniPath
 
         Write-Verbose '    Parsed ini content'
         foreach ($section in $SignatureIniSettings.GetEnumerator()) {
@@ -398,7 +398,7 @@ function main {
         if ($OOFIniPath) {
             ConvertPath ([ref]$OOFIniPath)
             CheckPath $OOFIniPath
-            $OOFIniSettings = Get-IniContent $OOFIniPath
+            $OOFIniSettings = GetIniContent $OOFIniPath
 
             Write-Verbose '    Parsed ini content'
             foreach ($section in $OOFIniSettings.GetEnumerator()) {
@@ -527,16 +527,18 @@ function main {
         Write-Host '  Simulation mode enabled, skip Outlook checks' -ForegroundColor Yellow
     } else {
         Write-Host '  Outlook'
-       
+
         $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
 
         try {
-            $OutlookFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
-            $OutlookBitness = 32
+            $OutlookFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+            $OutlookFileVersion = [System.Version]::Parse((((($OutlookFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+            $OutlookBitness = GetBitness $OutlookFilePath
         } catch {
             try {
-                $OutlookFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
-                $OutlookBitness = 64
+                $OutlookFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+                $OutlookFileVersion = [System.Version]::Parse((((($OutlookFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+                $OutlookBitness = GetBitness $OutlookFilePath
             } catch {
                 $OutlookFileVersion = $null
                 $OutlookBitness = $null
@@ -591,7 +593,7 @@ function main {
         Write-Host "    Roaming signature toggle: $OutlookDisableRoamingSignaturesTemporaryToggle"
     }
 
-    write-host "  Word"
+    Write-Host '  Word'
     $WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Word.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
     if ($WordRegistryVersion.major -eq 0) {
         $WordRegistryVersion = $null
@@ -610,12 +612,14 @@ function main {
     }
 
     try {
+        $WordFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
         $WordFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
-        $WordBitness = 32
+        $WordBitness = GetBitness $WordFilePath
     } catch {
         try {
-            $WordFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
-            $WordBitness = 64
+            $WordFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+            $WordFileVersion = [System.Version]::Parse((((($WordFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+            $WordBitness = GetBitness $WordFilePath
         } catch {
             $WordFileVersion = $null
             $WordBitness = $null
@@ -1975,7 +1979,7 @@ function main {
                                     if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -PathType Leaf) {
                                         if ($EmbedImagesInHtml -eq $false) {
                                             $x = (New-Guid).guid.tostring()
-                                            ConvertTo-SingleFileHTML ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) (Join-Path -Path $script:tempDir -ChildPath $x)
+                                            ConvertToSingleFileHTML ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) (Join-Path -Path $script:tempDir -ChildPath $x)
                                             $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $x) -Encoding UTF8 -Raw).ToString()
                                             Remove-Item (Join-Path -Path $script:tempDir -ChildPath $x) -Force
                                         } else {
@@ -2169,7 +2173,83 @@ function main {
 }
 
 
-Function ConvertTo-SingleFileHTML([string]$inputfile, [string]$outputfile) {
+function GetBitness {
+    [CmdletBinding(ConfirmImpact = 'none')]
+    param (
+        [Parameter(HelpMessage = 'Enter binary file(s) to examine', Position = 0,
+            Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName )]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ Test-Path -Path ((Get-Item -Path $_).FullName) })]
+        [string[]]  $Path,
+
+        [Alias('PassThru')]
+        [switch] $PassThrough
+    )
+
+    begin {
+        Write-Verbose -Message "Starting [$($MyInvocation.Mycommand)]"
+        $paths = Resolve-Path -Path $path | Select-Object -ExpandProperty Path
+        try {
+            $enumString = @'
+                public enum BinaryType
+                {
+                    BIT32 = 0, // A 32-bit Windows-based application, SCS_32BIT_BINARY
+                    DOS = 1, // An MS-DOS - based application, SCS_DOS_BINARY
+                    WOW = 2, // A 16-bit Windows-based application, SCS_WOW_BINARY
+                    PIF = 3, // A PIF file that executes an MS-DOS based application, SCS_PIF_BINARY
+                    POSIX = 4, // A POSIX based application, SCS_POSIX_BINARY
+                    OS216 = 5, // A 16-bit OS/2-based application, SCS_OS216_BINARY
+                    BIT64 = 6 // A 64-bit Windows-based application, SCS_64BIT_BINARY
+                }
+'@
+
+            Add-Type -TypeDefinition $enumString
+        } catch {
+            Write-Verbose -Message 'EnumString Type has already been loaded, do nothing'
+        }
+
+        try {
+            $Signature = @'
+                    [DllImport("kernel32.dll")]
+                    public static extern bool GetBinaryType(
+                                        string lpApplicationName,
+                                        ref int lpBinaryType
+                    );
+'@
+
+            Add-Type -MemberDefinition $Signature -Name BinaryType -Namespace PFWin32Utils
+        } catch {
+            Write-Verbose -Message 'Signature Type already been loaded, do nothing'
+        }
+    }
+
+    process {
+        foreach ($Item in $Paths) {
+            $ReturnedType = -1
+            Write-Verbose -Message "Attempting to get type for file: $($Item.FullName)"
+            $Result = [PFWin32Utils.BinaryType]::GetBinaryType($Item, [ref] $ReturnedType)
+
+            if (!$Result -or ($ReturnedType -eq -1)) {
+                Write-Error -Message "Failed to get binary type for file $($Item.FullName)"
+            } else {
+                $ToReturn = [BinaryType] $ReturnedType
+                if ($PassThrough) {
+                    Get-Item -Path $Item.FullName -Force |
+                    Add-Member -MemberType noteproperty -Name BinaryType -Value $ToReturn -Force -PassThru
+                } else {
+                    $ToReturn
+                }
+            }
+        }
+    }
+
+    end {
+        Write-Verbose -Message "Ending [$($MyInvocation.Mycommand)]"
+    }
+}
+
+
+Function ConvertToSingleFileHTML([string]$inputfile, [string]$outputfile) {
     $tempFileContent = Get-Content -LiteralPath $inputfile -Encoding UTF8 -Raw
 
     $src = @()
@@ -2445,7 +2525,7 @@ function SetSignatures {
                         }
                     }
                 } else {
-                    ConvertTo-SingleFileHTML $Signature.Name $path
+                    ConvertToSingleFileHTML $Signature.Name $path
                 }
             } catch {
                 Write-Host "$Indent        Error copying file. Skip template." -ForegroundColor Red
@@ -2772,10 +2852,10 @@ function SetSignatures {
                 [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
             } else {
                 [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
-                ConvertTo-SingleFileHTML $path $path
+                ConvertToSingleFileHTML $path $path
             }
         } else {
-            ConvertTo-SingleFileHTML $path ((Join-Path -Path $script:tempDir -ChildPath $Signature.Value))
+            ConvertToSingleFileHTML $path ((Join-Path -Path $script:tempDir -ChildPath $Signature.Value))
         }
 
 
@@ -3375,7 +3455,7 @@ function GraphFilterGroups($filter) {
 }
 
 
-function Get-IniContent ($filePath) {
+function GetIniContent ($filePath) {
     $local:ini = [ordered]@{}
     $local:SectionIndex = -1
     if ($filePath -ne '') {
