@@ -2187,7 +2187,6 @@ function GetBitness {
     )
 
     begin {
-        Write-Verbose -Message "Starting [$($MyInvocation.Mycommand)]"
         $paths = Resolve-Path -Path $path | Select-Object -ExpandProperty Path
         try {
             $enumString = @'
@@ -2205,7 +2204,6 @@ function GetBitness {
 
             Add-Type -TypeDefinition $enumString
         } catch {
-            Write-Verbose -Message 'EnumString Type has already been loaded, do nothing'
         }
 
         try {
@@ -2219,18 +2217,16 @@ function GetBitness {
 
             Add-Type -MemberDefinition $Signature -Name BinaryType -Namespace PFWin32Utils
         } catch {
-            Write-Verbose -Message 'Signature Type already been loaded, do nothing'
         }
     }
 
     process {
         foreach ($Item in $Paths) {
             $ReturnedType = -1
-            Write-Verbose -Message "Attempting to get type for file: $($Item.FullName)"
             $Result = [PFWin32Utils.BinaryType]::GetBinaryType($Item, [ref] $ReturnedType)
 
             if (!$Result -or ($ReturnedType -eq -1)) {
-                Write-Error -Message "Failed to get binary type for file $($Item.FullName)"
+                Write-Error -Message "Failed to get binary type for file $($Item)"
             } else {
                 $ToReturn = [BinaryType] $ReturnedType
                 if ($PassThrough) {
@@ -2241,10 +2237,6 @@ function GetBitness {
                 }
             }
         }
-    }
-
-    end {
-        Write-Verbose -Message "Ending [$($MyInvocation.Mycommand)]"
     }
 }
 
