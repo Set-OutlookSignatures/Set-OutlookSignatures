@@ -487,7 +487,8 @@ Variables are replaced everywhere, including links, QuickTips and alternative te
 
 With this feature, you can not only show e-mail addresses and telephone numbers in the signature and OOF message, but show them as links which open a new e-mail message (`"mailto:"`) or dial the number (`"tel:"`) via a locally installed softphone when clicked.
 
-Custom Active directory attributes are supported as well as custom replacement variables, see `'.\config\default replacement variables.ps1'` for details.
+Custom Active directory attributes are supported as well as custom replacement variables, see `'.\config\default replacement variables.ps1'` for details.  
+Attributes from Microsoft Graph need to be mapped, this is done in `'.\config\default graph config.ps1'`.
 
 Variables can also be retrieved from other sources than Active Directory by adding custom code to the variable config file.
 
@@ -500,6 +501,7 @@ Per default, `'.\config\default replacement variables.ps1'` contains the followi
     - `$CURRENTUSERSTREETADDRESS$`: Street address  
     - `$CURRENTUSERPOSTALCODE$`: Postal code  
     - `$CURRENTUSERLOCATION$`: Location  
+    - `$CURRENTUSERSTATE$`: State  
     - `$CURRENTUSERCOUNTRY$`: Country  
     - `$CURRENTUSERTELEPHONE$`: Telephone number  
     - `$CURRENTUSERFAX$`: Facsimile number  
@@ -776,11 +778,11 @@ It covers several general overview topics, administration, support, training acr
 
 The document is available in English and German language.  
 ## 16.14. What is the recommended approach for custom configuration files?
-You should not change the default configuration file `'.\config\default replacement variable.ps1'`, as it might be changed in a future release of Set-OutlookSignatures. In this case, you would have to sort out the changes yourself.
+You should not change the default configuration files `'.\config\default replacement variable.ps1'` and `'.\config\default graph config.ps1'`, as they might be changed in a future release of Set-OutlookSignatures. In this case, you would have to sort out the changes yourself.
 
 The following steps are recommended:
 1. Create a new custom configuration file in a separate folder.
-2. The first step in the new custom configuration file should be to load the default configuration file:
+2. The first step in the new custom configuration file should be to load the default configuration file, `'.\config\default replacement variable.ps1'` in this example:
    ```
    # Loading default replacement variables shipped with Set-OutlookSignatures
    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath '\\server\share\folder\Set-OutlookSignatures\config\default replacement variables.ps1' -Raw)))
