@@ -2136,8 +2136,8 @@ function main {
                     Remove-Item -LiteralPath $file.fullname -Force -ErrorAction silentlycontinue
                     Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
                     Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
-                    foreach ($x in $ConnectedFilesFolderNames) {
-                        Remove-Item -LiteralPath ($([System.IO.Path]::GetFileNameWithoutExtension($file.fullname)) + $x) -Recurse -Force -ErrorAction SilentlyContinue
+                    foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                        Remove-Item -LiteralPath ($([System.IO.Path]::GetFileNameWithoutExtension($file.fullname)) + $ConnectedFilesFolderName) -Recurse -Force -ErrorAction SilentlyContinue
                     }
                 }
             }
@@ -2501,8 +2501,8 @@ function SetSignatures {
         $pathGUID = (New-Guid).guid.tostring()
         $path = Join-Path -Path $script:tempDir -ChildPath "$($pathGUID).htm"
         $pathConnectedFolderNames = @()
-        foreach ($ConnectedFilesFolderName IN $ConnectedFilesFolderNames) {
-            $pathConnectedFolderNames += "$($pathGUID)$($ConnectedFilesFolderNames)"
+        foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+            $pathConnectedFolderNames += "$($pathGUID)$($ConnectedFilesFolderName)"
         }
 
         if ($UseHtmTemplates) {
@@ -2510,9 +2510,9 @@ function SetSignatures {
             try {
                 if ($EmbedImagesInHtml -eq $false) {
                     Copy-Item -LiteralPath $Signature.name -Destination $path
-                    foreach ($ConnectedFilesFolderNames in $ConnectedFilesFolderNames) {
-                        if (Test-Path (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderNames")) {
-                            Copy-Item (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderNames") (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files") -Recurse -Force
+                    foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                        if (Test-Path (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderName")) {
+                            Copy-Item (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderName") (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files") -Recurse -Force
                             return
                         }
                     }
@@ -2859,8 +2859,8 @@ function SetSignatures {
                 } else {
                     # Microsoft signature roaming not available
                     Write-Host "$Indent      Copy signature files to '$SignaturePath'"
-                    foreach ($x in $ConnectedFilesFolderNames) {
-                        Remove-Item -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $x) -Recurse -Force -ErrorAction SilentlyContinue
+                    foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                        Remove-Item -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $ConnectedFilesFolderName) -Recurse -Force -ErrorAction SilentlyContinue
                     }
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
                     if ($EmbedImagesInHtml -eq $false) {
@@ -2888,8 +2888,8 @@ function SetSignatures {
             Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, $extension)) -ErrorAction SilentlyContinue | Out-Null
         }
 
-        Foreach ($x in @(Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
-            Remove-Item -LiteralPath $x -Force -Recurse -ErrorAction SilentlyContinue
+        Foreach ($fiel in @(Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
+            Remove-Item -LiteralPath $file -Force -Recurse -ErrorAction SilentlyContinue
         }
         Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath $([System.IO.Path]::ChangeExtension($signature.value, '.files'))) -Force -Recurse -ErrorAction SilentlyContinue
     }
