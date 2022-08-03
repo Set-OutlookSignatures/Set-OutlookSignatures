@@ -107,6 +107,7 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [16.22. Why is no admin or user GUI available?](#1622-why-is-no-admin-or-user-gui-available)
   - [16.23. What about the roaming signatures feature announced by Microsoft?](#1623-what-about-the-roaming-signatures-feature-announced-by-microsoft)
     - [16.23.1. Please be aware of the following problem](#16231-please-be-aware-of-the-following-problem)
+  - [16.24. Why does the text color of my signature change sometimes?](#1624-why-does-the-text-color-of-my-signature-change-sometimes)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -992,3 +993,14 @@ At the time of writing, there are two workarounds:
   - Only Microsoft can do this. Let Microsoft know via a support case.
 
 As soon as there is an official API or a scriptable workaround available, it will be evaluated for support in Set-OutlookSignatures.
+## 16.24. Why does the text color of my signature change sometimes?
+Set-OutlookSignatures does not change text color. Very likely, your template files and your Outlook installation are configured for this color change:
+- Per default, Outlook uses black text for new e-mails, and blue text for replies and forwarded e-mails
+- Word and the signature editor integrated in Outlook have a specific color named "Automatic"
+
+When using DOCX templates with parts of the text formatted in the "Automatic" color, Outlook changes the color of these parts to black for new e-mails, and to blue for replies and forwards.
+
+This behavior is very often wanted, so that the greeting formula, which usually is part of the signature, has the same color as the preceding text of the e-mail.
+
+The default colors can be configured in Outlook.  
+Outlook seems to have problems with this in certain patch levels when creating a reply in the preview pane, popping out the draft to it's own window and then switching to another signature.

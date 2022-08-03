@@ -15,8 +15,10 @@
   ### Fixed
 -->
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.1-beta3" target="_blank">v3.2.1-beta3</a> - 2022-07-29
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.1" target="_blank">v3.2.1</a> - 2022-08-03
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
+### Added
+- New FAQ: Why does the text color of my signature change sometimes?
 ### Fixed
 - The permission check no longer takes more time than necessary by showing all allow or deny reasons, only the first match. Denies are only evaluated when an allow match has been found before.
 - Template file categorization time no longer grows exponentially with each template appearing multiple times in an ini file
