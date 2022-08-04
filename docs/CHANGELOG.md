@@ -15,6 +15,18 @@
   ### Fixed
 -->
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.1" target="_blank">v3.2.1</a> - 2022-08-04
+_Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
+### Added
+- New FAQ: Why does the text color of my signature change sometimes?
+### Fixed
+- The permission check no longer takes more time than necessary by showing all allow or deny reasons, only the first match. Denies are only evaluated when an allow match has been found before.
+- Template file categorization time no longer grows exponentially with each template appearing multiple times in an ini file
+- Handle nested attribute names in graph config file correctly ('onPremisesExtensionAttributes.extensionAttribute1' et al.) (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/41" target="_blank">#41</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
+- Handle ini files with only one section correctly (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/42" target="_blank">#42</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
+- Include 'state' in list of default replacement variables (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/44" target="_blank">#44</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
+- The code detecting Outlook and Word registry version, file version and bitness has been corrected
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.0" target="_blank">v3.2.0</a> - 2022-07-19
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Added
