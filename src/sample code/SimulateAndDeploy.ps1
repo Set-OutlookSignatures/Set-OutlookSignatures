@@ -58,8 +58,8 @@ Set-Location $PSScriptRoot | Out-Null
 $PSDefaultParameterValues['out-file:width'] = 2000
 
 
-('SimulateResultPath', 'SimulateListFile', 'SetOutlookSignaturesScriptPath') | ForEach-Object {
-	Set-Variable -Name $_ -Value $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath((Get-Variable -Name $_).Value).trimend('\')
+foreach ($VariableName in ('SimulateResultPath', 'SimulateListFile', 'SetOutlookSignaturesScriptPath')) {
+	Set-Variable -Name $VariableName -Value $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath((Get-Variable -Name $VariableName).Value).trimend('\')
 }
 
 if (-not (Test-Path $SimulateResultPath)) {
@@ -90,7 +90,7 @@ if ($ConnectOnpremInsteadOfCloud) {
 		$SetOutlookSignaturesScriptParameters = $SetOutlookSignaturesScriptParameters + " -GraphCredentialFile `"$GraphCredentialFile`""
 	}
 	Import-Module $(Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath -Parent) -ChildPath '\bin\msal.ps')
-	
+
 	# ClientId comes from Set-OutlookSignatures 'default graph config.ps1'
 	$auth = get-msaltoken -ClientId 'beea8249-8c98-4c76-92f6-ce3c468a61e6' -tenantid ($credential.username -split '@')[1] -RedirectUri 'http://localhost' -UserCredential $credential -Scopes 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All'
 	@{
@@ -178,18 +178,18 @@ do {
 				$SetOutlookSignaturesScriptParameters,
 				$GraphCredentialFile
 			)
-	
+
 			$PSDefaultParameterValues['out-file:width'] = 2000
-	
+
 			Remove-Item -Path $LogFilePath -Force
-	
+
 			. {
 				try {
 					Write-Host 'CREATE SIGNATURE FILES BY USING SIMULATON MODE OF SET-OUTLOOKSIGNATURES'
-					
+
 					# Need to use Invoke-Expression to be able to pass arguments stored in a string
 					Invoke-Expression ($(". `"$SetOutlookSignaturesScriptPath`" -SimulateUser `"$SimulateUser`" -SimulateMailbox `"$SimulateMailbox`" -AdditionalSignaturePath `"$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)`" $SetOutlookSignaturesScriptParameters") + '; $Success=$?')
-					
+
 					if ($Success) {
 						Write-Host 'xxxExitCode0xxx'
 					} else {
@@ -235,8 +235,8 @@ do {
 						Set-Location (Split-Path $LogFilePath -Parent)
 
 						Write-Host 'All signature names'
-						Get-ChildItem '*.htm' | ForEach-Object {
-							Write-Host "  $($_.basename)"
+						foreach ($file in @(Get-ChildItem '*.htm')) {
+							Write-Host "  $($file.basename)"
 						}
 
 						Write-Host 'Default signature name for new e-mails'
@@ -276,10 +276,10 @@ do {
 
 							# Set-MailboxMessageConfiguration requires a specific, non-standard definition for inline images
 							# With Exchange Web Services this is not necessary
-							($WebSigHtml | Select-String -Pattern '\s*src\="(data:image\/.*?"\s*>)' -AllMatches).Matches | ForEach-Object {
-								if ($_.groups.count -ge 2) {
-									if ($null -ne $_.groups[1]) {
-										$WebSigHtml = $WebSigHtml.Replace($_.groups[1].value, ('"><span id="dataURI" style="display:none">' + (($_.groups[1].value) -Replace '"\s*>', '') + '</span>'))
+							foreach ($match in @(($WebSigHtml | Select-String -Pattern '\s*src\="(data:image\/.*?"\s*>)' -AllMatches).Matches)) {
+								if ($match.groups.count -ge 2) {
+									if ($null -ne $match.groups[1]) {
+										$WebSigHtml = $WebSigHtml.Replace($match.groups[1].value, ('"><span id="dataURI" style="display:none">' + (($match.groups[1].value) -Replace '"\s*>', '') + '</span>'))
 									}
 								}
 							}
@@ -338,9 +338,9 @@ do {
 			}
 		}
 		$x | Remove-Job -Force
-		
+
 		$JobsCompleted++
-		
+
 		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
 	}
 

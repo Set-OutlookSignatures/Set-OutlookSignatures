@@ -111,4 +111,5 @@ $GraphUserAttributeMapping = @{
     physicaldeliveryofficename = 'officeLocation'
     mailboxsettings            = 'mailboxsettings'
     mailnickname               = 'mailNickname'
+    st                         = 'state'
 }

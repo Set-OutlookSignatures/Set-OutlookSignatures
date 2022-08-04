@@ -357,18 +357,20 @@ function main {
     if ($SignatureIniPath) {
         ConvertPath ([ref]$SignatureIniPath)
         CheckPath $SignatureIniPath
-        $SignatureIniSettings = Get-IniContent $SignatureIniPath
+        $SignatureIniSettings = GetIniContent $SignatureIniPath
+
+        Write-Verbose '    Parsed ini content'
         foreach ($section in $SignatureIniSettings.GetEnumerator()) {
-            Write-Verbose "    File: '$($section.name)'"
+            Write-Verbose "      Ini index #: '$($section.name)'"
             $local:tags = @()
-            foreach ($key in $SignatureIniSettings["$($section.name)"].GetEnumerator()) {
+            foreach ($key in $SignatureIniSettings[$($section.name)].GetEnumerator()) {
                 if ($key.value) {
                     $local:tags += "$($key.name) = $($key.value)"
                 } else {
                     $local:tags += "$($key.name)"
                 }
             }
-            Write-Verbose "      Tags: [$($local:tags -join '] [')]"
+            Write-Verbose "        Tags: [$($local:tags -join '] [')]"
         }
     } else {
         $SignatureIniSettings = @{}
@@ -396,18 +398,20 @@ function main {
         if ($OOFIniPath) {
             ConvertPath ([ref]$OOFIniPath)
             CheckPath $OOFIniPath
-            $OOFIniSettings = Get-IniContent $OOFIniPath
+            $OOFIniSettings = GetIniContent $OOFIniPath
+
+            Write-Verbose '    Parsed ini content'
             foreach ($section in $OOFIniSettings.GetEnumerator()) {
-                Write-Verbose "    File: '$($section.name)'"
+                Write-Verbose "      Ini index #: '$($section.name)'"
                 $local:tags = @()
-                foreach ($key in $OOFIniSettings["$($section.name)"].GetEnumerator()) {
+                foreach ($key in $OOFIniSettings[$($section.name)].GetEnumerator()) {
                     if ($key.value) {
                         $local:tags += "$($key.name) = $($key.value)"
                     } else {
                         $local:tags += "$($key.name)"
                     }
                 }
-                Write-Verbose "      Tags: [$($local:tags -join '] [')]"
+                Write-Verbose "        Tags: [$($local:tags -join '] [')]"
             }
         } else {
             $OOFIniSettings = @{}
@@ -433,8 +437,8 @@ function main {
     if ($GraphConfigFile) {
         ConvertPath ([ref]$GraphConfigFile)
         CheckPath $GraphConfigFile
-        (Get-Content -LiteralPath $GraphConfigFile -Encoding UTF8) | ForEach-Object {
-            Write-Verbose $_
+        foreach ($line in @(Get-Content -LiteralPath $GraphConfigFile -Encoding UTF8)) {
+            Write-Verbose $line
         }
     } else {
         Write-Host
@@ -444,8 +448,8 @@ function main {
     if ($GraphCredentialFile) {
         ConvertPath ([ref]$GraphCredentialFile)
         CheckPath $GraphCredentialFile
-        (Get-Content -LiteralPath $GraphCredentialFile -Encoding UTF8) | ForEach-Object {
-            Write-Verbose $_
+        foreach ($line in @(Get-Content -LiteralPath $GraphCredentialFile -Encoding UTF8)) {
+            Write-Verbose $line
         }
     } else {
         Write-Host
@@ -455,8 +459,8 @@ function main {
     if ($ReplacementVariableConfigFile) {
         ConvertPath ([ref]$ReplacementVariableConfigFile)
         CheckPath $ReplacementVariableConfigFile
-        (Get-Content -LiteralPath $ReplacementVariableConfigFile -Encoding UTF8) | ForEach-Object {
-            Write-Verbose $_
+        foreach ($line in @(Get-Content -LiteralPath $ReplacementVariableConfigFile -Encoding UTF8)) {
+            Write-Verbose $line
         }
     } else {
         Write-Host
@@ -505,7 +509,9 @@ function main {
 
     $tempSimulateMailboxes = $SimulateMailboxes
     [string[]]$SimulateMailboxes = $null
-    $tempSimulateMailboxes | ForEach-Object { $SimulateMailboxes += $_.Address }
+    foreach ($tempSimulateMailbox in $tempSimulateMailboxes) {
+        $SimulateMailboxes += $tempSimulateMailbox.Address
+    }
     Write-Host ('  SimulateMailboxes: ' + ('''' + $($SimulateMailboxes -join ''', ''') + ''''))
 
 
@@ -516,25 +522,33 @@ function main {
 
 
     Write-Host
-    Write-Host "Get Outlook and Word version, default Outlook profile @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    Write-Host "Get basic Outlook and Word information @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     if ($SimulateUser) {
         Write-Host '  Simulation mode enabled, skip Outlook checks' -ForegroundColor Yellow
     } else {
+        Write-Host '  Outlook'
+
+        $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+
         try {
-            $OutlookFileVersion = [system.version]::parse((Get-ChildItem (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction SilentlyContinue).'(default)')\LocalServer32" -ErrorAction SilentlyContinue).'(default)').versioninfo.fileversion)
+            $OutlookFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+            $OutlookFileVersion = [System.Version]::Parse((((($OutlookFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+            $OutlookBitness = GetBitness $OutlookFilePath
         } catch {
             try {
-                $OutlookFileVersion = [system.version]::parse((Get-ChildItem (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction SilentlyContinue).'(default)')\LocalServer32" -ErrorAction SilentlyContinue).'(default)').versioninfo.fileversion)
+                $OutlookFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+                $OutlookFileVersion = [System.Version]::Parse((((($OutlookFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+                $OutlookBitness = GetBitness $OutlookFilePath
             } catch {
                 $OutlookFileVersion = $null
+                $OutlookBitness = $null
             }
         }
-        $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
 
         if ($OutlookRegistryVersion.major -eq 0) {
             $OutlookRegistryVersion = $null
         } elseif ($OutlookRegistryVersion.major -gt 16) {
-            Write-Host "  Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+            Write-Host "    Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
             exit 1
         } elseif ($OutlookRegistryVersion.major -eq 16) {
             $OutlookRegistryVersion = '16.0'
@@ -543,7 +557,7 @@ function main {
         } elseif ($OutlookRegistryVersion.major -eq 14) {
             $OutlookRegistryVersion = '14.0'
         } elseif ($OutlookRegistryVersion.major -lt 14) {
-            Write-Host "  Outlook version $OutlookRegistryVersion is older than Outlook 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+            Write-Host "    Outlook version $OutlookRegistryVersion is older than Outlook 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
             exit 1
         }
 
@@ -552,13 +566,13 @@ function main {
         if ($null -ne $OutlookRegistryVersion) {
             $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook" -ErrorAction SilentlyContinue).DefaultProfile
 
-            (
-                "registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
-                "registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
-                "registry::HKEY_CURRENT_USER\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
-                "registry::HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup"
-            ) | ForEach-Object {
-                $x = (Get-ItemProperty $_ -ErrorAction SilentlyContinue).'DisableRoamingSignaturesTemporaryToggle'
+            foreach ($RegistryFolder in (
+                    "registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
+                    "registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
+                    "registry::HKEY_CURRENT_USER\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
+                    "registry::HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup"
+                )) {
+                $x = (Get-ItemProperty $RegistryFolder -ErrorAction SilentlyContinue).'DisableRoamingSignaturesTemporaryToggle'
                 if (($x -in (0, 1)) -and ($OutlookFileVersion -ge '16.0.0.0')) {
                     $OutlookDisableRoamingSignaturesTemporaryToggle = $x
                 }
@@ -567,22 +581,24 @@ function main {
             $OutlookDefaultProfile = $null
         }
 
-        Write-Host "  Outlook registry version: $OutlookRegistryVersion"
+        Write-Host "    Registry version: $OutlookRegistryVersion"
+        Write-Host "    File version: $OutlookFileVersion"
         if (($OutlookFileVersion -lt '16.0.0.0') -and ($EmbedImagesInHtml -eq $true)) {
-            Write-Host '    Outlook 2013 or earlier detected.' -ForegroundColor Yellow
-            Write-Host '    Consider parameter ''EmbedImagesInHtml false'' to avoid problems with images in templates.' -ForegroundColor Yellow
-            Write-Host '    Microsoft supports Outlook 2013 until April 2023, older versions are already out of support.' -ForegroundColor Yellow
+            Write-Host '      Outlook 2013 or earlier detected.' -ForegroundColor Yellow
+            Write-Host '      Consider parameter ''EmbedImagesInHtml false'' to avoid problems with images in templates.' -ForegroundColor Yellow
+            Write-Host '      Microsoft supports Outlook 2013 until April 2023, older versions are already out of support.' -ForegroundColor Yellow
         }
-        Write-Host "  Outlook default profile: $OutlookDefaultProfile"
-        Write-Host "  Outlook file version: $OutlookFileVersion"
-        Write-Host "  Roaming signatures disabled in Outlook: $OutlookDisableRoamingSignaturesTemporaryToggle"
+        Write-Host "    Bitness: $OutlookBitness"
+        Write-Host "    Default profile: $OutlookDefaultProfile"
+        Write-Host "    Roaming signature toggle: $OutlookDisableRoamingSignaturesTemporaryToggle"
     }
 
+    Write-Host '  Word'
     $WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Word.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
     if ($WordRegistryVersion.major -eq 0) {
         $WordRegistryVersion = $null
     } elseif ($WordRegistryVersion.major -gt 16) {
-        Write-Host "Word version $WordRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+        Write-Host "    Word version $WordRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
         exit 1
     } elseif ($WordRegistryVersion.major -eq 16) {
         $WordRegistryVersion = '16.0'
@@ -591,10 +607,28 @@ function main {
     } elseif ($WordRegistryVersion.major -eq 14) {
         $WordRegistryVersion = '14.0'
     } elseif ($WordRegistryVersion.major -lt 14) {
-        Write-Host "Word version $WordRegistryVersion is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+        Write-Host "    Word version $WordRegistryVersion is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
         exit 1
     }
-    Write-Host "  Word registry version: $WordRegistryVersion"
+
+    try {
+        $WordFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+        $WordFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+        $WordBitness = GetBitness $WordFilePath
+    } catch {
+        try {
+            $WordFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+            $WordFileVersion = [System.Version]::Parse((((($WordFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+            $WordBitness = GetBitness $WordFilePath
+        } catch {
+            $WordFileVersion = $null
+            $WordBitness = $null
+        }
+    }
+
+    Write-Host "    Registry version: $WordRegistryVersion"
+    Write-Host "    File version: $WordFileVersion"
+    Write-Host "    Bitness: $WordBitness"
 
 
     Write-Host
@@ -629,20 +663,20 @@ function main {
     if ($SimulateUser) {
         Write-Host '  Simulation mode enabled. Skip task, use SimulateMailboxes instead' -ForegroundColor Yellow
         for ($i = 0; $i -lt $SimulateMailboxes.count; $i++) {
-            $MailAddresses += $SimulateMailboxes[$i]
+            $MailAddresses += $SimulateMailboxes[$i].ToLower()
             $RegistryPaths += ''
             $LegacyExchangeDNs += ''
         }
     } else {
-        Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } } | ForEach-Object {
+        foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } })) {
             if ($OutlookFileVersion -ge '16.0.0.0') {
-                $MailAddresses += ($_.'Account Name').tolower()
+                $MailAddresses += ($RegistryFolder.'Account Name').ToLower()
             } else {
-                $MailAddresses += (($_.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' } | ForEach-Object { [char][int]"$($_)" }) -join ''
+                $MailAddresses += (@(ForEach ($char in @(($RegistryFolder.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '').ToLower()
             }
-            $RegistryPaths += $_.PSPath
-            if ($_.'Identity Eid') {
-                $LegacyExchangeDN = ('/O=' + (((($_.'Identity Eid' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' } | ForEach-Object { [char][int]"$($_)" }) -join '') -split '/O=')[-1]).ToString().trim()
+            $RegistryPaths += $RegistryFolder.PSPath
+            if ($RegistryFolder.'Identity Eid') {
+                $LegacyExchangeDN = ('/O=' + ((@(foreach ($char in @(($RegistryFolder.'Identity Eid' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split '/O=')[-1]).ToString().trim()
                 if ($LegacyExchangeDN.length -le 3) {
                     $LegacyExchangeDN = ''
                 }
@@ -650,7 +684,7 @@ function main {
                 $LegacyExchangeDN = ''
             }
             $LegacyExchangeDNs += $LegacyExchangeDN
-            Write-Host "  $($_.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $_.PSDrive)"
+            Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
             Write-Host "    $($MailAddresses[-1])"
         }
     }
@@ -678,34 +712,34 @@ function main {
                     $Search.SearchRoot = "GC://$($TrustsToCheckForGroups[0])"
                     $Search.Filter = '(ObjectClass=trustedDomain)'
 
-                    $Search.FindAll() | ForEach-Object {
+                    foreach ($TrustedDomain in $Search.FindAll()) {
                         # DNS name of this side of the trust (could be the root domain or any subdomain)
-                        # $TrustOrigin = ($_.properties.distinguishedname -split ',DC=')[1..999] -join '.'
+                        # $TrustOrigin = ($TrustedDomain.properties.distinguishedname -split ',DC=')[1..999] -join '.'
 
                         # DNS name of the other side of the trust (could be the root domain or any subdomain)
-                        # $TrustName = $_.properties.name
+                        # $TrustName = $TrustedDomain.properties.name
 
                         # Domain SID of the other side of the trust
-                        # $TrustNameSID = (New-Object system.security.principal.securityidentifier($($_.properties.securityidentifier), 0)).tostring()
+                        # $TrustNameSID = (New-Object system.security.principal.securityidentifier($($TrustedDomain.properties.securityidentifier), 0)).tostring()
 
                         # Trust direction
                         # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trustdirection?view=net-5.0
-                        # $TrustDirectionNumber = $_.properties.trustdirection
+                        # $TrustDirectionNumber = $TrustedDomain.properties.trustdirection
 
                         # Trust type
                         # https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.trusttype?view=net-5.0
-                        # $TrustTypeNumber = $_.properties.trusttype
+                        # $TrustTypeNumber = $TrustedDomain.properties.trusttype
 
                         # Trust attributes
                         # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/e9a2d23c-c31e-4a6f-88a0-6646fdb51a3c
-                        # $TrustAttributesNumber = $_.properties.trustattributes
+                        # $TrustAttributesNumber = $TrustedDomain.properties.trustattributes
 
                         # Which domains does the current user have access to?
                         # No intra-forest trusts, only bidirectional trusts and outbound trusts
 
-                        if (($($_.properties.trustattributes) -ne 32) -and (($($_.properties.trustdirection) -eq 2) -or ($($_.properties.trustdirection) -eq 3)) ) {
-                            Write-Host "  Trusted domain: $($_.properties.name)"
-                            $TrustsToCheckForGroups += $_.properties.name
+                        if (($($TrustedDomain.properties.trustattributes) -ne 32) -and (($($TrustedDomain.properties.trustdirection) -eq 2) -or ($($TrustedDomain.properties.trustdirection) -eq 3)) ) {
+                            Write-Host "  Trusted domain: $($TrustedDomain.properties.name)"
+                            $TrustsToCheckForGroups += $TrustedDomain.properties.name
                         }
                     }
                 }
@@ -861,11 +895,20 @@ function main {
             if ($x.error -eq $false) {
                 $AADProps = $x.properties
                 $ADPropsCurrentUser = [PSCustomObject]@{}
-                foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
-                    $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+
+                foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                    $z = $AADProps
+
+                    foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                        $z = $z.$y
+                    }
+
+                    $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
                 }
+
                 $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $script:CurrentUser).photo
                 $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $script:CurrentUser).properties.userprincipalname
+
             } else {
                 Write-Host "      Problem getting data for '$($script:CurrentUser)' from Microsoft Graph. Exit." -ForegroundColor Red
                 $error[0]
@@ -894,14 +937,14 @@ function main {
     }
 
 
-    if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -notcontains $ADPropsCurrentUser.mail) -and (-not $SimulateUser)) {
+    if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -inotcontains $ADPropsCurrentUser.mail) -and (-not $SimulateUser)) {
         # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
         # Maybe this is a pure Outlook Web user, so we will add a helper entry
         # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
         Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Add dummy mailbox entry." -ForegroundColor Yellow
         $script:CurrentUserDummyMailbox = $true
         $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
-        $MailAddresses = @($ADPropsCurrentUser.mail) + $MailAddresses
+        $MailAddresses = @($ADPropsCurrentUser.mail.tolower()) + $MailAddresses
         $RegistryPaths = @("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths
         $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
     } else {
@@ -921,11 +964,11 @@ function main {
             $CurrentUserSIDs += (New-Object System.Security.Principal.SecurityIdentifier $($ADPropsCurrentUser.objectsid), 0).value.tostring()
         }
     }
-    $ADPropsCurrentUser.sidhistory | Where-Object { ($_ -ne '') -and ($null -ne $_ ) } | ForEach-Object {
+    foreach ($SidHistorySid in @($ADPropsCurrentUser.sidhistory | Where-Object { ($_ -ne '') -and ($null -ne $_ ) })) {
         if ($GraphOnly) {
-            $CurrentUserSIDs += $_.tostring()
+            $CurrentUserSIDs += $SidHistorySid.tostring()
         } else {
-            $CurrentUserSIDs += (New-Object System.Security.Principal.SecurityIdentifier $_, 0).value.tostring()
+            $CurrentUserSIDs += (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value.tostring()
         }
     }
 
@@ -946,9 +989,17 @@ function main {
         if ($ADPropsCurrentUser.manager) {
             $AADProps = (GraphGetUserProperties $ADPropsCurrentUser.manager).properties
             $ADPropsCurrentUserManager = [PSCustomObject]@{}
-            foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
-                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+
+            foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                $z = $AADProps
+
+                foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                    $z = $z.$y
+                }
+
+                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
             }
+
             $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentUserManager.userprincipalname).photo
             $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null
         }
@@ -994,8 +1045,8 @@ function main {
                             Write-Host 'Not found'
                         } elseif ($u.count -gt 1) {
                             Write-Host 'Ignore due to multiple matches' -ForegroundColor Red
-                            $u | ForEach-Object {
-                                Write-Host "      $($_.path)" -ForegroundColor Yellow
+                            foreach ($SingleU in $u) {
+                                Write-Host "      $($SingleU.path)" -ForegroundColor Yellow
                             }
                             $LegacyExchangeDNs[$AccountNumberRunning] = ''
                             $MailAddresses[$AccountNumberRunning] = ''
@@ -1020,11 +1071,20 @@ function main {
                 }
             } else {
                 $AADProps = (GraphGetUserProperties $($MailAddresses[$AccountNumberRunning])).properties
+
                 $ADPropsMailboxes[$AccountNumberRunning] = [PSCustomObject]@{}
+
                 if ($AADProps) {
-                    foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
-                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+                    foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                        $z = $AADProps
+
+                        foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                            $z = $z.$y
+                        }
+
+                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
                     }
+
                     $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).photo
                     $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).properties.userprincipalname
                     $LegacyExchangeDNs[$AccountNumberRunning] = 'dummy'
@@ -1107,12 +1167,12 @@ function main {
         }
     }
 
-    ('RegistryPaths', 'MailAddresses', 'LegacyExchangeDNs', 'ADPropsMailboxesUserDomain', 'ADPropsMailboxes') | ForEach-Object {
-        (Get-Variable -Name $_).value = (Get-Variable -Name $_).value[$MailboxNewOrder]
+    foreach ($VariableName in ('RegistryPaths', 'MailAddresses', 'LegacyExchangeDNs', 'ADPropsMailboxesUserDomain', 'ADPropsMailboxes')) {
+        (Get-Variable -Name $VariableName).value = (Get-Variable -Name $VariableName).value[$MailboxNewOrder]
     }
     Write-Host '  Mailbox priority (highest to lowest)'
-    $MailAddresses | ForEach-Object {
-        Write-Host "    $_"
+    foreach ($MailAddress in $MailAddresses) {
+        Write-Host "    $MailAddress"
     }
 
 
@@ -1137,17 +1197,17 @@ function main {
 
         $TemplateFiles = @((Get-ChildItem -LiteralPath $TemplateTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
         if ($TemplateIniPath -ne '') {
-            $TemplateIniSettings.GetEnumerator().name | ForEach-Object {
-                if ($TemplateIniSettings[$_]['<Set-OutlookSignatures template>']) {
-                    if ( ($TemplateIniSettings[$_]['<Set-OutlookSignatures template>'].endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $TemplateIniSettings[$_]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
-                        Write-Host "  '$($TemplateIniSettings[$_]['<Set-OutlookSignatures template>'])' found in ini but not in signature template path, please check" -ForegroundColor Yellow
+            foreach ($Enumerator in $TemplateIniSettings.GetEnumerator().name) {
+                if ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>']) {
+                    if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
+                        Write-Host "  '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' (ini index #$($Enumerator)) found in ini but not in signature template path, please check" -ForegroundColor Yellow
                     }
                 }
             }
 
-            $TemplateFiles | ForEach-Object {
-                if ( ($_.name.endswith($(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))) -and ( $_.name -inotin @($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }))) {
-                    Write-Host "  '$($_.name)' found in signature template path but not in ini, please check" -ForegroundColor Yellow
+            foreach ($TemplateFile in $TemplateFiles) {
+                if ($TemplateFile.name -inotin @(foreach ($Enumerator in $TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)]) { $Enumerator['<Set-OutlookSignatures template>'] })) {
+                    Write-Host "  '$($TemplateFile.name)' found in signature template path but not in ini, please check" -ForegroundColor Yellow
                 }
             }
 
@@ -1160,307 +1220,328 @@ function main {
             # Populate template files in the most complicated way first: SortOrder 'AsInThisFile'
             # This also considers that templates can be referenced multiple times in the INI file
             # If the setting in the ini file is different, we only need to sort $TemplateFiles
-            $TemplateFiles = $TemplateFiles | Where-Object { $_.name -iin @($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }) }
+            $TemplateFiles = @($TemplateFiles | Where-Object { $_.name -iin @(foreach ($Enumerator in $TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)]) { $Enumerator['<Set-OutlookSignatures template>'] }) } | Select-Object *, TemplateIniSettingsIndex)
             $TemplateFilesSortOrder = @()
-                    (@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | ForEach-Object { $_['<Set-OutlookSignatures template>'] }) | Where-Object { $_ -iin $TemplateFiles.name }) | ForEach-Object {
-                $TemplateFilesSortOrder += [array]::indexof($TemplateFiles.name, $_)
-            }
-            $TemplateFiles = $TemplateFiles[$TemplateFilesSortOrder]
+            $TemplateFilesIniIndex = @()
 
-            switch ((@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortOrder']) {
-                { $_ -iin 'AsInThisFile', 'AsListed' } {
-                    # nothing to do, $TemplateFiles is already correctly populated and sorted
-                    continue
+            if ($TemplateFiles) {
+                foreach ($Enumerator in $TemplateIniSettings.GetEnumerator().name) {
+                    if (@($TemplateFiles.name) -icontains $TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>']) {
+                        for ($x = 0; $x -lt $TemplateFiles.count; $x++) {
+                            if ($TemplateFiles[$x].name -ieq $TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>']) {
+                                $TemplateFilesSortOrder += $x
+                                $TemplateFilesIniIndex += $Enumerator
+                            }
+                        }
+                    }
                 }
 
-                { $_ -iin ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } {
-                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture
-                    continue
+                $TemplateFiles = @($TemplateFiles[$TemplateFilesSortOrder] | Select-Object *)
+
+                if ($TemplateFiles.count -gt 0) {
+                    foreach ($index In 0..($TemplateFiles.Count - 1)) {
+                        $TemplateFiles[$index].TemplateIniSettingsIndex = $TemplateFilesIniIndex[$index]
+                    }
                 }
 
-                { $_ -iin ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } {
-                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Descending
-                    continue
-                }
+                if (($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' })) {
+                    switch ((@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortOrder']) {
+                        { $_ -iin 'AsInThisFile', 'AsListed' } {
+                            # nothing to do, $TemplateFiles is already correctly populated and sorted
+                            break
+                        }
 
-                default {
-                    # same as 'ascending'
-                    $TemplateFiles = $TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture
+                        { $_ -iin ('a', 'asc', 'ascending', 'az', 'a-z', 'a..z', 'up') } {
+                            $TemplateFiles = @($TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } })
+                            break
+                        }
+
+                        { $_ -iin ('d', 'des', 'desc', 'descending', 'za', 'z-a', 'z..a', 'dn', 'down') } {
+                            $TemplateFiles = @($TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } } -Descending)
+                            break
+                        }
+
+                        default {
+                            # same as 'ascending'
+                            $TemplateFiles = @($TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } })
+                        }
+                    }
+                } else {
+                    $TemplateFiles = @($TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } })
                 }
             }
         }
 
         foreach ($TemplateFile in $TemplateFiles) {
-            foreach ($TemplateIniSettingsIndex in @(($TemplateIniSettings.GetEnumerator() | Where-Object { $TemplateIniSettings[$_.name]['<Set-OutlookSignatures template>'] -ieq $TemplateFile.name }).name)) {
-                $TemplateFilesGroupSIDs = @{}
-                Write-Host ("  '$($TemplateFile.Name)'")
-                if ($TemplateIniSettings[$TemplateIniSettingsIndex]['<Set-OutlookSignatures template>'] -ieq $TemplateFile.name) {
-                    $TemplateFilePart = ($TemplateIniSettings[$TemplateIniSettingsIndex].GetEnumerator().Name -join '] [')
-                    if ($TemplateFilePart) {
-                        $TemplateFilePart = ($TemplateFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName', '<Set-OutlookSignatures template>') }) -join '] ['
-                        $TemplateFilePart = '[' + $TemplateFilePart + ']'
-                        $TemplateFilePart = $TemplateFilePart -replace '\[\]', ''
-                    }
-                    if ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']) {
-                        $TemplateFileTargetName = ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
-                    } else {
-                        $TemplateFileTargetName = $TemplateFile.Name
-                    }
+            $TemplateIniSettingsIndex = $TemplateFile.TemplateIniSettingsIndex
+            $TemplateFilesGroupSIDs = @{}
+            Write-Host ("  '$($TemplateFile.Name)' (ini index #$($TemplateIniSettingsIndex))")
+            if ($TemplateIniSettings[$TemplateIniSettingsIndex]['<Set-OutlookSignatures template>'] -ieq $TemplateFile.name) {
+                $TemplateFilePart = ($TemplateIniSettings[$TemplateIniSettingsIndex].GetEnumerator().Name -join '] [')
+                if ($TemplateFilePart) {
+                    $TemplateFilePart = ($TemplateFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName', '<Set-OutlookSignatures template>') }) -join '] ['
+                    $TemplateFilePart = '[' + $TemplateFilePart + ']'
+                    $TemplateFilePart = $TemplateFilePart -replace '\[\]', ''
+                }
+                if ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']) {
+                    $TemplateFileTargetName = ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
                 } else {
-                    $TemplateFilePart = ''
                     $TemplateFileTargetName = $TemplateFile.Name
                 }
+            } else {
+                $TemplateFilePart = ''
+                $TemplateFileTargetName = $TemplateFile.Name
+            }
 
-                Write-Host "    Outlook signature name: '$([System.IO.Path]::ChangeExtension($TemplateFileTargetName, $null) -replace '\.$')'"
+            Write-Host "    Outlook signature name: '$([System.IO.Path]::ChangeExtension($TemplateFileTargetName, $null) -replace '\.$')'"
 
-                $TemplateFilePartRegexTimeAllow = '\[(?!-:)\d{12}-\d{12}\]'
-                $TemplateFilePartRegexTimeDeny = '\[-:\d{12}-\d{12}\]'
-                $TemplateFilePartRegexGroupAllow = '\[(?!-:)\S+?(?<!]) .+?\]'
-                $TemplateFilePartRegexGroupDeny = '\[-:\S+?(?<!]) .+?\]'
-                $TemplateFilePartRegexMailaddressAllow = '\[(?!-:)(\S+?)@(\S+?)\.(\S+?)\]'
-                $TemplateFilePartRegexMailaddressDeny = '\[-:(\S+?)@(\S+?)\.(\S+?)\]'
-                if ($SigOrOOF -ieq 'signature') {
-                    $TemplateFilePartRegexDefaultneworinternal = '(?i)\[DefaultNew\]'
-                    $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[DefaultReplyFwd\]'
+            $TemplateFilePartRegexTimeAllow = '\[(?!-:)\d{12}-\d{12}\]'
+            $TemplateFilePartRegexTimeDeny = '\[-:\d{12}-\d{12}\]'
+            $TemplateFilePartRegexGroupAllow = '\[(?!-:)\S+?(?<!]) .+?\]'
+            $TemplateFilePartRegexGroupDeny = '\[-:\S+?(?<!]) .+?\]'
+            $TemplateFilePartRegexMailaddressAllow = '\[(?!-:)(\S+?)@(\S+?)\.(\S+?)\]'
+            $TemplateFilePartRegexMailaddressDeny = '\[-:(\S+?)@(\S+?)\.(\S+?)\]'
+            if ($SigOrOOF -ieq 'signature') {
+                $TemplateFilePartRegexDefaultneworinternal = '(?i)\[DefaultNew\]'
+                $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[DefaultReplyFwd\]'
+            } else {
+                $TemplateFilePartRegexDefaultneworinternal = '(?i)\[internal\]'
+                $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[external\]'
+            }
+            $TemplateFilePartRegexKnown = '(' + (($TemplateFilePartRegexTimeAllow, $TemplateFilePartRegexTimeDeny, $TemplateFilePartRegexGroupAllow, $TemplateFilePartRegexGroupDeny, $TemplateFilePartRegexMailaddressAllow, $TemplateFilePartRegexMailaddressDeny, $TemplateFilePartRegexDefaultneworinternal, $TemplateFilePartRegexDefaultreplyfwdorexternal) -join '|') + ')'
+
+            # time based template
+            $TemplateFileTimeActive = $true
+            if (($TemplateFilePart -match $TemplateFilePartRegexTimeAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexTimeDeny)) {
+                Write-Host '    Time based template'
+                if (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeAllow).captures.value).count -gt 0) {
+                    $TemplateFileTimeActive = $false
                 } else {
-                    $TemplateFilePartRegexDefaultneworinternal = '(?i)\[internal\]'
-                    $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[external\]'
+                    $TemplateFileTimeActive = $true
                 }
-                $TemplateFilePartRegexKnown = '(' + (($TemplateFilePartRegexTimeAllow, $TemplateFilePartRegexTimeDeny, $TemplateFilePartRegexGroupAllow, $TemplateFilePartRegexGroupDeny, $TemplateFilePartRegexMailaddressAllow, $TemplateFilePartRegexMailaddressDeny, $TemplateFilePartRegexDefaultneworinternal, $TemplateFilePartRegexDefaultreplyfwdorexternal) -join '|') + ')'
+                foreach ($TemplateFilePartTag in @((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeDeny).captures.value)) | Where-Object { $_ })) {
+                    Write-Host "      $($TemplateFilePartTag): " -NoNewline
+                    try {
+                        if (-not ($TemplateFilePartTag.startswith('[-:'))) {
+                            $DateTimeTagStart = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(1, 12)), 'yyyyMMddHHmm', $null)
+                            $DateTimeTagEnd = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(14, 12)), 'yyyyMMddHHmm', $null)
 
-                # time based template
-                $TemplateFileTimeActive = $true
-                if (($TemplateFilePart -match $TemplateFilePartRegexTimeAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexTimeDeny)) {
-                    Write-Host '    Time based template'
-                    if (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeAllow).captures.value).count -gt 0) {
-                        $TemplateFileTimeActive = $false
-                    } else {
-                        $TemplateFileTimeActive = $true
+                            if (((Get-Date) -ge $DateTimeTagStart) -and ((Get-Date) -le $DateTimeTagEnd)) {
+                                Write-Host 'Current DateTime is in allowed range'
+                                $TemplateFileTimeActive = $true
+                            } else {
+                                Write-Host 'Current DateTime is not in allowed range'
+                            }
+                        } else {
+                            $DateTimeTagStart = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(3, 12)), 'yyyyMMddHHmm', $null)
+                            $DateTimeTagEnd = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(16, 12)), 'yyyyMMddHHmm', $null)
+
+                            if (((Get-Date) -ge $DateTimeTagStart) -and ((Get-Date) -le $DateTimeTagEnd)) {
+                                Write-Host 'Current DateTime is in denied range'
+                                $TemplateFileTimeActive = $false
+                            } else {
+                                Write-Host 'Current DateTime is not in denied range'
+                            }
+                        }
+                    } catch {
+                        Write-Host 'Invalid DateTime, ignore tag' -ForegroundColor Red
                     }
-                    foreach ($TemplateFilePartTag in ((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexTimeDeny).captures.value)) | Where-Object { $_ })) {
-                        Write-Host "      $($TemplateFilePartTag): " -NoNewline
-                        try {
-                            if (-not ($TemplateFilePartTag.startswith('[-:'))) {
-                                $DateTimeTagStart = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(1, 12)), 'yyyyMMddHHmm', $null)
-                                $DateTimeTagEnd = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(14, 12)), 'yyyyMMddHHmm', $null)
+                }
+                if ($TemplateFileTimeActive -eq $true) {
+                    Write-Host "      Current DateTime is in allowed time ranges, use $SigOrOOF template"
+                } else {
+                    Write-Host "      Current DateTime is not in allowed time ranges, ignore $SigOrOOF template" -ForegroundColor Yellow
+                }
+            }
+            if ($TemplateFileTimeActive -ne $true) {
+                continue
+            }
 
-                                if (((Get-Date) -ge $DateTimeTagStart) -and ((Get-Date) -le $DateTimeTagEnd)) {
-                                    Write-Host 'Current DateTime is in allowed range'
-                                    $TemplateFileTimeActive = $true
+            # common template
+            if (($TemplateFilePart -notmatch $TemplateFilePartRegexGroupAllow) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexMailaddressAllow)) {
+                Write-Host '    Common template (no group or e-mail address allow tags specified)'
+                if (-not $TemplateFilesCommon.containskey($TemplateIniSettingsIndex)) {
+                    $TemplateFilesCommon.add($TemplateIniSettingsIndex, @{})
+                    $TemplateFilesCommon[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
+                }
+                $TemplateClassificationDisplayOrder = ('group', 'mail')
+            } elseif ($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) {
+                $TemplateClassificationDisplayOrder = ('group', 'mail')
+            } elseif ($TemplateFilePart -match $TemplateFilePartRegexMailaddressAllow) {
+                $TemplateClassificationDisplayOrder = ('mail', 'group')
+            }
+
+            foreach ($TemplateClassificationDisplayOrderEntry in $TemplateClassificationDisplayOrder) {
+                # group specific template
+                if ($TemplateClassificationDisplayOrderEntry -ieq 'group') {
+                    if (($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexGroupDeny)) {
+                        foreach ($TemplateFilePartTag in @((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexGroupAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexGroupDeny).captures.value)) | Where-Object { $_ })) {
+                            if (-not $TemplateFilesGroup.ContainsKey($TemplateIniSettingsIndex)) {
+                                if ($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) {
+                                    Write-Host '    Group specific template'
                                 } else {
-                                    Write-Host 'Current DateTime is not in allowed range'
+                                    Write-Host '    Group specific exclusions'
+                                }
+                                $TemplateFilesGroup.add($TemplateIniSettingsIndex, @{})
+                                $TemplateFilesGroup[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
+                            }
+                            Write-Host "      $($TemplateFilePartTag) = " -NoNewline
+                            $NTName = (((($TemplateFilePartTag -replace '\[', '') -replace '^-:', '') -replace '\]$', '') -replace '(.*?) (.*)', '$1\$2')
+
+                            # Check cache (only contains [xxx], not [-:xxx])
+                            if ($TemplateFilePartTag.startswith('[-:')) {
+                                if ($TemplateFilesGroupSIDsOverall.ContainsKey(($TemplateFilePartTag -replace '^\[-:', '['))) {
+                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + $TemplateFilesGroupSIDsOverall[($TemplateFilePartTag -replace '^\[-:', '[')]))
                                 }
                             } else {
-                                $DateTimeTagStart = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(3, 12)), 'yyyyMMddHHmm', $null)
-                                $DateTimeTagEnd = [System.DateTime]::ParseExact(($TemplateFilePartTag.tostring().Substring(16, 12)), 'yyyyMMddHHmm', $null)
-
-                                if (((Get-Date) -ge $DateTimeTagStart) -and ((Get-Date) -le $DateTimeTagEnd)) {
-                                    Write-Host 'Current DateTime is in denied range'
-                                    $TemplateFileTimeActive = $false
-                                } else {
-                                    Write-Host 'Current DateTime is not in denied range'
+                                if ($TemplateFilesGroupSIDsOverall.ContainsKey($TemplateFilePartTag)) {
+                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, $TemplateFilesGroupSIDsOverall[$TemplateFilePartTag])
                                 }
                             }
-                        } catch {
-                            Write-Host 'Invalid DateTime, ignore tag' -ForegroundColor Red
-                        }
-                    }
-                    if ($TemplateFileTimeActive -eq $true) {
-                        Write-Host "      Current DateTime is in allowed time ranges, use $SigOrOOF template"
-                    } else {
-                        Write-Host "      Current DateTime is not in allowed time ranges, ignore $SigOrOOF template" -ForegroundColor Yellow
-                    }
-                }
-                if ($TemplateFileTimeActive -ne $true) {
-                    continue
-                }
 
-                # common template
-                if (($TemplateFilePart -notmatch $TemplateFilePartRegexGroupAllow) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexMailaddressAllow)) {
-                    Write-Host '    Common template (no group or e-mail address allow tags specified)'
-                    if (-not $TemplateFilesCommon.containskey($TemplateIniSettingsIndex)) {
-                        $TemplateFilesCommon.add($TemplateIniSettingsIndex, @{})
-                        $TemplateFilesCommon[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
-                    }
-                    $TemplateClassificationDisplayOrder = ('group', 'mail')
-                } elseif ($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) {
-                    $TemplateClassificationDisplayOrder = ('group', 'mail')
-                } elseif ($TemplateFilePart -match $TemplateFilePartRegexMailaddressAllow) {
-                    $TemplateClassificationDisplayOrder = ('mail', 'group')
-                }
-
-                $TemplateClassificationDisplayOrder | ForEach-Object {
-                    # group specific template
-                    if ($_ -ieq 'group') {
-                        if (($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexGroupDeny)) {
-                            foreach ($TemplateFilePartTag in ((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexGroupAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexGroupDeny).captures.value)) | Where-Object { $_ })) {
-                                if (-not $TemplateFilesGroup.ContainsKey($TemplateIniSettingsIndex)) {
-                                    if ($TemplateFilePart -match $TemplateFilePartRegexGroupAllow) {
-                                        Write-Host '    Group specific template'
-                                    } else {
-                                        Write-Host '    Group specific exclusions'
-                                    }
-                                    $TemplateFilesGroup.add($TemplateIniSettingsIndex, @{})
-                                    $TemplateFilesGroup[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
-                                }
-                                Write-Host "      $($TemplateFilePartTag) = " -NoNewline
-                                $NTName = (((($TemplateFilePartTag -replace '\[', '') -replace '^-:', '') -replace '\]$', '') -replace '(.*?) (.*)', '$1\$2')
-
-                                # Check cache (only contains [xxx], not [-:xxx])
-                                if ($TemplateFilePartTag.startswith('[-:')) {
-                                    if ($TemplateFilesGroupSIDsOverall.ContainsKey(($TemplateFilePartTag -replace '^\[-:', '['))) {
-                                        $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + $TemplateFilesGroupSIDsOverall[($TemplateFilePartTag -replace '^\[-:', '[')]))
-                                    }
-                                } else {
-                                    if ($TemplateFilesGroupSIDsOverall.ContainsKey($TemplateFilePartTag)) {
-                                        $TemplateFilesGroupSIDs.add($TemplateFilePartTag, $TemplateFilesGroupSIDsOverall[$TemplateFilePartTag])
-                                    }
-                                }
-
-                                if ((-not $TemplateFilesGroupSIDs.ContainsKey($TemplateFilePartTag))) {
-                                    if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
+                            if ((-not $TemplateFilesGroupSIDs.ContainsKey($TemplateFilePartTag))) {
+                                if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($NTName.startswith('AzureAD\', 'CurrentCultureIgnorecase')))) {
+                                    try {
+                                        if ($TemplateFilePartTag.startswith('[-:')) {
+                                            $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value))
+                                            $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
+                                        } else {
+                                            $TemplateFilesGroupSIDs.add($TemplateFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
+                                            $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
+                                        }
+                                    } catch {
+                                        # No group with this sAMAccountName found. Maybe it's a display name?
                                         try {
+                                            Write-Verbose $error[0]
+                                            $objTrans = New-Object -ComObject 'NameTranslate'
+                                            $objNT = $objTrans.GetType()
+                                            $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
+                                            $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($NTName -split '\\')[1]))
                                             if ($TemplateFilePartTag.startswith('[-:')) {
-                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value))
-                                                $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
+                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value))
+                                                $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                             } else {
-                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
-                                                $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, (New-Object System.Security.Principal.NTAccount($NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value)
+                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
+                                                $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                             }
                                         } catch {
-                                            # No group with this sAMAccountName found. Maybe it's a display name?
-                                            try {
-                                                Write-Verbose $error[0]
-                                                $objTrans = New-Object -ComObject 'NameTranslate'
-                                                $objNT = $objTrans.GetType()
-                                                $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
-                                                $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($NTName -split '\\')[1]))
-                                                if ($TemplateFilePartTag.startswith('[-:')) {
-                                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value))
-                                                    $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
-                                                } else {
-                                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
-                                                    $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
-                                                }
-                                            } catch {
-                                                Write-Verbose $error[0]
-                                            }
+                                            Write-Verbose $error[0]
                                         }
-                                    } else {
-                                        $tempFilterOrder = @(
-                                            "((onPremisesNetBiosName eq '$($NTName.Split('\')[0])') and (onPremisesSamAccountName eq '$($NTName.Split('\')[1])'))"
-                                            "((onPremisesNetBiosName eq '$($NTName.Split('\')[0])') and (displayName eq '$($NTName.Split('\')[1])'))"
-                                            "(proxyAddresses/any(x:x eq 'smtp:$($NTName.Split('\')[1])'))"
-                                            "(mailNickname eq '$($NTName.Split('\')[1])')"
-                                            "(displayName eq '$($NTName.Split('\')[1])')"
-                                        )
-                                        ForEach ($tempFilter in $tempFilterOrder) {
-                                            $tempResults = (GraphFilterGroups $tempFilter)
-                                            if (($tempResults.error -eq $false) -and ($tempResults.groups.count -eq 1 )) {
-                                                if ($TemplateFilePartTag.startswith('[-:')) {
-                                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + $tempResults.groups[0].securityidentifier))
-                                                    $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), $tempResults.groups[0].securityidentifier)
-                                                } else {
-                                                    $TemplateFilesGroupSIDs.add($TemplateFilePartTag, $tempResults.groups[0].securityidentifier)
-                                                    $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, $tempResults.groups[0].securityidentifier)
-                                                }
-                                                break
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if ($TemplateFilesGroupSIDs.containskey($TemplateFilePartTag)) {
-                                    if ($null -ne $TemplateFilesGroupSIDs[$TemplateFilePartTag]) {
-                                        Write-Host "$($TemplateFilesGroupSIDs[$TemplateFilePartTag] -replace '^-:', '')"
-                                        $TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] = ($TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] + '[' + $TemplateFilesGroupSIDs[$TemplateFilePartTag] + ']')
-                                    } else {
-                                        Write-Host 'Not found, please check' -ForegroundColor Yellow
                                     }
                                 } else {
+                                    $tempFilterOrder = @(
+                                        "((onPremisesNetBiosName eq '$($NTName.Split('\')[0])') and (onPremisesSamAccountName eq '$($NTName.Split('\')[1])'))"
+                                        "((onPremisesNetBiosName eq '$($NTName.Split('\')[0])') and (displayName eq '$($NTName.Split('\')[1])'))"
+                                        "(proxyAddresses/any(x:x eq 'smtp:$($NTName.Split('\')[1])'))"
+                                        "(mailNickname eq '$($NTName.Split('\')[1])')"
+                                        "(displayName eq '$($NTName.Split('\')[1])')"
+                                    )
+                                    ForEach ($tempFilter in $tempFilterOrder) {
+                                        $tempResults = (GraphFilterGroups $tempFilter)
+                                        if (($tempResults.error -eq $false) -and ($tempResults.groups.count -eq 1 )) {
+                                            if ($TemplateFilePartTag.startswith('[-:')) {
+                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + $tempResults.groups[0].securityidentifier))
+                                                $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), $tempResults.groups[0].securityidentifier)
+                                            } else {
+                                                $TemplateFilesGroupSIDs.add($TemplateFilePartTag, $tempResults.groups[0].securityidentifier)
+                                                $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, $tempResults.groups[0].securityidentifier)
+                                            }
+                                            break
+                                        }
+                                    }
+                                }
+                            }
+
+                            if ($TemplateFilesGroupSIDs.containskey($TemplateFilePartTag)) {
+                                if ($null -ne $TemplateFilesGroupSIDs[$TemplateFilePartTag]) {
+                                    Write-Host "$($TemplateFilesGroupSIDs[$TemplateFilePartTag] -replace '^-:', '')"
+                                    $TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] = ($TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] + '[' + $TemplateFilesGroupSIDs[$TemplateFilePartTag] + ']')
+                                } else {
                                     Write-Host 'Not found, please check' -ForegroundColor Yellow
-                                    if ($TemplateFilePartTag.startswith('[-:')) {
-                                        $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), $null)
-                                    } else {
-                                        $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, $null)
-                                    }
-
                                 }
-                            }
-                        }
-                    }
-
-                    # mailbox specific template
-                    if ($_ -ieq 'mail') {
-                        if (($TemplateFilePart -match $TemplateFilePartRegexMailaddressAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexMailaddressDeny)) {
-                            foreach ($TemplateFilePartTag in ((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexMailaddressAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexMailaddressDeny).captures.value)) | Where-Object { $_ })) {
-                                if (-not $TemplateFilesMailbox.ContainsKey($TemplateIniSettingsIndex)) {
-                                    if ($TemplateFilePart -match $TemplateFilePartRegexmailaddressAllow) {
-                                        Write-Host '    Mailbox specific template'
-                                    } else {
-                                        Write-Host '    Mailbox specific exclusions'
-                                    }
-                                    $TemplateFilesMailbox.add($TemplateIniSettingsIndex, @{})
-                                    $TemplateFilesMailbox[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
+                            } else {
+                                Write-Host 'Not found, please check' -ForegroundColor Yellow
+                                if ($TemplateFilePartTag.startswith('[-:')) {
+                                    $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), $null)
+                                } else {
+                                    $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, $null)
                                 }
-                                Write-Host "      $($TemplateFilePartTag)"
-                                $TemplateFilesMailboxFilePart[$TemplateIniSettingsIndex] = ($TemplateFilesMailboxFilePart[$TemplateIniSettingsIndex] + $TemplateFilePartTag)
+
                             }
                         }
                     }
                 }
 
-                # DefaultNew, DefaultReplyFwd, Internal, External
-                if ($TemplateFilePart -match $TemplateFilePartRegexDefaultneworinternal) {
-                    foreach ($TemplateFilePartTag in (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultneworinternal).captures.value) | Where-Object { $_ })) {
-                        if ($SigOrOOF -ieq 'signature') {
-                            Write-Host '    Default signature for new e-mails'
+                # mailbox specific template
+                if ($TemplateClassificationDisplayOrderEntry -ieq 'mail') {
+                    if (($TemplateFilePart -match $TemplateFilePartRegexMailaddressAllow) -or ($TemplateFilePart -match $TemplateFilePartRegexMailaddressDeny)) {
+                        foreach ($TemplateFilePartTag in @((([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexMailaddressAllow).captures.value) + ([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexMailaddressDeny).captures.value)) | Where-Object { $_ })) {
+                            if (-not $TemplateFilesMailbox.ContainsKey($TemplateIniSettingsIndex)) {
+                                if ($TemplateFilePart -match $TemplateFilePartRegexmailaddressAllow) {
+                                    Write-Host '    Mailbox specific template'
+                                } else {
+                                    Write-Host '    Mailbox specific exclusions'
+                                }
+                                $TemplateFilesMailbox.add($TemplateIniSettingsIndex, @{})
+                                $TemplateFilesMailbox[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
+                            }
                             Write-Host "      $($TemplateFilePartTag)"
-                        } else {
-                            Write-Host '    Default internal OOF message'
-                            Write-Host "      $($TemplateFilePartTag)"
+                            $TemplateFilesMailboxFilePart[$TemplateIniSettingsIndex] = ($TemplateFilesMailboxFilePart[$TemplateIniSettingsIndex] + $TemplateFilePartTag)
                         }
                     }
+                }
+            }
 
-                    if (-not $TemplateFilesDefaultnewOrInternal.containskey($TemplateIniSettingsIndex)) {
-                        $TemplateFilesDefaultnewOrInternal.add($TemplateIniSettingsIndex, @{})
-                        $TemplateFilesDefaultnewOrInternal[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
+            # DefaultNew, DefaultReplyFwd, Internal, External
+            if ($TemplateFilePart -match $TemplateFilePartRegexDefaultneworinternal) {
+                foreach ($TemplateFilePartTag in @(([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultneworinternal).captures.value) | Where-Object { $_ })) {
+                    if ($SigOrOOF -ieq 'signature') {
+                        Write-Host '    Default signature for new e-mails'
+                        Write-Host "      $($TemplateFilePartTag)"
+                    } else {
+                        Write-Host '    Default internal OOF message'
+                        Write-Host "      $($TemplateFilePartTag)"
                     }
                 }
 
-                if ($TemplateFilePart -match $TemplateFilePartRegexDefaultreplyfwdorexternal) {
-                    foreach ($TemplateFilePartTag in (([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultreplyfwdorexternal).captures.value) | Where-Object { $_ })) {
-                        if ($SigOrOOF -ieq 'signature') {
-                            Write-Host '    Default signature for replies and forwards'
-                            Write-Host "      $($TemplateFilePartTag)"
-                        } else {
-                            Write-Host '    Default external OOF message'
-                            Write-Host "      $($TemplateFilePartTag)"
-                        }
-                    }
-
-                    if (-not $TemplateFilesDefaultreplyfwdOrExternal.containskey($TemplateIniSettingsIndex)) {
-                        $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateIniSettingsIndex, @{})
-                        $TemplateFilesDefaultreplyfwdOrExternal[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
-                    }
+                if (-not $TemplateFilesDefaultnewOrInternal.containskey($TemplateIniSettingsIndex)) {
+                    $TemplateFilesDefaultnewOrInternal.add($TemplateIniSettingsIndex, @{})
+                    $TemplateFilesDefaultnewOrInternal[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
                 }
+            }
 
-                if ($SigOrOOF -ieq 'OOF') {
-                    if (($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultreplyfwdorexternal) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultneworinternal)) {
-                        $TemplateFilesDefaultnewOrInternal.add($TemplateIniSettingsIndex, @{})
-                        $TemplateFilesDefaultnewOrInternal[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
-                        Write-Host '    Default internal OOF message (neither internal nor external tag specified)'
-                        $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateFile.FullName, $TemplateFileTargetName)
-                        Write-Host '    Default external OOF message (neither internal nor external tag specified)'
+            if ($TemplateFilePart -match $TemplateFilePartRegexDefaultreplyfwdorexternal) {
+                foreach ($TemplateFilePartTag in @(([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultreplyfwdorexternal).captures.value) | Where-Object { $_ })) {
+                    if ($SigOrOOF -ieq 'signature') {
+                        Write-Host '    Default signature for replies and forwards'
+                        Write-Host "      $($TemplateFilePartTag)"
+                    } else {
+                        Write-Host '    Default external OOF message'
+                        Write-Host "      $($TemplateFilePartTag)"
                     }
                 }
 
-                # unknown tags
-                $x = ($TemplateFilePart -replace $TemplateFilePartRegexKnown, '').trim()
-                if ($x) {
-                    Write-Host '    Unknown tags, please check' -ForegroundColor yellow
-                    Write-Host "      $x"
+                if (-not $TemplateFilesDefaultreplyfwdOrExternal.containskey($TemplateIniSettingsIndex)) {
+                    $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateIniSettingsIndex, @{})
+                    $TemplateFilesDefaultreplyfwdOrExternal[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
                 }
+            }
+
+            if ($SigOrOOF -ieq 'OOF') {
+                if (($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultreplyfwdorexternal) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultneworinternal)) {
+                    $TemplateFilesDefaultnewOrInternal.add($TemplateIniSettingsIndex, @{})
+                    $TemplateFilesDefaultnewOrInternal[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
+                    Write-Host '    Default internal OOF message (neither internal nor external tag specified)'
+                    $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateFile.FullName, $TemplateFileTargetName)
+                    Write-Host '    Default external OOF message (neither internal nor external tag specified)'
+                }
+            }
+
+            # unknown tags
+            $x = ($TemplateFilePart -replace $TemplateFilePartRegexKnown, '').trim()
+            if ($x) {
+                Write-Host '    Unknown tags, please check' -ForegroundColor yellow
+                Write-Host "      $x"
             }
 
             Set-Variable -Name "$($SigOrOOF)Files" -Value $TemplateFiles
@@ -1487,17 +1568,19 @@ function main {
     } else {
         # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the script
         try {
-            $script:COMWordDummy = New-Object -ComObject word.application
-            $script:COMWord = New-Object -ComObject word.application
-            $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
+            $script:COMWordDummy = New-Object -ComObject Word.Application
 
-            Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
+            $script:COMWord = New-Object -ComObject Word.Application
 
             if ($script:COMWordDummy) {
                 $script:COMWordDummy.Quit([ref]$false)
                 [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWordDummy) | Out-Null
                 Remove-Variable COMWordDummy -Scope 'script'
             }
+
+            $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
+
+            Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
         } catch {
             Write-Host '  Word not installed or not working correctly. Exit.' -ForegroundColor Red
             $error[0]
@@ -1538,8 +1621,9 @@ function main {
                     if ($ADPropsCurrentMailbox.objectsid) {
                         $SIDsToCheckInTrusts += (New-Object System.Security.Principal.SecurityIdentifier $($ADPropsCurrentMailbox.objectsid), 0).value.tostring()
                     }
-                    $ADPropsCurrentMailbox.sidhistory | Where-Object { $_ } | ForEach-Object {
-                        $SIDsToCheckInTrusts += (New-Object System.Security.Principal.SecurityIdentifier $_, 0).value.tostring()
+
+                    foreach ($SidHistorySid in @($ADPropsCurrentMailbox.sidhistory | Where-Object { $_ })) {
+                        $SIDsToCheckInTrusts += (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value.tostring()
                     }
 
                     try {
@@ -1556,15 +1640,16 @@ function main {
                         # Distribution groups (static only)
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')")
                         $Search.filter = "(&(objectClass=group)(!(groupType:1.2.840.113556.1.4.803:=2147483648))(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
-                        $search.findall() | ForEach-Object {
-                            if ($_.properties.objectsid) {
-                                $sid = (New-Object System.Security.Principal.SecurityIdentifier $($_.properties.objectsid), 0).value.tostring()
+                        foreach ($DistributionGroup in $search.findall()) {
+                            if ($DistributionGroup.properties.objectsid) {
+                                $sid = (New-Object System.Security.Principal.SecurityIdentifier $($DistributionGroup.properties.objectsid), 0).value.tostring()
                                 Write-Verbose "      $sid"
                                 $GroupsSIDs += $sid.tostring()
                                 $SIDsToCheckInTrusts += $sid.tostring()
                             }
-                            $_.properties.sidhistory | Where-Object { $_ } | ForEach-Object {
-                                $sid = (New-Object System.Security.Principal.SecurityIdentifier $_, 0).value.tostring()
+
+                            foreach ($SidHistorySid in @($DistributionGroup.properties.sidhistory | Where-Object { $_ })) {
+                                $sid = (New-Object System.Security.Principal.SecurityIdentifier $$SidHistorySid, 0).value.tostring()
                                 Write-Verbose "      $sid"
                                 $GroupsSIDs += $sid.tostring()
                                 $SIDsToCheckInTrusts += $sid.tostring()
@@ -1580,14 +1665,14 @@ function main {
                     # Domain local groups can not be used outside their own domain, so we don't need to query recursively
                     if ($SIDsToCheckInTrusts.count -gt 0) {
                         $LdapFilterSIDs = '(|'
-                        $SIDsToCheckInTrusts | ForEach-Object {
+                        foreach ($SidToCheckInTrusts in $SIDsToCheckInTrusts) {
                             try {
                                 $SidHex = @()
-                                $ot = New-Object System.Security.Principal.SecurityIdentifier($_)
+                                $ot = New-Object System.Security.Principal.SecurityIdentifier($SidToCheckInTrusts)
                                 $c = New-Object 'byte[]' $ot.BinaryLength
                                 $ot.GetBinaryForm($c, 0)
-                                $c | ForEach-Object {
-                                    $SidHex += $('\{0:x2}' -f $_)
+                                foreach ($char in $c) {
+                                    $SidHex += $('\{0:x2}' -f $char)
                                 }
                                 # Foreign Security Principals have an objectSID, but no sIDHistory
                                 # The sIDHistory of the current mailbox is part of $SIDsToCheckInTrusts and therefore also considered in $LdapFilterSIDs
@@ -1639,15 +1724,24 @@ function main {
                         $AADProps = $null
                         if ($ADPropsCurrentMailbox.manager) {
                             $AADProps = (GraphGetUserProperties $ADPropsCurrentMailbox.manager).properties
+
                             $ADPropsCurrentMailboxManager = [PSCustomObject]@{}
-                            foreach ($x in $GraphUserAttributeMapping.GetEnumerator()) {
-                                $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name ($x.Name) -Value ($AADProps.($x.value))
+
+                            foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                                $z = $AADProps
+
+                                foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                                    $z = $z.$y
+                                }
+
+                                $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
                             }
+
                             $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentMailboxManager.userprincipalname).photo
                             $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null
                         }
                         Write-Host '    Microsoft Graph'
-                        foreach ($sid in ((GraphGetUserTransitiveMemberOf $ADPropsCurrentMailbox.userPrincipalName).memberof.securityidentifier)) {
+                        foreach ($sid in @((GraphGetUserTransitiveMemberOf $ADPropsCurrentMailbox.userPrincipalName).memberof.securityidentifier)) {
                             $GroupsSIDs += $sid
                             Write-Verbose "      $sid"
                         }
@@ -1663,10 +1757,10 @@ function main {
             Write-Host "  Get SMTP addresses @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             $CurrentMailboxSMTPAddresses = @()
             if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                $ADPropsCurrentMailbox.proxyaddresses | ForEach-Object {
-                    if ([string]$_ -ilike 'smtp:*') {
-                        $CurrentMailboxSMTPAddresses += [string]$_ -ireplace 'smtp:', ''
-                        Write-Verbose ('    ' + ([string]$_ -ireplace 'smtp:', ''))
+                foreach ($ProxyAddress in $ADPropsCurrentMailbox.proxyaddresses) {
+                    if ([string]$ProxyAddress -ilike 'smtp:*') {
+                        $CurrentMailboxSMTPAddresses += [string]$ProxyAddress -ireplace 'smtp:', ''
+                        Write-Verbose "    $($CurrentMailboxSMTPAddresses[-1])"
                     }
                 }
             } else {
@@ -1690,7 +1784,7 @@ function main {
                 Write-Host "    Problem connecting to or reading from file '$ReplacementVariableConfigFile'. Exit." -ForegroundColor Red
                 exit 1
             }
-            foreach ($replaceKey in ($replaceHash.Keys | Sort-Object)) {
+            foreach ($replaceKey in @($replaceHash.Keys | Sort-Object)) {
                 if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
                     if ($($replaceHash[$replaceKey])) {
                         Write-Verbose "    $($replaceKey): $($replaceHash[$replaceKey])"
@@ -1708,12 +1802,12 @@ function main {
             $CURRENTUSERMANAGERPHOTOGUID = (New-Guid).guid
             $CURRENTUSERPHOTOGUID = (New-Guid).guid
 
-            (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
-                if ($null -ne $ReplaceHash[$_[0]]) {
+            foreach ($VariableName in (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID))) {
+                if ($null -ne $ReplaceHash[$VariableName[0]]) {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        $ReplaceHash[$_[0]] | Set-Content -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')))) -AsByteStream -Force
+                        $ReplaceHash[$VariableName[0]] | Set-Content -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')))) -AsByteStream -Force
                     } else {
-                        $ReplaceHash[$_[0]] | Set-Content -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')))) -Encoding Byte -Force
+                        $ReplaceHash[$VariableName[0]] | Set-Content -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')))) -Encoding Byte -Force
                     }
                 }
             }
@@ -1741,10 +1835,10 @@ function main {
 
 
             # Delete photos from file system
-            (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
-                Remove-Item -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')))) -Force -ErrorAction SilentlyContinue
-                $ReplaceHash.Remove($_[0])
-                $ReplaceHash.Remove(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')
+            foreach ($VariableName in (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID))) {
+                Remove-Item -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')))) -Force -ErrorAction SilentlyContinue
+                $ReplaceHash.Remove($VariableName[0])
+                $ReplaceHash.Remove(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')
             }
 
         }
@@ -1825,7 +1919,7 @@ function main {
                                 if ($script:CurrentUserDummyMailbox -ne $true) {
                                     $TempNewSig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'New Signature'
                                     if ($OutlookFileVersion -lt '16.0.0.0') {
-                                        $TempNewSig = (($TempNewSig -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' } | ForEach-Object { [char][int]"$($_)" }) -join ''
+                                        $TempNewSig = @(foreach ($char in @(($TempNewSig -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join ''
                                     }
                                 } else {
                                     $TempNewSig = $script:CurrentUserDummyMailboxDefaultSigNew
@@ -1837,7 +1931,7 @@ function main {
                                 if ($script:CurrentUserDummyMailbox -ne $true) {
                                     $TempReplySig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature'
                                     if ($OutlookFileVersion -lt '16.0.0.0') {
-                                        $TempReplySig = (($TempReplySig -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' } | ForEach-Object { [char][int]"$($_)" }) -join ''
+                                        $TempReplySig = @(foreach ($char in @(($TempReplySig -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$(char)" }) -join ''
                                     }
                                 } else {
                                     $TempReplySig = $script:CurrentUserDummyMailboxDefaultSigReply
@@ -1885,7 +1979,7 @@ function main {
                                     if (Test-Path -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -PathType Leaf) {
                                         if ($EmbedImagesInHtml -eq $false) {
                                             $x = (New-Guid).guid.tostring()
-                                            ConvertTo-SingleFileHTML ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) (Join-Path -Path $script:tempDir -ChildPath $x)
+                                            ConvertToSingleFileHTML ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) (Join-Path -Path $script:tempDir -ChildPath $x)
                                             $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $x) -Encoding UTF8 -Raw).ToString()
                                             Remove-Item (Join-Path -Path $script:tempDir -ChildPath $x) -Force
                                         } else {
@@ -1981,12 +2075,12 @@ function main {
                             }
                         }
                     } else {
-                        $SignaturePaths | ForEach-Object {
+                        foreach ($SignaturePath in $SignaturePaths) {
                             if (Test-Path -LiteralPath (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) {
-                                Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF Internal.htm')) -Force
+                                Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePath) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF Internal.htm')) -Force
                             }
                             if (Test-Path (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) {
-                                Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($_) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF External.htm')) -Force
+                                Copy-Item -LiteralPath ((Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePath) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'OOF External.htm')) -Force
                             }
                         }
                     }
@@ -2003,8 +2097,8 @@ function main {
                 }
 
                 # Delete temporary OOF files from file system
-               ("$OOFInternalGUID OOFInternal", "$OOFExternalGUID OOFExternal") | ForEach-Object {
-                    Remove-Item ((Join-Path -Path $script:tempDir -ChildPath ($_ + '.*'))) -Force -ErrorAction SilentlyContinue
+                foreach ($FileName in ("$OOFInternalGUID OOFInternal", "$OOFExternalGUID OOFExternal")) {
+                    Remove-Item ((Join-Path -Path $script:tempDir -ChildPath ($FileName + '.*'))) -Force -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -2016,15 +2110,15 @@ function main {
     if ($DeleteScriptCreatedSignaturesWithoutTemplate -eq $true) {
         Write-Host
         Write-Host "Remove old signatures created by this script, which are no longer centrally available @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-        $SignaturePaths | ForEach-Object {
-            Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
-                if ((Get-Content -LiteralPath $_.fullname -Encoding UTF8 -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
-                    if ($_.name -notin $script:SignatureFilesDone) {
-                        Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
-                        Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
-                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
-                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
-                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.files'))) -Recurse -Force -ErrorAction silentlycontinue
+        foreach ($SignaturePath in $SignaturePaths) {
+            foreach ($file in @(Get-ChildItem -LiteralPath $SignaturePath -Filter '*.htm' -File)) {
+                if ((Get-Content -LiteralPath $file.fullname -Encoding UTF8 -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
+                    if ($file.name -notin $script:SignatureFilesDone) {
+                        Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($file.fullname, '')) + "*'")
+                        Remove-Item -LiteralPath $file.fullname -Force -ErrorAction silentlycontinue
+                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
+                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
+                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.files'))) -Recurse -Force -ErrorAction silentlycontinue
                     }
                 }
             }
@@ -2035,15 +2129,15 @@ function main {
     if ($DeleteUserCreatedSignatures -eq $true) {
         Write-Host
         Write-Host "Remove user created signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-        $SignaturePaths | ForEach-Object {
-            Get-ChildItem -LiteralPath $_ -Filter '*.htm' -File | ForEach-Object {
-                if ((Get-Content -LiteralPath $_.fullname -Encoding UTF8 -Raw) -notlike ('*' + $HTMLMarkerTag + '*')) {
-                    Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($_.fullname, '')) + "*'")
-                    Remove-Item -LiteralPath $_.fullname -Force -ErrorAction silentlycontinue
-                    Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
-                    Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($_.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
-                    foreach ($x in $ConnectedFilesFolderNames) {
-                        Remove-Item -LiteralPath ($([System.IO.Path]::GetFileNameWithoutExtension($_.fullname)) + $x) -Recurse -Force -ErrorAction SilentlyContinue
+        foreach ($SignaturePath in $SignaturePaths) {
+            foreach ($file in @(Get-ChildItem -LiteralPath $SignaturePath -Filter '*.htm' -File)) {
+                if ((Get-Content -LiteralPath $file.fullname -Encoding UTF8 -Raw) -notlike ('*' + $HTMLMarkerTag + '*')) {
+                    Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($file.fullname, '')) + "*'")
+                    Remove-Item -LiteralPath $file.fullname -Force -ErrorAction silentlycontinue
+                    Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
+                    Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
+                    foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                        Remove-Item -LiteralPath ($([System.IO.Path]::GetFileNameWithoutExtension($file.fullname)) + $ConnectedFilesFolderName) -Recurse -Force -ErrorAction SilentlyContinue
                     }
                 }
             }
@@ -2079,16 +2173,84 @@ function main {
 }
 
 
-Function ConvertTo-SingleFileHTML([string]$inputfile, [string]$outputfile) {
+function GetBitness {
+    [CmdletBinding(ConfirmImpact = 'none')]
+    param (
+        [Parameter(HelpMessage = 'Enter binary file(s) to examine', Position = 0,
+            Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName )]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ Test-Path -Path ((Get-Item -Path $_).FullName) })]
+        [string[]]  $Path,
+
+        [Alias('PassThru')]
+        [switch] $PassThrough
+    )
+
+    begin {
+        $paths = Resolve-Path -Path $path | Select-Object -ExpandProperty Path
+        try {
+            $enumString = @'
+                public enum BinaryType
+                {
+                    BIT32 = 0, // A 32-bit Windows-based application, SCS_32BIT_BINARY
+                    DOS = 1, // An MS-DOS - based application, SCS_DOS_BINARY
+                    WOW = 2, // A 16-bit Windows-based application, SCS_WOW_BINARY
+                    PIF = 3, // A PIF file that executes an MS-DOS based application, SCS_PIF_BINARY
+                    POSIX = 4, // A POSIX based application, SCS_POSIX_BINARY
+                    OS216 = 5, // A 16-bit OS/2-based application, SCS_OS216_BINARY
+                    BIT64 = 6 // A 64-bit Windows-based application, SCS_64BIT_BINARY
+                }
+'@
+
+            Add-Type -TypeDefinition $enumString
+        } catch {
+        }
+
+        try {
+            $Signature = @'
+                    [DllImport("kernel32.dll")]
+                    public static extern bool GetBinaryType(
+                                        string lpApplicationName,
+                                        ref int lpBinaryType
+                    );
+'@
+
+            Add-Type -MemberDefinition $Signature -Name BinaryType -Namespace PFWin32Utils
+        } catch {
+        }
+    }
+
+    process {
+        foreach ($Item in $Paths) {
+            $ReturnedType = -1
+            $Result = [PFWin32Utils.BinaryType]::GetBinaryType($Item, [ref] $ReturnedType)
+
+            if (!$Result -or ($ReturnedType -eq -1)) {
+                Write-Error -Message "Failed to get binary type for file $($Item)"
+            } else {
+                $ToReturn = [BinaryType] $ReturnedType
+                if ($PassThrough) {
+                    Get-Item -Path $Item.FullName -Force |
+                    Add-Member -MemberType noteproperty -Name BinaryType -Value $ToReturn -Force -PassThru
+                } else {
+                    $ToReturn
+                }
+            }
+        }
+    }
+}
+
+
+Function ConvertToSingleFileHTML([string]$inputfile, [string]$outputfile) {
     $tempFileContent = Get-Content -LiteralPath $inputfile -Encoding UTF8 -Raw
 
     $src = @()
-    ([regex]'(?i)src="(.*?)"').Matches($tempFileContent) | ForEach-Object {
-        $src += $_.Groups[0].Value
-        if ($_.Groups[0].Value.StartsWith('src="data:')) {
+    foreach ($regex in @(([regex]'(?i)src="(.*?)"').Matches($tempFileContent))) {
+        $src += $regex.Groups[0].Value
+        if ($regex.Groups[0].Value.StartsWith('src="data:')) {
             $src += ''
         } else {
-            $src += (Join-Path -Path (Split-Path -Path ($inputfile) -Parent) -ChildPath ([uri]::UnEscapeDataString($_.Groups[1].Value)))
+            $src += (Join-Path -Path (Split-Path -Path ($inputfile) -Parent) -ChildPath ([uri]::UnEscapeDataString($regex.Groups[1].Value)))
         }
     }
     for ($x = 0; $x -lt $src.count; $x = $x + 2) {
@@ -2146,14 +2308,13 @@ function EvaluateAndSetSignatures {
     foreach ($TemplateGroup in ('common', 'group', 'mailbox')) {
         Write-Host "$Indent  Process $TemplateGroup $(if($TemplateGroup -iin ('group', 'mailbox')){'specific '})templates @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
+        if (-not (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly -ErrorAction SilentlyContinue)) {
+            continue
+        }
+
         for ($TemplateFileIndex = 0; $TemplateFileIndex -lt (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly).count; $TemplateFileIndex++) {
             $TemplateFile = (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)[$TemplateFileIndex]
-
-            $TemplateFileUniqueAppearenceCount = @((Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)[0..$TemplateFileIndex] | Where-Object { $_.fullname -eq $TemplateFile.fullname }).count
-
-            $TemplateIniSettingsIndex = ((Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly).GetEnumerator() | Where-Object { (Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly)[$_.name].containskey($TemplateFile.fullname) } | Select-Object -Skip (((0, ($TemplateFileUniqueAppearenceCount - 1)) | Measure-Object -Maximum).maximum) | Select-Object -First 1).name
-            #Write-Host "$($templatefile.fullname) = $($TemplateIniSettingsIndex) = $TemplateFileUniqueAppearenceCount"
-            #continue
+            $TemplateIniSettingsIndex = $TemplateFile.TemplateIniSettingsIndex
 
             if (-not $TemplateIniSettingsIndex) {
                 continue
@@ -2165,9 +2326,10 @@ function EvaluateAndSetSignatures {
                 $Template = (Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly)[$TemplateIniSettingsIndex].GetEnumerator() | Select-Object -First 1
             }
 
-            Write-Host "$Indent    '$([System.IO.Path]::GetFileName($Template.key))' @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+            Write-Host "$Indent    '$([System.IO.Path]::GetFileName($Template.key))' (ini index #$($TemplateIniSettingsIndex)) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
             Write-Host "$Indent      Check permissions"
             $TemplateAllowed = $false
+
 
             # check for allow entries
             Write-Host "$Indent        Allows"
@@ -2176,67 +2338,83 @@ function EvaluateAndSetSignatures {
                 Write-Host "$Indent          Common: Template is classified as common template valid for all mailboxes"
             } elseif ($TemplateGroup -ieq 'group') {
                 $tempAllowCount = 0
-                $GroupsSIDs | ForEach-Object {
-                    if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[$_``]*") {
+
+                foreach ($GroupsSid in $GroupsSIDs) {
+                    if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[$($GroupsSid)``]*") {
                         $TemplateAllowed = $true
                         $tempAllowCount++
-                        $tempSearchSting = $_
-                        Write-Host "$Indent          Group: $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -join '/') = $_"
+                        $tempSearchSting = $GroupsSid
+                        Write-Host "$Indent          First group match: $(($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -join '/') = $($GroupsSid)"
+                        break
                     }
                 }
+
                 if ($tempAllowCount -eq 0) {
                     Write-Host "$Indent          Group: Mailbox is not member of any allowed group"
                 }
             } elseif ($TemplateGroup -ieq 'mailbox') {
                 $tempAllowCount = 0
-                $CurrentMailboxSMTPAddresses | ForEach-Object {
-                    if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[$_``]*") {
+
+                foreach ($CurrentMailboxSmtpAddress in $CurrentMailboxSmtpAddresses) {
+                    if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[$($CurrentMailboxSmtpAddress)``]*") {
                         $TemplateAllowed = $true
                         $tempAllowCount++
-                        Write-Host "$Indent          E-mail address: $_"
+                        Write-Host "$Indent          First e-mail address match: $($CurrentMailboxSmtpAddress)"
+                        break
                     }
                 }
+
                 if ($tempAllowCount -eq 0) {
                     Write-Host "$Indent          E-mail address: Mailbox does not have any allowed e-mail address"
                 }
             }
 
 
-            # check for allow entries
-            Write-Host "$Indent        Denies"
-            # check for group deny
-            $tempDenyCount = 0
-            $GroupsSIDs | ForEach-Object {
-                if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-:$_``]*") {
-                    $TemplateAllowed = $false
-                    $tempDenyCount++
-                    $tempSearchSting = $_
-                    Write-Host "$Indent          Group: $((($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -replace '^\[', '[-:') -join '/') = $_"
+            # check for deny entries
+            if ($TemplateAllowed -eq $true) {
+                Write-Host "$Indent        Denies"
+                # check for group deny
+                $tempDenyCount = 0
+
+                foreach ($GroupsSid in $GroupsSIDs) {
+                    if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-:$($GroupsSid)``]*") {
+                        $TemplateAllowed = $false
+                        $tempDenyCount++
+                        $tempSearchSting = $($GroupsSid)
+                        Write-Host "$Indent          First group match: $((($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $tempSearchSting }).name -replace '^\[', '[-:') -join '/') = $($GroupsSid)"
+                        break
+                    }
+                }
+
+                if ($tempDenyCount -eq 0) {
+                    Write-Host "$Indent          Group: Mailbox is not member of any denied group"
+                }
+
+                # check for mail address deny
+                $tempDenyCount = 0
+
+                foreach ($CurrentMailboxSmtpAddress in $CurrentMailboxSmtpAddresses) {
+                    if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-:$($CurrentMailboxSmtpAddress)``]*") {
+                        $TemplateAllowed = $false
+                        $tempDenyCount++
+                        Write-Host "$Indent          First e-mail address match: $($CurrentMailboxSmtpAddress)"
+                        break
+                    }
+                }
+
+                if ($tempDenyCount -eq 0) {
+                    Write-Host "$Indent          E-Mail address: Mailbox does not have any denied e-mail address"
                 }
             }
-            if ($tempDenyCount -eq 0) {
-                Write-Host "$Indent          Group: Mailbox is not member of any denied group"
-            }
 
-            # check for mail address deny
-            $tempDenyCount = 0
-            $CurrentMailboxSMTPAddresses | ForEach-Object {
-                if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-:$_``]*") {
-                    $TemplateAllowed = $false
-                    $tempDenyCount++
-                    Write-Host "$Indent          E-mail address: $_"
-                }
-            }
-            if ($tempDenyCount -eq 0) {
-                Write-Host "$Indent          E-Mail address: Mailbox does not have any denied e-mail address"
-            }
-
+            # result
             if ($Template -and ($TemplateAllowed -eq $true)) {
                 Write-Host "$Indent        Use template as there is at least one allow and no deny for this mailbox"
                 if ($ProcessOOF) {
                     if ($OOFFilesInternal.contains($TemplateIniSettingsIndex)) {
                         $OOFInternal = $Template
                     }
+
                     if ($OOFFilesExternal.contains($TemplateIniSettingsIndex)) {
                         $OOFExternal = $Template
                     }
@@ -2323,8 +2501,8 @@ function SetSignatures {
         $pathGUID = (New-Guid).guid.tostring()
         $path = Join-Path -Path $script:tempDir -ChildPath "$($pathGUID).htm"
         $pathConnectedFolderNames = @()
-        $ConnectedFilesFolderNames | ForEach-Object {
-            $pathConnectedFolderNames += "$($pathGUID)$($_)"
+        foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+            $pathConnectedFolderNames += "$($pathGUID)$($ConnectedFilesFolderName)"
         }
 
         if ($UseHtmTemplates) {
@@ -2332,14 +2510,14 @@ function SetSignatures {
             try {
                 if ($EmbedImagesInHtml -eq $false) {
                     Copy-Item -LiteralPath $Signature.name -Destination $path
-                    $ConnectedFilesFolderNames | ForEach-Object {
-                        if (Test-Path (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$_")) {
-                            Copy-Item (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$_") (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files") -Recurse -Force
+                    foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                        if (Test-Path (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderName")) {
+                            Copy-Item (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderName") (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files") -Recurse -Force
                             return
                         }
                     }
                 } else {
-                    ConvertTo-SingleFileHTML $Signature.Name $path
+                    ConvertToSingleFileHTML $Signature.Name $path
                 }
             } catch {
                 Write-Host "$Indent        Error copying file. Skip template." -ForegroundColor Red
@@ -2366,39 +2544,39 @@ function SetSignatures {
             $html = New-Object -ComObject 'HTMLFile'
             $HTML.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
 
-            foreach ($image in ($html.images)) {
-                (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
-                    if (($image.src -clike "*$($_[0])*") -or ($image.alt -clike "*$($_[0])*")) {
-                        if ($null -ne $ReplaceHash[$_[0]]) {
+            foreach ($image in @($html.images)) {
+                foreach ($VariableName in (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID))) {
+                    if (($image.src -clike "*$($VariableName[0])*") -or ($image.alt -clike "*$($VariableName[0])*")) {
+                        if ($null -ne $ReplaceHash[$VariableName[0]]) {
                             if ($EmbedImagesInHtml -eq $false) {
                                 Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
-                                Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($_[0]).jpeg") -Force
-                                $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($_[0]).jpeg")
+                                Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
+                                $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($VariableName[0]).jpeg")
                                 if ($image.alt) {
-                                    $image.alt = $($image.alt).replace($_[0], '')
+                                    $image.alt = $($image.alt).replace($VariableName[0], '')
                                 }
                             } else {
-                                $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))))))
+                                $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg'))))))
                                 if ($image.alt) {
-                                    $image.alt = $($image.alt).replace($_[0], '')
+                                    $image.alt = $($image.alt).replace($VariableName[0], '')
                                 }
                             }
                         } else {
                             $image.src = "$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))"
                         }
-                    } elseif (($image.src -clike "*$(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')*")) {
-                        if ($null -ne $ReplaceHash[$_[0]]) {
+                    } elseif (($image.src -clike "*$(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')*")) {
+                        if ($null -ne $ReplaceHash[$VariableName[0]]) {
                             if ($EmbedImagesInHtml -eq $false) {
                                 Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
-                                Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($_[0]).jpeg") -Force
-                                $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($_[0]).jpeg")
+                                Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
+                                $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($VariableName[0]).jpeg")
                                 if ($image.alt) {
-                                    $image.alt = $($image.alt).replace((($_[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                                    $image.alt = $($image.alt).replace((($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
                                 }
                             } else {
-                                $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))))))
+                                $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg'))))))
                                 if ($image.alt) {
-                                    $image.alt = $($image.alt).replace((($_[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                                    $image.alt = $($image.alt).replace((($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
                                 }
                             }
                         } else {
@@ -2430,22 +2608,22 @@ function SetSignatures {
 
         if (-not $UseHtmTemplates) {
             Write-Host "$Indent      Replace picture variables"
-            foreach ($image in ($script:COMWord.ActiveDocument.Shapes + $script:COMWord.ActiveDocument.InlineShapes)) {
+            foreach ($image in @($script:COMWord.ActiveDocument.Shapes + $script:COMWord.ActiveDocument.InlineShapes)) {
                 try {
                     if ($image.linkformat.sourcefullname) {
-                        (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID)) | ForEach-Object {
-                            if (([System.IO.Path]::GetFileName($image.linkformat.sourcefullname).contains($_[0])) -or $(if ($image.alternativetext) { (($image.alternativetext).contains($_[0])) })) {
-                                if ($null -ne $ReplaceHash[$_[0]]) {
-                                    $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))
+                        foreach ($Variablename in (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID))) {
+                            if (([System.IO.Path]::GetFileName($image.linkformat.sourcefullname).contains($Variablename[0])) -or $(if ($image.alternativetext) { (($image.alternativetext).contains($Variablename[0])) })) {
+                                if ($null -ne $ReplaceHash[$Variablename[0]]) {
+                                    $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
                                     if ($image.alternativetext) {
-                                        $image.alternativetext = $($image.alternativetext).replace($_[0], '')
+                                        $image.alternativetext = $($image.alternativetext).replace($Variablename[0], '')
                                     }
                                 }
-                            } elseif (([System.IO.Path]::GetFileName($image.linkformat.sourcefullname).contains(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')) -or $(if ($image.alternativetext) { ($image.alternativetext.contains(($_[0][-999..-2] -join '') + 'DELETEEMPTY$')) })) {
-                                if ($null -ne $ReplaceHash[$_[0]]) {
-                                    $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($_[0] + $_[1] + '.jpeg'))
+                            } elseif (([System.IO.Path]::GetFileName($image.linkformat.sourcefullname).contains(($Variablename[0][-999..-2] -join '') + 'DELETEEMPTY$')) -or $(if ($image.alternativetext) { ($image.alternativetext.contains(($Variablename[0][-999..-2] -join '') + 'DELETEEMPTY$')) })) {
+                                if ($null -ne $ReplaceHash[$Variablename[0]]) {
+                                    $image.linkformat.sourcefullname = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
                                     if ($image.alternativetext) {
-                                        $image.alternativetext = $($image.alternativetext).replace((($_[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
+                                        $image.alternativetext = $($image.alternativetext).replace((($Variablename[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
                                     }
                                 } else {
                                     $image.delete()
@@ -2656,20 +2834,20 @@ function SetSignatures {
 
         if (-not $ProcessOOF) {
             if ($EmbedImagesInHtml -eq $false) {
-                $pathConnectedFolderNames | ForEach-Object {
-                    if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($_))) {
-                        $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $_ + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
-                        Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($_)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
+                foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
+                    if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName))) {
+                        $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $pathConnectedFolderName + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
+                        Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
                         return
                     }
                 }
                 [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
             } else {
                 [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
-                ConvertTo-SingleFileHTML $path $path
+                ConvertToSingleFileHTML $path $path
             }
         } else {
-            ConvertTo-SingleFileHTML $path ((Join-Path -Path $script:tempDir -ChildPath $Signature.Value))
+            ConvertToSingleFileHTML $path ((Join-Path -Path $script:tempDir -ChildPath $Signature.Value))
         }
 
 
@@ -2681,8 +2859,8 @@ function SetSignatures {
                 } else {
                     # Microsoft signature roaming not available
                     Write-Host "$Indent      Copy signature files to '$SignaturePath'"
-                    foreach ($x in $ConnectedFilesFolderNames) {
-                        Remove-Item -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $x) -Recurse -Force -ErrorAction SilentlyContinue
+                    foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                        Remove-Item -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $ConnectedFilesFolderName) -Recurse -Force -ErrorAction SilentlyContinue
                     }
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
                     if ($EmbedImagesInHtml -eq $false) {
@@ -2706,11 +2884,12 @@ function SetSignatures {
         }
 
         Write-Host "$Indent      Remove temporary files"
-        @('.docx', '.htm', '.rtf', '.txt') | ForEach-Object {
-            Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, $_)) -ErrorAction SilentlyContinue | Out-Null
+        foreach ($extension in ('.docx', '.htm', '.rtf', '.txt')) {
+            Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, $extension)) -ErrorAction SilentlyContinue | Out-Null
         }
-        Foreach ($x in (Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
-            Remove-Item -LiteralPath $x -Force -Recurse -ErrorAction SilentlyContinue
+
+        Foreach ($file in @(Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
+            Remove-Item -LiteralPath $file -Force -Recurse -ErrorAction SilentlyContinue
         }
         Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath $([System.IO.Path]::ChangeExtension($signature.value, '.files'))) -Force -Recurse -ErrorAction SilentlyContinue
     }
@@ -2815,15 +2994,15 @@ function CheckADConnectivity {
         [void]$script:jobs.Add($Temp)
     }
     while (($script:jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
-        $script:jobs | ForEach-Object {
-            if (($null -eq $_.StartTime) -and ($_.Powershell.Streams.Debug[0].Message -match 'Start')) {
-                $StartTicks = $_.powershell.Streams.Debug[0].Message -replace '[^0-9]'
-                $_.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
+        foreach ($job in $script:jobs) {
+            if (($null -eq $job.StartTime) -and ($job.Powershell.Streams.Debug[0].Message -match 'Start')) {
+                $StartTicks = $job.powershell.Streams.Debug[0].Message -replace '[^0-9]'
+                $job.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
             }
 
-            if ($null -ne $_.StartTime) {
-                if ((($_.handle.IsCompleted -eq $true) -and ($_.Done -eq $false)) -or (($_.Done -eq $false) -and ((New-TimeSpan -Start $_.StartTime -End (Get-Date)).TotalSeconds -ge 5))) {
-                    $data = $_.Object[0..$(($_.object).count - 1)]
+            if ($null -ne $job.StartTime) {
+                if ((($job.handle.IsCompleted -eq $true) -and ($job.Done -eq $false)) -or (($job.Done -eq $false) -and ((New-TimeSpan -Start $job.StartTime -End (Get-Date)).TotalSeconds -ge 5))) {
+                    $data = $job.Object[0..$(($job.object).count - 1)]
                     Write-Host "$Indent$($data[0])"
                     if ($data -icontains 'QueryPassed') {
                         Write-Host "$Indent  $CheckProtocolText query successful"
@@ -2834,7 +3013,7 @@ function CheckADConnectivity {
                         $TrustsToCheckForGroups.remove($data[0])
                         $returnvalue = $false
                     }
-                    $_.Done = $true
+                    $job.Done = $true
                 }
             }
         }
@@ -2867,8 +3046,8 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
         if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
             # Reconnect already connected network drives at the OS level
             # New-PSDrive is not enough for this
-            Get-CimInstance Win32_NetworkConnection | ForEach-Object {
-                & net use $_.LocalName $_.RemoteName 2>&1 | Out-Null
+            foreach ($NetworkConnection in @(Get-CimInstance Win32_NetworkConnection)) {
+                & net use $NetworkConnection.LocalName $NetworkConnection.RemoteName 2>&1 | Out-Null
             }
 
             if (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
@@ -2899,18 +3078,16 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
                     $app = New-Object -com shell.application
                     $i = 0
                     while ($i -lt 1) {
-                        $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
-                            $i = $i + 1
-                        }
+                        $i += @($app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') }).count
                         Start-Sleep -Milliseconds 50
                     }
 
                     # Wait until the corresponding URL is fully loaded, then close the tab
-                    $app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') } | ForEach-Object {
-                        while ($_.busy) {
+                    foreach ($window in @($app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') })) {
+                        while ($window.busy) {
                             Start-Sleep -Milliseconds 50
                         }
-                        $_.quit([ref]$false)
+                        $window.quit([ref]$false)
                     }
 
                     $app = $null
@@ -3270,13 +3447,16 @@ function GraphFilterGroups($filter) {
 }
 
 
-function Get-IniContent ($filePath) {
+function GetIniContent ($filePath) {
     $local:ini = [ordered]@{}
     $local:SectionIndex = -1
     if ($filePath -ne '') {
         try {
-            Get-Content -LiteralPath $FilePath -Encoding UTF8 -ErrorAction Stop | ForEach-Object {
-                switch -regex ($_) {
+            Write-Verbose '    Original ini content'
+
+            foreach ($line in @(Get-Content -LiteralPath $FilePath -Encoding UTF8 -ErrorAction Stop)) {
+                Write-Verbose "      $line"
+                switch -regex ($line) {
                     # Comments starting with ; or #, or empty line, whitespace(s) before are ignored
                     '(^\s*(;|#))|(^\s*$)' { continue }
 
