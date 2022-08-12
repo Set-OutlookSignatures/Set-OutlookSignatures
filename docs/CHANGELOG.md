@@ -15,6 +15,11 @@
   ### Fixed
 -->
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.2" target="_blank">v3.2.2</a> - 2022-08-12
+_Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
+### Fixed
+- When the '`EmbedImagesInHtml`' parameter is set to '`false`', correctly handle a certain file system condition instead of stopping processing the current template after the 'Embed local files in HTM format and add marker' step
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.1" target="_blank">v3.2.1</a> - 2022-08-04
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Added

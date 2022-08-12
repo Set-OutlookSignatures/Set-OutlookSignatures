@@ -2838,7 +2838,7 @@ function SetSignatures {
                     if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName))) {
                         $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $pathConnectedFolderName + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
                         Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
-                        return
+                        break
                     }
                 }
                 [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
