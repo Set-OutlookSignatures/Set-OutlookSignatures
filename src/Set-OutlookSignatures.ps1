@@ -163,6 +163,12 @@ Outlook 2013 and earlier can't handle these embedded images when composing HTML 
 When setting EmbedImagesInHtml to $false, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 Default value: $true
 
+.PARAMETER SignaturesForAutomappedAndAdditionalMailboxes
+Deploy signatures for automapped mailboxes and additional mailboxes
+Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook
+Up to a minute after starting Outlook, the detection of these mailboxes may fail as the corresponding registry keys are dynamically rebuilt by Outlook
+Default value: $false
+
 .INPUTS
 None. You cannot pipe objects to Set-OutlookSignatures.ps1.
 
@@ -290,6 +296,10 @@ Param(
     # Embed images in HTML
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
     $EmbedImagesInHtml = $true
+
+    # Deploy signatures for automapped mailboxes and additional mailboxes
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
+    $SignaturesForAutomappedAndAdditionalMailboxes = $false
 )
 
 
@@ -501,6 +511,13 @@ function main {
         $DeleteScriptCreatedSignaturesWithoutTemplate = $false
     }
 
+    Write-Host "  SignaturesForAutomappedAndAdditionalMailboxes: '$SignaturesForAutomappedAndAdditionalMailboxes'"
+    if ($SignaturesForAutomappedAndAdditionalMailboxes -in (1, '1', 'true', '$true', 'yes')) {
+        $SignaturesForAutomappedAndAdditionalMailboxes = $true
+    } else {
+        $SignaturesForAutomappedAndAdditionalMailboxes = $false
+    }
+
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
     ConvertPath ([ref]$AdditionalSignaturePath)
     checkpath $AdditionalSignaturePath -create
@@ -686,6 +703,20 @@ function main {
             $LegacyExchangeDNs += $LegacyExchangeDN
             Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
             Write-Host "    $($MailAddresses[-1])"
+        }
+
+        if ($SignaturesForAutomappedAndAdditionalMailboxes){
+            foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'0102663e') })) {
+                (@(ForEach ($char in @(($RegistryFolder.'0102663e' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split "$([char]0x000C)" | ForEach-Object {
+                    if ($_ -match "(\S+@\S+\.\S+(?=/o=))(/o=[\S ]+(?=.{5}$([char]0x0002)$([char]0x0010)))") {
+                        $RegistryPaths += $RegistryFolder.PSPath
+                        $MailAddresses += $matches[1].ToLower()
+                        $LegacyExchangeDNs += $matches[2].ToLower()
+                        Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
+                        Write-Host "    $($MailAddresses[-1]) (automapped or additional mailbox)"
+                    }
+                }
+            }
         }
     }
 
@@ -1108,7 +1139,7 @@ function main {
     if ($ADPropsCurrentUser.mail) {
         Write-Host "  AD mail attribute of currently logged in user: $($ADPropsCurrentUser.mail)"
         for ($i = 0; $i -lt $LegacyExchangeDNs.count; $i++) {
-            if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -contains $('SMTP:' + $ADPropsCurrentUser.mail))) {
+            if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -contains $('SMTP:' + $ADPropsCurrentUser.mail)) -and ($RegistryPaths[$i] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*')) {
                 $p = $i
                 break
             }
@@ -1129,18 +1160,18 @@ function main {
                         if ($p -ge 0) {
                             # $p already set before, there must be at least two matches, so set it to -1
                             $p = -1
-                        } elseif (-not $p) {
+                        } elseif ((-not $p) -and ($RegistryPaths[$i] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*')) {
                             $p = $i
                         }
                     }
                 }
             }
             if ($p -ge 0) {
-                Write-Host "    One matching mailbox found: $MailAddresses[$i]"
+                Write-Host "    One matching primary mailbox found: $MailAddresses[$i]"
             } elseif ($null -eq $p) {
-                Write-Host '    No matching mailbox found' -ForegroundColor Yellow
+                Write-Host '    No matching primary mailbox found' -ForegroundColor Yellow
             } else {
-                Write-Host '    Multiple matching mailboxes found, no prioritization possible' -ForegroundColor Yellow
+                Write-Host '    Multiple matching primary mailboxes found, no prioritization possible' -ForegroundColor Yellow
             }
         } else {
             Write-Host
@@ -1917,9 +1948,10 @@ function main {
                         if ($MailAddresses[$j] -ieq $PrimaryMailboxAddress) {
                             try {
                                 if ($script:CurrentUserDummyMailbox -ne $true) {
-                                    $TempNewSig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'New Signature'
                                     if ($OutlookFileVersion -lt '16.0.0.0') {
                                         $TempNewSig = @(foreach ($char in @(($TempNewSig -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join ''
+                                    } else {
+                                        $TempNewSig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'New Signature'
                                     }
                                 } else {
                                     $TempNewSig = $script:CurrentUserDummyMailboxDefaultSigNew

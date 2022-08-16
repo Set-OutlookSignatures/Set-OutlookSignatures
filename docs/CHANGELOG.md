@@ -15,6 +15,13 @@
   ### Fixed
 -->
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.x.x" target="_blank">v3.x.x</a> - YYYY-MM-DD
+_Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
+### Changed
+- Use different method to delete files to avoid occassional OneDrive error "access to the cloud file is denied"
+### Added
+- New parameter '`SignaturesForAutomappedAndAdditionalMailboxes`' allow deploying signatures not only for primary mailboxes configured in Outlook, but also for automapped and additional mailboxes. See '`README`' for details.
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.2" target="_blank">v3.2.2</a> - 2022-08-12
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Fixed

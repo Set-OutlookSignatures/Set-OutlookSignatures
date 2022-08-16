@@ -299,6 +299,14 @@ Outlook 2013 and earlier can't handle these embedded images when composing HTML 
 When setting EmbedImagesInHtml to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 
 Default value: `$true`
+## SignaturesForAutomappedAndAdditionalMailboxes
+Deploy signatures for automapped mailboxes and additional mailboxes.
+
+Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook.
+
+Up to a minute after starting Outlook, the detection of these mailboxes may fail as the corresponding registry keys are dynamically rebuilt by Outlook.
+
+Default value: `$false`
 # 3. Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.
 
