@@ -60,6 +60,7 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [2.18. CreateRtfSignatures](#218-creatertfsignatures)
   - [2.19. CreateTxtSignatures](#219-createtxtsignatures)
   - [2.20. EmbedImagesInHtml](#220-embedimagesinhtml)
+  - [2.21. SignaturesForAutomappedAndAdditionalMailboxes](#221-signaturesforautomappedandadditionalmailboxes)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -299,7 +300,7 @@ Outlook 2013 and earlier can't handle these embedded images when composing HTML 
 When setting EmbedImagesInHtml to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 
 Default value: `$true`
-## SignaturesForAutomappedAndAdditionalMailboxes
+## 2.21. SignaturesForAutomappedAndAdditionalMailboxes
 Deploy signatures for automapped mailboxes and additional mailboxes.
 
 Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook.

@@ -295,7 +295,7 @@ Param(
 
     # Embed images in HTML
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
-    $EmbedImagesInHtml = $true
+    $EmbedImagesInHtml = $true,
 
     # Deploy signatures for automapped mailboxes and additional mailboxes
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
@@ -705,7 +705,7 @@ function main {
             Write-Host "    $($MailAddresses[-1])"
         }
 
-        if ($SignaturesForAutomappedAndAdditionalMailboxes){
+        if ($SignaturesForAutomappedAndAdditionalMailboxes) {
             foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'0102663e') })) {
                 (@(ForEach ($char in @(($RegistryFolder.'0102663e' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split "$([char]0x000C)" | ForEach-Object {
                     if ($_ -match "(\S+@\S+\.\S+(?=/o=))(/o=[\S ]+(?=.{5}$([char]0x0002)$([char]0x0010)))") {
