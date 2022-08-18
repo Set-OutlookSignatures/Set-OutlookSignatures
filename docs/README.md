@@ -305,9 +305,7 @@ Deploy signatures for automapped mailboxes and additional mailboxes.
 
 Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook.
 
-Up to a minute after starting Outlook, the detection of these mailboxes may fail as the corresponding registry keys are dynamically rebuilt by Outlook.
-
-Default value: `$false`
+Default value: `$true`
 # 3. Outlook signature path  
 The Outlook signature path is retrieved from the users registry, so the script is language independent.
 

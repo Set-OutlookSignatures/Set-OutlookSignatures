@@ -166,8 +166,7 @@ Default value: $true
 .PARAMETER SignaturesForAutomappedAndAdditionalMailboxes
 Deploy signatures for automapped mailboxes and additional mailboxes
 Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook
-Up to a minute after starting Outlook, the detection of these mailboxes may fail as the corresponding registry keys are dynamically rebuilt by Outlook
-Default value: $false
+Default value: $true
 
 .INPUTS
 None. You cannot pipe objects to Set-OutlookSignatures.ps1.
@@ -299,7 +298,7 @@ Param(
 
     # Deploy signatures for automapped mailboxes and additional mailboxes
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
-    $SignaturesForAutomappedAndAdditionalMailboxes = $false
+    $SignaturesForAutomappedAndAdditionalMailboxes = $true
 )
 
 
@@ -710,6 +709,15 @@ function main {
         }
 
         if ($SignaturesForAutomappedAndAdditionalMailboxes) {
+            # When Outlook is running, wait until it is running for at least 60 seconds
+            # This ensures that the registry entries for automapped and additional mailboxes have been recreated
+            while (
+                (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }) -and
+                ((New-TimeSpan -Start (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }).starttime).totalseconds -le 60)
+            ) {
+                Start-Sleep -Seconds 1 
+            }
+            
             foreach ($OutlookProfile in $OutlookProfiles) {
                 foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'0102663e') })) {
                 (@(ForEach ($char in @(($RegistryFolder.'0102663e' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split "$([char]0x000C)" | ForEach-Object {
