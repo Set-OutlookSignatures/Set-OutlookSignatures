@@ -582,6 +582,7 @@ function main {
 
         if ($null -ne $OutlookRegistryVersion) {
             $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook" -ErrorAction SilentlyContinue).DefaultProfile
+            $OutlookProfiles = @(@($OutlookDefaultProfile) + @((Get-ChildItem "hkcu:\SOFTWARE\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles").PSChildName | Where-Object { $_ -ine $OutlookDefaultProfile }))
 
             foreach ($RegistryFolder in (
                     "registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
@@ -685,35 +686,47 @@ function main {
             $LegacyExchangeDNs += ''
         }
     } else {
-        foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } })) {
-            if ($OutlookFileVersion -ge '16.0.0.0') {
-                $MailAddresses += ($RegistryFolder.'Account Name').ToLower()
-            } else {
-                $MailAddresses += (@(ForEach ($char in @(($RegistryFolder.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '').ToLower()
-            }
-            $RegistryPaths += $RegistryFolder.PSPath
-            if ($RegistryFolder.'Identity Eid') {
-                $LegacyExchangeDN = ('/O=' + ((@(foreach ($char in @(($RegistryFolder.'Identity Eid' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split '/O=')[-1]).ToString().trim()
-                if ($LegacyExchangeDN.length -le 3) {
+        foreach ($OutlookProfile in $OutlookProfiles) {
+            foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } })) {
+                if ($OutlookFileVersion -ge '16.0.0.0') {
+                    $MailAddresses += ($RegistryFolder.'Account Name').ToLower()
+                } else {
+                    $MailAddresses += (@(ForEach ($char in @(($RegistryFolder.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '').ToLower()
+                }
+                $RegistryPaths += $RegistryFolder.PSPath
+                if ($RegistryFolder.'Identity Eid') {
+                    $LegacyExchangeDN = ('/O=' + ((@(foreach ($char in @(($RegistryFolder.'Identity Eid' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split '/O=')[-1]).ToString().trim()
+                    if ($LegacyExchangeDN.length -le 3) {
+                        $LegacyExchangeDN = ''
+                    }
+                } else {
                     $LegacyExchangeDN = ''
                 }
-            } else {
-                $LegacyExchangeDN = ''
+                $LegacyExchangeDNs += $LegacyExchangeDN
+                Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
+                Write-Host "    $($MailAddresses[-1])"
+                Write-Verbose "      $($LegacyExchangeDNs[-1])"
             }
-            $LegacyExchangeDNs += $LegacyExchangeDN
-            Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
-            Write-Host "    $($MailAddresses[-1])"
         }
 
         if ($SignaturesForAutomappedAndAdditionalMailboxes) {
-            foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'0102663e') })) {
+            foreach ($OutlookProfile in $OutlookProfiles) {
+                foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'0102663e') })) {
                 (@(ForEach ($char in @(($RegistryFolder.'0102663e' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split "$([char]0x000C)" | ForEach-Object {
-                    if ($_ -match "(\S+@\S+\.\S+(?=/o=))(/o=[\S ]+(?=.{5}$([char]0x0002)$([char]0x0010)))") {
-                        $RegistryPaths += $RegistryFolder.PSPath
-                        $MailAddresses += $matches[1].ToLower()
-                        $LegacyExchangeDNs += $matches[2].ToLower()
-                        Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
-                        Write-Host "    $($MailAddresses[-1]) (automapped or additional mailbox)"
+                        if ($_ -match "(\S+@\S+\.\S+(?=/o=))(/o=[\S ]+(?=.{5}$([char]0x0002)$([char]0x0010)))") {
+                            Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
+
+                            if ($MailAddresses -inotcontains $matches[1]) {
+                                Write-Host "    $($matches[1].ToLower()) (automapped or additional mailbox)"
+                                $RegistryPaths += $RegistryFolder.PSPath
+                                $MailAddresses += $matches[1].ToLower()
+                                $LegacyExchangeDNs += $matches[2].ToLower()
+                            } else {
+                                Write-Host "    $($matches[1].ToLower()) (automapped or additional mailbox, already added before)"
+                            }
+
+                            Write-Verbose "      $($LegacyExchangeDNs[-1])"
+                        }
                     }
                 }
             }
@@ -1201,11 +1214,13 @@ function main {
     foreach ($VariableName in ('RegistryPaths', 'MailAddresses', 'LegacyExchangeDNs', 'ADPropsMailboxesUserDomain', 'ADPropsMailboxes')) {
         (Get-Variable -Name $VariableName).value = (Get-Variable -Name $VariableName).value[$MailboxNewOrder]
     }
-    Write-Host '  Mailbox priority (highest to lowest)'
-    foreach ($MailAddress in $MailAddresses) {
-        Write-Host "    $MailAddress"
-    }
 
+    Write-Host '  Mailbox priority (highest to lowest)'
+    for ($x = 0; $x -lt $MailAddresses.count; $x++) {
+        Write-Host "    $($MailAddresses[$x])"
+        Write-Verbose "      $($RegistryPaths[$x] -ireplace '^Microsoft\.PowerShell\.Core\\Registry::HKEY_CURRENT_USER', 'HKCU')"
+        Write-Verbose "      $($LegacyExchangeDNs[$x])"
+    }
 
     $TemplateFilesGroupSIDsOverall = @{}
     foreach ($SigOrOOF in ('signature', 'OOF')) {
