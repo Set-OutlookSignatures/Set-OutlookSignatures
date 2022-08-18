@@ -5,7 +5,7 @@
 **Signatures and OOF messages can be:**
 - Generated from templates in DOCX or HTML file format  
 - Customized with a broad range of variables, including photos, from Active Directory and other sources  
-- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles  
+- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles (automapped and additional mailboxes are optional)  
 - Assigned time ranges within which they are valid  
 - Set as default signature for new e-mails, or for replies and forwards (signatures only)  
 - Set as default OOF message for internal or external recipients (OOF messages only)  
@@ -315,9 +315,11 @@ The registry setting does not allow for absolute paths, only for paths relative 
 
 If the relative path set in the registry would be a valid path but does not exist, the script creates it.  
 # 4. Mailboxes  
-The script only considers primary mailboxes, these are mailboxes added as separate accounts.
+The script only considers primary mailboxes per default, these are mailboxes added as separate accounts.
 
 This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
+
+Setting the parameter '`SignaturesForAutomappedAndAdditionalMailboxes`' to '`true`' allows the script to detect automapped and additional mailboxes. Signatures can be deployed for these types of mailboxes, but they can not be set as default signatures due to technical restrictions in Outlook.
 
 The script is created for Exchange environments. Non-Exchange mailboxes can not have OOF messages or group signatures, but common and mailbox specific signatures.  
 # 5. Group membership  
@@ -871,10 +873,11 @@ Fixing issues has priority over new features, of course.
 ## 16.19. How to deploy signatures for "Send As", "Send On Behalf" etc.?
 The script only considers primary mailboxes, these are mailboxes added as separate accounts. This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
 
+If you want to deploy signatures for non-primary mailboxes, sett the parameter '`SignaturesForAutomappedAndAdditionalMailboxes`' to '`true`' to allow the script to detect automapped and additional mailboxes. Signatures can be deployed for these types of mailboxes, but they can not be set as default signatures due to technical restrictions in Outlook.
+
 If you want to deploy signatures for
-- non-primary mailboxes,
 - mailboxes you don't add to Outlook but just use an assigned "Send As" or "Send on Behalf" right by choosing a different "From" address,
-- or distribution lists, for which you use an assigned "Send As" or "Send on Behalf" right by choosing a different "From" address,
+- distribution lists, for which you use an assigned "Send As" or "Send on Behalf" right by choosing a different "From" address,
 create a group or e-mail address specific signature, where the group or the e-mail address does not refer to the mailbox or distribution group the e-mail is sent from, but rather the user or group who has the right to send from this mailbox or distribution group.
 
 An example:

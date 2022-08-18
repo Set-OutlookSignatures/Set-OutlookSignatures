@@ -7,7 +7,7 @@ Centrally manage and deploy Outlook text signatures and Out of Office auto reply
 Signatures and OOF messages can be:
 - Generated from templates in DOCX or HTML file format
 - Customized with a broad range of variables, including photos, from Active Directory and other sources
-- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles
+- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles (automapped and additional mailboxes are optional)
 - Assigned time ranges within which they are valid
 - Set as default signature for new e-mails, or for replies and forwards (signatures only)
 - Set as default OOF message for internal or external recipients (OOF messages only)
