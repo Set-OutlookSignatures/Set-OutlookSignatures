@@ -715,9 +715,10 @@ function main {
                 (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }) -and
                 ((New-TimeSpan -Start (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }).starttime).totalseconds -le 60)
             ) {
-                Start-Sleep -Seconds 1 
+                Write-Verbose 'Outlook is running. Wait until Outlook is no longer running or running for more than 60 seconds'
+                Start-Sleep -Seconds 1
             }
-            
+
             foreach ($OutlookProfile in $OutlookProfiles) {
                 foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'0102663e') })) {
                 (@(ForEach ($char in @(($RegistryFolder.'0102663e' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split "$([char]0x000C)" | ForEach-Object {
