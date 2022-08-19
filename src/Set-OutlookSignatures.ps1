@@ -583,6 +583,28 @@ function main {
             $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook" -ErrorAction SilentlyContinue).DefaultProfile
             $OutlookProfiles = @(@($OutlookDefaultProfile) + @((Get-ChildItem "hkcu:\SOFTWARE\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles").PSChildName | Where-Object { $_ -ine $OutlookDefaultProfile }))
 
+
+            $OutlookIsBetaversion = $false
+
+            if (
+                ((Get-Item 'registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\ClickToRun\Configuration' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).Property -contains 'UpdateChannel') -and
+                ($OutlookFileVersion -ge '16.0.0.0')
+            ) {
+                $x = (Get-ItemProperty 'registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\ClickToRun\Configuration' -ErrorAction Stop -WarningAction SilentlyContinue).'UpdateChannel'
+                $x
+                if ($x -ieq 'http://officecdn.microsoft.com/pr/5440FD1F-7ECB-4221-8110-145EFAA6372F') {
+                    $OutlookIsBetaversion = $true
+                }
+
+                if ((Get-Item "registry::HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Common\OfficeUpdate" -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).Property -contains 'UpdateBranch') {
+                    $x = (Get-ItemProperty "registry::HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Common\OfficeUpdate" -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).'UpdateBranch'
+
+                    if ($x -ieq 'InsiderFast') {
+                        $OutlookIsBetaversion = $true
+                    }
+                }
+            }
+
             foreach ($RegistryFolder in (
                     "registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
                     "registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
@@ -607,6 +629,7 @@ function main {
         }
         Write-Host "    Bitness: $OutlookBitness"
         Write-Host "    Default profile: $OutlookDefaultProfile"
+        Write-Host "    Is C2R Beta: $OutlookIsBetaversion"
         Write-Host "    Roaming signature toggle: $OutlookDisableRoamingSignaturesTemporaryToggle"
     }
 
@@ -1868,16 +1891,16 @@ function main {
             }
 
             if (
-                # Outlook is installed
-                # and $OutlookFileVersion is high enough (exact value is unknown yet) or it is a suiting beta version (-or (($OutlookFileVersion -ge '16.0.13430.20000') -and ($OutlookFileVersion.revision -in 20000..20199)))
+                # Outlook is installed and
+                # (Outlook is a beta AND Version ge 16.0.13430.20000) or (Outlook is not a beta AND Version ge XXX)
                 # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
                 # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.msexchrecipienttypedetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
                 # and the current mailbox is the personal mailbox of the currently logged in user
-                ($null -ne $OutlookFileVersion) `
-                    -and (($OutlookFileVersion -ge [system.version]::parse('99.0.99999.99999'))) `
-                    -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
-                    -and ((($null -ne $ADPropsCurrentMailbox.msexchrecipienttypedetails) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) `
-                    -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
+                ($null -ne $OutlookFileVersion) -and
+                    ((($OutlookIsBetaversion -eq $true) -and ($OutlookFileVersion -ge [system.version]::parse('16.0.13430.20000'))) -or (($OutlookIsBetaversion -eq $false) -and ($OutlookFileVersion -ge [system.version]::parse('16.99999.99999.99999')))) -and
+                    ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) -and
+                    ((($null -ne $ADPropsCurrentMailbox.msexchrecipienttypedetails) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) -and
+                    ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
             ) {
                 # Microsoft signature roaming available
                 $CurrentMailboxUseSignatureRoaming = $true
