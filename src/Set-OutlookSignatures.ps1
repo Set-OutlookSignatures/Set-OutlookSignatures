@@ -1913,7 +1913,7 @@ function main {
 
             # Delete photos from file system
             foreach ($VariableName in (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID))) {
-                RemoveItemAlternativeRecurse -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg'))))
+                Remove-Item -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')))) -Force -ErrorAction SilentlyContinue
                 $ReplaceHash.Remove($VariableName[0])
                 $ReplaceHash.Remove(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')
             }
@@ -2059,7 +2059,7 @@ function main {
                                             $x = (New-Guid).guid.tostring()
                                             ConvertToSingleFileHTML ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) (Join-Path -Path $script:tempDir -ChildPath $x)
                                             $hsHtmlSignature = (Get-Content -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $x) -Encoding UTF8 -Raw).ToString()
-                                            RemoveItemAlternativeRecurse (Join-Path -Path $script:tempDir -ChildPath $x)
+                                            Remove-Item (Join-Path -Path $script:tempDir -ChildPath $x) -Force
                                         } else {
                                             $hsHtmlSignature = (Get-Content -LiteralPath ((Join-Path -Path ($SignaturePaths[0]) -ChildPath ($TempOWASigFile + '.htm'))) -Encoding UTF8 -Raw).ToString()
                                         }
@@ -2176,7 +2176,7 @@ function main {
 
                 # Delete temporary OOF files from file system
                 foreach ($FileName in ("$OOFInternalGUID OOFInternal", "$OOFExternalGUID OOFExternal")) {
-                    RemoveItemAlternativeRecurse (Join-Path -Path $script:tempDir -ChildPath ($FileName + '.*'))
+                    Remove-Item ((Join-Path -Path $script:tempDir -ChildPath ($FileName + '.*'))) -Force -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -2630,7 +2630,7 @@ function SetSignatures {
                     if (($image.src -clike "*$($VariableName[0])*") -or ($image.alt -clike "*$($VariableName[0])*")) {
                         if ($null -ne $ReplaceHash[$VariableName[0]]) {
                             if ($EmbedImagesInHtml -eq $false) {
-                                RemoveItemAlternativeRecurse (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))")
+                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                 Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
                                 $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($VariableName[0]).jpeg")
                                 if ($image.alt) {
@@ -2648,8 +2648,7 @@ function SetSignatures {
                     } elseif (($image.src -clike "*$(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')*")) {
                         if ($null -ne $ReplaceHash[$VariableName[0]]) {
                             if ($EmbedImagesInHtml -eq $false) {
-                                RemoveItemAlternativeRecurse (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))")
-                                Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
+                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
                                 $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($VariableName[0]).jpeg")
                                 if ($image.alt) {
                                     $image.alt = $($image.alt).replace((($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
@@ -2661,8 +2660,7 @@ function SetSignatures {
                                 }
                             }
                         } else {
-                            RemoveItemAlternativeRecurse (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))")
-                            $image.removenode() | Out-Null
+                            Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue $image.removenode() | Out-Null
                         }
                     }
                 }
@@ -2967,14 +2965,14 @@ function SetSignatures {
 
         Write-Host "$Indent      Remove temporary files"
         foreach ($extension in ('.docx', '.htm', '.rtf', '.txt')) {
-            RemoveItemAlternativeRecurse -LiteralPath $([System.IO.Path]::ChangeExtension($path, $extension))
+            Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, $extension)) -ErrorAction SilentlyContinue | Out-Null
         }
 
         Foreach ($file in @(Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
-            RemoveItemAlternativeRecurse -LiteralPath $file
+            Remove-Item -LiteralPath $file -Force -Recurse -ErrorAction SilentlyContinue
         }
 
-        RemoveItemAlternativeRecurse (Join-Path -Path (Split-Path $path) -ChildPath $([System.IO.Path]::ChangeExtension($signature.value, '.files')))
+        Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath $([System.IO.Path]::ChangeExtension($signature.value, '.files'))) -Force -Recurse -ErrorAction SilentlyContinue
     }
 
     if ((-not $ProcessOOF)) {
@@ -3452,7 +3450,7 @@ function GraphGetUserPhoto($user) {
             $local:x = (Get-Content -LiteralPath $local:tempFile -Encoding Byte -Raw)
         }
 
-        RemoveItemAlternativeRecurse $local:tempFile
+        Remove-Item $local:tempFile -Force
     } catch {
     }
 
@@ -3678,12 +3676,12 @@ try {
 
     if ($script:dllPath) {
         Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($script:dllpath)) -Force # Microsoft.Exchange.WebServices
-        RemoveItemAlternativeRecurse $script:dllPath
+        Remove-Item $script:dllPath -Force -ErrorAction SilentlyContinue
     }
 
     if ($script:msalPath) {
         Remove-Module -Name MSAL.PS -Force
-        RemoveItemAlternativeRecurse $script:msalPath
+        Remove-Item $script:msalPath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     Write-Host
