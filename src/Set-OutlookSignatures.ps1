@@ -577,21 +577,20 @@ function main {
             exit 1
         }
 
+        $OutlookIsBetaversion = $false
+
         $OutlookDisableRoamingSignaturesTemporaryToggle = 0
 
         if ($null -ne $OutlookRegistryVersion) {
             $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook" -ErrorAction SilentlyContinue).DefaultProfile
             $OutlookProfiles = @(@($OutlookDefaultProfile) + @((Get-ChildItem "hkcu:\SOFTWARE\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles").PSChildName | Where-Object { $_ -ine $OutlookDefaultProfile }))
 
-
-            $OutlookIsBetaversion = $false
-
             if (
                 ((Get-Item 'registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\ClickToRun\Configuration' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).Property -contains 'UpdateChannel') -and
                 ($OutlookFileVersion -ge '16.0.0.0')
             ) {
                 $x = (Get-ItemProperty 'registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\ClickToRun\Configuration' -ErrorAction Stop -WarningAction SilentlyContinue).'UpdateChannel'
-                $x
+
                 if ($x -ieq 'http://officecdn.microsoft.com/pr/5440FD1F-7ECB-4221-8110-145EFAA6372F') {
                     $OutlookIsBetaversion = $true
                 }
@@ -630,7 +629,7 @@ function main {
         Write-Host "    Bitness: $OutlookBitness"
         Write-Host "    Default profile: $OutlookDefaultProfile"
         Write-Host "    Is C2R Beta: $OutlookIsBetaversion"
-        Write-Host "    Roaming signature toggle: $OutlookDisableRoamingSignaturesTemporaryToggle"
+        Write-Host "    DisableRoamingSignaturesTemporaryToggle: $OutlookDisableRoamingSignaturesTemporaryToggle"
     }
 
     Write-Host '  Word'
@@ -2937,30 +2936,31 @@ function SetSignatures {
             foreach ($SignaturePath in $SignaturePaths) {
                 if ($CurrentMailboxUseSignatureRoaming -eq $true) {
                     # Microsoft signature roaming available
-                    Write-Host "$Indent      Microsoft signature roaming enabled. What to do now?" -ForegroundColor Red
-                } else {
-                    # Microsoft signature roaming not available
-                    Write-Host "$Indent      Copy signature files to '$SignaturePath'"
-                    foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
-                        RemoveItemAlternativeRecurse -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $ConnectedFilesFolderName)
-                    }
-                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
-                    if ($EmbedImagesInHtml -eq $false) {
-                        if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))")) {
-                            Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse
-                        }
-                    }
-                    if ($CreateRtfSignatures -eq $true) {
-                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
-                    } else {
-                        RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))
-                    }
-                    if ($CreateTxtSignatures -eq $true) {
-                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
-                    } else {
-                        RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))
+                    Write-Host "$Indent      Microsoft signature roaming is enabled for this mailbox, but Set-OutlookSignatures has not yet implemented this feature." -ForegroundColor Yellow
+                    Write-Host "$Indent        Signature will only be available locally, setting default and Outlook Web signature might not work." -ForegroundColor Yellow
+                    Write-Host "$Indent        Consider setting 'OutlookDisableRoamingSignaturesTemporaryToggle' to '1' in registry." -ForegroundColor Yellow
+                    Write-Host "$Indent        See 'README' for details." -ForegroundColor Yellow
+                }
 
+                Write-Host "$Indent      Copy signature files to '$SignaturePath'"
+                foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                    RemoveItemAlternativeRecurse -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $ConnectedFilesFolderName)
+                }
+                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
+                if ($EmbedImagesInHtml -eq $false) {
+                    if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))")) {
+                        Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse
                     }
+                }
+                if ($CreateRtfSignatures -eq $true) {
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
+                } else {
+                    RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))
+                }
+                if ($CreateTxtSignatures -eq $true) {
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
+                } else {
+                    RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))
                 }
             }
         }
