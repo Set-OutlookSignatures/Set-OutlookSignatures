@@ -7,7 +7,7 @@ Centrally manage and deploy Outlook text signatures and Out of Office auto reply
 Signatures and OOF messages can be:
 - Generated from templates in DOCX or HTML file format
 - Customized with a broad range of variables, including photos, from Active Directory and other sources
-- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles
+- Applied to all mailboxes (including shared mailboxes), specific mailbox groups or specific e-mail addresses, for every primary mailbox across all Outlook profiles (automapped and additional mailboxes are optional)
 - Assigned time ranges within which they are valid
 - Set as default signature for new e-mails, or for replies and forwards (signatures only)
 - Set as default OOF message for internal or external recipients (OOF messages only)
@@ -163,6 +163,11 @@ Outlook 2013 and earlier can't handle these embedded images when composing HTML 
 When setting EmbedImagesInHtml to $false, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 Default value: $true
 
+.PARAMETER SignaturesForAutomappedAndAdditionalMailboxes
+Deploy signatures for automapped mailboxes and additional mailboxes
+Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook
+Default value: $true
+
 .INPUTS
 None. You cannot pipe objects to Set-OutlookSignatures.ps1.
 
@@ -289,7 +294,11 @@ Param(
 
     # Embed images in HTML
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
-    $EmbedImagesInHtml = $true
+    $EmbedImagesInHtml = $true,
+
+    # Deploy signatures for automapped mailboxes and additional mailboxes
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
+    $SignaturesForAutomappedAndAdditionalMailboxes = $true
 )
 
 
@@ -501,6 +510,13 @@ function main {
         $DeleteScriptCreatedSignaturesWithoutTemplate = $false
     }
 
+    Write-Host "  SignaturesForAutomappedAndAdditionalMailboxes: '$SignaturesForAutomappedAndAdditionalMailboxes'"
+    if ($SignaturesForAutomappedAndAdditionalMailboxes -in (1, '1', 'true', '$true', 'yes')) {
+        $SignaturesForAutomappedAndAdditionalMailboxes = $true
+    } else {
+        $SignaturesForAutomappedAndAdditionalMailboxes = $false
+    }
+
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
     ConvertPath ([ref]$AdditionalSignaturePath)
     checkpath $AdditionalSignaturePath -create
@@ -561,10 +577,32 @@ function main {
             exit 1
         }
 
+        $OutlookIsBetaversion = $false
+
         $OutlookDisableRoamingSignaturesTemporaryToggle = 0
 
         if ($null -ne $OutlookRegistryVersion) {
             $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook" -ErrorAction SilentlyContinue).DefaultProfile
+            $OutlookProfiles = @(@($OutlookDefaultProfile) + @((Get-ChildItem "hkcu:\SOFTWARE\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles").PSChildName | Where-Object { $_ -ine $OutlookDefaultProfile }))
+
+            if (
+                ((Get-Item 'registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\ClickToRun\Configuration' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).Property -contains 'UpdateChannel') -and
+                ($OutlookFileVersion -ge '16.0.0.0')
+            ) {
+                $x = (Get-ItemProperty 'registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\ClickToRun\Configuration' -ErrorAction Stop -WarningAction SilentlyContinue).'UpdateChannel'
+
+                if ($x -ieq 'http://officecdn.microsoft.com/pr/5440FD1F-7ECB-4221-8110-145EFAA6372F') {
+                    $OutlookIsBetaversion = $true
+                }
+
+                if ((Get-Item "registry::HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Common\OfficeUpdate" -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).Property -contains 'UpdateBranch') {
+                    $x = (Get-ItemProperty "registry::HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Office\$OutlookRegistryVersion\Common\OfficeUpdate" -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).'UpdateBranch'
+
+                    if ($x -ieq 'InsiderFast') {
+                        $OutlookIsBetaversion = $true
+                    }
+                }
+            }
 
             foreach ($RegistryFolder in (
                     "registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Setup",
@@ -590,7 +628,8 @@ function main {
         }
         Write-Host "    Bitness: $OutlookBitness"
         Write-Host "    Default profile: $OutlookDefaultProfile"
-        Write-Host "    Roaming signature toggle: $OutlookDisableRoamingSignaturesTemporaryToggle"
+        Write-Host "    Is C2R Beta: $OutlookIsBetaversion"
+        Write-Host "    DisableRoamingSignaturesTemporaryToggle: $OutlookDisableRoamingSignaturesTemporaryToggle"
     }
 
     Write-Host '  Word'
@@ -668,24 +707,60 @@ function main {
             $LegacyExchangeDNs += ''
         }
     } else {
-        foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\*\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } })) {
-            if ($OutlookFileVersion -ge '16.0.0.0') {
-                $MailAddresses += ($RegistryFolder.'Account Name').ToLower()
-            } else {
-                $MailAddresses += (@(ForEach ($char in @(($RegistryFolder.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '').ToLower()
-            }
-            $RegistryPaths += $RegistryFolder.PSPath
-            if ($RegistryFolder.'Identity Eid') {
-                $LegacyExchangeDN = ('/O=' + ((@(foreach ($char in @(($RegistryFolder.'Identity Eid' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split '/O=')[-1]).ToString().trim()
-                if ($LegacyExchangeDN.length -le 3) {
+        foreach ($OutlookProfile in $OutlookProfiles) {
+            foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } })) {
+                if ($OutlookFileVersion -ge '16.0.0.0') {
+                    $MailAddresses += ($RegistryFolder.'Account Name').ToLower()
+                } else {
+                    $MailAddresses += (@(ForEach ($char in @(($RegistryFolder.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '').ToLower()
+                }
+                $RegistryPaths += $RegistryFolder.PSPath
+                if ($RegistryFolder.'Identity Eid') {
+                    $LegacyExchangeDN = ('/O=' + ((@(foreach ($char in @(($RegistryFolder.'Identity Eid' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split '/O=')[-1]).ToString().trim()
+                    if ($LegacyExchangeDN.length -le 3) {
+                        $LegacyExchangeDN = ''
+                    }
+                } else {
                     $LegacyExchangeDN = ''
                 }
-            } else {
-                $LegacyExchangeDN = ''
+                $LegacyExchangeDNs += $LegacyExchangeDN
+                Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
+                Write-Host "    $($MailAddresses[-1])"
+                Write-Verbose "      $($LegacyExchangeDNs[-1])"
             }
-            $LegacyExchangeDNs += $LegacyExchangeDN
-            Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
-            Write-Host "    $($MailAddresses[-1])"
+        }
+
+        if ($SignaturesForAutomappedAndAdditionalMailboxes) {
+            # When Outlook is running, wait until it is running for at least 60 seconds
+            # This ensures that the registry entries for automapped and additional mailboxes have been recreated
+            while (
+                (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }) -and
+                ((New-TimeSpan -Start (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }).starttime).totalseconds -le 60)
+            ) {
+                Write-Verbose 'Outlook is running. Wait until Outlook is no longer running or running for more than 60 seconds'
+                Start-Sleep -Seconds 1
+            }
+
+            foreach ($OutlookProfile in $OutlookProfiles) {
+                foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'0102663e') })) {
+                (@(ForEach ($char in @(($RegistryFolder.'0102663e' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split "$([char]0x000C)" | ForEach-Object {
+                        if ($_ -match "(\S+@\S+\.\S+(?=/o=))(/o=[\S ]+(?=.{5}$([char]0x0002)$([char]0x0010)))") {
+                            Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
+
+                            if ($MailAddresses -inotcontains $matches[1]) {
+                                Write-Host "    $($matches[1].ToLower()) (automapped or additional mailbox)"
+                                $RegistryPaths += $RegistryFolder.PSPath
+                                $MailAddresses += $matches[1].ToLower()
+                                $LegacyExchangeDNs += $matches[2].ToLower()
+                            } else {
+                                Write-Host "    $($matches[1].ToLower()) (automapped or additional mailbox, already added before)"
+                            }
+
+                            Write-Verbose "      $($LegacyExchangeDNs[-1])"
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1108,7 +1183,7 @@ function main {
     if ($ADPropsCurrentUser.mail) {
         Write-Host "  AD mail attribute of currently logged in user: $($ADPropsCurrentUser.mail)"
         for ($i = 0; $i -lt $LegacyExchangeDNs.count; $i++) {
-            if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -contains $('SMTP:' + $ADPropsCurrentUser.mail))) {
+            if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -contains $('SMTP:' + $ADPropsCurrentUser.mail)) -and ($RegistryPaths[$i] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*')) {
                 $p = $i
                 break
             }
@@ -1129,18 +1204,18 @@ function main {
                         if ($p -ge 0) {
                             # $p already set before, there must be at least two matches, so set it to -1
                             $p = -1
-                        } elseif (-not $p) {
+                        } elseif ((-not $p) -and ($RegistryPaths[$i] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*')) {
                             $p = $i
                         }
                     }
                 }
             }
             if ($p -ge 0) {
-                Write-Host "    One matching mailbox found: $MailAddresses[$i]"
+                Write-Host "    One matching primary mailbox found: $MailAddresses[$i]"
             } elseif ($null -eq $p) {
-                Write-Host '    No matching mailbox found' -ForegroundColor Yellow
+                Write-Host '    No matching primary mailbox found' -ForegroundColor Yellow
             } else {
-                Write-Host '    Multiple matching mailboxes found, no prioritization possible' -ForegroundColor Yellow
+                Write-Host '    Multiple matching primary mailboxes found, no prioritization possible' -ForegroundColor Yellow
             }
         } else {
             Write-Host
@@ -1170,11 +1245,13 @@ function main {
     foreach ($VariableName in ('RegistryPaths', 'MailAddresses', 'LegacyExchangeDNs', 'ADPropsMailboxesUserDomain', 'ADPropsMailboxes')) {
         (Get-Variable -Name $VariableName).value = (Get-Variable -Name $VariableName).value[$MailboxNewOrder]
     }
-    Write-Host '  Mailbox priority (highest to lowest)'
-    foreach ($MailAddress in $MailAddresses) {
-        Write-Host "    $MailAddress"
-    }
 
+    Write-Host '  Mailbox priority (highest to lowest)'
+    for ($x = 0; $x -lt $MailAddresses.count; $x++) {
+        Write-Host "    $($MailAddresses[$x])"
+        Write-Verbose "      $($RegistryPaths[$x] -ireplace '^Microsoft\.PowerShell\.Core\\Registry::HKEY_CURRENT_USER', 'HKCU')"
+        Write-Verbose "      $($LegacyExchangeDNs[$x])"
+    }
 
     $TemplateFilesGroupSIDsOverall = @{}
     foreach ($SigOrOOF in ('signature', 'OOF')) {
@@ -1813,16 +1890,16 @@ function main {
             }
 
             if (
-                # Outlook is installed
-                # and $OutlookFileVersion is high enough (exact value is unknown yet) or it is a suiting beta version (-or (($OutlookFileVersion -ge '16.0.13430.20000') -and ($OutlookFileVersion.revision -in 20000..20199)))
+                # Outlook is installed and
+                # (Outlook is a beta AND Version ge 16.0.13430.20000) or (Outlook is not a beta AND Version ge XXX)
                 # and $OutlookDisableRoamingSignaturesTemporaryToggle equals 0
                 # and the mailbox is in the cloud ((connected to AD AND $ADPropsCurrentMailbox.msexchrecipienttypedetails is like \*remote\*) OR (connected to Graph and $ADPropsCurrentMailbox is not like \*remote\*))
                 # and the current mailbox is the personal mailbox of the currently logged in user
-                ($null -ne $OutlookFileVersion) `
-                    -and (($OutlookFileVersion -ge [system.version]::parse('99.0.99999.99999'))) `
-                    -and ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) `
-                    -and ((($null -ne $ADPropsCurrentMailbox.msexchrecipienttypedetails) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) `
-                    -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
+                ($null -ne $OutlookFileVersion) -and
+                    ((($OutlookIsBetaversion -eq $true) -and ($OutlookFileVersion -ge [system.version]::parse('16.0.13430.20000'))) -or (($OutlookIsBetaversion -eq $false) -and ($OutlookFileVersion -ge [system.version]::parse('16.99999.99999.99999')))) -and
+                    ($OutlookDisableRoamingSignaturesTemporaryToggle -eq 0) -and
+                    ((($null -ne $ADPropsCurrentMailbox.msexchrecipienttypedetails) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -ilike 'remote*')) -or ($null -ne $ADPropsCurrentMailbox.mailboxsettings)) -and
+                    ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
             ) {
                 # Microsoft signature roaming available
                 $CurrentMailboxUseSignatureRoaming = $true
@@ -1917,9 +1994,10 @@ function main {
                         if ($MailAddresses[$j] -ieq $PrimaryMailboxAddress) {
                             try {
                                 if ($script:CurrentUserDummyMailbox -ne $true) {
-                                    $TempNewSig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'New Signature'
                                     if ($OutlookFileVersion -lt '16.0.0.0') {
                                         $TempNewSig = @(foreach ($char in @(($TempNewSig -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join ''
+                                    } else {
+                                        $TempNewSig = Get-ItemPropertyValue -LiteralPath $RegistryPaths[$j] -Name 'New Signature'
                                     }
                                 } else {
                                     $TempNewSig = $script:CurrentUserDummyMailboxDefaultSigNew
@@ -2115,10 +2193,11 @@ function main {
                 if ((Get-Content -LiteralPath $file.fullname -Encoding UTF8 -Raw) -like ('*' + $HTMLMarkerTag + '*')) {
                     if ($file.name -notin $script:SignatureFilesDone) {
                         Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($file.fullname, '')) + "*'")
-                        Remove-Item -LiteralPath $file.fullname -Force -ErrorAction silentlycontinue
-                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
-                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
-                        Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.files'))) -Recurse -Force -ErrorAction silentlycontinue
+
+                        RemoveItemAlternativeRecurse -LiteralPath $file.fullname
+                        RemoveItemAlternativeRecurse -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.rtf')))
+                        RemoveItemAlternativeRecurse -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.txt')))
+                        RemoveItemAlternativeRecurse -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.files')))
                     }
                 }
             }
@@ -2133,11 +2212,13 @@ function main {
             foreach ($file in @(Get-ChildItem -LiteralPath $SignaturePath -Filter '*.htm' -File)) {
                 if ((Get-Content -LiteralPath $file.fullname -Encoding UTF8 -Raw) -notlike ('*' + $HTMLMarkerTag + '*')) {
                     Write-Host ("  '" + $([System.IO.Path]::ChangeExtension($file.fullname, '')) + "*'")
-                    Remove-Item -LiteralPath $file.fullname -Force -ErrorAction silentlycontinue
-                    Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.rtf'))) -Force -ErrorAction silentlycontinue
-                    Remove-Item -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.txt'))) -Force -ErrorAction silentlycontinue
+
+                    RemoveItemAlternativeRecurse -LiteralPath $file.fullname
+                    RemoveItemAlternativeRecurse -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.rtf')))
+                    RemoveItemAlternativeRecurse -LiteralPath ($([System.IO.Path]::ChangeExtension($file.fullname, '.txt')))
+
                     foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
-                        Remove-Item -LiteralPath ($([System.IO.Path]::GetFileNameWithoutExtension($file.fullname)) + $ConnectedFilesFolderName) -Recurse -Force -ErrorAction SilentlyContinue
+                        RemoveItemAlternativeRecurse -LiteralPath ($([System.IO.Path]::GetFileNameWithoutExtension($file.fullname)) + $ConnectedFilesFolderName)
                     }
                 }
             }
@@ -2161,14 +2242,14 @@ function main {
                     Copy-Item -Path (Join-Path -Path $SignaturePaths[0] -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force -ErrorAction SilentlyContinue
                 }
             } else {
-                (Get-ChildItem -Path $AdditionalSignaturePath -Recurse -Force).fullname | Remove-Item -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+                RemoveItemAlternativeRecurse $AdditionalSignaturePath -SkipFolder
                 Copy-Item -Path (Join-Path -Path $SignaturePaths[0] -ChildPath '*') -Destination $AdditionalSignaturePath -Recurse -Force
             }
         }
     }
 
     if ($script:CurrentUserDummyMailbox -eq $true) {
-        Remove-Item $SignaturePaths[0] -Recurse -Force
+        RemoveItemAlternativeRecurse $SignaturePaths[0] -SkipFolder
     }
 }
 
@@ -2567,8 +2648,7 @@ function SetSignatures {
                     } elseif (($image.src -clike "*$(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')*")) {
                         if ($null -ne $ReplaceHash[$VariableName[0]]) {
                             if ($EmbedImagesInHtml -eq $false) {
-                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
-                                Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
+                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
                                 $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($VariableName[0]).jpeg")
                                 if ($image.alt) {
                                     $image.alt = $($image.alt).replace((($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
@@ -2855,30 +2935,31 @@ function SetSignatures {
             foreach ($SignaturePath in $SignaturePaths) {
                 if ($CurrentMailboxUseSignatureRoaming -eq $true) {
                     # Microsoft signature roaming available
-                    Write-Host "$Indent      Microsoft signature roaming enabled. What to do now?" -ForegroundColor Red
-                } else {
-                    # Microsoft signature roaming not available
-                    Write-Host "$Indent      Copy signature files to '$SignaturePath'"
-                    foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
-                        Remove-Item -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $ConnectedFilesFolderName) -Recurse -Force -ErrorAction SilentlyContinue
-                    }
-                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
-                    if ($EmbedImagesInHtml -eq $false) {
-                        if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))")) {
-                            Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse
-                        }
-                    }
-                    if ($CreateRtfSignatures -eq $true) {
-                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
-                    } else {
-                        Remove-Item ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force -ErrorAction SilentlyContinue
-                    }
-                    if ($CreateTxtSignatures -eq $true) {
-                        Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
-                    } else {
-                        Remove-Item ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force -ErrorAction SilentlyContinue
+                    Write-Host "$Indent      Microsoft signature roaming is enabled for this mailbox, but Set-OutlookSignatures has not yet implemented this feature." -ForegroundColor Yellow
+                    Write-Host "$Indent        Signature will only be available locally, setting default and Outlook Web signature might not work." -ForegroundColor Yellow
+                    Write-Host "$Indent        Consider setting 'OutlookDisableRoamingSignaturesTemporaryToggle' to '1' in registry." -ForegroundColor Yellow
+                    Write-Host "$Indent        See 'README' for details." -ForegroundColor Yellow
+                }
 
+                Write-Host "$Indent      Copy signature files to '$SignaturePath'"
+                foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                    RemoveItemAlternativeRecurse -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $ConnectedFilesFolderName)
+                }
+                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
+                if ($EmbedImagesInHtml -eq $false) {
+                    if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))")) {
+                        Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse
                     }
+                }
+                if ($CreateRtfSignatures -eq $true) {
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
+                } else {
+                    RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))
+                }
+                if ($CreateTxtSignatures -eq $true) {
+                    Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
+                } else {
+                    RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))
                 }
             }
         }
@@ -2891,6 +2972,7 @@ function SetSignatures {
         Foreach ($file in @(Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
             Remove-Item -LiteralPath $file -Force -Recurse -ErrorAction SilentlyContinue
         }
+
         Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath $([System.IO.Path]::ChangeExtension($signature.value, '.files'))) -Force -Recurse -ErrorAction SilentlyContinue
     }
 
@@ -2900,15 +2982,17 @@ function SetSignatures {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if (-not $SimulateUser) {
-                        Write-Host "$Indent      Set signature as default for new messages"
-                        if ($script:CurrentUserDummyMailbox -ne $true) {
-                            if ($OutlookFileVersion -ge '16.0.0.0') {
-                                New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force | Out-Null
+                        if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
+                            Write-Host "$Indent      Set signature as default for new messages"
+                            if ($script:CurrentUserDummyMailbox -ne $true) {
+                                if ($OutlookFileVersion -ge '16.0.0.0') {
+                                    New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force | Out-Null
+                                } else {
+                                    New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) + "`0")))) -Force | Out-Null
+                                }
                             } else {
-                                New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) + "`0")))) -Force | Out-Null
+                                $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                             }
-                        } else {
-                            $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                         }
                     } else {
                         Copy-Item -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + '.htm')) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePaths[0]) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'Default New.htm')) -Force
@@ -2924,15 +3008,17 @@ function SetSignatures {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if (-not $SimulateUser) {
-                        Write-Host "$Indent      Set signature as default for reply/forward messages"
-                        if ($script:CurrentUserDummyMailbox -ne $true) {
-                            if ($OutlookFileVersion -ge '16.0.0.0') {
-                                New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force | Out-Null
+                        if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
+                            Write-Host "$Indent      Set signature as default for reply/forward messages"
+                            if ($script:CurrentUserDummyMailbox -ne $true) {
+                                if ($OutlookFileVersion -ge '16.0.0.0') {
+                                    New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force | Out-Null
+                                } else {
+                                    New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) + "`0")))) -Force | Out-Null
+                                }
                             } else {
-                                New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) + "`0")))) -Force | Out-Null
+                                $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                             }
-                        } else {
-                            $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                         }
                     } else {
                         Copy-Item -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + '.htm')) -Destination ((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePaths[0]) -ChildPath "$($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath 'Default Reply-Forward.htm')) -Force
@@ -3514,6 +3600,44 @@ function ConvertPath ([ref]$path) {
 }
 
 
+function RemoveItemAlternativeRecurse {
+    # Function to avoid problems with OneDrive throwing "Access to the cloud file is denied"
+
+    param(
+        [alias('LiteralPath')][string] $Path,
+        [switch] $SkipFolder # when $Path is a folder, do not delete $path, only it's content
+    )
+
+    $local:ToDelete = @()
+
+    if (Test-Path $path) {
+        foreach ($SinglePath in @(Get-Item $Path)) {
+            if (Test-Path $SinglePath -PathType Container) {
+                if (-not $SkipFolder) {
+                    $local:ToDelete += @(Get-ChildItem $SinglePath -Recurse -Force | Sort-Object -Property PSIsContainer, @{expression = { $_.FullName.split('\').count }; descending = $true }, fullname)
+                    $local:ToDelete += @(Get-Item $SinglePath -Force)
+                } else {
+                    $local:ToDelete += @(Get-ChildItem $SinglePath -Recurse -Force | Sort-Object -Property PSIsContainer, @{expression = { $_.FullName.split('\').count }; descending = $true }, fullname)
+                }
+            } elseif (Test-Path $SinglePath -PathType Leaf) {
+                $local:ToDelete += (Get-Item $SinglePath -Force)
+            }
+        }
+    } else {
+        # Item to delete does not exist, nothing to do
+    }
+
+    foreach ($SingleItemToDelete in $local:ToDelete) {
+        try {
+            $SingleItemToDelete.delete()
+        } catch {
+            Write-Verbose "Could not delete $($SingleItemToDelete.FullName), error: $($_.Exception.Message)"
+            Write-Verbose $_
+        }
+    }
+}
+
+
 #
 # All functions have been defined above
 # Initially executed code starts here
@@ -3551,15 +3675,15 @@ try {
         Remove-Variable -Name 'COMWord' -Scope 'script'
     }
 
-    Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
-    Remove-Module -Name MSAL.PS -Force -ErrorAction SilentlyContinue
     if ($script:dllPath) {
+        Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($script:dllpath)) -Force # Microsoft.Exchange.WebServices
         Remove-Item $script:dllPath -Force -ErrorAction SilentlyContinue
     }
+
     if ($script:msalPath) {
+        Remove-Module -Name MSAL.PS -Force
         Remove-Item $script:msalPath -Recurse -Force -ErrorAction SilentlyContinue
     }
-
 
     Write-Host
     Write-Host "End script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
