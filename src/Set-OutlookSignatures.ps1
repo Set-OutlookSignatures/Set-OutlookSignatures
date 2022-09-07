@@ -1948,17 +1948,17 @@ function main {
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
                     Write-Host "  Connect to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                     try {
-                        Write-Host '    Try Windows Integrated Auth'
+                        Write-Verbose '    Try Windows Integrated Auth'
                         $exchService.UseDefaultCredentials = $true
                         $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
                     } catch {
                         try {
-                            Write-Host '    Try OAuth with Autodiscover'
+                            Write-Verbose '    Try OAuth with Autodiscover'
                             $exchService.UseDefaultCredentials = $false
                             $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $ExoToken
                             $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
                         } catch {
-                            Write-Host '    Try OAuth with fixed URL'
+                            Write-Verbose '    Try OAuth with fixed URL'
                             $exchService.UseDefaultCredentials = $false
                             $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $ExoToken
                             $exchService.Url = 'https://outlook.office365.com/EWS/Exchange.asmx'
