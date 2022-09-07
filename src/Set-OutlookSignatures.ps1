@@ -3329,7 +3329,7 @@ function GraphGetMe {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "https: / / graph.microsoft.com / $GraphEndpointVersion / me`?`$select=" + [System.Web.HttpUtility]::UrlEncode(($GraphUserProperties -join ', '))
+            Uri         = "https://graph.microsoft.com/$($GraphEndpointVersion)/me`?`$select=" + [System.Web.HttpUtility]::UrlEncode(($GraphUserProperties -join ', '))
             Headers     = $script:authorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
