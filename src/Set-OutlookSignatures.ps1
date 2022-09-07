@@ -582,8 +582,13 @@ function main {
         $OutlookDisableRoamingSignaturesTemporaryToggle = 0
 
         if ($null -ne $OutlookRegistryVersion) {
-            $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook" -ErrorAction SilentlyContinue).DefaultProfile
-            $OutlookProfiles = @(@($OutlookDefaultProfile) + @((Get-ChildItem "hkcu:\SOFTWARE\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles").PSChildName | Where-Object { $_ -ine $OutlookDefaultProfile }))
+            try {
+                $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\Outlook" -ErrorAction Stop -WarningAction SilentlyContinue).DefaultProfile
+                $OutlookProfiles = @(@($OutlookDefaultProfile) + @((Get-ChildItem "hkcu:\SOFTWARE\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles" -ErrorAction Stop -WarningAction SilentlyContinue).PSChildName | Where-Object { $_ -ine $OutlookDefaultProfile }))
+            } catch {
+                $OutlookDefaultProfile = $null
+                $OutlookProfiles = @()
+            }
 
             if (
                 ((Get-Item 'registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\ClickToRun\Configuration' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).Property -contains 'UpdateChannel') -and
@@ -991,7 +996,7 @@ function main {
             }
         } else {
             Write-Host '      Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
-            $error[0]
+            $GraphToken.error
             exit 1
         }
 
@@ -3233,7 +3238,10 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
 
 
 function GraphGetToken {
+    Write-Verbose '      Authentication'
+
     if ($GraphCredentialFile) {
+        Write-Verbose "        Via GraphCredentialFile '$(GraphCredentialFile)'"
         try {
             $auth = Import-Clixml -Path $GraphCredentialFile
             $script:authorizationHeader = @{
@@ -3253,35 +3261,60 @@ function GraphGetToken {
             }
         }
     } else {
-        $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($null -ne $script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+        $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
         try {
-            $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All' -IntegratedWindowsAuth
+            Write-Verbose '        Via IntegratedWindowsAuth'
+            $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All' -IntegratedWindowsAuth
         } catch {
             try {
-                $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All') -Silent -ForceRefresh
+                Write-Verbose '        Via Silent with LoginHint'
+                $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All') -Silent -ForceRefresh
             } catch {
                 try {
-                    $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($null -ne $script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All') -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false
+                    Write-Verbose '        Via Prompt with LoginHint and Timeout'
+                    $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes ('https://graph.microsoft.com/openid', 'https://graph.microsoft.com/email', 'https://graph.microsoft.com/profile', 'https://graph.microsoft.com/user.read.all', 'https://graph.microsoft.com/group.read.all', 'https://graph.microsoft.com/mailboxsettings.readwrite', 'https://graph.microsoft.com/EWS.AccessAsUser.All') -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false
                 } catch {
+                    Write-Verbose '        No authentication possible'
+                    $auth = $null
+                    return @{
+                        error       = (($error[0] | Out-String) + @"
+No authentication possible. Try:
+1. Delete MSAL.PS Graph token cache: '$([TokenCacheHelper]::CacheFilePath)'"
+2. Run Set-OutlookSignature with the "-Verbose" parameter and check for authentication messages
+3. If the "Via Prompt with LoginHint and Timeout" authentication message is diplayed:
+     - Check if a browser (the system default browser, if configured) opens for authentication
+         - Yes:
+             - Check if the correct user account is selected/entered and if the authentication is successful
+             - Check if authentication happens within two minutes
+         - No:
+             - Run Set-OutlookSignatures in a new PowerShell session
+             - Check the system default browser
+             - Make sure that Set-OutlookSignatures is executed in the security context of the currently logged-on user
+"@)
+                        accessToken = $null
+                        authHeader  = $null
+                    }
                 }
             }
         }
 
-        try {
-            $script:authorizationHeader = @{
-                Authorization = $auth.CreateAuthorizationHeader()
-            }
-            return @{
-                error       = $false
-                accessToken = $auth.AccessToken
-                authHeader  = $script:authorizationHeader
-            }
-        } catch {
-            return @{
-                error       = ($error | Out-String)
-                accessToken = $null
-                authHeader  = $null
+        if ($auth) {
+            try {
+                $script:authorizationHeader = @{
+                    Authorization = $auth.CreateAuthorizationHeader()
+                }
+                return @{
+                    error       = $false
+                    accessToken = $auth.AccessToken
+                    authHeader  = $script:authorizationHeader
+                }
+            } catch {
+                return @{
+                    error       = ($error | Out-String)
+                    accessToken = $null
+                    authHeader  = $null
+                }
             }
         }
     }
@@ -3296,7 +3329,7 @@ function GraphGetMe {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/me`?`$select=" + [System.Web.HttpUtility]::UrlEncode(($GraphUserProperties -join ', '))
+            Uri         = "https: / / graph.microsoft.com / $GraphEndpointVersion / me`?`$select=" + [System.Web.HttpUtility]::UrlEncode(($GraphUserProperties -join ', '))
             Headers     = $script:authorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -3557,7 +3590,7 @@ function GetIniContent ($filePath) {
                     }
 
                     # Key and value, whitespace(s) before and after brackets are ignored
-                    '^\s*(.+?)\s*=\s*(.*)\s*' {
+                    '^\s*(. + ?)\s*=\s*(. * )\s*' {
                         if ($null -ne $local:section) {
                             $local:ini["$($local:SectionIndex)"][($matches[1]).trim().trim('"').trim('''')] = ($matches[2]).trim().trim('"').trim('''')
                             continue
@@ -3565,7 +3598,7 @@ function GetIniContent ($filePath) {
                     }
 
                     # Key only, whitespace(s) before and after brackets are ignored
-                    '^\s*(.*)\s*' {
+                    '^\s*(. * )\s*' {
                         if ($null -ne $local:section) {
                             $local:ini["$($local:SectionIndex)"][($matches[1]).trim().trim('"').trim('''')] = $null
                             continue
