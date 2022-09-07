@@ -106,9 +106,11 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
     - [16.21.1. Graph](#16211-graph)
     - [16.21.2. Active Directory on premises](#16212-active-directory-on-premises)
   - [16.22. Why is no admin or user GUI available?](#1622-why-is-no-admin-or-user-gui-available)
-  - [16.23. What about the roaming signatures feature announced by Microsoft?](#1623-what-about-the-roaming-signatures-feature-announced-by-microsoft)
-    - [16.23.1. Please be aware of the following problem](#16231-please-be-aware-of-the-following-problem)
-  - [16.24. Why does the text color of my signature change sometimes?](#1624-why-does-the-text-color-of-my-signature-change-sometimes)
+  - [16.23. What if a user has no Outlook profile or is prohibited from starting Outlook?](#1623-what-if-a-user-has-no-outlook-profile-or-is-prohibited-from-starting-outlook)
+  - [16.24. What if Outlook is not installed at all?](#1624-what-if-outlook-is-not-installed-at-all)
+  - [16.25. What about the roaming signatures feature announced by Microsoft?](#1625-what-about-the-roaming-signatures-feature-announced-by-microsoft)
+    - [16.25.1. Please be aware of the following problem](#16251-please-be-aware-of-the-following-problem)
+  - [16.26. Why does the text color of my signature change sometimes?](#1626-why-does-the-text-color-of-my-signature-change-sometimes)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -962,7 +964,13 @@ These tasks typically happen multiple times a year. A graphical user interface m
 
 From an end user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
 
-## 16.23. What about the roaming signatures feature announced by Microsoft?  
+## 16.23. What if a user has no Outlook profile or is prohibited from starting Outlook?
+If a user has never started Outlook before or has deleted all Outlook profiles, Set-OutlookSignatures will still be useful: It will create the signature folder if it does not exist, determine the logged-on users e-mail address, create the signatures for his personal mailbox, set a default signature in Outlook Web as well as the Out of Office messages.
+
+Default signatures can not be set locally or in Outlook Web until an Outlook profile has been configured, as the corresponding settings are stored in registry paths containing random numbers, which need to be created by Outlook.
+## 16.24. What if Outlook is not installed at all?
+If Outlook is not installed at all, Set-OutlookSignatures will still be useful: It determine the logged-on users e-mail address, create the signatures for his personal mailbox in a temporary location, set a default signature in Outlook Web as well as the Out of Office messages.
+## 16.25. What about the roaming signatures feature announced by Microsoft?  
 Microsoft announced a future change in how and where signatures are stored. Basically, signatures will no longer stored in the file system, but in the mailbox itself.  
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
 
@@ -981,7 +989,7 @@ Outlook for Windows beta versions already support the roaming signatures feature
 
 Microsoft is already supporting the feature in Outlook Web for more and more Exchange Online tenants. Currently, this breaks PowerShell commands such as Set-MailboxMessageConfiguration and there is no public API available.
   - Set-OutlookSignatures can set one Outlook Web signature, but an Exchange Online tenant with multiple signatures feature enabled just ignores this signature (see the next chapter for workarounds).
-### 16.23.1. Please be aware of the following problem
+### 16.25.1. Please be aware of the following problem
 Since Q3 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes. There is still no hint of an API, or a way to disable it on the server.
 
 When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can successfully set the signature in Outlook Web, but this signature is ignored.
@@ -1003,7 +1011,7 @@ At the time of writing, there are two workarounds:
   - Only Microsoft can do this. Let Microsoft know via a support case.
 
 As soon as there is an official API or a scriptable workaround available, it will be evaluated for support in Set-OutlookSignatures.
-## 16.24. Why does the text color of my signature change sometimes?
+## 16.26. Why does the text color of my signature change sometimes?
 Set-OutlookSignatures does not change text color. Very likely, your template files and your Outlook installation are configured for this color change:
 - Per default, Outlook uses black text for new e-mails, and blue text for replies and forwarded e-mails
 - Word and the signature editor integrated in Outlook have a specific color named "Automatic"
