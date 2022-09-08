@@ -927,16 +927,18 @@ function main {
         }
     }
 
-    if (($GraphOnly -eq $true) -or
+    if (
+        ($GraphOnly -eq $true) -or
         (($GraphOnly -eq $false) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true))) -or
-        (($GraphOnly -eq $false) -and ($null -eq $ADPropsCurrentUser))) {
+        (($GraphOnly -eq $false) -and ($null -eq $ADPropsCurrentUser))
+    ) {
         Write-Host "    Set up environment for connection to Microsoft Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
         $script:CurrentUser = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\IdentityStore\Cache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)\IdentityCache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)" -Name 'UserName' -ErrorAction SilentlyContinue)
-        $script:msalPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
-        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
-        Get-ChildItem $script:msalPath -Recurse | Unblock-File
+        $script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
+        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:MsalModulePath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
+        Get-ChildItem $script:MsalModulePath -Recurse | Unblock-File
         try {
-            Import-Module (Join-Path -Path $script:msalPath -ChildPath 'msal.ps') -ErrorAction Stop
+            Import-Module (Join-Path -Path $script:MsalModulePath -ChildPath 'msal.ps') -ErrorAction Stop
         } catch {
             Write-Host '        Problem importing MSAL.PS module. Exit.' -ForegroundColor Red
             $error[0]
@@ -1929,14 +1931,14 @@ function main {
         if (((($SetCurrentUserOutlookWebSignature -eq $true) -and ($CurrentMailboxUseSignatureRoaming -eq $false)) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
             if ((-not $SimulateUser) ) {
                 Write-Host "  Set up environment for connection to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                $script:dllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
+                $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                 try {
                     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS.NetStandard\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:dllPath -Force
-                        Unblock-File -LiteralPath $script:dllPath
+                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS.NetStandard\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+                        Unblock-File -LiteralPath $script:WebServicesDllPath
                     } else {
-                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\Microsoft.Exchange.WebServices.dll')) -Destination $script:dllPath -Force
-                        Unblock-File -LiteralPath $script:dllPath
+                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
+                        Unblock-File -LiteralPath $script:WebServicesDllPath
                     }
                 } catch {
                 }
@@ -1944,7 +1946,7 @@ function main {
                 $error.clear()
 
                 try {
-                    Import-Module -Name $script:dllPath -Force -ErrorAction Stop
+                    Import-Module -Name $script:WebServicesDllPath -Force -ErrorAction Stop
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
                     Write-Host "  Connect to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                     try {
@@ -3287,6 +3289,7 @@ No authentication possible. Try:
          - Yes:
              - Check if the correct user account is selected/entered and if the authentication is successful
              - Check if authentication happens within two minutes
+             - Ensure that access to 'http://localhost' is allowed (https://localhost is currently not technically feasible)
          - No:
              - Run Set-OutlookSignatures in a new PowerShell session
              - Check the system default browser
@@ -3708,14 +3711,14 @@ try {
         Remove-Variable -Name 'COMWord' -Scope 'script'
     }
 
-    if ($script:dllPath) {
-        Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($script:dllpath)) -Force # Microsoft.Exchange.WebServices
-        Remove-Item $script:dllPath -Force -ErrorAction SilentlyContinue
+    if ($script:WebServicesDllPath) {
+        Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($script:WebServicesDllPath)) -Force # Microsoft.Exchange.WebServices
+        Remove-Item $script:WebServicesDllPath -Force -ErrorAction SilentlyContinue
     }
 
-    if ($script:msalPath) {
+    if ($script:MsalModulePath) {
         Remove-Module -Name MSAL.PS -Force
-        Remove-Item $script:msalPath -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item $script:MsalModulePath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     Write-Host
