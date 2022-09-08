@@ -3289,7 +3289,7 @@ No authentication possible. Try:
          - Yes:
              - Check if the correct user account is selected/entered and if the authentication is successful
              - Check if authentication happens within two minutes
-             - Ensure that access to 'http://localhost' is allowed (https://localhost is currently not technically feasible)
+             - Ensure that access to 'http://localhost' is allowed ('https://localhost' is currently not technically feasible, see 'https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/System-Browser-on-.Net-Core' and 'https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/MSAL.NET-uses-web-browser' for details)
          - No:
              - Run Set-OutlookSignatures in a new PowerShell session
              - Check the system default browser

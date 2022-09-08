@@ -615,7 +615,7 @@ If you prefer using own application IDs or need advanced configuration, follow t
     - '`https://graph.microsoft.com/group.read.all`' for reading properties of all groups, required for templates restricted to groups
     - '`https://graph.microsoft.com/mailboxsettings.readwrite`' for updating the logged-on user's Out of Office auto reply messages
     - '`https://graph.microsoft.com/EWS.AccessAsUser.All`' for updating the logged-on user's Outlook Web signature
-  - Set the Redirect URI to '`https://localhost`' and configure it for '`mobile and desktop applications`'
+  - Set the Redirect URI to '`http://localhost`' and configure it for '`mobile and desktop applications`'
   - Enable '`Allow public client flows`' to make Windows Integrated Authentication (SSO) work for Azure AD joined devices
 - In Set-OutlookSignature, use '`.\config\default graph config.ps1`' as a template for a custom Graph configuration file
   - Set '`$GraphClientID`' to the application ID created by the Graph administrator before
