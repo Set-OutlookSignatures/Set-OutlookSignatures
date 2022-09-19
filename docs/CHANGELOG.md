@@ -25,6 +25,7 @@ _Attention cloud mailbox users: Microsoft will make roaming signatures available
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Changed
 - Use different method to delete files to avoid occassional OneDrive error "access to the cloud file is denied"
+- Update logo and icon
 ### Added
 - The script now detects not only primary mailboxes configured in Outlook, but also automapped and additional mailboxes. This behavior can be disabled with the new parameter '`SignaturesForAutomappedAndAdditionalMailboxes`'. See '`README`' for details.
 
