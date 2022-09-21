@@ -1330,7 +1330,7 @@ function main {
 
                 if (($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' })) {
                     switch ((@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortOrder']) {
-                        { $_ -iin 'AsInThisFile', 'AsListed' } {
+                        { $_ -iin ('AsInThisFile', 'AsListed') } {
                             # nothing to do, $TemplateFiles is already correctly populated and sorted
                             break
                         }
@@ -3593,7 +3593,7 @@ function GetIniContent ($filePath) {
                     }
 
                     # Key and value, whitespace(s) before and after brackets are ignored
-                    '^\s*(. + ?)\s*=\s*(. * )\s*' {
+                    '^\s*(.+?)\s*=\s*(.*)\s*' {
                         if ($null -ne $local:section) {
                             $local:ini["$($local:SectionIndex)"][($matches[1]).trim().trim('"').trim('''')] = ($matches[2]).trim().trim('"').trim('''')
                             continue
@@ -3601,7 +3601,7 @@ function GetIniContent ($filePath) {
                     }
 
                     # Key only, whitespace(s) before and after brackets are ignored
-                    '^\s*(. * )\s*' {
+                    '^\s*(.*)\s*' {
                         if ($null -ne $local:section) {
                             $local:ini["$($local:SectionIndex)"][($matches[1]).trim().trim('"').trim('''')] = $null
                             continue
