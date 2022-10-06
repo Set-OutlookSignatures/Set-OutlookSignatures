@@ -186,9 +186,9 @@ When a domain in the custom list starts with a dash or minus (`'-domain-a.local'
 
 The `'*'` entry in a custom list is only considered when it is the first entry of the list.
 
-The Active Directory forest of the currently logged in user is always considered.
+The Active Directory forest of the currently logged in user is always considered, but specific domains can be removed.
 
-Subdomains of trusted domains are always considered.
+Subdomains of trusted forests are considered per default, but specific domains can be removed.
 
 Default value: `'*'`  
 ## 2.6. DeleteUserCreatedSignatures  

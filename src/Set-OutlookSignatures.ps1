@@ -74,7 +74,8 @@ Default value: '.\config\default graph config.ps1'
 List of trusted domains to check for group membership across trusts.
 If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
 If a string starts with a minus or dash ("-domain-a.local"), the domain after the dash or minus is removed from the list.
-Subdomains of trusted domains are always considered.
+The Active Directory forest of the currently logged in user is always considered, but specific domains can be removed.
+Subdomains of trusted forests are considered per default, but specific domains can be removed.
 Default value: '*'
 
 .PARAMETER DeleteUserCreatedSignatures
@@ -226,7 +227,7 @@ Param(
 
     # List of domains/forests to check for group membership across trusts
     [Alias('DomainsToCheckForGroups')]
-    [string[]]$TrustsToCheckForGroups = ('*'),
+    [string[]]$TrustsToCheckForGroups = @('*'),
 
     # Shall the script delete signatures which were created by the user itself?
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
@@ -772,6 +773,7 @@ function main {
 
     Write-Host
     Write-Host "Enumerate domains @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+    $InternalTrustsToCheckForGroups = @()
     $x = $TrustsToCheckForGroups
     [System.Collections.ArrayList]$TrustsToCheckForGroups = @()
     if ($GraphOnly -eq $false) {
@@ -787,15 +789,48 @@ function main {
                 Write-Host "  Current user forest: $y"
                 $TrustsToCheckForGroups += $y
 
+                # Internal trusts
+                $Search.SearchRoot = "GC://$($TrustsToCheckForGroups[0])"
+                $Search.Filter = '(ObjectClass=trustedDomain)'
+
+                foreach ($TrustedDomain in $Search.FindAll()) {
+                    # Only intra-forest trusts
+                    if ($TrustedDomain.properties.trustattributes -eq 32) {
+                        $InternalTrustsToCheckForGroups += $TrustedDomain.properties.name
+                    }
+                }
+
+                $InternalTrustsToCheckForGroups = @(
+                    $InternalTrustsToCheckForGroups | Select-Object -Unique | Sort-Object @{Expression = {
+                            $TemporaryArray = @($_.Split('.'))
+                            [Array]::Reverse($TemporaryArray)
+                            $TemporaryArray
+                        }
+                    }
+                )
+
+                foreach ($InternalTrustToCheckForGroups in $InternalTrustsToCheckForGroups) {
+                    if ($InternalTrustToCheckForGroups -ine $TrustsToCheckForGroups[0]) {
+                        Write-Host "    Child domain: $($InternalTrustToCheckForGroups)"
+                    }
+                }
+
+
                 # Other domains - either the list provided, or all outgoing and bidirectional trusts
                 if ($x[0] -eq '*') {
                     $Search.SearchRoot = "GC://$($TrustsToCheckForGroups[0])"
                     $Search.Filter = '(ObjectClass=trustedDomain)'
 
-                    foreach ($TrustedDomain in $Search.FindAll()) {
-                        # DNS name of this side of the trust (could be the root domain or any subdomain)
-                        # $TrustOrigin = ($TrustedDomain.properties.distinguishedname -split ',DC=')[1..999] -join '.'
+                    $TrustedDomains = @(
+                        @($Search.FindAll()) | Sort-Object @{Expression = {
+                                $TemporaryArray = @($_.properties.name.Split('.'))
+                                [Array]::Reverse($TemporaryArray)
+                                $TemporaryArray
+                            }
+                        }
+                    )
 
+                    foreach ($TrustedDomain in $TrustedDomains) {
                         # DNS name of the other side of the trust (could be the root domain or any subdomain)
                         # $TrustName = $TrustedDomain.properties.name
 
@@ -818,8 +853,27 @@ function main {
                         # No intra-forest trusts, only bidirectional trusts and outbound trusts
 
                         if (($($TrustedDomain.properties.trustattributes) -ne 32) -and (($($TrustedDomain.properties.trustdirection) -eq 2) -or ($($TrustedDomain.properties.trustdirection) -eq 3)) ) {
-                            Write-Host "  Trusted domain: $($TrustedDomain.properties.name)"
-                            $TrustsToCheckForGroups += $TrustedDomain.properties.name
+                            if ($TrustedDomain.properties.trustattributes -eq 8) {
+                                # Cross-forest trust, enumerate all child domains of the external forest via DNS
+                                Write-Host "  External trusted forest: $($TrustedDomain.properties.name)"
+                                @(
+                                    @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Select-Object -Unique | Sort-Object @{Expression = {
+                                            $TemporaryArray = @($_.Split('.'))
+                                            [Array]::Reverse($TemporaryArray)
+                                            $TemporaryArray
+                                        }
+                                    }
+                                ) | ForEach-Object {
+                                    $TrustsToCheckForGroups += $_
+                                    if ($_ -ine $TrustedDomain.properties.name) {
+                                        Write-Host "    Child domain: $($_)"
+                                    }
+                                }
+                            } else {
+                                # No cross-forest trust
+                                Write-Host "  External trusted domain: $($TrustedDomain.properties.name)"
+                                $TrustsToCheckForGroups += $TrustedDomain.properties.name
+                            }
                         }
                     }
                 }
@@ -856,8 +910,14 @@ function main {
                     } else {
                         Write-Host '    Remove domain.'
                         for ($z = 0; $z -lt $TrustsToCheckForGroups.Count; $z++) {
-                            if ($TrustsToCheckForGroups[$z] -ilike $y.substring(1)) {
+                            if ($TrustsToCheckForGroups[$z] -ieq $y.substring(1)) {
                                 $TrustsToCheckForGroups[$z] = ''
+                            }
+                        }
+
+                        for ($z = 0; $z -lt $InternalTrustsToCheckForGroups.Count; $z++) {
+                            if ($InternalTrustsToCheckForGroups[$z] -ieq $y.substring(1)) {
+                                $InternalTrustsToCheckForGroups[$z] = ''
                             }
                         }
                     }
@@ -865,13 +925,23 @@ function main {
 
 
                 Write-Host
-                Write-Host "Check for open LDAP port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                Write-Host "Check external trusts for open LDAP port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                 CheckADConnectivity $TrustsToCheckForGroups 'LDAP' '  ' | Out-Null
 
 
                 Write-Host
-                Write-Host "Check for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                Write-Host "Check internal trusts for open LDAP port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                CheckADConnectivity $InternalTrustsToCheckForGroups 'LDAP' '  ' | Out-Null
+
+
+                Write-Host
+                Write-Host "Check external trusts for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                 CheckADConnectivity $TrustsToCheckForGroups 'GC' '  ' | Out-Null
+
+
+                Write-Host
+                Write-Host "Check internal trusts for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                CheckADConnectivity $InternalTrustsToCheckForGroups 'GC' '  ' | Out-Null
             } else {
                 Write-Host '  Problem connecting to logged in user''s Active Directory (no error message, but forest root domain name is empty), assuming Graph/Azure AD from now on.' -ForegroundColor Yellow
                 $GraphOnly = $true
@@ -1739,6 +1809,26 @@ function main {
                                 $SIDsToCheckInTrusts += $sid.tostring()
                             }
                         }
+
+                        # Domain local groups in the current forest
+                        foreach ($InternalTrustToCheckForGroups in $InternalTrustsToCheckForGroups) {
+                            if ($InternalTrustToCheckForGroups -ine $UserDomain) {
+                                $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$($InternalTrustToCheckForGroups)")
+                                $Search.filter = "(&(objectClass=group)(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
+                                foreach ($LocalGroup in $search.findall()) {
+                                    if ($LocalGroup.properties.objectsid) {
+                                        $sid = (New-Object System.Security.Principal.SecurityIdentifier $($LocalGroup.properties.objectsid), 0).value.tostring()
+                                        Write-Verbose "      $sid"
+                                        $GroupsSIDs += $sid.tostring()
+                                    }
+
+                                    foreach ($SidHistorySid in @($LocalGroup.properties.sidhistory | Where-Object { $_ })) {
+                                        $sid = (New-Object System.Security.Principal.SecurityIdentifier $$SidHistorySid, 0).value.tostring()
+                                        $GroupsSIDs += $sid.tostring()
+                                    }
+                                }
+                            }
+                        }
                     } catch {
                         Write-Host "      Error getting group information from $((($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.'), check firewalls, DNS and AD trust" -ForegroundColor Red
                         $error[0]
@@ -1775,7 +1865,7 @@ function main {
                         for ($DomainNumber = 0; $DomainNumber -lt $TrustsToCheckForGroups.count; $DomainNumber++) {
                             if (($TrustsToCheckForGroups[$DomainNumber] -ne '') -and ($TrustsToCheckForGroups[$DomainNumber] -ine $UserDomain) -and ($UserDomain -ne '')) {
                                 Write-Host "    $($TrustsToCheckForGroups[$DomainNumber]) (mailbox group membership across trusts, takes some time) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                                $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
+                                $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$($TrustsToCheckForGroups[$DomainNumber])")
                                 $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
 
                                 foreach ($fsp in $Search.FindAll()) {
@@ -3103,7 +3193,15 @@ function CheckADConnectivity {
                     } else {
                         Write-Host "$Indent  $CheckProtocolText query failed, remove domain from list." -ForegroundColor Red
                         Write-Host "$Indent  If this error is permanent, check firewalls, DNS and AD trust. Consider parameter TrustsToCheckForGroups." -ForegroundColor Red
-                        $TrustsToCheckForGroups.remove($data[0])
+
+                        if ($TrustsToCheckForGroups -icontains $data[0]) {
+                            $TrustsToCheckForGroups.remove($data[0])
+                        }
+
+                        if ($InternalTrustsToCheckForGroups -icontains $data[0]) {
+                            $InternalTrustsToCheckForGroups.remove($data[0])
+                        }
+
                         $returnvalue = $false
                     }
                     $job.Done = $true
