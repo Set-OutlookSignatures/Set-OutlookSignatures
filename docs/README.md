@@ -176,21 +176,17 @@ The currently logged in user needs at least read access to the file.
 
 Default value: `'.\config\default graph config.ps1'`  
 ## 2.5. TrustsToCheckForGroups  
-The parameters tells the script which trusted domains should be used to search for mailbox and user group membership.
+List of domains to check for group membership.
 
-The default value, `'*'` tells the script to query all trusted domains in the Active Directory forest of the logged in user.
+If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
 
-For a custom list of trusted domains, specify them as comma-separated list of strings: `"domain-a.local", "dc=example,dc=com", "domain-b.internal"`.
+If a string starts with a minus or dash ('-domain-a.local'), the domain after the dash or minus is removed from the list (no wildcards allowed).
 
-When a domain in the custom list starts with a dash or minus (`'-domain-a.local'`), this domain is removed from the list.
+All domains belonging to the Active Directory forest of the currently logged in user are always considered, but specific domains can be removed (`'*', '-childA1.childA.user.forest'`).
 
-The `'*'` entry in a custom list is only considered when it is the first entry of the list.
+When a cross-forest trust is detected by the '*' option, all domains belonging to the trusted forest are considered but specific domains can be removed (`'*', '-childX.trusted.forest'`).
 
-The Active Directory forest of the currently logged in user is always considered, but specific domains can be removed.
-
-Subdomains of trusted forests are considered per default, but specific domains can be removed.
-
-Default value: `'*'`  
+Default value: '*'
 ## 2.6. DeleteUserCreatedSignatures  
 Shall the script delete signatures which were created by the user itself?
 
@@ -609,12 +605,12 @@ If you prefer using own application IDs or need advanced configuration, follow t
   - Create an application with a Client ID
   - Provide admin consent (pre-approval) for the following scopes (permissions):
     - '`https://graph.microsoft.com/openid`' for logging-on the user
-    - '`https://graph.microsoft.com/email`' for reading the logged-on user's mailbox properties
-    - '`https://graph.microsoft.com/profile`' for reading the logged-on user's properties
+    - '`https://graph.microsoft.com/email`' for reading the logged in user's mailbox properties
+    - '`https://graph.microsoft.com/profile`' for reading the logged in user's properties
     - '`https://graph.microsoft.com/user.read.all`' for reading properties of other users (manager, additional mailboxes and their managers)
     - '`https://graph.microsoft.com/group.read.all`' for reading properties of all groups, required for templates restricted to groups
-    - '`https://graph.microsoft.com/mailboxsettings.readwrite`' for updating the logged-on user's Out of Office auto reply messages
-    - '`https://graph.microsoft.com/EWS.AccessAsUser.All`' for updating the logged-on user's Outlook Web signature
+    - '`https://graph.microsoft.com/mailboxsettings.readwrite`' for updating the logged in user's Out of Office auto reply messages
+    - '`https://graph.microsoft.com/EWS.AccessAsUser.All`' for updating the logged in user's Outlook Web signature
   - Set the Redirect URI to '`http://localhost`' and configure it for '`mobile and desktop applications`'
   - Enable '`Allow public client flows`' to make Windows Integrated Authentication (SSO) work for Azure AD joined devices
 - In Set-OutlookSignature, use '`.\config\default graph config.ps1`' as a template for a custom Graph configuration file
@@ -965,11 +961,11 @@ These tasks typically happen multiple times a year. A graphical user interface m
 From an end user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
 
 ## 16.23. What if a user has no Outlook profile or is prohibited from starting Outlook?
-If a user has never started Outlook before or has deleted all Outlook profiles, Set-OutlookSignatures will still be useful: It will create the signature folder if it does not exist, determine the logged-on users e-mail address, create the signatures for his personal mailbox, set a default signature in Outlook Web as well as the Out of Office messages.
+If a user has never started Outlook before or has deleted all Outlook profiles, Set-OutlookSignatures will still be useful: It will create the signature folder if it does not exist, determine the logged in users e-mail address, create the signatures for his personal mailbox, set a default signature in Outlook Web as well as the Out of Office messages.
 
 Default signatures can not be set locally or in Outlook Web until an Outlook profile has been configured, as the corresponding settings are stored in registry paths containing random numbers, which need to be created by Outlook.
 ## 16.24. What if Outlook is not installed at all?
-If Outlook is not installed at all, Set-OutlookSignatures will still be useful: It determine the logged-on users e-mail address, create the signatures for his personal mailbox in a temporary location, set a default signature in Outlook Web as well as the Out of Office messages.
+If Outlook is not installed at all, Set-OutlookSignatures will still be useful: It determine the logged in users e-mail address, create the signatures for his personal mailbox in a temporary location, set a default signature in Outlook Web as well as the Out of Office messages.
 ## 16.25. What about the roaming signatures feature announced by Microsoft?  
 Microsoft announced a future change in how and where signatures are stored. Basically, signatures will no longer stored in the file system, but in the mailbox itself.  
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
