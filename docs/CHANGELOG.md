@@ -18,11 +18,11 @@
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Added
+- New parameter '`IncludeMailboxForestDomainLocalGroups`', see '`README`' for details
 - LDAP and Global Catalog connectivity is now additionally checked for every child domain of the current user's Active Directory forest and every child domain of cross-forest trusts
 - Consider SID history of groups in trusted domains/forests
 - New FAQs in '`.\docs\README`': '`What if Outlook is not installed at all?`' and '`What if a user has no Outlook profile or is prohibited from starting Outlook?`'
 ### Fixed
-- On-prem: Membership in domain local groups is now recognized if the group is in the user's AD forest but not in the user's domain
 - On-prem: Membership in domain local groups is now recognized if the group is in a child domain of a forest connected with a cross-forest trust
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.3.0" target="_blank">v3.3.0</a> - 2022-09-05

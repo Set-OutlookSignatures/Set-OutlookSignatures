@@ -78,6 +78,12 @@ All domains belonging to the Active Directory forest of the currently logged in 
 When a cross-forest trust is detected by the '*' option, all domains belonging to the trusted forest are considered but specific domains can be removed (`'*', '-childX.trusted.forest'`).
 Default value: '*'
 
+.PARAMETER IncludeMailboxForestDomainLocalGroups
+Shall the script consider group membership in domain local groups in the mailbox's AD forest?
+Per default, membership in domain local groups in the mailbox's forest is not considered as the required LDAP queries are slow and domain local groups are usually not used in Exchange.
+Domain local groups across trusts behave differently, they are always considered as soon as the trusted domain/forest is included in TrustsToCheckForGroups.
+Default value: $false
+
 .PARAMETER DeleteUserCreatedSignatures
 Shall the script delete signatures which were created by the user itself?
 Default value: $false
@@ -229,6 +235,10 @@ Param(
     [Alias('DomainsToCheckForGroups')]
     [string[]]$TrustsToCheckForGroups = @('*'),
 
+    # Shall the script consider group membership in domain local groups in the mailbox's AD forest?
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
+    $IncludeMailboxForestDomainLocalGroups = $false,
+
     # Shall the script delete signatures which were created by the user itself?
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
     $DeleteUserCreatedSignatures = $false,
@@ -358,6 +368,13 @@ function main {
 
 
     Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
+
+    Write-Host "  IncludeMailboxForestDomainLocalGroups: '$IncludeMailboxForestDomainLocalGroups'"
+    if ($IncludeMailboxForestDomainLocalGroups -in (1, '1', 'true', '$true', 'yes')) {
+        $IncludeMailboxForestDomainLocalGroups = $true
+    } else {
+        $IncludeMailboxForestDomainLocalGroups = $false
+    }
 
     Write-Host "  SignatureTemplatePath: '$SignatureTemplatePath'" -NoNewline
     ConvertPath ([ref]$SignatureTemplatePath)
@@ -1814,24 +1831,27 @@ function main {
                         }
 
                         # Domain local groups
-                        Write-Verbose "      LDAP query for domain local groups (security and distribution, one query per domain) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                        foreach ($DomainToCheckForDomainLocalGroups in @(($LookupDomainsToTrusts.GetEnumerator() | Where-Object { $_.Value -ieq $LookupDomainsToTrusts[$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')] }).name)) {
-                            Write-Verbose "        $($DomainToCheckForDomainLocalGroups) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
-                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$($DomainToCheckForDomainLocalGroups)")
-                            $Search.filter = "(&(objectClass=group)(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
-                            foreach ($LocalGroup in $search.findall()) {
-                                if ($LocalGroup.properties.objectsid) {
-                                    $sid = (New-Object System.Security.Principal.SecurityIdentifier $($LocalGroup.properties.objectsid), 0).value
-                                    Write-Verbose "          $sid"
-                                    $GroupsSIDs += $sid
-                                    $SIDsToCheckInTrusts += $sid
-                                }
+                        if ($IncludeMailboxForestDomainLocalGroups -eq $true) {
+                            Write-Verbose "      LDAP query for domain local groups (security and distribution, one query per domain) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
 
-                                foreach ($SidHistorySid in @($LocalGroup.properties.sidhistory | Where-Object { $_ })) {
-                                    $sid = (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value
-                                    Write-Verbose "          $sid"
-                                    $GroupsSIDs += $sid
-                                    $SIDsToCheckInTrusts += $sid
+                            foreach ($DomainToCheckForDomainLocalGroups in @(($LookupDomainsToTrusts.GetEnumerator() | Where-Object { $_.Value -ieq $LookupDomainsToTrusts[$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')] }).name)) {
+                                Write-Verbose "        $($DomainToCheckForDomainLocalGroups) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
+                                $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$($DomainToCheckForDomainLocalGroups)")
+                                $Search.filter = "(&(objectClass=group)(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
+                                foreach ($LocalGroup in $search.findall()) {
+                                    if ($LocalGroup.properties.objectsid) {
+                                        $sid = (New-Object System.Security.Principal.SecurityIdentifier $($LocalGroup.properties.objectsid), 0).value
+                                        Write-Verbose "          $sid"
+                                        $GroupsSIDs += $sid
+                                        $SIDsToCheckInTrusts += $sid
+                                    }
+
+                                    foreach ($SidHistorySid in @($LocalGroup.properties.sidhistory | Where-Object { $_ })) {
+                                        $sid = (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value
+                                        Write-Verbose "          $sid"
+                                        $GroupsSIDs += $sid
+                                        $SIDsToCheckInTrusts += $sid
+                                    }
                                 }
                             }
                         }
