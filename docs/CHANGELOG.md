@@ -23,6 +23,7 @@ _Attention cloud mailbox users: Microsoft will make roaming signatures available
 - Consider SID history of groups in trusted domains/forests
 - New FAQs in '`.\docs\README`': '`What if Outlook is not installed at all?`' and '`What if a user has no Outlook profile or is prohibited from starting Outlook?`'
 ### Fixed
+- Correctly calculate mailbox priority when simulation mode is enabled and/or the e-mail address is a secondary address
 - On-prem: Membership in domain local groups is now recognized if the group is in a child domain of a forest connected with a cross-forest trust
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.3.0" target="_blank">v3.3.0</a> - 2022-09-05

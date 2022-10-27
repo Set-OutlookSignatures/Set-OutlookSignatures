@@ -1277,12 +1277,16 @@ function main {
     # First, check if the user has a mail attribute set
     if ($ADPropsCurrentUser.mail) {
         Write-Host "  AD mail attribute of currently logged in user: $($ADPropsCurrentUser.mail)"
+        
         for ($i = 0; $i -lt $LegacyExchangeDNs.count; $i++) {
-            if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -contains $('SMTP:' + $ADPropsCurrentUser.mail)) -and ($RegistryPaths[$i] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*')) {
-                $p = $i
-                break
+            if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -icontains "smtp:$($ADPropsCurrentUser.mail)")) {
+                if (($SimulateUser) -or ((-not $SimulateUser) -and ($RegistryPaths[$i] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*'))) {
+                    $p = $i
+                    break
+                }
             }
         }
+
         if ($p -ge 0) {
             Write-Host '    Matching mailbox found'
         } else {
