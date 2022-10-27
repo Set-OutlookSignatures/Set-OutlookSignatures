@@ -1920,16 +1920,22 @@ function main {
                                                 $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$((($fsp.path -split ',DC=')[1..999] -join '.'))")
                                                 $Search.filter = "(&(objectClass=group)(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname)))"
 
-                                                foreach ($group in $Search.findall()) {
-                                                    $sid = (New-Object System.Security.Principal.SecurityIdentifier $($group.properties.objectsid), 0).value
-                                                    Write-Verbose "        $sid"
-                                                    $GroupsSIDs += $sid
+                                                $fspGroups = $Search.FindAll()
 
-                                                    foreach ($SidHistorySid in @($group.properties.sidhistory | Where-Object { $_ })) {
-                                                        $sid = (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value
+                                                if ($fspGroups.count -gt 0) {
+                                                    foreach ($group in $fspgroups) {
+                                                        $sid = (New-Object System.Security.Principal.SecurityIdentifier $($group.properties.objectsid), 0).value
                                                         Write-Verbose "        $sid"
                                                         $GroupsSIDs += $sid
+
+                                                        foreach ($SidHistorySid in @($group.properties.sidhistory | Where-Object { $_ })) {
+                                                            $sid = (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value
+                                                            Write-Verbose "        $sid"
+                                                            $GroupsSIDs += $sid
+                                                        }
                                                     }
+                                                } else {
+                                                    Write-Verbose '        FSP is not member of any group'
                                                 }
                                             } catch {
                                                 Write-Host "        Error: $($error[0].exception)" -ForegroundColor red
