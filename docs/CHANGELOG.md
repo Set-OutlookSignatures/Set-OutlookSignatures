@@ -15,10 +15,23 @@
   ### Fixed
 -->
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.4.0" target="_blank">v3.4.0</a> - 2022-11-02
+_Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
+### Added
+- New parameter '`IncludeMailboxForestDomainLocalGroups`', see '`README`' for details
+- LDAP and Global Catalog connectivity is now additionally checked for every child domain of the current user's Active Directory forest and every child domain of cross-forest trusts
+- Consider SID history of groups in trusted domains/forests
+- New FAQs in '`.\docs\README`': '`What if Outlook is not installed at all?`' and '`What if a user has no Outlook profile or is prohibited from starting Outlook?`'
+### Fixed
+- Correctly calculate mailbox priority when simulation mode is enabled and/or the e-mail address is a secondary address
+- On-prem: Membership in domain local groups is now recognized if the group is in a child domain of a forest connected with a cross-forest trust
+- Only consider mailboxes as additional mailboxes when they appear in Outlook's list in the e-mail navigation pane. This avoids falsely adding shared calendars as additional mailboxes.
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.3.0" target="_blank">v3.3.0</a> - 2022-09-05
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Changed
 - Use different method to delete files to avoid occassional OneDrive error "access to the cloud file is denied"
+- Update logo and icon
 ### Added
 - The script now detects not only primary mailboxes configured in Outlook, but also automapped and additional mailboxes. This behavior can be disabled with the new parameter '`SignaturesForAutomappedAndAdditionalMailboxes`'. See '`README`' for details.
 

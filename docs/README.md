@@ -45,22 +45,23 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [2.3. ReplacementVariableConfigFile](#23-replacementvariableconfigfile)
   - [2.4. GraphConfigFile](#24-graphconfigfile)
   - [2.5. TrustsToCheckForGroups](#25-truststocheckforgroups)
-  - [2.6. DeleteUserCreatedSignatures](#26-deleteusercreatedsignatures)
-  - [2.7. DeleteScriptCreatedSignaturesWithoutTemplate](#27-deletescriptcreatedsignatureswithouttemplate)
-  - [2.8. SetCurrentUserOutlookWebSignature](#28-setcurrentuseroutlookwebsignature)
-  - [2.9. SetCurrentUserOOFMessage](#29-setcurrentuseroofmessage)
-  - [2.10. OOFTemplatePath](#210-ooftemplatepath)
-  - [2.11. OOFIniPath](#211-oofinipath)
-  - [2.12. AdditionalSignaturePath](#212-additionalsignaturepath)
-  - [2.13. UseHtmTemplates](#213-usehtmtemplates)
-  - [2.14. SimulateUser](#214-simulateuser)
-  - [2.15. SimulateMailboxes](#215-simulatemailboxes)
-  - [2.16. GraphCredentialFile](#216-graphcredentialfile)
-  - [2.17. GraphOnly](#217-graphonly)
-  - [2.18. CreateRtfSignatures](#218-creatertfsignatures)
-  - [2.19. CreateTxtSignatures](#219-createtxtsignatures)
-  - [2.20. EmbedImagesInHtml](#220-embedimagesinhtml)
-  - [2.21. SignaturesForAutomappedAndAdditionalMailboxes](#221-signaturesforautomappedandadditionalmailboxes)
+  - [2.6. IncludeMailboxForestDomainLocalGroups](#26-includemailboxforestdomainlocalgroups)
+  - [2.7. DeleteUserCreatedSignatures](#27-deleteusercreatedsignatures)
+  - [2.8. DeleteScriptCreatedSignaturesWithoutTemplate](#28-deletescriptcreatedsignatureswithouttemplate)
+  - [2.9. SetCurrentUserOutlookWebSignature](#29-setcurrentuseroutlookwebsignature)
+  - [2.10. SetCurrentUserOOFMessage](#210-setcurrentuseroofmessage)
+  - [2.11. OOFTemplatePath](#211-ooftemplatepath)
+  - [2.12. OOFIniPath](#212-oofinipath)
+  - [2.13. AdditionalSignaturePath](#213-additionalsignaturepath)
+  - [2.14. UseHtmTemplates](#214-usehtmtemplates)
+  - [2.15. SimulateUser](#215-simulateuser)
+  - [2.16. SimulateMailboxes](#216-simulatemailboxes)
+  - [2.17. GraphCredentialFile](#217-graphcredentialfile)
+  - [2.18. GraphOnly](#218-graphonly)
+  - [2.19. CreateRtfSignatures](#219-creatertfsignatures)
+  - [2.20. CreateTxtSignatures](#220-createtxtsignatures)
+  - [2.21. EmbedImagesInHtml](#221-embedimagesinhtml)
+  - [2.22. SignaturesForAutomappedAndAdditionalMailboxes](#222-signaturesforautomappedandadditionalmailboxes)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -106,9 +107,11 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
     - [16.21.1. Graph](#16211-graph)
     - [16.21.2. Active Directory on premises](#16212-active-directory-on-premises)
   - [16.22. Why is no admin or user GUI available?](#1622-why-is-no-admin-or-user-gui-available)
-  - [16.23. What about the roaming signatures feature announced by Microsoft?](#1623-what-about-the-roaming-signatures-feature-announced-by-microsoft)
-    - [16.23.1. Please be aware of the following problem](#16231-please-be-aware-of-the-following-problem)
-  - [16.24. Why does the text color of my signature change sometimes?](#1624-why-does-the-text-color-of-my-signature-change-sometimes)
+  - [16.23. What if a user has no Outlook profile or is prohibited from starting Outlook?](#1623-what-if-a-user-has-no-outlook-profile-or-is-prohibited-from-starting-outlook)
+  - [16.24. What if Outlook is not installed at all?](#1624-what-if-outlook-is-not-installed-at-all)
+  - [16.25. What about the roaming signatures feature announced by Microsoft?](#1625-what-about-the-roaming-signatures-feature-announced-by-microsoft)
+    - [16.25.1. Please be aware of the following problem](#16251-please-be-aware-of-the-following-problem)
+  - [16.26. Why does the text color of my signature change sometimes?](#1626-why-does-the-text-color-of-my-signature-change-sometimes)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -174,42 +177,46 @@ The currently logged in user needs at least read access to the file.
 
 Default value: `'.\config\default graph config.ps1'`  
 ## 2.5. TrustsToCheckForGroups  
-The parameters tells the script which trusted domains should be used to search for mailbox and user group membership.
+List of domains to check for group membership.
 
-The default value, `'*'` tells the script to query all trusted domains in the Active Directory forest of the logged in user.
+If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
 
-For a custom list of trusted domains, specify them as comma-separated list of strings: `"domain-a.local", "dc=example,dc=com", "domain-b.internal"`.
+If a string starts with a minus or dash ('-domain-a.local'), the domain after the dash or minus is removed from the list (no wildcards allowed).
 
-When a domain in the custom list starts with a dash or minus (`'-domain-a.local'`), this domain is removed from the list.
+All domains belonging to the Active Directory forest of the currently logged in user are always considered, but specific domains can be removed (`'*', '-childA1.childA.user.forest'`).
 
-The `'*'` entry in a custom list is only considered when it is the first entry of the list.
+When a cross-forest trust is detected by the '*' option, all domains belonging to the trusted forest are considered but specific domains can be removed (`'*', '-childX.trusted.forest'`).
 
-The Active Directory forest of the currently logged in user is always considered.
+Default value: '*'
+## 2.6. IncludeMailboxForestDomainLocalGroups
+Shall the script consider group membership in domain local groups in the mailbox's AD forest?
 
-Subdomains of trusted domains are always considered.
+Per default, membership in domain local groups in the mailbox's forest is not considered as the required LDAP queries are slow and domain local groups are usually not used in Exchange.
 
-Default value: `'*'`  
-## 2.6. DeleteUserCreatedSignatures  
+Domain local groups across trusts behave differently, they are always considered as soon as the trusted domain/forest is included in TrustsToCheckForGroups.
+
+Default value: $false
+## 2.7. DeleteUserCreatedSignatures  
 Shall the script delete signatures which were created by the user itself?
 
 Default value: `$false`
-## 2.7. DeleteScriptCreatedSignaturesWithoutTemplate
+## 2.8. DeleteScriptCreatedSignaturesWithoutTemplate
 Shall the script delete signatures which were created by the script before but are no longer available as template?
 
 Default value: `$true`
-## 2.8. SetCurrentUserOutlookWebSignature  
+## 2.9. SetCurrentUserOutlookWebSignature  
 Shall the script set the Outlook Web signature of the currently logged in user?
 
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
-## 2.9. SetCurrentUserOOFMessage  
+## 2.10. SetCurrentUserOOFMessage  
 Shall the script set the Out of Office (OOF) auto reply message of the currently logged in user?
 
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
-## 2.10. OOFTemplatePath  
+## 2.11. OOFTemplatePath  
 Path to centrally managed Out of Office (OOF) auto reply templates.
 
 Local and remote paths are supported.
@@ -221,7 +228,7 @@ WebDAV paths are supported (https only): `'https://server.domain/SignatureSite/O
 The currently logged in user needs at least read access to the path.
 
 Default value: `'.\templates\Out of Office DOCX'`
-## 2.11. OOFIniPath
+## 2.12. OOFIniPath
 Template tags are placed in an ini file.
 
 The file must be UTF8 encoded.
@@ -235,7 +242,7 @@ WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/Si
 The currently logged in user needs at least read access to the path
 
 Default value: `'.\templates\Out of Office DOCX\_OOF.ini'`
-## 2.12. AdditionalSignaturePath  
+## 2.13. AdditionalSignaturePath  
 An additional path that the signatures shall be copied to.  
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
 
@@ -252,7 +259,7 @@ The currently logged in user needs at least write access to the path.
 If the folder or folder structure does not exist, it is created.
 
 Default value: `"$([environment]::GetFolderPath("MyDocuments"))\Outlook signatures"`  
-## 2.13. UseHtmTemplates  
+## 2.14. UseHtmTemplates  
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
 
 Templates in .htm format must be UTF8 encoded.
@@ -260,15 +267,15 @@ Templates in .htm format must be UTF8 encoded.
 Each format has advantages and disadvantages, please see "[13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)" for a quick overview.
 
 Default value: `$false`  
-## 2.14. SimulateUser  
+## 2.15. SimulateUser  
 SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged in user.
 
 Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an e-mail-address, but is not neecessarily one).
 
 See "[13. Simulation mode](#13-simulation-mode)" for details.  
-## 2.15. SimulateMailboxes  
+## 2.16. SimulateMailboxes  
 SimulateMailboxes is optional for simulation mode, although highly recommended. It is a comma separated list of e-mail addresses replacing the list of mailboxes otherwise gathered from the registry.
-## 2.16. GraphCredentialFile
+## 2.17. GraphCredentialFile
 Path to file containing Graph credential which should be used as alternative to other token acquisition methods.
 
 Makes only sense in combination with `'.\sample code\SimulateAndDeploy.ps1'`, do not use this parameter for other scenarios.
@@ -276,21 +283,21 @@ Makes only sense in combination with `'.\sample code\SimulateAndDeploy.ps1'`, do
 See `'.\sample code\SimulateAndDeploy.ps1'` for an example how to create this file.
 
 Default value: `$null`  
-## 2.17. GraphOnly
+## 2.18. GraphOnly
 Try to connect to Microsoft Graph only, ignoring any local Active Directory.
 
 The default behavior is to try Active Directory first and fall back to Graph.
 
 Default value: `$false`
-## 2.18. CreateRtfSignatures
+## 2.19. CreateRtfSignatures
 Should signatures be created in RTF format?
 
 Default value: `$true`
-## 2.19. CreateTxtSignatures
+## 2.20. CreateTxtSignatures
 Should signatures be created in TXT format?
 
 Default value: `$true`
-## 2.20. EmbedImagesInHtml
+## 2.21. EmbedImagesInHtml
 Should images be embedded into HTML files?
 
 Outlook 2016 and newer can handle images embedded directly into an HTML file as BASE64 string (`'<img src="data:image/[...]"'`).
@@ -300,7 +307,7 @@ Outlook 2013 and earlier can't handle these embedded images when composing HTML 
 When setting EmbedImagesInHtml to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 
 Default value: `$true`
-## 2.21. SignaturesForAutomappedAndAdditionalMailboxes
+## 2.22. SignaturesForAutomappedAndAdditionalMailboxes
 Deploy signatures for automapped mailboxes and additional mailboxes.
 
 Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook.
@@ -321,20 +328,23 @@ Setting the parameter '`SignaturesForAutomappedAndAdditionalMailboxes`' to '`tru
 
 The script is created for Exchange environments. Non-Exchange mailboxes can not have OOF messages or group signatures, but common and mailbox specific signatures.  
 # 5. Group membership  
-The script considers all static security and distribution groups the currently processed mailbox belongs to.
+Per default, the script considers all static security and distribution groups of group scopes global and universal the currently processed mailbox belongs to.
 
-Group membership is evaluated against the whole Active Directory forest of the currently logged in user, and against all trusted domains (and their subdomains) the user has access to.
+Group membership is evaluated against the whole Active Directory forest of the mailbox, and against all trusted domains (and their subdomains) the user has access to.
 
 In Exchange resource forest scenarios with linked mailboxes, the group membership of the linked account (as populated in msExchMasterAccountSID) is not considered, only the group membership of the actual mailbox.
 
 Group membership from Active Directory on-prem is retrieved by combining two queries:
-- Security groups, no matter if enabled for e-mail or not, are queried via the tokenGroups attribute. Querying this attribute is very fast, resource saving on client and server, and also considers sIDHistory.
-- Distribution groups are not covered by the tokenGroups attribute, they are retrieved with an optimized LDAP query, also sIDHistory is considered.
-- Group membership in any type of group across trusts is retrieved with an optimized LDAP query, considering the sID and sIDHistory of the group memberships retrieved in the steps before.
+- Security groups, no matter if enabled for e-mail or not, are queried via the tokenGroups attribute. Querying this attribute is very fast, resource saving on client and server, and also considers sIDHistory. This query only includes groups with the global or universal scope type.
+- Distribution groups are not covered by the tokenGroups attribute, they are retrieved with an optimized LDAP query, also sIDHistory is considered. This query only includes groups with the global or universal scope type.
+- Group membership across trusts is always considered, as soon as the trusted domain/forest is included in TrustsToCheckForGroups. Cross-trust group membership is retrieved with an optimized LDAP query, considering the sID and sIDHistory of the group memberships retrieved in the steps before. This query only includes groups with the domain local scope type, as this is the only group type that allows for group membership across trusts.
+- Only static groups are considered. Please see the FAQ section for detailed information why dynamic groups are not included in group membership queries on-prem.
+- Per default, the mailbox's own forest is not checked for membership in domain local groups. This is because querying for domain local groups takes time, as every domain local group domain in the forest has to be queried for membership. Also, domain local groups are usually not used when granting permissions in Exchange. You can enable searching for domain local groups in the mailbox's forest by setting the parameter '`IncludeMailboxForestDomainLocalGroups`' to '`$true`'.
 
-When no Active Directory connection is available, Microsoft Graph is queried for transitive group membership. This query includes security and distribution groups.
 
-Only static groups are considered. Please see the FAQ section for detailed information why dynamic groups are not included in group membership queries.
+When no Active Directory connection is available, Microsoft Graph is queried for transitive group membership. This query includes security and distribution groups.  
+In Microsoft Graph, membership in dynamic groups is considered, too.
+
 # 6. Removing old signatures  
 The script always deletes signatures which were deployed by the script earlier, but are no longer available in the central repository. The script marks each processed signature with a specific HTML tag, which enables this cleaning feature.
 
@@ -607,13 +617,13 @@ If you prefer using own application IDs or need advanced configuration, follow t
   - Create an application with a Client ID
   - Provide admin consent (pre-approval) for the following scopes (permissions):
     - '`https://graph.microsoft.com/openid`' for logging-on the user
-    - '`https://graph.microsoft.com/email`' for reading the logged-on user's mailbox properties
-    - '`https://graph.microsoft.com/profile`' for reading the logged-on user's properties
+    - '`https://graph.microsoft.com/email`' for reading the logged in user's mailbox properties
+    - '`https://graph.microsoft.com/profile`' for reading the logged in user's properties
     - '`https://graph.microsoft.com/user.read.all`' for reading properties of other users (manager, additional mailboxes and their managers)
     - '`https://graph.microsoft.com/group.read.all`' for reading properties of all groups, required for templates restricted to groups
-    - '`https://graph.microsoft.com/mailboxsettings.readwrite`' for updating the logged-on user's Out of Office auto reply messages
-    - '`https://graph.microsoft.com/EWS.AccessAsUser.All`' for updating the logged-on user's Outlook Web signature
-  - Set the Redirect URI to '`https://localhost`' and configure it for '`mobile and desktop applications`'
+    - '`https://graph.microsoft.com/mailboxsettings.readwrite`' for updating the logged in user's Out of Office auto reply messages
+    - '`https://graph.microsoft.com/EWS.AccessAsUser.All`' for updating the logged in user's Outlook Web signature
+  - Set the Redirect URI to '`http://localhost`' and configure it for '`mobile and desktop applications`'
   - Enable '`Allow public client flows`' to make Windows Integrated Authentication (SSO) work for Azure AD joined devices
 - In Set-OutlookSignature, use '`.\config\default graph config.ps1`' as a template for a custom Graph configuration file
   - Set '`$GraphClientID`' to the application ID created by the Graph administrator before
@@ -962,7 +972,13 @@ These tasks typically happen multiple times a year. A graphical user interface m
 
 From an end user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
 
-## 16.23. What about the roaming signatures feature announced by Microsoft?  
+## 16.23. What if a user has no Outlook profile or is prohibited from starting Outlook?
+If a user has never started Outlook before or has deleted all Outlook profiles, Set-OutlookSignatures will still be useful: It will create the signature folder if it does not exist, determine the logged in users e-mail address, create the signatures for his personal mailbox, set a default signature in Outlook Web as well as the Out of Office messages.
+
+Default signatures can not be set locally or in Outlook Web until an Outlook profile has been configured, as the corresponding settings are stored in registry paths containing random numbers, which need to be created by Outlook.
+## 16.24. What if Outlook is not installed at all?
+If Outlook is not installed at all, Set-OutlookSignatures will still be useful: It determine the logged in users e-mail address, create the signatures for his personal mailbox in a temporary location, set a default signature in Outlook Web as well as the Out of Office messages.
+## 16.25. What about the roaming signatures feature announced by Microsoft?  
 Microsoft announced a future change in how and where signatures are stored. Basically, signatures will no longer stored in the file system, but in the mailbox itself.  
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
 
@@ -981,7 +997,7 @@ Outlook for Windows beta versions already support the roaming signatures feature
 
 Microsoft is already supporting the feature in Outlook Web for more and more Exchange Online tenants. Currently, this breaks PowerShell commands such as Set-MailboxMessageConfiguration and there is no public API available.
   - Set-OutlookSignatures can set one Outlook Web signature, but an Exchange Online tenant with multiple signatures feature enabled just ignores this signature (see the next chapter for workarounds).
-### 16.23.1. Please be aware of the following problem
+### 16.25.1. Please be aware of the following problem
 Since Q3 2021, the roaming signature feature appears and disappears on Outlook Web of cloud mailboxes. There is still no hint of an API, or a way to disable it on the server.
 
 When multiple signatures in Outlook Web are enabled, Set-OutlookSignatures can successfully set the signature in Outlook Web, but this signature is ignored.
@@ -1003,7 +1019,7 @@ At the time of writing, there are two workarounds:
   - Only Microsoft can do this. Let Microsoft know via a support case.
 
 As soon as there is an official API or a scriptable workaround available, it will be evaluated for support in Set-OutlookSignatures.
-## 16.24. Why does the text color of my signature change sometimes?
+## 16.26. Why does the text color of my signature change sometimes?
 Set-OutlookSignatures does not change text color. Very likely, your template files and your Outlook installation are configured for this color change:
 - Per default, Outlook uses black text for new e-mails, and blue text for replies and forwarded e-mails
 - Word and the signature editor integrated in Outlook have a specific color named "Automatic"
