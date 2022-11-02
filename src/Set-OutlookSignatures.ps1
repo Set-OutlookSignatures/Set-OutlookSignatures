@@ -765,21 +765,19 @@ function main {
             }
 
             foreach ($OutlookProfile in $OutlookProfiles) {
-                foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\*" -ErrorAction SilentlyContinue | Where-Object { ($_.'0102663e') })) {
-                (@(ForEach ($char in @(($RegistryFolder.'0102663e' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split "$([char]0x000C)" | ForEach-Object {
-                        if ($_ -match "(\S+@\S+\.\S+(?=/o=))(/o=[\S ]+(?=.{5}$([char]0x0002)$([char]0x0010)))") {
-                            Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
+                foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\*" -ErrorAction SilentlyContinue | Where-Object { (($_.'001f6641') -and ($_.'01020fff')) })) {
+                    $x = (@(ForEach ($char in @(($RegistryFolder.'01020fff' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '')
 
-                            if ($MailAddresses -inotcontains $matches[1]) {
-                                Write-Host "    $($matches[1].ToLower()) (automapped or additional mailbox)"
+                    if ($x -match "(/o=[\S ]+(?=.{5}$([char]0x0002)$([char]0x0010)))(.{5}$([char]0x0002)$([char]0x0010))(\S+@\S+\.\S+)") {
+                        if ("smtp:$($matches[3])" -ilike (@(ForEach ($char in @(($RegistryFolder.'001f6641' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '')) {
+                            if ($MailAddresses -inotcontains $matches[3]) {
+                                Write-Host "  $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
+                                Write-Host "    $($matches[3].ToLower()) (automapped or additional mailbox)"
                                 $RegistryPaths += $RegistryFolder.PSPath
-                                $MailAddresses += $matches[1].ToLower()
-                                $LegacyExchangeDNs += $matches[2].ToLower()
-                            } else {
-                                Write-Host "    $($matches[1].ToLower()) (automapped or additional mailbox, already added before)"
+                                $MailAddresses += $matches[3].ToLower()
+                                $LegacyExchangeDNs += $matches[1].ToLower()
+                                Write-Verbose "      $($LegacyExchangeDNs[-1])"
                             }
-
-                            Write-Verbose "      $($LegacyExchangeDNs[-1])"
                         }
                     }
                 }

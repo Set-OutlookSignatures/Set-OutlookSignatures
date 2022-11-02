@@ -25,6 +25,7 @@ _Attention cloud mailbox users: Microsoft will make roaming signatures available
 ### Fixed
 - Correctly calculate mailbox priority when simulation mode is enabled and/or the e-mail address is a secondary address
 - On-prem: Membership in domain local groups is now recognized if the group is in a child domain of a forest connected with a cross-forest trust
+- Only consider mailboxes as additional mailboxes when they appear in Outlook's list in the e-mail navigation pane. This avoids falsely adding shared calendars as additional mailboxes.
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.3.0" target="_blank">v3.3.0</a> - 2022-09-05
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
