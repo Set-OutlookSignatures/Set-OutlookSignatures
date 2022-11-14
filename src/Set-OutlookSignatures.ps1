@@ -1105,23 +1105,32 @@ function main {
         }
     }
 
-
     if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -inotcontains $ADPropsCurrentUser.mail) -and (-not $SimulateUser)) {
         # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
         # Maybe this is a pure Outlook Web user, so we will add a helper entry
         # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
         Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Add dummy mailbox entry." -ForegroundColor Yellow
-        $script:CurrentUserDummyMailbox = $true
-        $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
-        $MailAddresses = @($ADPropsCurrentUser.mail.tolower()) + $MailAddresses
-        $RegistryPaths = @("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths
-        $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
+        if ($ADPropsCurrentUser.mail) {
+            $script:CurrentUserDummyMailbox = $true
+            $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
+            $MailAddresses = @($ADPropsCurrentUser.mail.tolower()) + $MailAddresses
+            $RegistryPaths = @("hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths
+            $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
+        } else {
+            Write-Host '      User does not have mail attribute configured' -ForegroundColor Yellow
+            $script:CurrentUserDummyMailbox = $false
+        }
     } else {
         $script:CurrentUserDummyMailbox = $false
     }
+
+    if ($ADPropsCurrentUser.mail) {
+        Write-Host "    $($ADPropsCurrentUser.mail.tolower())"
+    }
+
     if ($ADPropsCurrentUser.distinguishedname) {
         Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
-    } else {
+    } elseif ($ADPropsCurrentUser.userprincipalname) {
         Write-Host "    $($ADPropsCurrentUser.userprincipalname)"
     }
 
@@ -1175,9 +1184,13 @@ function main {
     }
 
     if ($ADPropsCurrentUserManager) {
+        if ($ADPropsCurrentUserManager.mail) {
+            Write-Host "    $($ADPropsCurrentUserManager.mail.tolower())"
+        }
+
         if ($ADPropsCurrentUserManager.distinguishedname) {
             Write-Host "    $($ADPropsCurrentUserManager.distinguishedname)"
-        } else {
+        } elseif ($ADPropsCurrentUserManager.userprincipalname) {
             Write-Host "    $($ADPropsCurrentUserManager.userprincipalname)"
         }
     } else {
@@ -1275,7 +1288,7 @@ function main {
     # First, check if the user has a mail attribute set
     if ($ADPropsCurrentUser.mail) {
         Write-Host "  AD mail attribute of currently logged in user: $($ADPropsCurrentUser.mail)"
-        
+
         for ($i = 0; $i -lt $LegacyExchangeDNs.count; $i++) {
             if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -icontains "smtp:$($ADPropsCurrentUser.mail)")) {
                 if (($SimulateUser) -or ((-not $SimulateUser) -and ($RegistryPaths[$i] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*'))) {
