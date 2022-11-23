@@ -1136,14 +1136,15 @@ function main {
 
     $CurrentUserSIDs = @()
     if (($ADPropsCurrentUser.objectsid -ne '') -and ($null -ne $ADPropsCurrentUser.objectsid)) {
-        if ($GraphOnly) {
+        if ($ADPropsCurrentUser.objectsid.tostring().startswith('S-', 'CurrentCultureIgnorecase')) {
             $CurrentUserSIDs += $ADPropsCurrentUser.objectsid.tostring()
         } else {
             $CurrentUserSIDs += (New-Object System.Security.Principal.SecurityIdentifier $($ADPropsCurrentUser.objectsid), 0).value
         }
     }
+
     foreach ($SidHistorySid in @($ADPropsCurrentUser.sidhistory | Where-Object { $_ })) {
-        if ($GraphOnly) {
+        if ($SidHistorySid.tostring().startswith('S-', 'CurrentCultureIgnorecase')) {
             $CurrentUserSIDs += $SidHistorySid.tostring()
         } else {
             $CurrentUserSIDs += (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value
