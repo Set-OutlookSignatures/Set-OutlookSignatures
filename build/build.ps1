@@ -61,7 +61,7 @@ function main {
         $tempFileContent = $tempFileContent -replace 'XXXRemoveWhenBuildingXXX-->', ''
         $tempFileContent | Set-Content $($_[0])
         # convert to HTML
-        & pandoc.exe $($_[0]) --resource-path=".;docs" -f gfm -t html --self-contained -H .\build\pandoc_header.html --css .\build\pandoc_css_empty.css --metadata pagetitle="$(([System.IO.FileInfo]"$($_[0])").basename) - Set-OutlookSignatures" -o $($_[1])
+        & pandoc.exe $($_[0]) --resource-path=".;docs" -f gfm -t html --embed-resources --standalone -H .\build\pandoc_header.html --css .\build\pandoc_css_empty.css --metadata pagetitle="$(([System.IO.FileInfo]"$($_[0])").basename) - Set-OutlookSignatures" -o $($_[1])
     }
 
 
