@@ -3194,7 +3194,7 @@ function SetSignatures {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if (-not $SimulateUser) {
                         if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
-                            Write-Host "$Indent      Set signature as default for new messages"
+                            Write-Host "$Indent      Set signature as default for new messages (Outlook profile '$(($RegistryPaths[$j] -split '\\')[8])')"
                             if ($script:CurrentUserDummyMailbox -ne $true) {
                                 if ($OutlookFileVersion -ge '16.0.0.0') {
                                     New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force | Out-Null
@@ -3220,7 +3220,7 @@ function SetSignatures {
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if (-not $SimulateUser) {
                         if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
-                            Write-Host "$Indent      Set signature as default for reply/forward messages"
+                            Write-Host "$Indent      Set signature as default for reply/forward messages (Outlook profile '$(($RegistryPaths[$j] -split '\\')[8])')"
                             if ($script:CurrentUserDummyMailbox -ne $true) {
                                 if ($OutlookFileVersion -ge '16.0.0.0') {
                                     New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + $(if ($CurrentMailboxUseSignatureRoaming -eq $true) { " ($($MailAddresses[$AccountNumberRunning]))" })) -Force | Out-Null
