@@ -752,23 +752,21 @@ function main {
                 Write-Host "    $($MailAddresses[-1])"
                 Write-Verbose "      $($LegacyExchangeDNs[-1])"
             }
-        }
 
-        if ($SignaturesForAutomappedAndAdditionalMailboxes) {
-            # When Outlook is running, wait until it is running for at least 60 seconds
-            # This ensures that the registry entries for automapped and additional mailboxes have been recreated
-            while (
-                (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }) -and
-                ((New-TimeSpan -Start (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }).starttime).totalseconds -le 60)
-            ) {
-                Write-Verbose 'Outlook is running. Wait until Outlook is no longer running or running for more than 60 seconds'
-                Start-Sleep -Seconds 1
-            }
-
-            foreach ($OutlookProfile in $OutlookProfiles) {
+            if ($SignaturesForAutomappedAndAdditionalMailboxes) {
+                # When Outlook is running, wait until it is running for at least 60 seconds
+                # This ensures that the registry entries for automapped and additional mailboxes have been recreated
+                while (
+                    (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }) -and
+                    ((New-TimeSpan -Start (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }).starttime).totalseconds -le 60)
+                ) {
+                    Write-Verbose 'Outlook is running. Wait until Outlook is no longer running or running for more than 60 seconds'
+                    Start-Sleep -Seconds 1
+                }
+    
                 foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\*" -ErrorAction SilentlyContinue | Where-Object { (($_.'001f6641') -and ($_.'01020fff')) })) {
                     $x = (@(ForEach ($char in @(($RegistryFolder.'01020fff' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '')
-
+    
                     if ($x -match "(/o=[\S ]+(?=.{5}$([char]0x0002)$([char]0x0010)))(.{5}$([char]0x0002)$([char]0x0010))(\S+@\S+\.\S+)") {
                         if ("smtp:$($matches[3])" -ilike (@(ForEach ($char in @(($RegistryFolder.'001f6641' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '')) {
                             if ($MailAddresses -inotcontains $matches[3]) {
@@ -1365,9 +1363,24 @@ function main {
 
     Write-Host '  Mailbox priority (highest to lowest)'
     for ($x = 0; $x -lt $MailAddresses.count; $x++) {
-        Write-Host "    $($MailAddresses[$x])"
-        Write-Verbose "      $($RegistryPaths[$x] -ireplace '^Microsoft\.PowerShell\.Core\\Registry::HKEY_CURRENT_USER', 'HKCU')"
-        Write-Verbose "      $($LegacyExchangeDNs[$x])"
+        if ($MailAddresses.IndexOf($MailAddresses[$x]) -eq $x) {
+            Write-Host "    $($MailAddresses[$x])"
+
+            $y = 0
+
+            @(
+                foreach ($MailAddress in $MailAddresses) {
+                    if ($MailAddress -ieq $MailAddresses[$x]) {
+                        $y
+                    }
+                    $y++
+                }
+            ) | ForEach-Object {
+                Write-Verbose "      Outlook profile '$(($RegistryPaths[$_] -split '\\')[8])'"
+                Write-Verbose "        $($RegistryPaths[$_] -ireplace '^Microsoft\.PowerShell\.Core\\Registry::HKEY_CURRENT_USER', 'HKCU')"
+                Write-Verbose "        $($LegacyExchangeDNs[$_])"
+            }
+        }
     }
 
     $TemplateFilesGroupSIDsOverall = @{}
