@@ -487,19 +487,19 @@ Else, the file names in the ini file and the file system do not match, which wil
 It is recommended to create a copy of your template folder for tests.
 6. Make the script use the ini file by passing the `'SignatureIniPath'` and/or `'OOFIniPath'` parameter
 # 11. Signature and OOF application order  
-Templates are applied in a specific order: Common tempaltes first, group templates second, e-mail address specific templates last.
+Signatures are applied mailbox for mailbox. The mailbox list is sorted as follows (from highest to lowest priority):
+- Mailbox of the currently logged-in user
+- Mailboxes from the default Outlook profile, in the sort order shown in Outlook (and not in the order they were added to the Outlook profile)
+- Mailboxes from other Outlook profiles. The profiles are sorted alphabetically. Within each profile, the mailboxes are sorted in the order they are shown in Outlook.
 
-Templates with a time range tag are only considered if the current system time is in range of at least one of these tags.
+For each mailbox, templates are applied in a specific order: Common templates first, group templates second, e-mail address specific templates last.
 
-Common templates are templates with either no tag or only `[defaultNew]` and/or `[defaultReplyFwd]` (`[internal]` and/or `[external]` for OOF templates).
+Each one of these templates groups can have one or more time range tags assigned. Such a template is only considered if the current system time is within at least one of these time range tags.
+- Common templates are templates with either no tag or only `[defaultNew]` and/or `[defaultReplyFwd]` (`[internal]` and/or `[external]` for OOF templates).
+- Within these template groups, templates are sorted according to the sort order and sort culture defines in the configuration file.
+- Every centrally stored signature template is only applied to the mailbox with the highest priority allowed to use it. This ensures that no mailbox with lower priority can overwrite a signature intended for a higher priority mailbox.
 
-Within these groups, templates are applied alphabetically ascending.
-
-Every centrally stored signature template is applied only once, as there is only one signature path in Outlook, and subfolders are not allowed - so the file names have to be unique.
-
-The script always starts with the mailboxes in the default Outlook profile, preferrably with the current users personal mailbox.
-
-OOF templates are only applied if the Out of Office assistant is currently disabled. If it is currently active or scheduled to be activated in the future, OOF templates are not applied.  
+OOF templates are only applied if the Out of Office assistant is currently disabled. If it is currently active or scheduled to be automatically activated in the future, OOF templates are not applied.  
 # 12. Variable replacement  
 Variables are case sensitive.
 

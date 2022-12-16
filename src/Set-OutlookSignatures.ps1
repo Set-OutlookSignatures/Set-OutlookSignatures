@@ -760,7 +760,7 @@ function main {
                     (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }) -and
                     ((New-TimeSpan -Start (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }).starttime).totalseconds -le 60)
                 ) {
-                    Write-Verbose 'Outlook is running. Wait until Outlook is no longer running or running for more than 60 seconds'
+                    Write-Verbose 'Outlook is running. Waiting until Outlook is running for more than 60 seconds, or closed.'
                     Start-Sleep -Seconds 1
                 }
 
@@ -1351,16 +1351,33 @@ function main {
         $PrimaryMailboxAddress = $MailAddresses[$p]
     }
 
-    for ($i = 0; $i -le $RegistryPaths.length - 1; $i++) {
-        if (($RegistryPaths[$i] -ilike "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\*") -and ($i -ne $p)) {
-            $MailboxNewOrder += $i
-        }
-    }
+    foreach ($OutlookProfile in $OutlookProfiles) {
+        $OutlookProfile
+        $CurrentOutlookProfileMailboxSortOrder = @()
 
-    for ($i = 0; $i -le $RegistryPaths.length - 1; $i++) {
-        if (($RegistryPaths[$i] -notlike "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\*") -and ($i -ne $p)) {
-            $MailboxNewOrder += $i
+        foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\0a0d020000000000c000000000000046" -ErrorAction SilentlyContinue | Where-Object { ($_.'11020458') })) {
+            $CurrentOutlookProfileMailboxSortOrder += @(([regex]::Matches((@(ForEach ($char in @(($RegistryFolder.'11020458' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join ''), '(?<=\s)[a-zA-Z0-9.!#$%&''*+\/^[a-zA-Z0-9.!#$%&''*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*(?=\/o=)').captures.value | Where-Object { ($_) -and ($_ -ine $PrimaryMailboxAddress) -and ($MailAddresses -icontains $_) }).tolower())
         }
+
+        if ($CurrentOutlookProfileMailboxSortOrder.count -gt 0) {
+            foreach ($CurrentOutlookProfileMailboxSortOrderMailbox in $CurrentOutlookProfileMailboxSortOrder) {
+                for ($i = 0; $i -le $RegistryPaths.count - 1; $i++) {
+                    if (($RegistryPaths[$i] -ilike "Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookProfile\*") -and ($i -ne $p)) {
+                        if ($MailAddresses[$i] -ieq $CurrentOutlookProfileMailboxSortOrderMailbox) {
+                            $MailboxNewOrder += $i
+                            break
+                        }
+                    }
+                }
+            }
+        } else {
+            for ($i = 0; $i -le $RegistryPaths.count - 1; $i++) {
+                if (($RegistryPaths[$i] -ilike "Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookProfile\*") -and ($i -ne $p)) {
+                    $MailboxNewOrder += $i
+                }
+            }
+        }
+
     }
 
     foreach ($VariableName in ('RegistryPaths', 'MailAddresses', 'LegacyExchangeDNs', 'ADPropsMailboxesUserDomain', 'ADPropsMailboxes')) {
@@ -1390,6 +1407,7 @@ function main {
     }
 
     $TemplateFilesGroupSIDsOverall = @{}
+
     foreach ($SigOrOOF in ('signature', 'OOF')) {
         if (($SigOrOOF -eq 'OOF') -and ($SetCurrentUserOOFMessage -eq $false)) {
             break
