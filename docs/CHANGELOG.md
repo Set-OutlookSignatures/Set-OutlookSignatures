@@ -21,7 +21,8 @@ _Attention cloud mailbox users: Microsoft will make roaming signatures available
 ### Fixed
 - Mailbox priority list: Don't add automapped or additional mailboxes to the end of the mailbox priority list, but to the end of each Outlook profile in the mailbox priority list
 - Mailbox priority list: When duplicates exist, only show the mail address with the highest priority. Verbose output contains additional information for each occurrence (Outlook profile name, registry path, legacyExchangeDN)
-- Setting default signature: Show Outlook profile name, so that mailboxes that exist in multiple profiles can be distinguished
+- Setting default signature: Show Outlook profile name, so that mailboxes that exist in multiple Outlook profiles can be distinguished
+- When the logged in user's personal mailbox exists in multiple profiles, set the Outlook Web signature and OOF message only for this mailbox only once
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.4.1" target="_blank">v3.4.1</a> - 2022-11-25
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
