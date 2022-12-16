@@ -1213,74 +1213,80 @@ function main {
         $ADPropsMailboxes += $null
         $ADPropsMailboxesUserDomain += $null
 
-        if ((($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '') -or ($($MailAddresses[$AccountNumberRunning]) -ne ''))) {
-            if ($null -ne $TrustsToCheckForGroups[0]) {
-                # Loop through domains until the first one knows the legacyExchangeDN or the proxy address
-                for ($DomainNumber = 0; (($DomainNumber -lt $TrustsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
-                    if (($TrustsToCheckForGroups[$DomainNumber] -ne '')) {
-                        Write-Host "    Search for mailbox user object in domain/forest '$($TrustsToCheckForGroups[$DomainNumber])': " -NoNewline
-                        $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
-                        if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
-                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(|(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning]))(&(legacyExchangeDN=*)(proxyaddresses=x500:$($LegacyExchangeDNs[$AccountNumberRunning])))))"
-                        } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
-                            $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
-                        }
-                        $u = $Search.FindAll()
-                        if ($u.count -eq 0) {
-                            Write-Host 'Not found'
-                        } elseif ($u.count -gt 1) {
-                            Write-Host 'Ignore due to multiple matches' -ForegroundColor Red
-                            foreach ($SingleU in $u) {
-                                Write-Host "      $($SingleU.path)" -ForegroundColor Yellow
+        if ($AccountNumberRunning -eq $MailAddresses.IndexOf($MailAddresses[$AccountNumberRunning])) {
+            if ((($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '') -or ($($MailAddresses[$AccountNumberRunning]) -ne ''))) {
+                if ($null -ne $TrustsToCheckForGroups[0]) {
+                    # Loop through domains until the first one knows the legacyExchangeDN or the proxy address
+                    for ($DomainNumber = 0; (($DomainNumber -lt $TrustsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
+                        if (($TrustsToCheckForGroups[$DomainNumber] -ne '')) {
+                            Write-Host "    Search for mailbox user object in domain/forest '$($TrustsToCheckForGroups[$DomainNumber])': " -NoNewline
+                            $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
+                            if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
+                                $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(|(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning]))(&(legacyExchangeDN=*)(proxyaddresses=x500:$($LegacyExchangeDNs[$AccountNumberRunning])))))"
+                            } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
+                                $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
                             }
-                            $LegacyExchangeDNs[$AccountNumberRunning] = ''
-                            $MailAddresses[$AccountNumberRunning] = ''
-                            $UserDomain = $null
-                        } else {
-                            # Connect to Domain Controller (LDAP), as Global Catalog (GC) does not have all attributes
-                            $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
-                            $ADPropsMailboxes[$AccountNumberRunning] = $Search.FindOne().Properties
-                            $UserDomain = $TrustsToCheckForGroups[$DomainNumber]
-                            $ADPropsMailboxesUserDomain[$AccountNumberRunning] = $TrustsToCheckForGroups[$DomainNumber]
-                            $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyexchangedn
-                            $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
-                            Write-Host 'Found'
-                            Write-Host "      $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
+                            $u = $Search.FindAll()
+                            if ($u.count -eq 0) {
+                                Write-Host 'Not found'
+                            } elseif ($u.count -gt 1) {
+                                Write-Host 'Ignore due to multiple matches' -ForegroundColor Red
+                                foreach ($SingleU in $u) {
+                                    Write-Host "      $($SingleU.path)" -ForegroundColor Yellow
+                                }
+                                $LegacyExchangeDNs[$AccountNumberRunning] = ''
+                                $MailAddresses[$AccountNumberRunning] = ''
+                                $UserDomain = $null
+                            } else {
+                                # Connect to Domain Controller (LDAP), as Global Catalog (GC) does not have all attributes
+                                $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
+                                $ADPropsMailboxes[$AccountNumberRunning] = $Search.FindOne().Properties
+                                $UserDomain = $TrustsToCheckForGroups[$DomainNumber]
+                                $ADPropsMailboxesUserDomain[$AccountNumberRunning] = $TrustsToCheckForGroups[$DomainNumber]
+                                $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyexchangedn
+                                $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
+                                Write-Host 'Found'
+                                Write-Host "      $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
+                            }
                         }
                     }
-                }
 
-                if (-not $ADPropsMailboxes[$AccountNumberRunning]) {
-                    $LegacyExchangeDNs[$AccountNumberRunning] = ''
-                    $UserDomain = $null
+                    if (-not $ADPropsMailboxes[$AccountNumberRunning]) {
+                        $LegacyExchangeDNs[$AccountNumberRunning] = ''
+                        $UserDomain = $null
+                    }
+                } else {
+                    $AADProps = (GraphGetUserProperties $($MailAddresses[$AccountNumberRunning])).properties
+
+                    $ADPropsMailboxes[$AccountNumberRunning] = [PSCustomObject]@{}
+
+                    if ($AADProps) {
+                        foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                            $z = $AADProps
+
+                            foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                                $z = $z.$y
+                            }
+
+                            $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
+                        }
+
+                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).photo
+                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).properties.userprincipalname
+                        $LegacyExchangeDNs[$AccountNumberRunning] = 'dummy'
+                        $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
+                    } else {
+                        $LegacyExchangeDNs[$AccountNumberRunning] = ''
+                        $UserDomain = $null
+                    }
                 }
             } else {
-                $AADProps = (GraphGetUserProperties $($MailAddresses[$AccountNumberRunning])).properties
-
-                $ADPropsMailboxes[$AccountNumberRunning] = [PSCustomObject]@{}
-
-                if ($AADProps) {
-                    foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
-                        $z = $AADProps
-
-                        foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
-                            $z = $z.$y
-                        }
-
-                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
-                    }
-
-                    $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).photo
-                    $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).properties.userprincipalname
-                    $LegacyExchangeDNs[$AccountNumberRunning] = 'dummy'
-                    $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
-                } else {
-                    $LegacyExchangeDNs[$AccountNumberRunning] = ''
-                    $UserDomain = $null
-                }
+                $ADPropsMailboxes[$AccountNumberRunning] = $null
             }
         } else {
-            $ADPropsMailboxes[$AccountNumberRunning] = $null
+            Write-Host '    Mailbox user object already searched before, using cached data'
+
+            $ADPropsMailboxes[$AccountNumberRunning] = $ADPropsMailboxes[$MailAddresses.IndexOf($MailAddresses[$AccountNumberRunning])]
         }
     }
 
