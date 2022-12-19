@@ -272,7 +272,7 @@ Param(
 
     # Simulate another user as currently logged in user
     [Alias('SimulationUser')]
-    [validatescript( {
+    [validatescript({
             $tempSimulateUser = $_
             if ($tempSimulateUser -match '^\S+@\S+$|^\S+\\\S+$') {
                 $true
@@ -568,16 +568,24 @@ function main {
         try {
             $OutlookFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
             $OutlookFileVersion = [System.Version]::Parse((((($OutlookFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
-            $OutlookBitness = GetBitness $OutlookFilePath
         } catch {
             try {
                 $OutlookFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
                 $OutlookFileVersion = [System.Version]::Parse((((($OutlookFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
-                $OutlookBitness = GetBitness $OutlookFilePath
             } catch {
+                $OutlookFilePath = $null
                 $OutlookFileVersion = $null
-                $OutlookBitness = $null
             }
+        }
+
+        if ($OutlookFilePath) {
+            try {
+                $OutlookBitness = (GetBitness -fullname $OutlookFilePath).Architecture
+            } catch {
+                $OutlookBitness = 'Error'
+            }
+        } else {
+            $OutlookBitness = $null
         }
 
         if ($OutlookRegistryVersion.major -eq 0) {
@@ -677,16 +685,24 @@ function main {
     try {
         $WordFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
         $WordFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
-        $WordBitness = GetBitness $WordFilePath
     } catch {
         try {
             $WordFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
             $WordFileVersion = [System.Version]::Parse((((($WordFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
-            $WordBitness = GetBitness $WordFilePath
         } catch {
+            $WordFilePath = $Null
             $WordFileVersion = $null
-            $WordBitness = $null
         }
+    }
+
+    if ($WordFilePath) {
+        try {
+            $WordBitness = (GetBitness -fullname $WordFilePath).Architecture
+        } catch {
+            $WordBitness = 'Error'
+        }
+    } else {
+        $WordBitness = $null
     }
 
     Write-Host "    Registry version: $WordRegistryVersion"
@@ -756,12 +772,14 @@ function main {
             if ($SignaturesForAutomappedAndAdditionalMailboxes) {
                 # When Outlook is running, wait until it is running for at least 60 seconds
                 # This ensures that the registry entries for automapped and additional mailboxes have been recreated
-                while (
+                if ($OutlookFilePath) {
+                    while (
                     (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }) -and
                     ((New-TimeSpan -Start (Get-Process | Where-Object { $_.path -ieq $OutlookFilePath.FullName }).starttime).totalseconds -le 60)
-                ) {
-                    Write-Verbose 'Outlook is running. Waiting until Outlook is running for more than 60 seconds, or closed.'
-                    Start-Sleep -Seconds 1
+                    ) {
+                        Write-Verbose 'Outlook is running. Waiting until Outlook is running for more than 60 seconds, or closed.'
+                        Start-Sleep -Seconds 1
+                    }
                 }
 
                 foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\*" -ErrorAction SilentlyContinue | Where-Object { (($_.'001f6641') -and ($_.'01020fff')) })) {
@@ -829,7 +847,7 @@ function main {
                 if ($x[0] -eq '*') {
                     foreach ($TrustedDomain in $TrustedDomains) {
                         # No intra-forest trusts, only bidirectional trusts and outbound trusts
-                        if (($($TrustedDomain.properties.trustattributes) -ne 32) -and (($($TrustedDomain.properties.trustdirection) -eq 2) -or ($($TrustedDomain.properties.trustdirection) -eq 3)) ) {
+                        if (($($TrustedDomain.properties.trustattributes) -ne 32) -and (($($TrustedDomain.properties.trustdirection) -eq 2) -or ($($TrustedDomain.properties.trustdirection) -eq 3))) {
                             if ($TrustedDomain.properties.trustattributes -eq 8) {
                                 # Cross-forest trust
                                 Write-Host "  Trusted forest: $($TrustedDomain.properties.name.tolower())"
@@ -897,7 +915,7 @@ function main {
                             if ($TrustedDomains.properties.name -icontains $y) {
                                 foreach ($TrustedDomain in @($TrustedDomains | Where-Object { $_.properties.name -ieq $y })) {
                                     # No intra-forest trusts, only bidirectional trusts and outbound trusts
-                                    if (($($TrustedDomain.properties.trustattributes) -ne 32) -and (($($TrustedDomain.properties.trustdirection) -eq 2) -or ($($TrustedDomain.properties.trustdirection) -eq 3)) ) {
+                                    if (($($TrustedDomain.properties.trustattributes) -ne 32) -and (($($TrustedDomain.properties.trustdirection) -eq 2) -or ($($TrustedDomain.properties.trustdirection) -eq 3))) {
                                         if ($TrustedDomain.properties.trustattributes -eq 8) {
                                             # Cross-forest trust
                                             Write-Host "    Trusted forest: $($TrustedDomain.properties.name)"
@@ -1673,7 +1691,7 @@ function main {
                                     )
                                     ForEach ($tempFilter in $tempFilterOrder) {
                                         $tempResults = (GraphFilterGroups $tempFilter)
-                                        if (($tempResults.error -eq $false) -and ($tempResults.groups.count -eq 1 )) {
+                                        if (($tempResults.error -eq $false) -and ($tempResults.groups.count -eq 1)) {
                                             if ($TemplateFilePartTag.startswith('[-:')) {
                                                 $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ('-:' + $tempResults.groups[0].securityidentifier))
                                                 $TemplateFilesGroupSIDsOverall.add(($TemplateFilePartTag -replace '^\[-:', '['), $tempResults.groups[0].securityidentifier)
@@ -2135,7 +2153,7 @@ function main {
 
             # Set OOF message and Outlook Web signature
             if (((($SetCurrentUserOutlookWebSignature -eq $true) -and ($CurrentMailboxUseSignatureRoaming -eq $false)) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
-                if ((-not $SimulateUser) ) {
+                if ((-not $SimulateUser)) {
                     Write-Host "  Set up environment for connection to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
                     $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                     try {
@@ -2477,66 +2495,160 @@ function main {
 
 
 function GetBitness {
-    [CmdletBinding(ConfirmImpact = 'none')]
-    param (
-        [Parameter(HelpMessage = 'Enter binary file(s) to examine', Position = 0,
-            Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName )]
-        [ValidateNotNullOrEmpty()]
-        [ValidateScript({ Test-Path -Path ((Get-Item -Path $_).FullName) })]
-        [string[]]  $Path,
+    [CmdletBinding()]
 
-        [Alias('PassThru')]
-        [switch] $PassThrough
+    Param
+    (
+        [Parameter(Mandatory = $true, ParameterSetName = 'files', HelpMessage = 'Comma separated list of files to process', ValueFromPipelineByPropertyName = $true)]
+        [string[]]$fullname ,
+        [Parameter(Mandatory = $true, ParameterSetName = 'folders', HelpMessage = 'Comma separated list of folders to process')]
+        [string[]]$folders ,
+        [Parameter(Mandatory = $false, ParameterSetName = 'folders')]
+        [switch]$recurse ,
+        [switch]$explain ,
+        [switch]$quiet ,
+        [switch]$dotnetOnly
     )
 
-    begin {
-        $paths = Resolve-Path -Path $path | Select-Object -ExpandProperty Path
-        try {
-            $enumString = @'
-                public enum BinaryType
-                {
-                    BIT32 = 0, // A 32-bit Windows-based application, SCS_32BIT_BINARY
-                    DOS = 1, // An MS-DOS - based application, SCS_DOS_BINARY
-                    WOW = 2, // A 16-bit Windows-based application, SCS_WOW_BINARY
-                    PIF = 3, // A PIF file that executes an MS-DOS based application, SCS_PIF_BINARY
-                    POSIX = 4, // A POSIX based application, SCS_POSIX_BINARY
-                    OS216 = 5, // A 16-bit OS/2-based application, SCS_OS216_BINARY
-                    BIT64 = 6 // A 64-bit Windows-based application, SCS_64BIT_BINARY
-                }
-'@
+    Begin {
+        [int]$MACHINE_OFFSET = 4
+        [int]$PE_POINTER_OFFSET = 60
 
-            Add-Type -TypeDefinition $enumString
-        } catch {
+        [hashtable]$machineTypes = @{
+            0x0000 = 'Unknown'
+            0x0001 = 'Interacts with the host and not a WOW64 guest'
+            0x014c = 'x86' # 'Intel 386 or later processors and compatible processors'
+            0x0160 = 'MIPS big-endian'
+            0x0162 = 'MIPS little-endian'
+            0x0166 = 'MIPS little-endian'
+            0x0169 = 'MIPS little-endian WCE v2'
+            0x0184 = 'Alpha_AXP'
+            0x01a2 = 'SH3 little-endian'
+            0x01a3 = 'SH3DSP'
+            0x01a4 = 'SH3E little-endian'
+            0x01a6 = 'SH4 little-endian'
+            0x01a8 = 'SH5'
+            0x01c0 = 'ARM little-endian'
+            0x01c2 = 'ARM Thumb/Thumb-2 little-endian'
+            0x01c4 = 'ARM Thumb-2 little-endian'
+            0x01d3 = 'TAM33BD'
+            0x01f0 = 'PowerPC little-endian'
+            0x01f1 = 'Power PC with floating point support'
+            0x0200 = 'IA64'
+            0x0266 = 'MIPS16'
+            0x0284 = 'AXP64'
+            0x0366 = 'MIPS with FPU'
+            0x0466 = 'MIPS16 with FPU'
+            0x0520 = 'Infineon'
+            0x0CEF = 'CEF'
+            0x0EBC = 'EFI byte code'
+            0x5032 = 'RISC-V 32-bit address space'
+            0x5064 = 'RISC-V 64-bit address space'
+            0x5128 = 'RISC-V 128-bit address space'
+            0x8664 = 'x64'
+            0x9041 = 'M32R little-endian'
+            0xAA64 = 'ARM64 little-endian'
+            0xC0EE = 'CEE'
         }
 
-        try {
-            $Signature = @'
-                    [DllImport("kernel32.dll")]
-                    public static extern bool GetBinaryType(
-                                        string lpApplicationName,
-                                        ref int lpBinaryType
-                    );
-'@
+        [hashtable]$processorAchitectures = @{
+            'None'  = 'None'
+            'MSIL'  = 'AnyCPU'
+            'X86'   = 'x86'
+            'I386'  = 'x86'
+            'IA64'  = 'Itanium'
+            'Amd64' = 'x64'
+            'Arm'   = 'ARM'
+        }
 
-            Add-Type -MemberDefinition $Signature -Name BinaryType -Namespace PFWin32Utils
-        } catch {
+        [hashtable]$pekindsExplanations = @{
+            'ILOnly'                      = 'MSIL processor neutral'
+            'NotAPortableExecutableImage' = 'Not in portable executable (PE) file format'
+            'PE32Plus'                    = 'Requires a 64-bit platform'
+            'Preferred32Bit'              = 'Platform-agnostic but should be run on 32-bit platform'
+            'Required32Bit'               = 'Runs on a 32-bit platform or in the 32-bit WOW environment on a 64-bit platform'
+            'Unmanaged32Bit'              = 'Contains pure unmanaged code'
+        }
+
+        If ($PSBoundParameters[ 'folders' ]) {
+            $fullname = @(ForEach ($folder in $folders) {
+                    Get-ChildItem -Path $folder -File -Recurse:$recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+                })
         }
     }
 
-    process {
-        foreach ($Item in $Paths) {
-            $ReturnedType = -1
-            $Result = [PFWin32Utils.BinaryType]::GetBinaryType($Item, [ref] $ReturnedType)
+    Process {
+        ForEach ($file in $fullname) {
+            Try {
+                $runtimeAssembly = [System.Reflection.Assembly]::ReflectionOnlyLoadFrom($file)
+            } Catch {
+                $runtimeAssembly = $null
+            }
 
-            if (!$Result -or ($ReturnedType -eq -1)) {
-                Write-Error -Message "Failed to get binary type for file $($Item)"
-            } else {
-                $ToReturn = [BinaryType] $ReturnedType
-                if ($PassThrough) {
-                    Get-Item -Path $Item.FullName -Force |
-                    Add-Member -MemberType noteproperty -Name BinaryType -Value $ToReturn -Force -PassThru
-                } else {
-                    $ToReturn
+            Try {
+                $assembly = [System.Reflection.AssemblyName]::GetAssemblyName($file)
+            } Catch {
+                $assembly = $null
+            }
+
+            if ((-not $dotnetOnly) -or ($assembly -and $runtimeAssembly)) {
+                $data = New-Object System.Byte[] 4096
+                Try {
+                    $stream = New-Object System.IO.FileStream -ArgumentList $file, Open, Read
+                } Catch {
+                    $stream = $null
+                    if (-not $quiet) {
+                        Write-Verbose $_
+                    }
+                }
+
+                If ($stream) {
+                    [uint16]$machineUint = 0xffff
+                    [int]$read = $stream.Read($data , 0 , $data.Count)
+                    If ($read -gt $PE_POINTER_OFFSET) {
+                        If (($data[0] -eq 0x4d) -and ($data[1] -eq 0x5a)) {
+                            ## MZ
+                            [int]$PE_HEADER_ADDR = [System.BitConverter]::ToInt32($data, $PE_POINTER_OFFSET)
+                            [int]$typeOffset = $PE_HEADER_ADDR + $MACHINE_OFFSET
+                            If ($data[$PE_HEADER_ADDR] -eq 0x50 -and $data[$PE_HEADER_ADDR + 1] -eq 0x45) {
+                                ## PE
+                                If ($read -gt $typeOffset + [System.Runtime.InteropServices.Marshal]::SizeOf($machineUint)) {
+                                    [uint16]$machineUint = [System.BitConverter]::ToUInt16($data, $typeOffset)
+                                    $versionInfo = Get-ItemProperty -Path $file -ErrorAction SilentlyContinue | Select-Object -ExpandProperty VersionInfo
+                                    If ($runtimeAssembly -and ($module = ($runtimeAssembly.GetModules() | Select-Object -First 1))) {
+                                        $pekinds = New-Object -TypeName System.Reflection.PortableExecutableKinds
+                                        $imageFileMachine = New-Object -TypeName System.Reflection.ImageFileMachine
+                                        $module.GetPEKind([ref]$pekinds, [ref]$imageFileMachine)
+                                    } Else {
+                                        $pekinds = $null
+                                        $imageFileMachine = $null
+                                    }
+
+                                    [pscustomobject][ordered]@{
+                                        'File'                = $file
+                                        'Architecture'        = $machineTypes[ [int]$machineUint ]
+                                        'NET Architecture'    = $(If ($assembly) { $processorAchitectures[ $assembly.ProcessorArchitecture.ToString() ] } else { 'Not .NET' })
+                                        'NET PE Kind'         = $(If ($pekinds) { if ($explain) { ($pekinds.ToString() -split ',\s?' | ForEach-Object { $pekindsExplanations[ $_ ] }) -join ',' } else { $pekinds.ToString() } }  else { 'Not .NET' })
+                                        'NET Platform'        = $(If ($imageFileMachine) { $processorAchitectures[ $imageFileMachine.ToString() ] } else { 'Not .NET' })
+                                        'NET Runtime Version' = $(If ($runtimeAssembly) { $runtimeAssembly.ImageRuntimeVersion } else { 'Not .NET' })
+                                        'Company'             = $versionInfo | Select-Object -ExpandProperty CompanyName
+                                        'File Version'        = $versionInfo | Select-Object -ExpandProperty FileVersionRaw
+                                        'Product Name'        = $versionInfo | Select-Object -ExpandProperty ProductName
+                                    }
+                                } Else {
+                                    Write-Verbose "Only read $($data.Count) bytes from `"$file`" so can't reader header at offset $typeOffset"
+                                }
+                            } ElseIf (-not $quiet) {
+                                Write-Verbose "'$file' does not have a PE header signature"
+                            }
+                        } ElseIf (-not $quiet) {
+                            Write-Verbose "'$file' is not an executable"
+                        }
+                    } ElseIf (-not $quiet) {
+                        Write-Verbose "Only read $read bytes from '$file', not enough to get header at $PE_POINTER_OFFSET"
+                    }
+                    $stream.Close()
+                    $stream = $null
                 }
             }
         }
@@ -3285,7 +3397,7 @@ function CheckADConnectivity {
         $PowerShell = [powershell]::Create()
         $PowerShell.RunspacePool = $RunspacePool
 
-        [void]$PowerShell.AddScript( {
+        [void]$PowerShell.AddScript({
                 Param (
                     [string]$CheckDomain,
                     [string]$CheckProtocolText
@@ -3747,9 +3859,9 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal) {
             $body = @{}
             $body.add('automaticRepliesSetting', @{})
 
-            if ($OOFInternal) { $Body.'automaticRepliesSetting'.add('internalReplyMessage', $OOFInternal ) }
+            if ($OOFInternal) { $Body.'automaticRepliesSetting'.add('internalReplyMessage', $OOFInternal) }
 
-            if ($OOFExternal) { $Body.'automaticRepliesSetting'.add('externalReplyMessage', $OOFExternal ) }
+            if ($OOFExternal) { $Body.'automaticRepliesSetting'.add('externalReplyMessage', $OOFExternal) }
 
             $body = $body | ConvertTo-Json
             $requestBody = @{
