@@ -16,6 +16,18 @@
 -->
 
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.5.0" target="_blank">v3.5.0</a> - 2022-12-19
+_Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `'What about the roaming signatures feature in Exchange Online?'` in '`README`' for details, known problems and workarounds._
+### Changed
+- Mailbox prioritization: Within an Outlook profile, mailbox priority is now determined by the sort order shown in Outlook, no longer by the time a mailbox has been added to the profile. See '`Update 'Signature and OOF application order`' in '`README`' for more details about mailbox prioritization.
+- `'README'`: Update FAQ `'What about the roaming signatures feature in Exchange Online?'`
+### Fixed
+- Mailbox priority list: Don't add automapped or additional mailboxes to the end of the mailbox priority list, but to the end of each Outlook profile in the mailbox priority list
+- Mailbox priority list: When duplicates exist, only show the mail address with the highest priority. Verbose output contains additional information for each occurrence (Outlook profile name, registry path, legacyExchangeDN)
+- Setting default signature: Show Outlook profile name, so that mailboxes that exist in multiple Outlook profiles can be distinguished
+- When the logged in user's personal mailbox exists in multiple profiles, set the Outlook Web signature and OOF message for this mailbox only once
+- When a mailbox exists in multiple Outlook profiles, only query AD/Graph at the first occurrence and use cached data on remaining occurrences
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.4.1" target="_blank">v3.4.1</a> - 2022-11-25
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Fixed

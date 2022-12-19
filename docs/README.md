@@ -109,7 +109,7 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [16.22. Why is no admin or user GUI available?](#1622-why-is-no-admin-or-user-gui-available)
   - [16.23. What if a user has no Outlook profile or is prohibited from starting Outlook?](#1623-what-if-a-user-has-no-outlook-profile-or-is-prohibited-from-starting-outlook)
   - [16.24. What if Outlook is not installed at all?](#1624-what-if-outlook-is-not-installed-at-all)
-  - [16.25. What about the roaming signatures feature announced by Microsoft?](#1625-what-about-the-roaming-signatures-feature-announced-by-microsoft)
+  - [16.25. What about the roaming signatures feature in Exchange Online?](#1625-what-about-the-roaming-signatures-feature-in-exchange-online)
     - [16.25.1. Please be aware of the following problem](#16251-please-be-aware-of-the-following-problem)
   - [16.26. Why does the text color of my signature change sometimes?](#1626-why-does-the-text-color-of-my-signature-change-sometimes)
   
@@ -487,19 +487,19 @@ Else, the file names in the ini file and the file system do not match, which wil
 It is recommended to create a copy of your template folder for tests.
 6. Make the script use the ini file by passing the `'SignatureIniPath'` and/or `'OOFIniPath'` parameter
 # 11. Signature and OOF application order  
-Templates are applied in a specific order: Common tempaltes first, group templates second, e-mail address specific templates last.
+Signatures are applied mailbox for mailbox. The mailbox list is sorted as follows (from highest to lowest priority):
+- Mailbox of the currently logged-in user
+- Mailboxes from the default Outlook profile, in the sort order shown in Outlook (and not in the order they were added to the Outlook profile)
+- Mailboxes from other Outlook profiles. The profiles are sorted alphabetically. Within each profile, the mailboxes are sorted in the order they are shown in Outlook.
 
-Templates with a time range tag are only considered if the current system time is in range of at least one of these tags.
+For each mailbox, templates are applied in a specific order: Common templates first, group templates second, e-mail address specific templates last.
 
-Common templates are templates with either no tag or only `[defaultNew]` and/or `[defaultReplyFwd]` (`[internal]` and/or `[external]` for OOF templates).
+Each one of these templates groups can have one or more time range tags assigned. Such a template is only considered if the current system time is within at least one of these time range tags.
+- Common templates are templates with either no tag or only `[defaultNew]` and/or `[defaultReplyFwd]` (`[internal]` and/or `[external]` for OOF templates).
+- Within these template groups, templates are sorted according to the sort order and sort culture defines in the configuration file.
+- Every centrally stored signature template is only applied to the mailbox with the highest priority allowed to use it. This ensures that no mailbox with lower priority can overwrite a signature intended for a higher priority mailbox.
 
-Within these groups, templates are applied alphabetically ascending.
-
-Every centrally stored signature template is applied only once, as there is only one signature path in Outlook, and subfolders are not allowed - so the file names have to be unique.
-
-The script always starts with the mailboxes in the default Outlook profile, preferrably with the current users personal mailbox.
-
-OOF templates are only applied if the Out of Office assistant is currently disabled. If it is currently active or scheduled to be activated in the future, OOF templates are not applied.  
+OOF templates are only applied if the Out of Office assistant is currently disabled. If it is currently active or scheduled to be automatically activated in the future, OOF templates are not applied.  
 # 12. Variable replacement  
 Variables are case sensitive.
 
@@ -978,20 +978,19 @@ If a user has never started Outlook before or has deleted all Outlook profiles, 
 Default signatures can not be set locally or in Outlook Web until an Outlook profile has been configured, as the corresponding settings are stored in registry paths containing random numbers, which need to be created by Outlook.
 ## 16.24. What if Outlook is not installed at all?
 If Outlook is not installed at all, Set-OutlookSignatures will still be useful: It determine the logged in users e-mail address, create the signatures for his personal mailbox in a temporary location, set a default signature in Outlook Web as well as the Out of Office messages.
-## 16.25. What about the roaming signatures feature announced by Microsoft?  
-Microsoft announced a future change in how and where signatures are stored. Basically, signatures will no longer stored in the file system, but in the mailbox itself.  
+## 16.25. What about the roaming signatures feature in Exchange Online?  
+Microsoft changed how and where signatures are stored for mailboxes in Exchange Online. Basically, signatures are stored in the mailbox itself.  
 For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.  
 
 This is a good idea, as it makes signatures available across devices and apps.
 
 Some personal educated guesses based on available documentation, Outlook for Windows beta versions and several Exchange Online tenants:
-- The feature has first been annount by Microsoft in 2020, but has been postponed multiple times. At the time of writing this, the feature shall be released publicly in October 2022 according to the Office 365 roadmap.
-- Microsoft has not yet published a public API. 
+- The feature has first been annount by Microsoft in 2020, but has been postponed multiple times. The feature seems to get enabled in waves across all Exchange Online tenants since late 2022.
+- Microsoft has not yet published a public API, although the feature is announced since 2020 and being actively enabled. 
 - Outlook for Windows is the only client mentioned to support the new feature for now. I am confident more e-mail clients - especially Outlook for Mac, iOS and Android - will follow (the sooner, the better).
-- The roaming signatures feature will very likely only be available for mailboxes in the cloud. Mailboxes on on-prem servers will not support this feature, no matter if in pure on-prem or in hybrid scenarios.
-- It is yet unclear if this feature will be available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about '`$CURRENTUSER[...]$`' replacement variables).
-
-Outlook for Windows beta versions already support the roaming signatures feature. Until the feature is fully rolled out and an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensure full compatibility with Set-OutlookSignatures, until a public API is released and incorporated into the script.
+- Although Micrsoft actively enables the feature for all Exchange Online tenants, it is yet unclear if this feature is available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about '`$CURRENTUSER[...]$`' replacement variables).
+- The roaming signatures feature is only available for mailboxes in the cloud. Mailboxes on on-prem servers do not (yet?) support this feature, no matter if in pure on-prem or in hybrid scenarios.
+- Outlook for Windows (beta) versions already support the roaming signatures feature. Until an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensure full compatibility with Set-OutlookSignatures, until a public API is released and incorporated into the script. For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.
   - With the '`DisableRoamingSignaturesTemporaryToggle`' registry value being absent or set to 0, file based signatures created by tools such as Set-OutlookSignatures are regularly deleted and replaced with signatures stored directly in the mailbox.
   - With the '`DisableRoamingSignaturesTemporaryToggle`' registry value set to 1, the file based approach continues to work as known. Outlook does not synchronize signatures to the mailbox.
 
