@@ -17,8 +17,8 @@
 # 1. Create a new custom configuration file in a separate folder.
 # 2. The first step in the new custom configuration file should be to load the default configuration file:
 #    # Loading default replacement variables shipped with Set-OutlookSignatures
-#    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath '\\server\share\folder\Set-OutlookSignatures\config\default graph config.ps1' -Raw)))
-# 3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
+#    . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $(Join-Path -Path $(Get-Location).path -ChildPath '\config\default graph config.ps1') -Raw)))
+# 3. After importing the default configuration file, existing configurations and mappings can be altered with custom definitions and new ones can be added.
 # 4. Instead of altering existing replacement variables, it is recommended to create new replacement variables with modified content.
 # 5. Start Set-OutlookSignatures with the parameter 'GraphConfigFile' pointing to the new custom configuration file.
 
