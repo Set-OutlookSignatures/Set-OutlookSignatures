@@ -562,14 +562,24 @@ function main {
         Write-Host '  Simulation mode enabled, skip Outlook checks' -ForegroundColor Yellow
     } else {
         Write-Host '  Outlook'
-
         $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
 
         try {
-            $OutlookFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+            # [Microsoft.Win32.RegistryView]::Registry32 makes sure view the registry as a 32 bit application would
+            # This is independent from the bitness of the PowerShell process, while Get-ItemProperty always uses the bitness of the PowerShell process
+            # Covers:
+            #   Office x86 on Windows x86
+            #   Office x86 on Windows x64
+            #   Any PowerShell process bitness
+            $OutlookFilePath = Get-ChildItem ((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry32)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0] -ErrorAction Stop
         } catch {
             try {
-                $OutlookFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+                # [Microsoft.Win32.RegistryView]::Registry64 makes sure we view the registry as a 64 bit application would
+                # This is independent from the bitness of the PowerShell process, while Get-ItemProperty always uses the bitness of the PowerShell process
+                # Covers:
+                #   Office x64 on Windows x64
+                #   Any PowerShell process bitness
+                $OutlookFilePath = Get-ChildItem ((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry64)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0] -ErrorAction Stop
             } catch {
                 $OutlookFilePath = $null
             }
@@ -1149,12 +1159,10 @@ function main {
 
     if ($ADPropsCurrentUser.mail) {
         Write-Host "    $($ADPropsCurrentUser.mail.tolower())"
-    }
-
-    if ($ADPropsCurrentUser.distinguishedname) {
+    } elseif ($ADPropsCurrentUser.distinguishedname) {
         Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
     } elseif ($ADPropsCurrentUser.userprincipalname) {
-        Write-Host "    $($ADPropsCurrentUser.userprincipalname)"
+        Write-Host "    $($ADPropsCurrentUser.userprincipalname.tolower())"
     }
 
     $CurrentUserSIDs = @()
@@ -1374,11 +1382,13 @@ function main {
     }
 
     foreach ($OutlookProfile in $OutlookProfiles) {
-        $OutlookProfile
         $CurrentOutlookProfileMailboxSortOrder = @()
 
         foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\0a0d020000000000c000000000000046" -ErrorAction SilentlyContinue | Where-Object { ($_.'11020458') })) {
-            $CurrentOutlookProfileMailboxSortOrder += @(([regex]::Matches((@(ForEach ($char in @(($RegistryFolder.'11020458' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join ''), '(?<=\s)[a-zA-Z0-9.!#$%&''*+\/^[a-zA-Z0-9.!#$%&''*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*(?=\/o=)').captures.value | Where-Object { ($_) -and ($_ -ine $PrimaryMailboxAddress) -and ($MailAddresses -icontains $_) }).tolower())
+            try {
+                $CurrentOutlookProfileMailboxSortOrder += @(([regex]::Matches((@(ForEach ($char in @(($RegistryFolder.'11020458' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join ''), '(?<=\s)[a-zA-Z0-9.!#$%&''*+\/^[a-zA-Z0-9.!#$%&''*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*(?=\/o=)').captures.value | Where-Object { ($_) -and ($_ -ine $PrimaryMailboxAddress) -and ($MailAddresses -icontains $_) }).tolower())
+            } catch {
+            }
         }
 
         if ($CurrentOutlookProfileMailboxSortOrder.count -gt 0) {
