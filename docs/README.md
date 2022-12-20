@@ -530,9 +530,10 @@ Per default, `'.\config\default replacement variables.ps1'` contains the followi
     - `$CURRENTUSERPHOTO$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
     - `$CURRENTUSERPHOTODELETEEMPTY$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
     - `$CURRENTUSEREXTATTR1$` to `$CURRENTUSEREXTATTR15$`: Exchange extension attributes 1 to 15  
-    - `$CURRENTUSERCOMPANY`: Company  
-    - `$CURRENTUSERMAILNICKNAME`: Alias (mailNickname)  
-    - `$CURRENTUSERDISPLAYNAME`: Display Name  
+    - `$CURRENTUSEROFFICE$`: Office room number (physicalDeliveryOfficeName)  
+    - `$CURRENTUSERCOMPANY$`: Company  
+    - `$CURRENTUSERMAILNICKNAME$`: Alias (mailNickname)  
+    - `$CURRENTUSERDISPLAYNAME$`: Display Name  
 - Manager of currently logged in user  
     - Same variables as logged in user, `$CURRENTUSERMANAGER[...]$` instead of `$CURRENTUSER[...]$`  
 - Current mailbox  
