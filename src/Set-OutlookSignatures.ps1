@@ -567,25 +567,27 @@ function main {
 
         try {
             $OutlookFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
-            $OutlookFileVersion = [System.Version]::Parse((((($OutlookFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
         } catch {
             try {
                 $OutlookFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
-                $OutlookFileVersion = [System.Version]::Parse((((($OutlookFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
             } catch {
                 $OutlookFilePath = $null
-                $OutlookFileVersion = $null
             }
         }
 
         if ($OutlookFilePath) {
             try {
-                $OutlookBitness = (GetBitness -fullname $OutlookFilePath).Architecture
+                $OutlookBitnessInfo = GetBitness -fullname $OutlookFilePath
+                $OutlookFileVersion = [System.Version]::Parse((((($OutlookBitnessInfo.'File Version'.ToString() + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+                $OutlookBitness = $OutlookBitnessInfo.Architecture
+                Remove-Variable -Name 'OutlookBitnessInfo'
             } catch {
                 $OutlookBitness = 'Error'
+                $OutlookFileVersion = $null
             }
         } else {
             $OutlookBitness = $null
+            $OutlookFileVersion = $null
         }
 
         if ($OutlookRegistryVersion.major -eq 0) {
@@ -684,25 +686,27 @@ function main {
 
     try {
         $WordFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
-        $WordFileVersion = [System.Version]::Parse(((((((Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop)).versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
     } catch {
         try {
             $WordFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
-            $WordFileVersion = [System.Version]::Parse((((($WordFilePath.versioninfo.fileversion + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
         } catch {
             $WordFilePath = $Null
-            $WordFileVersion = $null
         }
     }
 
     if ($WordFilePath) {
         try {
-            $WordBitness = (GetBitness -fullname $WordFilePath).Architecture
+            $WordBitnessInfo = GetBitness -fullname $WordFilePath
+            $WordFileVersion = [System.Version]::Parse((((($WordBitnessInfo.'File Version'.ToString() + '.0.0.0.0')) -replace '^\.', '' -split '\.')[0..3] -join '.'))
+            $WordBitness = $WordBitnessInfo.Architecture
+            Remove-Variable -Name 'WordBitnessInfo'
         } catch {
             $WordBitness = 'Error'
+            $WordFileVersion = $null
         }
     } else {
         $WordBitness = $null
+        $WordFileVersion = $null
     }
 
     Write-Host "    Registry version: $WordRegistryVersion"
@@ -2515,40 +2519,34 @@ function GetBitness {
         [int]$PE_POINTER_OFFSET = 60
 
         [hashtable]$machineTypes = @{
-            0x0000 = 'Unknown'
-            0x0001 = 'Interacts with the host and not a WOW64 guest'
-            0x014c = 'x86' # 'Intel 386 or later processors and compatible processors'
-            0x0160 = 'MIPS big-endian'
-            0x0162 = 'MIPS little-endian'
-            0x0166 = 'MIPS little-endian'
-            0x0169 = 'MIPS little-endian WCE v2'
-            0x0184 = 'Alpha_AXP'
-            0x01a2 = 'SH3 little-endian'
-            0x01a3 = 'SH3DSP'
-            0x01a4 = 'SH3E little-endian'
-            0x01a6 = 'SH4 little-endian'
-            0x01a8 = 'SH5'
-            0x01c0 = 'ARM little-endian'
-            0x01c2 = 'ARM Thumb/Thumb-2 little-endian'
-            0x01c4 = 'ARM Thumb-2 little-endian'
-            0x01d3 = 'TAM33BD'
-            0x01f0 = 'PowerPC little-endian'
-            0x01f1 = 'Power PC with floating point support'
-            0x0200 = 'IA64'
-            0x0266 = 'MIPS16'
-            0x0284 = 'AXP64'
-            0x0366 = 'MIPS with FPU'
-            0x0466 = 'MIPS16 with FPU'
-            0x0520 = 'Infineon'
-            0x0CEF = 'CEF'
-            0x0EBC = 'EFI byte code'
-            0x5032 = 'RISC-V 32-bit address space'
-            0x5064 = 'RISC-V 64-bit address space'
-            0x5128 = 'RISC-V 128-bit address space'
-            0x8664 = 'x64'
-            0x9041 = 'M32R little-endian'
-            0xAA64 = 'ARM64 little-endian'
-            0xC0EE = 'CEE'
+            # Source: https://learn.microsoft.com/en-us/windows/win32/debug/pe-format#machine-types
+            0x0    = 'UNKNOWN' # IMAGE_FILE_MACHINE_UNKNOWN; The content of this field is assumed to be applicable to any machine type
+            0x14c  = 'x86' # IMAGE_FILE_MACHINE_I386; Intel 386 or later processors and compatible processors
+            0x166  = 'R4000' # IMAGE_FILE_MACHINE_R4000; MIPS little endian
+            0x169  = 'WCEMIPSV2' # IMAGE_FILE_MACHINE_WCEMIPSV2; MIPS little-endian WCE v2
+            0x1a2  = 'SH3' # IMAGE_FILE_MACHINE_SH3; Hitachi SH3
+            0x1a3  = 'SH3DSP' # IMAGE_FILE_MACHINE_SH3DSP; Hitachi SH3 DSP
+            0x1a6  = 'SH4' # IMAGE_FILE_MACHINE_SH4; Hitachi SH4
+            0x1a8  = 'SH5' # IMAGE_FILE_MACHINE_SH5; Hitachi SH5
+            0x1c0  = 'ARM' # IMAGE_FILE_MACHINE_ARM; ARM little endian
+            0x1c2  = 'THUMB' # IMAGE_FILE_MACHINE_THUMB; Thumb
+            0x1c4  = 'ARMNT' # IMAGE_FILE_MACHINE_ARMNT; ARM Thumb-2 little endian
+            0x1d3  = 'AM33' # IMAGE_FILE_MACHINE_AM33; Matsushita AM33
+            0x1f0  = 'POWERPC' # IMAGE_FILE_MACHINE_POWERPC; Power PC little endian
+            0x1f1  = 'POWERPCFP' # IMAGE_FILE_MACHINE_POWERPCFP; Power PC with floating point support
+            0x200  = 'IA64' # IMAGE_FILE_MACHINE_IA64; Intel Itanium processor family
+            0x266  = 'MIPS16' # IMAGE_FILE_MACHINE_MIPS16; MIPS16
+            0x366  = 'MIPSFPU' # IMAGE_FILE_MACHINE_MIPSFPU; MIPS with FPU
+            0x466  = 'MIPSFPU16' # IMAGE_FILE_MACHINE_MIPSFPU16; MIPS16 with FPU
+            0x5032 = 'RISCV32' # IMAGE_FILE_MACHINE_RISCV32; RISC-V 32-bit address space
+            0x5064 = 'RISCV64' # IMAGE_FILE_MACHINE_RISCV64; RISC-V 64-bit address space
+            0x5128 = 'RISCV128' # IMAGE_FILE_MACHINE_RISCV128; RISC-V 128-bit address space
+            0x6232 = 'LOONGARCH32' # IMAGE_FILE_MACHINE_LOONGARCH32; LoongArch 32-bit processor family
+            0x6264 = 'LOONGARCH64' # IMAGE_FILE_MACHINE_LOONGARCH64; LoongArch 64-bit processor family
+            0x8664 = 'x64' # IMAGE_FILE_MACHINE_AMD64; x64
+            0x9041 = 'M32R' # IMAGE_FILE_MACHINE_M32R; Mitsubishi M32R little endian
+            0xaa64 = 'ARM64' # IMAGE_FILE_MACHINE_ARM64; ARM64 little endian
+            0xebc  = 'EBC' # IMAGE_FILE_MACHINE_EBC; EFI byte code
         }
 
         [hashtable]$processorAchitectures = @{
@@ -2626,9 +2624,9 @@ function GetBitness {
 
                                     [pscustomobject][ordered]@{
                                         'File'                = $file
-                                        'Architecture'        = $machineTypes[ [int]$machineUint ]
-                                        'NET Architecture'    = $(If ($assembly) { $processorAchitectures[ $assembly.ProcessorArchitecture.ToString() ] } else { 'Not .NET' })
-                                        'NET PE Kind'         = $(If ($pekinds) { if ($explain) { ($pekinds.ToString() -split ',\s?' | ForEach-Object { $pekindsExplanations[ $_ ] }) -join ',' } else { $pekinds.ToString() } }  else { 'Not .NET' })
+                                        'Architecture'        = $machineTypes[[int]$machineUint]
+                                        'NET Architecture'    = $(If ($assembly) { $processorAchitectures[$assembly.ProcessorArchitecture.ToString()] } else { 'Not .NET' })
+                                        'NET PE Kind'         = $(If ($pekinds) { if ($explain) { ($pekinds.ToString() -split ',\s?' | ForEach-Object { $pekindsExplanations[$_] }) -join ',' } else { $pekinds.ToString() } }  else { 'Not .NET' })
                                         'NET Platform'        = $(If ($imageFileMachine) { $processorAchitectures[ $imageFileMachine.ToString() ] } else { 'Not .NET' })
                                         'NET Runtime Version' = $(If ($runtimeAssembly) { $runtimeAssembly.ImageRuntimeVersion } else { 'Not .NET' })
                                         'Company'             = $versionInfo | Select-Object -ExpandProperty CompanyName
