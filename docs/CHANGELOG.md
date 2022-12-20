@@ -19,8 +19,8 @@
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.5.1" target="_blank">v3.5.1</a> - 2022-12-20
 _Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `'What about the roaming signatures feature in Exchange Online?'` in '`README`' for details, known problems and workarounds._
 ### Fixed
-- Use different code to determine Outlook and Word executable file bitness, as the .Net APIs used before seem to fail randomly with the latest Windows and .Net updates
-- Do not stop script when '`SignaturesForAutomappedAndAdditionalMailboxes`' is enabled and the Outlook file path can not be determined
+- Use different code to determine Outlook and Word executable file bitness, as the .Net APIs used before seem to fail randomly with the latest Windows and .Net updates (especially when using 32-bit PowerShell on 64-bit Windows)
+- Do not stop the script when '`SignaturesForAutomappedAndAdditionalMailboxes`' is enabled and the Outlook file path can not be determined
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.5.0" target="_blank">v3.5.0</a> - 2022-12-19
 _Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `'What about the roaming signatures feature in Exchange Online?'` in '`README`' for details, known problems and workarounds._
