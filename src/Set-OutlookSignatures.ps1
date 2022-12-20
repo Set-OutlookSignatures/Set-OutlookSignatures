@@ -695,12 +695,23 @@ function main {
     }
 
     try {
-        $WordFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\WOW6432NODE\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+        # [Microsoft.Win32.RegistryView]::Registry32 makes sure view the registry as a 32 bit application would
+        # This is independent from the bitness of the PowerShell process, while Get-ItemProperty always uses the bitness of the PowerShell process
+        # Covers:
+        #   Office x86 on Windows x86
+        #   Office x86 on Windows x64
+        #   Any PowerShell process bitness
+        $WordFilePath = Get-ChildItem ((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry32)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0] -ErrorAction Stop
     } catch {
         try {
-            $WordFilePath = Get-ChildItem (((Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32" -ErrorAction Stop).'(default)') -split ' \/')[0] -ErrorAction Stop
+            # [Microsoft.Win32.RegistryView]::Registry64 makes sure we view the registry as a 64 bit application would
+            # This is independent from the bitness of the PowerShell process, while Get-ItemProperty always uses the bitness of the PowerShell process
+            # Covers:
+            #   Office x64 on Windows x64
+            #   Any PowerShell process bitness
+            $WordFilePath = Get-ChildItem ((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry64)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0] -ErrorAction Stop
         } catch {
-            $WordFilePath = $Null
+            $WordFilePath = $null
         }
     }
 
@@ -1373,6 +1384,7 @@ function main {
         }
     }
 
+    Write-Host '  Mailbox priority (highest to lowest)'
     $MailboxNewOrder = @()
     $PrimaryMailboxAddress = $null
 
@@ -1391,7 +1403,8 @@ function main {
             }
         }
 
-        if ($CurrentOutlookProfileMailboxSortOrder.count -gt 0) {
+        if (($CurrentOutlookProfileMailboxSortOrder.count -gt 0) -and ($CurrentOutlookProfileMailboxSortOrder.count -eq (@($RegistryPaths | Where-Object { $_ -ilike "Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookProfile\*" }).count - @($RegistryPaths[$p] | Where-Object { $_ -ilike "Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookProfile\*" }).count))) {
+            Write-Verbose '  Outlook mailbox display sort order is defined and contains all found mail addresses.'
             foreach ($CurrentOutlookProfileMailboxSortOrderMailbox in $CurrentOutlookProfileMailboxSortOrder) {
                 for ($i = 0; $i -le $RegistryPaths.count - 1; $i++) {
                     if (($RegistryPaths[$i] -ilike "Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookProfile\*") -and ($i -ne $p)) {
@@ -1403,6 +1416,7 @@ function main {
                 }
             }
         } else {
+            Write-Verbose '  Outlook mailbox display sort order is not yet defined or does not yet contain all found mail addresses. Falling back to sorting by time mailboxes have been added.'
             for ($i = 0; $i -le $RegistryPaths.count - 1; $i++) {
                 if (($RegistryPaths[$i] -ilike "Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookProfile\*") -and ($i -ne $p)) {
                     $MailboxNewOrder += $i
@@ -1416,7 +1430,6 @@ function main {
         (Get-Variable -Name $VariableName).value = (Get-Variable -Name $VariableName).value[$MailboxNewOrder]
     }
 
-    Write-Host '  Mailbox priority (highest to lowest)'
     for ($x = 0; $x -lt $MailAddresses.count; $x++) {
         if ($MailAddresses.IndexOf($MailAddresses[$x]) -eq $x) {
             Write-Host "    $($MailAddresses[$x])"
