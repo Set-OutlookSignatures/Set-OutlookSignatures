@@ -2452,6 +2452,18 @@ function main {
     }
 
 
+    # Close Word, as it is no longer needed
+    if ($script:COMWord) {
+        try {
+            $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
+        } catch {
+        }
+        $script:COMWord.Quit([ref]$false)
+        [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWord) | Out-Null
+        Remove-Variable -Name 'COMWord' -Scope 'script'
+    }
+
+
     # Delete old signatures created by this script, which are no longer available in $SignatureTemplatePath
     # We check all local signatures for a specific marker in HTML code, so we don't touch user created signatures
     if ($DeleteScriptCreatedSignaturesWithoutTemplate -eq $true) {
@@ -2948,7 +2960,6 @@ function SetSignatures {
         }
 
         if ($UseHtmTemplates) {
-            # use .html for temporary file, .htm for final file
             try {
                 Copy-Item -LiteralPath $Signature.name -Destination $path
 
@@ -3162,6 +3173,10 @@ function SetSignatures {
             # Restore original view
             $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
 
+            # Save changed document, it's later used for export to .htm, .rtf and .txt
+            $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatDocumentDefault')
+            $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+
             # Export to .htm
             Write-Host "$Indent      Export to HTM format"
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
@@ -3216,7 +3231,7 @@ function SetSignatures {
         }
 
         if (-not $ProcessOOF) {
-            Write-Host "$Indent        Set correct connected folder name"
+            Write-Host "$Indent        Modify connected folder name"
 
             foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
                 if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName))) {
@@ -3227,12 +3242,12 @@ function SetSignatures {
             }
 
             [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
-                
+
             if ($EmbedImagesInHtml) {
                 Write-Host "$Indent        Embed local images"
 
                 [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
-                
+
                 ConvertToSingleFileHTML $path $path
             }
         } else {
@@ -3317,7 +3332,7 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.Close($false)
             }
         }
-        
+
         if (-not $ProcessOOF) {
             foreach ($SignaturePath in $SignaturePaths) {
                 if ($CurrentMailboxUseSignatureRoaming -eq $true) {

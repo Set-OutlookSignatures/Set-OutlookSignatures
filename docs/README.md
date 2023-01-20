@@ -1073,9 +1073,8 @@ If you enforce setting sensitivity labels:
   - Converting HTM files to TXT is also no problem, as both file formats can not be assigned a sensitivity label. 
 
 Additional information that might be of interest for your Information Protection configuration:
-- Template files are copied to the local temp directory of the user (PowerShell: '`[System.IO.Path]::GetTempPath()`') for further use, with a randomly generated GUID as name. The extension used is either .docx or .html (not .htm as used in the template).
-- The local copy of a template file is opened for variable replacement and file conversion to HTM, but never saved back to disk. 
-- Converted files are also stored in the temp directory, using the same GUID as the original file as file name, but a different file extension (.htm, .rtf, .txt).
-- Conversion to RTF and TXT uses the same source file (.docx when using DOCX templates, else .htm).
+- Template files are copied to the local temp directory of the user (PowerShell: '`[System.IO.Path]::GetTempPath()`') for further use, with a randomly generated GUID as name. The extension is the one of the template (.docx or .htm).
+- The local copy of a template file is opened for variable replacement, saved back to disk, and then re-opened for each file conversion (to .htm if neccessary, and optionally to .rtf and/or .txt). 
+- Converted files are also stored in the temp directory, using the same GUID as the original file as file name but a different file extension (.htm, .rtf, .txt).
 - After all variable replacements and conversions are completed for a template, the converted files (HTM mandatory, RTF and TXT optional) are copied to the Outlook signature folder. The path of this folder is language and version dependent (Registry: '`HKCU:\Software\Microsoft\Office\<Outlook Version>\Common\General\Signatures`').
 - All temporary files mentioned are deleted by Set-OutlookSignatures as part of the clean-up process.
