@@ -537,8 +537,10 @@ function main {
     }
 
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
-    ConvertPath ([ref]$AdditionalSignaturePath)
-    checkpath $AdditionalSignaturePath -create
+    if ($AdditionalSignaturePath) {
+        ConvertPath ([ref]$AdditionalSignaturePath)
+        checkpath $AdditionalSignaturePath -create
+    }
 
     Write-Host "  SimulateUser: '$SimulateUser'"
 
@@ -739,7 +741,9 @@ function main {
     Write-Host "Get Outlook signature file path(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $SignaturePaths = @()
     if ($SimulateUser) {
-        $SignaturePaths += $AdditionalSignaturePath
+        if ($AdditionalSignaturePath) {
+            $SignaturePaths += $AdditionalSignaturePath
+        }
         Write-Host '  Simulation mode enabled. Skip task, use AdditionalSignaturePath instead' -ForegroundColor Yellow
     } else {
         $x = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\common\general" -ErrorAction SilentlyContinue).'Signatures'
@@ -2985,6 +2989,7 @@ function SetSignatures {
         }
 
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
+
         if (-not $ProcessOOF) {
             $script:SignatureFilesDone += $Signature.Value
         }
@@ -3046,11 +3051,11 @@ function SetSignatures {
             }
 
             Write-Host "$Indent      Export to HTM format"
-            if (-not $ProcessOOF) {
-                $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
-            } else {
-                $tempFileContent | Out-File -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $Signature.Value) -Encoding UTF8 -Force
-            }
+            #            if (-not $ProcessOOF) {
+            $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
+            #           } else {
+            #              $tempFileContent | Out-File -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $Signature.Value) -Encoding UTF8 -Force
+            #         }
         } else {
             $script:COMWord.Documents.Open($path, $false) | Out-Null
 
@@ -3181,7 +3186,7 @@ function SetSignatures {
             Write-Host "$Indent      Export to HTM format"
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-            $script:COMWord.ActiveDocument.Weboptions.encoding = 65001
+            $script:COMWord.ActiveDocument.Weboptions.encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
 
             # Overcome Word security warning when export contains embedded pictures
             if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
@@ -3226,23 +3231,22 @@ function SetSignatures {
             } else {
                 $tempFileContent = $tempFileContent -ireplace ('<HTML>', ('<HTML><HEAD>' + $HTMLMarkerTag + '</HEAD>'))
             }
-        } else {
-
         }
 
-        if (-not $ProcessOOF) {
-            Write-Host "$Indent        Modify connected folder name"
+        Write-Host "$Indent        Modify connected folder name"
 
-            foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
-                if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName))) {
-                    $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $pathConnectedFolderName + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
-                    Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
-                    break
-                }
+        foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
+            if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName))) {
+                $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $pathConnectedFolderName + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
+                Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
+                break
             }
+        }
 
-            [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
+        [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
 
+
+        if (-not $ProcessOOF) {
             if ($EmbedImagesInHtml) {
                 Write-Host "$Indent        Embed local images"
 
@@ -3260,11 +3264,12 @@ function SetSignatures {
                 # If possible, use .docx file to avoid problems with MS Information Protection
                 if ($UseHtmTemplates) {
                     $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+                    $script:COMWord.Documents.Open($path, $false, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, 65001) | Out-Null
                 } else {
                     $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
+                    $script:COMWord.Documents.Open($path, $false) | Out-Null
                 }
 
-                $script:COMWord.Documents.Open($path, $false) | Out-Null
 
                 $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
                 $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
@@ -3309,14 +3314,14 @@ function SetSignatures {
                 # If possible, use .docx file to avoid problems with MS Information Protection
                 if ($UseHtmTemplates) {
                     $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+                    $script:COMWord.Documents.Open($path, $false, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, 65001) | Out-Null
                 } else {
                     $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
+                    $script:COMWord.Documents.Open($path, $false) | Out-Null
                 }
 
-                $script:COMWord.Documents.Open($path, $false) | Out-Null
-
                 $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
-                $script:COMWord.ActiveDocument.TextEncoding = 1200
+                $script:COMWord.ActiveDocument.TextEncoding = 1200 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
                 $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
 
                 try {

@@ -266,7 +266,7 @@ Default value: `"$([environment]::GetFolderPath("MyDocuments"))\Outlook signatur
 ## 2.14. UseHtmTemplates  
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
 
-Templates in .htm format must be UTF8 encoded.
+Templates in .htm format must be UTF8 encoded and the charset must be set to UTF8 ('`<META content="text/html; charset=utf-8">`').
 
 Each format has advantages and disadvantages, please see "[13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)" for a quick overview.
 
