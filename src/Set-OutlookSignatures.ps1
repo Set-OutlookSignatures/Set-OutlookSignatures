@@ -3306,7 +3306,7 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.Close($false)
 
                 Write-Host "$Indent        Shrink RTF file"
-                $((Get-Content -LiteralPath $path -Raw) -replace '\{\\nonshppict[\s\S]*?\}\}', '') | Set-Content -LiteralPath $path
+                $((Get-Content -LiteralPath $path -Raw -encoding Ascii) -replace '\{\\nonshppict[\s\S]*?\}\}', '') | Set-Content -LiteralPath $path -encoding Ascii
             }
 
             if ($CreateTxtSignatures) {
