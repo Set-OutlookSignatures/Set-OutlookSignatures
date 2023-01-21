@@ -864,6 +864,9 @@ function main {
             $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $Null)) # 3 = ADS_NAME_INITTYPE_GC
             $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (12, $(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value))) # 12 = ADS_NAME_TYPE_SID_OR_SID_HISTORY_NAME
             $UserForest = (([ADSI]"LDAP://$(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1) -split ',DC=')[1..999] -join '.')/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')).tolower()
+            [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
+            Remove-Variable -Name 'objTrans'
+            Remove-Variable -Name 'objNT'
 
             if ($UserForest -ne '') {
                 Write-Host "  User forest: $UserForest"
@@ -1061,6 +1064,9 @@ function main {
                         $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $null))
                         $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (8, $SimulateUser))
                         $SimulateUserDN = $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1)
+                        [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
+                        Remove-Variable -Name 'objTrans'
+                        Remove-Variable -Name 'objNT'
                         $Search.SearchRoot = "GC://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                         $ADPropsCurrentUser = $Search.FindOne().Properties
@@ -1726,6 +1732,9 @@ function main {
                                                 $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                                 $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                             }
+                                            [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
+                                            Remove-Variable -Name 'objTrans'
+                                            Remove-Variable -Name 'objNT'
                                         } catch {
                                             Write-Verbose $error[0]
                                         }
@@ -3071,6 +3080,10 @@ function SetSignatures {
 
             Write-Host "$Indent      Replace non-picture variables"
             $tempFileContent = $html.documentelement.outerhtml
+
+            [System.Runtime.Interopservices.Marshal]::ReleaseComObject($html) | Out-Null
+            Remove-Variable -Name 'html'
+
             foreach ($replaceKey in $replaceHash.Keys) {
                 if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
                     $tempFileContent = $tempFileContent.replace($replacekey, $replaceHash.$replaceKey)
@@ -3274,7 +3287,18 @@ function SetSignatures {
 
             if ($DocxHighResImageConversion) {
                 Write-Host "$Indent        Export high-res images"
-                if ((Test-Path ($path -replace '.htm$', $pathHtmlFolderSuffix) -PathType Container) -eq $true) {
+
+                $LowResHtml = New-Object -ComObject 'HTMLFile'
+
+                try {
+                    # PowerShell Desktop with Office
+                    $LowResHtml.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
+                } catch {
+                    # PowerShell Desktop without Office, PowerShell 6+
+                    $LowResHtml.write([System.Text.Encoding]::Unicode.GetBytes((Get-Content -LiteralPath $path -Encoding UTF8 -Raw)))
+                }
+
+                if (@($LowResHtml.images | Where-Object { ($_.src -inotlike 'data:*') -and ((Test-Path (Join-Path -Path (Split-Path -Path ($path) -Parent) -ChildPath ([uri]::UnEscapeDataString($_.src) -replace '^about:', '')))) }).Count -gt 0) {
                     $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
                     $script:COMWord.Documents.Open($path, $false) | Out-Null
 
@@ -3335,16 +3359,6 @@ function SetSignatures {
 
                     $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
-                    $LowResHtml = New-Object -ComObject 'HTMLFile'
-
-                    try {
-                        # PowerShell Desktop with Office
-                        $LowResHtml.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
-                    } catch {
-                        # PowerShell Desktop without Office, PowerShell 6+
-                        $LowResHtml.write([System.Text.Encoding]::Unicode.GetBytes((Get-Content -LiteralPath $path -Encoding UTF8 -Raw)))
-                    }
-
                     $HighResHtml = New-Object -ComObject 'HTMLFile'
 
                     try {
@@ -3368,20 +3382,29 @@ function SetSignatures {
                         # copy high-src files and update low-res link
                         for ($ImageIndex = 0; $ImageIndex -lt @($LowResHtml.images).count; $ImageIndex++) {
                             if ($LowResHtml.images[$ImageIndex].src -inotlike 'data:*') {
-                                Copy-Item -LiteralPath (Join-Path -Path (Split-Path -Path ($pathHighResHtml) -Parent) -ChildPath ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '')) -Destination ($path -replace '.htm$', $pathHtmlFolderSuffix) -Force
-                                $LowResHtml.images[$ImageIndex].src = ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '') -replace "$($pathGUID)$($pathHighResHtmlFolderSuffix)", $pathGUID
+                                if (Test-Path (Join-Path -Path (Split-Path -Path ($pathHighResHtml) -Parent) -ChildPath ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', ''))) {
+                                    Copy-Item -LiteralPath (Join-Path -Path (Split-Path -Path ($pathHighResHtml) -Parent) -ChildPath ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '')) -Destination ($path -replace '.htm$', $pathHtmlFolderSuffix) -Force
+                                    $LowResHtml.images[$ImageIndex].src = ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '') -replace "$($pathGUID)$($pathHighResHtmlFolderSuffix)", $pathGUID
+                                }
                             }
                         }
 
                         $LowResHtml.documentelement.outerhtml | Out-File -LiteralPath $path -Encoding UTF8 -Force
+
                     } else {
                         Write-Host "$Indent          Warning: Different amount of image tags in low-res ($(@($LowResHtml.images).count)) and high-res (@($HighResHtml.images).count) HTM export" -ForegroundColor Yellow
                         Write-Host "$Indent          Using low-res HTM export only" -ForegroundColor Yellow
                         Write-Host "$Indent          Please open an issue on GitHub for further investigation" -ForegroundColor Yellow
                     }
+
+                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($HighResHtml) | Out-Null
+                    Remove-Variable -Name 'HighResHtml'
                 } else {
-                    Write-Host "$Indent          Template contains no images"
+                    Write-Verbose "$Indent          No images found in connected folder"
                 }
+
+                [System.Runtime.Interopservices.Marshal]::ReleaseComObject($LowResHtml) | Out-Null
+                Remove-Variable -Name 'LowResHtml'
             }
         }
 
@@ -3753,7 +3776,8 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
                     $oIE = New-Object -com InternetExplorer.Application
                     $oIE.Visible = $false
                     $oIE.Navigate2('https://' + ((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
-                    $oIE = $null
+                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($oIE) | Out-Null
+                    Remove-Variable -Name 'oIE'
 
                     # Wait until an IE tab with the corresponding URL is open
                     $app = New-Object -com shell.application
@@ -3771,7 +3795,8 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
                         $window.quit([ref]$false)
                     }
 
-                    $app = $null
+                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($app) | Out-Null
+                    Remove-Variable -Name 'app'
                 } catch {
                 }
             }
