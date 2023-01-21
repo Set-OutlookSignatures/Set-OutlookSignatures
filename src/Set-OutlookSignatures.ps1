@@ -374,7 +374,7 @@ function main {
 
     # Connected Files - description and folder name sources:
     #   https://docs.microsoft.com/en-us/windows/win32/shell/manage#connected-files
-    #   https://docs.microsoft.com/en-us/office/vba/api/word.defaultweboptions.foldersuffix
+    #   https://docs.microsoft.com/en-us/office/vba/api/word.defaultWebOptions.foldersuffix
     $ConnectedFilesFolderNames = ('.files', '_archivos', '_arquivos', '_bestanden', '_bylos', '_datoteke', '_dosyalar', '_elemei', '_failid', '_fails', '_fajlovi', '_ficheiros', '_fichiers', '_file', '_files', '_fitxategiak', '_fitxers', '_pliki', '_soubory', '_tiedostot', '-Dateien', '-filer')
 
 
@@ -3210,20 +3210,32 @@ function SetSignatures {
 
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-            $script:COMWord.ActiveDocument.Weboptions.encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
-            $script:COMWord.ActiveDocument.Weboptions.UseLongFileNames = $true
-            $script:COMWord.ActiveDocument.Weboptions.OrganizeInFolder = $true
-            $script:COMWord.ActiveDocument.Weboptions.UseDefaultFolderSuffix()
-            $pathHtmlFolderSuffix = $script:COMWord.ActiveDocument.Weboptions.FolderSuffix
+
+            $script:WordWebOptions = $script:COMWord.ActiveDocument.WebOptions
+
+            $script:COMWord.ActiveDocument.WebOptions.AllowPNG = $true
+            $script:COMWord.ActiveDocument.WebOptions.BrowserLevel = 2 # IE6, which is the maximum
+            $script:COMWord.ActiveDocument.WebOptions.Encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
+            $script:COMWord.ActiveDocument.WebOptions.OptimizeForBrowser = $true
+            $script:COMWord.ActiveDocument.WebOptions.OrganizeInFolder = $true
+            $script:COMWord.ActiveDocument.WebOptions.PixelsPerInch = 96
+            $script:COMWord.ActiveDocument.WebOptions.RelyOnCSS = $true
+            $script:COMWord.ActiveDocument.WebOptions.RelyOnVMl = $true
+            $script:COMWord.ActiveDocument.WebOptions.ScreenSize = 3 # 800x600
+            $script:COMWord.ActiveDocument.WebOptions.TargetBrowser = 4 # IE6, which is the maximum
+            $script:COMWord.ActiveDocument.WebOptions.UseLongFileNames = $true
+
+            $script:COMWord.ActiveDocument.WebOptions.UseDefaultFolderSuffix()
+            $pathHtmlFolderSuffix = $script:COMWord.ActiveDocument.WebOptions.FolderSuffix
 
             # Overcome Word security warning when export contains embedded pictures
             if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
                 New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 0 -ErrorAction Ignore | Out-Null
             }
 
-            $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+            $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
 
-            if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
+            if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
                 New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
             }
@@ -3236,10 +3248,15 @@ function SetSignatures {
             }
 
             # Restore original security setting
-            if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
+            if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
                 Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
             } else {
-                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+            }
+
+            # Restore original WebOptions
+            foreach ($property in ('AllowPNG', 'BrowserLevel', 'Encoding', 'OptimizeForBrowser', 'OrganizeInFolder', 'PixelsPerInch', 'RelyOnCSS', 'RelyOnVMl', 'ScreenSize', 'TargetBrowser', 'UseLongFileNames')) {
+                $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
             }
 
             # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
@@ -3255,20 +3272,31 @@ function SetSignatures {
 
                     $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatHTML')
                     $pathHighResHtml = $([System.IO.Path]::ChangeExtension(($path -ireplace "$($pathguid)", "$($pathguid)HighRes"), '.htm'))
-                    $script:COMWord.ActiveDocument.Weboptions.encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
-                    $script:COMWord.ActiveDocument.Weboptions.UseLongFileNames = $true
-                    $script:COMWord.ActiveDocument.Weboptions.OrganizeInFolder = $true
-                    $script:COMWord.ActiveDocument.Weboptions.UseDefaultFolderSuffix()
-                    $pathHighResHtmlFolderSuffix = $script:COMWord.ActiveDocument.Weboptions.FolderSuffix
+
+                    $script:WordWebOptions = $script:COMWord.ActiveDocument.WebOptions
+                    $script:COMWord.ActiveDocument.WebOptions.AllowPNG = $true
+                    $script:COMWord.ActiveDocument.WebOptions.BrowserLevel = 2 # IE6, which is the maximum
+                    $script:COMWord.ActiveDocument.WebOptions.Encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
+                    $script:COMWord.ActiveDocument.WebOptions.OptimizeForBrowser = $true
+                    $script:COMWord.ActiveDocument.WebOptions.OrganizeInFolder = $true
+                    $script:COMWord.ActiveDocument.WebOptions.PixelsPerInch = 96
+                    $script:COMWord.ActiveDocument.WebOptions.RelyOnCSS = $true
+                    $script:COMWord.ActiveDocument.WebOptions.RelyOnVMl = $true
+                    $script:COMWord.ActiveDocument.WebOptions.ScreenSize = 3 # 800x600
+                    $script:COMWord.ActiveDocument.WebOptions.TargetBrowser = 4 # IE6, which is the maximum
+                    $script:COMWord.ActiveDocument.WebOptions.UseLongFileNames = $true
+
+                    $script:COMWord.ActiveDocument.WebOptions.UseDefaultFolderSuffix()
+                    $pathHighResHtmlFolderSuffix = $script:COMWord.ActiveDocument.WebOptions.FolderSuffix
 
                     # Overcome Word security warning when export contains embedded pictures
                     if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
                         New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 0 -ErrorAction Ignore | Out-Null
                     }
 
-                    $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
 
-                    if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
+                    if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
                         New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
                         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
                     }
@@ -3281,10 +3309,15 @@ function SetSignatures {
                     }
 
                     # Restore original security setting
-                    if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
+                    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
                         Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
                     } else {
-                        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                    }
+
+                    # Restore original WebOptions
+                    foreach ($property in ('AllowPNG', 'BrowserLevel', 'Encoding', 'OptimizeForBrowser', 'OrganizeInFolder', 'PixelsPerInch', 'RelyOnCSS', 'RelyOnVMl', 'ScreenSize', 'TargetBrowser', 'UseLongFileNames')) {
+                        $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
                     }
 
                     # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
@@ -3300,25 +3333,30 @@ function SetSignatures {
                     $HighResHtml = New-Object -ComObject 'HTMLFile'
                     $HighResHtml.IHTMLDocument2_write(((Get-Content -LiteralPath $pathHighResHtml -Encoding UTF8 -Raw) -ireplace '<v:imagedata src="', '<img src="'))
 
-
-                    # delete all low-res src files first
-                    foreach ($LowResHtmlImage in @($LowResHtml.images)) {
-                        if ($LowResHtmlImage.src -inotlike 'data:*') {
-                            if (Test-Path (Join-Path -Path (Split-Path -Path ($path) -Parent) -ChildPath ([uri]::UnEscapeDataString($LowResHtmlImage.src) -replace '^about:', ''))) {
-                                Remove-Item -LiteralPath (Join-Path -Path (Split-Path -Path ($path) -Parent) -ChildPath ([uri]::UnEscapeDataString($LowResHtmlImage.src) -replace '^about:', '')) -Force
+                    if (@($LowResHtml.images).count -eq @($HighResHtml.images).count) {
+                        # delete all low-res src files first
+                        foreach ($LowResHtmlImage in @($LowResHtml.images)) {
+                            if ($LowResHtmlImage.src -inotlike 'data:*') {
+                                if (Test-Path (Join-Path -Path (Split-Path -Path ($path) -Parent) -ChildPath ([uri]::UnEscapeDataString($LowResHtmlImage.src) -replace '^about:', ''))) {
+                                    Remove-Item -LiteralPath (Join-Path -Path (Split-Path -Path ($path) -Parent) -ChildPath ([uri]::UnEscapeDataString($LowResHtmlImage.src) -replace '^about:', '')) -Force
+                                }
                             }
                         }
-                    }
 
-                    # copy high-src files and update low-res link
-                    for ($ImageIndex = 0; $ImageIndex -lt @($LowResHtml.images).count; $ImageIndex++) {
-                        if ($LowResHtml.images[$ImageIndex].src -inotlike 'data:*') {
-                            Copy-Item -LiteralPath (Join-Path -Path (Split-Path -Path ($pathHighResHtml) -Parent) -ChildPath ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '')) -Destination ($path -replace '.htm$', $pathHtmlFolderSuffix) -Force
-                            $LowResHtml.images[$ImageIndex].src = ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '') -replace "$($pathGUID)$($pathHighResHtmlFolderSuffix)", $pathGUID
+                        # copy high-src files and update low-res link
+                        for ($ImageIndex = 0; $ImageIndex -lt @($LowResHtml.images).count; $ImageIndex++) {
+                            if ($LowResHtml.images[$ImageIndex].src -inotlike 'data:*') {
+                                Copy-Item -LiteralPath (Join-Path -Path (Split-Path -Path ($pathHighResHtml) -Parent) -ChildPath ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '')) -Destination ($path -replace '.htm$', $pathHtmlFolderSuffix) -Force
+                                $LowResHtml.images[$ImageIndex].src = ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '') -replace "$($pathGUID)$($pathHighResHtmlFolderSuffix)", $pathGUID
+                            }
                         }
-                    }
 
-                    $LowResHtml.documentelement.outerhtml | Out-File -LiteralPath $path -Encoding UTF8 -Force
+                        $LowResHtml.documentelement.outerhtml | Out-File -LiteralPath $path -Encoding UTF8 -Force
+                    } else {
+                        Write-Host "$Indent          Warning: Different amount of image tags in low-res ($(@($LowResHtml.images).count)) and high-res (@($HighResHtml.images).count) HTM export" -ForegroundColor Yellow
+                        Write-Host "$Indent          Using low-res HTM export only" -ForegroundColor Yellow
+                        Write-Host "$Indent          Please open an issue on GitHub for further investigation" -ForegroundColor Yellow
+                    }
                 } else {
                     Write-Host "$Indent          Template contains no images"
                 }
@@ -3384,9 +3422,9 @@ function SetSignatures {
                     New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 0 -ErrorAction Ignore | Out-Null
                 }
 
-                $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
 
-                if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
+                if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
                     New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
                     Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
                 }
@@ -3399,10 +3437,10 @@ function SetSignatures {
                 }
 
                 # Restore original security setting
-                if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
+                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
                     Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
                 } else {
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
                 }
 
                 # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
@@ -3426,8 +3464,10 @@ function SetSignatures {
                 }
 
                 $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
-                $script:COMWord.ActiveDocument.TextEncoding = 1200 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
                 $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
+
+                $script:WordTextEncoding = $script:COMWord.ActiveDocument.TextEncoding
+                $script:COMWord.ActiveDocument.TextEncoding = 1200 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
 
                 try {
                     $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
@@ -3435,6 +3475,8 @@ function SetSignatures {
                     Start-Sleep -Seconds 2
                     $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
                 }
+
+                $script:COMWord.ActiveDocument.TextEncoding = $script:WordTextEncoding
 
                 # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
                 # Close the document as conversion to .rtf happens from .htm
@@ -4224,17 +4266,32 @@ try {
     Write-Host
     Write-Host "Clean-up @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     # Restore original security setting
-    if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
+    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
         Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
     } else {
-        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
+        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
     }
 
     if ($script:COMWord) {
-        try {
-            $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
-        } catch {
+        if ($script:COMWord.ActiveDocument) {
+            try {
+                $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
+
+                # Restore original WebOptions
+                if ($script:WordWebOptions) {
+                    foreach ($property in ('AllowPNG', 'BrowserLevel', 'Encoding', 'OptimizeForBrowser', 'OrganizeInFolder', 'PixelsPerInch', 'RelyOnCSS', 'RelyOnVMl', 'ScreenSize', 'TargetBrowser', 'UseLongFileNames')) {
+                        $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
+                    }
+                }
+
+                # Restore original TextEncoding
+                if ($script:WordTextEncoding) {
+                    $script:COMWord.ActiveDocument.TextEndocing = $script:WordTextEncoding
+                }
+            } catch {
+            }
         }
+
         $script:COMWord.Quit([ref]$false)
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWord) | Out-Null
         Remove-Variable -Name 'COMWord' -Scope 'script'
