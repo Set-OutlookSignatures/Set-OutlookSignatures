@@ -24,7 +24,7 @@ _Attention cloud mailbox users: Microsoft actively enables roaming signatures in
 - Updated chapter in '`.\docs\README`': '`Photos from Active Directory`'
 ### Added
 - New FAQ in '`.\docs\README`': '`How to make Set-OutlookSignatures work with Microsoft Information Protection?`'
-- New parameter '`DocxHighResImageConversion`'. Enabled by default, this parameter creates HTM signatures with high resolution images. See '`.\docs\README`' for details.
+- New parameter '`DocxHighResImageConversion`'. Enabled by default, this parameter creates HTM signatures with high resolution images from DOCX templates. See '`.\docs\README`' for details.
 ### Fixed
 - User photo placeholders were not replaced when using HTM templates with images stored in connected sub-folders
 - Sample template files `'Test all default replacement variables.docx'` and `'Test all default replacement variables.htm'` did not contain all default replacement variables
