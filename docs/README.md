@@ -61,7 +61,8 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [2.19. CreateRtfSignatures](#219-creatertfsignatures)
   - [2.20. CreateTxtSignatures](#220-createtxtsignatures)
   - [2.21. EmbedImagesInHtml](#221-embedimagesinhtml)
-  - [2.22. SignaturesForAutomappedAndAdditionalMailboxes](#222-signaturesforautomappedandadditionalmailboxes)
+  - [2.22. DocxHighResImageConversion](#222-docxhighresimageconversion)
+  - [2.23. SignaturesForAutomappedAndAdditionalMailboxes](#223-signaturesforautomappedandadditionalmailboxes)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -311,7 +312,17 @@ Outlook 2013 and earlier can't handle these embedded images when composing HTML 
 When setting EmbedImagesInHtml to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 
 Default value: `$true`
-## 2.22. SignaturesForAutomappedAndAdditionalMailboxes
+## 2.22. DocxHighResImageConversion
+Enables or disables high resolution images in HTML signatures.
+
+When enabled, this parameter uses a workaround to overcome a Word limitation that results in low resolution images when converting to HTML. The price for high resolution images in HTML signatures are more time needed for document conversion and signature files requiring more storage space.
+
+Disabling this feature speeds up DOCX to HTML conversion, and HTML signatures require less storage space - at the cost of lower resolution images.
+
+Contrary to conversion to HTML, conversion to RTF always results in high resolution images.
+
+Default value: $true
+## 2.23. SignaturesForAutomappedAndAdditionalMailboxes
 Deploy signatures for automapped mailboxes and additional mailboxes.
 
 Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook.
