@@ -3015,8 +3015,16 @@ function SetSignatures {
 
         if ($UseHtmTemplates) {
             Write-Host "$Indent      Replace picture variables"
+
             $html = New-Object -ComObject 'HTMLFile'
-            $HTML.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
+
+            try {
+                # PowerShell Desktop with Office
+                $html.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
+            } catch {
+                # PowerShell Desktop without Office, PowerShell 6+
+                $html.write([System.Text.Encoding]::Unicode.GetBytes((Get-Content -LiteralPath $path -Encoding UTF8 -Raw)))
+            }
 
             foreach ($image in @($html.images)) {
                 foreach ($VariableName in (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID))) {
@@ -3328,10 +3336,24 @@ function SetSignatures {
                     $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
                     $LowResHtml = New-Object -ComObject 'HTMLFile'
-                    $LowResHtml.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
+
+                    try {
+                        # PowerShell Desktop with Office
+                        $LowResHtml.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
+                    } catch {
+                        # PowerShell Desktop without Office, PowerShell 6+
+                        $LowResHtml.write([System.Text.Encoding]::Unicode.GetBytes((Get-Content -LiteralPath $path -Encoding UTF8 -Raw)))
+                    }
 
                     $HighResHtml = New-Object -ComObject 'HTMLFile'
-                    $HighResHtml.IHTMLDocument2_write(((Get-Content -LiteralPath $pathHighResHtml -Encoding UTF8 -Raw) -ireplace '<v:imagedata src="', '<img src="'))
+
+                    try {
+                        # PowerShell Desktop with Office
+                        $HighResHtml.IHTMLDocument2_write(((Get-Content -LiteralPath $pathHighResHtml -Encoding UTF8 -Raw) -ireplace '<v:imagedata src="', '<img src="'))
+                    } catch {
+                        # PowerShell Desktop without Office, PowerShell 6+
+                        $HighResHtml.write([System.Text.Encoding]::Unicode.GetBytes(((Get-Content -LiteralPath $pathHighResHtml -Encoding UTF8 -Raw) -ireplace '<v:imagedata src="', '<img src="')))
+                    }
 
                     if (@($LowResHtml.images).count -eq @($HighResHtml.images).count) {
                         # delete all low-res src files first
