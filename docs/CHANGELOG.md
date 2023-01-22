@@ -17,7 +17,7 @@
 
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
-_Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `'What about the roaming signatures feature in Exchange Online?'` in '`README`' for details, known problems and workarounds._
+_Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `'What about the roaming signatures feature in Exchange Online?'` in '`.\docs\README`' for details, known problems and workarounds._
 ### Changed
 - Enforced Microsoft Information Protection sensitivity labels are now supported when using DOCX templates. See '`How to make Set-OutlookSignatures work with Microsoft Information Protection?`' in '`.\docs\README`' for details.
 - Shrinking RTF files is now compatible with enforced Microsoft Information Protection sensitivity labels
