@@ -61,7 +61,8 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [2.19. CreateRtfSignatures](#219-creatertfsignatures)
   - [2.20. CreateTxtSignatures](#220-createtxtsignatures)
   - [2.21. EmbedImagesInHtml](#221-embedimagesinhtml)
-  - [2.22. SignaturesForAutomappedAndAdditionalMailboxes](#222-signaturesforautomappedandadditionalmailboxes)
+  - [2.22. DocxHighResImageConversion](#222-docxhighresimageconversion)
+  - [2.23. SignaturesForAutomappedAndAdditionalMailboxes](#223-signaturesforautomappedandadditionalmailboxes)
 - [3. Outlook signature path](#3-outlook-signature-path)
 - [4. Mailboxes](#4-mailboxes)
 - [5. Group membership](#5-group-membership)
@@ -76,6 +77,9 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
 - [11. Signature and OOF application order](#11-signature-and-oof-application-order)
 - [12. Variable replacement](#12-variable-replacement)
   - [12.1. Photos from Active Directory](#121-photos-from-active-directory)
+    - [12.1.1. When using DOCX template files](#1211-when-using-docx-template-files)
+    - [12.1.2. When using HTM template files](#1212-when-using-htm-template-files)
+    - [12.1.3. Common behavior](#1213-common-behavior)
 - [13. Outlook Web](#13-outlook-web)
 - [14. Hybrid and cloud-only support](#14-hybrid-and-cloud-only-support)
   - [14.1. Basic Configuration](#141-basic-configuration)
@@ -112,6 +116,7 @@ Please consider <a href="https://github.com/sponsors/GruberMarkus" target="_blan
   - [16.25. What about the roaming signatures feature in Exchange Online?](#1625-what-about-the-roaming-signatures-feature-in-exchange-online)
     - [16.25.1. Please be aware of the following problem](#16251-please-be-aware-of-the-following-problem)
   - [16.26. Why does the text color of my signature change sometimes?](#1626-why-does-the-text-color-of-my-signature-change-sometimes)
+  - [16.27. How to make Set-OutlookSignatures work with Microsoft Information Protection?](#1627-how-to-make-set-outlooksignatures-work-with-microsoft-information-protection)
   
 # 1. Requirements  
 Requires Outlook and Word, at least version 2010.  
@@ -262,7 +267,7 @@ Default value: `"$([environment]::GetFolderPath("MyDocuments"))\Outlook signatur
 ## 2.14. UseHtmTemplates  
 With this parameter, the script searches for templates with the extension .htm instead of .docx.
 
-Templates in .htm format must be UTF8 encoded.
+Templates in .htm format must be UTF8 encoded and the charset must be set to UTF8 ('`<META content="text/html; charset=utf-8">`').
 
 Each format has advantages and disadvantages, please see "[13.5. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#135-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)" for a quick overview.
 
@@ -307,7 +312,17 @@ Outlook 2013 and earlier can't handle these embedded images when composing HTML 
 When setting EmbedImagesInHtml to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 
 Default value: `$true`
-## 2.22. SignaturesForAutomappedAndAdditionalMailboxes
+## 2.22. DocxHighResImageConversion
+Enables or disables high resolution images in HTML signatures.
+
+When enabled, this parameter uses a workaround to overcome a Word limitation that results in low resolution images when converting to HTML. The price for high resolution images in HTML signatures are more time needed for document conversion and signature files requiring more storage space.
+
+Disabling this feature speeds up DOCX to HTML conversion, and HTML signatures require less storage space - at the cost of lower resolution images.
+
+Contrary to conversion to HTML, conversion to RTF always results in high resolution images.
+
+Default value: $true
+## 2.23. SignaturesForAutomappedAndAdditionalMailboxes
 Deploy signatures for automapped mailboxes and additional mailboxes.
 
 Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook.
@@ -527,8 +542,8 @@ Per default, `'.\config\default replacement variables.ps1'` contains the followi
     - `$CURRENTUSERFAX$`: Facsimile number  
     - `$CURRENTUSERMOBILE$`: Mobile phone  
     - `$CURRENTUSERMAIL$`: E-mail address  
-    - `$CURRENTUSERPHOTO$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
-    - `$CURRENTUSERPHOTODELETEEMPTY$`: Photo from Active Directory, see "[11.1 Photos from Active Directory](#111-photos-from-active-directory)" for details  
+    - `$CURRENTUSERPHOTO$`: Photo from Active Directory, see "[12.1 Photos from Active Directory](#121-photos-from-active-directory)" for details  
+    - `$CURRENTUSERPHOTODELETEEMPTY$`: Photo from Active Directory, see "[12.1 Photos from Active Directory](#121-photos-from-active-directory)" for details  
     - `$CURRENTUSEREXTATTR1$` to `$CURRENTUSEREXTATTR15$`: Exchange extension attributes 1 to 15  
     - `$CURRENTUSEROFFICE$`: Office room number (physicalDeliveryOfficeName)  
     - `$CURRENTUSERCOMPANY$`: Company  
@@ -547,6 +562,7 @@ When using images in OOF templates, please be aware that Exchange and Outlook do
 
 As with other variables, photos can be obtained from the currently logged in user, it's manager, the currently processed mailbox and it's manager.
   
+### 12.1.1. When using DOCX template files
 To be able to apply Word image features such as sizing, cropping, frames, 3D effects etc, you have to exactly follow these steps:  
 1. Create a sample image file which will later be used as placeholder.  
 2. Optionally: If the sample image file name contains one of the following variable names, the script recognizes it and you do not need to add the value to the alternative text of the image in step 4:  
@@ -573,7 +589,24 @@ To be able to apply Word image features such as sizing, cropping, frames, 3D eff
 For the script to recognize images to replace, you need to follow at least one of the steps 2 and 4. If you follow both, the script first checks for step 2 first. If you provide multiple image replacement variables, `$CURRENTUSER[...]$` has the highest priority, followed by `$CURRENTUSERMANAGER[...]$`, `$CURRENTMAILBOX[...]$` and `$CURRENTMAILBOXMANAGER[...]$`. It is recommended to use only one image replacement variable per image.  
   
 The script will replace all images meeting the conditions described in the steps above and replace them with Active Directory photos in the background. This keeps Word image formatting option alive, just as if you would use Word's `"Change picture"` function.  
-  
+
+### 12.1.2. When using HTM template files
+Images are replaced when the `src` or `alt` property of the image tag contains one of the following strings:
+- `$CURRENTUSERPHOTO$`  
+- `$CURRENTUSERPHOTODELETEEMPTY$`  
+- `$CURRENTUSERMANAGERPHOTO$`  
+- `$CURRENTUSERMANAGERPHOTODELETEEMPTY$`  
+- `$CURRENTMAILBOXPHOTO$`  
+- `$CURRENTMAILBOXPHOTODELETEEMPTY$`  
+- `$CURRENTMAILBOXMANAGERPHOTO$`  
+- `$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$`
+
+Be aware that Outlook does not support the full HTML feature set. For example:
+- Some (older) Outlook versions ignore the `width` and `height` properties for embedded images.  
+  To overcome this limitation, use images in a connected folder (such as `Test all default replacement variables.files` in the sample templates folder) and additionally set the Set-OutlookSignatures parameter `EmbedImagesInHtml` to ``false`.
+- Text and image formatting are limited, especially when HTML5 or CSS features are used.
+- Consider switching to DOCX templates for easier maintenance.
+### 12.1.3. Common behavior
 If there is no photo available in Active Directory, there are two options:  
 - You used the `$CURRENT[...]PHOTO$` variables: The sample image used as placeholder is shown in the signature.  
 - You used the `$CURRENT[...]PHOTODELETEEMPTY$` variables: The sample image used as placeholder is deleted from the signature, which may affect the layout of the remaining signature depending on your formatting options.
@@ -1030,3 +1063,29 @@ This behavior is very often wanted, so that the greeting formula, which usually 
 
 The default colors can be configured in Outlook.  
 Outlook seems to have problems with this in certain patch levels when creating a reply in the preview pane, popping out the draft to it's own window and then switching to another signature.
+## 16.27. How to make Set-OutlookSignatures work with Microsoft Information Protection?
+Set-OutlookSignatures does work well with Microsoft Information Protection, when configured correctly.
+
+If you do not enforce setting sensitivity labels or exclude DOCX and RTF file formats, no further actions are required.
+
+If you enforce setting sensitivity labels:
+- When using DOCX templates, just set the desired sensitivity label on all your template files.
+  - It is recommended to use the 'General' label:
+    - Outlook signatures and Out of Office messages usually only contain information which is intended to be shared publicly by design.
+    - The templates themselves usually do not contain sensitive data, only placeholder variables.
+    - Documents labeled 'General' can be opened without having the Information Protection Add-In for Office installed. This is useful when not all of your Set-OutlookSignatures users are also Information Protection users and have the Add-In installed.
+  - When using a template with a sensitivity label other than 'General', every client Set-OutlookSignature runs on needs the Information Protection Add-In for Office installed, and the user running Set-OutlookSignatures needs permission to access the protected file.
+  - The RTF signature file will be created with the same sensitivity label as the template. This is only relevant for the user composing a new e-mail in RTF format, as the composing user needs to be able to open the RTF document and copy the content from it - the actual signature in the e-mail does not have Information Protection applied.
+  - The .HTM and .TXT signature files will be created without a sensitivity label, as these documents can not be protected by Microsoft Information Protection.
+  - If you do not set a sensitivity label, Word will prompt the user to choose one each time the unlabeled local copy of a template is converted to .htm, .rtf or .txt.
+    - The DOCX sample template files that come with Set-OutlookSignatures do not have a sensitivity label set.
+- When using HTM templates, no further actions are required.
+  - HTM files can not be assigned a sensitivity label, and converting HTM files to RTF is possible even when sensitivity labels are enforced.
+  - Converting HTM files to TXT is also no problem, as both file formats can not be assigned a sensitivity label. 
+
+Additional information that might be of interest for your Information Protection configuration:
+- Template files are copied to the local temp directory of the user (PowerShell: '`[System.IO.Path]::GetTempPath()`') for further use, with a randomly generated GUID as name. The extension is the one of the template (.docx or .htm).
+- The local copy of a template file is opened for variable replacement, saved back to disk, and then re-opened for each file conversion (to .htm if neccessary, and optionally to .rtf and/or .txt). 
+- Converted files are also stored in the temp directory, using the same GUID as the original file as file name but a different file extension (.htm, .rtf, .txt).
+- After all variable replacements and conversions are completed for a template, the converted files (HTM mandatory, RTF and TXT optional) are copied to the Outlook signature folder. The path of this folder is language and version dependent (Registry: '`HKCU:\Software\Microsoft\Office\<Outlook Version>\Common\General\Signatures`').
+- All temporary files mentioned are deleted by Set-OutlookSignatures as part of the clean-up process.

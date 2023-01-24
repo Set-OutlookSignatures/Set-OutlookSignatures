@@ -170,6 +170,13 @@ Outlook 2013 and earlier can't handle these embedded images when composing HTML 
 When setting EmbedImagesInHtml to $false, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
 Default value: $true
 
+.PARAMETER DocxHighResImageConversion
+Enables or disables high resolution images in HTML signatures.
+When enabled, this parameter uses a workaround to overcome a Word limitation that results in low resolution images when converting to HTML. The price for high resolution images in HTML signatures are more time needed for document conversion and signature files requiring more storage space.
+Disabling this feature speeds up DOCX to HTML conversion, and HTML signatures require less storage space - at the cost of lower resolution images.
+Contrary to conversion to HTML, conversion to RTF always results in high resolution images.
+Default value: $true
+
 .PARAMETER SignaturesForAutomappedAndAdditionalMailboxes
 Deploy signatures for automapped mailboxes and additional mailboxes
 Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook
@@ -270,6 +277,10 @@ Param(
     [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
     $UseHtmTemplates = $false,
 
+    # Should HTML signatures contain high resolution images?
+    [ValidateSet(1, 0, '1', '0', 'true', 'false', '$true', '$false', 'yes', 'no')]
+    $DocxHighResImageConversion = $true,
+
     # Simulate another user as currently logged in user
     [Alias('SimulationUser')]
     [validatescript({
@@ -363,7 +374,7 @@ function main {
 
     # Connected Files - description and folder name sources:
     #   https://docs.microsoft.com/en-us/windows/win32/shell/manage#connected-files
-    #   https://docs.microsoft.com/en-us/office/vba/api/word.defaultweboptions.foldersuffix
+    #   https://docs.microsoft.com/en-us/office/vba/api/word.defaultWebOptions.foldersuffix
     $ConnectedFilesFolderNames = ('.files', '_archivos', '_arquivos', '_bestanden', '_bylos', '_datoteke', '_dosyalar', '_elemei', '_failid', '_fails', '_fajlovi', '_ficheiros', '_fichiers', '_file', '_files', '_fitxategiak', '_fitxers', '_pliki', '_soubory', '_tiedostot', '-Dateien', '-filer')
 
 
@@ -515,6 +526,13 @@ function main {
         $CreateTxtSignatures = $false
     }
 
+    Write-Host "  DocxHighResImageConversion: '$DocxHighResImageConversion'"
+    if ($DocxHighResImageConversion -in (1, '1', 'true', '$true', 'yes')) {
+        $DocxHighResImageConversion = $true
+    } else {
+        $DocxHighResImageConversion = $false
+    }
+
     Write-Host "  DeleteUserCreatedSignatures: '$DeleteUserCreatedSignatures'"
     if ($DeleteUserCreatedSignatures -in (1, '1', 'true', '$true', 'yes')) {
         $DeleteUserCreatedSignatures = $true
@@ -537,8 +555,10 @@ function main {
     }
 
     Write-Host "  AdditionalSignaturePath: '$AdditionalSignaturePath'" -NoNewline
-    ConvertPath ([ref]$AdditionalSignaturePath)
-    checkpath $AdditionalSignaturePath -create
+    if ($AdditionalSignaturePath) {
+        ConvertPath ([ref]$AdditionalSignaturePath)
+        checkpath $AdditionalSignaturePath -create
+    }
 
     Write-Host "  SimulateUser: '$SimulateUser'"
 
@@ -739,7 +759,9 @@ function main {
     Write-Host "Get Outlook signature file path(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     $SignaturePaths = @()
     if ($SimulateUser) {
-        $SignaturePaths += $AdditionalSignaturePath
+        if ($AdditionalSignaturePath) {
+            $SignaturePaths += $AdditionalSignaturePath
+        }
         Write-Host '  Simulation mode enabled. Skip task, use AdditionalSignaturePath instead' -ForegroundColor Yellow
     } else {
         $x = (Get-ItemProperty "hkcu:\software\microsoft\office\$OutlookRegistryVersion\common\general" -ErrorAction SilentlyContinue).'Signatures'
@@ -842,6 +864,9 @@ function main {
             $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $Null)) # 3 = ADS_NAME_INITTYPE_GC
             $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (12, $(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value))) # 12 = ADS_NAME_TYPE_SID_OR_SID_HISTORY_NAME
             $UserForest = (([ADSI]"LDAP://$(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1) -split ',DC=')[1..999] -join '.')/RootDSE").rootDomainNamingContext -replace ('DC=', '') -replace (',', '.')).tolower()
+            [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
+            Remove-Variable -Name 'objTrans'
+            Remove-Variable -Name 'objNT'
 
             if ($UserForest -ne '') {
                 Write-Host "  User forest: $UserForest"
@@ -1039,6 +1064,9 @@ function main {
                         $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $null))
                         $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (8, $SimulateUser))
                         $SimulateUserDN = $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1)
+                        [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
+                        Remove-Variable -Name 'objTrans'
+                        Remove-Variable -Name 'objNT'
                         $Search.SearchRoot = "GC://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                         $ADPropsCurrentUser = $Search.FindOne().Properties
@@ -1704,6 +1732,9 @@ function main {
                                                 $TemplateFilesGroupSIDs.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                                 $TemplateFilesGroupSIDsOverall.add($TemplateFilePartTag, ((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
                                             }
+                                            [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
+                                            Remove-Variable -Name 'objTrans'
+                                            Remove-Variable -Name 'objNT'
                                         } catch {
                                             Write-Verbose $error[0]
                                         }
@@ -1849,8 +1880,10 @@ function main {
         # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the script
         try {
             $script:COMWordDummy = New-Object -ComObject Word.Application
+            $script:COMWordDummy.Visible = $false
 
             $script:COMWord = New-Object -ComObject Word.Application
+            $script:COMWord.Visible = $false
 
             if ($script:COMWordDummy) {
                 $script:COMWordDummy.Quit([ref]$false)
@@ -2450,6 +2483,18 @@ function main {
     }
 
 
+    # Close Word, as it is no longer needed
+    if ($script:COMWord) {
+        try {
+            $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
+        } catch {
+        }
+        $script:COMWord.Quit([ref]$false)
+        [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWord) | Out-Null
+        Remove-Variable -Name 'COMWord' -Scope 'script'
+    }
+
+
     # Delete old signatures created by this script, which are no longer available in $SignatureTemplatePath
     # We check all local signatures for a specific marker in HTML code, so we don't touch user created signatures
     if ($DeleteScriptCreatedSignaturesWithoutTemplate -eq $true) {
@@ -2694,25 +2739,26 @@ Function ConvertToSingleFileHTML([string]$inputfile, [string]$outputfile) {
         } elseif (Test-Path -LiteralPath $src[$x + 1] -PathType leaf) {
             $fmt = $null
             switch ((Get-ChildItem -LiteralPath $src[$x + 1]).Extension) {
-                '.apng' { $fmt = 'data:image/apng;base64,' }
-                '.avif' { $fmt = 'data:image/avif;base64,' }
-                '.gif' { $fmt = 'data:image/gif;base64,' }
-                '.jpg' { $fmt = 'data:image/jpeg;base64,' }
-                '.jpeg' { $fmt = 'data:image/jpeg;base64,' }
-                '.jfif' { $fmt = 'data:image/jpeg;base64,' }
-                '.pjpeg' { $fmt = 'data:image/jpeg;base64,' }
-                '.pjp' { $fmt = 'data:image/jpeg;base64,' }
-                '.png' { $fmt = 'data:image/png;base64,' }
-                '.svg' { $fmt = 'data:image/svg+xml;base64,' }
-                '.webp' { $fmt = 'data:image/webp;base64,' }
-                '.css' { $fmt = 'data:text/css;base64,' }
-                '.less' { $fmt = 'data:text/css;base64,' }
-                '.js' { $fmt = 'data:text/javascript;base64,' }
-                '.otf' { $fmt = 'data:font/otf;base64,' }
-                '.sfnt' { $fmt = 'data:font/sfnt;base64,' }
-                '.ttf' { $fmt = 'data:font/ttf;base64,' }
-                '.woff' { $fmt = 'data:font/woff;base64,' }
-                '.woff2' { $fmt = 'data:font/woff2;base64,' }
+                '.apng' { $fmt = 'data:image/apng;base64,'; break }
+                '.avif' { $fmt = 'data:image/avif;base64,'; break }
+                '.gif' { $fmt = 'data:image/gif;base64,'; break }
+                '.jpg' { $fmt = 'data:image/jpeg;base64,'; break }
+                '.jpeg' { $fmt = 'data:image/jpeg;base64,'; break }
+                '.jfif' { $fmt = 'data:image/jpeg;base64,'; break }
+                '.pjpeg' { $fmt = 'data:image/jpeg;base64,'; break }
+                '.pjp' { $fmt = 'data:image/jpeg;base64,'; break }
+                '.png' { $fmt = 'data:image/png;base64,'; break }
+                '.svg' { $fmt = 'data:image/svg+xml;base64,'; break }
+                '.webp' { $fmt = 'data:image/webp;base64,'; break }
+                '.css' { $fmt = 'data:text/css;base64,'; break }
+                '.less' { $fmt = 'data:text/css;base64,'; break }
+                '.js' { $fmt = 'data:text/javascript;base64,'; break }
+                '.otf' { $fmt = 'data:font/otf;base64,'; break }
+                '.sfnt' { $fmt = 'data:font/sfnt;base64,'; break }
+                '.ttf' { $fmt = 'data:font/ttf;base64,'; break }
+                '.woff' { $fmt = 'data:font/woff;base64,'; break }
+                '.woff2' { $fmt = 'data:font/woff2;base64,'; break }
+                default { $fmt = 'data:;base64,' }
             }
 
             if ($fmt) {
@@ -2942,21 +2988,18 @@ function SetSignatures {
         $pathConnectedFolderNames = @()
         foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
             $pathConnectedFolderNames += "$($pathGUID)$($ConnectedFilesFolderName)"
+            $pathConnectedFolderNames += "$($pathGUID)$([uri]::EscapeDataString($ConnectedFilesFolderName))"
         }
 
         if ($UseHtmTemplates) {
-            # use .html for temporary file, .htm for final file
             try {
-                if ($EmbedImagesInHtml -eq $false) {
-                    Copy-Item -LiteralPath $Signature.name -Destination $path
-                    foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
-                        if (Test-Path (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderName")) {
-                            Copy-Item (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderName") (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files") -Recurse -Force
-                            return
-                        }
+                Copy-Item -LiteralPath $Signature.name -Destination $path
+
+                foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                    if (Test-Path (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderName")) {
+                        Copy-Item (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderName") (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files") -Recurse -Force
+                        break
                     }
-                } else {
-                    ConvertToSingleFileHTML $Signature.Name $path
                 }
             } catch {
                 Write-Host "$Indent        Error copying file. Skip template." -ForegroundColor Red
@@ -2974,14 +3017,23 @@ function SetSignatures {
         }
 
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
+
         if (-not $ProcessOOF) {
             $script:SignatureFilesDone += $Signature.Value
         }
 
         if ($UseHtmTemplates) {
             Write-Host "$Indent      Replace picture variables"
+
             $html = New-Object -ComObject 'HTMLFile'
-            $HTML.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
+
+            try {
+                # PowerShell Desktop with Office
+                $html.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
+            } catch {
+                # PowerShell Desktop without Office, PowerShell 6+
+                $html.write([System.Text.Encoding]::Unicode.GetBytes((Get-Content -LiteralPath $path -Encoding UTF8 -Raw)))
+            }
 
             foreach ($image in @($html.images)) {
                 foreach ($VariableName in (('$CURRENTMAILBOXMANAGERPHOTO$', $CURRENTMAILBOXMANAGERPHOTOGUID) , ('$CURRENTMAILBOXPHOTO$', $CURRENTMAILBOXPHOTOGUID), ('$CURRENTUSERMANAGERPHOTO$', $CURRENTUSERMANAGERPHOTOGUID), ('$CURRENTUSERPHOTO$', $CURRENTUSERPHOTOGUID))) {
@@ -3006,7 +3058,8 @@ function SetSignatures {
                     } elseif (($image.src -clike "*$(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')*") -or ($image.alt -clike "*$(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')*")) {
                         if ($null -ne $ReplaceHash[$VariableName[0]]) {
                             if ($EmbedImagesInHtml -eq $false) {
-                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
+                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -replace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
+                                Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
                                 $image.src = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($VariableName[0]).jpeg")
                                 if ($image.alt) {
                                     $image.alt = $($image.alt).replace((($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$'), '')
@@ -3027,24 +3080,21 @@ function SetSignatures {
 
             Write-Host "$Indent      Replace non-picture variables"
             $tempFileContent = $html.documentelement.outerhtml
+
+            [System.Runtime.Interopservices.Marshal]::ReleaseComObject($html) | Out-Null
+            Remove-Variable -Name 'html'
+
             foreach ($replaceKey in $replaceHash.Keys) {
                 if ($replaceKey -notin ('$CURRENTMAILBOXMANAGERPHOTO$', '$CURRENTMAILBOXPHOTO$', '$CURRENTUSERMANAGERPHOTO$', '$CURRENTUSERPHOTO$', '$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$', '$CURRENTMAILBOXPHOTODELETEEMPTY$', '$CURRENTUSERMANAGERPHOTODELETEEMPTY$', '$CURRENTUSERPHOTODELETEEMPTY$')) {
                     $tempFileContent = $tempFileContent.replace($replacekey, $replaceHash.$replaceKey)
                 }
             }
 
-            if (-not $ProcessOOF) {
-                $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
-            } else {
-                $tempFileContent | Out-File -LiteralPath (Join-Path -Path $script:tempDir -ChildPath $Signature.Value) -Encoding UTF8 -Force
-            }
-        }
-
-        if ($CreateRtfSignatures -or $CreateTxtSignatures) {
+            Write-Host "$Indent      Export to HTM format"
+            $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
+        } else {
             $script:COMWord.Documents.Open($path, $false) | Out-Null
-        }
 
-        if (-not $UseHtmTemplates) {
             Write-Host "$Indent      Replace picture variables"
             foreach ($image in @($script:COMWord.ActiveDocument.Shapes + $script:COMWord.ActiveDocument.InlineShapes)) {
                 try {
@@ -3164,108 +3214,201 @@ function SetSignatures {
             # Restore original view
             $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = (-not $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes)
 
-            # Exports
+            # Save changed document, it's later used for export to .htm, .rtf and .txt
+            $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatDocumentDefault')
+            $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+
+            # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
+            # Close the document to remove in-memory references to already deleted images
+            $script:COMWord.ActiveDocument.Saved = $true
+            $script:COMWord.ActiveDocument.Close($false)
+
+
+            # Export to .htm
             Write-Host "$Indent      Export to HTM format"
+            $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
+            $script:COMWord.Documents.Open($path, $false) | Out-Null
+
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-            $script:COMWord.ActiveDocument.Weboptions.encoding = 65001
+
+            $script:WordWebOptions = $script:COMWord.ActiveDocument.WebOptions
+
+            $script:COMWord.ActiveDocument.WebOptions.AllowPNG = $true
+            $script:COMWord.ActiveDocument.WebOptions.BrowserLevel = 2 # IE6, which is the maximum
+            $script:COMWord.ActiveDocument.WebOptions.Encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
+            $script:COMWord.ActiveDocument.WebOptions.OptimizeForBrowser = $true
+            $script:COMWord.ActiveDocument.WebOptions.OrganizeInFolder = $true
+            $script:COMWord.ActiveDocument.WebOptions.PixelsPerInch = 96
+            $script:COMWord.ActiveDocument.WebOptions.RelyOnCSS = $true
+            $script:COMWord.ActiveDocument.WebOptions.RelyOnVMl = $true
+            $script:COMWord.ActiveDocument.WebOptions.ScreenSize = 3 # 800x600
+            $script:COMWord.ActiveDocument.WebOptions.TargetBrowser = 4 # IE6, which is the maximum
+            $script:COMWord.ActiveDocument.WebOptions.UseLongFileNames = $true
+
+            $script:COMWord.ActiveDocument.WebOptions.UseDefaultFolderSuffix()
+            $pathHtmlFolderSuffix = $script:COMWord.ActiveDocument.WebOptions.FolderSuffix
+
             # Overcome Word security warning when export contains embedded pictures
             if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
                 New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 0 -ErrorAction Ignore | Out-Null
             }
-            $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-            if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
+
+            $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+
+            if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
                 New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
             }
+
             try {
                 $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
             } catch {
                 Start-Sleep -Seconds 2
                 $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
             }
+
             # Restore original security setting
-            if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
+            if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
                 Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
             } else {
-                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             }
-        }
 
-        if (-not $ProcessOOF) {
-            if ($CreateRtfSignatures -eq $true) {
-                Write-Host "$Indent      Export to RTF format"
-                $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
-                $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
-                # Overcome Word security warning when export contains embedded pictures
-                if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
-                    New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 0 -ErrorAction Ignore | Out-Null
-                }
-                $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                    New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
-                }
+            # Restore original WebOptions
+            foreach ($property in ('AllowPNG', 'BrowserLevel', 'Encoding', 'OptimizeForBrowser', 'OrganizeInFolder', 'PixelsPerInch', 'RelyOnCSS', 'RelyOnVMl', 'ScreenSize', 'TargetBrowser', 'UseLongFileNames')) {
+                $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
+            }
+
+            # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
+            # Close the document as conversion to .rtf happens from .htm
+            $script:COMWord.ActiveDocument.Saved = $true
+            $script:COMWord.ActiveDocument.Close($false)
+
+            if ($DocxHighResImageConversion) {
+                Write-Host "$Indent        Export high-res images"
+
+                $LowResHtml = New-Object -ComObject 'HTMLFile'
+
                 try {
-                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                    # PowerShell Desktop with Office
+                    $LowResHtml.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
                 } catch {
-                    Start-Sleep -Seconds 2
-                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                    # PowerShell Desktop without Office, PowerShell 6+
+                    $LowResHtml.write([System.Text.Encoding]::Unicode.GetBytes((Get-Content -LiteralPath $path -Encoding UTF8 -Raw)))
                 }
-                # Restore original security setting
-                if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
-                    Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+
+                if (@($LowResHtml.images | Where-Object { ($_.src -inotlike 'data:*') -and ((Test-Path (Join-Path -Path (Split-Path -Path ($path) -Parent) -ChildPath ([uri]::UnEscapeDataString($_.src) -replace '^about:', '')))) }).Count -gt 0) {
+                    $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
+                    $script:COMWord.Documents.Open($path, $false) | Out-Null
+
+                    $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatHTML')
+                    $pathHighResHtml = $([System.IO.Path]::ChangeExtension(($path -ireplace "$($pathguid)", "$($pathguid)HighRes"), '.htm'))
+
+                    $script:WordWebOptions = $script:COMWord.ActiveDocument.WebOptions
+                    $script:COMWord.ActiveDocument.WebOptions.AllowPNG = $true
+                    $script:COMWord.ActiveDocument.WebOptions.BrowserLevel = 2 # IE6, which is the maximum
+                    $script:COMWord.ActiveDocument.WebOptions.Encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
+                    $script:COMWord.ActiveDocument.WebOptions.OptimizeForBrowser = $true
+                    $script:COMWord.ActiveDocument.WebOptions.OrganizeInFolder = $true
+                    $script:COMWord.ActiveDocument.WebOptions.PixelsPerInch = 96
+                    $script:COMWord.ActiveDocument.WebOptions.RelyOnCSS = $true
+                    $script:COMWord.ActiveDocument.WebOptions.RelyOnVMl = $true
+                    $script:COMWord.ActiveDocument.WebOptions.ScreenSize = 3 # 800x600
+                    $script:COMWord.ActiveDocument.WebOptions.TargetBrowser = 4 # IE6, which is the maximum
+                    $script:COMWord.ActiveDocument.WebOptions.UseLongFileNames = $true
+
+                    $script:COMWord.ActiveDocument.WebOptions.UseDefaultFolderSuffix()
+                    $pathHighResHtmlFolderSuffix = $script:COMWord.ActiveDocument.WebOptions.FolderSuffix
+
+                    # Overcome Word security warning when export contains embedded pictures
+                    if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
+                        New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 0 -ErrorAction Ignore | Out-Null
+                    }
+
+                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+
+                    if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
+                        New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
+                        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
+                    }
+
+                    try {
+                        $script:COMWord.ActiveDocument.SaveAs($pathHighResHtml, $saveFormat)
+                    } catch {
+                        Start-Sleep -Seconds 2
+                        $script:COMWord.ActiveDocument.SaveAs($pathHighResHtml, $saveFormat)
+                    }
+
+                    # Restore original security setting
+                    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
+                        Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                    } else {
+                        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                    }
+
+                    # Restore original WebOptions
+                    foreach ($property in ('AllowPNG', 'BrowserLevel', 'Encoding', 'OptimizeForBrowser', 'OrganizeInFolder', 'PixelsPerInch', 'RelyOnCSS', 'RelyOnVMl', 'ScreenSize', 'TargetBrowser', 'UseLongFileNames')) {
+                        $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
+                    }
+
+                    # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
+                    # Close the document as conversion to .rtf happens from .htm
+                    $script:COMWord.ActiveDocument.Saved = $true
+                    $script:COMWord.ActiveDocument.Close($false)
+
+                    $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+
+                    $HighResHtml = New-Object -ComObject 'HTMLFile'
+
+                    try {
+                        # PowerShell Desktop with Office
+                        $HighResHtml.IHTMLDocument2_write(((Get-Content -LiteralPath $pathHighResHtml -Encoding UTF8 -Raw) -ireplace '<v:imagedata src="', '<img src="'))
+                    } catch {
+                        # PowerShell Desktop without Office, PowerShell 6+
+                        $HighResHtml.write([System.Text.Encoding]::Unicode.GetBytes(((Get-Content -LiteralPath $pathHighResHtml -Encoding UTF8 -Raw) -ireplace '<v:imagedata src="', '<img src="')))
+                    }
+
+                    if (@($LowResHtml.images).count -eq @($HighResHtml.images).count) {
+                        # delete all low-res src files first
+                        foreach ($LowResHtmlImage in @($LowResHtml.images)) {
+                            if ($LowResHtmlImage.src -inotlike 'data:*') {
+                                if (Test-Path (Join-Path -Path (Split-Path -Path ($path) -Parent) -ChildPath ([uri]::UnEscapeDataString($LowResHtmlImage.src) -replace '^about:', ''))) {
+                                    Remove-Item -LiteralPath (Join-Path -Path (Split-Path -Path ($path) -Parent) -ChildPath ([uri]::UnEscapeDataString($LowResHtmlImage.src) -replace '^about:', '')) -Force
+                                }
+                            }
+                        }
+
+                        # copy high-src files and update low-res link
+                        for ($ImageIndex = 0; $ImageIndex -lt @($LowResHtml.images).count; $ImageIndex++) {
+                            if ($LowResHtml.images[$ImageIndex].src -inotlike 'data:*') {
+                                if (Test-Path (Join-Path -Path (Split-Path -Path ($pathHighResHtml) -Parent) -ChildPath ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', ''))) {
+                                    Copy-Item -LiteralPath (Join-Path -Path (Split-Path -Path ($pathHighResHtml) -Parent) -ChildPath ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '')) -Destination ($path -replace '.htm$', $pathHtmlFolderSuffix) -Force
+                                    $LowResHtml.images[$ImageIndex].src = ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '') -replace "$($pathGUID)$($pathHighResHtmlFolderSuffix)", $pathGUID
+                                }
+                            }
+                        }
+
+                        $LowResHtml.documentelement.outerhtml | Out-File -LiteralPath $path -Encoding UTF8 -Force
+
+                    } else {
+                        Write-Host "$Indent          Warning: Different amount of image tags in low-res ($(@($LowResHtml.images).count)) and high-res (@($HighResHtml.images).count) HTM export" -ForegroundColor Yellow
+                        Write-Host "$Indent          Using low-res HTM export only" -ForegroundColor Yellow
+                        Write-Host "$Indent          Please open an issue on GitHub for further investigation" -ForegroundColor Yellow
+                    }
+
+                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($HighResHtml) | Out-Null
+                    Remove-Variable -Name 'HighResHtml'
                 } else {
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                    Write-Verbose "$Indent          No images found in connected folder"
                 }
 
-                $script:COMWord.ActiveDocument.Close($false)
-
-                # RTF files with embedded images get really huge
-                # See https://support.microsoft.com/kb/224663 for a system-wide workaround
-                # The following workaround is from https://answers.microsoft.com/en-us/msoffice/forum/msoffice_word-mso_mac-mso_mac2011/huge-rtf-files-solved-on-windows-but-searching-for/58e54b37-cfd0-4a07-ac62-1cfc2769cad5
-                $openFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdOpenFormat], 'wdOpenFormatUnicodeText')
-                $script:COMWord.Documents.Open($path, $false, $false, $false, '', '', $true, '', '', $openFormat) | Out-Null
-                $FindText = '\{\\nonshppict*\}\}'
-                $ReplaceWith = ''
-                $script:COMWord.Selection.Find.Execute($FindText, $MatchCase, $MatchWholeWord, `
-                        $true, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
-                        $Wrap, $Format, $ReplaceWith, $ReplaceAll) | Out-Null
-                try {
-                    $script:COMWord.ActiveDocument.Save()
-                } catch {
-                    Start-Sleep -Seconds 2
-                    $script:COMWord.ActiveDocument.Save()
-                }
-            }
-
-            if ($CreateRtfSignatures -or $CreateTxtSignatures) {
-                $script:COMWord.ActiveDocument.Close($false)
-            }
-
-            if ($CreateTxtSignatures -eq $true) {
-                Write-Host "$Indent      Export to TXT format"
-                # We work with the .htm file to avoid problems with empty lines at the end of exported .txt files. Details: https://eileenslounge.com/viewtopic.php?t=16703
-                $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-                $script:COMWord.Documents.Open($path, $false) | Out-Null
-                $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
-                $script:COMWord.ActiveDocument.TextEncoding = 1200
-                $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
-                try {
-                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-                } catch {
-                    Start-Sleep -Seconds 2
-                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-                }
-                $script:COMWord.ActiveDocument.Close($false)
-            }
-        } else {
-            if ($CreateRtfSignatures -or $CreateTxtSignatures) {
-                $script:COMWord.ActiveDocument.Close($false)
+                [System.Runtime.Interopservices.Marshal]::ReleaseComObject($LowResHtml) | Out-Null
+                Remove-Variable -Name 'LowResHtml'
             }
         }
 
-        Write-Host "$Indent      Embed local files in HTM format and add marker"
+        Write-Host "$Indent        Add marker to final HTM file"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
         $tempFileContent = Get-Content -LiteralPath $path -Encoding UTF8 -Raw
@@ -3278,24 +3421,114 @@ function SetSignatures {
             }
         }
 
+        Write-Host "$Indent        Modify connected folder name"
+
+        foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
+            if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName))) {
+                $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $pathConnectedFolderName + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
+                Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
+                break
+            }
+        }
+
+        [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
+
+
         if (-not $ProcessOOF) {
-            if ($EmbedImagesInHtml -eq $false) {
-                foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
-                    if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName))) {
-                        $tempFileContent = $tempFileContent -replace ('(\s*src=")(' + $pathConnectedFolderName + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
-                        Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
-                        break
-                    }
-                }
+            if ($EmbedImagesInHtml) {
+                Write-Host "$Indent        Embed local images"
+
                 [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
-            } else {
-                [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
+
                 ConvertToSingleFileHTML $path $path
             }
         } else {
             ConvertToSingleFileHTML $path ((Join-Path -Path $script:tempDir -ChildPath $Signature.Value))
         }
 
+        if (-not $ProcessOOF) {
+            if ($CreateRtfSignatures) {
+                Write-Host "$Indent      Export to RTF format"
+                # If possible, use .docx file to avoid problems with MS Information Protection
+                if ($UseHtmTemplates) {
+                    $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+                    $script:COMWord.Documents.Open($path, $false, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, 65001) | Out-Null
+                } else {
+                    $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
+                    $script:COMWord.Documents.Open($path, $false) | Out-Null
+                }
+
+
+                $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
+                $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
+
+                # Overcome Word security warning when export contains embedded pictures
+                if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
+                    New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 0 -ErrorAction Ignore | Out-Null
+                }
+
+                $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+
+                if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
+                    New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
+                }
+
+                try {
+                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                } catch {
+                    Start-Sleep -Seconds 2
+                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                }
+
+                # Restore original security setting
+                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
+                    Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                } else {
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                }
+
+                # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
+                # Close the document as conversion to .rtf happens from .htm
+                $script:COMWord.ActiveDocument.Saved = $true
+                $script:COMWord.ActiveDocument.Close($false)
+
+                Write-Host "$Indent        Shrink RTF file"
+                $((Get-Content -LiteralPath $path -Raw -Encoding Ascii) -replace '\{\\nonshppict[\s\S]*?\}\}', '') | Set-Content -LiteralPath $path -Encoding Ascii
+            }
+
+            if ($CreateTxtSignatures) {
+                Write-Host "$Indent      Export to TXT format"
+                # If possible, use .docx file to avoid problems with MS Information Protection
+                if ($UseHtmTemplates) {
+                    $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+                    $script:COMWord.Documents.Open($path, $false, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, 65001) | Out-Null
+                } else {
+                    $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
+                    $script:COMWord.Documents.Open($path, $false) | Out-Null
+                }
+
+                $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
+                $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
+
+                $script:WordTextEncoding = $script:COMWord.ActiveDocument.TextEncoding
+                $script:COMWord.ActiveDocument.TextEncoding = 1200 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
+
+                try {
+                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                } catch {
+                    Start-Sleep -Seconds 2
+                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                }
+
+                $script:COMWord.ActiveDocument.TextEncoding = $script:WordTextEncoding
+
+                # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
+                # Close the document as conversion to .rtf happens from .htm
+                $script:COMWord.ActiveDocument.Saved = $true
+                $script:COMWord.ActiveDocument.Close($false)
+            }
+        }
 
         if (-not $ProcessOOF) {
             foreach ($SignaturePath in $SignaturePaths) {
@@ -3311,7 +3544,9 @@ function SetSignatures {
                 foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
                     RemoveItemAlternativeRecurse -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $ConnectedFilesFolderName)
                 }
+
                 Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
+
                 if ($EmbedImagesInHtml -eq $false) {
                     if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))")) {
                         Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse
@@ -3335,10 +3570,19 @@ function SetSignatures {
         Write-Host "$Indent      Remove temporary files"
         foreach ($extension in ('.docx', '.htm', '.rtf', '.txt')) {
             Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, $extension)) -ErrorAction SilentlyContinue | Out-Null
+            if ($pathHighResHtml) {
+                Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($pathHighResHtml, $extension)) -ErrorAction SilentlyContinue | Out-Null
+            }
         }
 
         Foreach ($file in @(Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
             Remove-Item -LiteralPath $file -Force -Recurse -ErrorAction SilentlyContinue
+        }
+
+        if ($pathHighResHtml) {
+            Foreach ($file in @(Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($pathHighResHtml) + '*') -Directory).FullName) {
+                Remove-Item -LiteralPath $file -Force -Recurse -ErrorAction SilentlyContinue
+            }
         }
 
         Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath $([System.IO.Path]::ChangeExtension($signature.value, '.files'))) -Force -Recurse -ErrorAction SilentlyContinue
@@ -3532,7 +3776,8 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
                     $oIE = New-Object -com InternetExplorer.Application
                     $oIE.Visible = $false
                     $oIE.Navigate2('https://' + ((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
-                    $oIE = $null
+                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($oIE) | Out-Null
+                    Remove-Variable -Name 'oIE'
 
                     # Wait until an IE tab with the corresponding URL is open
                     $app = New-Object -com shell.application
@@ -3550,7 +3795,8 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
                         $window.quit([ref]$false)
                     }
 
-                    $app = $null
+                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($app) | Out-Null
+                    Remove-Variable -Name 'app'
                 } catch {
                 }
             }
@@ -4067,17 +4313,32 @@ try {
     Write-Host
     Write-Host "Clean-up @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')@"
     # Restore original security setting
-    if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
+    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
         Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
     } else {
-        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
+        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
     }
 
     if ($script:COMWord) {
-        try {
-            $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
-        } catch {
+        if ($script:COMWord.ActiveDocument) {
+            try {
+                $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
+
+                # Restore original WebOptions
+                if ($script:WordWebOptions) {
+                    foreach ($property in ('AllowPNG', 'BrowserLevel', 'Encoding', 'OptimizeForBrowser', 'OrganizeInFolder', 'PixelsPerInch', 'RelyOnCSS', 'RelyOnVMl', 'ScreenSize', 'TargetBrowser', 'UseLongFileNames')) {
+                        $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
+                    }
+                }
+
+                # Restore original TextEncoding
+                if ($script:WordTextEncoding) {
+                    $script:COMWord.ActiveDocument.TextEndocing = $script:WordTextEncoding
+                }
+            } catch {
+            }
         }
+
         $script:COMWord.Quit([ref]$false)
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWord) | Out-Null
         Remove-Variable -Name 'COMWord' -Scope 'script'

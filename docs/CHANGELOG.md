@@ -16,6 +16,21 @@
 -->
 
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.6.0" target="_blank">v3.6.0</a> - 2023-01-24
+_Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `'What about the roaming signatures feature in Exchange Online?'` in '`.\docs\README`' for details, known problems and workarounds._
+### Changed
+- Microsoft Information Protection sensitivity labels are now supported when using DOCX templates. See '`How to make Set-OutlookSignatures work with Microsoft Information Protection?`' in '`.\docs\README`' for details.
+- Shrinking RTF files is now compatible with Microsoft Information Protection sensitivity labels
+- Updated chapter in '`.\docs\README`': '`Photos from Active Directory`'
+### Added
+- New FAQ in '`.\docs\README`': '`How to make Set-OutlookSignatures work with Microsoft Information Protection?`'
+- New parameter '`DocxHighResImageConversion`'. Enabled by default, this parameter creates HTM signatures with high resolution images from DOCX templates. See '`.\docs\README`' for details.
+### Fixed
+- User photo placeholders were not replaced when using HTM templates with images stored in connected sub-folders
+- Sample template files `'Test all default replacement variables.docx'` and `'Test all default replacement variables.htm'` did not contain all default replacement variables
+- Correctly handle empty `'AdditionalSignaturePath'` parameter
+
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.5.1" target="_blank">v3.5.1</a> - 2022-12-20
 _Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `'What about the roaming signatures feature in Exchange Online?'` in '`README`' for details, known problems and workarounds._
 ### Fixed
