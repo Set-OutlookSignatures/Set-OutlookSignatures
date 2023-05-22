@@ -367,6 +367,7 @@ function main {
     $script:tempDir = [System.IO.Path]::GetTempPath()
     $script:jobs = New-Object System.Collections.ArrayList
     Add-Type -AssemblyName System.DirectoryServices.AccountManagement
+    Add-Type -AssemblyName System.Web
     $Search = New-Object DirectoryServices.DirectorySearcher
     $Search.PageSize = 1000
 
@@ -3384,7 +3385,7 @@ function SetSignatures {
                             if ($LowResHtml.images[$ImageIndex].src -inotlike 'data:*') {
                                 if (Test-Path (Join-Path -Path (Split-Path -Path ($pathHighResHtml) -Parent) -ChildPath ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', ''))) {
                                     Copy-Item -LiteralPath (Join-Path -Path (Split-Path -Path ($pathHighResHtml) -Parent) -ChildPath ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '')) -Destination ($path -replace '.htm$', $pathHtmlFolderSuffix) -Force
-                                    $LowResHtml.images[$ImageIndex].src = ([uri]::UnEscapeDataString($HighResHtml.images[$ImageIndex].src) -replace '^about:', '') -replace "$($pathGUID)$($pathHighResHtmlFolderSuffix)", $pathGUID
+                                    $LowResHtml.images[$ImageIndex].src = "$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($HighResHtml.images[$ImageIndex].src -replace '^about:', '')))))"
                                 }
                             }
                         }

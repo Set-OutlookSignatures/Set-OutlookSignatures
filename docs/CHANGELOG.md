@@ -16,6 +16,12 @@
 -->
 
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.6.1" target="_blank">v3.6.1</a> - 2023-05-22
+_Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `'What about the roaming signatures feature in Exchange Online?'` in '`.\docs\README`' for details, known problems and workarounds._
+### Fixed
+- Signatures created with '`DocxHighResImageConversion true`' in combination with '`EmbedImagesInHtml false`' include high resolution image files, but these images could not be displayed because a wrong path was set in the HTM file
+
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.6.0" target="_blank">v3.6.0</a> - 2023-01-24
 _Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `'What about the roaming signatures feature in Exchange Online?'` in '`.\docs\README`' for details, known problems and workarounds._
 ### Changed
