@@ -1089,3 +1089,44 @@ Additional information that might be of interest for your Information Protection
 - Converted files are also stored in the temp directory, using the same GUID as the original file as file name but a different file extension (.htm, .rtf, .txt).
 - After all variable replacements and conversions are completed for a template, the converted files (HTM mandatory, RTF and TXT optional) are copied to the Outlook signature folder. The path of this folder is language and version dependent (Registry: '`HKCU:\Software\Microsoft\Office\<Outlook Version>\Common\General\Signatures`').
 - All temporary files mentioned are deleted by Set-OutlookSignatures as part of the clean-up process.
+- ## 16.28. Images in signatures have a different size than in templates
+The size of images in signatures may differ to the size of the very same image in a template. This may have observable in several ways:
+- Images are already displayed too big or too small when composing a message. Not all signatures with images need to be affected, and the problem does not need to be bound to specific users or client computers.
+- Images are displayed correctly when composing and sending an e-mail, but are shown in different sizes at the recipient.
+
+In both cases, usually only e-mails composed HTML format are affected, but not e-mails in RTF format.
+
+When only the recipient is affected, it is very likely that the problem is to be found within the mail client of the recipient, as it very likely does not respect or interpret HTML width and height attributes correctly.  
+- This problem can not be solved on the sending side, only on the recipient side. But the sender side can implement a workaround: Do not scale images in templates (by resizing them in Word or using HTML width and height tags), but use the original size of the image. It may be neccessary to resize the images with tools like GIMP before using them in templates.
+
+When the problem can already be seen when composing a message, there may be different root causes and according solutions or workarounds.
+
+To find the root cause:
+- Use the same signature template to create individual signatures for all the following steps.
+- Find out if the problem is user or computer related. Let affected users log on to non-affected computer, and vice versa, to test this.
+- Find out if only Outlook displays the image in the wrong size. Open the signature HTM file in Word, Chrome, Edge and Firefox for comparison.
+- Copy the affected HTM signature file (the signature, not the template) and let a non-affected user use it in Outlook to see if the problem exists there, too.
+- Compare the 'img' tag between the signature (from the same template) of an affected and a non-affected user. If they are identical, the root cause is not the generated HTML code, but it's interpretation and display in Outlook (therefore, the problem can't be in Set-OutlookSignatures).
+- Collect the following data for a number of affected and non-affected users and computer to help you find the root cause:
+  - User name
+  - Computer name
+  - Windows version including build number
+  - Word version including build number
+  - Outlook version including build number
+  - Does Chrome display the image in the correct size?
+  - Does Edge display the image in the correct size?
+  - Does Firefox display the image in the correct size?
+  - Does Outlook display the image in the correct size?
+  - Does Word display the image in the correct size?
+
+Two workarounds are available when you do not want to or can't find and solve the root cause of the problem:
+- Do not scale images in templates (by resizing them in Word, or using HTML width and height attributes), but use the original size of the image. It may be neccessary to resize the images with tools like GIMP before using them in templates.
+- The problem may only appear when templates are converted to signatures on computers configured with a display scaling higher than 100 %. In this case, the problem is in the Word conversion module or the HTML rendering engine of Outlook. The registry key described in <a href="https://learn.microsoft.com/en-US/outlook/troubleshoot/user-interface/graphics-file-attachment-grows-larger-in-recipient-email" target="_blank">this Microsoft article</a> may help here. After setting the registry key according to the article, Set-OutlookSignatures may need to run again.  
+
+Nonetheless, some scaling problems simply can not be solved in the HTML code of the signature, because the problem is in the rendering engine: For example, some Outlook 2016 builds scale images wrong when they are embedded and not linked. In this case, you can influence how images are displayed and converted from DOCX to HTM with the parameters '`EmbedImagesInHtml`' and '`DocxHighResImageConversion`':
+| Parameter  | Default<br>value | Alternate<br>configuration A | Alternate<br>configuration B | Alternate<br>configuration C |
+| - | - | - | - | - |
+| EmbedImagesInHtml | true | true | false | false |
+| DocxHighResImageConversion | true | false | true | false |
+| Influence on images | HTM signatures with images consist of a single file<br><br>Office 2013 can't handle embedded images<br><br>Some versions of Office/Outlook/Word (some Office 2016 builds, for example) show embedded images wrongly sized | HTM signatures with images consist of a single file<br><br>Office 2013 can't handle embedded images<br><br>Some versions of Office/Outlook/Word (some Office 2016 builds, for example) show embedded images wrongly sized<br><br>Images can look blurred and pixelated, especially on systems with high display resolution | HTM signatures with images consist of multiple files | HTM signatures with images consist of multiple files<br><br>Images can look blurred and pixelated, especially on systems with high display resolution |
+| Recommendation | This configuration should be used as long as there is nothing to the contrary | This configuration should not be used due to the low graphic quality | This configuration should be tried if the standard values do not provide a suitable result | This configuration should not be used due to the low graphic quality |
