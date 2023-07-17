@@ -1,0 +1,1 @@
+See folder '.\docs' for README and other documents related to Set-OutlookSignatures.

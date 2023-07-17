@@ -1,0 +1,19 @@
+<xml xmlns:o="urn:schemas-microsoft-com:office:office">
+ <o:MainFile HRef="../Test%20all%20default%20replacement%20variables.htm"/>
+ <o:File HRef="themedata.thmx"/>
+ <o:File HRef="colorschememapping.xml"/>
+ <o:File HRef="$CURRENTMAILBOXMANAGERPHOTO$.jpeg"/>
+ <o:File HRef="$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$.jpeg"/>
+ <o:File HRef="$CURRENTMAILBOXPHOTO$.jpeg"/>
+ <o:File HRef="$CURRENTMAILBOXPHOTODELETEEMPTY$.jpeg"/>
+ <o:File HRef="$CURRENTUSERMANAGERPHOTO$.jpeg"/>
+ <o:File HRef="$CURRENTUSERMANAGERPHOTODELETEEMPTY$.jpeg"/>
+ <o:File HRef="$CURRENTUSERPHOTO$.jpeg"/>
+ <o:File HRef="$CURRENTUSERPHOTODELETEEMPTY$.jpeg"/>
+ <o:File HRef="Apple.jpeg"/>
+ <o:File HRef="Square blue.jpeg"/>
+ <o:File HRef="Square green.jpeg"/>
+ <o:File HRef="Square red.jpeg"/>
+ <o:File HRef="Square yellow.jpeg"/>
+ <o:File HRef="filelist.xml"/>
+</xml>

@@ -1,0 +1,3 @@
+# exclude files and folders from the generated tarball
+/**                                           export-ignore
+/download[[:space:]]information.txt           -export-ignore
