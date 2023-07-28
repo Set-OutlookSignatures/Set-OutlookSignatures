@@ -6,7 +6,7 @@
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
-- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups** or specific **e-mail addresses**, for **every mailbox across all Outlook profiles** (**automapped and additional mailboxes** are optional)  
+- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups**, specific **e-mail addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles** (**automapped and additional mailboxes** are optional)  
 - Created with different names from the same template (e.g., **one template can be used for multiple shared mailboxes**)
 - Assigned **time ranges** within which they are valid  
 - Set as **default signature** for new e-mails, or for replies and forwards (signatures only)  
@@ -39,7 +39,7 @@ The script core is **Free and Open-Source Software (FOSS)**. It is published und
 **Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source licence.  Please see `.\docs\Benefactor Circle` for details.  
 
 **A big "Thank you!" for listing, featuring, supporting or sponsoring Set-OutlookSignatures!**
-<pre><a href="https://explicitconsulting.at" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/ExplicIT Consulting, color on black.png" height="100" title="ExplicIT Consulting" alt="ExplicIT Consulting"></a>  <a href="https://archiveprogram.github.com/" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/GitHub-Archive-Program-logo.png" height="100" title="GitHub Archive Program" alt="GitHub Archive Program"></a>  <a href="https://joinup.ec.europa.eu/collection/free-and-open-source-software/solution/set-outlooksignatures/about" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/EC Joinup Interoperable Europe.png" height="100" title="European Commission Joinup/Interoperable Europe programs" alt="European Commission Joinup/Interoperable Europe programs"></a></pre>
+<pre><a href="https://explicitconsulting.at" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/ExplicIT Consulting, color on black.png" height="100" title="ExplicIT Consulting" alt="ExplicIT Consulting"></a>  <a href="https://joinup.ec.europa.eu/collection/free-and-open-source-software/solution/set-outlooksignatures/about" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/EC Joinup Interoperable Europe.png" height="100" title="European Commission Joinup/Interoperable Europe programs" alt="European Commission Joinup/Interoperable Europe programs"></a>  <a href="https://startups.microsoft.com" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/MS_Startups_Celebration_Badge_Dark.png" height="100" title="Proud to partner with Microsoft for Startups" alt="Proud to partner with Microsoft for Startups"></a>  <a href="https://archiveprogram.github.com/" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/GitHub-Archive-Program-logo.png" height="100" title="GitHub Archive Program" alt="GitHub Archive Program"></a></pre>
 
 # Table of Contents <!-- omit in toc -->
 - [1. Requirements](#1-requirements)
@@ -80,7 +80,8 @@ The script core is **Free and Open-Source Software (FOSS)**. It is published und
 - [8. Error handling](#8-error-handling)
 - [9. Run script while Outlook is running](#9-run-script-while-outlook-is-running)
 - [10. Signature and OOF file format](#10-signature-and-oof-file-format)
-  - [10.1. Signature template file naming](#101-signature-template-file-naming)
+  - [10.1. Relation between template file name and Outlook signature name](#101-relation-between-template-file-name-and-outlook-signature-name)
+  - [10.2. Proposed template and signature naming convention](#102-proposed-template-and-signature-naming-convention)
 - [11. Template tags and ini files](#11-template-tags-and-ini-files)
   - [11.1. Allowed tags](#111-allowed-tags)
   - [11.2. How to work with ini files](#112-how-to-work-with-ini-files)
@@ -177,8 +178,8 @@ There are locked down environments, where all files matching the patterns `*.ps*
       ```
       powershell.exe -noexit -file "c:\test\Set-OutlookSignatures.ps1" # adopt the file path as needed
       ```
-   - Mailbox is in Exchange Online and/or the logged-in user has no access to the on-prem Active Directory and/or your environment is cloud only: You need to register an Azure AD application first, because Set-OutlookSignatures needs permissions to access the Graph API.
-     1. An Azure AD administrator needs to register Set-OutlookSignatures as app and provide admin consent for the required permissions. See the file '.\config\default graph config.ps1' for details.
+   - Mailbox is in Exchange Online and/or the logged-in user has no access to the on-prem Active Directory and/or your environment is cloud only: You need to register an Entra ID/Azure AD application first, because Set-OutlookSignatures needs permissions to access the Graph API.
+     1. An Entra ID/Azure AD administrator needs to register Set-OutlookSignatures as app and provide admin consent for the required permissions. See the file '.\config\default graph config.ps1' for details.
      2. Run Set-OutlookSignatures
         - Cloud only, or hybrid without synced Exchange attributes (mail, legacyExchangeDN, msExchRecipientTypeDetails, msExchMailboxGuid, proxyAddresses):
           ```
@@ -518,7 +519,7 @@ New and changed signatures can be used instantly in Outlook.
 Changing which signature is to be used as default signature for new e-mails or for replies and forwards requires restarting Outlook.   
 # 10. Signature and OOF file format  
 Only Word files with the extension .docx and HTML files with the extension .htm are supported as signature and OOF template files.  
-## 10.1. Signature template file naming  
+## 10.1. Relation between template file name and Outlook signature name  
 The name of the signature template file without extension is the name of the signature in Outlook.
 Example: The template "Test signature.docx" will create a signature named "Test signature" in Outlook.
 
@@ -528,11 +529,70 @@ Example: The template "Test signature.htm" with the following ini file configura
 [Test signature.htm]
 OutlookSignatureName = Test signature, do not use
 ```
+## 10.2. Proposed template and signature naming convention
+To make life easier for template maintainers and for users, a consistent template and signature naming convention should be used.
+
+There are multiple approaches, with the following one gaining popularity: `<Company> <internal/external> <Language> <formal/informal> <additional info>`
+
+Let's break down the components:
+- Company: Useful when your users work with multiple company or brand names.
+- Internal/External: Usually abbreviated as int and ext. Show if a signature is intended for use with a purely internal recipient audience, or if an external audience is involved.
+- Language: Usually abbreviated to a two-letter code, such as AT for Austria. This way, you can handle multi-language signatures.
+- Formal/informal: Usually abbreviated as frml and infrml. Allows you to deploy signatures with a certain formality in the salutation of the signature.
+- Additional info: Typically used to identify signatures for shares mailboxes or in delegate scenarios.
+
+Example signature names for a user having access to his own mailbox and the office mailbox:
+- CompA ext DE frml
+- CompA ext DE frml office@
+- CompA ext DE infrml
+- CompA ext DE infrml office@
+- CompA ext EN frml
+- CompA ext EN frml office@
+- CompA ext EN infrml
+- CompA ext EN infrml office@
+- CompA int EN infrml
+- CompA int EN infrml office@
+
+For the user, the selection process may look complicated at first sight, but is actually quite natural and fast:
+- Example A: Informal German mail sent to externals from own mailbox
+  1. "I act in the name of company CompA" -> "CompA"
+  2. "The mail has at least one external recipient" -> "CompA ext"
+  3. "The mail is written in German language" -> "CompA ext DE"
+  4. "The tone is informal" -> "CompA ext DE infrml"
+  5. "I send from my own mailbox" -> no change, use "CompA ext DE infrml"
+- Example B: Formal English mail sent to externals from office@
+  1. "I act in the name of company CompA" -> "CompA"
+  2. "The mail has at least one external recipient" -> "CompA ext"
+  3. "The mail is written in English language" -> "CompA ext EN"
+  4. "The tone is formal" -> "CompA ext EN frml"
+  5. "I send from the office mailbox" -> "CompA ext EN frml office@"
+- Example C: Internal English mail from own mailbox
+  1. "I act in the name of company CompA" -> "CompA"
+  2. "The mail has only internal recipients" -> "CompA int"
+  3. "The mail is written in English language" -> "CompA int EN"
+  4. "The tone is informal" -> "CompA int EN infrml"
+  5. "I send from my own mailbox" -> "CompA int EN infrml"
+
+Don't forget: You can use one and the same template for different signature names. In the example above, the template might not be named `CompA ext EN frml office@.docx`, but `CompA ext EN frml shared@.docx` and be used multiple times in the ini file:
+```
+# office@example.com
+[CompA ext EN frml shared@.docx]
+office@example.com
+OutlookSignatureName = CompA ext EN frml office@
+DefaultNew
+
+# marketing@example.com
+[CompA ext EN frml shared@.docx]
+marketing@example.com
+OutlookSignatureName = CompA ext EN frml marketing@
+DefaultNew
+```
 # 11. Template tags and ini files
 Tags define properties for templates, such as
 - time ranges during which a template shall be applied or not applied
 - groups whose direct or indirect members are allowed or denied application of a template
 - specific e-mail addresses which are are allowed or denied application of a template
+- specific replacement variables which allow or deny application of a template
 - an Outlook signature name that is different from the file name of the template
 - if a signature template shall be set as default signature for new e-mails or as default signature for replies and forwards
 - if a OOF template shall be set as internal or external message
@@ -542,7 +602,97 @@ There are additional tags which are not template specific, but change the behavi
 - specific sort culture used for sorting ascendingly or descendingly (de-AT or en-US, for example)
 
 If you want to give template creators control over the ini file, place it in the same folder as the templates.
+
+Tags are case insensitive.
 ## 11.1. Allowed tags
+- `<yyyyMMddHHmm-yyyyMMddHHmm>`, `-:<yyyyMMddHHmm-yyyyMMddHHmm>`
+  - Make this template valid only during the specific time range (`yyyy` = year, `MM` = month, `dd` = day, `HH` = hour (00-24), `mm` = minute).
+  - The `-:` prefix makes this template invalid during the specified time range.
+  - Examples: `202112150000-202112262359` for the 2021 Christmas season, `-:202202010000-202202282359` for a deny in February 2022
+  - If the script does not run after a template has expired, the template is still available on the client and can be used.
+  - Time ranges are interpreted as local time per default, which means times depend on the user or client configuration. If you do not want to use local times, but global times just add 'Z' as time zone. For example: `202112150000Z-202112262359Z`
+- `<NetBiosDomain> <GroupSamAccountName>`, `<NetBiosDomain> <Display name of Group>`, `-:<NetBiosDomain> <GroupSamAccountName>`, `-:<NetBiosDomain> <Display name of Group>`
+  - Make this template specific for an Outlook mailbox being a direct or indirect member of this group or distribution list
+  - The `-:` prefix makes this template invalid for the specified group.
+  - Examples: `EXAMPLE Domain Users`, `-:Example GroupA`  
+  - Groups must be available in Active Directory. Groups like `Everyone` and `Authenticated Users` only exist locally, not in Active Directory
+  - This tag supports alternative formats, which are of special interest if you are in a cloud only or hybrid environmonent:
+    - `<NetBiosDomain> <GroupSamAccountName>` and `<NetBiosDomain> <Group DisplayName>` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName. Use these formats when your environment is hybrid or on premises only.
+    - `AzureAD <e-mail-address-of-group@example.com>`, `AzureAD <GroupMailNickname>`, `AzureAD <GroupDisplayName>`, `EntraID <e-mail-address-of-group@example.com>`, `EntraID <GroupMailNickname>`, `EntraID <GroupDisplayName>` do not work with a local Active Directory, only with Microsoft Graph. They are queried in the order given. 'EntraID' and 'AzureAD' are the literal, case-insensitive strings 'EntraID' and 'AzureAD', not a variable. Use these formats when you are in a cloud only environment.
+  - '<NetBiosDomain>' and '<EXAMPLE>' are just examples. You need to replace them with the actual NetBios domain name of the Active Director domain containing the group.
+  - 'EntraID' and 'AzureAD' are not examples. If you want to assign a template to a group stored in Azure Active Directory, you have to use 'EntraID' or 'AzureAD' as domain name.
+  - When multiple groups are defined, membership in a single group is sufficient to be assigned the template - it is not required to be a member of all the defined groups.  
+- `CURRENTUSER:<NetBiosDomain> <GroupSamAccountName>`, `CURRENTUSER:<NetBiosDomain> <Display name of Group>`, `-CURRENTUSER:<NetBiosDomain> <GroupSamAccountName>`, `-CURRENTUSER:<NetBiosDomain> <Display name of Group>`, `CURRENTUSER:AzureAD <e-mail-address-of-group@example.com>`, `CURRENTUSER:AzureAD <GroupMailNickname>`, `CURRENTUSER:AzureAD <GroupDisplayName>`, `-CURRENTUSER:AzureAD <e-mail-address-of-group@example.com>`, `-CURRENTUSER:AzureAD <GroupMailNickname>`, `-CURRENTUSER:AzureAD <GroupDisplayName>`, `CURRENTUSER:EntraID <e-mail-address-of-group@example.com>`, `CURRENTUSER:EntraID <GroupMailNickname>`, `CURRENTUSER:EntraID <GroupDisplayName>`, `-CURRENTUSER:EntraID <e-mail-address-of-group@example.com>`, `-CURRENTUSER:EntraID <GroupMailNickname>`, `-CURRENTUSER:EntraID <GroupDisplayName>`
+  - Make this template specific for the logged on user if his _personal_ mailbox (which does not need to be in Outlook) is a direct or indirect member of this group or distribution list
+  - Example: Assign template to every mailbox, but not if the mailbox of the current user is member of the group EXAMPLE\Group
+    ```
+    [template.docx]
+    -CURRENTUSER:EXAMPLE Group
+    ```
+- `<SmtpAddress>`, `-:<SmtpAddress>`
+  - Make this template specific for the assigned e-mail address (all SMTP addresses of a mailbox are considered, not only the primary one)
+  - The `-:` prefix makes this template invalid for the specified e-mail address.
+  - Examples: `office@example.com`, `-:test@example.com`
+  - The `CURRENTUSER:` and `-CURRENTUSER:` prefixes make this template invalid for the specified e-mail addresses of the current user.  
+  Example: Assign template to every mailbox, but not if the personal mailbox of the current user has the e-mail address userX@example.com
+  - Useful for delegate or boss-secretary scenarios: "Assign a template to everyone having the boss mailbox userA@example.com in Outlook, but not for UserA itself" is realized like that in the ini file:
+    ```
+    [delegate template name.docx]
+    # Assign the template to everyone having userA@example.com in Outlook
+    userA@example.com
+    # Do not assign the template to the actual user owning the mailbox userA@example.com
+    -CURRENTUSER:userA@example.com
+    ```
+    You can even only use only one delegate template for your whole company to cover all delegate scenarios. Make sure the template correctly uses `$CurrentUser[...]$` and `$CurrentMailbox[...]$` replacement variables, and then use the template multiple times in the ini file, with different signature names:
+    ```
+    [Company EN external formal delegate.docx]
+    # Assign the template to everyone having userA@example.com in Outlook
+    userA@example.com
+    # Do not assign the template to the actual user owning the mailbox userA@example.com
+    -CURRENTUSER:userA@example.com
+    # Use a custom signature name instead of the template file name 
+    OutlookSignatureName = Company EN external formal userA@
+
+
+    [Company EN external formal delegate.docx]
+    # Assign the template to everyone having userX@example.com in Outlook
+    userX@example.com
+    # Do not assign the template to the actual user owning the mailbox userX@example.com
+    -CURRENTUSER:userX@example.com
+    # Use a custom signature name instead of the template file name 
+    OutlookSignatureName = Company EN external formal UserX@
+- `<ReplacementVariable>`, `-:<ReplacementVariable>`
+  - Make this template specific for the assigned replacement variable
+  - The `-:` prefix makes this template invalid for the specified replacement variable.
+  - Replacement variable are checked for true or false values. If a replacement variable is not a boolean (true or false) value per se, it is converted to the boolean data type first.
+    - Replacement variables that can only hold one value evaluate to false if they contain no value (null, empty) or have the value 0. All other values evaluate to true.
+    - Replacement variables that can hold multiple values evaluate to false if they contain no value, or if they contain only one value, which in turn evaluates to false. All other values evaluate to true.
+  - Examples:
+    - `$CurrentMailboxManagerMail$` (apply if current user has a manager with an e-mail address)
+    - `-:$CurrentMailboxManagerMail$` (do not apply if current user has a manager with an e-mail address)
+    - A template should only be applied to users which are member of the Marketing group and the Sales group at the same time:
+      - Use a custom replacement variable config file, define the custom replacement variable `$CurrentMailbox-IsMemberOf-MarketingAndSales$` and set it to yes if the current user's mailbox is member of the Marketing and the Sales groups at the same time:  
+        ```
+        @(@('CurrentUser', '$CurrentUser-IsMemberOf-MarketingAndSales$', 'EXAMPLEDOMAIN Marketing', 'EXAMPLEDOMAIN Sales'), @()) | Where-Object { $_ } | Foreach-Object { if ( ((Get-Variable -Name "ADProps$($_[0])" -ValueOnly).GroupsSids -icontains ResolveToSid($_2])) -and ((Get-Variable -Name "ADProps$($_[0])" -ValueOnly).GroupsSids -icontains ResolveToSid($_3])) ) { $ReplaceHash[$_[1]] = 'yes' } else { $ReplaceHash[$_[1]] = $null } }
+        ```
+      - The template ini configuration then looks like this:
+        ```
+        [template.docx]
+        $CurrentUser-IsMemberOf-MarketingAndSales$
+        ```
+      - If you want a template only to not be applied to users whose primary mailbox is a of the Marketing group and the Sales group at the same time:
+        ```
+        [template.docx]
+        -:$CurrentUser-IsMemberOf-MarketingAndSales$
+        ```
+      - Combinations are possible: Only in January 2024, for all members of EXAMPLEDOMAIN\Examplegroup but not for the mailbox example@example.com and not for users whose primary mailbox is a of the Marketing group and the Sales group at the same time:
+        ```
+        [template.docx]
+        202401010000-202401312359
+        EXAMPLEDOMAIN Examplegroup
+        -:example@example.com
+        -:$CurrentUser-IsMemberOf-MarketingAndSales$
+        ```
 - `writeProtect` (signature template files only)  
     - Write protects the signature files. Works only in Outlook. Modifying the signature in Outlook's signature editor leads to an error on saving, but the signature can still be changed after it has been added to an e-mail.  
 - `defaultNew` (signature template files only)  
@@ -555,27 +705,7 @@ If you want to give template creators control over the ini file, place it in the
 - `external` (OOF template files only)  
     - Set template as default OOF message for external recipients  
     - If neither `internal` nor `external` is defined, the template is set as default OOF message for internal and external recipients  
-- `NetBiosDomain GroupSamAccountName`, `NetBiosDomain Display name of Group`, `-:NetBiosDomain GroupSamAccountName`, `-:NetBiosDomain Display name of Group`
-  - Make this template specific for an Outlook mailbox being a direct or indirect member of this group or distribution list
-  - The `-:` prefix makes this template invalid for the specified group.
-  - Examples: `EXAMPLE Domain Users`, `-:Example GroupA`  
-  - Groups must be available in Active Directory. Groups like `Everyone` and `Authenticated Users` only exist locally, not in Active Directory
-  - This tag supports alternative formats, which are of special interest if you are in a cloud only or hybrid environmonent:
-    - `NetBiosDomain GroupSamAccountName` and `NetBiosDomain Group DisplayName` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName. Use these formats when your environment is hybrid or on premises only.
-    - `AzureAD e-mail-address-of-group@example.com`, `AzureAD GroupMailNickname`, `AzureAD GroupDisplayName` do not work with a local Active Directory, only with Microsoft Graph. They are queried in the order given. 'AzureAD' is the literal, case-insensitive string 'AzureAD', not a variable. Use these formats when you are in a cloud only environment.
-  - 'NetBiosDomain' and 'EXAMPLE' are just examples. You need to replace them with the actual NetBios domain name of the Active Director domain containing the group.
-  - 'AzureAD' is not an example. If you want to assign a template to a group stored in Azure Active Directory, you have to use 'AzureAD' as domain name.
-  - When multiple groups are defined, membership in a single group is sufficient to be assigned the template - it is not required to be a member of all the defined groups.  
-- `SmtpAddress`, `-:SmtpAddress`
-  - Make this template specific for the assigned e-mail address (all SMTP addresses of a mailbox are considered, not only the primary one)
-  - The `-:` prefix makes this template invalid for the specified e-mail address.
-  - Examples: `office@example.com`, `-:test@example.com`
-- `yyyyMMddHHmm-yyyyMMddHHmm`, `-:yyyyMMddHHmm-yyyyMMddHHmm`
-  - Make this template valid only during the specific time range (`yyyy` = year, `MM` = month, `dd` = day, `HH` = hour (00-24), `mm` = minute).
-  - The `-:` prefix makes this template invalid during the specified time range.
-  - Examples: `202112150000-202112262359` for the 2021 Christmas season, `-:202202010000-202202282359` for a deny in February 2022
-  - If the script does not run after a template has expired, the template is still available on the client and can be used.
-  - Time ranges are interpreted as local time per default, which means times depend on the user or client configuration. If you do not want to use local times, but global times just add 'Z' as time zone. For example: `202112150000Z-202112262359Z`
+    ```
 
 <br>Tags can be combined: A template may be assigned to several groups, e-mail addresses and time ranges, be denied for several groups, e-mail adresses and time ranges, be used as default signature for new e-mails and as default signature for replies and forwards - all at the same time. Simple add different tags below a file name, separated by line breaks (each tag needs to be on a separate line).
 
@@ -592,7 +722,7 @@ If you want to give template creators control over the ini file, place it in the
     `[file a.docx]` is the same as `["File A.docx"]` and `['fILE a.dOCX']`  
   File names not mentioned in this file are not considered, even if they are available in the file system. Set-OutlookSignatures will report files which are in the file system but not mentioned in the current ini, and vice versa.<br>  
   When there are two or more sections for a filename: The keys and values are not combined, each section is considered individually (SortCulture and SortOrder still apply).  
-  This can be useful in the following scenario: Multiple shared mailboxes shall use the same template, individualized by using `$CURRENTMAILBOX[...]$` variables. A user can have multiple of these shared mailboxes in his Outlook configuration.
+  This can be useful in the following scenario: Multiple shared mailboxes shall use the same template, individualized by using `$CurrentMailbox[...]$` variables. A user can have multiple of these shared mailboxes in his Outlook configuration.
     - Solution A: Use multiple templates (possible in all versions)
       - Instructions
         - Create a copy of the initial template for each shared mailbox.
@@ -634,6 +764,25 @@ If you want to give template creators control over the ini file, place it in the
           SharedMailboxC@example.com
           OutlookSignatureName = template SharedMailboxC
           ```
+    You can even only use only one delegate template for your whole company to cover all delegate scenarios. Make sure the template correctly uses `$CurrentUser[...]$` and `$CurrentMailbox[...]$` replacement variables, and then use the template multiple times in the ini file, with different signature names:
+    ```
+    [Company EN external formal delegate.docx]
+    # Assign the template to everyone having userA@example.com in Outlook
+    userA@example.com
+    # Do not assign the template to the actual user owning the mailbox userA@example.com
+    -CURRENTUSER:userA@example.com
+    # Use a custom signature name instead of the template file name 
+    OutlookSignatureName = Company EN external formal userA@
+
+
+    [Company EN external formal delegate.docx]
+    # Assign the template to everyone having userX@example.com in Outlook
+    userX@example.com
+    # Do not assign the template to the actual user owning the mailbox userX@example.com
+    -CURRENTUSER:userX@example.com
+    # Use a custom signature name instead of the template file name 
+    OutlookSignatureName = Company EN external formal UserX@
+    ```
 4. Add tags in the lines below the filename
   Example: `defaultNew`
     - Do not enclose tags in square brackets. This is not allowed here, but required when you add tags directly to file names.    - When an ini file is used, tags in file names are not considered as tags, but as part of the file name, so the Outlook signature name will contain them.  
@@ -643,7 +792,7 @@ If you want to give template creators control over the ini file, place it in the
     - Tags are case insensitive  
     `defaultNew` is the same as `DefaultNew` and `dEFAULTnEW`
     - You can override the automatic Outlook signature name generation by setting OutlookSignatureName, e. g. `OutlookSignatureName = This is a custom signature name`  
-    With this option, you can have different template file names for the same Outlook signature name. Search for "Marketing external English formal" in the sample ini files for an example. Take care of signature group priorities (common, group, e-mail address) and the SortOrder and SortCulture parameters.
+    With this option, you can have different template file names for the same Outlook signature name. Search for "Marketing external English formal" in the sample ini files for an example. Take care of signature group priorities (common, group, e-mail address, replacement variable) and the SortOrder and SortCulture parameters.
 5. Remove the tags from the file names in the file system  
 Else, the file names in the ini file and the file system do not match, which will result in some templates not being applied.  
 It is recommended to create a copy of your template folder for tests.
@@ -654,7 +803,7 @@ Signatures are applied mailbox for mailbox. The mailbox list is sorted as follow
 - Mailboxes from the default Outlook profile, in the sort order shown in Outlook (and not in the order they were added to the Outlook profile)
 - Mailboxes from other Outlook profiles. The profiles are sorted alphabetically. Within each profile, the mailboxes are sorted in the order they are shown in Outlook.
 
-For each mailbox, templates are applied in a specific order: Common templates first, group templates second, e-mail address specific templates last.
+For each mailbox, templates are applied in a specific order: Common templates first, group templates second, e-mail address specific templates third, replacement variables last.
 
 Each one of these templates groups can have one or more time range tags assigned. Such a template is only considered if the current system time is within at least one of these time range tags.
 - Common templates are templates with either no tag or only `[defaultNew]` and/or `[defaultReplyFwd]` (`[internal]` and/or `[external]` for OOF templates).
@@ -676,32 +825,32 @@ Variables can also be retrieved from other sources than Active Directory by addi
 
 Per default, `.\config\default replacement variables.ps1` contains the following replacement variables:  
 - Currently logged-in user  
-    - `$CURRENTUSERGIVENNAME$`: Given name  
-    - `$CURRENTUSERSURNAME$`: Surname  
-    - `$CURRENTUSERDEPARTMENT$`: Department  
-    - `$CURRENTUSERTITLE$`: (Job) Title  
-    - `$CURRENTUSERSTREETADDRESS$`: Street address  
-    - `$CURRENTUSERPOSTALCODE$`: Postal code  
-    - `$CURRENTUSERLOCATION$`: Location  
-    - `$CURRENTUSERSTATE$`: State  
-    - `$CURRENTUSERCOUNTRY$`: Country  
-    - `$CURRENTUSERTELEPHONE$`: Telephone number  
-    - `$CURRENTUSERFAX$`: Facsimile number  
-    - `$CURRENTUSERMOBILE$`: Mobile phone  
-    - `$CURRENTUSERMAIL$`: E-mail address  
-    - `$CURRENTUSERPHOTO$`: Photo from Active Directory, see "[12.1 Photos from Active Directory](#121-photos-from-active-directory)" for details  
-    - `$CURRENTUSERPHOTODELETEEMPTY$`: Photo from Active Directory, see "[12.1 Photos from Active Directory](#121-photos-from-active-directory)" for details  
-    - `$CURRENTUSEREXTATTR1$` to `$CURRENTUSEREXTATTR15$`: Exchange extension attributes 1 to 15  
-    - `$CURRENTUSEROFFICE$`: Office room number (physicalDeliveryOfficeName)  
-    - `$CURRENTUSERCOMPANY$`: Company  
-    - `$CURRENTUSERMAILNICKNAME$`: Alias (mailNickname)  
-    - `$CURRENTUSERDISPLAYNAME$`: Display Name  
+    - `$CurrentUserGivenname$`: Given name  
+    - `$CurrentUserSurname$`: Surname  
+    - `$CurrentUserDepartment$`: Department  
+    - `$CurrentUserTitle$`: (Job) Title  
+    - `$CurrentUserStreetaddress$`: Street address  
+    - `$CurrentUserPostalcode$`: Postal code  
+    - `$CurrentUserLocation$`: Location  
+    - `$CurrentUserState$`: State  
+    - `$CurrentUserCountry$`: Country  
+    - `$CurrentUserTelephone$`: Telephone number  
+    - `$CurrentUserFax$`: Facsimile number  
+    - `$CurrentUserMobile$`: Mobile phone  
+    - `$CurrentUserMail$`: E-mail address  
+    - `$CurrentUserPhoto$`: Photo from Active Directory, see "[12.1 Photos from Active Directory](#121-photos-from-active-directory)" for details  
+    - `$CurrentUserPhotodeleteempty$`: Photo from Active Directory, see "[12.1 Photos from Active Directory](#121-photos-from-active-directory)" for details  
+    - `$CurrentUserExtattr1$` to `$CurrentUserExtattr15$`: Exchange extension attributes 1 to 15  
+    - `$CurrentUserOffice$`: Office room number (physicalDeliveryOfficeName)  
+    - `$CurrentUserCompany$`: Company  
+    - `$CurrentUserMailnickname$`: Alias (mailNickname)  
+    - `$CurrentUserDisplayname$`: Display Name  
 - Manager of currently logged-in user  
-    - Same variables as logged-in user, `$CURRENTUSERMANAGER[...]$` instead of `$CURRENTUSER[...]$`  
+    - Same variables as logged-in user, `$CurrentUserManager[...]$` instead of `$CurrentUser[...]$`  
 - Current mailbox  
-    - Same variables as logged-in user, `$CURRENTMAILBOX[...]$` instead of `$CURRENTUSER[...]$`  
+    - Same variables as logged-in user, `$CurrentMailbox[...]$` instead of `$CurrentUser[...]$`  
 - Manager of current mailbox  
-    - Same variables as logged-in user, `$CURRENTMAILBOXMANAGER[...]$` instead of `$CURRENTMAILBOX[...]$`  
+    - Same variables as logged-in user, `$CurrentMailboxManager[...]$` instead of `$CurrentMailbox[...]$`  
 ## 13.1. Photos from Active Directory  
 The script supports replacing images in signature templates with photos stored in Active Directory.
 
@@ -713,40 +862,40 @@ As with other variables, photos can be obtained from the currently logged-in use
 To be able to apply Word image features such as sizing, cropping, frames, 3D effects etc, you have to exactly follow these steps:  
 1. Create a sample image file which will later be used as placeholder.  
 2. Optionally: If the sample image file name contains one of the following variable names, the script recognizes it and you do not need to add the value to the alternative text of the image in step 4:  
-    - `$CURRENTUSERPHOTO$`  
-    - `$CURRENTUSERPHOTODELETEEMPTY$`  
-    - `$CURRENTUSERMANAGERPHOTO$`  
-    - `$CURRENTUSERMANAGERPHOTODELETEEMPTY$`  
-    - `$CURRENTMAILBOXPHOTO$`  
-    - `$CURRENTMAILBOXPHOTODELETEEMPTY$`  
-    - `$CURRENTMAILBOXMANAGERPHOTO$`  
-    - `$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$`  
+    - `$CurrentUserPhoto$`  
+    - `$CurrentUserPhotodeleteempty$`  
+    - `$CurrentUserManagerPhoto$`  
+    - `$CurrentUserManagerPhotodeleteempty$`  
+    - `$CurrentMailboxPhoto$`  
+    - `$CurrentMailboxPhotodeleteempty$`  
+    - `$CurrentMailboxManagerPhoto$`  
+    - `$CurrentMailboxManagerPhotodeleteempty$`  
 3. Insert the image into the signature template. Make sure to use `Insert | Pictures | This device` (Word 2019, other versions have the same feature in different menus) and to select the option `Insert and Link` - if you forget this step, a specific Word property is not set and the script will not be able to replace the image.  
 4. If you did not follow optional step 2, please add one of the following variable names to the alternative text of the image in Word (these variables are removed from the alternative text in the final signature):  
-    - `$CURRENTUSERPHOTO$`  
-    - `$CURRENTUSERPHOTODELETEEMPTY$`  
-    - `$CURRENTUSERMANAGERPHOTO$`  
-    - `$CURRENTUSERMANAGERPHOTODELETEEMPTY$`  
-    - `$CURRENTMAILBOXPHOTO$`  
-    - `$CURRENTMAILBOXPHOTODELETEEMPTY$`  
-    - `$CURRENTMAILBOXMANAGERPHOTO$`  
-    - `$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$`  
+    - `$CurrentUserPhoto$`  
+    - `$CurrentUserPhotodeleteempty$`  
+    - `$CurrentUserManagerPhoto$`  
+    - `$CurrentUserManagerPhotodeleteempty$`  
+    - `$CurrentMailboxPhoto$`  
+    - `$CurrentMailboxPhotodeleteempty$`  
+    - `$CurrentMailboxManagerPhoto$`  
+    - `$CurrentMailboxManagerPhotodeleteempty$`  
 5. Format the image as wanted.
 
-For the script to recognize images to replace, you need to follow at least one of the steps 2 and 4. If you follow both, the script first checks for step 2 first. If you provide multiple image replacement variables, `$CURRENTUSER[...]$` has the highest priority, followed by `$CURRENTUSERMANAGER[...]$`, `$CURRENTMAILBOX[...]$` and `$CURRENTMAILBOXMANAGER[...]$`. It is recommended to use only one image replacement variable per image.  
+For the script to recognize images to replace, you need to follow at least one of the steps 2 and 4. If you follow both, the script first checks for step 2 first. If you provide multiple image replacement variables, `$CurrentUser[...]$` has the highest priority, followed by `$CurrentUserManager[...]$`, `$CurrentMailbox[...]$` and `$CurrentMailboxManager[...]$`. It is recommended to use only one image replacement variable per image.  
   
 The script will replace all images meeting the conditions described in the steps above and replace them with Active Directory photos in the background. This keeps Word image formatting option alive, just as if you would use Word's `"Change picture"` function.  
 
 ### 13.1.2. When using HTM template files
 Images are replaced when the `src` or `alt` property of the image tag contains one of the following strings:
-- `$CURRENTUSERPHOTO$`  
-- `$CURRENTUSERPHOTODELETEEMPTY$`  
-- `$CURRENTUSERMANAGERPHOTO$`  
-- `$CURRENTUSERMANAGERPHOTODELETEEMPTY$`  
-- `$CURRENTMAILBOXPHOTO$`  
-- `$CURRENTMAILBOXPHOTODELETEEMPTY$`  
-- `$CURRENTMAILBOXMANAGERPHOTO$`  
-- `$CURRENTMAILBOXMANAGERPHOTODELETEEMPTY$`
+- `$CurrentUserPhoto$`  
+- `$CurrentUserPhotodeleteempty$`  
+- `$CurrentUserManagerPhoto$`  
+- `$CurrentUserManagerPhotodeleteempty$`  
+- `$CurrentMailboxPhoto$`  
+- `$CurrentMailboxPhotodeleteempty$`  
+- `$CurrentMailboxManagerPhoto$`  
+- `$CurrentMailboxManagerPhotodeleteempty$`
 
 Be aware that Outlook does not support the full HTML feature set. For example:
 - Some (older) Outlook versions ignore the `width` and `height` properties for embedded images.  
@@ -755,8 +904,8 @@ Be aware that Outlook does not support the full HTML feature set. For example:
 - Consider switching to DOCX templates for easier maintenance.
 ### 13.1.3. Common behavior
 If there is no photo available in Active Directory, there are two options:  
-- You used the `$CURRENT[...]PHOTO$` variables: The sample image used as placeholder is shown in the signature.  
-- You used the `$CURRENT[...]PHOTODELETEEMPTY$` variables: The sample image used as placeholder is deleted from the signature, which may affect the layout of the remaining signature depending on your formatting options.
+- You used the `$Current[...]Photo$` variables: The sample image used as placeholder is shown in the signature.  
+- You used the `$Current[...]PhotoDeleteempty$` variables: The sample image used as placeholder is deleted from the signature, which may affect the layout of the remaining signature depending on your formatting options.
 
 **Attention**: A signature with embedded images has the expected file size in DOCX, HTML and TXT formats, but the RTF file will be much bigger.
 
@@ -773,34 +922,34 @@ If the link is not working, please visit the <a href="https://web.archive.org/we
 ## 13.2. Delete images when attribute is empty, variable content based on group membership
 You can avoid creating multiple templates which only differ by the images contained by only creating one template containing all images and marking this images to be deleted when a certain replacement variable is empty.
 
-Just add the text `$<name of the replacement variable>DELETEEMPTY$` (for example: `$CURRENTMAILBOXEXTATTR10DELETEEMPTY$` ) to the description or alt text of the image. Taking the example, the image is deleted when extension attribute 10 of the current mailbox is empty.
+Just add the text `$<name of the replacement variable>DELETEEMPTY$` (for example: `$CurrentMailboxExtattr10deleteempty$` ) to the description or alt text of the image. Taking the example, the image is deleted when extension attribute 10 of the current mailbox is empty.
 
-This can be combined with the `GroupsSIDs` attribute of the current mailbox to only keep images when the mailbox is member of a certain group.
+This can be combined with the `GroupsSIDs` attribute of the current mailbox or current user to only keep images when the mailbox is member of a certain group.
 
 Examples:
-- A signature should only show a social network icon with an associated link when there is data in the extension attribute 10:
-  - Insert the icon of the social network in the template, set the hyperlink target to '$CURRENT[...]EXTATTR10$' and add '$CURRENT[...]EXTATTR10DELETEEMPTY$' to the description of the picture.
-    - When using embedded and linked pictures, you can also set the file name to '$CURRENT[...]EXTATTR10DELETEEMPTY$'
-- A signature should only contain a certain image when the current mailbox is member of a specified group:
-  - Create a new replacement variable. We use '$CURRENTMAILBOX-ISMEMBEROF-MARKETING$' in the following example.
-    - Get the SID of the Marketing group and check if the current mailbox is a member of this SID.
-      - Attention on-prem users: If Domain Local Active Directory groups are involved, you need to set the `IncludeMailboxForestDomainLocalGroups` parameter to `true` when running Set-OutlookSignatures, so that the SIDs of these groups are considered too.
-    - If the current mailbox is a member, give '$CURRENTMAILBOX-ISMEMBEROF-MARKETING$' any value. If not, give '$CURRENTMAILBOX-ISMEMBEROF-MARKETING$' no value (NULL or an empty string).
-    - The code for all this is just one line:
+- A signature should only show a social network icon with an associated link when there is data in the extension attribute 10 of the mailbox:
+  - Insert the icon of the social network in the template, set the hyperlink target to '$CurrentMailboxExtattr10$' and add '$CurrentMailboxExtattr10Deleteempty$' to the description of the picture.
+    - When using embedded and linked pictures, you can also set the file name to '$CurrentMailboxExtattr10Deleteempty$'
+- A signature should only contain a certain image when the current mailbox is a member of the Marketing group:
+  - Create a new replacement variable. We use '$CurrentMailbox-ismemberof-marketing$' in the following example.
+    - Attention on-prem users: If Domain Local Active Directory groups are involved, you need to set the `IncludeMailboxForestDomainLocalGroups` parameter to `true` when running Set-OutlookSignatures, so that the SIDs of these groups are considered too.
+    - If the current mailbox is a member, give '$CurrentMailbox-ismemberof-marketing$' any value. If not, give '$CurrentMailbox-ismemberof-marketing$' no value (NULL or an empty string).
+    - The code for all this is just one line - it is long, but you only have to modify three strings right at the beginning:
       ```
-      # Check if current mailbox is member of group 'EXAMPLEDOMAIN\GROUPNAME' and set $ReplaceHash['$CURRENTMAILBOX-ISMEMBEROF-MARKETING$'] accordingly
+      # Check if current mailbox is member of group 'EXAMPLEDOMAIN\Marketing' and set $ReplaceHash['$CurrentMailbox-ismemberof-marketing$'] accordingly
       #
-      # Replace 'EXAMPLEDOMAIN\GROUPNAME' with the group you are searching for
-      # Replace '$CURRENTMAILBOX-ISMEMBEROF-MARKETING$' with the replacement variable that should be used
+      # Replace 'EXAMPLEDOMAIN Marketing' with the domain and group you are searching for. Use 'EntraID' or 'AzureAD' instead of 'EXAMPLEDOMAIN' to only search Entra ID/Azure AD/Graph
+      # Replace '$CurrentMailbox-ismemberof-marketing$' with the replacement variable that should be used
+      # Replace 'CurrentMailbox' with 'CurrentUser' if you do not want to check the current mailbox group SIDs, but the group SIDs of the current user's mailbox
       #
-      # The 'GroupsSIDs' attribute is only available for the current mailbox, not for the current user or any manager
-      #   It contains the mailbox's SID and SIDHistory, the SID and SIDHistory of all groups the mailbox belongs to (nested), and also considers group membership (nested) across trusts.
+      # The 'GroupsSIDs' attribute is available for the current mailbox and the current user, but not for the managers of these two
+      #   It contains the mailboxes' SID and SIDHistory, the SID and SIDHistory of all groups the mailbox belongs to (nested), and also considers group membership (nested) across trusts.
       #   Attention on-prem users: If Active Directory groups of the Domain Local type are queried, you need to set the `IncludeMailboxForestDomainLocalGroups` parameter to `true` when running Set-OutlookSignatures, so that the SIDs of these groups are considered in GroupsSIDs, too.
       #
-      @(@('EXAMPLEDOMAIN\GROUPNAME', '$CURRENTMAILBOX-ISMEMBEROF-MARKETING$'), @()) | Where-Object { $_ } | ForEach-Object { if ($ADPropsCurrentMailbox.GroupsSids -icontains $(try { ((New-Object System.Security.Principal.NTAccount($(($_[0] -split '\\')[0]), $(($_[0] -split '\\')[1]))).Translate([System.Security.Principal.SecurityIdentifier])).Value } catch { 'Invalid SID because group not found' })) { $ReplaceHash[$_[1]] = 'yes' } else { $ReplaceHash[$_[1]] = '' } }
+      @(@('CurrentMailbox', '$CurrentMailbox-IsMemberOf-Marketing$', 'EXAMPLEDOMAIN Marketing'), @()) | Where-Object { $_ } | Foreach-Object { if ((Get-Variable -Name "ADProps$($_[0])" -ValueOnly).GroupsSids -icontains ResolveToSid($_2]) ) { $ReplaceHash[$_[1]] = 'yes' } else { $ReplaceHash[$_[1]] = $null } }
       ```
-  - Insert the image in the template, and add '$CURRENTMAILBOX-ISMEMBEROF-MARKETINGDELETEEMPTY$' to the description of the picture.
-    - When using embedded and linked pictures, you can also set the file name to '$CURRENTMAILBOX-ISMEMBEROF-MARKETINGDELETEEMPTY$'
+  - Insert the image in the template, and add '$CurrentMailbox-IsMemberOf-MarketingDeleteempty$' to the description of the picture.
+    - When using embedded and linked pictures, you can also set the file name to '$CurrentMailbox-IsMemberOf-MarketingDeleteempty$'
 
 # 14. Outlook Web  
 If the currently logged-in user has configured his personal mailbox in Outlook, the default signature for new emails is configured in Outlook Web automatically.
@@ -821,15 +970,15 @@ Set-OutlookSignatures supports three directory environments:
 - Cloud-only. This environment has no Active Directory on premises, or does not sync mail attributes between the cloud and the on-prem enviroment. The script does not connect to your on-prem environment, only to the cloud via the Microsoft Graph API.
 
 The script parameter `GraphOnly` defines which directory environment is used:
-- `-GraphOnly false` or not passing the parameter: On-prem AD first, Azure AD only when on-prem AD can not be reached
-- `-GraphOnly true`: Azure AD only, even when on-prem AD could be reached
+- `-GraphOnly false` or not passing the parameter: On-prem AD first, Entra ID/Azure AD only when on-prem AD can not be reached
+- `-GraphOnly true`: Entra ID/Azure AD only, even when on-prem AD could be reached
 ## 15.1. Basic Configuration
 To allow communication between Microsoft Graph and Set-Outlooksignatures, both need to be configured for each other.
 
 The easiest way is to once start Set-OutlookSignatures with a cloud administrator. The administrator then gets asked for admin consent for the correct permissions:
-1. Log on with a user that has administrative rights in Azure AD.
+1. Log on with a user that has administrative rights in Entra ID/Azure AD.
 2. Run `Set-OutlookSignatures.ps1 -GraphOnly true`
-3. When asked for credentials, provide your Azure AD admin credentials
+3. When asked for credentials, provide your Entra ID/Azure AD admin credentials
 4. For the required permissions, grant consent in the name of your organization
 
 If you don't want to use custom Graph attributes or other advanced configurations, no more configuration in Microsoft Graph or Set-OutlookSignatures is required.
@@ -846,7 +995,7 @@ If you prefer using own application IDs or need advanced configuration, follow t
     - `https://graph.microsoft.com/mailboxsettings.readwrite` for updating the logged-in user's Out of Office auto reply messages
     - `https://graph.microsoft.com/EWS.AccessAsUser.All` for updating the logged-in user's Outlook Web signature
   - Set the Redirect URI to `http://localhost` and configure it for `mobile and desktop applications`
-  - Enable `Allow public client flows` to make Windows Integrated Authentication (SSO) work for Azure AD joined devices
+  - Enable `Allow public client flows` to make Windows Integrated Authentication (SSO) work for Entra ID/Azure AD joined devices
 - In Set-OutlookSignature, use `.\config\default graph config.ps1` as a template for a custom Graph configuration file
   - Set `$GraphClientID` to the application ID created by the Graph administrator before
   - Use the `GraphConfigFile` parameter to make the tool use the newly created Graph configuration file.
@@ -1100,28 +1249,28 @@ The following example describes optional preceeding text combined with an option
 The internal variable `$UseHtmTemplates` is used to automatically differentiate between DOCX and HTM line breaks.
 - Custom replacement variable config file
   ```
-  $ReplaceHash['$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERTELEPHONE$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Telephone: ' } )
-  $ReplaceHash['$CURRENTUSERMOBILE-PREFIX-NOEMPTY$'] = $(if (-not $ReplaceHash['$CURRENTUSERMOBILE$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Mobile: ' } )
+  $ReplaceHash['$CurrentUserTelephone-prefix-noempty$'] = $(if (-not $ReplaceHash['$CurrentUserTelephone$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Telephone: ' } )
+  $ReplaceHash['$CurrentUserMobile-prefix-noempty$'] = $(if (-not $ReplaceHash['$CurrentUserMobile$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Mobile: ' } )
   ```
 - Word template:  
-  <pre><code>E-Mail: <a href="mailto:$CURRENTUSERMAIL$">$CURRENTUSERMAIL$</a>$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERTELEPHONE$">$CURRENTUSERTELEPHONE$</a>$CURRENTUSERMOBILE-PREFIX-NOEMPTY$<a href="tel:$CURRENTUSERMOBILE$">$CURRENTUSERMOBILE$</a></code></pre>
+  <pre><code>E-Mail: <a href="mailto:$CurrentUserMail$">$CurrentUserMail$</a>$CurrentUserTelephone-prefix-noempty$<a href="tel:$CurrentUserTelephone$">$CurrentUserTelephone$</a>$CurrentUserMobile-prefix-noempty$<a href="tel:$CurrentUserMobile$">$CurrentUserMobile$</a></code></pre>
 
-  Note that all variables are written on one line and that not only `$CURRENTUSERMAIL$` is configured with a hyperlink, but `$CURRENTUSERPHONE$` and `$CURRENTUSERMOBILE$` too:
-  - `mailto:$CURRENTUSERMAIL$`
-  - `tel:$CURRENTUSERTELEPHONE$`
-  - `tel:$CURRENTUSERMOBILE$`
+  Note that all variables are written on one line and that not only `$CurrentUserMail$` is configured with a hyperlink, but `$CurrentUserPhone$` and `$CurrentUserMobile$` too:
+  - `mailto:$CurrentUserMail$`
+  - `tel:$CurrentUserTelephone$`
+  - `tel:$CurrentUserMobile$`
 - Results
   - Telephone number and mobile number are set.  
-  The paragraph marks come from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$` and `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
+  The paragraph marks come from `$CurrentUserTelephone-prefix-noempty$` and `$CurrentUserMobile-prefix-noempty$`.  
     <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
     Telephone: <a href="tel:+43xxx">+43xxx</a>
     Mobile: <a href="tel:+43yyy">+43yyy</a></code></pre>
   - Telephone number is set, mobile number is empty.  
-  The paragraph mark comes from `$CURRENTUSERTELEPHONE-PREFIX-NOEMPTY$`.  
+  The paragraph mark comes from `$CurrentUserTelephone-prefix-noempty$`.  
     <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
     Telephone: <a href="tel:+43xxx">+43xxx</a></code></pre>
   - Telephone number is empty, mobile number is set.  
-  The paragraph mark comes from `$CURRENTUSERMOBILE-PREFIX-NOEMPTY$`.  
+  The paragraph mark comes from `$CurrentUserMobile-prefix-noempty$`.  
     <pre><code>E-Mail: <a href="mailto:first.last@example.com">first.last@example.com</a>
     Mobile: <a href="tel:+43yyy">+43yyy</a></code></pre>
 ## 17.18. Is there a roadmap for future versions?
@@ -1240,7 +1389,7 @@ Some personal educated guesses based on available documentation, Outlook for Win
 - The feature has first been annount by Microsoft in 2020, but has been postponed multiple times. The feature seems to get enabled in waves across all Exchange Online tenants since late 2022.
 - Microsoft has not yet published a public API, although the feature is announced since 2020 and being actively enabled. 
 - Outlook for Windows is the only client mentioned to support the new feature for now. I am confident more e-mail clients - especially Outlook for Mac, iOS and Android - will follow (the sooner, the better).
-- Although Micrsoft actively enables the feature for all Exchange Online tenants, it is yet unclear if this feature is available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about `$CURRENTUSER[...]$` replacement variables).
+- Although Micrsoft actively enables the feature for all Exchange Online tenants, it is yet unclear if this feature is available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about `$CurrentUser[...]$` replacement variables).
 - The roaming signatures feature is only available for mailboxes in the cloud. Mailboxes on on-prem servers do not (yet?) support this feature, no matter if in pure on-prem or in hybrid scenarios.
 - Outlook for Windows (beta) versions already support the roaming signatures feature. Until an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensure full compatibility with Set-OutlookSignatures, until a public API is released and incorporated into the script. For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.
   - With the `DisableRoamingSignatures` (formerly named `DisableRoamingSignaturesTemporaryToggle`) registry value being absent or set to 0, file based signatures created by tools such as Set-OutlookSignatures are regularly deleted and replaced with signatures stored directly in the mailbox.

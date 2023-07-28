@@ -81,17 +81,17 @@ All release upgrades during the licence period are for free, no matter if it is 
 
 Support may be chargeable. This includes workshops, implementation support, all forms of remote or on site outsourcing, support for topics already well-explained in the documentation and support for problems with the root cause outside of Set-OutlookSignatures or Set-OutlookSignatures Benefactor Circle.
 # How do licence groups work?
-Each Benefactor Circle licence is bound to one or more Active Directory or Azure AD groups. Each mailbox of your company needs to be a direct or indirect (a.k.a. nested, recursive or transitive) member of a licence group, so that it can receive a signature. Primary group membership is not considered due to Active Directory and Azure AD query restrictions.
+Each Benefactor Circle licence is bound to one or more Active Directory or Entra ID/Azure AD groups. Each mailbox of your company needs to be a direct or indirect (a.k.a. nested, recursive or transitive) member of a licence group, so that it can receive a signature. Primary group membership is not considered due to Active Directory and Entra ID/Azure AD query restrictions.
 
 Each group may only contain as many mailboxes as direct or indirect members as defined in the licence. The user running Set-OutlookSignatures must be able to resolve all direct and indirect members of the licence group, even across trusts.
 
-Licence groups are defined by the DNS domain name of the domain (or "AzureAD" for non-synced groups), their SID (security identifier) and the number of members licensed.
-- Use 'AzureAD' if the group only exists in Azure Active Directory and is not synced to on-prem. Only one pure Azure AD group is supported, it must be the group with the highest priority (first list entry).
+Licence groups are defined by the DNS domain name of the domain (or 'EntraID' or 'AzureAD' for non-synced groups), their SID (security identifier) and the number of members licensed.
+- Use 'EntraID' or 'AzureAD' if the group only exists in Azure Active Directory and is not synced to on-prem. Only one pure Entra ID/Azure AD group is supported, it must be the group with the highest priority (first list entry).
 - If you have multiple domains in a forest or multiple forests, you can have multiple licence groups, each with a separate maximum member count. For each licence, there can be one licence group per AD domain. There must be a default group, which is used for mailboxes which are not covered by separate licence groups.
 
 When the licence has a licence group for the mailbox's domain, this licence group is used. If not, the licence group defined as default will be used.
 
-There are three situations where Set-OutlookSignatures uses Azure AD via Graph API insteed of on-prem AD: Parameter GraphOnly is set to true, no connection to the on-prem AD is possible, or the current user has a mailbox in Exchange Online and either OOF messages or Outlook Web signatures should be set.
+There are three situations where Set-OutlookSignatures uses Entra ID/Azure AD via Graph API insteed of on-prem AD: Parameter GraphOnly is set to true, no connection to the on-prem AD is possible, or the current user has a mailbox in Exchange Online and either OOF messages or Outlook Web signatures should be set.
 In these cases, licence groups are handled as follows:
 - If the current mailbox has the Graph "onPremisesDomainName" attribute set:
   - If there is a licence group associated with this DNS domain name, it is queried via Graph
@@ -107,7 +107,7 @@ Just place a request for quotation with the following information:
   - One for receiving the download link for the licence file, updates and other non invoice related information
 - List of licence groups and maximum members in the following format:
   - DNS domain name of the Active Directory Domain the group is in.
-    - Use 'AzureAD' if the group only exists in Azure Active Directory and is not synced to on-prem. Only one pure Azure AD group is supported, it must be the group with the highest priority (first list entry).
+    - Use 'EntraID' or 'AzureAD' if the group only exists in Azure Active Directory and is not synced to on-prem. Only one pure Entra ID/Azure AD group is supported, it must be the group with the highest priority (first list entry).
   - SID (security identifier) of the group, as string in the "S-[...]" format
   - Maximum number of recursive members in the group (add a buffer for future growth)
   - If multiple licence groups are defined, designate one of these groups as default or fallback group. For details, see 'How do licence groups work?' later in this document.
