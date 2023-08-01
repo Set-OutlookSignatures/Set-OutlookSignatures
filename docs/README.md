@@ -41,6 +41,9 @@ The script core is **Free and Open-Source Software (FOSS)**. It is published und
 **A big "Thank you!" for listing, featuring, supporting or sponsoring Set-OutlookSignatures!**
 <pre><a href="https://explicitconsulting.at" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/ExplicIT Consulting, color on black.png" height="100" title="ExplicIT Consulting" alt="ExplicIT Consulting"></a>  <a href="https://joinup.ec.europa.eu/collection/free-and-open-source-software/solution/set-outlooksignatures/about" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/EC Joinup Interoperable Europe.png" height="100" title="European Commission Joinup/Interoperable Europe programs" alt="European Commission Joinup/Interoperable Europe programs"></a>  <a href="https://startups.microsoft.com" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/MS_Startups_Celebration_Badge_Dark.png" height="100" title="Proud to partner with Microsoft for Startups" alt="Proud to partner with Microsoft for Startups"></a>  <a href="https://archiveprogram.github.com/" target="_blank"><img src="../src_Set-OutlookSignatures/logo/Others/GitHub-Archive-Program-logo.png" height="100" title="GitHub Archive Program" alt="GitHub Archive Program"></a></pre>
 
+## Demo video  <!-- omit in toc -->
+<a href="https://www.youtube-nocookie.com/embed/RQGGp42Db3s" target="_blank"><img src="https://img.youtube.com/vi/RQGGp42Db3s/hqdefault.jpg" height="300" title="Set-OutlookSignatures demo video" alt="Set-OutlookSignatures demo video"></a>
+
 # Table of Contents <!-- omit in toc -->
 - [1. Requirements](#1-requirements)
 - [2. Quick Start Guide](#2-quick-start-guide)
