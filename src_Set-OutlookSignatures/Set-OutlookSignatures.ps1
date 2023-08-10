@@ -177,6 +177,11 @@ Default value: $true
 Should signatures be created in TXT format?
 Default value: $true
 
+.PARAMETER MoveCSSInline
+Move CSS to inline style attributes, for maximum e-mail client compatibility.
+This parameter is enabled per default, as a workaround to Microsoft's problem with formatting in Outlook Web (M365 roaming signatures and font sizes, especially).
+Default value: $true
+
 .PARAMETER EmbedImagesInHtml
 Should images be embedded into HTML files?
 Outlook 2016 and newer can handle images embedded directly into an HTML file as BASE64 string ('<img src="data:image/[...]"').
@@ -333,6 +338,12 @@ Param(
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $CreateTxtSignatures = $true,
+
+    # Move CSS to inline style attributes
+    [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
+    [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
+    $MoveCSSInline = $true,
 
     # Embed images in HTML
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
@@ -624,6 +635,26 @@ function main {
         }
     } else {
         Write-Host
+    }
+
+    Write-Host "  MoveCSSInline: '$MoveCSSInline'"
+    if ($MoveCSSInline -iin (1, '1', 'true', '$true', 'yes')) {
+        $MoveCSSInline = $true
+    } else {
+        $MoveCSSInline = $false
+    }
+
+    if ($MoveCSSInline) {
+        $script:PreMailerNetModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
+        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\PreMailer.net')) -Destination $script:PreMailerNetModulePath -Recurse -ErrorAction SilentlyContinue
+        Get-ChildItem $script:PreMailerNetModulePath -Recurse | Unblock-File
+        try {
+            Import-Module (Join-Path -Path $script:PreMailerNetModulePath -ChildPath 'PreMailer.Net.dll') -Force -ErrorAction Stop
+        } catch {
+            Write-Host '        Problem importing PreMailer.Net module. Exit.' -ForegroundColor Red
+            $error[0]
+            exit 1
+        }
     }
 
     Write-Host "  EmbedImagesInHtml: '$EmbedImagesInHtml'"
@@ -1306,7 +1337,7 @@ function main {
         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:MsalModulePath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
         Get-ChildItem $script:MsalModulePath -Recurse | Unblock-File
         try {
-            Import-Module (Join-Path -Path $script:MsalModulePath -ChildPath 'msal.ps') -ErrorAction Stop
+            Import-Module (Join-Path -Path $script:MsalModulePath -ChildPath 'msal.ps') -Force -ErrorAction Stop
         } catch {
             Write-Host '        Problem importing MSAL.PS module. Exit.' -ForegroundColor Red
             $error[0]
@@ -3663,16 +3694,16 @@ function SetSignatures {
 
             $script:WordWebOptions = $script:COMWord.ActiveDocument.WebOptions
 
-            $script:COMWord.ActiveDocument.WebOptions.AllowPNG = $true
+            $script:COMWord.ActiveDocument.WebOptions.TargetBrowser = 4 # IE6, which is the maximum
             $script:COMWord.ActiveDocument.WebOptions.BrowserLevel = 2 # IE6, which is the maximum
-            $script:COMWord.ActiveDocument.WebOptions.Encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
+            $script:COMWord.ActiveDocument.WebOptions.AllowPNG = $true
             $script:COMWord.ActiveDocument.WebOptions.OptimizeForBrowser = $true
+            $script:COMWord.ActiveDocument.WebOptions.RelyOnCSS = $true
+            $script:COMWord.ActiveDocument.WebOptions.RelyOnVML = $true
+            $script:COMWord.ActiveDocument.WebOptions.Encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
             $script:COMWord.ActiveDocument.WebOptions.OrganizeInFolder = $true
             $script:COMWord.ActiveDocument.WebOptions.PixelsPerInch = 96
-            $script:COMWord.ActiveDocument.WebOptions.RelyOnCSS = $true
-            $script:COMWord.ActiveDocument.WebOptions.RelyOnVMl = $true
-            $script:COMWord.ActiveDocument.WebOptions.ScreenSize = 3 # 800x600
-            $script:COMWord.ActiveDocument.WebOptions.TargetBrowser = 4 # IE6, which is the maximum
+            $script:COMWord.ActiveDocument.WebOptions.ScreenSize = 10 # 1920x1200
             $script:COMWord.ActiveDocument.WebOptions.UseLongFileNames = $true
 
             $script:COMWord.ActiveDocument.WebOptions.UseDefaultFolderSuffix()
@@ -3705,7 +3736,7 @@ function SetSignatures {
             }
 
             # Restore original WebOptions
-            foreach ($property in ('AllowPNG', 'BrowserLevel', 'Encoding', 'OptimizeForBrowser', 'OrganizeInFolder', 'PixelsPerInch', 'RelyOnCSS', 'RelyOnVMl', 'ScreenSize', 'TargetBrowser', 'UseLongFileNames')) {
+            foreach ($property in @('TargetBrowser', 'BrowserLevel', 'AllowPNG', 'OptimizeForBrowser', 'RelyOnCSS', 'RelyOnVML', 'Encoding', 'OrganizeInFolder', 'PixelsPerInch', 'ScreenSize', 'UseLongFileNames')) {
                 $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
             }
 
@@ -3759,6 +3790,14 @@ function SetSignatures {
         Remove-Variable -Name 'html'
         $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
 
+        if ($MoveCSSInline) {
+            Write-Host "$Indent        Move CSS inline"
+
+            $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+            $tempFileContent = Get-Content -LiteralPath $path -Encoding UTF8 -Raw
+
+            [System.IO.File]::WriteAllText($path, $([PreMailer.Net.PreMailer]::MoveCssInline($tempFileContent).html), (New-Object System.Text.UTF8Encoding($False)))
+        }
 
         Write-Host "$Indent        Add marker to final HTM file"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
@@ -4942,7 +4981,7 @@ try {
             # Restore original WebOptions
             try {
                 if ($script:WordWebOptions) {
-                    foreach ($property in ('AllowPNG', 'BrowserLevel', 'Encoding', 'OptimizeForBrowser', 'OrganizeInFolder', 'PixelsPerInch', 'RelyOnCSS', 'RelyOnVMl', 'ScreenSize', 'TargetBrowser', 'UseLongFileNames')) {
+                    foreach ($property in @('TargetBrowser', 'BrowserLevel', 'AllowPNG', 'OptimizeForBrowser', 'RelyOnCSS', 'RelyOnVML', 'Encoding', 'OrganizeInFolder', 'PixelsPerInch', 'ScreenSize', 'UseLongFileNames')) {
                         $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
                     }
                 }
@@ -4975,6 +5014,11 @@ try {
     if ($script:MsalModulePath) {
         Remove-Module -Name MSAL.PS -Force
         Remove-Item $script:MsalModulePath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    if ($script:PreMailerNetModulePath) {
+        Remove-Module -Name PreMailer.Net -Force
+        Remove-Item $script:PreMailerNetModulePath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     Write-Host

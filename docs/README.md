@@ -1,6 +1,6 @@
 <!-- omit in toc -->
 # **<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages<p><p><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <img src="https://img.shields.io/badge/dynamic/json?color=brightgreen&label=views&query=%24.count&url=https%3A%2F%2Fraw.githubusercontent.com%2FGruberMarkus%2Fmy-traffic2badge%2Ftraffic%2Ftraffic-Set-OutlookSignatures%2Ftraffic_views.json" alt="views" data-external="1"> <img src="https://img.shields.io/badge/dynamic/json?color=brightgreen&label=clones&query=%24.count&url=https%3A%2F%2Fraw.githubusercontent.com%2FGruberMarkus%2Fmy-traffic2badge%2Ftraffic%2Ftraffic-Set-OutlookSignatures%2Ftraffic_clones.json" alt="clones" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures?color=brightgreen" alt="stars" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/donate,%20support,%20sponsor-white?logo=githubsponsors" alt="donate or sponsor"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/unlock%20all%20features%20with-Benefactor%20Circle-gold" alt="unlock all features with Benefactor Circle"></a>
-# Features <!-- omit in toc -->
+# Features and demo video<!-- omit in toc -->
 **Signatures and OOF messages can be:**
 - Generated from **templates in DOCX or HTML** file format  
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
@@ -69,13 +69,14 @@ The script core is **Free and Open-Source Software (FOSS)**. It is published und
   - [3.19. GraphOnly](#319-graphonly)
   - [3.20. CreateRtfSignatures](#320-creatertfsignatures)
   - [3.21. CreateTxtSignatures](#321-createtxtsignatures)
-  - [3.22. EmbedImagesInHtml](#322-embedimagesinhtml)
-  - [3.23. DocxHighResImageConversion](#323-docxhighresimageconversion)
-  - [3.24. SignaturesForAutomappedAndAdditionalMailboxes](#324-signaturesforautomappedandadditionalmailboxes)
-  - [3.25. DisableRoamingSignatures](#325-disableroamingsignatures)
-  - [3.26. MirrorLocalSignaturesToCloud](#326-mirrorlocalsignaturestocloud)
-  - [3.27. BenefactorCircleId](#327-benefactorcircleid)
-  - [3.28. BenefactorCircleLicenceFile](#328-benefactorcirclelicencefile)
+  - [3.22. MoveCSSInline](#322-movecssinline)
+  - [3.23. EmbedImagesInHtml](#323-embedimagesinhtml)
+  - [3.24. DocxHighResImageConversion](#324-docxhighresimageconversion)
+  - [3.25. SignaturesForAutomappedAndAdditionalMailboxes](#325-signaturesforautomappedandadditionalmailboxes)
+  - [3.26. DisableRoamingSignatures](#326-disableroamingsignatures)
+  - [3.27. MirrorLocalSignaturesToCloud](#327-mirrorlocalsignaturestocloud)
+  - [3.28. BenefactorCircleId](#328-benefactorcircleid)
+  - [3.29. BenefactorCircleLicenceFile](#329-benefactorcirclelicencefile)
 - [4. Outlook signature path](#4-outlook-signature-path)
 - [5. Mailboxes](#5-mailboxes)
 - [6. Group membership](#6-group-membership)
@@ -401,7 +402,13 @@ Default value: `$false`
 Should signatures be created in TXT format?
 
 Default value: `$true`
-## 3.22. EmbedImagesInHtml
+## 3.22. MoveCSSInline
+Move CSS to inline style attributes, for maximum e-mail client compatibility.
+
+This parameter is enabled per default, as a workaround to Microsoft's problem with formatting in Outlook Web (M365 roaming signatures and font sizes, especially).
+
+Default value: $true
+## 3.23. EmbedImagesInHtml
 Should images be embedded into HTML files?
 
 Outlook 2016 and newer can handle images embedded directly into an HTML file as BASE64 string (`<img src="data:image/[...]"`).
@@ -411,7 +418,7 @@ Outlook 2013 and earlier can't handle these embedded images when composing HTML 
 When setting EmbedImagesInHtml to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details). Set-OutlookSignatures does this automatically for the currently logged-in user, but it may be overridden by other scripts or group policies.
 
 Default value: `$false`
-## 3.23. DocxHighResImageConversion
+## 3.24. DocxHighResImageConversion
 Enables or disables high resolution images in HTML signatures.
 
 When enabled, this parameter uses a workaround to overcome a Word limitation that results in low resolution images when converting to HTML. The price for high resolution images in HTML signatures are more time needed for document conversion and signature files requiring more storage space.
@@ -421,13 +428,13 @@ Disabling this feature speeds up DOCX to HTML conversion, and HTML signatures re
 Contrary to conversion to HTML, conversion to RTF always results in high resolution images.
 
 Default value: $true
-## 3.24. SignaturesForAutomappedAndAdditionalMailboxes
+## 3.25. SignaturesForAutomappedAndAdditionalMailboxes
 Deploy signatures for automapped mailboxes and additional mailboxes.
 
 Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook.
 
 Default value: `$true`
-## 3.25. DisableRoamingSignatures
+## 3.26. DisableRoamingSignatures
 Disable roaming signatures.
 
 Only sets HKCU registry key, does not override configuration set by group policy.
@@ -435,7 +442,7 @@ Only sets HKCU registry key, does not override configuration set by group policy
 Possible values: $null, $true, $false
 
 Default value: $true
-## 3.26. MirrorLocalSignaturesToCloud
+## 3.27. MirrorLocalSignaturesToCloud
 Should local signatures be uploaded as roaming signature for the current user?
 
 Possible for Exchange Online mailbox of currently logged-in user.
@@ -469,11 +476,11 @@ Another advantage of this solution is that it makes roaming signatures available
 
 Default value: $false
 
-## 3.27. BenefactorCircleId
+## 3.28. BenefactorCircleId
 The Benefactor Circle member Id matching your licence file, which unlocks exclusive features.
 
 Default value: ''
-## 3.28. BenefactorCircleLicenceFile
+## 3.29. BenefactorCircleLicenceFile
 The Benefactor Circle licence file matching your member Id, which unlocks exclusive features.
 
 Default value: ''
