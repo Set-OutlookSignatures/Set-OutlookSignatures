@@ -17,6 +17,18 @@
   ### Fixed
 -->
 
+
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.2.1" target="_blank">v4.2.1</a> - 2023-08-16
+_**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle licence._
+
+_**Attention, cloud mailbox users:**_
+- _**Set-OutlookSignatures can now experimentally handle roaming signatures!** See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
+- _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._
+### Fixed
+- MoveCSSInline may not find a dependent DLL on some systems (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/84" target="_blank">#84</a>) (Thanks <a href="https://github.com/panki27" target="_blank">@panki27</a>!)
+- An error occurred when a trust of the forest root domain of an on-prem Active Directory to itself was detected (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/83" target="_blank">#83</a>) (Thanks <a href="https://github.com/panki27" target="_blank">@panki27</a>!)
+
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.2.0" target="_blank">v4.2.0</a> - 2023-08-10
 _**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle licence._
 
@@ -522,22 +534,3 @@ _Initial release._
 
 ## v0.1.0 - 2021-04-21
 _First lines of code were written as proof of concept, but never published._
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

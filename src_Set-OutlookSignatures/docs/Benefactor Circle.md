@@ -72,14 +72,16 @@ Each mailbox, for which an exlusive feature shall be used, needs a licence. The 
 Licences are paid in advance and are valid for one year from the day the full payment is received. There is no automatic renewal.
 
 At the time of the release of this version of Set-OutlookSignatures, the following prices were set by [ExplicIT Consulting](https://explicitconsulting.at). Please check their homepage for updates.
+
 ```
-The net price in EUR currently is 1.50 € per mailbox and year, with a minimum annual total sum of 200 €.
+The net price in EUR currently is 1.50 € per mailbox and year, with a minimum annual total sum of 100 €.
 
 Yes, that's right: Per year, not per month.
-```
+
 All release upgrades during the licence period are for free, no matter if it is a patch, feature or major release.
 
 Support may be chargeable. This includes workshops, implementation support, all forms of remote or on site outsourcing, support for topics already well-explained in the documentation and support for problems with the root cause outside of Set-OutlookSignatures or Set-OutlookSignatures Benefactor Circle.
+```
 # How do licence groups work?
 Each Benefactor Circle licence is bound to one or more Active Directory or Entra ID/Azure AD groups. Each mailbox of your company needs to be a direct or indirect (a.k.a. nested, recursive or transitive) member of a licence group, so that it can receive a signature. Primary group membership is not considered due to Active Directory and Entra ID/Azure AD query restrictions.
 
@@ -133,15 +135,15 @@ If more licence shifts are required, additional licences have to be acquired tem
 When adding licences during a licence period, you only pay for the new mailboxes and only for the remaining months in the running licence period.
 The new payment does not extend the existing licence period, but it increases the number of licenced mailboxes in it.
 An example:
-- You start a pilot with 110 mailboxes in mid of April 2023. The licence is valid until mid of April 2024, with the following cost: ax(200; 110 * 1.50) = 200.00 € net
+- After a trial with 20 mailboxes, you start a pilot with 110 mailboxes in mid of April 2023. The licence is valid until mid of April 2024, with the following cost:
+    max(100; 110 * 1.50) = 165.00 € net
 - As the pilot is a success, the number of licenced mailboxes is raised to 7,500 in July 2023.
-  - The licence validity period does not change, the licence is still valid from mid of April 2023 to mid of April 2024, of course with the higher number of mailboxes.
+  - The licence period does not change, the licence is still valid from mid of April 2023 to mid of April 2024, of course with the higher number of mailboxes.
 - The added licences result in the following costs:
-  - Year 1 total cost of 9,437,50 €, consisting of
-    - Year 1 cost for 110 maiboxes for 12 months: max(200; 110 * 1.11) = 200.00 € net
-    - Year 1 additional maiboxes for 10 months (July 2023 to mid of April 2024): max(200; (7,500 - 110) * 1.50)/12*10 = 9,237.50 € net
-  - When the price is not changing, the consecutive years will cost: max(200; 7,500 * 1,50) = 11,250.00 € net
-
+  - Year 1 total cost of 9,402.50 €, consisting of
+    - Year 1 cost for 110 mailboxes for 12 months: max(100; 110 * 1.50) = 165.00 € net
+    - Year 1 additional maiboxes for 10 months (July 2023 to mid of April 2024): max(100; (7,500 - 110) * 1.50)/12*10 = 9,237.50 € net
+    - As long as the price is not changing, the consecutive years will cost: max(100; 7,500 * 1,50) = 11,250.00 € net
 
 # Licence and script version
 Licence and script versions go hand in hand, so every new release of Set-OutlookSignatures also means a new licence release, and vice-versa.

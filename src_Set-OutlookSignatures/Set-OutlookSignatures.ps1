@@ -648,12 +648,15 @@ function main {
         $script:PreMailerNetModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\PreMailer.net')) -Destination $script:PreMailerNetModulePath -Recurse -ErrorAction SilentlyContinue
         Get-ChildItem $script:PreMailerNetModulePath -Recurse | Unblock-File
-        try {
-            Import-Module (Join-Path -Path $script:PreMailerNetModulePath -ChildPath 'PreMailer.Net.dll') -Force -ErrorAction Stop
-        } catch {
-            Write-Host '        Problem importing PreMailer.Net module. Exit.' -ForegroundColor Red
-            $error[0]
-            exit 1
+
+        @('System.Text.Encoding.CodePages.dll', 'System.Buffers.dll', 'AngleSharp.dll', 'PreMailer.Net.dll') | ForEach-Object {
+            try {
+                Import-Module (Join-Path -Path $script:PreMailerNetModulePath -ChildPath $($_)) -Force -ErrorAction Stop
+            } catch {
+                Write-Host "        Problem importing PreMailer.Net module ($($_)). Exit." -ForegroundColor Red
+                $error[0]
+                exit 1
+            }
         }
     }
 
@@ -1109,26 +1112,39 @@ function main {
 
             if ($UserForest -ne '') {
                 Write-Host "  User forest: $UserForest"
-                $TrustsToCheckForGroups += $UserForest.tolower()
-                $LookupDomainsToTrusts.add($UserForest, $UserForest)
+
+                if ($TrustsToCheckForGroups -inotcontains $UserForest) {
+                    $TrustsToCheckForGroups += $UserForest.tolower()
+                }
+
+                if (-not $LookupDomainsToTrusts.ContainsKey($UserForest.tolower())) {
+                    $LookupDomainsToTrusts.add($UserForest.tolower(), $UserForest.tolower())
+                }
 
                 $Search.SearchRoot = "GC://$($UserForest)"
                 $Search.Filter = '(ObjectClass=trustedDomain)'
 
-                $TrustedDomains = @(
-                    @($Search.FindAll()) | Sort-Object @{Expression = {
-                            $TemporaryArray = @($_.properties.name.Split('.'))
-                            [Array]::Reverse($TemporaryArray)
-                            $TemporaryArray
+                $TrustedDomains = @($Search.FindAll())
+
+                if ($TrustedDomains) {
+                    $TrustedDomains = @(
+                        @($TrustedDomains) | Where-Object { $_ -ine $UserForest } | Sort-Object @{Expression = {
+                                $TemporaryArray = @($_.properties.name.Split('.'))
+                                [Array]::Reverse($TemporaryArray)
+                                $TemporaryArray
+                            }
                         }
-                    }
-                )
+                    )
+                }
 
                 # Internal trusts
                 foreach ($TrustedDomain in $TrustedDomains) {
                     if (($TrustedDomain.properties.trustattributes -eq 32) -and ($TrustedDomain.properties.name -ine $UserForest) -and (-not $LookupDomainsToTrusts.ContainsKey($TrustedDomain.properties.name.tolower()))) {
                         Write-Host "    Child domain: $($TrustedDomain.properties.name.tolower())"
-                        $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $UserForest)
+
+                        if (-not $LookupDomainsToTrusts.ContainsKey($TrustedDomain.properties.name.tolower())) {
+                            $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $UserForest.tolower())
+                        }
                     }
                 }
 
@@ -1143,8 +1159,13 @@ function main {
                                 if ("-$($TrustedDomain.properties.name)" -iin $x) {
                                     Write-Host "    Ignoring because of TrustsToCheckForGroups entry '-$($TrustedDomain.properties.name.tolower())'"
                                 } else {
-                                    $TrustsToCheckForGroups += $TrustedDomain.properties.name.tolower()
-                                    $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $TrustedDomain.properties.name.tolower())
+                                    if ($TrustsToCheckForGroups -inotcontains $TrustedDomain.properties.name) {
+                                        $TrustsToCheckForGroups += $TrustedDomain.properties.name.tolower()
+                                    }
+
+                                    if (-not $LookupDomainsToTrusts.ContainsKey($TrustedDomain.properties.name.tolower())) {
+                                        $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $TrustedDomain.properties.name.tolower())
+                                    }
                                 }
 
                                 $temp = @(
@@ -1158,7 +1179,10 @@ function main {
 
                                 $temp | ForEach-Object {
                                     Write-Host "    Child domain: $($_.tolower())"
-                                    $LookupDomainsToTrusts.add($_.tolower(), $TrustedDomain.properties.name.tolower())
+
+                                    if (-not $LookupDomainsToTrusts.ContainsKey($_.tolower())) {
+                                        $LookupDomainsToTrusts.add($_.tolower(), $TrustedDomain.properties.name.tolower())
+                                    }
                                 }
                             } else {
                                 # No cross-forest trust
@@ -1166,8 +1190,13 @@ function main {
                                 if ("-$($TrustedDomain.properties.name)" -iin $x) {
                                     Write-Host "    Ignoring because of TrustsToCheckForGroups entry '-$($TrustedDomain.properties.name)'"
                                 } else {
-                                    $TrustsToCheckForGroups += $TrustedDomain.properties.name.tolower()
-                                    $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $TrustedDomain.properties.name.tolower())
+                                    if ($TrustsToCheckForGroups -inotcontains $TrustedDomain.properties.name) {
+                                        $TrustsToCheckForGroups += $TrustedDomain.properties.name.tolower()
+                                    }
+
+                                    if (-not $LookupDomainsToTrusts.ContainsKey($TrustedDomain.properties.name.tolower())) {
+                                        $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $TrustedDomain.properties.name.tolower())
+                                    }
                                 }
                             }
                         }
@@ -1211,8 +1240,13 @@ function main {
                                             if ("-$($TrustedDomain.properties.name)" -iin $x) {
                                                 Write-Host "      Ignoring because of TrustsToCheckForGroups entry '-$($TrustedDomain.properties.name)'"
                                             } else {
-                                                $TrustsToCheckForGroups += $TrustedDomain.properties.name.tolower()
-                                                $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $TrustedDomain.properties.name.tolower())
+                                                if ($TrustsToCheckForGroups -inotcontains $TrustedDomain.properties.name) {
+                                                    $TrustsToCheckForGroups += $TrustedDomain.properties.name.tolower()
+                                                }
+
+                                                if (-not $LookupDomainsToTrusts.ContainsKey($TrustedDomain.properties.name.tolower())) {
+                                                    $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $TrustedDomain.properties.name.tolower())
+                                                }
                                             }
 
                                             $temp = @(
@@ -1226,7 +1260,10 @@ function main {
 
                                             $temp | ForEach-Object {
                                                 Write-Host "      Child domain: $($_.tolower())"
-                                                $LookupDomainsToTrusts.add($_.tolower(), $TrustedDomain.properties.name.tolower())
+
+                                                if (-not $LookupDomainsToTrusts.ContainsKey($TrustedDomain.properties.name.tolower())) {
+                                                    $LookupDomainsToTrusts.add($_.tolower(), $TrustedDomain.properties.name.tolower())
+                                                }
                                             }
                                         } else {
                                             # No cross-forest trust
@@ -1234,8 +1271,13 @@ function main {
                                             if ("-$($TrustedDomain.properties.name)" -iin $x) {
                                                 Write-Host "      Ignoring because of TrustsToCheckForGroups entry '-$($TrustedDomain.properties.name)'"
                                             } else {
-                                                $TrustsToCheckForGroups += $TrustedDomain.properties.name.tolower()
-                                                $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $TrustedDomain.properties.name.tolower())
+                                                if ($TrustsToCheckForGroups -inotcontains $TrustedDomain.properties.name) {
+                                                    $TrustsToCheckForGroups += $TrustedDomain.properties.name.tolower()
+                                                }
+
+                                                if (-not $LookupDomainsToTrusts.ContainsKey($TrustedDomain.properties.name.tolower())) {
+                                                    $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $TrustedDomain.properties.name.tolower())
+                                                }
                                             }
                                         }
                                     }
@@ -5002,22 +5044,25 @@ try {
     }
 
     if ($script:BenefactorCircleLicenceFilePath) {
-        Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($script:BenefactorCircleLicenceFilePath)) -Force
+        Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($script:BenefactorCircleLicenceFilePath)) -Force -ErrorAction SilentlyContinue
         Remove-Item $script:BenefactorCircleLicenceFilePath -Force -ErrorAction SilentlyContinue
     }
 
     if ($script:WebServicesDllPath) {
-        Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($script:WebServicesDllPath)) -Force
+        Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($script:WebServicesDllPath)) -Force -ErrorAction SilentlyContinue
         Remove-Item $script:WebServicesDllPath -Force -ErrorAction SilentlyContinue
     }
 
     if ($script:MsalModulePath) {
-        Remove-Module -Name MSAL.PS -Force
+        Remove-Module -Name MSAL.PS -Force -ErrorAction SilentlyContinue
         Remove-Item $script:MsalModulePath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     if ($script:PreMailerNetModulePath) {
-        Remove-Module -Name PreMailer.Net -Force
+        @('System.Text.Encoding.CodePages.dll', 'System.Buffers.dll', 'AngleSharp.dll', 'PreMailer.Net.dll') | ForEach-Object {
+            Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($_)) -Force -ErrorAction SilentlyContinue
+        }
+
         Remove-Item $script:PreMailerNetModulePath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
