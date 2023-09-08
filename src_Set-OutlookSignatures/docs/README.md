@@ -1,7 +1,11 @@
 <!-- omit in toc -->
 # **<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages<p><p><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <img src="https://img.shields.io/badge/dynamic/json?color=brightgreen&label=views&query=%24.count&url=https%3A%2F%2Fraw.githubusercontent.com%2FGruberMarkus%2Fmy-traffic2badge%2Ftraffic%2Ftraffic-Set-OutlookSignatures%2Ftraffic_views.json" alt="views" data-external="1"> <img src="https://img.shields.io/badge/dynamic/json?color=brightgreen&label=clones&query=%24.count&url=https%3A%2F%2Fraw.githubusercontent.com%2FGruberMarkus%2Fmy-traffic2badge%2Ftraffic%2Ftraffic-Set-OutlookSignatures%2Ftraffic_clones.json" alt="clones" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures?color=brightgreen" alt="stars" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/donate,%20support,%20sponsor-white?logo=githubsponsors" alt="donate or sponsor"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/unlock%20all%20features%20with-Benefactor%20Circle-gold" alt="unlock all features with Benefactor Circle"></a>
-# Features and demo video<!-- omit in toc -->
-**Signatures and OOF messages can be:**
+# Overview and features<!-- omit in toc -->
+E-mail signatures and Out of Office auto reply messages are an integral part of corporate identity and corporate design, but also of successful media and internet presence concepts and marketing campaigns.
+
+Besides the design and texting, one must also think about their central administration and distribution. This ensures compliance with CI/CD guidelines, guarantees the use of correct and up-to-date data, helps with legal compliance, relieves staff and opens up an additional marketing channel.
+
+**With Set-OutlookSignatures, signatures and Out of Office auto reply messages can be:**
 - Generated from **templates in DOCX or HTML** file format  
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
@@ -11,13 +15,12 @@
 - Assigned **time ranges** within which they are valid  
 - Set as **default signature** for new e-mails, or for replies and forwards (signatures only)  
 - Set as **default OOF message** for internal or external recipients (OOF messages only)  
-- Set in **Outlook Web** for the currently logged-in user  
+- Set in **Outlook Web** for the currently logged-in user, including mirroring signatures the the cloud as **roaming signatures**  
 - Centrally managed only or **exist along user created signatures** (signatures only)  
 - Copied to an **alternate path** for easy access on mobile devices not directly supported by this script (signatures only)
 - **Write protected** (Outlook signatures only)
-- Mirrored to the cloud as **roaming signatures**
 
-Set-Outlooksignatures can be **executed by users on clients, or on a server without end user interaction**.  
+Set-OutlookSignatures can be **executed by users on clients and terminal servers, or on a central server without end user interaction**.  
 On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.  
 Signatures and OOF messages can also be created and deployed centrally, without end user or client involvement.
 
@@ -29,10 +32,10 @@ The script is **designed to work in big and complex environments** (Exchange res
 
 It is **multi-client capable** by using different template paths, configuration files and script parameters.
 
-Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard file share on a server, and PowerShell and Office. 
+Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard SMB file share on a central system, and Office on your clients. 
 
 A **documented implementation approach**, based on real life experiences implementing the script in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.  
-The implementatin approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
+The implementation approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The script core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\docs\LICENSE.txt` for copyright and MIT license details.
 
@@ -41,7 +44,7 @@ The script core is **Free and Open-Source Software (FOSS)**. It is published und
 **A big "Thank you!" for listing, featuring, supporting or sponsoring Set-OutlookSignatures!**
 <pre><a href="https://explicitconsulting.at" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Others/ExplicIT Consulting, color on black.png" height="100" title="ExplicIT Consulting" alt="ExplicIT Consulting"></a>  <a href="https://joinup.ec.europa.eu/collection/free-and-open-source-software/solution/set-outlooksignatures/about" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Others/EC Joinup Interoperable Europe.png" height="100" title="European Commission Joinup/Interoperable Europe programs" alt="European Commission Joinup/Interoperable Europe programs"></a>  <a href="https://startups.microsoft.com" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Others/MS_Startups_Celebration_Badge_Dark.png" height="100" title="Proud to partner with Microsoft for Startups" alt="Proud to partner with Microsoft for Startups"></a>  <a href="https://archiveprogram.github.com/" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Others/GitHub-Archive-Program-logo.png" height="100" title="GitHub Archive Program" alt="GitHub Archive Program"></a></pre>
 
-## Demo video  <!-- omit in toc -->
+# Demo video  <!-- omit in toc -->
 <a href="https://www.youtube-nocookie.com/embed/K9TrCjTdRUI" target="_blank"><img src="https://img.youtube.com/vi/K9TrCjTdRUI/hqdefault.jpg" height="300" title="Set-OutlookSignatures demo video" alt="Set-OutlookSignatures demo video"></a>
 
 # Table of Contents <!-- omit in toc -->
@@ -183,7 +186,55 @@ There are locked down environments, where all files matching the patterns `*.ps*
       powershell.exe -noexit -file "c:\test\Set-OutlookSignatures.ps1" # adopt the file path as needed
       ```
    - Mailbox is in Exchange Online and/or the logged-in user has no access to the on-prem Active Directory and/or your environment is cloud only: You need to register an Entra ID/Azure AD application first, because Set-OutlookSignatures needs permissions to access the Graph API.
-     1. An Entra ID/Azure AD administrator needs to register Set-OutlookSignatures as app and provide admin consent for the required permissions. See the file '.\config\default graph config.ps1' for details.
+     1. An Entra ID/Azure AD administrator needs to register Set-OutlookSignatures as app and provide admin consent for the required permissions.
+        - Option A: Use app provided by the developer
+          - Option A1: Provide admin consent via URL
+            1. Open a browser, preferably in a private window
+            2. Open the URL 'https://login.microsoftonline.com/organizations/adminconsent?client_id=beea8249-8c98-4c76-92f6-ce3c468a61e6'
+            3. Log on with a user that has Global Admin or Application Administrator rights in your tenant
+            4. Accept the required permissions on behalf of your tenant
+               - You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[...]' could not be found accessed. The reason for this message is that the Entra ID/Azure AD app is configured to only be able to authenticate against http://localhost.
+          - Option A2: Run Set-OutlookSignatures as admin
+            1. Log on to a client with a local user or with an Entra ID/Azure AD user with Global Admin or Application Administrator rights
+               - You might prefer a local user for security reasons
+            2. Remove previously cached access tokens by deleting the file '%LocalAppData%\MSAL.PS\MSAL.PS.msalcache.bin3'
+               - PowerShell command 
+                  ```
+                  @($(Join-Path -Path $env:LocalAppData -ChildPath '\MSAL.PS\MSAL.PS.msalcache.bin3')) | ForEach-Object {
+                      if (Test-Path $_) {
+                          Remove-Item $_ -Force
+                      }
+                  }
+                  ```
+                - Command line command
+                  ```
+                  del "%LocalAppData%\MSAL.PS\MSAL.PS.msalcache.bin3"
+                  ```
+            3. Run Set-OutlookSignatures with the '-GraphOnly true' parameter:
+                ```
+                powershell.exe -noexit -file "c:\test\Set-OutlookSignatures.ps1" -GraphOnly true # adopt the file path as needed
+                ```
+            5. When prompted for credentials, log on with a user that has Global Admin or Application Administrator rights in your tenant
+            6. Accept the required permissions on behalf of your tenant
+            7. After accepting the permissions, you may close the browser window and then stop Set-OutlookSignatures by pressing Ctrl+Z.
+            8. For security reasons, remove cached access tokens by deleting the file '%LocalAppData%\MSAL.PS\MSAL.PS.msalcache.bin3'
+               - PowerShell command 
+                  ```
+                  @($(Join-Path -Path $env:LocalAppData -ChildPath '\MSAL.PS\MSAL.PS.msalcache.bin3')) | ForEach-Object {
+                      if (Test-Path $_) {
+                          Remove-Item $_ -Force
+                      }
+                  }
+                  ```
+                - Command line command
+                  ```
+                  del "%LocalAppData%\MSAL.PS\MSAL.PS.msalcache.bin3"
+                  ```
+        - Option B: Create and use your own Entra ID/Azure AD app
+          - As you create and host your own Entra ID/Azure AD application, this option is more secure than using the application provided by the developers.
+          - This is an option for experienced Entra ID/Azure AD administrators.  
+          If you lack this experience, but still want to use this option, [ExplicIT Consulting](https://explicitconsulting.at) offers commercial support also covering this topic.
+          - See the file '.\config\default graph config.ps1' for details about the required application permissions, endpoints and authentication methods.
      2. Run Set-OutlookSignatures
         - Cloud only, or hybrid without synced Exchange attributes (mail, legacyExchangeDN, msExchRecipientTypeDetails, msExchMailboxGuid, proxyAddresses):
           ```
@@ -304,13 +355,13 @@ Default value: `$true`
 ## 3.9. SetCurrentUserOutlookWebSignature  
 Shall the script set the Outlook Web signature of the currently logged-in user?
 
-If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
+If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
 ## 3.10. SetCurrentUserOOFMessage  
 Shall the script set the Out of Office (OOF) auto reply message of the currently logged-in user?
 
-If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used. 
+If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the script can be used in environments where only Outlook Web is used. 
 
 Default value: `$true`  
 ## 3.11. OOFTemplatePath  

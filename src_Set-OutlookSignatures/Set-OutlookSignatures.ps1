@@ -4,45 +4,45 @@ Set-OutlookSignatures XXXVersionStringXXX
 Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages.
 
 .DESCRIPTION
-Signatures and OOF messages can be:
-- Generated from templates in DOCX or HTML file format
-- Customized with a broad range of variables, including photos, from Active Directory and other sources
-  - Images in signatures can be bound to the existence of certain variables (useful for optional social network icons, for example)
-- Applied to all mailboxes (including shared mailboxes), specific mailbox groups, specific e-mail addresses or specific user or mailbox properties, for every primary mailbox across all Outlook profiles (automapped and additional mailboxes are optional)
-- Created with different names from the same template (e.g., one template can be used for multiple shared mailboxes)- Assigned time ranges within which they are valid
-- Set as default signature for new e-mails, or for replies and forwards (signatures only)
-- Set as default OOF message for internal or external recipients (OOF messages only)
-- Set in Outlook Web for the currently logged-in user
-- Centrally managed only or exist along user created signatures (signatures only)
-- Copied to an alternate path for easy access on mobile devices not directly supported by this script (signatures only)
-- Write protected (Outlook signatures only)
+E-mail signatures and Out of Office auto reply messages are an integral part of corporate identity and corporate design, but also of successful media and internet presence concepts and marketing campaigns.
 
-Set-Outlooksignatures can be executed by users on clients, or on a server without end user interaction.
-On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.
+Besides the design and texting, one must also think about their central administration and distribution. This ensures compliance with CI/CD guidelines, guarantees the use of correct and up-to-date data, helps with legal compliance, relieves staff and opens up an additional marketing channel.
+
+**With Set-OutlookSignatures, signatures and Out of Office auto reply messages can be:**
+- Generated from **templates in DOCX or HTML** file format  
+- Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
+  - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
+  - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
+- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups**, specific **e-mail addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles** (**automapped and additional mailboxes** are optional)  
+- Created with different names from the same template (e.g., **one template can be used for multiple shared mailboxes**)
+- Assigned **time ranges** within which they are valid  
+- Set as **default signature** for new e-mails, or for replies and forwards (signatures only)  
+- Set as **default OOF message** for internal or external recipients (OOF messages only)  
+- Set in **Outlook Web** for the currently logged-in user, including mirroring signatures the the cloud as **roaming signatures**  
+- Centrally managed only or **exist along user created signatures** (signatures only)  
+- Copied to an **alternate path** for easy access on mobile devices not directly supported by this script (signatures only)
+- **Write protected** (Outlook signatures only)
+
+Set-OutlookSignatures can be **executed by users on clients and terminal servers, or on a central server without end user interaction**.  
+On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.  
 Signatures and OOF messages can also be created and deployed centrally, without end user or client involvement.
 
-Sample templates for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
+**Sample templates** for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 
-Simulation mode allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
+**Simulation mode** allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
+  
+The script is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
 
-The script is designed to work in big and complex environments (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works on premises, in hybrid and cloud-only environments.
+It is **multi-client capable** by using different template paths, configuration files and script parameters.
 
-It is multi-client capable by using different template paths, configuration files and script parameters.
+Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard SMB file share on a central system, and Office on your clients. 
 
-Set-OutlookSignatures requires no installation on servers or clients. You only need a standard file share on a server, and PowerShell and Office.
+A **documented implementation approach**, based on real life experiences implementing the script in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.  
+The implementation approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
-A documented implementation approach, based on real life experiences implementing the script in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.
-The implementatin approach is suited for service providers as well as for clients, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
+The script core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\docs\LICENSE.txt` for copyright and MIT license details.
 
-The script core is Free and Open-Source Software (FOSS). It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see '.\docs\LICENSE.txt' for copyright and MIT license details.
-
-Some features are exclusive to Benefactor Circle members. Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source licence.  Please see '.\docs\Benefactor Circle' for details.
-
-Dear businesses using Set-OutlookSignatures:
-- Being Free and Open-Source Software, Set-OutlookSignatures can save you thousands or even tens or hundreds of thousand Euros/US-Dollars per year in comparison to commercial software.
-Please consider sponsoring this project or becoming a Benefactor Circle member to ensure continued support, testing and enhancements.
-- Invest in the open-source projects you depend on. Contributors are working behind the scenes to make open-source better for everyone - give them the help and recognition they deserve.
-- Sponsor the open-source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
+**Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source licence.  Please see `.\docs\Benefactor Circle` for details.  
 .LINK
 Github: https://github.com/GruberMarkus/Set-OutlookSignatures
 
@@ -103,12 +103,12 @@ default value: $true
 
 .PARAMETER SetCurrentUserOutlookWebSignature
 Shall the script set the Outlook Web signature of the currently logged-in user?
-If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used.
+If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the script can be used in environments where only Outlook Web is used.
 Default value: $true
 
 .PARAMETER SetCurrentUserOOFMessage
 Shall the script set the Out of Office (OOF) auto reply message of the currently logged-in user?
-If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. This way, the script can be used in environments where only Outlook Web is used.
+If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the script can be used in environments where only Outlook Web is used.
 Default value: $true
 
 .PARAMETER OOFTemplatePath
@@ -1020,19 +1020,24 @@ function main {
         if ($AdditionalSignaturePath) {
             $SignaturePaths += $AdditionalSignaturePath
         }
+
         Write-Host '  Simulation mode enabled. Skip task, use AdditionalSignaturePath instead' -ForegroundColor Yellow
     } else {
         $x = (Get-ItemProperty "hkcu:\software\microsoft\office\$($OutlookRegistryVersion)\common\general" -ErrorAction SilentlyContinue).'Signatures'
+
         if ($x) {
             Push-Location ((Join-Path -Path ($env:AppData) -ChildPath 'Microsoft'))
             $x = ($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($x))
+
             if (Test-Path $x -IsValid) {
                 if (-not (Test-Path $x -type container)) {
                     New-Item -Path $x -ItemType directory -Force | Out-Null
                 }
+
                 $SignaturePaths += $x
                 Write-Host "  $x"
             }
+
             Pop-Location
         }
     }
@@ -1505,25 +1510,6 @@ function main {
         }
     }
 
-    if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -inotcontains $ADPropsCurrentUser.mail)) {
-        # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
-        # Maybe this is a pure Outlook Web user, so we will add a helper entry
-        # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
-        Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Add dummy mailbox entry." -ForegroundColor Yellow
-        if ($ADPropsCurrentUser.mail) {
-            $script:CurrentUserDummyMailbox = $true
-            $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
-            $MailAddresses = @($ADPropsCurrentUser.mail.tolower()) + $MailAddresses
-            $RegistryPaths = @("hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths
-            $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
-        } else {
-            Write-Host '      User does not have mail attribute configured' -ForegroundColor Yellow
-            $script:CurrentUserDummyMailbox = $false
-        }
-    } else {
-        $script:CurrentUserDummyMailbox = $false
-    }
-
     if ($ADPropsCurrentUser.distinguishedname) {
         Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
     } elseif ($ADPropsCurrentUser.userprincipalname) {
@@ -1535,6 +1521,118 @@ function main {
     Write-Verbose "    distinguishedname: $($ADPropsCurrentUser.distinguishedname)"
     Write-Verbose "    userprincipalname: $($ADPropsCurrentUser.userprincipalname)"
     Write-Verbose "    mail: $($ADPropsCurrentUser.mail)"
+
+    if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -inotcontains $ADPropsCurrentUser.mail)) {
+        # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
+        # Maybe this is a pure Outlook Web user, so we will add a helper entry
+        # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
+        Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Add dummy mailbox entry." -ForegroundColor Yellow
+        if ($ADPropsCurrentUser.mail) {
+            $script:CurrentUserDummyMailbox = $true
+            $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
+            $MailAddresses = @($ADPropsCurrentUser.mail.tolower()) + $MailAddresses
+            $RegistryPaths = @("hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths
+            $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
+
+            # OWA.OtherMailbox
+            if ($MailAddresses.Count -eq 1) {
+                Write-Host '    No mailboxes found in Outlook, searching Outlook Web for additional mailboxes.'
+                if (-not $script:WebServicesDllPath) {
+                    Write-Host '      Set up environment for connection to Outlook Web'
+                    $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
+                    try {
+                        if ($($PSVersionTable.PSEdition) -ieq 'Core') {
+                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS.NetStandard\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+                            Unblock-File -LiteralPath $script:WebServicesDllPath
+                        } else {
+                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
+                            Unblock-File -LiteralPath $script:WebServicesDllPath
+                        }
+                    } catch {
+                    }
+                }
+
+                $error.clear()
+
+                try {
+                    Import-Module -Name $script:WebServicesDllPath -Force -ErrorAction Stop
+                    $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
+                    Write-Host '      Connect to Outlook Web'
+                    try {
+                        Write-Verbose '        Try Windows Integrated Auth'
+                        $exchService.UseDefaultCredentials = $true
+                        $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
+                    } catch {
+                        try {
+                            Write-Verbose '        Try OAuth with Autodiscover'
+                            $exchService.UseDefaultCredentials = $false
+                            $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $ExoToken
+                            $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
+                        } catch {
+                            Write-Verbose '        Try OAuth with fixed URL'
+                            $exchService.UseDefaultCredentials = $false
+                            $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $ExoToken
+                            $exchService.Url = 'https://outlook.office.com/EWS/Exchange.asmx'
+                        }
+                    }
+
+                    $Calendar = [Microsoft.Exchange.WebServices.Data.Folder]::Bind($exchservice, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Calendar)
+                    if ($Calendar.DisplayName) {
+                        $error.clear()
+
+                        $folderid = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Root, $($PrimaryMailboxAddress))
+                        $Root = [Microsoft.Exchange.WebServices.Data.Folder]::Bind($exchService, $folderid)
+                        $SfSearchFilter = New-Object Microsoft.Exchange.WebServices.Data.SearchFilter+IsEqualTo([Microsoft.Exchange.WebServices.Data.ItemSchema]::ItemClass, 'IPM.Configuration.OWA.OtherMailbox')
+
+                        $ivItemView = New-Object Microsoft.Exchange.WebServices.Data.ItemView(1)
+                        $ivItemView.Traversal = [Microsoft.Exchange.WebServices.Data.ItemTraversal]::Associated
+                        $fiResults = $exchService.FindItems($Root.Id, $SfSearchFilter, $ivItemView)
+
+                        if ($fiResults.Items.Count -eq 0) {
+                            # Write-Host ('No Config Item found, create new Item')
+                            #$UMConfig = New-Object Microsoft.Exchange.WebServices.Data.UserConfiguration -ArgumentList $exchService
+                            #$UMConfig.Save("OWA.OtherMailbox",$Root.Id)
+                        } else {
+                            # Write-Host ('Existing Config Item Found');
+                        }
+
+                        $owaOtherMailbox = [Microsoft.Exchange.WebServices.Data.UserConfiguration]::Bind($exchService, 'OWA.OtherMailbox', $Root.Id, [Microsoft.Exchange.WebServices.Data.UserConfigurationProperties]::All);
+
+                        $xmlConfig = New-Object System.Xml.XmlDocument
+
+                        if ($null -eq $owaOtherMailbox.XmlData) {
+                            $xmlConfig.LoadXml('<OtherMailbox></OtherMailbox>');
+                        } else {
+                            $xmlConfig.LoadXml([System.Text.UTF8Encoding]::UTF8.GetString($owaOtherMailbox.XmlData));
+                        }
+
+                        if ($null -ne $xmlConfig.OtherMailbox.entry) {
+                            foreach ($obMailbox in  $xmlConfig.OtherMailbox.entry) {
+                                if ($obMailbox.principalSMTPAddress -inotin $MailAddresses) {
+                                    Write-Host "      $($obMailbox.principalSMTPAddress.tolower())"
+
+                                    $MailAddresses += $obMailbox.principalSMTPAddress.tolower()
+                                    $RegistryPaths += "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\"
+                                    $LegacyExchangeDNs += ''
+                                }
+                            }
+                        }
+                    } else {
+                        Write-Host '      Could not connect to Outlook Web, although the EWS DLL threw no error.' -ForegroundColor Red
+                        throw
+                    }
+                } catch {
+                    Write-Host "      Error connecting to Outlook Web: $_" -ForegroundColor Red
+                    Write-Host '        Cannot enumerate additional mailboxes' -ForegroundColor Red
+                }
+            }
+        } else {
+            Write-Host '      User does not have mail attribute configured' -ForegroundColor Yellow
+            $script:CurrentUserDummyMailbox = $false
+        }
+    } else {
+        $script:CurrentUserDummyMailbox = $false
+    }
 
     $CurrentUserSIDs = @()
     if (($ADPropsCurrentUser.objectsid -ne '') -and ($null -ne $ADPropsCurrentUser.objectsid)) {
@@ -1760,9 +1858,8 @@ function main {
         $PrimaryMailboxAddress = $MailAddresses[$p]
     }
 
-    if (-not $SimulateUser) {
+    if ((-not $SimulateUser) -and ($OutlookProfiles.count -gt 0)) {
         foreach ($OutlookProfile in $OutlookProfiles) {
-
             $MailAddressesToSearch = @()
             $MailAddressesToSearchLookup = @{}
             for ($count = 0; $count -lt $RegistryPaths.count; $count++) {
@@ -1803,7 +1900,7 @@ function main {
                     }
                 }
             } else {
-                Write-Verbose '  Outlook mailbox display sort order is not yet defined or does not yet contain all found mail addresses. Falling back to sorting by time mailboxes have been added.'
+                Write-Host 'hier 1'
                 for ($i = 0; $i -le $RegistryPaths.count - 1; $i++) {
                     if (($RegistryPaths[$i] -ilike "Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$OutlookProfile\*") -and ($i -ne $p)) {
                         $MailboxNewOrder += $i
@@ -2579,17 +2676,19 @@ function main {
             # Set OOF message and Outlook Web signature
             if (((($SetCurrentUserOutlookWebSignature -eq $true)) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
                 if ((-not $SimulateUser)) {
-                    Write-Host "  Set up environment for connection to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-                    $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
-                    try {
-                        if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS.NetStandard\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
-                            Unblock-File -LiteralPath $script:WebServicesDllPath
-                        } else {
-                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
-                            Unblock-File -LiteralPath $script:WebServicesDllPath
+                    if (-not $script:WebServicesDllPath) {
+                        Write-Host "  Set up environment for connection to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                        $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
+                        try {
+                            if ($($PSVersionTable.PSEdition) -ieq 'Core') {
+                                Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS.NetStandard\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+                                Unblock-File -LiteralPath $script:WebServicesDllPath
+                            } else {
+                                Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
+                                Unblock-File -LiteralPath $script:WebServicesDllPath
+                            }
+                        } catch {
                         }
-                    } catch {
                     }
 
                     $error.clear()
@@ -4355,6 +4454,7 @@ No authentication possible. Try:
              - Run Set-OutlookSignatures in a new PowerShell session
              - Check the system default browser
              - Make sure that Set-OutlookSignatures is executed in the security context of the currently logged-in user
+             - Make sure that the current PowerShell session allows TLS 1.2 (see https://github.com/GruberMarkus/Set-OutlookSignatures/issues/85 for details)
 "@)
                         accessToken = $null
                         authHeader  = $null
