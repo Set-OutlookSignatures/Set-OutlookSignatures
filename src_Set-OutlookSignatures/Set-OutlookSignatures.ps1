@@ -9,40 +9,40 @@ E-mail signatures and Out of Office auto reply messages are an integral part of 
 Besides the design and texting, one must also think about their central administration and distribution. This ensures compliance with CI/CD guidelines, guarantees the use of correct and up-to-date data, helps with legal compliance, relieves staff and opens up an additional marketing channel.
 
 **With Set-OutlookSignatures, signatures and Out of Office auto reply messages can be:**
-- Generated from **templates in DOCX or HTML** file format  
+- Generated from **templates in DOCX or HTML** file format
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
-- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups**, specific **e-mail addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles** (**automapped and additional mailboxes** are optional)  
+- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups**, specific **e-mail addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)** (**automapped and additional mailboxes** are optional)
 - Created with different names from the same template (e.g., **one template can be used for multiple shared mailboxes**)
-- Assigned **time ranges** within which they are valid  
-- Set as **default signature** for new e-mails, or for replies and forwards (signatures only)  
-- Set as **default OOF message** for internal or external recipients (OOF messages only)  
-- Set in **Outlook Web** for the currently logged-in user, including mirroring signatures the the cloud as **roaming signatures**  
-- Centrally managed only or **exist along user created signatures** (signatures only)  
+- Assigned **time ranges** within which they are valid
+- Set as **default signature** for new e-mails, or for replies and forwards (signatures only)
+- Set as **default OOF message** for internal or external recipients (OOF messages only)
+- Set in **Outlook Web** for the currently logged-in user, including mirroring signatures the the cloud as **roaming signatures**
+- Centrally managed only or **exist along user created signatures** (signatures only)
 - Copied to an **alternate path** for easy access on mobile devices not directly supported by this script (signatures only)
 - **Write protected** (Outlook signatures only)
 
-Set-OutlookSignatures can be **executed by users on clients and terminal servers, or on a central server without end user interaction**.  
-On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.  
+Set-OutlookSignatures can be **executed by users on clients and terminal servers, or on a central server without end user interaction**.
+On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.
 Signatures and OOF messages can also be created and deployed centrally, without end user or client involvement.
 
 **Sample templates** for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
-  
+
 The script is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
 
 It is **multi-client capable** by using different template paths, configuration files and script parameters.
 
-Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard SMB file share on a central system, and Office on your clients. 
+Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard SMB file share on a central system, and Office on your clients.
 
-A **documented implementation approach**, based on real life experiences implementing the script in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.  
+A **documented implementation approach**, based on real life experiences implementing the script in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and e-mail and client administrators.
 The implementation approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The script core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\docs\LICENSE.txt` for copyright and MIT license details.
 
-**Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source licence.  Please see `.\docs\Benefactor Circle` for details.  
+**Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source licence.  Please see `.\docs\Benefactor Circle` for details.
 .LINK
 Github: https://github.com/GruberMarkus/Set-OutlookSignatures
 
@@ -817,6 +817,12 @@ function main {
     if ($SimulateUser) {
         Write-Host '  Simulation mode enabled, skip Outlook checks' -ForegroundColor Yellow
     } else {
+        if ($(Get-Command -Name 'Get-AppPackage' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue)) {
+            $NewOutlook = Get-AppPackage -Name 'Microsoft.OutlookForWindows' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+        } else {
+            $NewOutlook = $null
+        }
+
         Write-Host '  Outlook'
         $OutlookRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace 'Outlook.Application.', '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
 
@@ -872,20 +878,14 @@ function main {
             exit 1
         }
 
-        $OutlookIsBetaversion = $false
+        Write-Host "    Set 'Send Pictures With Document' registry value to '1'"
+        $null = "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Options\Mail" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'Send Pictures With Document' -Type DWORD -Value 1 -Force
 
-        if (-not $SimulateUser) {
-            Write-Host "    Set 'Send Pictures With Document' registry value to '1'"
-            $null = "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Options\Mail" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'Send Pictures With Document' -Type DWORD -Value 1 -Force
-
-            if (($DisableRoamingSignatures -in @($true, $false)) -and ($OutlookFileVersion -ge '16.0.0.0')) {
-                Write-Host "    Set 'DisableRoamingSignatures' registry value to '$([int]$DisableRoamingSignatures)'"
-                $null = "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableRoamingSignaturesTemporaryToggle' -Type DWORD -Value $([int]$DisableRoamingSignatures) -Force
-                $null = "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableRoamingSignatures' -Type DWORD -Value $([int]$DisableRoamingSignatures) -Force
-            }
+        if (($DisableRoamingSignatures -in @($true, $false)) -and ($OutlookFileVersion -ge '16.0.0.0')) {
+            Write-Host "    Set 'DisableRoamingSignatures' registry value to '$([int]$DisableRoamingSignatures)'"
+            $null = "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableRoamingSignaturesTemporaryToggle' -Type DWORD -Value $([int]$DisableRoamingSignatures) -Force
+            $null = "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableRoamingSignatures' -Type DWORD -Value $([int]$DisableRoamingSignatures) -Force
         }
-
-        $OutlookDisableRoamingSignatures = 0
 
         if ($null -ne $OutlookRegistryVersion) {
             try {
@@ -895,6 +895,8 @@ function main {
                 $OutlookDefaultProfile = $null
                 $OutlookProfiles = @()
             }
+
+            $OutlookIsBetaversion = $false
 
             if (
                 ((Get-Item 'registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\ClickToRun\Configuration' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).Property -contains 'UpdateChannel') -and
@@ -915,6 +917,8 @@ function main {
                 }
             }
 
+            $OutlookDisableRoamingSignatures = 0
+
             foreach ($RegistryFolder in (
                     "registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup",
                     "registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup",
@@ -934,8 +938,22 @@ function main {
                     $OutlookDisableRoamingSignatures = $x
                 }
             }
+
+            if ($NewOutlook -and ($((Get-ItemProperty "registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Preferences" -ErrorAction SilentlyContinue).'UseNewOutlook') -eq 1)) {
+                $OutlookUseNewOutlook = $true
+            } else {
+                $OutlookUseNewOutlook = $false
+            }
         } else {
             $OutlookDefaultProfile = $null
+            $OutlookDisableRoamingSignatures = $null
+            $OutlookIsBetaVersion = $null
+
+            if ($NewOutlook) {
+                $OutlookUseNewOutlook = $true
+            } else {
+                $OutlookUseNewOutlook = $false
+            }
         }
 
         Write-Host "    Registry version: $OutlookRegistryVersion"
@@ -949,6 +967,12 @@ function main {
         Write-Host "    Default profile: $OutlookDefaultProfile"
         Write-Host "    Is C2R Beta: $OutlookIsBetaversion"
         Write-Host "    DisableRoamingSignatures: $OutlookDisableRoamingSignatures"
+        Write-Host "    UseNewOutlook: $OutlookUseNewOutlook"
+
+        Write-Host '  New Outlook'
+        Write-Host "    Version: $($NewOutlook.Version)"
+        Write-Verbose "    Status: $($NewOutlook.Status)"
+        Write-Host "    UseNewOutlook: $OutlookUseNewOutlook"
     }
 
     Write-Host '  Word'
@@ -1016,13 +1040,13 @@ function main {
     Write-Host
     Write-Host "Get Outlook signature file path(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
     $SignaturePaths = @()
+
     if ($SimulateUser) {
+        Write-Host '  Simulation mode enabled. Skip task, use AdditionalSignaturePath instead' -ForegroundColor Yellow
         if ($AdditionalSignaturePath) {
             $SignaturePaths += $AdditionalSignaturePath
         }
-
-        Write-Host '  Simulation mode enabled. Skip task, use AdditionalSignaturePath instead' -ForegroundColor Yellow
-    } else {
+    } elseif ($OutlookProfiles -and ($OutlookUseNewOutlook -ne $true)) {
         $x = (Get-ItemProperty "hkcu:\software\microsoft\office\$($OutlookRegistryVersion)\common\general" -ErrorAction SilentlyContinue).'Signatures'
 
         if ($x) {
@@ -1040,60 +1064,14 @@ function main {
 
             Pop-Location
         }
-    }
-
-
-    Write-Host
-    Write-Host "Get e-mail addresses from Outlook profiles and corresponding registry paths @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-    $MailAddresses = @()
-    $RegistryPaths = @()
-    $LegacyExchangeDNs = @()
-
-    if ($SimulateUser) {
-        Write-Host '  Simulation mode enabled. Skip task, use SimulateMailboxes instead' -ForegroundColor Yellow
-        for ($i = 0; $i -lt $SimulateMailboxes.count; $i++) {
-            $MailAddresses += $SimulateMailboxes[$i].ToLower()
-            $RegistryPaths += ''
-            $LegacyExchangeDNs += ''
-        }
     } else {
-        foreach ($OutlookProfile in $OutlookProfiles) {
-            Write-Host "  Profile '$($OutlookProfile)'"
-            foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } })) {
-                if ($OutlookFileVersion -ge '16.0.0.0') {
-                    $MailAddresses += ($RegistryFolder.'Account Name').ToLower()
-                } else {
-                    $MailAddresses += (@(ForEach ($char in @(($RegistryFolder.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '').ToLower()
-                }
-                $RegistryPaths += $RegistryFolder.PSPath
-                if ($RegistryFolder.'Identity Eid') {
-                    $LegacyExchangeDN = ('/O=' + ((@(foreach ($char in @(($RegistryFolder.'Identity Eid' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split '/O=')[-1]).ToString().trim()
-                    if ($LegacyExchangeDN.length -le 3) {
-                        $LegacyExchangeDN = ''
-                    }
-                } else {
-                    $LegacyExchangeDN = ''
-                }
-                $LegacyExchangeDNs += $LegacyExchangeDN
-                Write-Host "    $($MailAddresses[-1])"
-                Write-Verbose "      $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
-                Write-Verbose "      $($LegacyExchangeDNs[-1])"
-            }
-
-            if ($SignaturesForAutomappedAndAdditionalMailboxes) {
-                if (-not $BenefactorCircleLicenceFile) {
-                    Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
-                    Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
-                } else {
-                    $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SignaturesForAutomappedAndAdditionalMailboxes()
-
-                    if ($FeatureResult -ne 'true') {
-                        Write-Host '    Error finding automapped and additional mailboxes.' -ForegroundColor Yellow
-                        Write-Host "    $FeatureResult" -ForegroundColor Yellow
-                    }
-                }
-            }
+        if ($OutlookUseNewOutlook -eq $true) {
+            Write-Host '  New Outlook is set as default Outlook, so use a temporary signature path'
+        } else {
+            Write-Host '  Outlook Web will be used, so use a temporary signature path'
         }
+
+        $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname))
     }
 
 
@@ -1522,23 +1500,111 @@ function main {
     Write-Verbose "    userprincipalname: $($ADPropsCurrentUser.userprincipalname)"
     Write-Verbose "    mail: $($ADPropsCurrentUser.mail)"
 
-    if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -inotcontains $ADPropsCurrentUser.mail)) {
-        # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
-        # Maybe this is a pure Outlook Web user, so we will add a helper entry
-        # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
-        Write-Host "    User's mailbox not found in Outlook profiles, but Outlook Web signature and/or OOF message should be set. Add dummy mailbox entry." -ForegroundColor Yellow
-        if ($ADPropsCurrentUser.mail) {
-            $script:CurrentUserDummyMailbox = $true
-            $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
-            $MailAddresses = @($ADPropsCurrentUser.mail.tolower()) + $MailAddresses
-            $RegistryPaths = @("hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\") + $RegistryPaths
-            $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
 
-            # OWA.OtherMailbox
-            if ($MailAddresses.Count -eq 1) {
-                Write-Host '    No mailboxes found in Outlook, searching Outlook Web for additional mailboxes.'
+    Write-Host
+    Write-Host "Get e-mail addresses @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+    $MailAddresses = @()
+    $RegistryPaths = @()
+    $LegacyExchangeDNs = @()
+
+    if ($SimulateUser) {
+        Write-Host '  Simulation mode enabled, use SimulateMailboxes as mailbox list' -ForegroundColor Yellow
+        for ($i = 0; $i -lt $SimulateMailboxes.count; $i++) {
+            $MailAddresses += $SimulateMailboxes[$i].ToLower()
+            $RegistryPaths += ''
+            $LegacyExchangeDNs += ''
+        }
+    } elseif (($OutlookProfiles) -and ($OutlookUseNewOutlook -ne $true)) {
+        Write-Host '  Get e-mail addresses from Outlook'
+
+        foreach ($OutlookProfile in $OutlookProfiles) {
+            Write-Host "    Profile '$($OutlookProfile)'"
+            foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } })) {
+                if ($OutlookFileVersion -ge '16.0.0.0') {
+                    $MailAddresses += ($RegistryFolder.'Account Name').ToLower()
+                } else {
+                    $MailAddresses += (@(ForEach ($char in @(($RegistryFolder.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '').ToLower()
+                }
+
+                $RegistryPaths += $RegistryFolder.PSPath
+
+                if ($RegistryFolder.'Identity Eid') {
+                    $LegacyExchangeDN = ('/O=' + ((@(foreach ($char in @(($RegistryFolder.'Identity Eid' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '') -split '/O=')[-1]).ToString().trim()
+                    if ($LegacyExchangeDN.length -le 3) {
+                        $LegacyExchangeDN = ''
+                    }
+                } else {
+                    $LegacyExchangeDN = ''
+                }
+
+                $LegacyExchangeDNs += $LegacyExchangeDN
+
+                Write-Host "      $($MailAddresses[-1])"
+                Write-Verbose "        Registry: $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
+                Write-Verbose "        LegacyExchangeDN: $($LegacyExchangeDNs[-1])"
+            }
+
+            if ($SignaturesForAutomappedAndAdditionalMailboxes) {
+                if (-not $BenefactorCircleLicenceFile) {
+                    Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                    Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                } else {
+                    $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SignaturesForAutomappedAndAdditionalMailboxes()
+
+                    if ($FeatureResult -ne 'true') {
+                        Write-Host '      Error finding automapped and additional mailboxes.' -ForegroundColor Yellow
+                        Write-Host "      $FeatureResult" -ForegroundColor Yellow
+                    }
+                }
+            }
+        }
+    } else {
+        if ($OutlookUseNewOutlook -eq $true) {
+            Write-Host '  Get e-mail addresses from New Outlook and Outlook Web, as New Outlook is set as default'
+        } else {
+            Write-Host '  Get e-mail addresses from Outlook Web'
+        }
+
+        $OutlookProfiles = @()
+        $OutlookDefaultProfile = $null
+
+        $script:CurrentUserDummyMailbox = $true
+
+        if ($OutlookUseNewOutlook -eq $true) {
+            $x = @(
+                @((Get-Content -Path $(Join-Path -Path $env:LocalAppData -ChildPath '\Microsoft\Olk\UserSettings.json') -Force -Encoding utf8 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | ConvertFrom-Json).Identities.IdentityMap.PSObject.Properties | Select-Object -Unique | Where-Object { $_.name -match '(\S+?)@(\S+?)\.(\S+?)' }) | ForEach-Object {
+                    if ((Get-Content -Path $(Join-Path -Path $env:LocalAppData -ChildPath "\Microsoft\OneAuth\accounts\$($_.Value)") -Force -Encoding utf8 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | ConvertFrom-Json).association_status -ilike '*"com.microsoft.Olk":"associated"*') {
+                        $_.name
+                    }
+                }
+            )
+        } else {
+            $x = @()
+        }
+
+        if ($ADPropsCurrentUser.mail) {
+            if ($x -icontains $ADPropsCurrentUser.mail) {
+                $x = @($ADPropsCurrentUser.mail.tolower()) + @($x | Where-Object { $_ -ine $ADPropsCurrentUser.mail })
+            } else {
+                $x = @($ADPropsCurrentUser.mail.tolower()) + $x
+            }
+        } else {
+            Write-Host '    User does not have mail attribute configured' -ForegroundColor Yellow
+            $script:CurrentUserDummyMailbox = $false
+        }
+
+        $x | ForEach-Object {
+            $MailAddresses += $_.ToLower()
+            $RegistryPaths += ''
+            $LegacyExchangeDNs += ''
+
+            Write-Host "    $($MailAddresses[-1])"
+            Write-Verbose "      Registry: $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
+            Write-Verbose "      LegacyExchangeDN: $($LegacyExchangeDNs[-1])"
+
+            if ($ADPropsCurrentUser.mail -and ($_ -ieq $ADPropsCurrentUser.mail)) {
                 if (-not $script:WebServicesDllPath) {
-                    Write-Host '      Set up environment for connection to Outlook Web'
+                    Write-Host '    Set up environment for connection to Outlook Web'
                     $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                     try {
                         if ($($PSVersionTable.PSEdition) -ieq 'Core') {
@@ -1557,19 +1623,19 @@ function main {
                 try {
                     Import-Module -Name $script:WebServicesDllPath -Force -ErrorAction Stop
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
-                    Write-Host '      Connect to Outlook Web'
+                    Write-Host '    Connect to Outlook Web'
                     try {
-                        Write-Verbose '        Try Windows Integrated Auth'
+                        Write-Verbose '      Try Windows Integrated Auth'
                         $exchService.UseDefaultCredentials = $true
-                        $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
+                        $exchService.AutodiscoverUrl($MailAddresses[0], { $true }) | Out-Null
                     } catch {
                         try {
-                            Write-Verbose '        Try OAuth with Autodiscover'
+                            Write-Verbose '      Try OAuth with Autodiscover'
                             $exchService.UseDefaultCredentials = $false
                             $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $ExoToken
-                            $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
+                            $exchService.AutodiscoverUrl($MailAddresses[0], { $true }) | Out-Null
                         } catch {
-                            Write-Verbose '        Try OAuth with fixed URL'
+                            Write-Verbose '      Try OAuth with fixed URL'
                             $exchService.UseDefaultCredentials = $false
                             $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $ExoToken
                             $exchService.Url = 'https://outlook.office.com/EWS/Exchange.asmx'
@@ -1577,43 +1643,20 @@ function main {
                     }
 
                     $Calendar = [Microsoft.Exchange.WebServices.Data.Folder]::Bind($exchservice, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Calendar)
+
                     if ($Calendar.DisplayName) {
                         $error.clear()
 
-                        $folderid = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Root, $($PrimaryMailboxAddress))
-                        $Root = [Microsoft.Exchange.WebServices.Data.Folder]::Bind($exchService, $folderid)
-                        $SfSearchFilter = New-Object Microsoft.Exchange.WebServices.Data.SearchFilter+IsEqualTo([Microsoft.Exchange.WebServices.Data.ItemSchema]::ItemClass, 'IPM.Configuration.OWA.OtherMailbox')
+                        if ($SignaturesForAutomappedAndAdditionalMailboxes) {
+                            if (-not $BenefactorCircleLicenceFile) {
+                                Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                                Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                            } else {
+                                $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SignaturesForAutomappedAndAdditionalMailboxes()
 
-                        $ivItemView = New-Object Microsoft.Exchange.WebServices.Data.ItemView(1)
-                        $ivItemView.Traversal = [Microsoft.Exchange.WebServices.Data.ItemTraversal]::Associated
-                        $fiResults = $exchService.FindItems($Root.Id, $SfSearchFilter, $ivItemView)
-
-                        if ($fiResults.Items.Count -eq 0) {
-                            # Write-Host ('No Config Item found, create new Item')
-                            #$UMConfig = New-Object Microsoft.Exchange.WebServices.Data.UserConfiguration -ArgumentList $exchService
-                            #$UMConfig.Save("OWA.OtherMailbox",$Root.Id)
-                        } else {
-                            # Write-Host ('Existing Config Item Found');
-                        }
-
-                        $owaOtherMailbox = [Microsoft.Exchange.WebServices.Data.UserConfiguration]::Bind($exchService, 'OWA.OtherMailbox', $Root.Id, [Microsoft.Exchange.WebServices.Data.UserConfigurationProperties]::All);
-
-                        $xmlConfig = New-Object System.Xml.XmlDocument
-
-                        if ($null -eq $owaOtherMailbox.XmlData) {
-                            $xmlConfig.LoadXml('<OtherMailbox></OtherMailbox>');
-                        } else {
-                            $xmlConfig.LoadXml([System.Text.UTF8Encoding]::UTF8.GetString($owaOtherMailbox.XmlData));
-                        }
-
-                        if ($null -ne $xmlConfig.OtherMailbox.entry) {
-                            foreach ($obMailbox in  $xmlConfig.OtherMailbox.entry) {
-                                if ($obMailbox.principalSMTPAddress -inotin $MailAddresses) {
-                                    Write-Host "      $($obMailbox.principalSMTPAddress.tolower())"
-
-                                    $MailAddresses += $obMailbox.principalSMTPAddress.tolower()
-                                    $RegistryPaths += "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$OutlookDefaultProfile\9375CFF0413111d3B88A00104B2A6676\"
-                                    $LegacyExchangeDNs += ''
+                                if ($FeatureResult -ne 'true') {
+                                    Write-Host '    Error finding automapped and additional mailboxes.' -ForegroundColor Yellow
+                                    Write-Host "    $FeatureResult" -ForegroundColor Yellow
                                 }
                             }
                         }
@@ -1623,9 +1666,25 @@ function main {
                     }
                 } catch {
                     Write-Host "      Error connecting to Outlook Web: $_" -ForegroundColor Red
-                    Write-Host '        Cannot enumerate additional mailboxes' -ForegroundColor Red
                 }
             }
+        }
+    }
+
+    if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -inotcontains $ADPropsCurrentUser.mail)) {
+        # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
+        # Maybe this is a pure Outlook Web user, so we will add a helper entry
+        # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
+        Write-Host "  User's mailbox not found in e-mail address list, but Outlook Web signature and/or OOF message should be set. Add dummy mailbox entry." -ForegroundColor Yellow
+
+        if ($ADPropsCurrentUser.mail) {
+            $script:CurrentUserDummyMailbox = $true
+
+            $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
+
+            $MailAddresses = @($ADPropsCurrentUser.mail.tolower()) + $MailAddresses
+            $RegistryPaths = @('') + $RegistryPaths
+            $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
         } else {
             Write-Host '      User does not have mail attribute configured' -ForegroundColor Yellow
             $script:CurrentUserDummyMailbox = $false
@@ -1807,7 +1866,7 @@ function main {
         for ($i = 0; $i -lt $LegacyExchangeDNs.count; $i++) {
             # if (($LegacyExchangeDNs[$i]) -and (($ADPropsMailboxes[$i].proxyaddresses) -icontains "smtp:$($ADPropsCurrentUser.mail)")) {
             if ((($ADPropsMailboxes[$i].proxyaddresses) -icontains "smtp:$($ADPropsCurrentUser.mail)")) {
-                if (($SimulateUser) -or ((-not $SimulateUser) -and ($LegacyExchangeDNs[$i]) -and ($RegistryPaths[$i] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*'))) {
+                if (($SimulateUser) -or ((-not $SimulateUser) -and ($LegacyExchangeDNs[$i]))) {
                     $p = $i
                     break
                 }
@@ -1821,6 +1880,7 @@ function main {
         }
     } else {
         Write-Host '  AD mail attribute of currently logged-in user is empty' -NoNewline
+
         if ($null -ne $TrustsToCheckForGroups[0]) {
             Write-Host ', searching msExchMasterAccountSid'
             # No mail attribute set, check for match(es) of user's objectSID and mailbox's msExchMasterAccountSid
@@ -1900,7 +1960,6 @@ function main {
                     }
                 }
             } else {
-                Write-Host 'hier 1'
                 for ($i = 0; $i -le $RegistryPaths.count - 1; $i++) {
                     if (($RegistryPaths[$i] -ilike "Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$OutlookProfile\*") -and ($i -ne $p)) {
                         $MailboxNewOrder += $i
@@ -2881,7 +2940,10 @@ function main {
         }
     }
 
-    if ($script:CurrentUserDummyMailbox -eq $true) {
+    if (
+        ($script:CurrentUserDummyMailbox -eq $true) -or
+        ($OutlookUseNewOutlook -eq $true)
+    ) {
         RemoveItemAlternativeRecurse $SignaturePaths[0] -SkipFolder
     }
 }

@@ -10,7 +10,7 @@ Besides the design and texting, one must also think about their central administ
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
-- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups**, specific **e-mail addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles** (**automapped and additional mailboxes** are optional)  
+- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups**, specific **e-mail addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)** (**automapped and additional mailboxes** are optional)  
 - Created with different names from the same template (e.g., **one template can be used for multiple shared mailboxes**)
 - Assigned **time ranges** within which they are valid  
 - Set as **default signature** for new e-mails, or for replies and forwards (signatures only)  
@@ -1433,7 +1433,11 @@ These tasks typically happen multiple times a year. A graphical user interface m
 From an end user perspective, Set-OutlookSignatures should not have a GUI at all. It should run in the background or on demand, but there should be no need for any user interaction.
 
 ## 17.23. What if a user has no Outlook profile or is prohibited from starting Outlook?
-If a user has never started Outlook before or has deleted all Outlook profiles, Set-OutlookSignatures will still be useful: It will create the signature folder if it does not exist, determine the logged-in users e-mail address, create the signatures for his personal mailbox, set a default signature in Outlook Web as well as the Out of Office messages.
+Mailboxes are taken from the first matching source:
+  1. Simulation mode is enabled: Mailboxes defined in SimulateMailboxes
+  2. Outlook is installed and has profiles, and New Outlook is not set as default: Mailboxes from Outlook profiles
+  3. New Outlook is installed: Mailboxes from New Outlook (including manually added and automapped mailboxes for the currently logged-in user)
+  4. If none of the above matches: Mailboxes from Outlook Web (including manually added mailboxes, automapped mailboxes follow when Microsoft updates Outlook Web to match the New Outlook experience)
 
 Default signatures can not be set locally or in Outlook Web until an Outlook profile has been configured, as the corresponding settings are stored in registry paths containing random numbers, which need to be created by Outlook.
 ## 17.24. What if Outlook is not installed at all?
@@ -1446,13 +1450,13 @@ This is a good idea, as it makes signatures available across devices and apps.
 
 Before we jump into the details of roaming signatures and the pros and cons of them: **Set-OutlookSignatures can experimentally handle roaming signatures since v4.0.0!** See `MirrorLocalSignaturesToCloud` in this document for details.
 
-Some personal educated guesses based on available documentation, Outlook for Windows beta versions and several Exchange Online tenants:
+Some personal educated guesses based on available documentation, New Outlook for Windows beta versions and several Exchange Online tenants:
 - The feature has first been annount by Microsoft in 2020, but has been postponed multiple times. The feature seems to get enabled in waves across all Exchange Online tenants since late 2022.
 - Microsoft has not yet published a public API, although the feature is announced since 2020 and being actively enabled. 
-- Outlook for Windows is the only client mentioned to support the new feature for now. I am confident more e-mail clients - especially Outlook for Mac, iOS and Android - will follow (the sooner, the better).
-- Although Micrsoft actively enables the feature for all Exchange Online tenants, it is yet unclear if this feature is available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about `$CurrentUser[...]$` replacement variables).
+- Outlook, New Outlook (partly) and Outlook Web (partly) are the only clients currently supporting the feature for now. I am confident more e-mail clients - especially Outlook for Mac (or rather New Outlook for Mac), iOS and Android - will follow (the sooner, the better).
+- Although Microsoft actively enables the feature for all Exchange Online tenants, it is yet unclear if this feature is available for shared mailboxes. If yes, the disadvantage is that signatures for shared mailboxes can no longer be personalized, as the latest signature change would be propagated to all users accessing the shared mailbox (which is especially bad when personalized signatures for shared mailboxes are set as default signature - think about `$CurrentUser[...]$` replacement variables).
 - The roaming signatures feature is only available for mailboxes in the cloud. Mailboxes on on-prem servers do not (yet?) support this feature, no matter if in pure on-prem or in hybrid scenarios.
-- Outlook for Windows (beta) versions already support the roaming signatures feature. Until an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensure full compatibility with Set-OutlookSignatures, until a public API is released and incorporated into the script. For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.
+- Outlook for Windows versions already support the roaming signatures feature. Until an API is available, you can disable the feature with a registry key. This forces Outlook for Windows to use the well-known file based approach and ensure full compatibility with Set-OutlookSignatures, until a public API is released and incorporated into the script. For details, please see <a href="https://support.microsoft.com/en-us/office/outlook-roaming-signatures-420c2995-1f57-4291-9004-8f6f97c54d15?ui=en-us&rs=en-us&ad=us" target="_blank">this Microsoft article</a>.
   - With the `DisableRoamingSignatures` (formerly named `DisableRoamingSignaturesTemporaryToggle`) registry value being absent or set to 0, file based signatures created by tools such as Set-OutlookSignatures are regularly deleted and replaced with signatures stored directly in the mailbox.
   - With the `DisableRoamingSignatures` (formerly named `DisableRoamingSignaturesTemporaryToggle`) registry value set to 1, the file based approach continues to work as known. Outlook does not synchronize signatures to the mailbox.
 
