@@ -18,6 +18,24 @@
 -->
 
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.5.0" target="_blank">v4.5.0</a> - 2023-09-29
+_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle licence._
+
+_**Attention, cloud mailbox users:**_  
+_Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._  
+_Set-OutlookSignatures can experimentally handle cloud roaming signatures since v4.0.0. See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
+### Changed
+- Adopt program logic to cloud roaming signatures API changes introduced by Microsoft
+- Updated FAQ `How can I log the script output?`. See `README` for details.
+### Added
+- New parameter `EmbedImagesInHtmlAdditionalSignaturePath`. See `README` for details.
+- New FAQ `How can I start the script only when there is a connection to the Active Directory on-prem?`. See `README` for details.
+### Fixed
+- Variables in HTM templates have not been replaced with actual values because of a wrong RegEx syntax
+- Content of path defined in `AdditionalSignaturePath` was not deleted before copy operations.
+
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.4.0" target="_blank">v4.4.0</a> - 2023-09-20
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle licence._
@@ -33,6 +51,7 @@ _Set-OutlookSignatures can experimentally handle cloud roaming signatures since 
   4. If none of the above matches: Mailboxes from Outlook Web (including manually added mailboxes, automapped mailboxes follow when Microsoft updates Outlook Web to match the New Outlook experience)
 ### Fixed
 - Correctly handly write protected files when copying to AdditionalSignaturePath
+
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.3.0" target="_blank">v4.3.0</a> - 2023-09-08
 _**Some features are exclusive to the commercial Benefactor Circle add-on.**_
