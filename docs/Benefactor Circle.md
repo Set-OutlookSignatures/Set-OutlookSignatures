@@ -21,8 +21,6 @@ Visit <a href="https://explicitconsulting.at/open-source/set-outlooksignatures" 
 
 The features reserved for Benefactor Circle members are available at a very, very competitive price compared to other commercial solutions that work with on-prem, hybrid and cloud-only configurations.
 
-At the end of its commercial life, the Benefactor Circle source code will be handed over to the team developing the core version of Set-OutlookSignatures. This will allow the Benefactor Circle code to be integrated into the Free and Open-Source (FOSS) version of Set-OutlookSignatures.
-
 There are also topics you need to be aware of:
 - As there is no server component, signatures can not be automatically added to mails sent from mobile devices. This will change as soon as Microsoft's roaming signature feature will be accessible by an API, and mobile applications start using this feature.  
 Set-OutlookSignatures Benefactor Circle already supports the roaming signature feature.
