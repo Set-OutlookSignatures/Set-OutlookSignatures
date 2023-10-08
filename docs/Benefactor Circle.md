@@ -4,7 +4,7 @@
 # What is the Benefactor Circle?
 Benefactor Circle is the result of the partnership between Set-OutlookSignatures and <a href="https://explicitconsulting.at" target="_blank">ExplicIT Consulting</a>.  
 <pre><a href="https://explicitconsulting.at" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Others/ExplicIT Consulting, color on black.png" height="100" title="ExplicIT Consulting" alt="ExplicIT Consulting"></a></pre>
-ExplicIT Consulting's Benefactor Circle enhances Set-OutlookSignatures with new features and extended support in form of a commercial add-on, ensuring that the core of Set-OutlookSignatures remains Free and Open-Source Software (FOSS) and continues to evolve.
+ExplicIT Consulting's Benefactor Circle enhances Set-OutlookSignatures with new features and extended support in form of a commercial add-on, ensuring that the core of Set-OutlookSignatures can remain Free and Open-Source Software (FOSS) and continues to evolve.
 
 Visit <a href="https://explicitconsulting.at/open-source/set-outlooksignatures" target="_blank">ExplicIT Consulting's Set-OutlookSignatures Benefactor Circle site</a> for details and pricing information.
 
