@@ -13,7 +13,7 @@ Visit <a href="https://explicitconsulting.at/open-source/set-outlooksignatures" 
 - Mails are not routed through a cloud service, no SPF record change
 - Software does not call home
 - Works with on-prem, hybrid and cloud-only configurations
-- Supports Exchange Online roaming signatures
+- Supports Exchange Online roaming signatures, New Outlook and Outlook Web
 - Multi-customer capable
 - Works with linked mailboxes in resource forest scenarios
 - Users see signature when writing e-mails

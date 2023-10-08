@@ -43,7 +43,30 @@ The script core is **Free and Open-Source Software (FOSS)**. It is published und
 
 **Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source licence.  Please see `.\docs\Benefactor Circle` for details.  
 
-# Demo video  <!-- omit in toc -->
+# Why choose Set-OutlookSignatures? <!-- omit in toc -->
+- Runs only on your clients, no server side installation
+- Mails are not routed through a cloud service, no SPF record change
+- Software does not call home
+- Works with on-prem, hybrid and cloud-only configurations
+- Supports Exchange Online roaming signatures, New Outlook and Outlook Web
+- Multi-customer capable
+- Works with linked mailboxes in resource forest scenarios
+- Users see signature when writing e-mails
+- More cost-effective than other cloud based products, more features than other on-prem products
+
+The features reserved for Benefactor Circle members are available at a very, very competitive price compared to other commercial solutions that work with on-prem, hybrid and cloud-only configurations.
+
+At the end of its commercial life, the Benefactor Circle source code will be handed over to the team developing the core version of Set-OutlookSignatures. This will allow the Benefactor Circle code to be integrated into the Free and Open-Source (FOSS) version of Set-OutlookSignatures.
+
+There are also topics you need to be aware of:
+- As there is no server component, signatures can not be automatically added to mails sent from mobile devices. This will change as soon as Microsoft's roaming signature feature will be accessible by an API, and mobile applications start using this feature.  
+Set-OutlookSignatures Benefactor Circle already supports the roaming signature feature.
+- There is no graphical user interface. This is on purpose:
+  - End users typically never see the tool, only results.
+  - Admins typically need around two hours for the basic setup, as the default parameters are very well chosen and documented.
+  - Template maintainers need nothing but Word to create, modify and configure templates.
+
+# Demo video <!-- omit in toc -->
 <a href="https://www.youtube-nocookie.com/embed/K9TrCjTdRUI" target="_blank"><img src="https://img.youtube.com/vi/K9TrCjTdRUI/hqdefault.jpg" height="300" title="Set-OutlookSignatures demo video" alt="Set-OutlookSignatures demo video"></a>
 
 # Table of Contents <!-- omit in toc -->
