@@ -1,7 +1,5 @@
 <!-- omit in toc -->
-# **<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Centrally manage and deploy Outlook text signatures and Out of Office auto reply messages<p><p><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <img src="https://img.shields.io/badge/dynamic/json?color=brightgreen&label=views&query=%24.count&url=https%3A%2F%2Fraw.githubusercontent.com%2FGruberMarkus%2Fmy-traffic2badge%2Ftraffic%2Ftraffic-Set-OutlookSignatures%2Ftraffic_views.json" alt="views" data-external="1"> <img src="https://img.shields.io/badge/dynamic/json?color=brightgreen&label=clones&query=%24.count&url=https%3A%2F%2Fraw.githubusercontent.com%2FGruberMarkus%2Fmy-traffic2badge%2Ftraffic%2Ftraffic-Set-OutlookSignatures%2Ftraffic_clones.json" alt="clones" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures?color=brightgreen" alt="stars" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/donate,%20support,%20sponsor-white?logo=githubsponsors" alt="donate or sponsor"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/unlock%20all%20features%20with-Benefactor%20Circle-gold" alt="unlock all features with Benefactor Circle"></a>
-**A big "Thank you!" for listing, featuring, supporting or sponsoring Set-OutlookSignatures!**
-<pre><a href="https://explicitconsulting.at" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Others/ExplicIT Consulting, color on black.png" height="100" title="ExplicIT Consulting" alt="ExplicIT Consulting"></a>  <a href="https://joinup.ec.europa.eu/collection/free-and-open-source-software/solution/set-outlooksignatures/about" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Others/EC Joinup Interoperable Europe.png" height="100" title="European Commission Joinup/Interoperable Europe programs" alt="European Commission Joinup/Interoperable Europe programs"></a>  <a href="https://startups.microsoft.com" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Others/MS_Startups_Celebration_Badge_Dark.png" height="100" title="Proud to partner with Microsoft for Startups" alt="Proud to partner with Microsoft for Startups"></a>  <a href="https://archiveprogram.github.com/" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Others/GitHub-Archive-Program-logo.png" height="100" title="GitHub Archive Program" alt="GitHub Archive Program"></a></pre>
+# **<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out of office replies for Outlook and Exchange<p><p><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <img src="https://img.shields.io/badge/dynamic/json?color=brightgreen&label=clones&query=%24.count&url=https%3A%2F%2Fraw.githubusercontent.com%2FGruberMarkus%2Fmy-traffic2badge%2Ftraffic%2Ftraffic-Set-OutlookSignatures%2Ftraffic_clones.json" alt="clones" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures?color=brightgreen" alt="stars" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/donate,%20sponsor-white?logo=githubsponsors" alt="donate, sponsor"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
 
 # Changelog
 <!--
@@ -18,15 +16,43 @@
 -->
 
 
+## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.6.0" target="_blank">v4.6.0</a> - 2023-10-23
+_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+_**Attention, cloud mailbox users:**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
+### Added
+- 'default graph config.ps1' now includes a description for each permission required by the Entra ID/Azure AD application for Graph access
+- Additional documentation: Implementation approach
+  - The content is based on real-life experiences implementing the script in multi-client environments with a five-digit number of mailboxes.
+  - Proven procedures and recommendations for product managers, architects, operations managers, account managers, mail and client administrators. Suited for service providers as well as for clients.
+  - It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
+  - Available in English and German.
+- New and improved sample code
+  - SimulateAndDeploy.ps1: Deploy signatures without end user interaction, running Set-OutlookSignatures on a server - including support for roaming signatures
+  - Test-ADTrust.ps1: Detect why a client cannot query Active Directory information
+  - SimulationModeHelper.ps1: Makes using simulation mode easier. An admin sets the parameters in the script, the content creators execute it and just have to enter the values required for simulation:
+    - The user to simulate (mandatory)
+    - The mailbox(es) to simulate (optional)
+    - The time to simulate (optional)
+    - The output path (optional)
+- A basic configuration user interface with grouped parameter sets, just run `Show-Command .\Set-OutlookSignatures.ps1` in PowerShell.
+- New parameter `WordProcessPriority`: Define the Word process priority. With lower values, Set-OutlookSignature runs longer but minimizes possible performance impact. See `README` for details.
+### Fixed
+- On-prem only: Make sure that Active Directory attributes of the current user, the current mailbox and their managers are available in environments where not every domain controller is also a global catalog server
+- Always connect to Entra ID/Azure AD/Graph when New Outlook is used 
+
+
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.5.0" target="_blank">v4.5.0</a> - 2023-09-29
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
-_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle licence._
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_  
 _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._  
 _Set-OutlookSignatures can experimentally handle cloud roaming signatures since v4.0.0. See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Changed
-- Adopt program logic to cloud roaming signatures API changes introduced by Microsoft
+- Adapt program logic to cloud roaming signatures API changes introduced by Microsoft
 - Updated FAQ `How can I log the script output?`. See `README` for details.
 ### Added
 - New parameter `EmbedImagesInHtmlAdditionalSignaturePath`. See `README` for details.
@@ -38,7 +64,7 @@ _Set-OutlookSignatures can experimentally handle cloud roaming signatures since 
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.4.0" target="_blank">v4.4.0</a> - 2023-09-20
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
-_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle licence._
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_  
 _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._  
@@ -55,7 +81,7 @@ _Set-OutlookSignatures can experimentally handle cloud roaming signatures since 
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.3.0" target="_blank">v4.3.0</a> - 2023-09-08
 _**Some features are exclusive to the commercial Benefactor Circle add-on.**_
-- _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle licence._
+- _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_
 - _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._  
@@ -67,7 +93,7 @@ _**Attention, cloud mailbox users:**_
 
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.2.1" target="_blank">v4.2.1</a> - 2023-08-16
-_**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle licence._
+_**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_
 - _**Set-OutlookSignatures can now experimentally handle roaming signatures!** See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
@@ -78,19 +104,19 @@ _**Attention, cloud mailbox users:**_
 
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.2.0" target="_blank">v4.2.0</a> - 2023-08-10
-_**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle licence._
+_**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_
 - _**Set-OutlookSignatures can now experimentally handle roaming signatures!** See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 - _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._
 ### Added
-- New parameter `MoveCSSInline` to move CSS to inline style attributes, for maximum e-mail client compatibility. This parameter is enabled per default, as a workaround to Microsoft's problem with formatting in Outlook Web (M365 roaming signatures and font sizes, especially).
+- New parameter `MoveCSSInline` to move CSS to inline style attributes, for maximum email client compatibility. This parameter is enabled per default, as a workaround to Microsoft's problem with formatting in Outlook Web (M365 roaming signatures and font sizes, especially).
 ### Fixed
 - Set Word WebOptions in correct order, so that they do not overwrite each other
 
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.1.0" target="_blank">v4.1.0</a> - 2023-07-28
-_**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle licence._
+_**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_
 - _**Set-OutlookSignatures can now experimentally handle roaming signatures!** See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
@@ -102,10 +128,10 @@ Use cases:
   - Assign template to a specific mailbox or user, but only if user or mailbox is member in multiple groups at the same time.
   - Assign template to users or mailboxes which have or have not a value in a replacement variable.
   - Every replacement variable can be used: Current user and current mailbox, their managers, or tailored replacement variables defined in a custom replacement variable config file.
-- Templates can now be **assigned to or excluded for specific e-mail addresses or groups SIDs of the _mailbox of the current user_**. Thanks to [ExplicIT Consulting](https://explicitconsulting.at) for donating this code!  
+- Templates can now be **assigned to or excluded for specific email addresses or groups SIDs of the _mailbox of the current user_**. Thanks to [ExplicIT Consulting](https://explicitconsulting.at) for donating this code!  
 See `Template tags and ini files` in `README` for details and examples.  
 Use cases:
-  - Assign template to a specific mailbox, but not if the _mailbox of the current user_ has a specific e-mail address or is member of a specific group. It does not matter if this personal mailbox is added in Outlook or not.  
+  - Assign template to a specific mailbox, but not if the _mailbox of the current user_ has a specific email address or is member of a specific group. It does not matter if this personal mailbox is added in Outlook or not.  
 This is useful for delegate and boss-secretary scenarios - secretaries get specific delegate template for boss's mailbox, but the boss not. **Combine this with the feature that one template can be used multiple times in the ini file, and you basically only need one template file for all delegate combinations in the company!**
   - Assign a template to the mailbox of a specific logged-in user or deny a template for the mailbox of a specific user, no matter which mailboxes the user has added in Outlook.
 - The attribute 'GroupsSIDs' is now also available in the `$AdPropsCurrentUser` replacement variable. It contains all the SIDs of the groups the mailbox of the current user is a member of, which allows for replacement variable content based on group membership, as well as assigning or denying templates for specific users. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
@@ -114,11 +140,11 @@ This is useful for delegate and boss-secretary scenarios - secretaries get speci
 - Microsoft has renamed Azure AD to Entra ID. Documentation and code have been updated where possible. In configuration files, 'EntraID' and 'AzureAD' are interchangeable.
 ### Fixed
 - The attribute 'GroupsSIDs' is now reliably available in the `$AdPropsCurrentMailbox` replacement variable.
-- Correctly log group and e-mail address specific exclusions (only an optical issue, no technical one)
+- Correctly log group and email address specific exclusions (only an optical issue, no technical one)
 
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.0.0" target="_blank">v4.0.0</a> - 2023-07-12
-_**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle licence._
+_**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_
 - _**Set-OutlookSignatures can now experimentally handle roaming signatures!** See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
@@ -128,26 +154,18 @@ _**Attention, cloud mailbox users:**_
   - Prioritized support and feature requests
     - Issues are handled with priority via a Benefactor Circle exclusive email address and a callback option.
     - Requests for new features are checked for feasability with priority.
-    - All release upgrades during the licence period are for free, no matter if it is a patch, feature or major release.
+    - All release upgrades during the license period are for free, no matter if it is a patch, feature or major release.
   - Script features
     - Time-based campaigns by assigning time range constraints to templates
     - Signatures for automapped and additional mailboxes
     - Set current user Outlook Web signature (classic Outlook Web signature and roaming signature)
     - Download and upload roaming signatures
-    - Set current user Out of Office messages
+    - Set current user out of office replies
     - Delete signatures created by the script, where the template no longer exists or is no longer assigned
     - Delete user created signatures
     - Additional signature path (when used outside of simulation mode)
     - High resolution images from DOCX templates
-  - Additional documentation: Implementation approach
-    - The content is based on real-life experiences implementing the script in multi-client environments with a five-digit number of mailboxes.
-    - Proven procedures and recommendations for product managers, architects, operations managers, account managers, mail and client administrators. Suited for service providers as well as for clients.
-    - It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
-    - Available in English and German.
-  - Sample code
-    - SimulateAndDeploy.ps1: Deploy signatures without end user interaction, running Set-OutlookSignatures on a server
-    - Test-ADTrust.ps1: Detect why a client cannot query Active Directory information
-- **Breaking:** The `CreateRTFSignatures` parameter now defaults to `false`, because the RTF format for e-mails is hardly used nowadays.
+- **Breaking:** The `CreateRTFSignatures` parameter now defaults to `false`, because the RTF format for emails is hardly used nowadays.
 - **Breaking:** The `EmbedImagesInHtml` parameter now defaults to `false` because certain recent versions of Word (which Outlook uses as HTML renderer) incorrectly hande embedded images. See `Images in signatures have a different size than in templates, or a black background` in `README` for details.
 When `EmbedimagesInHtml` is enabled, it now automatically enables the "Send pictures with document" Outlook registry key. 
 - **Breaking:** New parameter `DisableRoamingSignatures` defaults to `true`. See `README` for details.
@@ -159,11 +177,6 @@ When `EmbedimagesInHtml` is enabled, it now automatically enables the "Send pict
 This is not only available for Benefactor Circle members, but also the Free and Open Source core version is code signed. Code signing makes it much easier to implement Set-OutlookSignatures in environments being locked down with AppLocker or comparable tools.
 - All replacement variables now have the 'DELETEEMPTY' option, which allows for images to be kept only when an attribute has a value. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
 - The attribute 'GroupsSIDs' is now available in the `$CurrentMailbox...]` variable for use with replacement variables. It contains all the SIDs of the groups the current mailbox is a member of, which allows for replacement variable content based on group membership. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
-- New sample script `SimulationModeHelper.ps1` make simulation mode usage easier. An admin sets the parameters in the script, the content creators execute it and just have to enter the values required for simulation:
-  - The user to simulate (mandatory)
-  - The mailbox(es) to simulate (optional)
-  - The time to simulate (optional)
-  - The output path (optional)
 - A basic configuration user interface with grouped parameter sets, just run `Show-Command .\Set-OutlookSignatures.ps1` in PowerShell.
 - The new template tag `WriteProtect` write protects individual signature files. See `README` for details and restrictions.
 - The new script parameter `SimulateTime` allows to use a specific time when running simulation mode, which is handy for testing time-based templates.
@@ -247,9 +260,9 @@ _Attention cloud mailbox users: Microsoft will make roaming signatures available
 - Consider SID history of groups in trusted domains/forests
 - New FAQs in `.\docs\README`: `What if Outlook is not installed at all?` and `What if a user has no Outlook profile or is prohibited from starting Outlook?`
 ### Fixed
-- Correctly calculate mailbox priority when simulation mode is enabled and/or the e-mail address is a secondary address
+- Correctly calculate mailbox priority when simulation mode is enabled and/or the email address is a secondary address
 - On-prem: Membership in domain local groups is now recognized if the group is in a child domain of a forest connected with a cross-forest trust
-- Only consider mailboxes as additional mailboxes when they appear in Outlook's list in the e-mail navigation pane. This avoids falsely adding shared calendars as additional mailboxes.
+- Only consider mailboxes as additional mailboxes when they appear in Outlook's list in the email navigation pane. This avoids falsely adding shared calendars as additional mailboxes.
 
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.3.0" target="_blank">v3.3.0</a> - 2022-09-05
@@ -334,11 +347,11 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 ### Added
 - New parameter DeleteScriptCreatedSignaturesWithoutTemplate, see README for details
 - New parameter EmbedImagesInHtml, see README for details
-- Tags can now not only be used to allow access to a template, but also to deny access. Denies are available for time, group and e-mail based tags. See README for details.
+- Tags can now not only be used to allow access to a template, but also to deny access. Denies are available for time, group and email based tags. See README for details.
 - Consider distribution group membership in addition to security group membership
 - Consider sIDHistory in searches across trusts and when comparing msExchMasterAccountSid, which adds support for scenarios in which a mailbox or a linked account has been migrated between Active Directory domains/forests
 - Show matching allow and deny tags for each mailbox-template-combination. This makes it easy to find out why a certain template is applied for a certain mailbox and why not.
-- Show which tags lead to a classification as time based, common, group based or e-mail address specific template
+- Show which tags lead to a classification as time based, common, group based or email address specific template
 - New FAQ: Why is membership in dynamic distribution groups and dynamic security groups not considered?
 - New FAQ: Why is no admin or user GUI available?
 ### Fixed
@@ -364,7 +377,7 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - New default replacement variables for displayName and mailNickname (a.k.a. alias)
 - New parameter GraphOnly: Try to connect to Microsoft Graph only, ignoring any local Active Directory. The default behavior without GraphOnly is unchanged (try Active Directory first, fall back to Graph).
 - New parameters CreateRtfSignatures and CreateTxtSignatures allow to disable RTF/TXT signature creation
-- New parameter GraphCredentialFile
+- New parameter SimulateAndDeployGraphCredentialFile
 - New FAQ: How to deploy signatures for "Send As", "Send On Behalf" etc.?
 - New FAQ: Can I centrally manage and deploy Outook stationery with this script?
 - Report templates that are mentioned in the ini file but do not exist in the file system, and vice versa
@@ -411,7 +424,7 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 ### Changed
 - Make script compatible with PowerShell Core 7.x on Windows (Linux and MacOS are not supported yet)
 - Reduce and speed up Active Directory queries by only accepting input in the 'Domain\User' or UPN (User Principal Name) format for the 'SimulateUser' parameter
-- Reduce and speed up Active Directory queries by only accepting e-mail addresses as input for the 'SimulateMailboxes' parameter
+- Reduce and speed up Active Directory queries by only accepting email addresses as input for the 'SimulateMailboxes' parameter
 - Revise repository structure, as well as the process for development, build and release
 ### Added
 - Full support for Exchange mailboxes added in Outlook as POP3 or IMAP4 accounts
@@ -527,7 +540,7 @@ _Do not use this release. It was withdrawn due to a severe problem._
 
 ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.5.0" target="_blank">v1.5.0</a> - 2021-06-18
 ### Added
-- Add support for Out of Office (OOF) auto reply messages
+- Add support for out of office replies
 - New parameter SetCurrentUserOOFMessage
 - New parameter OOFTemplatePath
 - Add sample files for OOF templates '.\OOF templates'

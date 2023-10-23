@@ -26,15 +26,15 @@
 # Client ID
 # The default client ID is defined in the developer's Azure tenant as multi-tenant, so it can be used everywhere
 # Can be replaced with a Client ID from the own tenant
-#   Scopes (please provide admin consent):
-#     'https://graph.microsoft.com/email'
-#     'https://graph.microsoft.com/EWS.AccessAsUser.All'
-#     'https://graph.microsoft.com/group.read.all'
-#     'https://graph.microsoft.com/mailboxsettings.readwrite'
-#     'https://graph.microsoft.com/mailboxsettings.offline_access'
-#     'https://graph.microsoft.com/openid'
-#     'https://graph.microsoft.com/profile'
-#     'https://graph.microsoft.com/user.read.all'
+#   Add the following delegated (not application) permissions and provide admin consent:
+#     'https://graph.microsoft.com/email' # Allows the app to read your users' primary email address
+#     'https://graph.microsoft.com/EWS.AccessAsUser.All' # Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
+#     'https://graph.microsoft.com/group.read.all' # Allows the app to list groups, and to read their properties and all group memberships on behalf of the signed-in user. Also allows the app to read calendar, conversations, files, and other group content for all groups the signed-in user can access.
+#     'https://graph.microsoft.com/mailboxsettings.readwrite' # Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
+#     'https://graph.microsoft.com/offline_access' # Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
+#     'https://graph.microsoft.com/openid' # Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
+#     'https://graph.microsoft.com/profile' # Allows the app to see your users' basic profile (e.g., name, picture, user name, email address)
+#     'https://graph.microsoft.com/user.read.all' # Allows the app to read the full set of profile properties, reports, and managers of users in your organization, on behalf of the signed-in user.
 #   Redirect URI: 'http://localhost', configure for "mobile and desktop applications"
 #   Enable 'Allow public client flows' to make Windows Integrated Authentication (SSO) work for Entra ID/Azure AD joined devices
 $GraphClientID = 'beea8249-8c98-4c76-92f6-ce3c468a61e6'

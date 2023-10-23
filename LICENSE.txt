@@ -1,6 +1,6 @@
-This file contains the licence for the Free and Open-Source Sofware Set-OutlookSignatures.
+This file contains the license for the Free and Open-Source Sofware Set-OutlookSignatures.
 
-The following licence does not apply to add-ons such as Set-OutlookSignatures Benefactor Circle.
+The following license does not apply to add-ons such as Set-OutlookSignatures Benefactor Circle.
 
 MIT License
 
