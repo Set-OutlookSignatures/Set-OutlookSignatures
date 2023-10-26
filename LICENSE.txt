@@ -1,10 +1,6 @@
-This file contains the license for the Free and Open-Source Sofware Set-OutlookSignatures.
-
-The following license does not apply to add-ons such as Set-OutlookSignatures Benefactor Circle.
-
 MIT License
 
-Copyright (c) Markus Gruber, all rights reserved
+Copyright (c) Markus Gruber
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
