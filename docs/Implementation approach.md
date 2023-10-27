@@ -132,7 +132,7 @@ There is no central maintenance.
 ### 1.2.1. Signatures in Outlook  
 In Outlook, practically any number of signatures can be created per mailbox. This is practical, for example, to distinguish between internal and external emails or emails in different languages.
 
-Pro Postfach kann darüber hinaus eine Standard-Signatur für neue emails und eine für Antworten festgelegt werden.   
+You can also set a standard signature for new emails and one for replies per mailbox.   
 ### 1.2.2. Signatur in Outlook im Web
 If you also work with Outlook on the Web, you must set up your signature in Outlook on the Web independently of your signature on the client.
 
