@@ -133,7 +133,7 @@ There is no central maintenance.
 In Outlook, practically any number of signatures can be created per mailbox. This is practical, for example, to distinguish between internal and external emails or emails in different languages.
 
 You can also set a standard signature for new emails and one for replies per mailbox.   
-### 1.2.2. Signatur in Outlook im Web
+### 1.2.2. Signature in Outlook on the Web
 If you also work with Outlook on the Web, you must set up your signature in Outlook on the Web independently of your signature on the client.
 
 In Outlook on the Web, only one signature is possible unless the mailbox is in Exchange Online and the Roaming Signatures feature has been enabled.
