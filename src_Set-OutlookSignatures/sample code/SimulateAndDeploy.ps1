@@ -15,10 +15,10 @@ Features
 
 Requirements
 - On-prem
-  - The script needs to be run with an account that has a mailbox which is granted full access to all simulated mailboxes
+  - the software needs to be run with an account that has a mailbox which is granted full access to all simulated mailboxes
   - If you do not want to simulate cloud mailboxes, set $ConnectOnpremInsteadOfCloud to $true
 - Cloud
-  - The script needs to be run with an account that has a mailbox which is granted full access to all simulated mailboxes
+  - the software needs to be run with an account that has a mailbox which is granted full access to all simulated mailboxes
     - MFA is not yet supported, but script can be adapted accordingly
 	  - MFA would require interactivity, breaking the possibility for complete automation
 	  - Better configure a Conditional Access Policy that only allows logon from a controlled network and does not require MFA
@@ -50,7 +50,7 @@ Requirements
   - https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
 
 Limitations
-- Despitze parallelization, the script runtime can be unsuited for a higher number of users. The reason usually is the Word background process.
+- Despitze parallelization, the software runtime can be unsuited for a higher number of users. The reason usually is the Word background process.
   - If you require signatures in RTF and/or TXT format, Word is needed for document conversion and you can only shorten runtime by adding hardware (scale up or scale out)
   - If you do need HTML signatures only, you can use the following workaround to avoid starting Word:
     - Use HTM templates instead of DOCX templates (parameter '-UseHtmTemplates true')
@@ -75,7 +75,7 @@ param (
 		# Do not use: SimulateUser, SimulateMailboxes, AdditionalSignaturePath, SimulateAndDeployGraphCredentialFile
 		#BenefactorCircleLicenseFile = "'\\server\share\folder\license.dll'"
 		#BenefactorCircleId = '<BenefactorCircleId>'
-		SimulateAndDeploy                             = $false # $false simulates without deployment, $true simulates and deploys
+		SimulateAndDeploy                             = $false # $false simulates but does not deploy, $true simulates and deploys
 		UseHtmTemplates                               = $false
 		SignatureTemplatePath                         = "'.\sample templates\Signatures DOCX'"
 		SignatureIniPath                              = "'.\sample templates\Signatures DOCX\_Signatures.ini'"
@@ -88,7 +88,7 @@ param (
 		DeleteScriptCreatedSignaturesWithoutTemplate  = $true
 		SetCurrentUserOutlookWebSignature             = $true
 		SetCurrentUserOOFMessage                      = $true
-		MirrorLocalSignaturesToCloud                  = $(if ($ConnectOnpremInsteadOfCloud) { $false } else { $true })
+		MirrorLocalSignaturesToCloud                  = $true #Set to $false if you do not want to use this feature
 		CreateRtfSignatures                           = $false
 		CreateTxtSignatures                           = $true
 		DocxHighResImageConversion                    = $true
@@ -127,24 +127,34 @@ function CreateUpdateSimulateAndDeployGraphCredentialFile {
 	# auth with user and app with delegated permissions
 	$GraphClientTenantId = ($GraphUserCredential.username -split '@')[1]
 
-	# User authentication
-	$auth = get-msaltoken -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
-	$authExo = get-msaltoken -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
+	try {
+		# User authentication
+		$auth = get-msaltoken -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
+		$authExo = get-msaltoken -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
 
-	# App authentication
-	$Appauth = get-msaltoken -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
-	$AppauthExo = get-msaltoken -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
+		# App authentication
+		$Appauth = get-msaltoken -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
+		$AppauthExo = get-msaltoken -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
 
-	@{
-		'AccessToken'       = $auth.accessToken
-		'AuthHeader'        = $auth.createauthorizationheader()
-		'AccessTokenExo'    = $authExo.accessToken
-		'AuthHeaderExo'     = $authExo.createauthorizationheader()
-		'AppAccessToken'    = $Appauth.accessToken
-		'AppAuthHeader'     = $Appauth.createauthorizationheader()
-		'AppAccessTokenExo' = $AppauthExo.accessToken
-		'AppAuthHeaderExo'  = $AppauthExo.createauthorizationheader()
-	} | Export-Clixml -Path $SimulateAndDeployGraphCredentialFile
+		$null = @{
+			'AccessToken'       = $auth.accessToken
+			'AuthHeader'        = $auth.createauthorizationheader()
+			'AccessTokenExo'    = $authExo.accessToken
+			'AuthHeaderExo'     = $authExo.createauthorizationheader()
+			'AppAccessToken'    = $Appauth.accessToken
+			'AppAuthHeader'     = $Appauth.createauthorizationheader()
+			'AppAccessTokenExo' = $AppauthExo.accessToken
+			'AppAuthHeaderExo'  = $AppauthExo.createauthorizationheader()
+		} | Export-Clixml -Path $SimulateAndDeployGraphCredentialFile
+
+		return @{
+			'error' = $false
+		}
+	} catch {
+		return @{
+			'error' = $error[0] | Out-String
+		}
+	}
 }
 
 
@@ -193,8 +203,6 @@ Write-Host "Start script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 # Folders and objects
 Set-Location $PSScriptRoot | Out-Null
 
-#$PSDefaultParameterValues['out-file:width'] = [int32]::MaxValue
-
 foreach ($VariableName in ('SimulateResultPath', 'SetOutlookSignaturesScriptPath')) {
 	Set-Variable -Name $VariableName -Value $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath((Get-Variable -Name $VariableName).Value).trimend('\')
 }
@@ -217,7 +225,19 @@ if (-not $ConnectOnpremInsteadOfCloud) {
 
 	Import-Module $(Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath -Parent) -ChildPath '\bin\msal.ps') -Force
 
-	CreateUpdateSimulateAndDeployGraphCredentialFile
+	$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
+
+	if ($GraphConnectResult.error) {
+		Start-Sleep -Seconds 10
+
+		$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
+
+		if ($GraphConnectResult.error) {
+			Write-Host '    Exiting because of repeated Graph connection error' -ForegroundColor Red
+			Write-Host "    $($GraphConnectResult.error)" -ForegroundColor Red
+			exit 1
+		}
+	}
 }
 
 
@@ -289,7 +309,7 @@ if ($WordRegistryVersion.major -eq 0) {
 
 $WordDisableWarningOnIncludeFieldsUpdate = Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
 
-if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ne 1)) {
+if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
 	New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
 	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
 }
@@ -317,9 +337,31 @@ do {
 		}
 
 		# Update Graph credential file before starting a job
-		#   this makes sure that the token is still valid when the script runs longer than token lifetime
+		#   this makes sure that the token is still valid when the software runs longer than token lifetime
 		if (-not $ConnectOnpremInsteadOfCloud) {
-			CreateUpdateSimulateAndDeployGraphCredentialFile
+			$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
+
+			if ($GraphConnectResult.error) {
+				Start-Sleep -Seconds 10
+
+				$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
+
+				if ($GraphConnectResult.error) {
+					$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
+
+					if ($GraphConnectResult.error) {
+						Start-Sleep -Seconds 30
+
+						$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
+
+						if ($GraphConnectResult.error) {
+							Write-Host '    Exiting because of repeated Graph connection error' -ForegroundColor Red
+							Write-Host "    $($GraphConnectResult.error)" -ForegroundColor Red
+							exit 1
+						}
+					}
+				}
+			}
 		}
 
 		Start-Job {
@@ -334,12 +376,8 @@ do {
 				$SimulateAndDeployGraphCredentialFile
 			)
 
-			#$PSDefaultParameterValues['out-file:width'] = [int32]::MaxValue
-
-			#Remove-Item -Path $LogFilePath -Force -ErrorAction SilentlyContinue
 			Start-Transcript -LiteralPath $LogFilePath -Force
 
-			#. {
 			try {
 				Write-Host 'CREATE SIGNATURE FILES BY USING SIMULATON MODE OF SET-OUTLOOKSIGNATURES'
 
@@ -362,7 +400,6 @@ do {
 				$error[0]
 				Write-Host 'xxxSimulateAndDeployExitCode999xxx'
 			}
-			#} # *>&1 | Out-File -FilePath $LogFilePath -Append -Force -Encoding utf8
 
 			Stop-Transcript
 		} -Name ("$($Jobsstarted)_Job") -ArgumentList (Get-Process -Id $pid).Path,
@@ -415,7 +452,7 @@ Write-Host "Restore original Word security setting @$(Get-Date -Format 'yyyy-MM-
 if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
 	Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
 } else {
-	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 }
 
 

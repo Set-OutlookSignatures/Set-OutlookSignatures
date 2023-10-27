@@ -10,7 +10,7 @@
 # Active Directory property names are case sensitive.
 # It is required to use full lowercase Active Directory property names.
 #
-# A variable defined in this file overrides the definition of the same variable defined earlier in the script.
+# A variable defined in this file overrides the definition of the same variable defined earlier in the software.
 #
 #
 # See README file for more examples, such as:

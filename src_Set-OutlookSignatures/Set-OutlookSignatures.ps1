@@ -4,7 +4,7 @@ Set-OutlookSignatures XXXVersionStringXXX
 The open source gold standard to centrally manage and deploy email signatures and out of office replies for Outlook and Exchange..
 
 .DESCRIPTION
-email signatures and out of office replies are an integral part of corporate identity and corporate design, of successful concepts for media and internet presence, and of marketing campaigns.
+Email signatures and out of office replies are an integral part of corporate identity and corporate design, of successful concepts for media and internet presence, and of marketing campaigns.
 
 Central administration and distribution ensures that CI/CD guidelines are met, guarantees the use of correct and up-to-date data, helps to comply with legal requirements, relieves staff and also opens up an additional marketing channel.
 
@@ -31,27 +31,27 @@ Signatures and OOF messages can also be created and deployed centrally, without 
 
 **Sample templates** for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 
-**Simulation mode** allows content creators and admins to simulate the behavior of the script and to inspect the resulting signature files before going live.
+**Simulation mode** allows content creators and admins to simulate the behavior of the software and to inspect the resulting signature files before going live.
 
-The script is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
+the software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
 
 It is **multi-client capable** by using different template paths, configuration files and script parameters.
 
 Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard SMB file share on a central system, and Office on your clients.
 
-A **documented implementation approach**, based on real life experiences implementing the script in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators.
+A **documented implementation approach**, based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators.
 The implementation approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
-The script core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\docs\LICENSE.txt` for copyright and MIT license details.
+the software core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\LICENSE.txt` for copyright and MIT license details.
 
 **Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source license.  Please see `.\docs\Benefactor Circle` for details.
 .LINK
-Github: https://github.com/GruberMarkus/Set-OutlookSignatures
+Github: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures
 
 .PARAMETER SignatureTemplatePath
 Path to centrally managed signature templates.
 Local and remote paths are supported.
-Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\sample templates\Signatures DOCX').
+Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX').
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 Default value: '.\sample templates\Signatures DOCX'
 
@@ -59,7 +59,7 @@ Default value: '.\sample templates\Signatures DOCX'
 Path to ini file containing signature template tags.
 Must be UTF8 encoded.
 See '.\sample templates\Signatures DOCX\_Signatures.ini' for a sample file with further explanations.
-Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\sample templates\Signatures DOCX')
+Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX')
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 The currently logged-in user needs at least read access to the path
 Default value: '.\sample templates\Signatures DOCX\_Signatures.ini'
@@ -68,7 +68,7 @@ Default value: '.\sample templates\Signatures DOCX\_Signatures.ini'
 Path to a replacement variable config file.
 Must be UTF8 encoded.
 Local and remote paths are supported.
-Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\sample templates\Signatures DOCX').
+Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX').
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 Default value: '.\config\default replacement variables.txt'
 
@@ -76,7 +76,7 @@ Default value: '.\config\default replacement variables.txt'
 Path to a Graph variable config file.
 Must be UTF8 encoded.
 Local and remote paths are supported.
-Local paths can be absolute ('C:\config\default graph config.ps1') or relative to the script path ('.\config\default graph config.ps1')
+Local paths can be absolute ('C:\config\default graph config.ps1') or relative to the software path ('.\config\default graph config.ps1')
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/config/default graph config.ps1' or '\\server.domain@SSL\SignatureSite\config\default graph config.ps1'
 The currently logged-in user needs at least read access to the path
 Default value: '.\config\default graph config.ps1'
@@ -90,33 +90,33 @@ When a cross-forest trust is detected by the '*' option, all domains belonging t
 Default value: '*'
 
 .PARAMETER IncludeMailboxForestDomainLocalGroups
-Shall the script consider group membership in domain local groups in the mailbox's AD forest?
+Shall the software consider group membership in domain local groups in the mailbox's AD forest?
 Per default, membership in domain local groups in the mailbox's forest is not considered as the required LDAP queries are slow and domain local groups are usually not used in Exchange.
 Domain local groups across trusts behave differently, they are always considered as soon as the trusted domain/forest is included in TrustsToCheckForGroups.
 Default value: $false
 
 .PARAMETER DeleteUserCreatedSignatures
-Shall the script delete signatures which were created by the user itself?
+Shall the software delete signatures which were created by the user itself?
 Default value: $false
 
 .PARAMETER DeleteScriptCreatedSignaturesWithoutTemplate
-Shall the script delete signatures which were created by the script before but are no longer available as template?
+Shall the software delete signatures which were created by the software before but are no longer available as template?
 default value: $true
 
 .PARAMETER SetCurrentUserOutlookWebSignature
-Shall the script set the Outlook Web signature of the currently logged-in user?
-If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the script can be used in environments where only Outlook Web is used.
+Shall the software set the Outlook Web signature of the currently logged-in user?
+If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the software can be used in environments where only Outlook Web is used.
 Default value: $true
 
 .PARAMETER SetCurrentUserOOFMessage
-Shall the script set the out of office (OOF) message of the currently logged-in user?
-If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the script can be used in environments where only Outlook Web is used.
+Shall the software set the out of office (OOF) message of the currently logged-in user?
+If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the software can be used in environments where only Outlook Web is used.
 Default value: $true
 
 .PARAMETER OOFTemplatePath
 Path to centrally managed signature templates.
 Local and remote paths are supported.
-Local paths can be absolute ('C:\OOF templates') or relative to the script path ('.\sample templates\ Out of Office ').
+Local paths can be absolute ('C:\OOF templates') or relative to the software path ('.\sample templates\ Out of Office ').
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
 The currently logged-in user needs at least read access to the path.
 Default value: '.\sample templates\Out of Office DOCX'
@@ -125,7 +125,7 @@ Default value: '.\sample templates\Out of Office DOCX'
 Path to ini file containing signature template tags.
 Must be UTF8 encoded.
 See '.\sample templates\Out of Office DOCX\_OOF.ini' for a sample file with further explanations.
-Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the script path ('.\sample templates\Signatures')
+Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures')
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 The currently logged-in user needs at least read access to the path
 Default value: '.\sample templates\Out of Office DOCX\_OOF.ini'
@@ -135,7 +135,7 @@ An additional path that the signatures shall be copied to.
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
 This way, the user can easily copy-paste the preferred preconfigured signature for use in an email app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
 Local and remote paths are supported.
-Local paths can be absolute ('C:\Outlook signatures') or relative to the script path ('.\Outlook signatures').
+Local paths can be absolute ('C:\Outlook signatures') or relative to the software path ('.\Outlook signatures').
 WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
 The currently logged-in user needs at least write access to the path.
 If the folder or folder structure does not exist, it is created.
@@ -143,7 +143,7 @@ Also see related parameter 'EmbedImagesInHtmlAdditionalSignaturePath'.
 Default value: "$([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures'))"
 
 .PARAMETER UseHtmTemplates
-With this parameter, the script searches for templates with the extension .htm instead of .docx.
+With this parameter, the software searches for templates with the extension .htm instead of .docx.
 Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
 Templates in .htm format must be UTF8 encoded.
 Default value: $false
@@ -265,13 +265,13 @@ Passing arguments to PowerShell.exe from the command line or task scheduler can 
 PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -SignatureTemplatePath '\\internal.example.com\share\Signature Templates\_Signatures.ini' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -OOFTemplatePath '\\internal.example.com\share\Signature Templates\_OOF.ini' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1' "
 
 .EXAMPLE
-Please see '.\docs\README' and https://github.com/GruberMarkus/Set-OutlookSignatures for more details.
+Please see '.\docs\README' and https://github.com/Set-OutlookSignatures/Set-OutlookSignatures for more details.
 
 .NOTES
 Script : Set-OutlookSignatures
 Version: XXXVersionStringXXX
-Web    : https://github.com/GruberMarkus/Set-OutlookSignatures
-License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)
+Web    : https://github.com/Set-OutlookSignatures/Set-OutlookSignatures
+License: MIT license (see '.\LICENSE.txt' for details and copyright)
 #>
 
 
@@ -308,19 +308,19 @@ Param(
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $SignaturesForAutomappedAndAdditionalMailboxes = $true,
 
-    # Shall the script delete signatures which were created by the user itself?
+    # Shall the software delete signatures which were created by the user itself?
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $DeleteUserCreatedSignatures = $false,
 
-    # Shall the script delete signatures which were created by the script before but are no longer available as template?
+    # Shall the software delete signatures which were created by the software before but are no longer available as template?
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $DeleteScriptCreatedSignaturesWithoutTemplate = $true,
 
-    # Shall the script set the Outlook Web signature of the currently logged-in user?
+    # Shall the software set the Outlook Web signature of the currently logged-in user?
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
@@ -375,7 +375,7 @@ Param(
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $EmbedImagesInHtmlAdditionalSignaturePath = $true,
 
-    # Shall the script set the out of office (OOF) message(s) of the currently logged-in user?
+    # Shall the software set the out of office (OOF) message(s) of the currently logged-in user?
     [Parameter(Mandatory = $false, ParameterSetName = 'C: OOF messages')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
@@ -417,7 +417,7 @@ Param(
     [Alias('DomainsToCheckForGroups')]
     [string[]]$TrustsToCheckForGroups = @('*'),
 
-    # Shall the script consider group membership in domain local groups in the mailbox's AD forest?
+    # Shall the software consider group membership in domain local groups in the mailbox's AD forest?
     [Parameter(Mandatory = $false, ParameterSetName = 'E: Graph and Active Directory')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
@@ -499,8 +499,8 @@ function main {
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
     Write-Host '  Script : Set-OutlookSignatures'
     Write-Host "  Version: $ScriptVersion"
-    Write-Host '  Web    : https://github.com/GruberMarkus/Set-OutlookSignatures'
-    Write-Host "  License: MIT license (see '.\docs\LICENSE.txt' for details and copyright)"
+    Write-Host '  Web    : https://github.com/Set-OutlookSignatures/Set-OutlookSignatures'
+    Write-Host "  License: MIT license (see '.\LICENSE.txt' for details and copyright)"
 
 
     Write-Host
@@ -882,9 +882,9 @@ If some or all of your mailboxes are hosted in the cloud, make sure you read the
 This guide is part of the documention file '.\docs\README.html'.
 The '.\docs' folder also contains additional information.
 
-Go to 'https://github.com/GruberMarkus/Set-OutlookSignatures' for new releases or to report issues.
+Go to 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' for new releases or to report issues.
 
-You may be interested in some of the scripts located in the '.\sample code' folder.
+You may be interested in some of the softwares located in the '.\sample code' folder.
 
 To unlock additional features, consider becoming a Set-OutlookSignatures Benefactor Circle member.
 Members have exclusive access to:
@@ -893,7 +893,7 @@ Members have exclusive access to:
   - Set current user Outlook Web signature (classic Outlook Web signature and roaming signatures)
   - Download and upload roaming signatures
   - Set current user out of office replies
-  - Delete signatures created by the script, where the templates no longer exist or are no longer assigned
+  - Delete signatures created by the software, where the templates no longer exist or are no longer assigned
   - Delete user created signatures
   - Additional signature path (when used outside of simulation mode)
   - High resolution images from DOCX templates
@@ -2581,7 +2581,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 }
 '@
 
-        # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the script
+        # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the software
         try {
             $script:COMWordDummy = New-Object -ComObject Word.Application
             $script:COMWordDummy.Visible = $false
@@ -4929,7 +4929,7 @@ function GraphGetToken {
             }
         } catch {
             return @{
-                error             = ($error | Out-String)
+                error             = ($error[0] | Out-String)
                 AccessToken       = $null
                 AuthHeader        = $null
                 AccessTokenExo    = $null
@@ -4972,7 +4972,7 @@ No authentication possible. Try:
        - Run Set-OutlookSignatures in a new PowerShell session
        - Check the system default browser
        - Make sure that Set-OutlookSignatures is executed in the security context of the currently logged-in user
-       - Make sure that the current PowerShell session allows TLS 1.2 (see https://github.com/GruberMarkus/Set-OutlookSignatures/issues/85 for details)
+       - Make sure that the current PowerShell session allows TLS 1.2 (see https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85 for details)
        - Interactive authentication may fail due to a bug in Windows Terminal, which can be recognized because of its multiple sub windows organized in tabs. Try running Set-OutlookSignatures in the classic console host instead: conhost.exe powershell.exe -file '\server\share\folder\Set-OutlookSignatures.ps1'
 "@)
                         AccessToken       = $null
@@ -5013,7 +5013,7 @@ No authentication possible. Try:
                 }
             } catch {
                 return @{
-                    error             = ($error | Out-String)
+                    error             = ($error[0] | Out-String)
                     accessToken       = $null
                     authHeader        = $null
                     accessTokenExo    = $null
@@ -5071,7 +5071,7 @@ function GraphGetMe {
         }
     } else {
         return @{
-            error = $error | Out-String
+            error = $error[0] | Out-String
             me    = $null
         }
     }
@@ -5195,7 +5195,7 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
             }
         } else {
             return @{
-                error      = $error | Out-String
+                error      = $error[0] | Out-String
                 properties = $null
             }
         }
@@ -5251,7 +5251,7 @@ function GraphGetUserManager($user) {
         }
     } else {
         return @{
-            error      = $error | Out-String
+            error      = $error[0] | Out-String
             properties = $null
         }
     }
@@ -5301,7 +5301,7 @@ function GraphGetUserTransitiveMemberOf($user) {
         }
     } else {
         return @{
-            error    = $error | Out-String
+            error    = $error[0] | Out-String
             memberof = $null
         }
     }
@@ -5346,7 +5346,7 @@ function GraphGetUserPhoto($user) {
         }
     } else {
         return @{
-            error = $error | Out-String
+            error = $error[0] | Out-String
             photo = $null
         }
     }
@@ -5437,7 +5437,7 @@ function GraphFilterGroups($filter) {
         }
     } else {
         return @{
-            error  = $error | Out-String
+            error  = $error[0] | Out-String
             groups = $null
         }
     }
@@ -5486,7 +5486,7 @@ function GraphFilterUsers($filter) {
         }
     } else {
         return @{
-            error = $error | Out-String
+            error = $error[0] | Out-String
             users = $null
         }
     }
@@ -5547,7 +5547,7 @@ function ExoGenericQuery ([Parameter(Mandatory = $true)] [string]$method, [Param
         }
     } else {
         return @{
-            error  = $error | Out-String
+            error  = $error[0] | Out-String
             result = $null
         }
     }
@@ -5683,7 +5683,7 @@ try {
     if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
         Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
     } else {
-        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate.DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
+        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
     }
 
     if ($script:COMWord) {

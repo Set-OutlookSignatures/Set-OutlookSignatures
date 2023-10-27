@@ -1,11 +1,11 @@
 <!-- omit in toc -->
-# **<a href="https://github.com/GruberMarkus/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out of office replies for Outlook and Exchange<p><p><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/GruberMarkus/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/GruberMarkus/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <img src="https://img.shields.io/badge/dynamic/json?color=brightgreen&label=clones&query=%24.count&url=https%3A%2F%2Fraw.githubusercontent.com%2FGruberMarkus%2Fmy-traffic2badge%2Ftraffic%2Ftraffic-Set-OutlookSignatures%2Ftraffic_clones.json" alt="clones" data-external="1"> <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/GruberMarkus/Set-OutlookSignatures?color=brightgreen" alt="stars" data-external="1"></a><br><a href="https://github.com/sponsors/GruberMarkus" target="_blank"><img src="https://img.shields.io/badge/donate,%20sponsor-white?logo=githubsponsors" alt="donate, sponsor"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out of office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
 
 # Changelog
 <!--
   Sample changelog entry
   Remove leading spaces after pasting
-  ## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
+  ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
   _Put Notice here_
   _**Breaking:** Notice about breaking change_  
   ### Changed
@@ -16,7 +16,19 @@
 -->
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.6.0" target="_blank">v4.6.0</a> - 2023-10-23
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.0" target="_blank">v4.x.x</a> - YYYY-MM-DD
+_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+_**Attention, cloud mailbox users:**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
+### Fixed
+- Correctly detect and restore Word registry key 'DisableWarningOnIncludeFieldsUpdate'
+- Simulation mode: Show images in out of office replies, even though Exchange does not support them yet
+- SimulateAndDeploy.ps1: Advanced error handling
+
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.0" target="_blank">v4.6.0</a> - 2023-10-23
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
@@ -25,14 +37,14 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 ### Added
 - 'default graph config.ps1' now includes a description for each permission required by the Entra ID/Azure AD application for Graph access
 - Additional documentation: Implementation approach
-  - The content is based on real-life experiences implementing the script in multi-client environments with a five-digit number of mailboxes.
+  - The content is based on real-life experiences implementing the software in multi-client environments with a five-digit number of mailboxes.
   - Proven procedures and recommendations for product managers, architects, operations managers, account managers, mail and client administrators. Suited for service providers as well as for clients.
   - It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
   - Available in English and German.
 - New and improved sample code
   - SimulateAndDeploy.ps1: Deploy signatures without end user interaction, running Set-OutlookSignatures on a server - including support for roaming signatures
   - Test-ADTrust.ps1: Detect why a client cannot query Active Directory information
-  - SimulationModeHelper.ps1: Makes using simulation mode easier. An admin sets the parameters in the script, the content creators execute it and just have to enter the values required for simulation:
+  - SimulationModeHelper.ps1: Makes using simulation mode easier. An admin sets the parameters in the software, the content creators execute it and just have to enter the values required for simulation:
     - The user to simulate (mandatory)
     - The mailbox(es) to simulate (optional)
     - The time to simulate (optional)
@@ -44,7 +56,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 - Always connect to Entra ID/Azure AD/Graph when New Outlook is used 
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.5.0" target="_blank">v4.5.0</a> - 2023-09-29
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.5.0" target="_blank">v4.5.0</a> - 2023-09-29
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
@@ -53,16 +65,16 @@ _Microsoft actively enables roaming signatures in Exchange Online. See `What abo
 _Set-OutlookSignatures can experimentally handle cloud roaming signatures since v4.0.0. See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Changed
 - Adapt program logic to cloud roaming signatures API changes introduced by Microsoft
-- Updated FAQ `How can I log the script output?`. See `README` for details.
+- Updated FAQ `How can I log the software output?`. See `README` for details.
 ### Added
 - New parameter `EmbedImagesInHtmlAdditionalSignaturePath`. See `README` for details.
-- New FAQ `How can I start the script only when there is a connection to the Active Directory on-prem?`. See `README` for details.
+- New FAQ `How can I start the software only when there is a connection to the Active Directory on-prem?`. See `README` for details.
 ### Fixed
 - Variables in HTM templates have not been replaced with actual values because of a wrong RegEx syntax
 - Content of path defined in `AdditionalSignaturePath` was not deleted before copy operations.
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.4.0" target="_blank">v4.4.0</a> - 2023-09-20
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.4.0" target="_blank">v4.4.0</a> - 2023-09-20
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
@@ -79,7 +91,7 @@ _Set-OutlookSignatures can experimentally handle cloud roaming signatures since 
 - Correctly handly write protected files when copying to AdditionalSignaturePath
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.3.0" target="_blank">v4.3.0</a> - 2023-09-08
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.3.0" target="_blank">v4.3.0</a> - 2023-09-08
 _**Some features are exclusive to the commercial Benefactor Circle add-on.**_
 - _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
@@ -88,22 +100,22 @@ _**Attention, cloud mailbox users:**_
 - _Set-OutlookSignatures can experimentally handle roaming signatures since v4.0.0. See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Added
 - When no mailboxes are configured in Outlook, additional mailboxes configured in Outlook Web are used. Thanks to our partner [ExplicIT Consulting](https://explicitconsulting.at) for donating this code, enabling another world-first feature and bringing us even closer to supporting the "new Outlook" client (codename "Monarch") in the future!
-- Add hint to TLS 1.2 when Entra ID/Azure AD/Graph authentication is not successful (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/85" target="_blank">#85</a>) (Thanks <a href="https://github.com/halatovic" target="_blank">@halatovic</a>!)
+- Add hint to TLS 1.2 when Entra ID/Azure AD/Graph authentication is not successful (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85" target="_blank">#85</a>) (Thanks <a href="https://github.com/halatovic" target="_blank">@halatovic</a>!)
 - Update '`Quick Start Guide`' in '`README`' file with clearer instructions on how to register the Entra ID/Azure AD app required for hybrid and cloud-only environments
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.2.1" target="_blank">v4.2.1</a> - 2023-08-16
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.2.1" target="_blank">v4.2.1</a> - 2023-08-16
 _**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_
 - _**Set-OutlookSignatures can now experimentally handle roaming signatures!** See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 - _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._
 ### Fixed
-- MoveCSSInline may not find a dependent DLL on some systems (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/84" target="_blank">#84</a>) (Thanks <a href="https://github.com/panki27" target="_blank">@panki27</a>!)
-- An error occurred when a trust of the forest root domain of an on-prem Active Directory to itself was detected (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/83" target="_blank">#83</a>) (Thanks <a href="https://github.com/panki27" target="_blank">@panki27</a>!)
+- MoveCSSInline may not find a dependent DLL on some systems (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/84" target="_blank">#84</a>) (Thanks <a href="https://github.com/panki27" target="_blank">@panki27</a>!)
+- An error occurred when a trust of the forest root domain of an on-prem Active Directory to itself was detected (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/83" target="_blank">#83</a>) (Thanks <a href="https://github.com/panki27" target="_blank">@panki27</a>!)
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.2.0" target="_blank">v4.2.0</a> - 2023-08-10
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.2.0" target="_blank">v4.2.0</a> - 2023-08-10
 _**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_
@@ -115,7 +127,7 @@ _**Attention, cloud mailbox users:**_
 - Set Word WebOptions in correct order, so that they do not overwrite each other
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.1.0" target="_blank">v4.1.0</a> - 2023-07-28
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.1.0" target="_blank">v4.1.0</a> - 2023-07-28
 _**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_
@@ -143,7 +155,7 @@ This is useful for delegate and boss-secretary scenarios - secretaries get speci
 - Correctly log group and email address specific exclusions (only an optical issue, no technical one)
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v4.0.0" target="_blank">v4.0.0</a> - 2023-07-12
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.0.0" target="_blank">v4.0.0</a> - 2023-07-12
 _**Some features are exclusive to the commercial Benefactor Circle add-on.** See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, cloud mailbox users:**_
@@ -161,7 +173,7 @@ _**Attention, cloud mailbox users:**_
     - Set current user Outlook Web signature (classic Outlook Web signature and roaming signature)
     - Download and upload roaming signatures
     - Set current user out of office replies
-    - Delete signatures created by the script, where the template no longer exists or is no longer assigned
+    - Delete signatures created by the software, where the template no longer exists or is no longer assigned
     - Delete user created signatures
     - Additional signature path (when used outside of simulation mode)
     - High resolution images from DOCX templates
@@ -191,7 +203,7 @@ This is not only available for Benefactor Circle members, but also the Free and 
 - Simulation mode
   - Simulation mode partly returned data of the currently logged on user instead of data of the simulated user
   - Simulation mode did not prioritize mailbox list correctly
-  - When SimulateUser is not defined, but other simulation parameters, the script exits
+  - When SimulateUser is not defined, but other simulation parameters, the software exits
   - When multiple mailboxes to simulate were passed, only the first one was considered 
 - Graph queries did not correctly handle paged results
 - Restoring the Word setting 'ShowFieldCodes' now works correctly in more error scenarios
@@ -203,13 +215,13 @@ This is not only available for Benefactor Circle members, but also the Free and 
 - Display sort order for was not handled correctly when primary smtp address of a mailboxes has been changed after it was already added to Outlook
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.6.1" target="_blank">v3.6.1</a> - 2023-05-22
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.6.1" target="_blank">v3.6.1</a> - 2023-05-22
 _Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._
 ### Fixed
 - Signatures created with `DocxHighResImageConversion true` in combination with `EmbedImagesInHtml false` include high resolution image files, but these images could not be displayed because a wrong path was set in the HTM file
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.6.0" target="_blank">v3.6.0</a> - 2023-01-24
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.6.0" target="_blank">v3.6.0</a> - 2023-01-24
 _Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._
 ### Changed
 - Microsoft Information Protection sensitivity labels are now supported when using DOCX templates. See `How to make Set-OutlookSignatures work with Microsoft Information Protection?` in `.\docs\README` for details.
@@ -224,14 +236,14 @@ _Attention cloud mailbox users: Microsoft actively enables roaming signatures in
 - Correctly handle empty `AdditionalSignaturePath` parameter
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.5.1" target="_blank">v3.5.1</a> - 2022-12-20
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.5.1" target="_blank">v3.5.1</a> - 2022-12-20
 _Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `README` for details, known problems and workarounds._
 ### Fixed
 - Use different code to determine Outlook and Word executable file bitness, as the .Net APIs used before seem to fail randomly with the latest Windows and .Net updates (especially when using 32-bit PowerShell on 64-bit Windows)
-- Do not stop the script when `SignaturesForAutomappedAndAdditionalMailboxes` is enabled and the Outlook file path can not be determined
+- Do not stop the software when `SignaturesForAutomappedAndAdditionalMailboxes` is enabled and the Outlook file path can not be determined
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.5.0" target="_blank">v3.5.0</a> - 2022-12-19
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.5.0" target="_blank">v3.5.0</a> - 2022-12-19
 _Attention cloud mailbox users: Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `README` for details, known problems and workarounds._
 ### Changed
 - Mailbox prioritization: Within an Outlook profile, mailbox priority is now determined by the sort order shown in Outlook, no longer by the time a mailbox has been added to the profile. See `Signature and OOF application order` in `README` for more details about mailbox prioritization.
@@ -244,15 +256,15 @@ _Attention cloud mailbox users: Microsoft actively enables roaming signatures in
 - When a mailbox exists in multiple Outlook profiles, only query AD/Graph at the first occurrence and use cached data on remaining occurrences
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.4.1" target="_blank">v3.4.1</a> - 2022-11-25
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.4.1" target="_blank">v3.4.1</a> - 2022-11-25
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Fixed
 - Correctly handle logged in user with empty mail attribute
-- Correctly enumerate SID and SidHistory when connected to a local Active Directory user with a mailbox in Exchange Online (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/59" target="_blank">#59</a>) (Thanks <a href="https://github.com/AnotherFranck" target="_blank">@AnotherFranck</a>!)
+- Correctly enumerate SID and SidHistory when connected to a local Active Directory user with a mailbox in Exchange Online (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/59" target="_blank">#59</a>) (Thanks <a href="https://github.com/AnotherFranck" target="_blank">@AnotherFranck</a>!)
 - Correctly handle empty templates, signatures and OOF messages
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.4.0" target="_blank">v3.4.0</a> - 2022-11-02
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.4.0" target="_blank">v3.4.0</a> - 2022-11-02
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Added
 - New parameter `IncludeMailboxForestDomainLocalGroups`, see `README` for details
@@ -265,42 +277,42 @@ _Attention cloud mailbox users: Microsoft will make roaming signatures available
 - Only consider mailboxes as additional mailboxes when they appear in Outlook's list in the email navigation pane. This avoids falsely adding shared calendars as additional mailboxes.
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.3.0" target="_blank">v3.3.0</a> - 2022-09-05
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.3.0" target="_blank">v3.3.0</a> - 2022-09-05
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Changed
 - Use different method to delete files to avoid occassional OneDrive error "access to the cloud file is denied"
 - Update logo and icon
 ### Added
-- The script now detects not only primary mailboxes configured in Outlook, but also automapped and additional mailboxes. This behavior can be disabled with the new parameter `SignaturesForAutomappedAndAdditionalMailboxes`. See `README` for details.
+- the software now detects not only primary mailboxes configured in Outlook, but also automapped and additional mailboxes. This behavior can be disabled with the new parameter `SignaturesForAutomappedAndAdditionalMailboxes`. See `README` for details.
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.2" target="_blank">v3.2.2</a> - 2022-08-12
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.2.2" target="_blank">v3.2.2</a> - 2022-08-12
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Fixed
 - When the `EmbedImagesInHtml` parameter is set to `false`, correctly handle a certain file system condition instead of stopping processing the current template after the 'Embed local files in HTM format and add marker' step
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.1" target="_blank">v3.2.1</a> - 2022-08-04
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.2.1" target="_blank">v3.2.1</a> - 2022-08-04
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Added
 - New FAQ: Why does the text color of my signature change sometimes?
 ### Fixed
 - The permission check no longer takes more time than necessary by showing all allow or deny reasons, only the first match. Denies are only evaluated when an allow match has been found before.
 - Template file categorization time no longer grows exponentially with each template appearing multiple times in an ini file
-- Handle nested attribute names in graph config file correctly ('onPremisesExtensionAttributes.extensionAttribute1' et al.) (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/41" target="_blank">#41</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
-- Handle ini files with only one section correctly (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/42" target="_blank">#42</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
-- Include 'state' in list of default replacement variables (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/44" target="_blank">#44</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
+- Handle nested attribute names in graph config file correctly ('onPremisesExtensionAttributes.extensionAttribute1' et al.) (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/41" target="_blank">#41</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
+- Handle ini files with only one section correctly (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/42" target="_blank">#42</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
+- Include 'state' in list of default replacement variables (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/44" target="_blank">#44</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
 - The code detecting Outlook and Word registry version, file version and bitness has been corrected
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.2.0" target="_blank">v3.2.0</a> - 2022-07-19
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.2.0" target="_blank">v3.2.0</a> - 2022-07-19
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Added
 - Workaround for Word ignoring manual line breaks (`` `n ``) and paragraph marks (`` `r`n ``) in replacement variables when converting a template to a signature in RTF format (signatures in HTM and TXT formats are not affected).
 - Sample script `Test-ADTrust.ps1` to test the connection to all Domain Controllers and Global Catalog server of a trusted domain
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.1.0" target="_blank">v3.1.0</a> - 2022-06-26
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.1.0" target="_blank">v3.1.0</a> - 2022-06-26
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Changed
 - Each template reference in an INI file is now considered individually, not just the last entry. See 'How to work with ini files' in README for a usecase example.
@@ -309,10 +321,10 @@ _Attention cloud mailbox users: Microsoft will make roaming signatures available
 - Extend FAQ "How to avoid blank lines when replacement variables return an empty string?" with new examples and sample code that automatically differentiates between DOCX and HTM templates
 - Optimized format of 'hashes.txt'
 ### Fixed
-- Convert WebDAV paths to a PowerShell compatible format before accessing them. (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/discussions/38" target="_blank">#38</a>) (Thanks <a href="https://github.com/Johan-Claesson" target="_blank">@Johan-Claesson</a>!)
+- Convert WebDAV paths to a PowerShell compatible format before accessing them. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions/38" target="_blank">#38</a>) (Thanks <a href="https://github.com/Johan-Claesson" target="_blank">@Johan-Claesson</a>!)
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v3.0.0" target="_blank">v3.0.0</a> - 2022-04-20
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.0.0" target="_blank">v3.0.0</a> - 2022-04-20
 _This major release brings several changes which can make it incompatible with previous versions. Pay special attention to the changes marked '**Breaking:**' to find out if your environment is affected and what to do._
 ### Added
 - New FAQ: How can I get more script output for troubleshooting?
@@ -331,19 +343,19 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - All sample files with tags based on file names have been removed
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.2" target="_blank">v2.5.2</a> - 2022-02-09
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.5.2" target="_blank">v2.5.2</a> - 2022-02-09
 ### Fixed
 - Use another Windows API to get the Active Directory object of the logged in user. This API also works when 'CN=Computers,DC=[...]' does not exist or the logged in user does not have read access to it. (Thanks <a href="https://www.linkedin.com/in/mariandanisek/" target="_blank">Marián Daníšek</a>!)
 - Correct handle objectSid and SidHistory returned from Graph. The format is no longer a byte array as from on-prem Active Directory, but a list of clear text strings ('S-1-[...]').
 - Validate SimulateUser and SimulateMailboxes input
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.1" target="_blank">v2.5.1</a> - 2022-01-20
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.5.1" target="_blank">v2.5.1</a> - 2022-01-20
 ### Fixed
 - Fix search for mailbox user object across trusts
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.5.0" target="_blank">v2.5.0</a> - 2022-01-14
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.5.0" target="_blank">v2.5.0</a> - 2022-01-14
 ### Added
 - New parameter DeleteScriptCreatedSignaturesWithoutTemplate, see README for details
 - New parameter EmbedImagesInHtml, see README for details
@@ -356,15 +368,15 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - New FAQ: Why is no admin or user GUI available?
 ### Fixed
 - Don't throw an error when UseHtmTemplates is set to true and OOFIniFile is used, but there is no \*.htm file in OOFTemplatePath
-- Correct mapping of Graph businessPhones attribute, so the replacement variable `$Current[...]Telephone$` is populated (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/26" target="_blank">#26</a>)  (Thanks <a href="https://github.com/vitorpereira" target="_blank">@vitorpereira</a>!)
-- Fix Outlook 2013 registry key handling and temporary folder handling in environments without Outlook or Outlook profile (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/27" target="_blank">#27</a>)  (Thanks <a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>!)
+- Correct mapping of Graph businessPhones attribute, so the replacement variable `$Current[...]Telephone$` is populated (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/26" target="_blank">#26</a>)  (Thanks <a href="https://github.com/vitorpereira" target="_blank">@vitorpereira</a>!)
+- Fix Outlook 2013 registry key handling and temporary folder handling in environments without Outlook or Outlook profile (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/27" target="_blank">#27</a>)  (Thanks <a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>!)
 ### Changed
 - Cache group SIDs across all types of templates to reduce network load and increase script speed
 - Deprecate file name based tags. They work as-is, no new features will be added and support for file name based tags will be removed completely in the next months. Please switch to ini files, see README for details.
 - Update usage examples in script
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.4.0" target="_blank">v2.4.0</a> - 2021-12-10
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.4.0" target="_blank">v2.4.0</a> - 2021-12-10
 ### Changed
 - Documentation updates
 - Updated FAQ: What about the new signature roaming feature Microsoft announced?
@@ -387,14 +399,14 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - Correctly handle time based tags, so they are not checked twice (the first check is positive, the second one returns 'unknown tag')
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.1" target="_blank">v2.3.1</a> - 2021-11-05
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.3.1" target="_blank">v2.3.1</a> - 2021-11-05
 ### Fixed
 - Ignore mail-enabled users an mailbox search to avoid binding to the wrong Exchange object in migration scenarios (which would lead to wrong replacement variable data and group membership)
 - When connecting to Exchange Online, check for valid mailbox in addition to valid credentials
 - Clarify port requirements and group membership evaluation in documentation
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.3.0" target="_blank">v2.3.0</a> - 2021-10-08
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.3.0" target="_blank">v2.3.0</a> - 2021-10-08
 ### Changed
 - The parameter TrustsToCheckForGroups is also available under the more descriptive name TrustsToCheckForGroups. Both names can be used, functionality is unchanged.
 - Contribution opportunities in '.\docs\CONTRIBUTING.html'
@@ -403,24 +415,24 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - Possibility to use ini files instead of file name tags, including settings for template sort order, sort culture, and custom Outlook signature names (see parameters 'SignatureIniPath' and 'OOFIniPath' for details)
 - New default replacement variables `$Current[...]Office$` and `$Current[...]Company$`, including updated templates
 - Enterprise ready workaround for Word security warning when converting documents with linked images
-- FAQ: The script hangs at HTM/RTF export, Word shows a security warning!?
-- FAQ: Isn't a plural noun in the script name against PowerShell best practices?
+- FAQ: the software hangs at HTM/RTF export, Word shows a security warning!?
+- FAQ: Isn't a plural noun in the software name against PowerShell best practices?
 - FAQ: How to avoid empty lines when replacement variables return an empty string?
 - FAQ: Is there a roadmap for future versions?
 - Code of Conduct (see '.\docs\CODE_OF_CONDUCT.html' for details)
 ### Fixed
 - User could connect to hidden Word instance used for conversion of DOCX templates
 - Do no classify templates with unknown tags as common templates 
-- Word settings temporarily changed by the script are now also restored to their original values when the script ends due to an unexpected error
+- Word settings temporarily changed by the software are now also restored to their original values when the software ends due to an unexpected error
 - Do not try to change read-only Word attributes \<image>.hyperlink.name and \<image>.hyperlink.addressold (regression bug)
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.1" target="_blank">v2.2.1</a> - 2021-09-15
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.2.1" target="_blank">v2.2.1</a> - 2021-09-15
 ### Fixed
 - Allow multi-relative paths (Example: 'c:\a\b\x\\..\c\y\z\\..\\..\d' -> 'c:\a\b\c\d')
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.2.0" target="_blank">v2.2.0</a> - 2021-09-15
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.2.0" target="_blank">v2.2.0</a> - 2021-09-15
 ### Changed
 - Make script compatible with PowerShell Core 7.x on Windows (Linux and MacOS are not supported yet)
 - Reduce and speed up Active Directory queries by only accepting input in the 'Domain\User' or UPN (User Principal Name) format for the 'SimulateUser' parameter
@@ -433,53 +445,53 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - Add dark mode support and badges to documentation files
 ### Fixed
 - Do not show an error message when no default Outlook profile is configured
-- Avoid additional blank lines at the end of TXT signature files when DOCX templates are used (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/13" target="_blank">#13</a>)
+- Avoid additional blank lines at the end of TXT signature files when DOCX templates are used (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/13" target="_blank">#13</a>)
 - Detect user's domain correctly when user and computer belong to different AD forests
 - Do not show an error message when only external or interal OOF message is set
 - Set current user's OWA signature even when mailbox is in another Outlook profile than the default one
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.2" target="_blank">v2.1.2</a> - 2021-09-03
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.1.2" target="_blank">v2.1.2</a> - 2021-09-03
 ### Fixed
-- Correct extension attributes being shown as empty in replacement variables (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/11" target="_blank">#11</a>) (Thanks <a href="https://github.com/goranko73" target="_blank">@goranko73</a>!)
+- Correct extension attributes being shown as empty in replacement variables (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/11" target="_blank">#11</a>) (Thanks <a href="https://github.com/goranko73" target="_blank">@goranko73</a>!)
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.1" target="_blank">v2.1.1</a> - 2021-08-26
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.1.1" target="_blank">v2.1.1</a> - 2021-08-26
 ### Changed
 - Disable positional binding of passed arguments for easier debugging.
 - Rename '\bin\licenses.txt' to '\bin\LICENSE.txt'
 ### Added
-- "implementation approach.html" describes the recommended approach for implementing the software, based on real-life experience implementing the script in multi-client environments with a five-digit number of mailboxes.
-- New FAQ "How to create a shortcut to the script with parameters?"
+- "implementation approach.html" describes the recommended approach for implementing the software, based on real-life experience implementing the software in multi-client environments with a five-digit number of mailboxes.
+- New FAQ "How to create a shortcut to the software with parameters?"
 - New FAQ "What is the recommended approach for implementing the software?"
 - Add multi-client capability hint to script description and readme file
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.1.0" target="_blank">v2.1.0</a> - 2021-08-13
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.1.0" target="_blank">v2.1.0</a> - 2021-08-13
 ### Changed
 - Enhance long file path handling
 - Enhance FullLanguage mode detection
 ### Added
-- FAQ: How do I start the script from the command line or a scheduled task?
+- FAQ: How do I start the software from the command line or a scheduled task?
 - Added command line and task scheduler example to script
 - Logo and icon files are now part of the download package
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.0.2" target="_blank">v2.0.2</a> - 2021-07-23
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.0.2" target="_blank">v2.0.2</a> - 2021-07-23
 ### Changed
 - Inform the user when an Active Directory search returns less or more than one result
 - Readme chapter "Simulation mode" updated
 ### Added
 - Readme FAQ "Can multiple script instances run in parallel?"
 ### Fixed
-- Readme link about MS Word ExportPictureWithMetafile registry key to avoid huge RTF files supplemented by alternate link to Internet Archive Wayback Machine (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/9" target="_blank">#9</a>) (Thanks <a href="https://github.com/nitishkanu820" target="_blank">@nitishkanu820</a>!)
+- Readme link about MS Word ExportPictureWithMetafile registry key to avoid huge RTF files supplemented by alternate link to Internet Archive Wayback Machine (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/9" target="_blank">#9</a>) (Thanks <a href="https://github.com/nitishkanu820" target="_blank">@nitishkanu820</a>!)
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.0.1" target="_blank">v2.0.1</a> - 2021-07-22
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.0.1" target="_blank">v2.0.1</a> - 2021-07-22
 _Do not use this release. It was withdrawn due to a severe problem._
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v2.0.0" target="_blank">v2.0.0</a> - 2021-07-21
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.0.0" target="_blank">v2.0.0</a> - 2021-07-21
 ### Changed
 - **Breaking:** The configuration file is no longer a plain text file, but a full PowerShell script. This allows for complex replacement variable handling (complex string transformations, retrieving information from web services and databases, etc.).
 - When enumerating and categoring templates, category defining information is logged (assigned mail address, group name including SID)
@@ -488,17 +500,17 @@ _Do not use this release. It was withdrawn due to a severe problem._
 ### Added
 - Simulation mode
 - Major script steps now show a timestamp
-- Readme for "Simulation mode" and FAQ "How can I log the script output?"
+- Readme for "Simulation mode" and FAQ "How can I log the software output?"
 ### Fixed
 - Templates with multiple groups or multiple mail addresses were not applied correctly and led to redundant Active Directory queries
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.6.1" target="_blank">v1.6.1</a> - 2021-06-30
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.6.1" target="_blank">v1.6.1</a> - 2021-06-30
 ### Fixed
-- Empty AdditionalSignaturePath leads to error (<a href="https://github.com/GruberMarkus/Set-OutlookSignatures/issues/8" target="_blank">#8</a>)
+- Empty AdditionalSignaturePath leads to error (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/8" target="_blank">#8</a>)
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.6.0" target="_blank">v1.6.0</a> - 2021-06-26
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.6.0" target="_blank">v1.6.0</a> - 2021-06-26
 ### Changed
 - Change template path structure
 - Update readme
@@ -511,26 +523,26 @@ _Do not use this release. It was withdrawn due to a severe problem._
 - Check existence of signature file before trying to set Outlook web signature
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.5.4" target="_blank">v1.5.4</a> - 2021-06-24
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.5.4" target="_blank">v1.5.4</a> - 2021-06-24
 ### Added
 - New FAQ: Why DOCX as template format and not HTML? Signatures in Outlook sometimes look different than my DOCX templates.
 ### Fixed
 - Fix: Consider images with different text wrapping setting (Shapes for "in line with text" and InlineShapes for all other text wrapping settings).
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.5.3" target="_blank">v1.5.3</a> - 2021-06-23
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.5.3" target="_blank">v1.5.3</a> - 2021-06-23
 ### Fixed
 - Fix problem connecting to WebDAV-paths.
 - Fix readme file to reflect enhanced WebDAV possibilities in path parameters.
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.5.2" target="_blank">v1.5.2</a> - 2021-06-21
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.5.2" target="_blank">v1.5.2</a> - 2021-06-21
 ### Fixed
 - Fix handling of Outlook Web connection error.
 - Fix readme: OOF templates are not applied when currently active or scheduled.
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.5.1" target="_blank">v1.5.1</a> - 2021-06-20
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.5.1" target="_blank">v1.5.1</a> - 2021-06-20
 ## Fixed
 - Provide readme.html in releases, not markdown file
 - Update link formatting in readme files
@@ -538,7 +550,7 @@ _Do not use this release. It was withdrawn due to a severe problem._
 - Update logo path and dependencies
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.5.0" target="_blank">v1.5.0</a> - 2021-06-18
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.5.0" target="_blank">v1.5.0</a> - 2021-06-18
 ### Added
 - Add support for out of office replies
 - New parameter SetCurrentUserOOFMessage
@@ -546,24 +558,24 @@ _Do not use this release. It was withdrawn due to a severe problem._
 - Add sample files for OOF templates '.\OOF templates'
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.4.0" target="_blank">v1.4.0</a> - 2021-06-17
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.4.0" target="_blank">v1.4.0</a> - 2021-06-17
 ### Added
 - New parameter AdditionalSignaturePath
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.3.0" target="_blank">v1.3.0</a> - 2021-06-16
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.3.0" target="_blank">v1.3.0</a> - 2021-06-16
 ### Added
 - New parameter DeleteUserCreatedSignatures
 - New parameter SetCurrentUserOutlookWebSignature
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.2.1" target="_blank">v1.2.1</a>  2021-06-14
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.2.1" target="_blank">v1.2.1</a>  2021-06-14
 ### Fixed
 - Fix signature group name to SID mapping
 - Make logo work with every background (transparency, white glow)
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.2.0" target="_blank">v1.2.0</a> - 2021-06-11
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.2.0" target="_blank">v1.2.0</a> - 2021-06-11
 ### Changed
 - Reduce LDAP queries by getting replacement variable data per mailbox, not per signature file and mailbox
 - Speed up variable replacement in image metadata
@@ -574,7 +586,7 @@ _Do not use this release. It was withdrawn due to a severe problem._
 - Update signature template file 'Test all signature replacement variables.docx'
 - Include info about case sensitivity in file 'default replacement variables.txt'
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.1.0" target="_blank">v1.1.0</a> - 2021-06-10
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.1.0" target="_blank">v1.1.0</a> - 2021-06-10
 ### Changed
 -Move all replacement variable definitions to './config/default replacement variables.txt'
 -Update README: Add logo, modify chapter ordering, document parameter ReplacementVariableConfigFile
@@ -589,7 +601,7 @@ _Do not use this release. It was withdrawn due to a severe problem._
 - Add 'readme.txt', a plain text version of README, which can be read on all systems with on-board tools.
 
 
-## <a href="https://github.com/GruberMarkus/Set-OutlookSignatures/releases/tag/v1.0.0" target="_blank">v1.0.0</a> - 2021-06-01
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.0.0" target="_blank">v1.0.0</a> - 2021-06-01
 _Initial release._
 
 
