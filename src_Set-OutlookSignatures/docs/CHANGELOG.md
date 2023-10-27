@@ -16,7 +16,7 @@
 -->
 
 
-## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.0" target="_blank">v4.x.x</a> - YYYY-MM-DD
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.1" target="_blank">v4.6.1</a> - 2023-10-27
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
@@ -26,6 +26,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 - Correctly detect and restore Word registry key 'DisableWarningOnIncludeFieldsUpdate'
 - Simulation mode: Show images in out of office replies, even though Exchange does not support them yet
 - SimulateAndDeploy.ps1: Advanced error handling
+- Implementation approach: Translated a sentence to English, which was only available in German (Thanks <a href="https://github.com/JeroenOortwijn" target="_blank">@JeroenOortwijn</a>!)
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.0" target="_blank">v4.6.0</a> - 2023-10-23

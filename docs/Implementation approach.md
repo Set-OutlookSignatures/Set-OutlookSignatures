@@ -22,7 +22,7 @@ The document is available in English and German language.
   - [1.1. Overview](#11-overview)
   - [1.2. Manual maintenance of signatures](#12-manual-maintenance-of-signatures)
     - [1.2.1. Signatures in Outlook](#121-signatures-in-outlook)
-    - [1.2.2. Signatur in Outlook im Web](#122-signatur-in-outlook-im-web)
+    - [1.2.2. Signature in Outlook Web](#122-signature-in-outlook-web)
   - [1.3. Automatic maintenance of signatures](#13-automatic-maintenance-of-signatures)
     - [1.3.1. Server-based signatures](#131-server-based-signatures)
     - [1.3.2. Client-based signatures](#132-client-based-signatures)
@@ -132,8 +132,8 @@ There is no central maintenance.
 ### 1.2.1. Signatures in Outlook  
 In Outlook, practically any number of signatures can be created per mailbox. This is practical, for example, to distinguish between internal and external emails or emails in different languages.
 
-Pro Postfach kann darüber hinaus eine Standard-Signatur für neue emails und eine für Antworten festgelegt werden.   
-### 1.2.2. Signatur in Outlook im Web
+In addition, a default signature for new emails and one for replies and forwards can be set per mailbox.
+### 1.2.2. Signature in Outlook Web
 If you also work with Outlook on the Web, you must set up your signature in Outlook on the Web independently of your signature on the client.
 
 In Outlook on the Web, only one signature is possible unless the mailbox is in Exchange Online and the Roaming Signatures feature has been enabled.
