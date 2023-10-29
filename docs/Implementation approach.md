@@ -29,7 +29,7 @@ The document is available in English and German language.
   - [1.4. Criteria](#14-criteria)
   - [1.5. Synchronizing signatures between different devices](#15-synchronizing-signatures-between-different-devices)
   - [1.6. Recommendation: Set-OutlookSignatures](#16-recommendation-set-outlooksignatures)
-    - [1.6.1. Allgemeine Beschreibung, Lizenzmodell](#161-allgemeine-beschreibung-lizenzmodell)
+    - [1.6.1. Common description, license model](#161-common-description-license-model)
     - [1.6.2. Features](#162-features)
   - [1.7. Administration](#17-administration)
     - [1.7.1. Client](#171-client)
@@ -44,27 +44,27 @@ The document is available in English and German language.
     - [1.8.1. Consulting and implementation phase](#181-consulting-and-implementation-phase)
       - [1.8.1.1. Initial consultation on textual signatures.](#1811-initial-consultation-on-textual-signatures)
         - [1.8.1.1.1. Participants](#18111-participants)
-        - [1.8.1.1.2. content and objectives](#18112-content-and-objectives)
-        - [1.8.1.1.3. duration](#18113-duration)
-      - [1.8.1.2. training of template administrators](#1812-training-of-template-administrators)
-        - [1.8.1.2.1. participants](#18121-participants)
-        - [1.8.1.2.2. content and objectives](#18122-content-and-objectives)
-        - [1.8.1.2.3. duration](#18123-duration)
-        - [1.8.1.2.4. prerequisites](#18124-prerequisites)
+        - [1.8.1.1.2. Content and objectives](#18112-content-and-objectives)
+        - [1.8.1.1.3. Duration](#18113-duration)
+      - [1.8.1.2. Training of template administrators](#1812-training-of-template-administrators)
+        - [1.8.1.2.1. Participants](#18121-participants)
+        - [1.8.1.2.2. Content and objectives](#18122-content-and-objectives)
+        - [1.8.1.2.3. Duration](#18123-duration)
+        - [1.8.1.2.4. Prerequisites](#18124-prerequisites)
       - [1.8.1.3. Client management training](#1813-client-management-training)
-        - [1.8.1.3.1. participants](#18131-participants)
-        - [1.8.1.3.2. content and objectives](#18132-content-and-objectives)
-        - [1.8.1.3.3. duration](#18133-duration)
-        - [1.8.1.3.4. prerequisites](#18134-prerequisites)
+        - [1.8.1.3.1. Participants](#18131-participants)
+        - [1.8.1.3.2. Content and objectives](#18132-content-and-objectives)
+        - [1.8.1.3.3. Duration](#18133-duration)
+        - [1.8.1.3.4. Prerequisites](#18134-prerequisites)
     - [1.8.2. 1.8.2 Tests, pilot operation, rollout](#182-182-tests-pilot-operation-rollout)
-  - [1.9. running operation](#19-running-operation)
+  - [1.9. Operations](#19-operations)
     - [1.9.1. 1.9.1 Creating and maintaining templates](#191-191-creating-and-maintaining-templates)
-    - [1.9.2. creating and maintaining storage shares for templates and script components](#192-creating-and-maintaining-storage-shares-for-templates-and-script-components)
+    - [1.9.2. Creating and maintaining storage shares for templates and software components](#192-creating-and-maintaining-storage-shares-for-templates-and-software-components)
     - [1.9.3. 1.9.3 Setting and maintaining AD attributes](#193-193-setting-and-maintaining-ad-attributes)
-    - [1.9.4. configuration adjustments](#194-configuration-adjustments)
+    - [1.9.4. Configuration adjustments](#194-configuration-adjustments)
     - [1.9.5. 1.9.5 Problems and questions during operation](#195-195-problems-and-questions-during-operation)
-    - [1.9.6. supported versions](#196-supported-versions)
-    - [1.9.7. new versions](#197-new-versions)
+    - [1.9.6. Supported versions](#196-supported-versions)
+    - [1.9.7. New versions](#197-new-versions)
     - [1.9.8. Adaptations to the code of the product](#198-adaptations-to-the-code-of-the-product)
 - [2. Deutsch (German)](#2-deutsch-german)
   - [2.1. Überblick](#21-überblick)
@@ -84,9 +84,9 @@ The document is available in English and German language.
     - [2.7.2. Server](#272-server)
     - [2.7.3. Ablage der Vorlagen](#273-ablage-der-vorlagen)
     - [2.7.4. Verwaltung der Vorlagen](#274-verwaltung-der-vorlagen)
-    - [2.7.5. Ausführen des Scripts](#275-ausführen-des-scripts)
+    - [2.7.5. Ausführen der Software](#275-ausführen-der-software)
       - [2.7.5.1. Parameter](#2751-parameter)
-      - [2.7.5.2. Laufzeit und Sichtbarkeit des Scripts](#2752-laufzeit-und-sichtbarkeit-des-scripts)
+      - [2.7.5.2. Laufzeit und Sichtbarkeit der software](#2752-laufzeit-und-sichtbarkeit-der-software)
       - [2.7.5.3. Nutzung von Outlook und Word während der Laufzeit](#2753-nutzung-von-outlook-und-word-während-der-laufzeit)
   - [2.8. Unterstützung durch den Service-Provider](#28-unterstützung-durch-den-service-provider)
     - [2.8.1. Beratungs- und Einführungsphase](#281-beratungs--und-einführungsphase)
@@ -107,7 +107,7 @@ The document is available in English and German language.
     - [2.8.2. Tests, Pilotbetrieb, Rollout](#282-tests-pilotbetrieb-rollout)
   - [2.9. Laufender Betrieb](#29-laufender-betrieb)
     - [2.9.1. Erstellen und Warten von Vorlagen](#291-erstellen-und-warten-von-vorlagen)
-    - [2.9.2. Erstellen und Warten von Ablage-Shares für Vorlagen und Script-Komponenten](#292-erstellen-und-warten-von-ablage-shares-für-vorlagen-und-script-komponenten)
+    - [2.9.2. Erstellen und Warten von Ablage-Shares für Vorlagen und Software-Komponenten](#292-erstellen-und-warten-von-ablage-shares-für-vorlagen-und-software-komponenten)
     - [2.9.3. Setzen und Warten von AD-Attributen](#293-setzen-und-warten-von-ad-attributen)
     - [2.9.4. Konfigurationsanpassungen](#294-konfigurationsanpassungen)
     - [2.9.5. Probleme und Fragen im laufenden Betrieb](#295-probleme-und-fragen-im-laufenden-betrieb)
@@ -138,7 +138,7 @@ If you also work with Outlook on the Web, you must set up your signature in Outl
 
 In Outlook on the Web, only one signature is possible unless the mailbox is in Exchange Online and the Roaming Signatures feature has been enabled.
 ## 1.3. Automatic maintenance of signatures  
-The service provider recommends a free script-based solution with central administration and extended client-side functionality, which can be operated and maintained by the customers themselves with the support of the service provider. For details see "Recommendation: Set-OutlookSignatures Benefact Circle".  
+The service provider recommends a solution with central administration and extended client-side functionality, which is free and open-source in the core and can be operated and maintained by the customers themselves with the support of the service provider. For details see "Recommendation: Set-OutlookSignatures Benefact Circle".  
 ### 1.3.1. Server-based signatures  
 The biggest advantage of a server-based solution is that every email is captured using a defined rule set, regardless of the application or device from which it was sent.
 
@@ -184,10 +184,10 @@ The recommended product already supports the roaming signatures of Exchange Onli
 The service provider recommends the free open source software Set-OutlookSignatures with the chargeable "Benefactor Circle" extension after a survey of the customer requirements and tests of several server- and client-based products and offers its customers support during introduction and operation.  
 
 This document provides an overview of the functional scope and administration of the recommended solution, support of the service provider during introduction and operation, as well as associated expenses.
-### 1.6.1. Allgemeine Beschreibung, Lizenzmodell  
+### 1.6.1. Common description, license model  
 <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank">Set-OutlookSignatures</a> is a free open-source product with a chargeable extension for company-relevant functions.
 
-The product is used for the central administration and local distribution of textual signatures and out of office replies to clients. Outlook on Windows is supported as the target platform.
+The product is used for the central administration and local distribution of textual signatures and out of office replies to clients. Outlook on Windows, Outlook Web and New Outlook are supported as targets.
 
 Integration into the client, which is secured with the help of AppLocker and other mechanisms such as Microsoft Purview Informatoin Protection, is technically and organisationally simple thanks to established measures (such as the digital signing of PowerShell scripts).
 ### 1.6.2. Features
@@ -203,7 +203,7 @@ Integration into the client, which is secured with the help of AppLocker and oth
 - Set as **default OOF message** for internal or external recipients (OOF messages only)  
 - Set in **Outlook Web** for the currently logged-in user  
 - Centrally managed only or **exist along user created signatures** (signatures only)  
-- Copied to an **alternate path** for easy access on mobile devices not directly supported by this script (signatures only)
+- Copied to an **alternate path** for easy access on mobile devices not directly supported by this software (signatures only)
 - **Write protected** (Outlook signatures only)
 - Mirrored to the cloud as **roaming signatures**
 
@@ -215,23 +215,23 @@ Signatures and OOF messages can also be created and deployed centrally, without 
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the software and to inspect the resulting signature files before going live.
   
-the software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
+The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
 
-It is **multi-client capable** by using different template paths, configuration files and script parameters.
+It is **multi-client capable** by using different template paths, configuration files and software parameters.
 
 Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard file share on a server, and PowerShell and Office. 
 
 A **documented implementation approach**, based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators.  
 The implementatin approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
-the software core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\LICENSE.txt` for copyright and MIT license details.
+The software core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\LICENSE.txt` for copyright and MIT license details.
 
 **Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source license.  Please see `.\docs\Benefactor Circle` for details.  
 ## 1.7. Administration  
 ### 1.7.1. Client  
 - Outlook and Word, each from version 2010  
 - the software must run in the security context of the user currently logged in.  
-- The PowerShell script must be executed in "Full Language Mode". The "Constrained Language Mode" is not supported, as certain functions such as Base64 conversions are not available in this mode or require very slow alternatives.  
+- The software must be executed in "Full Language Mode". The "Constrained Language Mode" is not supported, as certain functions such as Base64 conversions are not available in this mode or require very slow alternatives.  
 - If AppLocker or comparable solutions are used, the software is already digitally signed.  
 - Network unlocks:  
 	- Ports 389 (LDAP) and 3268 (Global Catalog), TCP and UDP respectively, must be enabled between the client and all domain controllers. If this is not the case, signature-relevant information and variables cannot be retrieved. the software checks with each run whether access is possible.
@@ -272,7 +272,7 @@ For maximum performance and flexibility, it is recommended that each client plac
 ### 1.7.4. Template management  
 By simply assigning write permissions to the template folder or to individual files within it, the creation and management of signature and absence templates is delegated to a defined group of people. Typically, the templates are defined, created and maintained by the Corporate Communications and Marketing departments.
 
-the software can process templates in DOCX or HTML format. For a start, the use of the DOCX format is recommended; the reasons for this recommendation and the advantages and disadvantages of each format are described in the software's `README' file.
+The software can process templates in DOCX or HTML format. For a start, the use of the DOCX format is recommended; the reasons for this recommendation and the advantages and disadvantages of each format are described in the software's `README' file.
 
 The `README` file supplied with the software provides an overview of how to administer templates so that they are  
 - apply only to certain groups or mailboxes  
@@ -284,13 +284,13 @@ In `README` and the sample templates, the replaceable variables, the extension w
 
 The sample file "Test all signature replacement variables.docx" provided contains all variables available by default; in addition, custom variables can be defined.
 ### 1.7.5. Running the software  
-the software can be executed via any mechanism, for example  
+The software can be executed via any mechanism, for example  
 - when the user logs in as part of the logon script or as a separate script  
 - via the task scheduling at fixed times or at certain events  
 - by the user himself, e.g. via a shortcut on the desktop  
 - by a tool for client administration
 
-Since Set-OutlookSignatures is a pure PowerShell script, it is called like any other script of this file type:  
+Since Set-OutlookSignatures is mainly a pure PowerShell script, it is called like any other script of this file type:  
 ```
 powershell.exe <PowerShell parameter> -file <path to Set-OutlookSignatures.ps1> <Script parameter>  
 ```
@@ -314,7 +314,7 @@ At the time of writing, other parameters were available. The following is a brie
 - UseHtmTemplates: By default, templates are processed in DOCX format. This switch can be used to switch to HTML (.htm).  
 The 'README' file contains further parameters.
 #### 1.7.5.2. Runtime and Visibility of the software  
-the software is designed for fast runtime and minimal network load. Nevertheless, the runtime of the software depends on many parameters:  
+The software is designed for fast runtime and minimal network load. Nevertheless, the runtime of the software depends on many parameters:  
 - general speed of the client (CPU, RAM, HDD)  
 - Number of mailboxes configured in Outlook  
 - Number of trusted domains  
@@ -334,7 +334,7 @@ Under the following general conditions, a reproducible runtime of approx. 30 sec
   
 Since the software does not require any user interaction, it can be minimised or hidden using the usual mechanisms. This makes the runtime of the software almost irrelevant.
 #### 1.7.5.3. Use of Outlook and Word during runtime.  
-the software does not start Outlook, all queries and configurations are done via the file system and the registry.
+The software does not start Outlook, all queries and configurations are done via the file system and the registry.
 
 Outlook can be started, used or closed at will while the software is running.
 
@@ -342,7 +342,7 @@ All changes to signatures and out of office notifications are immediately visibl
 
 Word can be started, used or closed at will while the software is running.
 
-the software uses Word to replace variables in DOCX templates and to convert DOCX and HTML to RTF and TXT. Word is started as a separate invisible process. This process can practically not be influenced by the user and does not affect Word processes started by the user.
+The software uses Word to replace variables in DOCX templates and to convert DOCX and HTML to RTF and TXT. Word is started as a separate invisible process. This process can practically not be influenced by the user and does not affect Word processes started by the user.
 ## 1.8. Support from the service provider.  
 The service provider not only recommends the Set-OutlookSignatures software, but also offers its customers defined support free of charge.
 
@@ -355,19 +355,19 @@ The following services are covered by the product price:
 ##### 1.8.1.1.1. Participants  
 - Customer: corporate communications, marketing, client management, project coordinator  
 - Service provider: mail product management, mail operations management or mail architecture  
-##### 1.8.1.1.2. content and objectives  
+##### 1.8.1.1.2. Content and objectives  
 - Customer: Presentation of own wishes regarding textual signatures  
 - Service provider: Brief description of the basic options for textual signatures, advantages and disadvantages of the different approaches, reasons for deciding on the recommended product.  
 - Comparison of customer requirements with technical and organizational possibilities  
 - Live demonstration of the product, taking customer requirements into account  
 - Determination of the next steps  
-##### 1.8.1.1.3. duration  
+##### 1.8.1.1.3. Duration  
 4 hours
-#### 1.8.1.2. training of template administrators  
-##### 1.8.1.2.1. participants  
+#### 1.8.1.2. Training of template administrators  
+##### 1.8.1.2.1. Participants  
 - Customer: template administrators (corporate communications, marketing, analysts), optional client management, project coordinator.  
 - Service provider: mail product management, mail operations management, or mail architecture.  
-##### 1.8.1.2.2. content and objectives  
+##### 1.8.1.2.2. Content and objectives  
 - Summary of the previous meeting "Initial coordination on textual signatures", with focus on desired and feasible functions  
 - Presentation of the structure of the template directories, with focus on  
 - naming conventions  
@@ -380,21 +380,21 @@ The following services are covered by the product price:
 - Possibilities for the integration of a disclaimer  
 - Joint development of initial templates based on existing templates and customer requirements  
 - Live demonstration on a standard client with a test user and test mailboxes of the customer (see requirements)  
-##### 1.8.1.2.3. duration  
+##### 1.8.1.2.3. Duration  
 4 hours
-##### 1.8.1.2.4. prerequisites  
+##### 1.8.1.2.4. Prerequisites  
 - The customer provides a standard client with Outlook and Word.  
 - The screen content of the client must be able to be projected by a beamer or displayed on an appropriately large monitor for collaborative work.  
 - The customer provides a test user. This test user must be able to run script files on the standard client  
 	- be allowed to download script files from the Internet (github.com) once (alternatively, the customer can provide a BitLocker-encrypted USB stick for data transfer).  
-	- be allowed to run unsigned PowerShell scripts in full language mode  
+	- be allowed to run signed PowerShell scripts in full language mode  
 	- have a mailbox  
 	- have full access to various test mailboxes (personal mailboxes or group mailboxes) that are, if possible, direct or indirect members of various groups or distribution lists. For full access, the user may be authorized to the other mailboxes accordingly, or username and password of the additional mailboxes are known.  
 #### 1.8.1.3. Client management training  
-##### 1.8.1.3.1. participants  
+##### 1.8.1.3.1. Participants  
 - Customer: client management, optionally an administrator of the Active Directory, optionally an administrator of the file server and/or SharePoint server, optionally corporate communications and marketing, coordinator of the project  
 - Service Provider: mail product management, mail operations management, or mail architecture, a representative of the client team at appropriate clients
-##### 1.8.1.3.2. content and objectives  
+##### 1.8.1.3.2. Content and objectives  
 - Summary of the previous meeting "Initial agreement on textual signatures", with focus on desired and feasible functions  
 - Presentation of the possibilities with focus on  
 - Basic flow of the software  
@@ -411,14 +411,14 @@ The following services are covered by the product price:
 - Place signatures on an additional path?  
 - Joint testing based on templates previously developed by the customer and customer requirements.  
 - Definition of next steps  
-##### 1.8.1.3.3. duration  
+##### 1.8.1.3.3. Duration  
 4 hours 
-##### 1.8.1.3.4. prerequisites  
+##### 1.8.1.3.4. Prerequisites  
 - The customer provides a standard client with Outlook and Word.  
 - The screen content of the client must be able to be projected via beamer or displayed on an appropriately large monitor for collaborative work.  
 - The customer provides a test user. This test user must be able to run on the standard client  
 	- be allowed to download script files from the Internet (github.com) once (alternatively, the customer can provide a BitLocker-encrypted USB stick for data transfer).  
-	- be allowed to run unsigned PowerShell scripts in full language mode
+	- be allowed to run signed PowerShell scripts in full language mode
 	- have a mailbox  
 	- have full access to various test mailboxes (personal mailboxes or group mailboxes) that are, if possible, direct or indirect members of various groups or distribution lists. For full access, the user may be authorized to the other mailboxes accordingly, or the user name and password of the additional mailboxes are known.  
 - Customer shall provide at least one central SMB file or WebDAV share for template storage.  
@@ -433,19 +433,19 @@ In the event of fundamental technical problems, the Mail product management team
 The creation and maintenance of templates is the responsibility of the customer.
 
 For the procedure for adjustments to the code or the release of new functions, see the "Ongoing Operations" chapter.
-## 1.9. running operation  
+## 1.9. Operations  
 ### 1.9.1. 1.9.1 Creating and maintaining templates  
 Creating and maintaining templates is the responsibility of the customer.  
 Mail Product Management is available to advise on feasibility and impact issues.
-### 1.9.2. creating and maintaining storage shares for templates and script components  
-The creation and maintenance of storage shares for templates and script components is the responsibility of the customer.
+### 1.9.2. Creating and maintaining storage shares for templates and software components  
+The creation and maintenance of storage shares for templates and software components is the responsibility of the customer.
 
 Mail Product Management is available to advise on feasibility and implications.  
 ### 1.9.3. 1.9.3 Setting and maintaining AD attributes  
 Setting and maintaining AD attributes related to textual signatures (e.g., attributes for variables, user photos, group memberships) is the customer's responsibility.
 
 Mail Product Management is available to advise on feasibility and impact issues.
-### 1.9.4. configuration adjustments  
+### 1.9.4. Configuration adjustments  
 Configuration adjustments explicitly provided for by the developers of the software are supported at any time.
 
 Mail product management is available to advise on the feasibility and impact of desired customizations.
@@ -457,7 +457,7 @@ If, in addition to mail, the client is also supported by the service provider, t
 In the event of fundamental technical problems, Mail Product Management provides support in researching the causes, works out proposed solutions and, if necessary, establishes contact with the manufacturer of the product.
 
 Mail product management is also available to answer general questions about the product and its possible applications.
-### 1.9.6. supported versions  
+### 1.9.6. Supported versions  
 The version numbers of the product follow the specifications of Semantic Versioning and are therefore structured according to the "Major.Minor.Patch" format.  
 - "Major" is incremented when there is no compatibility with previous versions.  
 - "Minor" is incremented when new features compatible with previous versions are introduced.  
@@ -471,7 +471,7 @@ Service Provider Supported Versions:
 This means that customers have three months after a new version is released to upgrade to that version before service provider support for previously released versions expires.
 
 This means that no more than one update is ever required in a 3-month period. This protects both customers and service providers from gross errors in product development.
-### 1.9.7. new versions  
+### 1.9.7. New versions  
 When new versions of the product are released, Mail Product Management informs customer-defined contacts of the changes associated with that version, potential impacts on the existing configuration, and identifies upgrade options.
 
 Planning and coordination of the rollout of the new version is done by the customer contact.
@@ -514,7 +514,7 @@ Falls Sie auch mit Outlook im Web arbeiten, müssen Sie sich unabhängig von Ihr
 
 In Outlook im Web ist nur eine einzige Signatur möglich, außer das Postfach befindet sich in Exchange Online und die Funktion Roaming Signatures wurde aktiviert.
 ## 2.3. Automatische Wartung von Signaturen  
-Der Service-Provider empfiehlt eine kostenlose scriptbasierte Lösung mit zentraler Verwaltung und erweitertem clientseitigen Funktionsumfang, die mit Unterstützung des Service-Providers von den Kunden selbst betrieben und gewartet werden kann. Details siehe "Empfehlung: Set-OutlookSignatures Benefact Circle".  
+Der Service-Provider empfiehlt eine Lösung mit zentraler Verwaltung und erweitertem clientseitigen Funktionsumfang, die im Kern kostenlos und quelloffen ist, und mit Unterstützung des Service-Providers von den Kunden selbst betrieben und gewartet werden kann. Details siehe "Empfehlung: Set-OutlookSignatures Benefact Circle".  
 ### 2.3.1. Serverbasierte Signaturen  
 Der größte Vorteil einer serverbasierten Lösung ist, dass an Hand eines definierten Regelsets jedes email erfasst wird, ganz gleich, von welcher Applikation oder welchem Gerät es verschickt wurde.
 
@@ -563,9 +563,9 @@ Dieses Dokument bietet einen Überblick über Funktionsumfang und Administration
 ### 2.6.1. Allgemeine Beschreibung, Lizenzmodell  
 <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank">Set-OutlookSignatures</a> ist ein kostenloses Open-Source-Produkt mit einer kostenpflichtigen Erweiterung für unternehmensrelevante Funktionen.
 
-Das Produkt dient der zentralen Verwaltung und lokalen Verteilung textueller Signaturen und Abwesenheits-Nachrichten auf Clients. Als Zielplattform wird dabei Outlook auf Windows unterstützt.
+Das Produkt dient der zentralen Verwaltung und lokalen Verteilung textueller Signaturen und Abwesenheits-Nachrichten auf Clients. Als Zielplattform werden dabei Outlook auf Windows, New Outlook und Outlook Web unterstützt.
 
-Die Einbindung in den mit Hilfe von AppLocker und anderen Mechanismen wie z. B. Microsoft Purview Informatoin Protection abgesicherten Client ist durch etablierte Maßnahmen (wie z. B. dem digitalen Signieren von PowerShell-Skripten) technisch und organisatorisch einfach möglich.  
+Die Einbindung in den mit Hilfe von AppLocker und anderen Mechanismen wie z. B. Microsoft Purview Informatoin Protection abgesicherten Client ist durch etablierte Maßnahmen (wie z. B. dem digitalen Signieren von PowerShell-Scripts) technisch und organisatorisch einfach möglich.  
 ### 2.6.2. Funktionen  
 **Signaturen und OOF-Nachrichten können:**
 - Aus **Vorlagen im DOCX- oder HTML**-Dateiformat generiert werden  
@@ -579,43 +579,43 @@ Die Einbindung in den mit Hilfe von AppLocker und anderen Mechanismen wie z. B. 
 - Als **Standard-OOF-Nachricht** für interne oder externe Empfänger festgelegt werden (nur OOF-Nachrichten)  
 - Nach **Outlook Web** für den aktuell angemeldeten Benutzer synchronisiert werden  
 - Nur zentral verwaltet sein oder **mit vom Benutzer erstellten Signaturen** koexistieren (nur Signaturen)  
-- In einen **alternativen Pfad** kopiert werden für einfachen Zugriff auf mobilen Geräten, die nicht direkt von diesem Skript unterstützt werden (nur Signaturen)
+- In einen **alternativen Pfad** kopiert werden für einfachen Zugriff auf mobilen Geräten, die nicht direkt von dieser Softwware unterstützt werden (nur Signaturen)
 - **Schreibgeschützt** (nur Outlook-Signaturen)
 - Gespiegelt in die Cloud als **Roaming-Signaturen**
 
 Set-Outlooksignatures kann **von Benutzern auf Clients oder auf einem Server ohne Interaktion des Endbenutzers** ausgeführt werden.  
-Auf den Clients kann es als Teil des Anmeldeskripts, als geplante Aufgabe oder auf Wunsch des Benutzers über ein Desktop-Symbol, einen Startmenüeintrag, eine Verknüpfung oder eine andere Art des Programmstarts ausgeführt werden.  
+Auf den Clients kann es als Teil des Anmeldescripts, als geplante Aufgabe oder auf Wunsch des Benutzers über ein Desktop-Symbol, einen Startmenüeintrag, eine Verknüpfung oder eine andere Art des Programmstarts ausgeführt werden.  
 Signaturen und OOF-Nachrichten können auch zentral erstellt und bereitgestellt werden, ohne dass der Endbenutzer oder der Client beteiligt sind.
 
 **Beispielvorlagen** für Signaturen und OOF-Nachrichten demonstrieren alle verfügbaren Funktionen und werden als .docx- und .htm-Dateien bereitgestellt.
 
-Der **Simulationsmodus** ermöglicht es Inhaltserstellern und Administratoren, das Verhalten des Skripts zu simulieren und die resultierenden Signaturdateien zu überprüfen, bevor sie in Betrieb gehen.
+Der **Simulationsmodus** ermöglicht es Inhaltserstellern und Administratoren, das Verhalten der Software zu simulieren und die resultierenden Signaturdateien zu überprüfen, bevor sie in Betrieb gehen.
   
-Das Skript ist **für den Einsatz in großen und komplexen Umgebungen** (Exchange Resource Forest-Szenarien, AD-übergreifende Trusts, mehrstufige AD-Subdomänen, viele Objekte) konzipiert. Es funktioniert **vor Ort, in hybriden und reinen Cloud-Umgebungen**.
+Die Software ist **für den Einsatz in großen und komplexen Umgebungen** (Exchange Resource Forest-Szenarien, AD-übergreifende Trusts, mehrstufige AD-Subdomänen, viele Objekte) konzipiert. Es funktioniert **vor Ort, in hybriden und reinen Cloud-Umgebungen**.
 
-Es ist **multimandantenfähig** durch die Verwendung verschiedener Vorlagenpfade, Konfigurationsdateien und Skriptparameter.
+Es ist **multimandantenfähig** durch die Verwendung verschiedener Vorlagenpfade, Konfigurationsdateien und Softwareparameter.
 
 Set-OutlookSignatures erfordert **keine Installation auf Servern oder Clients**. Sie benötigen lediglich eine Standard-Dateifreigabe auf einem Server sowie PowerShell und Office.
 ## 2.7. Administration  
 ### 2.7.1. Client  
 - Outlook und Word, jeweils ab Version 2010  
-- Das Script muss im Sicherheitskontext des aktuell angemeldeten Benutzers laufen.  
-- Das PowerShell-Script muss im „Full Language Mode” ausgeführt werden. Der „Constrained Language Mode“ wird nicht unterstützt, da gewisse Funktionen wie z. B. Base64-Konvertierungen in diesem Modus nicht verfügbar sind oder sehr langsame Alternativen benötigen.  
-- Falls AppLocker oder vergleichbare Lösungen zum Einsatz kommen, ist das Script bereits digital signiert.  
+- Die Software muss im Sicherheitskontext des aktuell angemeldeten Benutzers laufen.  
+- Die Software muss im „Full Language Mode” ausgeführt werden. Der „Constrained Language Mode“ wird nicht unterstützt, da gewisse Funktionen wie z. B. Base64-Konvertierungen in diesem Modus nicht verfügbar sind oder sehr langsame Alternativen benötigen.  
+- Falls AppLocker oder vergleichbare Lösungen zum Einsatz kommen, ist die Software bereits digital signiert.  
 - Netzwerkfreischaltungen:  
-	- Die Ports 389 (LDAP) and 3268 (Global Catalog), jeweils TCP and UDP, müssen zwischen Client und allen Domain Controllern freigeschaltet sein. Falls dies nicht der Fall ist, können signaturrelevante Informationen und Variablen nicht abgerufen werden. Das Script prüft bei jedem Lauf, ob der Zugriff möglich ist.  
-	- Für den Zugriff auf den SMB-File-Share mit den Script-Komponenten werden folgende Ports benötigt: 137 UDP, 138 UDP, 139 TCP, 445 TCP (Details <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)" target="_blank">in diesem Microsoft-Artikel</a>).  
+	- Die Ports 389 (LDAP) and 3268 (Global Catalog), jeweils TCP and UDP, müssen zwischen Client und allen Domain Controllern freigeschaltet sein. Falls dies nicht der Fall ist, können signaturrelevante Informationen und Variablen nicht abgerufen werden. Die Software prüft bei jedem Lauf, ob der Zugriff möglich ist.  
+	- Für den Zugriff auf den SMB-File-Share mit den Software-Komponenten werden folgende Ports benötigt: 137 UDP, 138 UDP, 139 TCP, 445 TCP (Details <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)" target="_blank">in diesem Microsoft-Artikel</a>).  
 	- Für den Zugriff auf WebDAV-Shares (z. B. SharePoint Dokumentbibliotheken) wird Port 443 TCP benötigt.  
 ### 2.7.2. Server  
 Benötigt werden:
-- Ein SMB-File-Share, in den das Script und seine Komponenten abgelegt werden. Auf diesen File-Share und seine Inhalte müssen alle Benutzer lesend zugreifen können.  
+- Ein SMB-File-Share, in den die Software und seine Komponenten abgelegt werden. Auf diesen File-Share und seine Inhalte müssen alle Benutzer lesend zugreifen können.  
 - Ein oder mehrere SMB-File-Shares oder WEBDAV-Shares (z. B. SharePoint Dokumentbibliotheken), in den die Vorlagen für Signaturen und Abwesenheitsnachrichten gespeichert und verwaltet werden.
 
 Falls in den Vorlagen Variablen (z. B. Vorname, Nachname, Telefonnummer) genutzt werden, müssen die entsprechenden Werte im Active Directory vorhanden sein. Im Fall von Linked Mailboxes kann dabei zwischen den Attributen des aktuellen Benutzers und den Attributen des Postfachs, die sich in unterschiedlichen AD-Forests befinden, unterschieden werden.  
 
-Wie in den Systemanforderungen beschrieben, ist das Script samt seinen Komponenten auf einem SMB-File-Share abzulegen. Alternativ kann es durch einen beliebigen Mechanismus auf die Clients verteilt und von dort ausgeführt werden.
+Wie in den Systemanforderungen beschrieben, ist die Software samt seinen Komponenten auf einem SMB-File-Share abzulegen. Alternativ kann es durch einen beliebigen Mechanismus auf die Clients verteilt und von dort ausgeführt werden.
 
-Alle Benutzer benötigen Lesezugriff auf das Script und alle seine Komponenten.
+Alle Benutzer benötigen Lesezugriff auf die Software und alle seine Komponenten.
 
 Solange diese Anforderungen erfüllt sind, kann jeder beliebige SMB-File-Share genutzt werden, beispielsweise  
 - der NETLOGON-Share eines Active Directory  
@@ -623,11 +623,11 @@ Solange diese Anforderungen erfüllt sind, kann jeder beliebige SMB-File-Share g
 - ein Share auf einem Windows-Client  
 - ein Share auf einem beliebigen Nicht-Windows-System, z. B. über SAMBA
 
-Solange alle Kunden die gleiche Version des Scripts einsetzen und dieses nur über Parameter konfigurieren, genügt eine zentrale Ablage für die Script-Komponenten.
+Solange alle Kunden die gleiche Version der Software einsetzen und diese nur über Parameter konfigurieren, genügt eine zentrale Ablage für die Software-Komponenten.
 
-Für maximale Leistung und Flexibilität wird empfohlen, dass jeder Kunde das Script in einem eigenen SMB-File-Share ablegt und diesen gegebenenfalls über Standorte hinweg auf verschiedene Server repliziert.  
+Für maximale Leistung und Flexibilität wird empfohlen, dass jeder Kunde die Software in einem eigenen SMB-File-Share ablegt und diesen gegebenenfalls über Standorte hinweg auf verschiedene Server repliziert.  
 ### 2.7.3. Ablage der Vorlagen  
-Wie in den Systemanforderungen beschrieben, können Vorlagen für Signaturen und Abwesenheitsnachrichten analog zum Script selbst auf SMB-File-Shares oder WebDAV-Shares (z. B. SharePoint Dokumentbibliotheken) abgelegt werden.
+Wie in den Systemanforderungen beschrieben, können Vorlagen für Signaturen und Abwesenheitsnachrichten analog zur Software selbst auf SMB-File-Shares oder WebDAV-Shares (z. B. SharePoint Dokumentbibliotheken) abgelegt werden.
 
 SharePoint-Dokumentbibliotheken haben den Vorteil der optionalen Versionierung von Dateien, so dass im Fehlerfall durch die Vorlagen-Verwalter rasch eine frühere Version einer Vorlage wiederhergestellt werden kann.
 
@@ -637,13 +637,13 @@ Benutzer benötigen lesenden Zugriff auf alle Vorlagen.
 
 Durch simple Vergabe von Schreibrechten auf den gesamten Vorlagen-Ordner oder auf einzelne Dateien darin wird die Erstellung und Verwaltung von Signatur- und Abwesenheits-Vorlagen an eine definierte Gruppe von Personen delegiert. Üblicherweise werden die Vorlagen von den Abteilungen Unternehmenskommunikation und Marketing definiert, erstellt und gewartet.
 
-Für maximale Leistung und Flexibilität wird empfohlen, dass jeder Kunde das Script in einem eigenen SMB-File-Share ablegt und diesen gegebenenfalls über Standorte hinweg auf verschiedene Server repliziert.  
+Für maximale Leistung und Flexibilität wird empfohlen, dass jeder Kunde die Software in einem eigenen SMB-File-Share ablegt und diesen gegebenenfalls über Standorte hinweg auf verschiedene Server repliziert.  
 ### 2.7.4. Verwaltung der Vorlagen  
 Durch simple Vergabe von Schreibrechten auf den Vorlagen-Ordner oder auf einzelne Dateien darin wird die Erstellung und Verwaltung von Signatur- und Abwesenheits-Vorlagen an eine definierte Gruppe von Personen delegiert. Üblicherweise werden die Vorlagen von den Abteilungen Unternehmenskommunikation und Marketing definiert, erstellt und gewartet.
 
-Das Script kann Vorlagen im DOCX- oder im HTML-Format verarbeiten. Für den Anfang wird die Verwendung des DOCX-Formats empfohlen; die Gründe für diese Empfehlung und die Vor- und Nachteile des jeweiligen Formats werden in der `README`-Datei des Scripts beschrieben.
+Die Software kann Vorlagen im DOCX- oder im HTML-Format verarbeiten. Für den Anfang wird die Verwendung des DOCX-Formats empfohlen; die Gründe für diese Empfehlung und die Vor- und Nachteile des jeweiligen Formats werden in der `README`-Datei der Software beschrieben.
 
-Die mit dem Script mitgelieferte `README`-Datei bietet eine Übersicht, wie Vorlagen zu administrieren sind, damit sie  
+Die mit der Software mitgelieferte `README`-Datei bietet eine Übersicht, wie Vorlagen zu administrieren sind, damit sie  
 - nur für bestimmte Gruppen oder Postfächer gelten  
 - als Standard-Signatur für neue Mails oder Antworten und Weiterleitungen gesetzt werden  
 - als interne oder externe Abwesenheits-Nachricht gesetzt werden
@@ -652,26 +652,26 @@ Die mit dem Script mitgelieferte `README`-Datei bietet eine Übersicht, wie Vorl
 In `README` und den Beispiel-Vorlagen werden zudem die ersetzbaren Variablen, die Erweiterung um benutzerdefinierte Variablen und der Umgang mit Fotos aus dem Active Directory beschrieben.
 
 In der mitgelieferten Beispiel-Datei „Test all signature replacement variables.docx“ sind alle standardmäßig verfügbaren Variablen enthalten; zusätzlich können eigene Variablen definiert werden.
-### 2.7.5. Ausführen des Scripts  
-Das Script kann über einen beliebigen Mechanismus ausgeführt werden, beispielsweise  
+### 2.7.5. Ausführen der Software
+Die Software kann über einen beliebigen Mechanismus ausgeführt werden, beispielsweise  
 - bei Anmeldung des Benutzers als Teil des Logon-Scripts oder als eigenes Script  
 - über die Aufgabenplanung zu fixen Zeiten oder bei bestimmten Ereignissen  
 - durch den Benutzer selbst, z. B. über eine Verknüpfung auf dem Desktop  
 - durch ein Werkzeug zur Client-Verwaltung
 
-Da es sich bei Set-OutlookSignatures um ein reines PowerShell-Script handelt, erfolgt der Aufruf wie bei jedem anderen Script dieses Dateityps:  
+Da es sich bei Set-OutlookSignatures hauptsächlich um ein PowerShell-Script handelt, erfolgt der Aufruf wie bei jedem anderen Script dieses Dateityps:  
 ```
 powershell.exe <PowerShell-Parameter> -file <Pfad zu Set-OutlookSignatures.ps1> <Script-Parameter>  
 ```
 #### 2.7.5.1. Parameter  
-Das Verhalten des Scripts kann über Parameter gesteuert werden. Besonders relevant sind dabei SignatureTemplatePath und OOFTemplatePath, über die der Pfad zu den Signatur- und Abwesenheits-Vorlagen angegeben wird.
+Das Verhalten der Software kann über Parameter gesteuert werden. Besonders relevant sind dabei SignatureTemplatePath und OOFTemplatePath, über die der Pfad zu den Signatur- und Abwesenheits-Vorlagen angegeben wird.
 
 Folgend ein Beispiel, bei dem die Signatur-Vorlagen auf einem SMB-File-Share und die AbwesenheService-Providerorlagen auf einem WebDAV-Share liegen:  
 ```
 powershell.exe -file '\\example.com\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' –SignatureTemplatePath '\\example.com\DFS-Share\Common\Templates\Signatures Outlook' –OOFTemplatePath 'https://webdav.example.com/CorporateCommunications/Templates/Out of Office templates'  
 ```
 
-Zum Zeitpunkt der Erstellung dieses Dokuments waren noch weitere Parameter verfügbar. Folgend eine kurze Übersicht der Möglichkeit, für Details sei auf die Dokumentation des Scripts in der `README`-Datei verwiesen:  
+Zum Zeitpunkt der Erstellung dieses Dokuments waren noch weitere Parameter verfügbar. Folgend eine kurze Übersicht der Möglichkeit, für Details sei auf die Dokumentation der Software in der `README`-Datei verwiesen:  
 - SignatureTemplatePath: Pfad zu den Signatur-Vorlagen. Kann ein SMB- oder WebDAV-Share sein.  
 - ReplacementVariableConfigFile: Pfad zur Datei, in der vom Standard abweichende Variablen definiert werden. Kann ein SMB- oder WebDAV-Share sein.  
 - TrustsToCheckForGroups: Standardmäßig werden alle Trusts nach Postfachinformationen abgefragt. Über diesen Parameter können bestimmte Domains entfernt und nicht-getrustete Domains hinzugefügt werden.  
@@ -679,11 +679,11 @@ Zum Zeitpunkt der Erstellung dieses Dokuments waren noch weitere Parameter verf�
 - SetCurrentUserOutlookWebSignature: Standardmäßig wird für den angemeldeten Benutzer eine Signatur in Outlook im Web gesetzt. Über diesen Parameter kann das verhindert werden.  
 - SetCurrentUserOOFMessage: Standardmäßig wird der Text der Abwesenheits-Nachrichten gesetzt. Über diesen Parameter kann dieses Verhalten geändert werden.  
 - OOFTemplatePath: Pfad zu den Abwesenheits-Vorlagen. Kann ein SMB- oder WebDAV-Share sein.  
-- AdditionalSignaturePath: Pfad zu einem zusätzlichen Share, in den alle Signaturen kopiert werden sollen, z. B. für den Zugriff von einem mobilen Gerät aus und zur vereinfachten Konfiguration nicht vom Script unterstützter Clients. Kann ein SMB- oder WebDAV-Share sein.  
+- AdditionalSignaturePath: Pfad zu einem zusätzlichen Share, in den alle Signaturen kopiert werden sollen, z. B. für den Zugriff von einem mobilen Gerät aus und zur vereinfachten Konfiguration nicht von der Software unterstützter Clients. Kann ein SMB- oder WebDAV-Share sein.  
 - UseHtmTemplates: Standardmäßig werden Vorlagen im DOCX-Format verarbeitet. Über diesen Schalter kann auf HTML (.htm) umgeschaltet werden.  
 Die `README`-Datei enthält weitere Parameter.
-#### 2.7.5.2. Laufzeit und Sichtbarkeit des Scripts  
-Das Script ist auf schnelle Durchlaufzeit und minimale Netzwerkbelastung ausgelegt, die Laufzeit des Scripts hängt dennoch von vielen Parametern ab:  
+#### 2.7.5.2. Laufzeit und Sichtbarkeit der software 
+Die Software ist auf schnelle Durchlaufzeit und minimale Netzwerkbelastung ausgelegt, die Laufzeit der Software hängt dennoch von vielen Parametern ab:  
 - allgemeine Geschwindigkeit des Clients (CPU, RAM, HDD)  
 - Anzahl der in Outlook konfigurierten Postfächer  
 - Anzahl der Trusted Domains  
@@ -701,17 +701,17 @@ Unter folgenden Rahmenbedingungen wurde eine reproduzierbare Laufzeit von ca. 30
 - Setzen der Signatur in Outlook im Web  
 - Kein Kopieren der Signaturen auf einen zusätzlichen Netzwerkpfad
   
-Da das Script keine Benutzerinteraktion erfordert, kann es über die üblichen Mechanismen minimiert oder versteckt ausgeführt werden. Die Laufzeit des Script wird dadurch nahezu irrelevant.  
+Da die Software keine Benutzerinteraktion erfordert, kann es über die üblichen Mechanismen minimiert oder versteckt ausgeführt werden. Die Laufzeit der Software wird dadurch nahezu irrelevant.  
 #### 2.7.5.3. Nutzung von Outlook und Word während der Laufzeit  
-Das Script startet Outlook nicht, alle Abfragen und Konfigurationen erfolgen über das Dateisystem und die Registry.
+Die Software startet Outlook nicht, alle Abfragen und Konfigurationen erfolgen über das Dateisystem und die Registry.
 
-Outlook kann während der Ausführung des Scripts nach Belieben gestartet, verwendet oder geschlossen werden.
+Outlook kann während der Ausführung der Software nach Belieben gestartet, verwendet oder geschlossen werden.
 
 Sämtliche Änderungen an Signaturen und Abwesenheits-Benachrichtigungen sind für den Benutzer sofort sichtbar und verwendbar, mit einer Ausnahme: Falls sich der Name der zu verwendenden Standard-Signatur für neue emails oder für Antworten und Weiterleitungen ändert, so greift diese Änderung erst beim nächsten Start von Outlook. Ändert sich nur der Inhalt, aber nicht der Name einer der Standard-Signaturen, so ist diese Änderung sofort verfügbar.
 
-Word kann während der Ausführung des Scripts nach Belieben gestartet, verwendet oder geschlossen werden.
+Word kann während der Ausführung der Software nach Belieben gestartet, verwendet oder geschlossen werden.
 
-Das Script nutzt Word zum Ersatz von Variablen in DOCX-Vorlagen und zum Konvertieren von DOCX und HTML nach RTF und TXT. Word wird dabei als eigener unsichtbarer Prozess gestartet. Dieser Prozess kann vom Benutzer praktisch nicht beeinflusst werden und beeinflusst vom Benutzer gestartete Word-Prozesse nicht.  
+Die Software nutzt Word zum Ersatz von Variablen in DOCX-Vorlagen und zum Konvertieren von DOCX und HTML nach RTF und TXT. Word wird dabei als eigener unsichtbarer Prozess gestartet. Dieser Prozess kann vom Benutzer praktisch nicht beeinflusst werden und beeinflusst vom Benutzer gestartete Word-Prozesse nicht.  
 ## 2.8. Unterstützung durch den Service-Provider  
 Der Service-Provider empfiehlt die Software Set-OutlookSignatures nicht nur, sondern bietet seinen Kunden auch definierte kostenlose Unterstützung an.
 
@@ -755,8 +755,8 @@ Folgende Leistungen sind mit dem Produktpreis abgedeckt:
 - Der Kunde stellt einen Standard-Client mit Outlook und Word zu fVerfügung.  
 - Der Bildschirminhalt des Clients muss zur gemeinsamen Arbeit per Beamer projiziert oder auf einem entsprechend großen Monitor dargestellt werden können.  
 - Der Kunde stellt einen Testbenutzer zur Verfügung. Dieser Testbenutzer muss auf dem Standard-Client  
-	- einmalig Script-Dateien aus dem Internet (github.com) herunterladen dürfen (alternativ kann der Kunde einen BitLocker-verschlüsselten USB-Stick für die Datenübertragung stellen).  
-	- unsignierte PowerShell-Scripte im Full Language Mode ausführen dürfen  
+	- einmalig Dateien aus dem Internet (github.com) herunterladen dürfen (alternativ kann der Kunde einen BitLocker-verschlüsselten USB-Stick für die Datenübertragung stellen).  
+	- signierte PowerShell-Scripte im Full Language Mode ausführen dürfen  
 	- über ein Mail-Postfach verfügen  
 	- Vollzugriff auf diverse Testpostfächer (persönliche Postfächer oder Gruppenpostfächer) haben, die nach Möglichkeit direkt oder indirekt Mitglied in diversen Gruppen oder Verteilerlisten sind. Für den Vollzugriff kann der Benutzer auf die anderen Postfächer entsprechend berechtigt sein, oder Benutzername und Passwort der zusätzlichen Postfächer sind bekannt.  
 #### 2.8.1.3. Schulung des Clientmanagements  
@@ -766,11 +766,11 @@ Folgende Leistungen sind mit dem Produktpreis abgedeckt:
 ##### 2.8.1.3.2. Inhalt und Ziele  
 - Zusammenfassung des vorangegangenen Termins „Erstabstimmung zu textuellen Signaturen“, mit Fokus auf gewünschte und realisierbare Funktionen  
 - Vorstellung der Möglichkeiten mit Fokus auf  
-- Prinzipieller Ablauf des Scripts  
-- Systemanforderungen Client (Office, PowerShell, AppLocker, digitale Signatur des Scripts, Netzwerk-Ports)  
+- Prinzipieller Ablauf der Software  
+- Systemanforderungen Client (Office, PowerShell, AppLocker, digitale Signatur der Software, Netzwerk-Ports)  
 - Systemanforderungen Server (Ablage der Vorlagen)  
 - Möglichkeiten der Einbindung des Produkts (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung)  
-- Parametrisierung des Scripts, unter anderem:  
+- Parametrisierung der Software, unter anderem:  
 - Bekanntgabe der Vorlagen-Ordner  
 - Outlook im Web berücksichtigen?  
 - Abwesenheitsnachrichten berücksichtigen?  
@@ -786,16 +786,16 @@ Folgende Leistungen sind mit dem Produktpreis abgedeckt:
 - Der Kunde stellt einen Standard-Client mit Outlook und Word zu Verfügung.  
 - Der Bildschirminhalt des Clients muss zur gemeinsamen Arbeit per Beamer projiziert oder auf einem entsprechend großen Monitor dargestellt werden können.  
 - Der Kunde stellt einen Testbenutzer zur Verfügung. Dieser Testbenutzer muss auf dem Standard-Client  
-	- einmalig Script-Dateien aus dem Internet (github.com) herunterladen dürfen (alternativ kann der Kunde einen BitLocker-verschlüsselten USB-Stick für die Datenübertragung stellen).  
-	- unsignierte PowerShell-Scripte im Full Language Mode ausführen dürfen
+	- einmalig Dateien aus dem Internet (github.com) herunterladen dürfen (alternativ kann der Kunde einen BitLocker-verschlüsselten USB-Stick für die Datenübertragung stellen).  
+	- signierte PowerShell-Scripte im Full Language Mode ausführen dürfen
 	- über ein Mail-Postfach verfügen  
 	- Vollzugriff auf diverse Testpostfächer (persönliche Postfächer oder Gruppenpostfächer) haben, die nach Möglichkeit direkt oder indirekt Mitglied in diversen Gruppen oder Verteilerlisten sind. Für den Vollzugriff kann der Benutzer auf die anderen Postfächer entsprechend berechtigt sein, oder Benutzername und Passwort der zusätzlichen Postfächer sind bekannt.  
 - Der Kunde stellt mindestens einen zentralen SMB-File- oder WebDAV-Share für die Ablage der Vorlagen zur Verfügung.  
-- Der Kunde stellt einen zentralen SMB-File-Share für die Ablage des Scripts und seiner Komponenten zur Verfügung.  
+- Der Kunde stellt einen zentralen SMB-File-Share für die Ablage der Software und seiner Komponenten zur Verfügung.  
 ### 2.8.2. Tests, Pilotbetrieb, Rollout  
 Die Planung und Koordination von Tests, Pilotbetrieb und Rollout erfolgt durch den Vorhabens-Verantwortlichen des Kunden.
 
-Die konkrete technische Umsetzung erfolgt durch den Kunden. Falls zusätzlich zu Mail auch der Client durch Service-Provider betreut wird, unterstützt das Client-Team bei der Einbindung des Scripts (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung).
+Die konkrete technische Umsetzung erfolgt durch den Kunden. Falls zusätzlich zu Mail auch der Client durch Service-Provider betreut wird, unterstützt das Client-Team bei der Einbindung der Software (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung).
 
 Bei prinzipiellen technischen Problemen unterstützt das Mail-Produktmanagement bei der Ursachenforschung, arbeitet Lösungsvorschläge aus und stellt gegebenenfalls den Kontakt zum Hersteller des Produkts her.
 
@@ -807,8 +807,8 @@ Zur Vorgehensweise bei Anpassungen am Code oder der Veröffentlichung neuer Funk
 Das Erstellen und Warten von Vorlagen ist Aufgabe des Kunden.  
 Das Mail-Produktmanagement steht für Fragen zu Realisierbarkeit und Auswirkungen beratend zur Verfügung.
 
-### 2.9.2. Erstellen und Warten von Ablage-Shares für Vorlagen und Script-Komponenten  
-Das Erstellen und Warten von Ablage-Shares für Vorlagen und Script-Komponenten ist Aufgabe des Kunden.
+### 2.9.2. Erstellen und Warten von Ablage-Shares für Vorlagen und Software-Komponenten  
+Das Erstellen und Warten von Ablage-Shares für Vorlagen und Software-Komponenten ist Aufgabe des Kunden.
 
 Das Mail-Produktmanagement steht für Fragen zu Realisierbarkeit und Auswirkungen beratend zur Verfügung.  
 ### 2.9.3. Setzen und Warten von AD-Attributen  
@@ -816,13 +816,13 @@ Das Setzen und Warten von AD-Attributen, die im Zusammenhang mit textuellen Sign
 
 Das Mail-Produktmanagement steht für Fragen zu Realisierbarkeit und Auswirkungen beratend zur Verfügung.  
 ### 2.9.4. Konfigurationsanpassungen  
-Konfigurationsanpassungen, die von den Entwicklern des Scripts explizit vorgesehen sind, werden jederzeit unterstützt.
+Konfigurationsanpassungen, die von den Entwicklern der Software explizit vorgesehen sind, werden jederzeit unterstützt.
 
 Das Mail-Produktmanagement steht für Fragen zur Realisierbarkeit und den Auswirkungen gewünschter Anpassungen beratend zur Verfügung.
 
 Die Planung und Koordination von Tests, Pilotbetrieb und Rollout im Zusammenhang mit Konfigurationsanpassungen erfolgt ebenso durch den Kunden wie die konkrete technische Umsetzung.
 
-Falls zusätzlich zu Mail auch der Client durch den Service-Provider betreut wird, unterstützt das Client-Team bei der Einbindung des Scripts (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung).  
+Falls zusätzlich zu Mail auch der Client durch den Service-Provider betreut wird, unterstützt das Client-Team bei der Einbindung der Software (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung).  
 ### 2.9.5. Probleme und Fragen im laufenden Betrieb  
 Bei prinzipiellen technischen Problemen unterstützt das Mail-Produktmanagement bei der Ursachenforschung, arbeitet Lösungsvorschläge aus und stellt gegebenenfalls den Kontakt zum Hersteller des Produkts her.
 
@@ -846,7 +846,7 @@ Wenn neue Versionen des Produkts veröffentlicht werden, informiert das Mail-Pro
 
 Die Planung und Koordination der Einführung der neuen Version erfolgt durch den Ansprechpartner beim Kunden.
 
-Die konkrete technische Umsetzung erfolgt ebenfalls durch den Kunden. Falls zusätzlich zu Mail auch der Client durch Service-Provider betreut wird, unterstützt das Client-Team bei der Einbindung des Scripts (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung).
+Die konkrete technische Umsetzung erfolgt ebenfalls durch den Kunden. Falls zusätzlich zu Mail auch der Client durch Service-Provider betreut wird, unterstützt das Client-Team bei der Einbindung der Software (Logon-Script, geplante Aufgabe, Desktop-Verknüpfung).
 
 Bei prinzipiellen technischen Problemen unterstützt das Mail-Produktmanagement bei der Ursachenforschung, arbeitet Lösungsvorschläge aus und stellt gegebenenfalls den Kontakt zum Hersteller des Produkts her.  
 ### 2.9.8. Anpassungen am Code des Produkts  

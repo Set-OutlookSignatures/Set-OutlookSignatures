@@ -42,7 +42,8 @@ Signatures and OOF messages can also be created and deployed centrally, without 
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the software and to inspect the resulting signature files before going live.
   
-The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
+The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.  
+All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).
 
 It is **multi-client capable** by using different template paths, configuration files and script parameters.
 
@@ -83,18 +84,19 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
   - [3.18. SimulateAndDeploy](#318-simulateanddeploy)
   - [3.19. SimulateAndDeployGraphCredentialFile](#319-simulateanddeploygraphcredentialfile)
   - [3.20. GraphOnly](#320-graphonly)
-  - [3.21. CreateRtfSignatures](#321-creatertfsignatures)
-  - [3.22. CreateTxtSignatures](#322-createtxtsignatures)
-  - [3.23. MoveCSSInline](#323-movecssinline)
-  - [3.24. EmbedImagesInHtml](#324-embedimagesinhtml)
-  - [3.25. EmbedImagesInHtmlAdditionalSignaturePath](#325-embedimagesinhtmladditionalsignaturepath)
-  - [3.26. DocxHighResImageConversion](#326-docxhighresimageconversion)
-  - [3.27. SignaturesForAutomappedAndAdditionalMailboxes](#327-signaturesforautomappedandadditionalmailboxes)
-  - [3.28. DisableRoamingSignatures](#328-disableroamingsignatures)
-  - [3.29. MirrorLocalSignaturesToCloud](#329-mirrorlocalsignaturestocloud)
-  - [3.30. WordProcessPriority](#330-wordprocesspriority)
-  - [3.31. BenefactorCircleId](#331-benefactorcircleid)
-  - [3.32. BenefactorCircleLicenseFile](#332-benefactorcirclelicensefile)
+  - [3.21. CloudEnvironment](#321-cloudenvironment)
+  - [3.22. CreateRtfSignatures](#322-creatertfsignatures)
+  - [3.23. CreateTxtSignatures](#323-createtxtsignatures)
+  - [3.24. MoveCSSInline](#324-movecssinline)
+  - [3.25. EmbedImagesInHtml](#325-embedimagesinhtml)
+  - [3.26. EmbedImagesInHtmlAdditionalSignaturePath](#326-embedimagesinhtmladditionalsignaturepath)
+  - [3.27. DocxHighResImageConversion](#327-docxhighresimageconversion)
+  - [3.28. SignaturesForAutomappedAndAdditionalMailboxes](#328-signaturesforautomappedandadditionalmailboxes)
+  - [3.29. DisableRoamingSignatures](#329-disableroamingsignatures)
+  - [3.30. MirrorLocalSignaturesToCloud](#330-mirrorlocalsignaturestocloud)
+  - [3.31. WordProcessPriority](#331-wordprocesspriority)
+  - [3.32. BenefactorCircleId](#332-benefactorcircleid)
+  - [3.33. BenefactorCircleLicenseFile](#333-benefactorcirclelicensefile)
 - [4. Outlook signature path](#4-outlook-signature-path)
 - [5. Mailboxes](#5-mailboxes)
 - [6. Group membership](#6-group-membership)
@@ -212,7 +214,7 @@ There are locked down environments, where all files matching the patterns `*.ps*
           - Option A1: Provide admin consent via URL
             1. Open a browser, preferably in a private window
             2. Open the URL 'https://login.microsoftonline.com/organizations/adminconsent?client_id=beea8249-8c98-4c76-92f6-ce3c468a61e6'
-            3. Log on with a user that has Global Admin or Application Administrator rights in your tenant
+            3. Log on with a user that has Global Admin or Client Application Administrator rights in your tenant
             4. Accept the required permissions on behalf of your tenant
                - You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[...]' could not be found or accessed. The reason for this message is that the Entra ID/Azure AD app is configured to only be able to authenticate against http://localhost.
           - Option A2: Run Set-OutlookSignatures as admin
@@ -251,7 +253,7 @@ There are locked down environments, where all files matching the patterns `*.ps*
                   ```
                   del "%LocalAppData%\MSAL.PS\MSAL.PS.msalcache.bin3"
                   ```
-        - Option B: Create and use your own Entra ID/Azure AD app
+        - Option B: Create and use your own Entra ID/Azure AD ap
           - As you create and host your own Entra ID/Azure AD application, this option is more secure than using the application provided by the developers.
           - This is an option for experienced Entra ID/Azure AD administrators.  
           If you lack this experience, but still want to use this option, [ExplicIT Consulting](https://explicitconsulting.at) offers commercial support also covering this topic.
@@ -478,21 +480,29 @@ Try to connect to Microsoft Graph only, ignoring any local Active Directory.
 The default behavior is to try Active Directory first and fall back to Graph.
 
 Default value: `$false`
-## 3.21. CreateRtfSignatures
+
+## 3.21. CloudEnvironment
+The cloud environment to connect to.
+
+Allowed values: Public, USGovernmentL4, USGovernmentL5, China
+
+Default value: `Public`
+`
+## 3.22. CreateRtfSignatures
 Should signatures be created in RTF format?
 
 Default value: `$false`
-## 3.22. CreateTxtSignatures
+## 3.23. CreateTxtSignatures
 Should signatures be created in TXT format?
 
 Default value: `$true`
-## 3.23. MoveCSSInline
+## 3.24. MoveCSSInline
 Move CSS to inline style attributes, for maximum email client compatibility.
 
 This parameter is enabled per default, as a workaround to Microsoft's problem with formatting in Outlook Web (M365 roaming signatures and font sizes, especially).
 
 Default value: $true
-## 3.24. EmbedImagesInHtml
+## 3.25. EmbedImagesInHtml
 Should images be embedded into HTML files?
 
 Outlook 2016 and newer can handle images embedded directly into an HTML file as BASE64 string (`<img src="data:image/[...]"`).
@@ -502,11 +512,11 @@ Outlook 2013 and earlier can't handle these embedded images when composing HTML 
 When setting EmbedImagesInHtml to `$false`, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details). Set-OutlookSignatures does this automatically for the currently logged-in user, but it may be overridden by other scripts or group policies.
 
 Default value: `$false`
-## 3.25. EmbedImagesInHtmlAdditionalSignaturePath
+## 3.26. EmbedImagesInHtmlAdditionalSignaturePath
 Some feature as 'EmbedImagesInHtml' parameter, but only valid for the path defined in AdditionalSignaturesPath when not in simulation mode.
 
 Default value: $false
-## 3.26. DocxHighResImageConversion
+## 3.27. DocxHighResImageConversion
 Enables or disables high resolution images in HTML signatures.
 
 When enabled, this parameter uses a workaround to overcome a Word limitation that results in low resolution images when converting to HTML. The price for high resolution images in HTML signatures are more time needed for document conversion and signature files requiring more storage space.
@@ -516,21 +526,21 @@ Disabling this feature speeds up DOCX to HTML conversion, and HTML signatures re
 Contrary to conversion to HTML, conversion to RTF always results in high resolution images.
 
 Default value: $true
-## 3.27. SignaturesForAutomappedAndAdditionalMailboxes
+## 3.28. SignaturesForAutomappedAndAdditionalMailboxes
 Deploy signatures for automapped mailboxes and additional mailboxes.
 
 Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook.
 
 Default value: `$true`
-## 3.28. DisableRoamingSignatures
+## 3.29. DisableRoamingSignatures
 Disable roaming signatures.
 
 Only sets HKCU registry key, does not override configuration set by group policy.
 
-Possible values: $null, $true, $false
+Allowed values: $null, $true, $false
 
 Default value: $true
-## 3.29. MirrorLocalSignaturesToCloud
+## 3.30. MirrorLocalSignaturesToCloud
 Should local signatures be uploaded as roaming signature for the current user?
 
 Possible for Exchange Online mailbox of currently logged-in user.
@@ -564,18 +574,18 @@ Another advantage of this solution is that it makes roaming signatures available
 
 Default value: $false
 
-## 3.30. WordProcessPriority
+## 3.31. WordProcessPriority
 Define the Word process priority. With lower values, Set-OutlookSignature runs longer but minimizes possible performance impact
 
-Possible values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
+Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
 
 Default value: 'Normal' ('32')
 
-## 3.31. BenefactorCircleId
+## 3.32. BenefactorCircleId
 The Benefactor Circle member Id matching your license file, which unlocks exclusive features.
 
 Default value: ''
-## 3.32. BenefactorCircleLicenseFile
+## 3.33. BenefactorCircleLicenseFile
 The Benefactor Circle license file matching your member Id, which unlocks exclusive features.
 
 Default value: ''
@@ -586,13 +596,13 @@ The registry setting does not allow for absolute paths, only for paths relative 
 
 If the relative path set in the registry would be a valid path but does not exist, the software creates it.  
 # 5. Mailboxes  
-the software only considers primary mailboxes per default, these are mailboxes added as separate accounts.
+The software only considers primary mailboxes per default, these are mailboxes added as separate accounts.
 
 This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
 
 Setting the parameter `SignaturesForAutomappedAndAdditionalMailboxes` to `true` allows the software to detect automapped and additional mailboxes. Signatures can be deployed for these types of mailboxes, but they can not be set as default signatures due to technical restrictions in Outlook.
 
-the software is created for Exchange environments. Non-Exchange mailboxes can not have OOF messages or group signatures, but common and mailbox specific signatures.  
+The software is created for Exchange environments. Non-Exchange mailboxes can not have OOF messages or group signatures, but common and mailbox specific signatures.  
 # 6. Group membership  
 Per default, the software considers all static security and distribution groups of group scopes global and universal the currently processed mailbox belongs to.
 
@@ -611,7 +621,7 @@ When no Active Directory connection is available, Microsoft Graph is queried for
 In Microsoft Graph, membership in dynamic groups is considered, too.
 
 # 7. Removing old signatures  
-the software always deletes signatures which were deployed by the software earlier, but are no longer available in the central repository. the software marks each processed signature with a specific HTML tag, which enables this cleaning feature.
+The software always deletes signatures which were deployed by the software earlier, but are no longer available in the central repository. the software marks each processed signature with a specific HTML tag, which enables this cleaning feature.
 
 Signatures created manually by the user are not deleted by default, this behavior can be changed with the DeleteUserCreatedSignatures parameter.  
 # 8. Error handling  
@@ -957,7 +967,7 @@ Per default, `.\config\default replacement variables.ps1` contains the following
 - Manager of current mailbox  
     - Same variables as logged-in user, `$CurrentMailboxManager[...]$` instead of `$CurrentMailbox[...]$`  
 ## 13.1. Photos from Active Directory  
-the software supports replacing images in signature templates with photos stored in Active Directory.
+The software supports replacing images in signature templates with photos stored in Active Directory.
 
 When using images in OOF templates, please be aware that Exchange and Outlook do not yet support images in OOF messages.
 
@@ -989,7 +999,7 @@ To be able to apply Word image features such as sizing, cropping, frames, 3D eff
 
 For the software to recognize images to replace, you need to follow at least one of the steps 2 and 4. If you follow both, the software first checks for step 2 first. If you provide multiple image replacement variables, `$CurrentUser[...]$` has the highest priority, followed by `$CurrentUserManager[...]$`, `$CurrentMailbox[...]$` and `$CurrentMailboxManager[...]$`. It is recommended to use only one image replacement variable per image.  
   
-the software will replace all images meeting the conditions described in the steps above and replace them with Active Directory photos in the background. This keeps Word image formatting option alive, just as if you would use Word's `"Change picture"` function.  
+The software will replace all images meeting the conditions described in the steps above and replace them with Active Directory photos in the background. This keeps Word image formatting option alive, just as if you would use Word's `"Change picture"` function.  
 
 ### 13.1.2. When using HTM template files
 Images are replaced when the `src` or `alt` property of the image tag contains one of the following strings:
@@ -1020,7 +1030,7 @@ The signature template `.\templates\Signatures DOCX\Test all signature replaceme
 - .RTF without workaround: 27.5 MB  
 - .RTF with workaround: 1.4 MB
   
-the software uses a workaround, but the resulting RTF files are still huge compared to other file types and especially for use in emails. If this is a problem, please either do not use embedded images in the signature template (including photos from Active Directory), or switch to HTML formatted emails.
+The software uses a workaround, but the resulting RTF files are still huge compared to other file types and especially for use in emails. If this is a problem, please either do not use embedded images in the signature template (including photos from Active Directory), or switch to HTML formatted emails.
 
 If you ran into this problem outside this script, please consider modifying the ExportPictureWithMetafile setting as described in  <a href="https://support.microsoft.com/kb/224663" target="_blank">this Microsoft article</a>.  
 If the link is not working, please visit the <a href="https://web.archive.org/web/20180827213151/https://support.microsoft.com/en-us/help/224663/document-file-size-increases-with-emf-png-gif-or-jpeg-graphics-in-word" target="_blank">Internet Archive Wayback Machine's snapshot of Microsoft's article</a>.  
@@ -1074,7 +1084,7 @@ Set-OutlookSignatures supports three directory environments:
 - Hybrid. This environment consists of an Active Directory on premises, which is synced with Microsoft 365 Azure Active Directory in the cloud. Make sure that all signature relevant groups (if applicable) are available as well on-prem and in the cloud, and also ensure this for mail related attributes (At least legacyExchangeDN, msexchrecipienttypedetails, msExchMailboxGuid and proxyaddresses - see https://learn.microsoft.com/en-us/azure/active-directory/hybrid/connect/reference-connect-sync-attributes-synchronized for details. Make sure that the mail attribute in any environment is set to the users primary SMTP address - it may only be empty on the linked user account in the on-prem resource forest scenario.). If the software can't make a connection to your on-prem environment, it tries to get required data from the cloud via the Microsoft Graph API.
 - Cloud-only. This environment has no Active Directory on premises, or does not sync mail attributes between the cloud and the on-prem enviroment. the software does not connect to your on-prem environment, only to the cloud via the Microsoft Graph API.
 
-the software parameter `GraphOnly` defines which directory environment is used:
+The software parameter `GraphOnly` defines which directory environment is used:
 - `-GraphOnly false` or not passing the parameter: On-prem AD first, Entra ID/Azure AD only when on-prem AD can not be reached
 - `-GraphOnly true`: Entra ID/Azure AD only, even when on-prem AD could be reached
 ## 15.1. Basic Configuration
@@ -1182,7 +1192,7 @@ The client needs port 443 TCP to access a WebDAV share (a SharePoint document li
 ## 17.6. Why is out of office abbreviated OOF and not OOO?  
 Back in the 1980s, Microsoft had a UNIX OS named Xenix ... but read yourself <a href="https://techcommunity.microsoft.com/t5/exchange-team-blog/why-is-oof-an-oof-and-not-an-ooo/ba-p/610191" target="_blank">here</a>.  
 ## 17.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
-the software uses DOCX as default template format, as this seems to be the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications:  
+The software uses DOCX as default template format, as this seems to be the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications:  
 - Not all Word formatting options are supported in HTML, which can lead to signatures looking a bit different than templates. For example, images may be placed at a different position in the signature compared to the template - this is because the Outlook HTML component only supports the "in line with text" text wrapping option, while Word offers more options.  
 - On the other hand, the Outlook HTML renderer works better with templates in the DOCX format: The Outlook HTML renderer does not respect the HTML image tags "width" and "height" and displays all images in their original size. When using DOCX as template format, the images are resized when exported to the HTM format.
   
@@ -1215,7 +1225,7 @@ The templates delivered with this script represent all possible formats:
 - `.\templates\Out of Office HTML` contains templates in the HTML format as Word exports them when using `"Website, filtered"` as format. Note the additional folders for each signature.  
 - `.\templates\Signatures HTML` contains templates in the HTML format. Note that there are no additional folders, as the Word export files have been processed with ConvertTo-SingleFileHTML function to create a single HTMl file with all local images embedded.  
 ## 17.8. How can I log the software output?  
-the software has no built-in logging option other than writing output to the host window.
+The software has no built-in logging option other than writing output to the host window.
 
 You can, for example, use PowerShell's `Start-Transcript` and `Stop-Transcript` commands to create a logging wrapper around Set-OutlookSignatures.ps1.
 ```
@@ -1317,7 +1327,7 @@ if ($AllChecksPassed = $true) {
 Stop-Transcript
 ```
 ## 17.11. Can multiple script instances run in parallel?  
-the software is designed for being run in multiple instances at the same. You can combine any of the following scenarios:  
+The software is designed for being run in multiple instances at the same. You can combine any of the following scenarios:  
 - One user runs multiple instances of the software in parallel  
 - One user runs multiple instances of the software in simulation mode in parallel  
 - Multiple users on the same machine (e.g. Terminal Server) run multiple instances of the software in parallel  
@@ -1480,7 +1490,7 @@ There is no binding roadmap for future versions, although I maintain a list of i
 
 Fixing issues has priority over new features, of course.
 ## 17.20. How to deploy signatures for "Send As", "Send On Behalf" etc.?
-the software only considers primary mailboxes, these are mailboxes added as separate accounts. This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
+The software only considers primary mailboxes, these are mailboxes added as separate accounts. This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
 
 If you want to deploy signatures for non-primary mailboxes, sett the parameter `SignaturesForAutomappedAndAdditionalMailboxes` to `true` to allow the software to detect automapped and additional mailboxes. Signatures can be deployed for these types of mailboxes, but they can not be set as default signatures due to technical restrictions in Outlook.
 

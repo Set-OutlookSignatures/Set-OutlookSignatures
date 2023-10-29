@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>MSAL.PS</id>
+    <version>4.37.0</version>
+    <authors>Jason Thompson</authors>
+    <owners>Microsoft Corporation</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://raw.githubusercontent.com/jasoth/MSAL.PS/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/jasoth/MSAL.PS</projectUrl>
+    <description>The MSAL.PS PowerShell module wraps MSAL.NET functionality into PowerShell-friendly cmdlets and is not supported by Microsoft. Microsoft support does not extend beyond the underlying MSAL.NET library. For any inquiries regarding the PowerShell module itself, you may contact the author on GitHub or PowerShell Gallery.
+
+MSAL.NET (Microsoft.Identity.Client) is an authentication library which enables you to acquire tokens from Azure AD, to access protected Web APIs (Microsoft APIs or applications registered with Azure Active Directory).</description>
+    <releaseNotes></releaseNotes>
+    <copyright>(c) 2021 Microsoft Corporation. All rights reserved.</copyright>
+    <tags>Microsoft Identity Azure AzureActiveDirectory AzureAD AAD ActiveDirectory AD ActiveDirectoryFederationServices ADFS Microsoft.Identity.Client MicrosoftAuthenticationLibrary MSAL OAuth OpenIdConnect OIDC AzureAutomationNotSupported PSEdition_Desktop PSEdition_Core Windows Linux MacOS PSModule PSIncludes_Function PSFunction_Add-MsalClientApplication PSFunction_Clear-MsalTokenCache PSFunction_Enable-MsalTokenCacheOnDisk PSFunction_Get-MsalAccount PSFunction_Get-MsalClientApplication PSFunction_Get-MsalFeatureSupport PSFunction_Get-MsalToken PSFunction_New-MsalClientApplication PSFunction_Remove-MsalClientApplication PSFunction_Select-MsalClientApplication PSCommand_Add-MsalClientApplication PSCommand_Clear-MsalTokenCache PSCommand_Enable-MsalTokenCacheOnDisk PSCommand_Get-MsalAccount PSCommand_Get-MsalClientApplication PSCommand_Get-MsalFeatureSupport PSCommand_Get-MsalToken PSCommand_New-MsalClientApplication PSCommand_Remove-MsalClientApplication PSCommand_Select-MsalClientApplication</tags>
+  </metadata>
+</package>

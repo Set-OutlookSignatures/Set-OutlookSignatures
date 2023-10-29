@@ -26,19 +26,46 @@ Requirements
   - Create a new app registration in Entra ID/Azure AD with the following non-default properties:
     - Application permissions with admin consent
       - Microsoft Graph
-        - MailboxSettings.ReadWrite # To set out of office replies for the simulated mailboxes
+        - GroupMember.Read.All
+          Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
+          Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+        - MailboxSettings.ReadWrite
+          Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
+		  Required to set out of office replies for the simulated mailboxes
+        - User.Read.All
+          Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
+          Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
       - Office 365 Exchange Online
-        - full_access_as_app # Required for Exchange Web Services access (read Outlook Web configuration, set classic signature and roaming signatures)
+        - full_access_as_app
+          Allows the app to have full access via Exchange Web Services to all mailboxes without a signed-in user.
+		  Required for Exchange Web Services access (read Outlook Web configuration, set classic signature and roaming signatures)
     - Delegated permissions with admin consent
+	  These permissions equal those mentioned in '.\config\default graph config.ps1'
       - Microsoft Graph
-	    - email # Allows the app to read your users' primary email address
-        - EWS.AccessAsUser.All # Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
-        - Group.Read.All # Allows the app to list groups, and to read their properties and all group memberships on behalf of the signed-in user. Also allows the app to read calendar, conversations, files, and other group content for all groups the signed-in user can access.
-        - MailboxSettings.readwrite # Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-        - offline_access # Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
-        - openid # Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
-        - profile # Allows the app to see your users' basic profile (e.g., name, picture, user name, email address)
-        - User.Read.All # Allows the app to read the full set of profile properties, reports, and managers of users in your organization, on behalf of the signed-in user.
+	    - email
+          Allows the app to read your users' primary email address.
+          Required to log on the current user.
+        - EWS.AccessAsUser.All
+          Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
+          Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
+        - GroupMember.Read.All
+          Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
+          Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+        - MailboxSettings.ReadWrite
+          Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
+          Required to detect the state of the out of office assistant and to set out of office replies.
+        - offline_access
+          Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
+          Required to get a refresh token from Graph.
+        - openid
+          Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
+          Required to log on the current user.
+        - profile
+          Allows the app to see your users' basic profile (e.g., name, picture, user name, email address).
+          Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
+        - User.Read.All
+          Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
+          Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
     - Define a client secret (and set a reminder to update it, because it will expire)
 	  - The code can easily be adapted for certificate authentication at application level (which is not possible for user authentication)
     - Set supported account types to "Accounts in this organizational directory only" (for security reasons)
@@ -96,6 +123,7 @@ param (
 		EmbedImagesInHtml                             = $false
 		EmbedImagesInHtmlAdditionalSignaturePath      = $true
 		GraphOnly                                     = $false
+		CloudEnvironment                              = "'Public'"
 		TrustsToCheckForGroups                        = @('*')
 		IncludeMailboxForestDomainLocalGroups         = $false
 		WordProcessPriority                           = "'Normal'"
@@ -129,12 +157,12 @@ function CreateUpdateSimulateAndDeployGraphCredentialFile {
 
 	try {
 		# User authentication
-		$auth = get-msaltoken -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
-		$authExo = get-msaltoken -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
+		$auth = get-msaltoken -AzureCloudInstance 'Public' -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
+		$authExo = get-msaltoken -AzureCloudInstance 'Public' -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
 
 		# App authentication
-		$Appauth = get-msaltoken -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
-		$AppauthExo = get-msaltoken -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
+		$Appauth = get-msaltoken -AzureCloudInstance 'Public' -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
+		$AppauthExo = get-msaltoken -AzureCloudInstance 'Public' -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
 
 		$null = @{
 			'AccessToken'       = $auth.accessToken

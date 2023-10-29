@@ -24,19 +24,51 @@
 
 
 # Client ID
-# The default client ID is defined in the developer's Azure tenant as multi-tenant, so it can be used everywhere
-# Can be replaced with a Client ID from the own tenant
-#   Add the following delegated (not application) permissions and provide admin consent:
-#     'https://graph.microsoft.com/email' # Allows the app to read your users' primary email address
-#     'https://graph.microsoft.com/EWS.AccessAsUser.All' # Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
-#     'https://graph.microsoft.com/group.read.all' # Allows the app to list groups, and to read their properties and all group memberships on behalf of the signed-in user. Also allows the app to read calendar, conversations, files, and other group content for all groups the signed-in user can access.
-#     'https://graph.microsoft.com/mailboxsettings.readwrite' # Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-#     'https://graph.microsoft.com/offline_access' # Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
-#     'https://graph.microsoft.com/openid' # Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
-#     'https://graph.microsoft.com/profile' # Allows the app to see your users' basic profile (e.g., name, picture, user name, email address)
-#     'https://graph.microsoft.com/user.read.all' # Allows the app to read the full set of profile properties, reports, and managers of users in your organization, on behalf of the signed-in user.
-#   Redirect URI: 'http://localhost', configure for "mobile and desktop applications"
-#   Enable 'Allow public client flows' to make Windows Integrated Authentication (SSO) work for Entra ID/Azure AD joined devices
+# The default client ID is defined in the developers Entra ID/Azure AD tenant as multi-tenant, so it can be used everywhere
+#   For security and maintenance reasons, it is recommended to create you own app in your own tenant
+# It can be replaced with the ID of an app created in your own tenant
+#   Create an app in Entra admin center (https://entra.microsoft.com)
+#     Sign in as at least Cloud Application Administrator
+#     Identity > Applications > App registrations > New registration
+#     Enter at least a display name for your application
+#     Set "Supported account type" to "Accounts in this organizational directory only"
+#     Set Redirect URI to "Mobile and desktop applications" and 'http://localhost' (http, not https)
+#     The "Application (client) ID" is the value you need to set for $GraphClientID in this file
+#   Client secret
+#     There is no need to define a client secret, as we only work with delegated permissions, and not with application permissions
+#   Add the following delegated permissions (not application permissions)
+#     Identity > Applications > App registrations > your application > API permissions > Add a permission
+#     Microsoft Graph
+#       email
+#         Allows the app to read your users' primary email address.
+#         Required to log on the current user.
+#       EWS.AccessAsUser.All
+#         Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
+#         Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
+#       GroupMember.Read.All
+#         Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
+#         Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+#       MailboxSettings.ReadWrite
+#         Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
+#         Required to detect the state of the out of office assistant and to set out of office replies.
+#       offline_access
+#         Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
+#         Required to get a refresh token from Graph.
+#       openid
+#         Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
+#         Required to log on the current user.
+#       profile
+#         Allows the app to see your users' basic profile (e.g., name, picture, user name, email address).
+#         Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
+#       User.Read.All
+#         Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
+#         Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
+#     Provide admin consent
+#       Click the "Grant admin consent for {your tenant}" button
+#   Enable 'Allow public client flows'
+#     Identity > Applications > App registrations > your application > Advanced settings
+#     Enable "Allow public client flows"
+#     This enables SSO (single sign-on) for domain-joined Windows (Windows Integrated Auth Flow)
 $GraphClientID = 'beea8249-8c98-4c76-92f6-ce3c468a61e6'
 
 

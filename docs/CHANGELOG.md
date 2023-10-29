@@ -16,6 +16,35 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.7.0" target="_blank">v4.7.0</a> - 2023-10-29
+_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+_**Attention, cloud mailbox users:**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
+### Changed
+- Reduced minimum required Graph permissions: GroupMember.Read.All is now used instead of Group.Read.All, which reduces delegated app permissions.  
+To compare the two permissions, see their description at [Microsoft Graph permission reference](https://learn.microsoft.com/en-us/graph/permissions-reference).
+  - If you use an Entra ID/Azure AD app defined in your own tenant
+    - If you want to use GroupMember.Read.All instead of Group.Read.All, you have to use at least v4.6.0 of Set-OutlookSignatures.  
+    Remove admin consent for the Group.Read.All permission and remove it from the app, then add the delegated GroupMember.Read.All permission and grant admin consent for it.
+    - If you do not want to use GroupMember.Read.All instead of Group.Read.All, there is nothing to do: v4.6.0 and up just request all permissions defined in the Entra ID/Azure AD app, versions before v4.6.0 explicitly request Group.Read.All.
+  - If you use the Entra ID/Azure AD app provided by the developers (app ID 'beea8249-8c98-4c76-92f6-ce3c468a61e6')
+    - If you want to use GroupMember.Read.All instead of Group.Read.All, you have to use at least v4.6.0 of Set-OutlookSignatures, and renew your admin consent for the new reduced permissions:
+      1. Open a browser, preferably in a private window
+      2. Open the URL 'https://login.microsoftonline.com/organizations/adminconsent?client_id=beea8249-8c98-4c76-92f6-ce3c468a61e6'
+      3. Log on with a user that has Global Admin or Client Application Administrator rights in your tenant
+      4. Accept the required permissions on behalf of your tenant. You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[...]' could not be found or accessed.
+    - If you want to use a version older than v4.6.0, you need to create your own app in your own Entra ID/Azure AD tenant as detailed in `.\config\default graph config.ps1`.
+    - For security and maintenance reasons, it is recommended to create you own app in your own tenant.
+### Added
+- Support for all cloud environments via new parameter `CloudEnvironment`: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet). See `.\docs\README` for details.
+- The software now shows a hint at startup when a newer release is available on GitHub.
+### Fixed
+- Implementation approach: Translated a sentence to English, which was only available in German (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/pull/89" target="_blank">#89</a>) (Thanks <a href="https://github.com/JeroenOortwijn" target="_blank">@JeroenOortwijn</a>!)
+- Update dependency MSAL.PS so that process id is correctly determined when run in Windows Terminal (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/88" target="_blank">#88</a>) (Thanks <a href="https://github.com/Ben-munich" target="_blank">@Ben-munich</a>!)
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.1" target="_blank">v4.6.1</a> - 2023-10-27
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
@@ -26,7 +55,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 - Correctly detect and restore Word registry key 'DisableWarningOnIncludeFieldsUpdate'
 - Simulation mode: Show images in out of office replies, even though Exchange does not support them yet
 - SimulateAndDeploy.ps1: Advanced error handling
-- Implementation approach: Translated a sentence to English, which was only available in German (Thanks <a href="https://github.com/JeroenOortwijn" target="_blank">@JeroenOortwijn</a>!)
+- Implementation approach: Translated a sentence to English, which was only available in German (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/pull/89" target="_blank">#89</a>) (Thanks <a href="https://github.com/JeroenOortwijn" target="_blank">@JeroenOortwijn</a>!)
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.0" target="_blank">v4.6.0</a> - 2023-10-23

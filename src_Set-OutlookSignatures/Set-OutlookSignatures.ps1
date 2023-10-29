@@ -33,7 +33,8 @@ Signatures and OOF messages can also be created and deployed centrally, without 
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the software and to inspect the resulting signature files before going live.
 
-the software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
+The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
+All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).
 
 It is **multi-client capable** by using different template paths, configuration files and script parameters.
 
@@ -42,7 +43,7 @@ Set-OutlookSignatures requires **no installation on servers or clients**. You on
 A **documented implementation approach**, based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators.
 The implementation approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
-the software core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\LICENSE.txt` for copyright and MIT license details.
+The software core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\LICENSE.txt` for copyright and MIT license details.
 
 **Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source license.  Please see `.\docs\Benefactor Circle` for details.
 .LINK
@@ -178,6 +179,11 @@ Try to connect to Microsoft Graph only, ignoring any local Active Directory.
 The default behavior is to try Active Directory first and fall back to Graph.
 Default value: $false
 
+.PARAMETER CloudEnvironment
+The cloud environment to connect to.
+Allowed values: Public, USGovernmentL4, USGovernmentL5, China
+Default value: 'Public'
+
 .PARAMETER CreateRtfSignatures
 Should signatures be created in RTF format?
 Default value: $true
@@ -217,7 +223,7 @@ Default value: $true
 .PARAMETER DisableRoamingSignatures
 Disable roaming signatures.
 Only sets HKCU registry key, does not override configuration set by group policy.
-Possible values: $null, $true, $false
+Allowed values: $null, $true, $false
 Default value: $true
 
 .PARAMETER MirrorLocalSignaturesToCloud
@@ -227,7 +233,7 @@ Default value: $false
 
 .PARAMETER WordProcessPriority
 Define the Word process priority. With lower values, Set-OutlookSignature runs longer but minimizes possible performance impact
-Possible values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
+Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
 Default value: 'Normal' ('32')
 
 .PARAMETER BenefactorCircleId
@@ -268,10 +274,10 @@ PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' 
 Please see '.\docs\README' and https://github.com/Set-OutlookSignatures/Set-OutlookSignatures for more details.
 
 .NOTES
-Script : Set-OutlookSignatures
-Version: XXXVersionStringXXX
-Web    : https://github.com/Set-OutlookSignatures/Set-OutlookSignatures
-License: MIT license (see '.\LICENSE.txt' for details and copyright)
+Software: Set-OutlookSignatures
+Version : XXXVersionStringXXX
+Web     : https://github.com/Set-OutlookSignatures/Set-OutlookSignatures
+License : MIT license (see '.\LICENSE.txt' for details and copyright)
 #>
 
 
@@ -405,6 +411,12 @@ Param(
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $GraphOnly = $false,
 
+    # Cloud environment to use
+    [Parameter(Mandatory = $false, ParameterSetName = 'E: Graph and Active Directory')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
+    [ValidateSet('Public', 'USGovernmentL4', 'USGovernmentL5', 'China')]
+    [string]$CloudEnvironment = 'Public',
+
     # Path to a Graph variable config file.
     [Parameter(Mandatory = $false, ParameterSetName = 'E: Graph and Active Directory')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
@@ -490,17 +502,113 @@ Param(
 )
 
 
+function ToSemVer($version) {
+    $major = 0
+    $minor = 0
+    $patch = 0
+    $pre = @()
+
+    if (($version -ireplace '^v') -match '^(?<major>\d+)(\.(?<minor>\d+))?(\.(?<patch>\d+))?(\-(?<pre>[0-9A-Za-z\-\.]+))?(\+(?<build>[0-9A-Za-z\-\.]+))?$') {
+        $major = [int]$matches['major']
+        $minor = [int]$matches['minor']
+        $patch = [int]$matches['patch']
+
+        if ($null -eq $matches['pre']) {
+            $pre = @()
+        } else {
+            $pre = $matches['pre'].Split('.')
+        }
+    }
+
+    New-Object PSObject -Property @{
+        Major         = $major
+        Minor         = $minor
+        Patch         = $patch
+        Pre           = $pre
+        VersionString = $version
+    } | Select-Object -Property Major, Minor, Patch, Pre, VersionString
+}
+
+
+function CompareSemVer($a, $b) {
+    $result = 0
+    $result = $a.Major.CompareTo($b.Major)
+    if ($result -ne 0) { return $result }
+
+    $result = $a.Minor.CompareTo($b.Minor)
+    if ($result -ne 0) { return $result }
+
+    $result = $a.Patch.CompareTo($b.Patch)
+    if ($result -ne 0) { return $result }
+
+    $ap = $a.Pre
+    $bp = $b.Pre
+
+    if ($ap.Length -eq 0 -and $bp.Length -eq 0) { return 0 }
+    if ($ap.Length -eq 0) { return 1 }
+    if ($bp.Length -eq 0) { return -1 }
+
+    $minLength = [Math]::Min($ap.Length, $bp.Length)
+
+    for ($i = 0; $i -lt $minLength; $i++) {
+        $ac = $ap[$i]
+        $bc = $bp[$i]
+
+        $anum = 0
+        $bnum = 0
+        $aIsNum = [Int]::TryParse($ac, [ref] $anum)
+        $bIsNum = [Int]::TryParse($bc, [ref] $bnum)
+
+        if ($aIsNum -and $bIsNum) {
+            $result = $anum.CompareTo($bnum)
+            if ($result -ne 0) {
+                return $result
+            }
+        }
+        if ($aIsNum) {
+            return -1
+        }
+        if ($bIsNum) {
+            return 1
+        }
+
+        $result = [string]::CompareOrdinal($ac, $bc)
+
+        if ($result -ne 0) { return $result }
+    }
+
+    return $ap.Length.CompareTo($bp.Length)
+}
+
+
 function main {
     Set-Location $PSScriptRoot | Out-Null
 
     $ScriptVersion = 'XXXVersionStringXXX'
 
+    $OldProgressPreference = $ProgressPreference
+    $ProgressPreference = 'SilentlyContinue'
+
+    try {
+        $ScriptVersionLatestRelease = (Invoke-WebRequest -Uri 'https://api.github.com/repos/Set-OutlookSignatures/Set-OutlookSignatures/releases/latest' -UseBasicParsing -TimeoutSec 2 | ConvertFrom-Json).tag_name
+    } catch {
+        $ScriptVersionLatestRelease = 'v0.0.0'
+    }
+
+    $ProgressPreference = $OldProgressPreference
+
+
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-    Write-Host '  Script : Set-OutlookSignatures'
-    Write-Host "  Version: $ScriptVersion"
-    Write-Host '  Web    : https://github.com/Set-OutlookSignatures/Set-OutlookSignatures'
-    Write-Host "  License: MIT license (see '.\LICENSE.txt' for details and copyright)"
+    Write-Host '  Software: Set-OutlookSignatures'
+    Write-Host "  Version : $ScriptVersion"
+
+    if ((CompareSemVer (ToSemVer($ScriptVersion)) (ToSemVer($ScriptVersionLatestRelease))) -lt 0) {
+        Write-Host "            A newer release than $($ScriptVersion) is available: $($ScriptVersionLatestRelease)" -ForegroundColor Yellow
+    }
+
+    Write-Host '  Web     : https://github.com/Set-OutlookSignatures/Set-OutlookSignatures'
+    Write-Host "  License : MIT license (see '.\LICENSE.txt' for details and copyright)"
 
 
     Write-Host
@@ -638,6 +746,44 @@ function main {
         $GraphOnly = $true
     } else {
         $GraphOnly = $false
+    }
+
+    Write-Host "  CloudEnvironment: '$CloudEnvironment'" -NoNewline
+    # Endpoints from https://github.com/microsoft/CSS-Exchange/blob/main/Shared/AzureFunctions/Get-CloudServiceEndpoint.ps1
+    # Environment names must match https://learn.microsoft.com/en-us/dotnet/api/microsoft.identity.client.azurecloudinstance?view=msal-dotnet-latest
+    switch ($CloudEnvironment) {
+        'Public' {
+            $CloudEnvironmentEnvironmentName = 'AzurePublic'
+            $CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.com'
+            $CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office.com'
+            $CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.outlook.com'
+            $CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.com'
+            break
+        }
+        'USGovernmentL4' {
+            $CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
+            $CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.us'
+            $CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office365.us'
+            $CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.office365.us'
+            $CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
+            break
+        }
+        'USGovernmentL5' {
+            $CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
+            $CloudEnvironmentGraphApiEndpoint = 'https://dod-graph.microsoft.us'
+            $CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook-dod.office365.us'
+            $CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s-dod.office365.us'
+            $CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
+            break
+        }
+        'China' {
+            $CloudEnvironmentEnvironmentName = 'AzureChina'
+            $CloudEnvironmentGraphApiEndpoint = 'https://microsoftgraph.chinacloudapi.cn'
+            $CloudEnvironmentExchangeOnlineEndpoint = 'https://partner.outlook.cn'
+            $CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.partner.outlook.cn'
+            $CloudEnvironmentAzureADEndpoint = 'https://login.partner.microsoftonline.cn'
+            break
+        }
     }
 
     Write-Host "  GraphConfigFile: '$GraphConfigFile'" -NoNewline
@@ -883,8 +1029,15 @@ This guide is part of the documention file '.\docs\README.html'.
 The '.\docs' folder also contains additional information.
 
 Go to 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' for new releases or to report issues.
+'@ -ForegroundColor Green
 
-You may be interested in some of the softwares located in the '.\sample code' folder.
+        if ((CompareSemVer (ToSemVer($ScriptVersion)) (ToSemVer($ScriptVersionLatestRelease))) -lt 0) {
+            Write-Host "A newer release than $($ScriptVersion) is available: $($ScriptVersionLatestRelease)" -ForegroundColor Yellow
+        }
+
+        Write-Host @'
+
+You may be interested in some of the software located in the '.\sample code' folder.
 
 To unlock additional features, consider becoming a Set-OutlookSignatures Benefactor Circle member.
 Members have exclusive access to:
@@ -904,9 +1057,10 @@ or visit 'https://explicitconsulting.at'.
 
         Write-Host
 
-        foreach ($step in (30..1)) {
-            Write-Host ("`rAutomaticaly continue in {0:00} seconds, or stop script with Ctrl+C" -f $step) -NoNewline
-            Start-Sleep -Seconds 1
+        foreach ($step in (30..0)) {
+            Write-Host ("`rAutomatically continue in {0:00} seconds, or stop script with Ctrl+C" -f $step) -NoNewline
+
+            if ($step -gt 0) { Start-Sleep -Seconds 1 }
         }
 
         Write-Host
@@ -1859,7 +2013,7 @@ or visit 'https://explicitconsulting.at'.
                                 $exchService.ImpersonatedUserId = $null
                                 $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AccessTokenExo)
                             }
-                            $exchService.Url = 'https://outlook.office.com/EWS/Exchange.asmx'
+                            $exchService.Url = "$($CloudEnvironmentExchangeOnlineEndpoint)/EWS/Exchange.asmx"
                         }
                     }
 
@@ -2411,10 +2565,10 @@ or visit 'https://explicitconsulting.at'.
                                     Write-Host "$($TemplateFileGroupSIDs[$TemplateFilePartTag] -ireplace '(?i)^(-:|-CURRENTUSER:|CURRENTUSER:|)', '')"
                                     $TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] = ($TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] + '[' + $TemplateFileGroupSIDs[$TemplateFilePartTag] + ']')
                                 } else {
-                                    Write-Host 'Not found.' -ForegroundColor Yellow
+                                    Write-Host 'Not found' -ForegroundColor Yellow
                                 }
                             } else {
-                                Write-Host 'Not found.' -ForegroundColor Yellow
+                                Write-Host 'Not found' -ForegroundColor Yellow
                                 $TemplateFilesGroupSIDsOverall.add($($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$1$3'), $null)
                             }
                         }
@@ -3008,7 +3162,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                                     $exchService.ImpersonatedUserId = $null
                                     $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AccessTokenExo)
                                 }
-                                $exchService.Url = 'https://outlook.office.com/EWS/Exchange.asmx'
+                                $exchService.Url = "$($CloudEnvironmentExchangeOnlineEndpoint)/EWS/Exchange.asmx"
                             }
                         }
 
@@ -4941,26 +5095,26 @@ function GraphGetToken {
             }
         }
     } else {
-        $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -TenantId $(if ($script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+        $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId $(if ($script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
         try {
             Write-Verbose '        Via IntegratedWindowsAuth'
-            $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/.default' -IntegratedWindowsAuth
+            $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -IntegratedWindowsAuth
         } catch {
             try {
                 Write-Verbose '        Via Silent with LoginHint'
-                $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/.default' -Silent -ForceRefresh
+                $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Silent -ForceRefresh
             } catch {
                 try {
                     Write-Verbose '        Via Prompt with LoginHint and Timeout'
-                    $auth = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://graph.microsoft.com/.default' -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false
+                    $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false
                 } catch {
                     Write-Verbose '        No authentication possible'
                     $auth = $null
                     return @{
-                        error             = (($error[0] | Out-String) + @"
+                        error             = (($error[0] | Out-String) + @'
 No authentication possible. Try:
-1. Delete MSAL.PS Graph token cache: '$([TokenCacheHelper]::CacheFilePath)'"
+1. When running in Windows Powershell, delete MSAL.PS Graph token cache file."
 2. Run Set-OutlookSignatures with the "-Verbose" parameter and check for authentication messages
 3. If the "Via Prompt with LoginHint and Timeout" authentication message is diplayed:
    - Check if a browser (the system default browser, if configured) opens for authentication
@@ -4974,7 +5128,7 @@ No authentication possible. Try:
        - Make sure that Set-OutlookSignatures is executed in the security context of the currently logged-in user
        - Make sure that the current PowerShell session allows TLS 1.2 (see https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85 for details)
        - Interactive authentication may fail due to a bug in Windows Terminal, which can be recognized because of its multiple sub windows organized in tabs. Try running Set-OutlookSignatures in the classic console host instead: conhost.exe powershell.exe -file '\server\share\folder\Set-OutlookSignatures.ps1'
-"@)
+'@)
                         AccessToken       = $null
                         AuthHeader        = $null
                         AccessTokenExo    = $null
@@ -4989,7 +5143,7 @@ No authentication possible. Try:
         }
 
         if ($auth) {
-            $authExo = $script:msalClientApp | Get-MsalToken -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes 'https://outlook.office.com/.default' -Silent -ForceRefresh
+            $authExo = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" -Silent -ForceRefresh
 
             try {
                 $script:AuthorizationHeader = @{
@@ -5038,7 +5192,7 @@ function GraphGetMe {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "https://graph.microsoft.com/$($GraphEndpointVersion)/me?`$select=" + [System.Web.HttpUtility]::UrlEncode(($GraphUserProperties -join ', '))
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Web.HttpUtility]::UrlEncode(($GraphUserProperties -join ', '))
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -5087,7 +5241,7 @@ function GraphGetUpnFromSmtp($user) {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users?`$filter=proxyAddresses/any(x:x eq 'smtp:$user')"
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$filter=proxyAddresses/any(x:x eq 'smtp:$($user)')"
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -5149,7 +5303,7 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
             $local:x = @($local:x | Select-Object -Unique) -join ','
             $requestBody = @{
                 Method      = 'Get'
-                Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Web.HttpUtility]::UrlEncode($local:x)
+                Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Web.HttpUtility]::UrlEncode($local:x)
                 Headers     = $authHeader
                 ContentType = 'Application/Json; charset=utf-8'
             }
@@ -5218,7 +5372,7 @@ function GraphGetUserManager($user) {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users/$user/manager"
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user)/manager"
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -5268,7 +5422,7 @@ function GraphGetUserTransitiveMemberOf($user) {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users/$user/transitiveMemberOf"
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user)/transitiveMemberOf"
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -5317,7 +5471,7 @@ function GraphGetUserPhoto($user) {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users/$user/photo/`$value"
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user)/photo/`$value"
             Headers     = $script:AuthorizationHeader
             ContentType = 'image/jpg'
         }
@@ -5371,7 +5525,7 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal, $authH
             $body = ConvertTo-Json -InputObject $body
             $requestBody = @{
                 Method      = 'Patch'
-                Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users/$user/mailboxsettings"
+                Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user)/mailboxsettings"
                 Headers     = $authHeader
                 ContentType = 'Application/Json; charset=utf-8'
                 Body        = $body
@@ -5398,13 +5552,13 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal, $authH
 function GraphFilterGroups($filter) {
     # https://docs.microsoft.com/en-us/graph/api/group-get?view=graph-rest-1.0&tabs=http
     # Required permission(s):
-    #   Delegated: Group.ReadAll
-    #   Application: Group.ReadAll
+    #   Delegated: GroupMember.Read.All
+    #   Application: GroupMember.Read.All
 
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/groups?`$select=securityidentifier&`$filter=" + [System.Web.HttpUtility]::UrlEncode($filter)
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/groups?`$select=securityidentifier&`$filter=" + [System.Web.HttpUtility]::UrlEncode($filter)
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -5453,7 +5607,7 @@ function GraphFilterUsers($filter) {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "https://graph.microsoft.com/$GraphEndpointVersion/users?`$select=securityidentifier&`$filter=" + [System.Web.HttpUtility]::UrlEncode($filter)
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$select=securityidentifier&`$filter=" + [System.Web.HttpUtility]::UrlEncode($filter)
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
