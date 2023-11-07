@@ -1,9 +1,5 @@
 ##[String]$location = Split-Path -Parent $PSCommandPath
 [String]$temp = [environment]::getfolderpath('TEMP')
-New-Item -Path $temp -Name "set-outlooksignatures" -ItemType "directory" -erroraction SilentlyContinue
-$destination = $temp + "\set-outlooksignatures"
-
-
 
 function DownloadGitHubRepository 
 { 
@@ -12,14 +8,14 @@ function DownloadGitHubRepository
        [string] $Name, 
          
        [Parameter(Mandatory=$True)] 
-       [string] $Author, 
+       [string] $Owner = "Set-OutlookSignatures", 
 
        [Parameter(Mandatory=$False)] 
-       [string] $RepositoryZipUrl = "https://github.com/alltimeuk/emailsignatures/archive/master.zip", 
-         
+       [string] $RepoName = "Set-OutlookSignatures", 
+
        [Parameter(Mandatory=$False)] 
        [string] $Branch = "master", 
-         
+
        [Parameter(Mandatory=$False)] 
        [string] $Location = "C:\temp"
     ) 
@@ -29,6 +25,8 @@ function DownloadGitHubRepository
     New-Item $ZipFile -ItemType File -Force
  
     # download the zip 
+    #$RepositoryZipUrl = "https://github.com/[Owner]/[repoName]/archive/[Branch].zip", 
+    $RepositoryZipUrl = "https://github.com/$Owner/$RepoName/archive/$Branch.zip"
     Write-Host 'Starting download from GitHub'
     Invoke-RestMethod -Uri $RepositoryZipUrl -OutFile $ZipFile
     Write-Host 'Download finished'
@@ -36,6 +34,7 @@ function DownloadGitHubRepository
     #Extract Zip File
     Write-Host 'Starting unzipping of $Name.zip'
     Expand-Archive -Path $ZipFile -DestinationPath $location -Force
+    Get-ChildItem  -path $location
     Write-Host 'Unzip finished here: $Location'
      
     # remove the zip file
@@ -43,7 +42,7 @@ function DownloadGitHubRepository
 }
 
 #Download
-DownloadGitHubRepository -Name "Set-OutlookSignatures" -Author "Simon Jackson @ Alltime Technologies Ltd" -RepositoryZipUrl "https://github.com/alltimeuk/EmailSignatures/archive/refs/heads/main.zip" -location "$destination"
+DownloadGitHubRepository -Name "OutlookSignatures" -Owner "alltimeuk" -RepoName "EmailSignatures" -branch "main" -location "$temp"
 
 #Run
-.\$destination\src_set-OutlookSignatures\Set-OutlookSignatures.ps1 -graphonly true -SignatureTemplatePath .\$destination\private\Signatures -SignatureIniPath .\$destination\private\Signatures\_Signatures.ini -SetCurrentUserOOFMessage false -CreateRtfSignatures true -CreateTxtSignatures true -DisableRoamingSignatures false -MirrorLocalSignaturesToCloud true
+.\$temp\src_set-OutlookSignatures\Set-OutlookSignatures.ps1 -graphonly true -SignatureTemplatePath .\$temp\private\Signatures -SignatureIniPath .\$temp\private\Signatures\_Signatures.ini -SetCurrentUserOOFMessage false -CreateRtfSignatures true -CreateTxtSignatures true -DisableRoamingSignatures false -MirrorLocalSignaturesToCloud true
