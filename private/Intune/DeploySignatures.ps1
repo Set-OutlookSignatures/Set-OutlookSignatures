@@ -4,13 +4,7 @@ New-Item -Path $temp -Name "set-outlooksignatures" -ItemType "directory" -errora
 $destination = $temp + "\set-outlooksignatures"
 
 
-######################################################################
-#                                                                    #
-# Download and Unzip GitHub Repository                               #
-# Author: Sandro Pereira                                             #
-#                                                                    #
-######################################################################
- 
+
 function DownloadGitHubRepository 
 { 
     param( 
