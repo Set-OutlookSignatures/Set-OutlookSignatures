@@ -1,3 +1,4 @@
 # exclude files and folders from the generated tarball
-/**                                           export-ignore
-/download[[:space:]]information.txt           -export-ignore
+/docs                                           export-ignore
+/src_Set-OutlookSignatures\sample[[:space:]] code -export-ignore
+/src_Set-OutlookSignatures\sample[[:space:]] templates -export-ignore

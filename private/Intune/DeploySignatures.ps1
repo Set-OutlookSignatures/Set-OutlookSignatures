@@ -6,8 +6,11 @@ function DownloadGitHubRepository
     param( 
        [Parameter(Mandatory=$True)] 
        [string] $Name, 
-         
-       [Parameter(Mandatory=$True)] 
+        
+       [Parameter(Mandatory=$False)]
+       [string] $RepositoryZipUrl = "",
+
+       [Parameter(Mandatory=$False)] 
        [string] $Owner = "Set-OutlookSignatures", 
 
        [Parameter(Mandatory=$False)] 
@@ -26,7 +29,8 @@ function DownloadGitHubRepository
  
     # download the zip 
     #$RepositoryZipUrl = "https://github.com/[Owner]/[repoName]/archive/[Branch].zip", 
-    $RepositoryZipUrl = "https://github.com/$Owner/$RepoName/archive/$Branch.zip"
+    #$RepositoryZipUrl = "https://github.com/$Owner/$RepoName/archive/$Branch.zip"
+    $RepositoryZipUrl = "https://github.com/alltimeuk/EmailSignatures/archive/refs/tags/1.0.0.zip"
     Write-Host 'Starting download from GitHub'
     Invoke-RestMethod -Uri $RepositoryZipUrl -OutFile $ZipFile
     Write-Host 'Download finished'
@@ -38,7 +42,7 @@ function DownloadGitHubRepository
     Write-Host 'Unzip finished here: $Location'
      
     # remove the zip file
-    Remove-Item -Path $ZipFile -Force
+    #Remove-Item -Path $ZipFile -Force
 }
 
 #Download
