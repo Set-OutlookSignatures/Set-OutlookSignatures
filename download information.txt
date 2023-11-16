@@ -1,4 +1,4 @@
-Thanks for your interest in Set-OutlookSignatures, the open source gold standard to centrally manage and deploy email signatures and out of office replies for Outlook and Exchange!
+Thanks for your interest in Set-OutlookSignatures, the open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange!
 
 
 To download an official release, visit 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases'.

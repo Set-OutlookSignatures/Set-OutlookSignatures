@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out of office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
 
 # What is the recommended approach for implementing the software? <!-- omit in toc -->
 There is certainly no definitive generic recommendation, but this document should be a good starting point.
@@ -187,7 +187,7 @@ This document provides an overview of the functional scope and administration of
 ### 1.6.1. Common description, license model  
 <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank">Set-OutlookSignatures</a> is a free open-source product with a chargeable extension for company-relevant functions.
 
-The product is used for the central administration and local distribution of textual signatures and out of office replies to clients. Outlook on Windows, Outlook Web and New Outlook are supported as targets.
+The product is used for the central administration and local distribution of textual signatures and out-of-office replies to clients. Outlook on Windows, Outlook Web and New Outlook are supported as targets.
 
 Integration into the client, which is secured with the help of AppLocker and other mechanisms such as Microsoft Purview Informatoin Protection, is technically and organisationally simple thanks to established measures (such as the digital signing of PowerShell scripts).
 ### 1.6.2. Features
@@ -202,7 +202,7 @@ Integration into the client, which is secured with the help of AppLocker and oth
 - Set as **default signature** for new emails, or for replies and forwards (signatures only)  
 - Set as **default OOF message** for internal or external recipients (OOF messages only)  
 - Set in **Outlook Web** for the currently logged-in user  
-- Centrally managed only or **exist along user created signatures** (signatures only)  
+- Centrally managed only or **exist along user-created signatures** (signatures only)  
 - Copied to an **alternate path** for easy access on mobile devices not directly supported by this software (signatures only)
 - **Write protected** (Outlook signatures only)
 - Mirrored to the cloud as **roaming signatures**
@@ -240,7 +240,7 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
 ### 1.7.2. Server  
 Required are:
 - An SMB file share in which the software and its components are stored. All users must have read access to this file share and its contents.  
-- One or more SMB file shares or WEBDAV shares (e.g. SharePoint document libraries) in which the templates for signatures and out of office replies are stored and managed.
+- One or more SMB file shares or WEBDAV shares (e.g. SharePoint document libraries) in which the templates for signatures and out-of-office replies are stored and managed.
 
 If variables (e.g. first name, last name, phone number) are used in the templates, the corresponding values must be available in the Active Directory. In the case of Linked Mailboxes, a distinction can be made between the attributes of the current user and the attributes of the mailbox located in different AD forests.  
 
@@ -258,7 +258,7 @@ As long as all clients use the same version of the software and only configure i
 
 For maximum performance and flexibility, it is recommended that each client stores the software in its own SMB file share and, if necessary, replicates this across locations on different servers.
 ### 1.7.3. Storage of templates  
-As described in the system requirements, templates for signatures and out of office replies can be stored on SMB file shares or WebDAV shares (e.g. SharePoint document libraries) analogous to the software itself.
+As described in the system requirements, templates for signatures and out-of-office replies can be stored on SMB file shares or WebDAV shares (e.g. SharePoint document libraries) analogous to the software itself.
 
 SharePoint document libraries have the advantage of optional versioning of files, so that in the event of an error, template administrators can quickly restore an earlier version of a template.
 
@@ -308,7 +308,7 @@ At the time of writing, other parameters were available. The following is a brie
 - TrustsToCheckForGroups: By default, all trusts are queried for mailbox information. This parameter can be used to remove specific domains and add non-trusted domains.  
 - DeleteUserCreatedSignatures: Should signatures created by the user be deleted? This is not done by default.  
 - SetCurrentUserOutlookWebSignature: By default, a signature is set in Outlook on the web for the logged-in user. This parameter can be used to prevent this.  
-- SetCurrentUserOOFMessage: By default, the text of the out of office replies is set. This parameter can be used to change this behaviour.  
+- SetCurrentUserOOFMessage: By default, the text of the out-of-office replies is set. This parameter can be used to change this behaviour.  
 - OOFTemplatePath: Path to the absence templates. Can be an SMB or WebDAV share.  
 - AdditionalSignaturePath: Path to an additional share to which all signatures should be copied, e.g. for access from a mobile device and for simplified configuration of clients not supported by the software. Can be an SMB or WebDAV share.  
 - UseHtmTemplates: By default, templates are processed in DOCX format. This switch can be used to switch to HTML (.htm).  
@@ -404,10 +404,10 @@ The following services are covered by the product price:
 - Parameterization of the software, among others:  
 - Disclosure of template folders  
 - Consider Outlook on the web?  
-- Consider out of office replies?  
+- Consider out-of-office replies?  
 - Which trusts to take into account?  
 - How to define additional variables?  
-- Allow user created signatures?  
+- Allow user-created signatures?  
 - Place signatures on an additional path?  
 - Joint testing based on templates previously developed by the customer and customer requirements.  
 - Definition of next steps  

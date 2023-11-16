@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out of office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
 
 # Welcome!<!-- omit in toc -->
 To get to know Set-OutlookSignatures, we recommend following the content flow of this README file: [Overview and features](#overview-and-features) > [Demo video](#demo-video) > [Requirements](#1-requirements) > [Quick Start Guide](#2-quick-start-guide) > [Table of Contents](#table-of-contents).
@@ -13,13 +13,13 @@ When facing a problem, look through [previously solved issues](https://github.co
 You are welcome to share your experiences with Set-OutlookSignatures, exchange ideas with other users or suggest new features in our [discussions board](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions?discussions_q=).
 
 # Overview and features<!-- omit in toc -->
-Email signatures and out of office replies are an integral part of corporate identity and corporate design, of successful concepts for media and internet presence, and of marketing campaigns.
+Email signatures and out-of-office replies are an integral part of corporate identity and corporate design, of successful concepts for media and internet presence, and of marketing campaigns.
 
 Central management and deployment ensures that CI/CD guidelines are met, guarantees the use of correct and up-to-date data, helps to comply with legal requirements, relieves staff and also opens up an additional marketing channel.
 
 Many companies are not aware that business emails, similar to a web presence, are usually subject to an imprint obligation. The legal basis differs from country to country, and non-compliance can result in severe penalties.
 
-**With Set-OutlookSignatures, signatures and out of office replies can be:**
+**With Set-OutlookSignatures, signatures and out-of-office replies can be:**
 - Generated from **templates in DOCX or HTML** file format  
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
@@ -30,7 +30,7 @@ Many companies are not aware that business emails, similar to a web presence, ar
 - Set as **default signature** for new emails, or for replies and forwards (signatures only)  
 - Set as **default OOF message** for internal or external recipients (OOF messages only)  
 - Set in **Outlook Web** for the currently logged-in user, including mirroring signatures the the cloud as **roaming signatures**  
-- Centrally managed only or **exist along user created signatures** (signatures only)  
+- Centrally managed only or **exist along user-created signatures** (signatures only)  
 - Copied to an **alternate path** for easy access on mobile devices not directly supported by this script (signatures only)
 - **Write protected** (Outlook signatures only)
 
@@ -257,7 +257,7 @@ There are locked down environments, where all files matching the patterns `*.ps*
           - As you create and host your own Entra ID/Azure AD application, this option is more secure than using the application provided by the developers.
           - This is an option for experienced Entra ID/Azure AD administrators.  
           If you lack this experience, but still want to use this option, [ExplicIT Consulting](https://explicitconsulting.at) offers commercial support also covering this topic.
-          - See the file '.\config\default graph config.ps1' for details about the required application permissions, endpoints and authentication methods.
+          - See the file '.\config\default graph config.ps1' for details about the required application permissions, endpoints and authentication methods. This file also links to sample code that automates the creation of the required application in your tenant.
      2. Run Set-OutlookSignatures
         - Cloud only, or hybrid without synced Exchange attributes (mail, legacyExchangeDN, msExchRecipientTypeDetails, msExchMailboxGuid, proxyAddresses):
           ```
@@ -484,7 +484,11 @@ Default value: `$false`
 ## 3.21. CloudEnvironment
 The cloud environment to connect to.
 
-Allowed values: Public, USGovernmentL4, USGovernmentL5, China
+Allowed values:
+- 'Public' (or: 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC')
+- 'AzureUSGovernment' (or: 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4')
+- 'AzureUSGovernmentDOD' (or: 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5')
+- 'China' (or: 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')
 
 Default value: `Public`
 `
@@ -1107,7 +1111,7 @@ If you prefer using own application IDs or need advanced configuration, follow t
     - `https://graph.microsoft.com/profile` for reading the logged-in user's properties
     - `https://graph.microsoft.com/user.read.all` for reading properties of other users (manager, additional mailboxes and their managers)
     - `https://graph.microsoft.com/group.read.all` for reading properties of all groups, required for templates restricted to groups
-    - `https://graph.microsoft.com/mailboxsettings.readwrite` for updating the logged-in user's out of office replies
+    - `https://graph.microsoft.com/mailboxsettings.readwrite` for updating the logged-in user's out-of-office replies
     - `https://graph.microsoft.com/EWS.AccessAsUser.All` for updating the logged-in user's Outlook Web signature
   - Set the Redirect URI to `http://localhost` and configure it for `mobile and desktop applications`
   - Enable `Allow public client flows` to make Windows Integrated Authentication (SSO) work for Entra ID/Azure AD joined devices
@@ -1592,7 +1596,7 @@ Mailboxes are taken from the first matching source:
 
 Default signatures can not be set locally or in Outlook Web until an Outlook profile has been configured, as the corresponding settings are stored in registry paths containing random numbers, which need to be created by Outlook.
 ## 17.25. What if Outlook is not installed at all?
-If Outlook is not installed at all, Set-OutlookSignatures will still be useful: It determine the logged-in users email address, create the signatures for his personal mailbox in a temporary location, set a default signature in Outlook Web as well as the out of office replies.
+If Outlook is not installed at all, Set-OutlookSignatures will still be useful: It determine the logged-in users email address, create the signatures for his personal mailbox in a temporary location, set a default signature in Outlook Web as well as the out-of-office replies.
 ## 17.26. What about the roaming signatures feature in Exchange Online?  
 Set-OutlookSignatures can handle roaming signatures since v4.0.0. See `MirrorLocalSignaturesToCloud` in this document for details.
 
@@ -1628,7 +1632,7 @@ If you do not enforce setting sensitivity labels or exclude DOCX and RTF file fo
 If you enforce setting sensitivity labels:
 - When using DOCX templates, just set the desired sensitivity label on all your template files.
   - It is recommended to use the 'General' label:
-    - Outlook signatures and out of office replies usually only contain information which is intended to be shared publicly by design.
+    - Outlook signatures and out-of-office replies usually only contain information which is intended to be shared publicly by design.
     - The templates themselves usually do not contain sensitive data, only placeholder variables.
     - Documents labeled 'General' can be opened without having the Information Protection Add-In for Office installed. This is useful when not all of your Set-OutlookSignatures users are also Information Protection users and have the Add-In installed.
   - When using a template with a sensitivity label other than 'General', every client Set-OutlookSignatures runs on needs the Information Protection Add-In for Office installed, and the user running Set-OutlookSignatures needs permission to access the protected file.

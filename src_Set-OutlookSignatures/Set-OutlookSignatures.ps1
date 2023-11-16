@@ -1,16 +1,16 @@
 <#
 .SYNOPSIS
 Set-OutlookSignatures XXXVersionStringXXX
-The open source gold standard to centrally manage and deploy email signatures and out of office replies for Outlook and Exchange..
+The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange.
 
 .DESCRIPTION
-Email signatures and out of office replies are an integral part of corporate identity and corporate design, of successful concepts for media and internet presence, and of marketing campaigns.
+Email signatures and out-of-office replies are an integral part of corporate identity and corporate design, of successful concepts for media and internet presence, and of marketing campaigns.
 
 Central administration and distribution ensures that CI/CD guidelines are met, guarantees the use of correct and up-to-date data, helps to comply with legal requirements, relieves staff and also opens up an additional marketing channel.
 
 Many companies are not aware that business emails, similar to a web presence, are usually subject to an imprint obligation. The legal basis differs from country to country, and non-compliance can result in severe penalties.
 
-**With Set-OutlookSignatures, signatures and out of office replies can be:**
+**With Set-OutlookSignatures, signatures and out-of-office replies can be:**
 - Generated from **templates in DOCX or HTML** file format
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
@@ -21,7 +21,7 @@ Many companies are not aware that business emails, similar to a web presence, ar
 - Set as **default signature** for new emails, or for replies and forwards (signatures only)
 - Set as **default OOF message** for internal or external recipients (OOF messages only)
 - Set in **Outlook Web** for the currently logged-in user, including mirroring signatures the the cloud as **roaming signatures**
-- Centrally managed only or **exist along user created signatures** (signatures only)
+- Centrally managed only or **exist along user-created signatures** (signatures only)
 - Copied to an **alternate path** for easy access on mobile devices not directly supported by this script (signatures only)
 - **Write protected** (Outlook signatures only)
 
@@ -181,7 +181,11 @@ Default value: $false
 
 .PARAMETER CloudEnvironment
 The cloud environment to connect to.
-Allowed values: Public, USGovernmentL4, USGovernmentL5, China
+Allowed values:
+- 'Public' (or: 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC')
+- 'AzureUSGovernment' (or: 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4')
+- 'AzureUSGovernmentDOD' (or: 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5')
+- 'China' (or: 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')
 Default value: 'Public'
 
 .PARAMETER CreateRtfSignatures
@@ -414,7 +418,7 @@ Param(
     # Cloud environment to use
     [Parameter(Mandatory = $false, ParameterSetName = 'E: Graph and Active Directory')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
-    [ValidateSet('Public', 'USGovernmentL4', 'USGovernmentL5', 'China')]
+    [ValidateSet('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC', 'AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4', 'AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5', 'China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')]
     [string]$CloudEnvironment = 'Public',
 
     # Path to a Graph variable config file.
@@ -581,6 +585,27 @@ function CompareSemVer($a, $b) {
 }
 
 
+function rankedSemVer($versions) {
+    for ($i = 0; $i -lt $versions.Length; $i++) {
+        $rank = 0
+
+        for ($j = 0; $j -lt $versions.Length; $j++) {
+            $diff = 0
+            $diff = compareSemVer $versions[$i] $versions[$j]
+
+            if ($diff -gt 0) {
+                $rank++
+            }
+        }
+
+        $current = [PsObject]$versions[$i]
+        Add-Member -InputObject $current -MemberType NoteProperty -Name Rank -Value $rank
+    }
+
+    return $versions
+}
+
+
 function main {
     Set-Location $PSScriptRoot | Out-Null
 
@@ -590,12 +615,28 @@ function main {
     $ProgressPreference = 'SilentlyContinue'
 
     try {
-        $ScriptVersionLatestRelease = (Invoke-WebRequest -Uri 'https://api.github.com/repos/Set-OutlookSignatures/Set-OutlookSignatures/releases/latest' -UseBasicParsing -TimeoutSec 2 | ConvertFrom-Json).tag_name
+        $GitHubReleases = @()
+
+        (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Set-OutlookSignatures/Set-OutlookSignatures/main/docs/releases.txt' -UseBasicParsing).Content -split '\r?\n' | Where-Object { $_ } | ForEach-Object {
+            $GitHubReleases += $_
+        }
     } catch {
-        $ScriptVersionLatestRelease = 'v0.0.0'
+        $GitHubReleases = @(, 'v0.0.0')
     }
 
     $ProgressPreference = $OldProgressPreference
+
+    $GitHubReleases += $ScriptVersion
+
+    $GitHubReleasesSemVer = @()
+
+    foreach ($v in $GitHubReleases) {
+        $GitHubReleasesSemVer += toSemVer $v
+    }
+
+    $GitHubReleasesSemVerRanked = rankedSemVer($GitHubReleasesSemVer) | Sort-Object -Property Rank -Unique
+
+    $GitHubReleasesNewer = @(@($GitHubReleasesSemVerRanked | Where-Object { $_.Rank -gt ($GitHubReleasesSemVerRanked | Where-Object { $_.VersionString -ieq $ScriptVersion }).Rank }).VersionString)
 
 
     Write-Host
@@ -603,8 +644,8 @@ function main {
     Write-Host '  Software: Set-OutlookSignatures'
     Write-Host "  Version : $ScriptVersion"
 
-    if ((CompareSemVer (ToSemVer($ScriptVersion)) (ToSemVer($ScriptVersionLatestRelease))) -lt 0) {
-        Write-Host "            A newer release than $($ScriptVersion) is available: $($ScriptVersionLatestRelease)" -ForegroundColor Yellow
+    if ($GitHubReleasesNewer) {
+        Write-Host "            At least one release newer than $($ScriptVersion) is available: $($GitHubReleasesNewer -join ', ')" -ForegroundColor Yellow
     }
 
     Write-Host '  Web     : https://github.com/Set-OutlookSignatures/Set-OutlookSignatures'
@@ -752,7 +793,7 @@ function main {
     # Endpoints from https://github.com/microsoft/CSS-Exchange/blob/main/Shared/AzureFunctions/Get-CloudServiceEndpoint.ps1
     # Environment names must match https://learn.microsoft.com/en-us/dotnet/api/microsoft.identity.client.azurecloudinstance?view=msal-dotnet-latest
     switch ($CloudEnvironment) {
-        'Public' {
+        { $_ -iin @('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC') } {
             $CloudEnvironmentEnvironmentName = 'AzurePublic'
             $CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.com'
             $CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office.com'
@@ -760,7 +801,8 @@ function main {
             $CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.com'
             break
         }
-        'USGovernmentL4' {
+
+        { $_ -iin @('AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4') } {
             $CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
             $CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.us'
             $CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office365.us'
@@ -768,7 +810,8 @@ function main {
             $CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
             break
         }
-        'USGovernmentL5' {
+
+        { $_ -iin @('AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5') } {
             $CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
             $CloudEnvironmentGraphApiEndpoint = 'https://dod-graph.microsoft.us'
             $CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook-dod.office365.us'
@@ -776,7 +819,8 @@ function main {
             $CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
             break
         }
-        'China' {
+
+        { $_ -iin @('China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud') } {
             $CloudEnvironmentEnvironmentName = 'AzureChina'
             $CloudEnvironmentGraphApiEndpoint = 'https://microsoftgraph.chinacloudapi.cn'
             $CloudEnvironmentExchangeOnlineEndpoint = 'https://partner.outlook.cn'
@@ -1031,25 +1075,25 @@ The '.\docs' folder also contains additional information.
 Go to 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' for new releases or to report issues.
 '@ -ForegroundColor Green
 
-        if ((CompareSemVer (ToSemVer($ScriptVersion)) (ToSemVer($ScriptVersionLatestRelease))) -lt 0) {
-            Write-Host "A newer release than $($ScriptVersion) is available: $($ScriptVersionLatestRelease)" -ForegroundColor Yellow
+        if ($GitHubReleasesNewer) {
+            Write-Host "At least one release newer than $($ScriptVersion) is available: $($GitHubReleasesNewer -join ', ')" -ForegroundColor Yellow
         }
 
         Write-Host @'
 
 You may be interested in some of the software located in the '.\sample code' folder.
 
-To unlock additional features, consider becoming a Set-OutlookSignatures Benefactor Circle member.
-Members have exclusive access to:
+Unlock additional features with a Benefactor Circle membership:
   - Time-based campaigns by assigning time range constraints to templates
   - Signatures for automapped and additional mailboxes
   - Set current user Outlook Web signature (classic Outlook Web signature and roaming signatures)
   - Download and upload roaming signatures
-  - Set current user out of office replies
-  - Delete signatures created by the software, where the templates no longer exist or are no longer assigned
-  - Delete user created signatures
+  - Set current user out-of-office replies
+  - Delete signatures created by the software, for which the templates no longer exist or apply
+  - Delete user-created signatures
   - Additional signature path (when used outside of simulation mode)
   - High resolution images from DOCX templates
+  - Digitally signed components for tamper protection and easy integration into locked-down environments
 
 Learn more about Set-OutlookSignatures Benefactor Circle in '.\docs\Benefactor Circle.html',
 or visit 'https://explicitconsulting.at'.
@@ -1058,7 +1102,7 @@ or visit 'https://explicitconsulting.at'.
         Write-Host
 
         foreach ($step in (30..0)) {
-            Write-Host ("`rAutomatically continue in {0:00} seconds, or stop script with Ctrl+C" -f $step) -NoNewline
+            Write-Host ("`rAutomatically continue in {0:00} seconds, or stop program with Ctrl+C" -f $step) -NoNewline
 
             if ($step -gt 0) { Start-Sleep -Seconds 1 }
         }
@@ -1701,7 +1745,7 @@ or visit 'https://explicitconsulting.at'.
             exit 1
         }
 
-        if (($($PSVersionTable.PSEdition) -ieq 'Desktop') -and (-not $SimulateAndDeployGraphCredentialFile)) {
+        if (-not $SimulateAndDeployGraphCredentialFile) {
             Write-Host "      MSAL.PS Graph token cache: '$([TokenCacheHelper]::CacheFilePath)'"
         }
 
@@ -1970,10 +2014,10 @@ or visit 'https://explicitconsulting.at'.
                     $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                     try {
                         if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS.NetStandard\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netcore\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
                             Unblock-File -LiteralPath $script:WebServicesDllPath
                         } else {
-                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
+                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netframework\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
                             Unblock-File -LiteralPath $script:WebServicesDllPath
                         }
                     } catch {
@@ -2690,7 +2734,7 @@ or visit 'https://explicitconsulting.at'.
             # unknown tags
             $x = ($TemplateFilePart -ireplace $TemplateFilePartRegexKnown, '').trim()
             if ($x) {
-                Write-Host '      Unknown tags.' -ForegroundColor yellow
+                Write-Host '      Unknown tags' -ForegroundColor yellow
                 Write-Host "        $(($x -ireplace '^\[', '') -ireplace '\]$', '')"
             }
 
@@ -2748,7 +2792,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $script:COMWordDummyPid = [IntPtr]::Zero
                 $null = [Win32Api]::GetWindowThreadProcessId( $script:COMWordDummyHWND, [ref] $script:COMWordDummyPid );
                 $script:COMWordDummy.Caption = $script:COMWordDummyCaption
-                Get-WmiObject Win32_process -Filter "ProcessId = ""$script:COMWordDummyPid""" | ForEach-Object { $null = $_.SetPriority($WordProcessPriority) }
+                $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$script:COMWordDummyPid""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $WordProcessPriority }
 
                 $script:COMWordDummy.Quit([ref]$false)
                 [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWordDummy) | Out-Null
@@ -2766,7 +2810,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $script:COMWordPid = [IntPtr]::Zero
                 $null = [Win32Api]::GetWindowThreadProcessId( $script:COMWordHWND, [ref] $script:COMWordPid );
                 $script:COMWord.Caption = $script:COMWordCaption
-                Get-WmiObject Win32_process -Filter "ProcessId = ""$script:COMWordPid""" | ForEach-Object { $null = $_.SetPriority($WordProcessPriority) }
+                $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$script:COMWordPid""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $WordProcessPriority }
             }
 
             Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
@@ -3119,10 +3163,10 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                         try {
                             if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                                Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS.NetStandard\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+                                Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netcore\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
                                 Unblock-File -LiteralPath $script:WebServicesDllPath
                             } else {
-                                Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
+                                Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netframework\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
                                 Unblock-File -LiteralPath $script:WebServicesDllPath
                             }
                         } catch {
@@ -3259,7 +3303,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
 
     # Delete old signatures created by this script, which are no longer available in $SignatureTemplatePath
-    # We check all local signatures for a specific marker in HTML code, so we don't touch user created signatures
+    # We check all local signatures for a specific marker in HTML code, so we don't touch user-created signatures
     if ($DeleteScriptCreatedSignaturesWithoutTemplate -eq $true) {
         Write-Host
         Write-Host "Remove old signatures created by this script, which are no longer centrally available @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
@@ -3277,10 +3321,10 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         }
     }
 
-    # Delete user created signatures if $DeleteUserCreatedSignatures -eq $true
+    # Delete user-created signatures if $DeleteUserCreatedSignatures -eq $true
     if ($DeleteUserCreatedSignatures -eq $true) {
         Write-Host
-        Write-Host "Remove user created signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+        Write-Host "Remove user-created signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
         if (-not $BenefactorCircleLicenseFile) {
             Write-Host "  The 'DeleteUserCreatedSignatures' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
@@ -3289,7 +3333,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::DeleteUserCreatedSignatures()
 
             if ($FeatureResult -ne 'true') {
-                Write-Host '  Error removing user created signatures.' -ForegroundColor Yellow
+                Write-Host '  Error removing user-created signatures.' -ForegroundColor Yellow
                 Write-Host "  $FeatureResult" -ForegroundColor Yellow
             }
         }
@@ -5101,34 +5145,63 @@ function GraphGetToken {
             Write-Verbose '        Via IntegratedWindowsAuth'
             $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -IntegratedWindowsAuth
         } catch {
+            Write-Verbose $error[0]
+
             try {
                 Write-Verbose '        Via Silent with LoginHint'
                 $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Silent -ForceRefresh
             } catch {
+                Write-Verbose $error[0]
+
                 try {
                     Write-Verbose '        Via Prompt with LoginHint and Timeout'
-                    $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false
+
+                    if (-not [string]::IsNullOrWhitespace($GraphHtmlMessageboxText)) {
+                        Add-Type -AssemblyName PresentationCore, PresentationFramework
+
+                        [System.Windows.MessageBox]::Show("$($GraphHtmlMessageboxText)", $(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }), 'OK', 'Information', 'None', 'DefaultDesktopOnly')
+                    }
+
+                    $MsalInteractiveParams = @{}
+
+                    if (-not [string]::IsNullOrWhiteSpace($GraphBrowserRedirectSuccess)) {
+                        $MsalInteractiveParams.BrowserRedirectSuccess = $GraphBrowserRedirectSuccess
+                    }
+
+                    if (-not [string]::IsNullOrWhiteSpace($GraphBrowserRedirectError)) {
+                        $MsalInteractiveParams.BrowserRedirectError = $GraphBrowserRedirectError
+                    }
+
+                    if (-not [string]::IsNullOrWhiteSpace($GraphHtmlMessageSuccess)) {
+                        $MsalInteractiveParams.HtmlMessageSuccess = $GraphHtmlMessageSuccess
+                    }
+
+                    if (-not [string]::IsNullOrWhiteSpace($GraphHtmlMessageError)) {
+                        $MsalInteractiveParams.HtmlMessageError = $GraphHtmlMessageError
+                    }
+
+                    $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
                 } catch {
                     Write-Verbose '        No authentication possible'
                     $auth = $null
                     return @{
-                        error             = (($error[0] | Out-String) + @'
-No authentication possible. Try:
-1. When running in Windows Powershell, delete MSAL.PS Graph token cache file."
-2. Run Set-OutlookSignatures with the "-Verbose" parameter and check for authentication messages
-3. If the "Via Prompt with LoginHint and Timeout" authentication message is diplayed:
-   - Check if a browser (the system default browser, if configured) opens for authentication
+                        error             = (($error[0] | Out-String) + @"
+No Graph authentication possible.
+1. Did you follow the Quick Start Guide in '.\docs\README' and configure the Entra ID/Azure AD app correctly?
+2. If the "Via Prompt with LoginHint and Timeout" authentication message is diplayed:
+   - Does a browser (the system default browser, if configured) open and ask for authentication?
      - Yes:
        - Check if the correct user account is selected/entered and if the authentication is successful
        - Check if authentication happens within two minutes
        - Ensure that access to 'http://localhost' is allowed ('https://localhost' is currently not technically feasible, see 'https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/System-Browser-on-.Net-Core' and 'https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/MSAL.NET-uses-web-browser' for details)
      - No:
        - Run Set-OutlookSignatures in a new PowerShell session
-       - Check the system default browser
+       - Check if a default browser is set and if "start https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" opens it
        - Make sure that Set-OutlookSignatures is executed in the security context of the currently logged-in user
        - Make sure that the current PowerShell session allows TLS 1.2 (see https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85 for details)
-       - Interactive authentication may fail due to a bug in Windows Terminal, which can be recognized because of its multiple sub windows organized in tabs. Try running Set-OutlookSignatures in the classic console host instead: conhost.exe powershell.exe -file '\server\share\folder\Set-OutlookSignatures.ps1'
-'@)
+3. Run Set-OutlookSignatures with the "-Verbose" parameter and check for authentication messages
+4. Delete the MSAL.PS Graph token cache file '$(try { [TokenCacheHelper]::CacheFilePath } catch { 'TokenCacheHelper error - file info not available!' } )'.
+"@)
                         AccessToken       = $null
                         AuthHeader        = $null
                         AccessTokenExo    = $null

@@ -1,10 +1,12 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out of office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/release/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
 
 # Changelog
 <!--
   Sample changelog entry
   Remove leading spaces after pasting
+  Update .\docs\releases.txt
+
   ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
   _Put Notice here_
   _**Breaking:** Notice about breaking change_  
@@ -14,6 +16,26 @@
   ### Removed
   ### Fixed
 -->
+
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.0-beta.2" target="_blank">v4.8.0-beta.2</a> - 2023-11-16
+_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+_**Attention, cloud mailbox users:**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
+### Changed
+- Updated dependency MSAL.Net to v4.57.0.
+- Allow more alternate names for cloud environments. See `.\docs\README` for details about the `CloudEnvironment` parameter.
+### Added
+- Graph token cache now not only works in Windows PowerShell 5.1, but also in PowerShell 7. 
+- A message box now informs the user before a new browser tab is opened for authentication, as Microsoft still does not show the Entra ID/Azure AD app name in the authentication prompt. The message text can be customized or disabled with the `$GraphHtmlMessageboxText` parameter in `.\config\default graph config.ps1`. See that file for details.
+- The HTML message after a successful browser authentication can be customized with the `$GraphHtmlMessageSuccess` parameter in `.\config\default graph config.ps1`. See that file for details, and also consider `$GraphBrowserRedirectSuccess` for a redirection alternative.
+- The HTML message after an unsuccessful browser authentication can be customized with the `$GraphHtmlMessageError` parameter in `.\config\default graph config.ps1`. See that file for details, and also consider `$GraphBrowserRedirectError` for a redirection alternative.
+- New sample code `.\sample code\Create-EntraApp.ps1` automates the creation of the Entra app required to access Microsoft Graph.
+### Fixed
+- MirrorLocalSignaturesToCloud now correctly detects cloud mailboxes in hybrid environments when a connection to the on-prem Active Directory is used
+- Setting Word process priority no longer leads to an error in PowerShell 7
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.7.0" target="_blank">v4.7.0</a> - 2023-10-29
@@ -53,7 +75,7 @@ _**Attention, cloud mailbox users:**_
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Fixed
 - Correctly detect and restore Word registry key 'DisableWarningOnIncludeFieldsUpdate'
-- Simulation mode: Show images in out of office replies, even though Exchange does not support them yet
+- Simulation mode: Show images in out-of-office replies, even though Exchange does not support them yet
 - SimulateAndDeploy.ps1: Advanced error handling
 - Implementation approach: Translated a sentence to English, which was only available in German (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/pull/89" target="_blank">#89</a>) (Thanks <a href="https://github.com/JeroenOortwijn" target="_blank">@JeroenOortwijn</a>!)
 
@@ -202,9 +224,9 @@ _**Attention, cloud mailbox users:**_
     - Signatures for automapped and additional mailboxes
     - Set current user Outlook Web signature (classic Outlook Web signature and roaming signature)
     - Download and upload roaming signatures
-    - Set current user out of office replies
-    - Delete signatures created by the software, where the template no longer exists or is no longer assigned
-    - Delete user created signatures
+    - Set current user out-of-office replies
+    - Delete signatures created by the software, for which the templates no longer exist or apply
+    - Delete user-created signatures
     - Additional signature path (when used outside of simulation mode)
     - High resolution images from DOCX templates
 - **Breaking:** The `CreateRTFSignatures` parameter now defaults to `false`, because the RTF format for emails is hardly used nowadays.
@@ -582,7 +604,7 @@ _Do not use this release. It was withdrawn due to a severe problem._
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.5.0" target="_blank">v1.5.0</a> - 2021-06-18
 ### Added
-- Add support for out of office replies
+- Add support for out-of-office replies
 - New parameter SetCurrentUserOOFMessage
 - New parameter OOFTemplatePath
 - Add sample files for OOF templates '.\OOF templates'

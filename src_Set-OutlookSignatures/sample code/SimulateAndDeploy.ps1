@@ -7,85 +7,88 @@ The sample code is written in a generic way, which allows for easy adaption.
 Looking for support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support.
 
 Features
-- Automate simulation mode for all given mailboxes
-- A configurable number of Set-OutlookSignatures instances run in parallel for better performance
-- Set default signature in Outlook Web, no matter if classic signature or roaming signatures
-- Set internal and external out of office (OOF) message
-- Supports on-prem, hybrid and cloud-only environments
+	- Automate simulation mode for all given mailboxes
+	- A configurable number of Set-OutlookSignatures instances run in parallel for better performance
+	- Set default signature in Outlook Web, no matter if classic signature or roaming signatures
+	- Set internal and external out of office (OOF) message
+	- Supports on-prem, hybrid and cloud-only environments
 
 Requirements
-- On-prem
-  - the software needs to be run with an account that has a mailbox which is granted full access to all simulated mailboxes
-  - If you do not want to simulate cloud mailboxes, set $ConnectOnpremInsteadOfCloud to $true
-- Cloud
-  - the software needs to be run with an account that has a mailbox which is granted full access to all simulated mailboxes
-    - MFA is not yet supported, but script can be adapted accordingly
-	  - MFA would require interactivity, breaking the possibility for complete automation
-	  - Better configure a Conditional Access Policy that only allows logon from a controlled network and does not require MFA
-	- Service Principals are not supported by the API
-  - Create a new app registration in Entra ID/Azure AD with the following non-default properties:
-    - Application permissions with admin consent
-      - Microsoft Graph
-        - GroupMember.Read.All
-          Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
-          Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
-        - MailboxSettings.ReadWrite
-          Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-		  Required to set out of office replies for the simulated mailboxes
-        - User.Read.All
-          Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-          Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
-      - Office 365 Exchange Online
-        - full_access_as_app
-          Allows the app to have full access via Exchange Web Services to all mailboxes without a signed-in user.
-		  Required for Exchange Web Services access (read Outlook Web configuration, set classic signature and roaming signatures)
-    - Delegated permissions with admin consent
-	  These permissions equal those mentioned in '.\config\default graph config.ps1'
-      - Microsoft Graph
-	    - email
-          Allows the app to read your users' primary email address.
-          Required to log on the current user.
-        - EWS.AccessAsUser.All
-          Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
-          Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
-        - GroupMember.Read.All
-          Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
-          Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
-        - MailboxSettings.ReadWrite
-          Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-          Required to detect the state of the out of office assistant and to set out of office replies.
-        - offline_access
-          Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
-          Required to get a refresh token from Graph.
-        - openid
-          Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
-          Required to log on the current user.
-        - profile
-          Allows the app to see your users' basic profile (e.g., name, picture, user name, email address).
-          Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
-        - User.Read.All
-          Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-          Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
-    - Define a client secret (and set a reminder to update it, because it will expire)
-	  - The code can easily be adapted for certificate authentication at application level (which is not possible for user authentication)
-    - Set supported account types to "Accounts in this organizational directory only" (for security reasons)
-  - You can limit the access of the app to specific mailboxes. This is recommended because of the "MailboxSettings.ReadWrite" and "full_access_as-app" permission required at application level.
-    - Use the New-ApplicationAccessPolicy cmdlet to limit access or to deny access to specific mailboxes or to mailboxes organized in groups.
-    - See https://learn.microsoft.com/en-us/powershell/module/exchange/new-applicationaccesspolicy for details
-- Microsoft Word (see 'Limitations' for a scenario that does not require Word)
-- File paths can get very long and be longer than the default OS limit. Make sure you allow long file paths.
-  - https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+	- On-prem
+		- the software needs to be run with an account that has a mailbox which is granted full access to all simulated mailboxes
+		- If you do not want to simulate cloud mailboxes, set $ConnectOnpremInsteadOfCloud to $true
+	- Cloud
+		- The software needs to be run with an account that has a mailbox which is granted full access to all simulated mailboxes
+		- MFA is not yet supported, but script can be adapted accordingly
+			- MFA would require interactivity, breaking the possibility for complete automation
+			- Better configure a Conditional Access Policy that only allows logon from a controlled network and does not require MFA
+		- Service Principals are not supported by the API
+		- Create a new app registration in Entra ID/Azure AD
+			- Option A: Create the app automatically by using the script '.\sample code\Create-EntraApp.ps1'
+				The sample code creates the app with all required settings automatically, only providing admin consent is a manual task
+			- Option B: Create the Entra app manually, with the following properties:
+				- Application permissions with admin consent
+					- Microsoft Graph
+						- GroupMember.Read.All
+							Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
+							Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+						- MailboxSettings.ReadWrite
+							Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
+							Required to set out-of-office replies for the simulated mailboxes
+						- User.Read.All
+							Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
+							Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
+					- Office 365 Exchange Online
+						- full_access_as_app
+							Allows the app to have full access via Exchange Web Services to all mailboxes without a signed-in user.
+							Required for Exchange Web Services access (read Outlook Web configuration, set classic signature and roaming signatures)
+				- Delegated permissions with admin consent
+					These permissions equal those mentioned in '.\config\default graph config.ps1'
+					- Microsoft Graph
+						- email
+							Allows the app to read your users' primary email address.
+							Required to log on the current user.
+						- EWS.AccessAsUser.All
+							Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
+							Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
+						- GroupMember.Read.All
+							Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
+							Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+						- MailboxSettings.ReadWrite
+							Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
+							Required to detect the state of the out of office assistant and to set out-of-office replies.
+						- offline_access
+							Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
+							Required to get a refresh token from Graph.
+						- openid
+							Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
+							Required to log on the current user.
+						- profile
+							Allows the app to see your users' basic profile (e.g., name, picture, user name, email address).
+							Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
+						- User.Read.All
+							Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
+							Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
+					- Define a client secret (and set a reminder to update it, because it will expire)
+						The code can easily be adapted for certificate authentication at application level (which is not possible for user authentication)
+					- Set supported account types to "Accounts in this organizational directory only" (for security reasons)
+		- You can limit the access of the app to specific mailboxes. This is recommended because of the "MailboxSettings.ReadWrite" and "full_access_as-app" permission required at application level.
+			- Use the New-ApplicationAccessPolicy cmdlet to limit access or to deny access to specific mailboxes or to mailboxes organized in groups.
+			- See https://learn.microsoft.com/en-us/powershell/module/exchange/new-applicationaccesspolicy for details
+	- Microsoft Word (see 'Limitations' for a scenario that does not require Word)
+	- File paths can get very long and be longer than the default OS limit. Make sure you allow long file paths.
+		- https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
 
 Limitations
-- Despitze parallelization, the software runtime can be unsuited for a higher number of users. The reason usually is the Word background process.
-  - If you require signatures in RTF and/or TXT format, Word is needed for document conversion and you can only shorten runtime by adding hardware (scale up or scale out)
-  - If you do need HTML signatures only, you can use the following workaround to avoid starting Word:
-    - Use HTM templates instead of DOCX templates (parameter '-UseHtmTemplates true')
-	    There are features in DOCX templates that can not be replicated HTM templates, such as applying Word specific image and text filters
-    - Do not create signatures in RTF format (parameter '-CreateRtfSignatures false')
-    - Do not create signatures in TXT format (parameter '-CreateTxtSignatures false')
-- Roaming signatures can currently not be deployed for shared mailboxes, as the API does not support this scenario.
-  - Roaming signatures for shared mailboxes pose a general problem, as only signatures with replacement variables from the $CurrentMailbox[...]$ namespace would make sense anyhow
+	- Despitze parallelization, the software runtime can be unsuited for a higher number of users. The reason usually is the Word background process.
+		- If you require signatures in RTF and/or TXT format, Word is needed for document conversion and you can only shorten runtime by adding hardware (scale up or scale out)
+		- If you do need HTML signatures only, you can use the following workaround to avoid starting Word:
+			- Use HTM templates instead of DOCX templates (parameter '-UseHtmTemplates true')
+				There are features in DOCX templates that can not be replicated HTM templates, such as applying Word specific image and text filters
+			- Do not create signatures in RTF format (parameter '-CreateRtfSignatures false')
+			- Do not create signatures in TXT format (parameter '-CreateTxtSignatures false')
+	- Roaming signatures can currently not be deployed for shared mailboxes, as the API does not support this scenario.
+		- Roaming signatures for shared mailboxes pose a general problem, as only signatures with replacement variables from the $CurrentMailbox[...]$ namespace would make sense anyhow
 #>
 
 
@@ -96,6 +99,9 @@ param (
 
 	$GraphClientId = 'The Client Id of the Entra ID/Azure AD application for SimulateAndDeploy', # not the same id as defined in 'default graph config.ps1' or a custom Graph config file
 	$GraphClientSecret = 'The Client Secret of the Entra ID/Azure AD application for SimulateAndDeploy',
+
+	[ValidateSet('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC', 'AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4', 'AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5', 'China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')]
+	[string]$CloudEnvironment = 'Public',
 
 	$SetOutlookSignaturesScriptPath = '..\Set-OutlookSignatures.ps1',
 	$SetOutlookSignaturesScriptParameters = @{
@@ -123,7 +129,6 @@ param (
 		EmbedImagesInHtml                             = $false
 		EmbedImagesInHtmlAdditionalSignaturePath      = $true
 		GraphOnly                                     = $false
-		CloudEnvironment                              = "'Public'"
 		TrustsToCheckForGroups                        = @('*')
 		IncludeMailboxForestDomainLocalGroups         = $false
 		WordProcessPriority                           = "'Normal'"
@@ -157,12 +162,12 @@ function CreateUpdateSimulateAndDeployGraphCredentialFile {
 
 	try {
 		# User authentication
-		$auth = get-msaltoken -AzureCloudInstance 'Public' -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
-		$authExo = get-msaltoken -AzureCloudInstance 'Public' -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
+		$auth = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
+		$authExo = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
 
 		# App authentication
-		$Appauth = get-msaltoken -AzureCloudInstance 'Public' -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
-		$AppauthExo = get-msaltoken -AzureCloudInstance 'Public' -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
+		$Appauth = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
+		$AppauthExo = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
 
 		$null = @{
 			'AccessToken'       = $auth.accessToken
@@ -230,6 +235,50 @@ Write-Host "Start script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
 # Folders and objects
 Set-Location $PSScriptRoot | Out-Null
+
+# Cloud environment
+## Endpoints from https://github.com/microsoft/CSS-Exchange/blob/main/Shared/AzureFunctions/Get-CloudServiceEndpoint.ps1
+## Environment names must match https://learn.microsoft.com/en-us/dotnet/api/microsoft.identity.client.azurecloudinstance?view=msal-dotnet-latest
+switch ($CloudEnvironment) {
+	{ $_ -iin @('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC') } {
+		$CloudEnvironmentEnvironmentName = 'AzurePublic'
+		$CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.com'
+		$CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office.com'
+		$CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.outlook.com'
+		$CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.com'
+		break
+	}
+
+	{ $_ -iin @('AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4') } {
+		$CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
+		$CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.us'
+		$CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office365.us'
+		$CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.office365.us'
+		$CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
+		break
+	}
+
+	{ $_ -iin @('AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5') } {
+		$CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
+		$CloudEnvironmentGraphApiEndpoint = 'https://dod-graph.microsoft.us'
+		$CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook-dod.office365.us'
+		$CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s-dod.office365.us'
+		$CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
+		break
+	}
+
+	{ $_ -iin @('China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud') } {
+		$CloudEnvironmentEnvironmentName = 'AzureChina'
+		$CloudEnvironmentGraphApiEndpoint = 'https://microsoftgraph.chinacloudapi.cn'
+		$CloudEnvironmentExchangeOnlineEndpoint = 'https://partner.outlook.cn'
+		$CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.partner.outlook.cn'
+		$CloudEnvironmentAzureADEndpoint = 'https://login.partner.microsoftonline.cn'
+		break
+	}
+}
+
+$SetOutlookSignaturesScriptParameters.CloudEnvironment = $CloudEnvironment # not $CloudEnvironmentEnvironmentName
+
 
 foreach ($VariableName in ('SimulateResultPath', 'SetOutlookSignaturesScriptPath')) {
 	Set-Variable -Name $VariableName -Value $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath((Get-Variable -Name $VariableName).Value).trimend('\')
