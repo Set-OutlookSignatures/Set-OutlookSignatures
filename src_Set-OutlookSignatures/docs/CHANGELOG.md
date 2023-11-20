@@ -18,7 +18,7 @@
 -->
 
 
-## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.0-beta.2" target="_blank">v4.8.0-beta.2</a> - 2023-11-16
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.0" target="_blank">v4.8.0</a> - 2023-11-20
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
@@ -33,9 +33,11 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 - The HTML message after a successful browser authentication can be customized with the `$GraphHtmlMessageSuccess` parameter in `.\config\default graph config.ps1`. See that file for details, and also consider `$GraphBrowserRedirectSuccess` for a redirection alternative.
 - The HTML message after an unsuccessful browser authentication can be customized with the `$GraphHtmlMessageError` parameter in `.\config\default graph config.ps1`. See that file for details, and also consider `$GraphBrowserRedirectError` for a redirection alternative.
 - New sample code `.\sample code\Create-EntraApp.ps1` automates the creation of the Entra app required to access Microsoft Graph.
+- New FAQ `How do I alternate banners and other images in signatures?`. See `.\docs\README` for details.
 ### Fixed
 - MirrorLocalSignaturesToCloud now correctly detects cloud mailboxes in hybrid environments when a connection to the on-prem Active Directory is used
 - Setting Word process priority no longer leads to an error in PowerShell 7
+- Fix a regression introduced with the option to set the Word process priority. This fix avoids a rare problem where a manually started Word instance connects to the Word background process created by the software.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.7.0" target="_blank">v4.7.0</a> - 2023-10-29

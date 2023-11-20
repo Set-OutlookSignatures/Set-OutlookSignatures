@@ -1101,10 +1101,10 @@ or visit 'https://explicitconsulting.at'.
 
         Write-Host
 
-        foreach ($step in (30..0)) {
-            Write-Host ("`rAutomatically continue in {0:00} seconds, or stop program with Ctrl+C" -f $step) -NoNewline
+        30..0 | ForEach-Object {
+            Write-Host ("`rAutomatically continue in {0:00} seconds, or stop program with Ctrl+C" -f $_) -NoNewline
 
-            if ($step -gt 0) { Start-Sleep -Seconds 1 }
+            if ($_ -gt 0) { Start-Sleep -Seconds 1 }
         }
 
         Write-Host
@@ -2779,7 +2779,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 }
 '@
 
-        # Start Word dummy object, start real Word object, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the software
+        # Start Word dummy object, set process priority, start real Word object, set process priority, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the software
         try {
             $script:COMWordDummy = New-Object -ComObject Word.Application
             $script:COMWordDummy.Visible = $false
@@ -2793,10 +2793,6 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $null = [Win32Api]::GetWindowThreadProcessId( $script:COMWordDummyHWND, [ref] $script:COMWordDummyPid );
                 $script:COMWordDummy.Caption = $script:COMWordDummyCaption
                 $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$script:COMWordDummyPid""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $WordProcessPriority }
-
-                $script:COMWordDummy.Quit([ref]$false)
-                [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWordDummy) | Out-Null
-                Remove-Variable COMWordDummy -Scope 'script'
             }
 
             $script:COMWord = New-Object -ComObject Word.Application
@@ -2811,6 +2807,12 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $null = [Win32Api]::GetWindowThreadProcessId( $script:COMWordHWND, [ref] $script:COMWordPid );
                 $script:COMWord.Caption = $script:COMWordCaption
                 $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$script:COMWordPid""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $WordProcessPriority }
+            }
+
+            if ($script:COMWordDummy) {
+                $script:COMWordDummy.Quit([ref]$false)
+                [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWordDummy) | Out-Null
+                Remove-Variable COMWordDummy -Scope 'script'
             }
 
             Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)

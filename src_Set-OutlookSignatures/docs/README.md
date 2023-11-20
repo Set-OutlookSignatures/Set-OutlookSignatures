@@ -155,6 +155,7 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
   - [17.27. Why does the text color of my signature change sometimes?](#1727-why-does-the-text-color-of-my-signature-change-sometimes)
   - [17.28. How to make Set-OutlookSignatures work with Microsoft Information Protection?](#1728-how-to-make-set-outlooksignatures-work-with-microsoft-information-protection)
   - [17.29. Images in signatures have a different size than in templates, or a black background](#1729-images-in-signatures-have-a-different-size-than-in-templates-or-a-black-background)
+  - [17.30. How do I alternate banners and other images in signatures?](#1730-how-do-i-alternate-banners-and-other-images-in-signatures)
   
 # 1. Requirements  
 Outlook and Word are typically used, but are not required in all constellations:
@@ -1699,3 +1700,35 @@ In this case, you can influence how images are displayed and converted from DOCX
 The parameter `MoveCSSInline` may also influence how signatures are displayed. Not all clients support the same set of CSS features, and there are clients not or not fully supporting CSS classes.  
 The Word HTML rendering engine used by Outlook is rather conservative regarding CSS support, which is good from a sender perspective.  
 When the `MoveCSSInline` parameter is enabled, which it is by default, cross-client compatibility is even more enhanced: All the formatting defined in CSS classes is intellegently moved to inline CSS formatting, which supported by a higher number of clients. This is a best practive in email marketing.
+## 17.30. How do I alternate banners and other images in signatures?
+Let's say, your marketing campaign has three different banners to avoid viewer fatigue. It will be very hard to instruct your users to regularly rotate between these banners in signatures.
+
+You can automate this with Set-OutlookSignatures in two simple steps:
+1. Create a customer replacement variable for each banner and randomly only assign one of these variables a value:
+    ```
+    $tempBannerIdentifiers = @(1, 2, 3)
+
+    $tempBannerIdentifiers | Foreach-Object {
+        $ReplaceHash["CurrentMailbox_Banner$($_)"] = $null
+    }
+
+    $ReplaceHash["CurrentMailbox_Banner$($tempBannerIdentifiers | Get-Random)"] = $true
+
+    Remove-Variable -Name 'tempBannerIdentifiers'
+    ```
+2. Add all three banners to your template and define an alternate text  
+Use `$CurrentMailbox_Banner1DELETEEMPTY$` for banner 1, `$CurrentMailbox_Banner2DELETEEMPTY$` for banner 2, and so on.  
+The DELETEEMPTY part deletes an image when the corresponding replacement variable does not contain a value.
+
+Now, with every run of Set-OutlookSignatures, a different random banner from the template is chosen and the other banners are deleted.
+
+
+You can enhance this even further:
+- Use banner 1 twice as often as the others. Just add it to the code multiple times:
+  ```
+  $tempBannerIdentifiers = @(1, 1, 2, 3)
+  ```
+- Assign banners to specific users, departments, locations or any other attribute
+- Restrict banner usage by date or season
+- You could assign banners based on your share price or expected weather queried from a web service
+- And much more, including any combination of the above
