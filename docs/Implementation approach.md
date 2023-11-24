@@ -56,13 +56,13 @@ The document is available in English and German language.
         - [1.8.1.3.2. Content and objectives](#18132-content-and-objectives)
         - [1.8.1.3.3. Duration](#18133-duration)
         - [1.8.1.3.4. Prerequisites](#18134-prerequisites)
-    - [1.8.2. 1.8.2 Tests, pilot operation, rollout](#182-182-tests-pilot-operation-rollout)
+    - [1.8.2. Tests, pilot operation, rollout](#182-tests-pilot-operation-rollout)
   - [1.9. Operations](#19-operations)
-    - [1.9.1. 1.9.1 Creating and maintaining templates](#191-191-creating-and-maintaining-templates)
+    - [1.9.1. Creating and maintaining templates](#191-creating-and-maintaining-templates)
     - [1.9.2. Creating and maintaining storage shares for templates and software components](#192-creating-and-maintaining-storage-shares-for-templates-and-software-components)
-    - [1.9.3. 1.9.3 Setting and maintaining AD attributes](#193-193-setting-and-maintaining-ad-attributes)
+    - [1.9.3. Setting and maintaining AD attributes](#193-setting-and-maintaining-ad-attributes)
     - [1.9.4. Configuration adjustments](#194-configuration-adjustments)
-    - [1.9.5. 1.9.5 Problems and questions during operation](#195-195-problems-and-questions-during-operation)
+    - [1.9.5. Problems and questions during operation](#195-problems-and-questions-during-operation)
     - [1.9.6. Supported versions](#196-supported-versions)
     - [1.9.7. New versions](#197-new-versions)
     - [1.9.8. Adaptations to the code of the product](#198-adaptations-to-the-code-of-the-product)
@@ -423,7 +423,7 @@ The following services are covered by the product price:
 	- have full access to various test mailboxes (personal mailboxes or group mailboxes) that are, if possible, direct or indirect members of various groups or distribution lists. For full access, the user may be authorized to the other mailboxes accordingly, or the user name and password of the additional mailboxes are known.  
 - Customer shall provide at least one central SMB file or WebDAV share for template storage.  
 - Customer shall provide a central SMB file share for the storage of the software and its components.
-### 1.8.2. 1.8.2 Tests, pilot operation, rollout  
+### 1.8.2. Tests, pilot operation, rollout  
 The customer's project manager is responsible for planning and coordinating tests, pilot operation and rollout.
 
 The concrete technical implementation is carried out by the customer. If, in addition to mail, the client is also supported by service providers, the client team will assist with the integration of the software (logon script, scheduled task, desktop shortcut).
@@ -434,14 +434,14 @@ The creation and maintenance of templates is the responsibility of the customer.
 
 For the procedure for adjustments to the code or the release of new functions, see the "Ongoing Operations" chapter.
 ## 1.9. Operations  
-### 1.9.1. 1.9.1 Creating and maintaining templates  
+### 1.9.1. Creating and maintaining templates  
 Creating and maintaining templates is the responsibility of the customer.  
 Mail Product Management is available to advise on feasibility and impact issues.
 ### 1.9.2. Creating and maintaining storage shares for templates and software components  
 The creation and maintenance of storage shares for templates and software components is the responsibility of the customer.
 
 Mail Product Management is available to advise on feasibility and implications.  
-### 1.9.3. 1.9.3 Setting and maintaining AD attributes  
+### 1.9.3. Setting and maintaining AD attributes  
 Setting and maintaining AD attributes related to textual signatures (e.g., attributes for variables, user photos, group memberships) is the customer's responsibility.
 
 Mail Product Management is available to advise on feasibility and impact issues.
@@ -453,7 +453,7 @@ Mail product management is available to advise on the feasibility and impact of 
 The planning and coordination of tests, pilot operation and rollout in connection with configuration adjustments is carried out by the customer, as is the concrete technical implementation.
 
 If, in addition to mail, the client is also supported by the service provider, the client team provides support with the integration of the software (logon script, scheduled task, desktop shortcut).  
-### 1.9.5. 1.9.5 Problems and questions during operation  
+### 1.9.5. Problems and questions during operation  
 In the event of fundamental technical problems, Mail Product Management provides support in researching the causes, works out proposed solutions and, if necessary, establishes contact with the manufacturer of the product.
 
 Mail product management is also available to answer general questions about the product and its possible applications.

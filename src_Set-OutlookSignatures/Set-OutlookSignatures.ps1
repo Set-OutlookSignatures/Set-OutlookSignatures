@@ -1847,44 +1847,66 @@ or visit 'https://explicitconsulting.at'.
         Write-Host '  Manager of simulated currently logged-in user'
     }
 
-    if ($null -ne $TrustsToCheckForGroups[0]) {
-        try {
-            $Search.SearchRoot = "GC://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
-            $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
-            $ADPropsCurrentUserManager = $Search.FindOne().Properties
+    $ADPropsCurrentUserManager = $null
 
-            $Search.SearchRoot = "LDAP://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
-            $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
-            $ADPropsCurrentUserManagerLdap = $Search.FindOne().Properties
+    if ($ADPropsCurrentUser -and ($ADPropsCurrentUser.manager)) {
+        if ($ADPropsCurrentUser.manager -imatch '(\S+?)@(\S+?)\.(\S+?)') {
+            # Manager is in UPN format, search via Graph
+            # Graph connection must already be established, else the manager would not be in UPN format
 
-            foreach ($keyName in @($ADPropsCurrentUserManagerLdap.Keys)) {
-                if (
-                    ($keyName -inotin $ADPropsCurrentUserManager.Keys) -or
-                    (-not ($ADPropsCurrentUserManager[$keyName]) -and ($ADPropsCurrentUserManagerLdap[$keyName]))
-                ) {
-                    $ADPropsCurrentUserManager[$keyName] = $ADPropsCurrentUserManagerLdap[$keyName]
-                }
-            }
-        } catch {
-            $ADPropsCurrentUserManager = $null
-        }
-    } else {
-        if ($ADPropsCurrentUser.manager) {
-            $AADProps = (GraphGetUserProperties $ADPropsCurrentUser.manager).properties
-            $ADPropsCurrentUserManager = [PSCustomObject]@{}
+            Write-Verbose "    Search manager '$($ADPropsCurrentUser.manager)' via Graph"
 
-            foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
-                $z = $AADProps
+            try {
+                $AADProps = (GraphGetUserProperties $ADPropsCurrentUser.manager).properties
+                $ADPropsCurrentUserManager = [PSCustomObject]@{}
 
-                foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
-                    $z = $z.$y
+                foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                    $z = $AADProps
+
+                    foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                        $z = $z.$y
+                    }
+
+                    $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
                 }
 
-                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
+                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentUserManager.userprincipalname).photo
+                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null
+            } catch {
+                $ADPropsCurrentUserManager = $null
             }
+        } else {
+            # Manager is not in UPN format, try search on-prem
+            # But only if ($GraphOnly -ne $true)
 
-            $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentUserManager.userprincipalname).photo
-            $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null
+            Write-Verbose "    Search manager '$($ADPropsCurrentUser.manager)' on-prem"
+
+            if ($GraphOnly -ne $true) {
+                try {
+                    $Search.SearchRoot = "GC://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
+                    $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
+                    $ADPropsCurrentUserManager = $Search.FindOne().Properties
+
+                    $Search.SearchRoot = "LDAP://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
+                    $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
+                    $ADPropsCurrentUserManagerLdap = $Search.FindOne().Properties
+
+                    foreach ($keyName in @($ADPropsCurrentUserManagerLdap.Keys)) {
+                        if (
+                        ($keyName -inotin $ADPropsCurrentUserManager.Keys) -or
+                        (-not ($ADPropsCurrentUserManager[$keyName]) -and ($ADPropsCurrentUserManagerLdap[$keyName]))
+                        ) {
+                            $ADPropsCurrentUserManager[$keyName] = $ADPropsCurrentUserManagerLdap[$keyName]
+                        }
+                    }
+                } catch {
+                    $ADPropsCurrentUserManager = $null
+                }
+            } else {
+                $ADPropsCurrentUserManager = $null
+
+                Write-Verbose "    Undefined combination: GraphOnly is set to true, but manager '$($ADPropsCurrentUser.manager)' is not in UPN format."
+            }
         }
     }
 
@@ -3690,11 +3712,7 @@ Function ConvertToSingleFileHTML([string]$inputfile, [string]$outputfile) {
             }
 
             if ($fmt) {
-                if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                    $tempFileContent = $tempFileContent -ireplace [Regex]::Escape($src[$x]), ('src="' + $fmt + [Convert]::ToBase64String((Get-Content -LiteralPath $src[$x + 1] -AsByteStream)) + '"')
-                } else {
-                    $tempFileContent = $tempFileContent -ireplace [Regex]::Escape($src[$x]), ('src="' + $fmt + [Convert]::ToBase64String((Get-Content -LiteralPath $src[$x + 1] -Encoding Byte)) + '"')
-                }
+                $tempFileContent = $tempFileContent -ireplace [Regex]::Escape($src[$x]), ('src="' + $fmt + [Convert]::ToBase64String(([System.IO.File]::ReadAllBytes(((Resolve-Path $src[$x + 1]).Path)))) + '"')
             }
         }
     }
@@ -4074,7 +4092,7 @@ function SetSignatures {
                                         $image.alt = $($image.alt) -ireplace [Regex]::Escape($VariableName[0]), ''
                                     }
                                 } else {
-                                    $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg'))))))
+                                    $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([System.IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg'))))))
                                 }
                             } else {
                                 $image.src = "$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -ireplace '^about:', '')))))"
@@ -4090,7 +4108,7 @@ function SetSignatures {
                                         $image.alt = $($image.alt) -ireplace [Regex]::Escape($tempImageVariableString), ''
                                     }
                                 } else {
-                                    $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg'))))))
+                                    $image.src = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([System.IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg'))))))
                                 }
                             } else {
                                 Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.src -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
@@ -5159,9 +5177,15 @@ function GraphGetToken {
                     Write-Verbose '        Via Prompt with LoginHint and Timeout'
 
                     if (-not [string]::IsNullOrWhitespace($GraphHtmlMessageboxText)) {
-                        Add-Type -AssemblyName PresentationCore, PresentationFramework
+                        Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
 
-                        [System.Windows.MessageBox]::Show("$($GraphHtmlMessageboxText)", $(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }), 'OK', 'Information', 'None', 'DefaultDesktopOnly')
+                        $window = New-Object System.Windows.Window
+                        $window.ShowActivated = $false
+                        $window.Topmost = $true
+                        $window.Show()
+                        $window.Hide()
+                        [System.Windows.MessageBox]::Show($window, "$($GraphHtmlMessageboxText)", $(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }), [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Information, [System.Windows.MessageBoxResult]::None)
+                        $window.close()
                     }
 
                     $MsalInteractiveParams = @{}
@@ -5558,11 +5582,7 @@ function GraphGetUserPhoto($user) {
 
         $ProgressPreference = $OldProgressPreference
 
-        if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-            $local:x = (Get-Content -LiteralPath $local:tempFile -AsByteStream -Raw)
-        } else {
-            $local:x = (Get-Content -LiteralPath $local:tempFile -Encoding Byte -Raw)
-        }
+        $local:x = [System.IO.File]::ReadAllBytes($local:tempFile)
 
         Remove-Item $local:tempFile -Force -ErrorAction SilentlyContinue
     } catch {

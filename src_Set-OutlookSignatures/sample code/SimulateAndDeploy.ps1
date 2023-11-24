@@ -293,7 +293,7 @@ if (-not (Test-Path $SimulateResultPath)) {
 
 # Connect to Graph
 if (-not $ConnectOnpremInsteadOfCloud) {
-	Write-Host "Conncect to Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+	Write-Host "Connect to Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
 	Write-Host '  Microsoft Graph'
 	$SimulateAndDeployGraphCredentialFile = Join-Path -Path $env:temp -ChildPath "$((New-Guid).guid).xml"

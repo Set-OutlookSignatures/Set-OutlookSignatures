@@ -18,6 +18,18 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.1" target="_blank">v4.8.1</a> - 2023-11-24
+_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+_**Attention, cloud mailbox users:**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
+### Fixed
+- Embedding images and loading the Graph config file is now much faster because of switching from PowerShell cmdlets to .Net system calls for conversions to Base64 (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/pull/95" target="_blank">#95</a>)
+- The manager of the current user was not correctly detected in certain hybrid scenarios (Thanks Thomas Müllerchen and Tommy Malodisdach!)
+- The message informing the user before a new browser tab is opened for authentication now does not steal the focus in all combinations of PowerShell Core/Desktop and Windows Terminal/Classic Console Host
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.0" target="_blank">v4.8.0</a> - 2023-11-20
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
