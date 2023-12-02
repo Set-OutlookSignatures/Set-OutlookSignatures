@@ -236,7 +236,12 @@ Possible for Exchange Online mailbox of currently logged-in user.
 Default value: $false
 
 .PARAMETER WordProcessPriority
-Define the Word process priority. With lower values, Set-OutlookSignature runs longer but minimizes possible performance impact
+Define the Word process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
+Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
+Default value: 'Normal' ('32')
+
+.PARAMETER ScriptProcessPriority
+Define the script process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
 Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
 Default value: 'Normal' ('32')
 
@@ -502,7 +507,13 @@ Param(
     [Parameter(Mandatory = $false, ParameterSetName = 'H: Word')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet('Idle', 64, 'BelowNormal', 16384, 'Normal', 32, 'AboveNormal', 32768, 'High', 128, 'RealTime', 256)]
-    $WordProcessPriority = 'Normal'
+    $WordProcessPriority = 'Normal',
+
+    # Script process priority
+    [Parameter(Mandatory = $false, ParameterSetName = 'I: Script')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
+    [ValidateSet('Idle', 64, 'BelowNormal', 16384, 'Normal', 32, 'AboveNormal', 32768, 'High', 128, 'RealTime', 256)]
+    $ScriptProcessPriority = 'Normal'
 )
 
 
@@ -606,6 +617,32 @@ function rankedSemVer($versions) {
 }
 
 
+function CheckFilenamePossiblyInvalid ([string] $Filename = '', [bool] $CheckOutlook = $true, [bool] $CheckDeviceNames = $false) {
+    $InvalidCharacters = @()
+
+    # [System.Io.Path]::GetInvalidFileNameChars()
+    $InvalidCharacters += @(($Filename | Select-String -Pattern "[$([regex]::escape(([System.Io.Path]::GetInvalidFileNameChars() -join '')))]" -AllMatches).Matches.Value) | Where-Object { $_ }
+
+    # Outlook GUI
+    if ($CheckOutlook) {
+        $InvalidCharacters += @(($Filename | Select-String -Pattern "[$([regex]::escape('\/:"*?><,|'))]" -AllMatches).Matches.Value) | Where-Object { $_ }
+    }
+
+    # Windows reserved file names and device names (CON, PRN, AUX, COMx, LPTx, ...)
+    if ($CheckDeviceNames) {
+        if (([System.Io.Path]::GetFullPath($Filename)).StartsWith('\\.\')) {
+            $InvalidCharacters += $Filename
+        }
+    }
+
+    $InvalidCharacters = @(@($InvalidCharacters | Select-Object -Unique | Where-Object { $_ } | Sort-Object) | ForEach-Object { "'$($_)'" })
+
+    if ($InvalidCharacters) {
+        return $InvalidCharacters -join ', '
+    }
+}
+
+
 function main {
     Set-Location $PSScriptRoot | Out-Null
 
@@ -638,14 +675,13 @@ function main {
 
     $GitHubReleasesNewer = @(@($GitHubReleasesSemVerRanked | Where-Object { $_.Rank -gt ($GitHubReleasesSemVerRanked | Where-Object { $_.VersionString -ieq $ScriptVersion }).Rank }).VersionString)
 
-
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
     Write-Host '  Software: Set-OutlookSignatures'
     Write-Host "  Version : $ScriptVersion"
 
     if ($GitHubReleasesNewer) {
-        Write-Host "            At least one release newer than $($ScriptVersion) is available: $($GitHubReleasesNewer -join ', ')" -ForegroundColor Yellow
+        Write-Host "            At least one release newer than $($ScriptVersion) is available: $(@($GitHubReleasesNewer[0, -1] | Select-Object -Unique) -join $(if($GitHubReleasesNewer.Count -gt 2) { ', ..., ' } else {', '}))" -ForegroundColor Yellow
     }
 
     Write-Host '  Web     : https://github.com/Set-OutlookSignatures/Set-OutlookSignatures'
@@ -876,18 +912,10 @@ function main {
 
     if ($MoveCSSInline) {
         $script:PreMailerNetModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
-        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\PreMailer.net')) -Destination $script:PreMailerNetModulePath -Recurse -ErrorAction SilentlyContinue
-        Get-ChildItem $script:PreMailerNetModulePath -Recurse | Unblock-File
 
-        @('System.Text.Encoding.CodePages.dll', 'System.Buffers.dll', 'AngleSharp.dll', 'PreMailer.Net.dll') | ForEach-Object {
-            try {
-                Import-Module (Join-Path -Path $script:PreMailerNetModulePath -ChildPath $($_)) -Force -ErrorAction Stop
-            } catch {
-                Write-Host "        Problem importing PreMailer.Net module ($($_)). Exit." -ForegroundColor Red
-                $error[0]
-                exit 1
-            }
-        }
+        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\PreMailer.net\net462')) -Destination $script:PreMailerNetModulePath -Recurse -ErrorAction SilentlyContinue
+
+        Get-ChildItem $script:PreMailerNetModulePath -Recurse | Unblock-File
     }
 
     Write-Host "  EmbedImagesInHtml: '$EmbedImagesInHtml'"
@@ -989,14 +1017,42 @@ function main {
         'AboveNormal' { $WordProcessPriorityText = $WordProcessPriority; $WordProcessPriority = 32768; break }
         'High' { $WordProcessPriorityText = $WordProcessPriority; $WordProcessPriority = 128; break }
         'Realtime' { $WordProcessPriorityText = $WordProcessPriority; $WordProcessPriority = 256; break }
+        64 { $WordProcessPriorityText = 'Idle'; break }
         16384 { $WordProcessPriorityText = 'BelowNormal'; break }
         32 { $WordProcessPriorityText = 'Normal'; break }
         32768 { $WordProcessPriorityText = 'AboveNormal'; break }
         128 { $WordProcessPriorityText = 'High'; break }
         256 { $WordProcessPriorityText = 'Realtime'; break }
-        default { $WordProcessPriority = 16384; $WordProcessPriorityText = 'BelowNormal' }
+        default { $WordProcessPriority = 32; $WordProcessPriorityText = 'Normal' }
     }
     Write-Host "  WordProcessPriority: '$($WordProcessPriorityText)' ('$($WordProcessPriority)')"
+
+    switch ((Get-Process -Id $pid).PriorityClass.ToString()) {
+        'Idle' { $script:ScriptProcessPriorityOriginal = 64; break }
+        'BelowNormal' { $script:ScriptProcessPriorityOriginal = 16384; break }
+        'Normal' { $script:ScriptProcessPriorityOriginal = 32; break }
+        'AboveNormal' { $script:ScriptProcessPriorityOriginal = 32768; break }
+        'High' { $script:ScriptProcessPriorityOriginal = 128; break }
+        'Realtime' { $script:ScriptProcessPriorityOriginal = 256; break }
+        default { $script:ScriptProcessPriorityOriginal = 32 }
+    }
+    switch ($ScriptProcessPriority) {
+        'Idle' { $ScriptProcessPriorityText = $ScriptProcessPriority; $ScriptProcessPriority = 64; break }
+        'BelowNormal' { $ScriptProcessPriorityText = $ScriptProcessPriority; $ScriptProcessPriority = 16384; break }
+        'Normal' { $ScriptProcessPriorityText = $ScriptProcessPriority; $ScriptProcessPriority = 32; break }
+        'AboveNormal' { $ScriptProcessPriorityText = $ScriptProcessPriority; $ScriptProcessPriority = 32768; break }
+        'High' { $ScriptProcessPriorityText = $ScriptProcessPriority; $ScriptProcessPriority = 128; break }
+        'Realtime' { $ScriptProcessPriorityText = $ScriptProcessPriority; $ScriptProcessPriority = 256; break }
+        64 { $ScriptProcessPriorityText = 'Idle'; break }
+        16384 { $ScriptProcessPriorityText = 'BelowNormal'; break }
+        32 { $ScriptProcessPriorityText = 'Normal'; break }
+        32768 { $ScriptProcessPriorityText = 'AboveNormal'; break }
+        128 { $ScriptProcessPriorityText = 'High'; break }
+        256 { $ScriptProcessPriorityText = 'Realtime'; break }
+        default { $ScriptProcessPriority = 32; $ScriptProcessPriorityText = 'Normal' }
+    }
+    Write-Host "  ScriptProcessPriority: '$($ScriptProcessPriorityText)' ('$($ScriptProcessPriority)')"
+    $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$PID""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $ScriptProcessPriority }
 
     Write-Host "  BenefactorCircleLicenseFile: '$BenefactorCircleLicenseFile'" -NoNewline
     if ($BenefactorCircleLicenseFile) {
@@ -1076,7 +1132,7 @@ Go to 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' for new r
 '@ -ForegroundColor Green
 
         if ($GitHubReleasesNewer) {
-            Write-Host "At least one release newer than $($ScriptVersion) is available: $($GitHubReleasesNewer -join ', ')" -ForegroundColor Yellow
+            Write-Host "At least one release newer than $($ScriptVersion) is available: $(@($GitHubReleasesNewer[0, -1] | Select-Object -Unique) -join $(if($GitHubReleasesNewer.Count -gt 2) { ', ..., ' } else {', '}))" -ForegroundColor Yellow
         }
 
         Write-Host @'
@@ -2035,13 +2091,16 @@ or visit 'https://explicitconsulting.at'.
                     Write-Host '    Set up environment for connection to Outlook Web'
                     $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                     try {
-                        if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netcore\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
-                            Unblock-File -LiteralPath $script:WebServicesDllPath
-                        } else {
-                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netframework\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
-                            Unblock-File -LiteralPath $script:WebServicesDllPath
-                        }
+                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+                        Unblock-File -LiteralPath $script:WebServicesDllPath
+
+                        #if ($($PSVersionTable.PSEdition) -ieq 'Core') {
+                        #    Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netcore\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+                        #    Unblock-File -LiteralPath $script:WebServicesDllPath
+                        #} else {
+                        #    Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netframework\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
+                        #    Unblock-File -LiteralPath $script:WebServicesDllPath
+                        #}
                     } catch {
                     }
                 }
@@ -2420,9 +2479,10 @@ or visit 'https://explicitconsulting.at'.
         $TemplateIniPath = Get-Variable -Name "$($SigOrOOF)IniPath" -ValueOnly
         $TemplateIniSettings = Get-Variable -Name "$($SigOrOOF)IniSettings" -ValueOnly
 
-        Write-Host "  Compare $($SigOrOOF) ini entries and file system"
         $TemplateFiles = @((Get-ChildItem -LiteralPath $TemplateTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
+
         if ($TemplateIniPath -ne '') {
+            Write-Host "  Compare $($SigOrOOF) ini entries and file system"
             foreach ($Enumerator in $TemplateIniSettings.GetEnumerator().name) {
                 if ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>']) {
                     if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
@@ -2506,6 +2566,7 @@ or visit 'https://explicitconsulting.at'.
             $TemplateIniSettingsIndex = $TemplateFile.TemplateIniSettingsIndex
             $TemplateFileGroupSIDs = @{}
             Write-Host ("    '$($TemplateFile.Name)' ($($SigOrOOF) ini index #$($TemplateIniSettingsIndex))")
+
             if ($TemplateIniSettings[$TemplateIniSettingsIndex]['<Set-OutlookSignatures template>'] -ieq $TemplateFile.name) {
                 $TemplateFilePart = ($TemplateIniSettings[$TemplateIniSettingsIndex].GetEnumerator().Name -join '] [')
                 if ($TemplateFilePart) {
@@ -2515,16 +2576,29 @@ or visit 'https://explicitconsulting.at'.
                 }
 
                 if ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']) {
+                    Write-Host "      Outlook signature name: '$($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'])'"
+
+                    if ((CheckFilenamePossiblyInvalid -Filename $TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'])) {
+                        Write-Host "        Ignore INI entry, signature name is invalid: $((CheckFilenamePossiblyInvalid -Filename $TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']))" -ForegroundColor Yellow
+
+                        Continue
+                    }
+
                     $TemplateFileTargetName = ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
+
                 } else {
+                    if ((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name)) {
+                        Write-Host "      Ignore INI entry, signature name is invalid: $((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name))" -ForegroundColor Yellow
+
+                        Continue
+                    }
+
                     $TemplateFileTargetName = $TemplateFile.Name
                 }
             } else {
                 $TemplateFilePart = ''
                 $TemplateFileTargetName = $TemplateFile.Name
             }
-
-            Write-Host "      Outlook signature name: '$([System.IO.Path]::ChangeExtension($TemplateFileTargetName, $null) -ireplace '\.$')'"
 
             $TemplateFilePartRegexTimeAllow = '\[(?!-:)\d{12}Z?-\d{12}Z?\]'
             $TemplateFilePartRegexTimeDeny = '\[-:\d{12}Z?-\d{12}Z?\]'
@@ -2782,8 +2856,8 @@ or visit 'https://explicitconsulting.at'.
 
     Write-Host
     Write-Host "Start Word background process @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-    if (($UseHtmTemplates -eq $true) -and (($CreateRtfSignatures -eq $false) -and ($CreateTxtSignatures -eq $false))) {
-        Write-Host '  Do not start Word: UseHtmTemplates = $true, CreateRtfSignatures = $false, CreateTxtSignatures = $false'
+    if (($UseHtmTemplates -eq $true) -and (($CreateRtfSignatures -eq $false))) {
+        Write-Host '  Not required: UseHtmTemplates = $true, CreateRtfSignatures = $false'
     } else {
         Write-Verbose "  WordProcessPriority: '$($WordProcessPriorityText)' ('$($WordProcessPriority)')"
 
@@ -3186,13 +3260,16 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         Write-Host "  Set up environment for connection to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
                         $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                         try {
-                            if ($($PSVersionTable.PSEdition) -ieq 'Core') {
-                                Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netcore\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
-                                Unblock-File -LiteralPath $script:WebServicesDllPath
-                            } else {
-                                Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netframework\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
-                                Unblock-File -LiteralPath $script:WebServicesDllPath
-                            }
+                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+                            Unblock-File -LiteralPath $script:WebServicesDllPath
+
+                            #if ($($PSVersionTable.PSEdition) -ieq 'Core') {
+                            #    Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netcore\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+                            #    Unblock-File -LiteralPath $script:WebServicesDllPath
+                            #} else {
+                            #    Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netframework\Microsoft.Exchange.WebServices.dll')) -Destination $script:WebServicesDllPath -Force
+                            #    Unblock-File -LiteralPath $script:WebServicesDllPath
+                            #}
                         } catch {
                         }
                     }
@@ -4026,7 +4103,10 @@ function SetSignatures {
         $pathConnectedFolderNames = @()
         foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
             $pathConnectedFolderNames += "$($pathGUID)$($ConnectedFilesFolderName)"
-            $pathConnectedFolderNames += "$($pathGUID)$([uri]::EscapeDataString($ConnectedFilesFolderName))"
+            $pathConnectedFolderNames += [uri]::EscapeDataString($pathConnectedFolderNames[-1])
+
+            $pathConnectedFolderNames += "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$($ConnectedFilesFolderName)"
+            $pathConnectedFolderNames += [uri]::EscapeDataString($pathConnectedFolderNames[-1])
         }
 
         if ($UseHtmTemplates) {
@@ -4552,7 +4632,8 @@ function SetSignatures {
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
             $tempFileContent = Get-Content -LiteralPath $path -Encoding UTF8 -Raw
 
-            [System.IO.File]::WriteAllText($path, $([PreMailer.Net.PreMailer]::MoveCssInline($tempFileContent).html), (New-Object System.Text.UTF8Encoding($False)))
+            # Use a separate job for PreMailer.Net, as there are DLL conflicts in PowerShell 5.x with Invoke-RestMethod
+            [System.IO.File]::WriteAllText($path, $((Start-Job -ScriptBlock { Import-Module (Join-Path -Path $using:script:PreMailerNetModulePath -ChildPath 'PreMailer.Net.dll'); [PreMailer.Net.PreMailer]::MoveCssInline($using:tempFileContent) } | Receive-Job -Wait -AutoRemoveJob).html), (New-Object System.Text.UTF8Encoding($False)))
         }
 
         Write-Host "$Indent        Add marker to final HTM file"
@@ -4570,11 +4651,8 @@ function SetSignatures {
         Write-Host "$Indent        Modify connected folder name"
 
         foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
-            if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName))) {
-                $tempFileContent = $tempFileContent -ireplace ('(\s*src=")(' + $pathConnectedFolderName + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
-                Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
-                break
-            }
+            $tempFileContent = $tempFileContent -ireplace ('(\s*src=")(' + [regex]::escape($pathConnectedFolderName) + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
+            Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
         }
 
         [System.IO.File]::WriteAllText($path, $tempFileContent, (New-Object System.Text.UTF8Encoding($False)))
@@ -4672,80 +4750,22 @@ function SetSignatures {
 
             if ($CreateTxtSignatures) {
                 Write-Host "$Indent      Export to TXT format"
-                # If possible, use .docx file to avoid problems with MS Information Protection
-                if ($UseHtmTemplates) {
-                    $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-                    $script:COMWord.Documents.Open($path, $false, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, 65001) | Out-Null
-                } else {
-                    $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
-                    $script:COMWord.Documents.Open($path, $false) | Out-Null
-                }
 
-                $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatUnicodeText')
-                $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
+                $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
-                $script:WordTextEncoding = $script:COMWord.ActiveDocument.TextEncoding
-                $script:COMWord.ActiveDocument.TextEncoding = 1200 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
+                $html = New-Object -ComObject 'HTMLFile'
 
                 try {
-                    # Overcome Word security warning when export contains embedded pictures
-                    if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
-                    }
-
-                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-
-                    if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
-                    }
-
-                    # Save
-                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-
-                    # Restore original security setting
-                    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                        Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                    } else {
-                        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                    }
+                    # PowerShell Desktop with Office
+                    $html.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
                 } catch {
-                    # Restore original security setting after error
-                    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                        Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                    } else {
-                        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                    }
-
-                    Start-Sleep -Seconds 2
-
-                    # Overcome Word security warning when export contains embedded pictures
-                    if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
-                    }
-
-                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-
-                    if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
-                    }
-
-                    # Save
-                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
-
-                    # Restore original security setting
-                    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                        Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                    } else {
-                        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                    }
+                    # PowerShell Desktop without Office, PowerShell 6+
+                    $html.write([System.Text.Encoding]::Unicode.GetBytes((Get-Content -LiteralPath $path -Encoding UTF8 -Raw)))
                 }
 
-                $script:COMWord.ActiveDocument.TextEncoding = $script:WordTextEncoding
+                $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
 
-                # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
-                # Close the document as conversion to .rtf happens from .htm
-                $script:COMWord.ActiveDocument.Saved = $true
-                $script:COMWord.ActiveDocument.Close($false)
+                $html.body.innerText | Out-File -LiteralPath $path -Encoding Unicode -Force # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
             }
         }
 
@@ -5163,13 +5183,13 @@ function GraphGetToken {
 
         try {
             Write-Verbose '        Via IntegratedWindowsAuth'
-            $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -IntegratedWindowsAuth
+            $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -IntegratedWindowsAuth -Timeout (New-TimeSpan -Minutes 1)
         } catch {
             Write-Verbose $error[0]
 
             try {
                 Write-Verbose '        Via Silent with LoginHint'
-                $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Silent -ForceRefresh
+                $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Silent -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
             } catch {
                 Write-Verbose $error[0]
 
@@ -5180,6 +5200,9 @@ function GraphGetToken {
                         Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
 
                         $window = New-Object System.Windows.Window
+                        $window.Width = 1
+                        $window.Height = 1
+                        $window.WindowStartupLocation = [System.Windows.WindowStartupLocation]::CenterOwner
                         $window.ShowActivated = $false
                         $window.Topmost = $true
                         $window.Show()
@@ -5206,7 +5229,7 @@ function GraphGetToken {
                         $MsalInteractiveParams.HtmlMessageError = $GraphHtmlMessageError
                     }
 
-                    $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Interactive -Timeout (New-TimeSpan -Minutes 2) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
+                    $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Interactive -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
                 } catch {
                     Write-Verbose '        No authentication possible'
                     $auth = $null
@@ -5749,7 +5772,7 @@ function ExoGenericQuery ([Parameter(Mandatory = $true)] [string]$method, [Param
             Method      = $method
             Uri         = $uri
             Headers     = $script:ExoAuthorizationHeader
-            ContentType = 'Application/Json; charset=utf-8'
+            ContentType = 'application/json; charset=utf-8'
         }
 
         if ($body) {
@@ -5757,16 +5780,18 @@ function ExoGenericQuery ([Parameter(Mandatory = $true)] [string]$method, [Param
         }
 
         if ($isLargeSetting -eq $true) {
-            $requestBody['Headers']['X-Islargesetting'] = 'true'
+            $requestBody['Headers']['x-islargesetting'] = 'true'
         } else {
-            $requestBody['Headers']['X-Islargesetting'] = 'false'
+            $requestBody['Headers']['x-islargesetting'] = 'false'
         }
 
         if ($PrimaryMailboxAddress) {
-            $requestBody['Headers']['X-Anchormailbox'] = "SMTP:$($PrimaryMailboxAddress)"
+            $requestBody['Headers']['x-anchormailbox'] = "SMTP:$($PrimaryMailboxAddress)"
         }
 
-        $requestBody['Headers']['X-Overridetimestamp'] = 'true'
+        $requestBody['Headers']['x-overridetimestamp'] = 'true'
+
+        $requestBody['Headers']['content-type'] = 'Application/Json; charset=utf-8'
 
         $OldProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
@@ -5981,11 +6006,11 @@ try {
     }
 
     if ($script:PreMailerNetModulePath) {
-        @('System.Text.Encoding.CodePages.dll', 'System.Buffers.dll', 'AngleSharp.dll', 'PreMailer.Net.dll') | ForEach-Object {
-            Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($_)) -Force -ErrorAction SilentlyContinue
-        }
-
         Remove-Item $script:PreMailerNetModulePath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    if ($script:ScriptProcessPriorityOriginal) {
+        $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$PID""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $script:ScriptProcessPriorityOriginal }
     }
 
     Write-Host

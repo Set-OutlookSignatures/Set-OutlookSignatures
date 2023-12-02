@@ -1,4 +1,4 @@
 {
-    "dll.lenientLoading": false,
-    "dll.lenientLoadingPrompt": true
+    "dll.lenientLoading": true,
+    "dll.lenientLoadingPrompt": false
 }

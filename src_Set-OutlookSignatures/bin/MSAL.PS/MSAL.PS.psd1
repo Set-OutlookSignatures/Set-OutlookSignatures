@@ -12,7 +12,7 @@
     RootModule             = 'MSAL.PS.psm1'
 
     # Version number of this module.
-    ModuleVersion          = '4.57.0.0'
+    ModuleVersion          = '4.58.0.0'
 
     # Supported PSEditions
     CompatiblePSEditions   = 'Core', 'Desktop'
@@ -130,16 +130,16 @@ MSAL.NET (Microsoft.Identity.Client) is an authentication library which enables 
     '.\internal\Select-PsBoundParameters.ps1', 
     '.\internal\Set-Config.ps1', '.\internal\TokenCacheHelper.cs', 
     '.\internal\Write-HostPrompt.ps1', 
-    '.\netframework\Microsoft.IdentityModel.Abstractions.dll',
-    '.\netframework\Microsoft.Identity.Client.dll',
-    '.\netframework\Microsoft.Identity.Client.NativeInterop.dll',
-    '.\netframework\Microsoft.Identity.Client.Broker.dll',
-    '.\netframework\Microsoft.Identity.Client.Desktop.dll',
-    '.\netcore\Microsoft.IdentityModel.Abstractions.dll',
-    '.\netcore\Microsoft.Identity.Client.dll',
-    '.\netcore\Microsoft.Identity.Client.NativeInterop.dll',
-    '.\netcore\Microsoft.Identity.Client.Broker.dll',
-    '.\netcore\Microsoft.Identity.Client.Desktop.dll'
+    '.\netstandard2.0\Microsoft.Identity.Client.Broker.dll',
+    '.\netstandard2.0\Microsoft.Identity.Client.Desktop.dll',
+    '.\netstandard2.0\Microsoft.Identity.Client.dll',
+    '.\netstandard2.0\Microsoft.Identity.Client.NativeInterop.dll',
+    '.\netstandard2.0\Microsoft.IdentityModel.Abstractions.dll',
+    '.\netstandard2.0\System.Buffers.dll',
+    '.\netstandard2.0\System.Diagnostics.DiagnosticSource.dll',
+    '.\netstandard2.0\System.Memory.dll',
+    '.\netstandard2.0\System.Numerics.Vectors.dll',
+    '.\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll'
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData            = @{

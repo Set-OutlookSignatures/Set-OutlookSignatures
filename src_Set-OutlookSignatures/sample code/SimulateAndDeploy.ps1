@@ -139,6 +139,8 @@ param (
 	$JobsConcurrent = 2,
 	$JobTimeout = [timespan]::FromMinutes(10),
 
+	$UpdateInterval = [timespan]::FromMinutes(1),
+
 	# List of users and mailboxes to simulate
 	#   SimulateUser: UPN, or NT4 style NetBIOS domain name and logon name
 	#   SimulateMailboxes: Separate multiple mailboxes by spaces or commas. Leave empty to get mailboxes from Outlook Web (recommended).
@@ -290,6 +292,17 @@ if (-not (Test-Path $SimulateResultPath)) {
 	RemoveItemAlternativeRecurse -Path $SimulateResultPath -SkipFolder
 }
 
+@(
+	(Join-Path -Path $SimulateResultPath -ChildPath '_log_started.txt'),
+	(Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt'),
+	(Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt')
+) | ForEach-Object {
+	New-Item -ItemType File $_ | Out-Null
+}
+
+
+Start-Transcript -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log.txt') -Force
+
 
 # Connect to Graph
 if (-not $ConnectOnpremInsteadOfCloud) {
@@ -396,6 +409,7 @@ if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarnin
 Write-Host "Run simulation mode for each user and its mailbox(es) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
 Write-Host '  Remove old jobs'
+
 Get-Job | Remove-Job -Force
 
 $JobsToStartTotal = ($SimulateList | Measure-Object).count
@@ -403,7 +417,10 @@ $JobsToStartOpen = ($SimulateList | Measure-Object).count
 $JobsStarted = 0
 $JobsCompleted = 0
 
-Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
+Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+
+$UpdateTime = (Get-Date).Add($UpdateInterval)
 
 do {
 	while ((($JobsToStartOpen -gt 0) -and ((Get-Job).count -lt $JobsConcurrent))) {
@@ -488,44 +505,64 @@ do {
 		$SetOutlookSignaturesScriptParameters,
 		$SimulateAndDeployGraphCredentialFile | Out-Null
 
-		Write-Host "    User $($SimulateList[$Jobsstarted].SimulateUser) started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+		"    User $($SimulateList[$Jobsstarted].SimulateUser) started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
+			Write-Host $($_)
+			Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_started.txt') -Force -Encoding UTF8
+		}
 
 		$JobsToStartOpen--
 		$JobsStarted++
 
-		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
+		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 	}
 
 	foreach ($x in (Get-Job | Where-Object { $_.State -ieq 'Running' -and (((Get-Date) - $_.PSBeginTime) -gt $JobTimeout) })) {
-		Write-Host "    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) canceled due to timeout @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" -ForegroundColor Red
-
-		$x | Remove-Job -Force
-
-		$JobsCompleted++
-
-		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
-	}
-
-	foreach ($x in (Get-Job -State Completed)) {
-		$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser)) -ChildPath '_log.txt'
-
-		if (-not (Get-Content -Path $LogFilePath -Encoding UTF8 -Raw).trim().Contains('xxxSimulateAndDeployExitCode0xxx')) {
-			Write-Host "    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-			Write-Host "      User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser): Error creating signatures, please check log." -ForegroundColor Red
+		"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) canceled due to timeout @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
+			Write-Host $($_) -ForegroundColor Red
+			Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
 		}
 
 		$x | Remove-Job -Force
 
 		$JobsCompleted++
 
-		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue"
+		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 	}
 
+	foreach ($x in (Get-Job -State Completed)) {
+		$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser)) -ChildPath '_log.txt'
+
+		if ((Get-Content -Path $LogFilePath -Encoding UTF8 -Raw).trim().Contains('xxxSimulateAndDeployExitCode0xxx')) {
+			"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with no errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
+				Write-Host $($_) -ForegroundColor Green
+				Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt') -Force -Encoding UTF8
+			}
+		} else {
+			"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
+				Write-Host $($_) -ForegroundColor Red
+				Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
+			}
+		}
+
+		$x | Remove-Job -Force
+
+		$JobsCompleted++
+
+		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+	}
+
+	if ((Get-Date) -ge $UpdateTime) {
+		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+		$UpdateTime = (Get-Date).Add($UpdateInterval)
+	}
+
+	Start-Sleep -Seconds 1
 } until (($JobsToStartTotal -eq $JobsStarted) -and ($JobsCompleted -eq $JobsToStartTotal))
 
 
 # Restore Word security setting for embedded images
 Write-Host "Restore original Word security setting @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
 if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
 	Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
 } else {
@@ -534,6 +571,7 @@ if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
 
 
 Write-Host "Cleanup @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
 if (-not $ConnectOnpremInsteadOfCloud) {
 	Remove-Module msal.ps
 	Remove-Item -Force $SimulateAndDeployGraphCredentialFile -ErrorAction SilentlyContinue
@@ -541,3 +579,6 @@ if (-not $ConnectOnpremInsteadOfCloud) {
 
 
 Write-Host "End script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+
+Stop-Transcript

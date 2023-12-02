@@ -95,8 +95,9 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
   - [3.29. DisableRoamingSignatures](#329-disableroamingsignatures)
   - [3.30. MirrorLocalSignaturesToCloud](#330-mirrorlocalsignaturestocloud)
   - [3.31. WordProcessPriority](#331-wordprocesspriority)
-  - [3.32. BenefactorCircleId](#332-benefactorcircleid)
-  - [3.33. BenefactorCircleLicenseFile](#333-benefactorcirclelicensefile)
+  - [3.32. ScriptProcessPriority](#332-scriptprocesspriority)
+  - [3.33. BenefactorCircleId](#333-benefactorcircleid)
+  - [3.34. BenefactorCircleLicenseFile](#334-benefactorcirclelicensefile)
 - [4. Outlook signature path](#4-outlook-signature-path)
 - [5. Mailboxes](#5-mailboxes)
 - [6. Group membership](#6-group-membership)
@@ -111,7 +112,7 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
   - [11.2. How to work with ini files](#112-how-to-work-with-ini-files)
 - [12. Signature and OOF application order](#12-signature-and-oof-application-order)
 - [13. Variable replacement](#13-variable-replacement)
-  - [13.1. Photos from Active Directory](#131-photos-from-active-directory)
+  - [13.1. Photos from Active Directory (account pictures, user image)](#131-photos-from-active-directory-account-pictures-user-image)
     - [13.1.1. When using DOCX template files](#1311-when-using-docx-template-files)
     - [13.1.2. When using HTM template files](#1312-when-using-htm-template-files)
     - [13.1.3. Common behavior](#1313-common-behavior)
@@ -580,17 +581,24 @@ Another advantage of this solution is that it makes roaming signatures available
 Default value: $false
 
 ## 3.31. WordProcessPriority
-Define the Word process priority. With lower values, Set-OutlookSignature runs longer but minimizes possible performance impact
+Define the Word process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
 
 Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
 
 Default value: 'Normal' ('32')
 
-## 3.32. BenefactorCircleId
+## 3.32. ScriptProcessPriority
+Define the script process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
+
+Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
+
+Default value: 'Normal' ('32')
+
+## 3.33. BenefactorCircleId
 The Benefactor Circle member Id matching your license file, which unlocks exclusive features.
 
 Default value: ''
-## 3.33. BenefactorCircleLicenseFile
+## 3.34. BenefactorCircleLicenseFile
 The Benefactor Circle license file matching your member Id, which unlocks exclusive features.
 
 Default value: ''
@@ -971,7 +979,7 @@ Per default, `.\config\default replacement variables.ps1` contains the following
     - Same variables as logged-in user, `$CurrentMailbox[...]$` instead of `$CurrentUser[...]$`  
 - Manager of current mailbox  
     - Same variables as logged-in user, `$CurrentMailboxManager[...]$` instead of `$CurrentMailbox[...]$`  
-## 13.1. Photos from Active Directory  
+## 13.1. Photos from Active Directory (account pictures, user image)
 The software supports replacing images in signature templates with photos stored in Active Directory.
 
 When using images in OOF templates, please be aware that Exchange and Outlook do not yet support images in OOF messages.

@@ -18,6 +18,29 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.9.0" target="_blank">v4.9.0</a> - 2023-12-02
+_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+_**Attention, cloud mailbox users:**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
+### Changed
+- Word is no longer required to convert signatures to TXT format, which reduces resource consumption and execution time
+- `MoveCssInline`: Update dependency PreMailer.Net to v2.5.0
+- Graph connectivity: Update dependency MSAL.Net to v4.58.0
+### Added
+- Check for valid Windows/Outlook/Outlook Web signature names when using the `MirrorLocalSignaturesToCloud` parameter or the `OutlookSignatureName` INI parameter
+- `MirrorLocalSignaturesToCloud`: Only download a roaming signature from Exchange Online when its local version is older or does not exist
+- Sample code `SimulateAndDeploy.ps1`
+  - Display info when a specific job ends, in addition to when there is an error
+  - Display info at least once a minute, and make this update interval configurable
+  - Separate logs for sample code output, successful jobs, jobs with errors and details of each job
+- New parameter `ScriptProcessPriority`: Define the script process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact. See `README` for details.
+### Fixed
+- `DeleteScriptCreatedSignaturesWithoutTemplate` and `DeleteUserCreatedSignatures` did not remove all subfolders belonging to a signature
+- When using HTM templates with images in a connected folder, the folder name was not corrected reliably, which resulted in missing images (as they pointed to a wrong path)
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.1" target="_blank">v4.8.1</a> - 2023-11-24
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
@@ -37,7 +60,7 @@ _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicito
 _**Attention, cloud mailbox users:**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Changed
-- Updated dependency MSAL.Net to v4.57.0.
+- Updated dependency MSAL.Net to v4.57.0
 - Allow more alternate names for cloud environments. See `.\docs\README` for details about the `CloudEnvironment` parameter.
 ### Added
 - Graph token cache now not only works in Windows PowerShell 5.1, but also in PowerShell 7. 
@@ -116,7 +139,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
     - The time to simulate (optional)
     - The output path (optional)
 - A basic configuration user interface with grouped parameter sets, just run `Show-Command .\Set-OutlookSignatures.ps1` in PowerShell.
-- New parameter `WordProcessPriority`: Define the Word process priority. With lower values, Set-OutlookSignature runs longer but minimizes possible performance impact. See `README` for details.
+- New parameter `WordProcessPriority`: Define the Word process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact. See `README` for details.
 ### Fixed
 - On-prem only: Make sure that Active Directory attributes of the current user, the current mailbox and their managers are available in environments where not every domain controller is also a global catalog server
 - Always connect to Entra ID/Azure AD/Graph when New Outlook is used 

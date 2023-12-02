@@ -67,20 +67,20 @@ $ModuleManifest = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'MSAL.PS.ps
 #         $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
 #     }
 # }
-if ($PSVersionTable.PSEdition -eq 'Core') {
-    foreach ($Path in ($ModuleManifest.FileList -ilike '*\netcore\*.dll')) {
+#if ($PSVersionTable.PSEdition -eq 'Core') {
+    foreach ($Path in ($ModuleManifest.FileList -ilike '*\netstandard2.0\*.dll')) {
         $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
     }
-} elseif ($PSVersionTable.PSEdition -eq 'Desktop') {
-    foreach ($Path in ($ModuleManifest.FileList -ilike '*\netframework\*.dll')) {
-        $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
-    }
-}
+#} elseif ($PSVersionTable.PSEdition -eq 'Desktop') {
+#    foreach ($Path in ($ModuleManifest.FileList -ilike '*\netframework\*.dll')) {
+#        $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
+#    }
+#}
 
 ## Load correct assemblies for the PowerShell platform
 foreach ($RequiredAssembly in $RequiredAssemblies) {
     try {
-        Add-Type -LiteralPath $RequiredAssembly | Out-Null
+        Add-Type -LiteralPath $RequiredAssembly -IgnoreWarnings | Out-Null
     } catch {
         $RequiredAssembly = Catch-AssemblyLoadError $RequiredAssembly
     }
@@ -94,25 +94,25 @@ if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') {
     }
 
     if ($PSVersionTable.PSEdition -ieq 'Core') {
-        $RequiredAssemblies.AddRange([string[]]@('netstandard.dll', 'System.Threading.dll', 'System.Runtime.Extensions.dll', 'System.IO.FileSystem.dll', 'System.Security.Cryptography.ProtectedData.dll'))
+        $RequiredAssemblies.AddRange([string[]]@('netstandard.dll', 'System.Threading.dll', 'System.Runtime.Extensions.dll', 'System.IO.FileSystem.dll', 'System.Security.Cryptography.ProtectedData.dll', 'mscorlib.dll'))
 
-        #if (-not 'TokenCachehelper' -as [type]) {
+        if (-not ('TokenCacheHelper' -as [type])) {
             try {
                 Add-Type -LiteralPath $srcTokenCacheHelper -ReferencedAssemblies $RequiredAssemblies
             } catch {
                 Write-Warning 'There was an error loading some dependencies. Storing TokenCache on disk will not function.'
             }
-        #}
+        }
     } else {
-        $RequiredAssemblies.Add('System.Security.dll')
+        $RequiredAssemblies.AddRange([string[]]@('netstandard.dll', 'System.Security.dll'))
 
-        #if (-not 'TokenCacheHelper' -as [type]) {
+        if (-not ('TokenCacheHelper' -as [type])) {
             try {
-                Add-Type -LiteralPath $srcTokenCacheHelper -ReferencedAssemblies $RequiredAssemblies
+                Add-Type -LiteralPath $srcTokenCacheHelper -ReferencedAssemblies $RequiredAssemblies -IgnoreWarnings
             } catch {
                 Write-Warning 'There was an error loading some dependencies. Storing TokenCache on disk will not function.'
             }
-        #}
+        }
     }
 }
 
@@ -126,7 +126,7 @@ if ($PSVersionTable.PSVersion -ge [version]'6.0') {
     #$RequiredAssemblies.Add('System.Diagnostics.Process.dll')
 }
 
-if (-not 'DeviceCodeHelper' -as [type]) {
+if (-not ('DeviceCodeHelper' -as [type])) {
     try {
         Add-Type -LiteralPath $srcDeviceCodeHelper -ReferencedAssemblies $RequiredAssemblies -IgnoreWarnings -WarningAction SilentlyContinue
     } catch {
