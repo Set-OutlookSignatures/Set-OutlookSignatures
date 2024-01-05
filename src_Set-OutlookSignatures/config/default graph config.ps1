@@ -90,8 +90,9 @@ $GraphHtmlMessageboxText = "You started Set-OutlookSignatures, or an administrat
 
 
 # HTML message to show after successful browser authentication to Microsoft Graph
-$GraphHtmlMessageSuccess = "<html><head><title>$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</title></head><body style=""font-family:sans-serif;""><h2><a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank""><img src=""data:image/png;base64,$([Convert]::ToBase64String(([System.IO.File]::ReadAllBytes((Join-Path -Path $(Get-Location).ProviderPath -ChildPath $(if ($BenefactorCircleLicenseFile) { '.\logo\Set-OutlookSignatures Benefactor Circle Logo.png' } else { '.\logo\Set-OutlookSignatures Logo.png' }))))))"" width=""400"" title=""Set-OutlookSignatures"" alt=""$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })""></a></h2><p>Graph authentication successful at $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK').</p><p>&nbsp;</p><p>You can close this tab anytime.</p><p>&nbsp;</p><p><strong>Thank you for using <a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a>!</strong></p></body></html>"
-# Example with automatically closing tab: "<html><head><title>Set-OutlookSignatures</title><script>window.close();</script></head><body style=""font-family:sans-serif;""><h2>Set-OutlookSignatures</h2><p>Graph authentication successful at $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK').</p><p>&nbsp;</p><p>You can close this tab anytime.</p><p>&nbsp;</p><p><strong>Thank you for using Set-OutlookSignatures!</strong></p></body></html>"
+# Try to keep the resulting HTML code small, as long code may lead to display errors ("connection reset")
+$GraphHtmlMessageSuccess = "<html><head><title>$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</title></head><body style=""font-family:sans-serif;""><h1><a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a></h1><p>Graph authentication successful at $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK').</p><p>&nbsp;</p><p><strong>Thank you for using <a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a>!</strong></p><p>&nbsp;</p><p>You can close this tab at any time.</p></body></html>"
+# Example with automatically closing tab: $GraphHtmlMessageSuccess = "<html><head><script>window.close();</script><title>$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</title></head><body style=""font-family:sans-serif;""><h1><a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a></h1><p>Graph authentication successful at $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK').</p><p>&nbsp;</p><p><strong>Thank you for using <a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a>!</strong></p><p>&nbsp;</p><p>You can close this tab at any time.</p></body></html>"
 
 
 # When the user successfully authenticates in the browser, the browser will be redirected to to the given Uri
@@ -100,10 +101,11 @@ $GraphHtmlMessageSuccess = "<html><head><title>$(if ($BenefactorCircleLicenseFil
 
 
 # HTML message to show after unsuccessful browser authentication to Microsoft Graph
-$GraphHtmlMessageError = "<html><head><title>$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</title></head><body style=""font-family:sans-serif;""><h2><a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank""><img src=""data:image/png;base64,$([Convert]::ToBase64String(([System.IO.File]::ReadAllBytes((Join-Path -Path $(Get-Location).ProviderPath -ChildPath $(if ($BenefactorCircleLicenseFile) { '.\logo\Set-OutlookSignatures Benefactor Circle Logo.png' } else { '.\logo\Set-OutlookSignatures Logo.png' }))))))"" width=""400"" title=""Set-OutlookSignatures"" alt=""$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })""></a></h2><p>Graph authentication failed at $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK').</p><p>You may want to inform your helpdesk or administrator about this problem.</p><p>&nbsp;</p><p>Error: {0}</p><p>Details: {1}</p><p>&nbsp;</p><p>You can close this tab anytime.</p><p>&nbsp;</p><p><strong>Thank you for using <a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a>!</strong></p></body></html>"
+# Try to keep the resulting HTML code small, as long code may lead to display errors ("connection reset")
+$GraphHtmlMessageError = "<html><head><title>$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</title></head><body style=""font-family:sans-serif;""><h1><a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a></h1><p>Graph authentication failed at $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK').</p><p>You may want to inform your helpdesk or administrator about this problem.</p><p>&nbsp;</p><p>Error: {0}</p><p>Details: {1}</p><p>&nbsp;</p><p><strong>Thank you for using <a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a>!</strong></p></body></html>"
 
 
-# When the user fail to successfully authenticate in the browser, the browser will be redirected to to the given Uri
+# When the user fails to successfully authenticate in the browser, the browser will be redirected to to the given Uri
 # Takes precedence over $GraphHtmlMessageError
 [uri] $GraphBrowserRedirectError = ''
 
@@ -147,18 +149,10 @@ $GraphUserProperties = @(
 # Active Directory attribute names on the left, Graph attribute names on the right
 # Custom Graph attributes: 'extension_<AppID owning the extension attribute>_<attribute name>'
 $GraphUserAttributeMapping = @{
-    givenname                  = 'givenName'
-    sn                         = 'surname'
-    department                 = 'department'
-    title                      = 'jobTitle'
-    streetaddress              = 'streetAddress'
-    postalcode                 = 'postalCode'
-    l                          = 'city'
     co                         = 'country'
-    telephonenumber            = 'businessPhones'
-    facsimiletelephonenumber   = 'faxNumber'
-    mobile                     = 'mobilePhone'
-    mail                       = 'mail'
+    company                    = 'companyName'
+    department                 = 'department'
+    displayname                = 'displayName'
     extensionattribute1        = 'onPremisesExtensionAttributes.extensionAttribute1'
     extensionattribute2        = 'onPremisesExtensionAttributes.extensionAttribute2'
     extensionattribute3        = 'onPremisesExtensionAttributes.extensionAttribute3'
@@ -174,14 +168,18 @@ $GraphUserAttributeMapping = @{
     extensionattribute13       = 'onPremisesExtensionAttributes.extensionAttribute13'
     extensionattribute14       = 'onPremisesExtensionAttributes.extensionAttribute14'
     extensionattribute15       = 'onPremisesExtensionAttributes.extensionAttribute15'
-    objectsid                  = 'onPremisesSecurityIdentifier'
-    distinguishedname          = 'onPremisesDistinguishedName'
-    company                    = 'companyName'
-    displayname                = 'displayName'
-    proxyAddresses             = 'proxyAddresses'
-    userprincipalname          = 'userPrincipalName'
-    physicaldeliveryofficename = 'officeLocation'
-    mailboxsettings            = 'mailboxsettings'
+    facsimiletelephonenumber   = 'faxNumber'
+    givenname                  = 'givenName'
+    l                          = 'city'
+    mail                       = 'mail'
     mailnickname               = 'mailNickname'
+    mobile                     = 'mobilePhone'
+    physicaldeliveryofficename = 'officeLocation'
+    postalcode                 = 'postalCode'
+    proxyaddresses             = 'proxyAddresses'
+    sn                         = 'surname'
     st                         = 'state'
+    streetaddress              = 'streetAddress'
+    telephonenumber            = 'businessPhones'
+    title                      = 'jobTitle'
 }

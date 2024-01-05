@@ -172,13 +172,13 @@ function CreateUpdateSimulateAndDeployGraphCredentialFile {
 		$AppauthExo = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
 
 		$null = @{
-			'AccessToken'       = $auth.accessToken
+			'AccessToken'       = $auth.AccessToken
 			'AuthHeader'        = $auth.createauthorizationheader()
-			'AccessTokenExo'    = $authExo.accessToken
+			'AccessTokenExo'    = $authExo.AccessToken
 			'AuthHeaderExo'     = $authExo.createauthorizationheader()
-			'AppAccessToken'    = $Appauth.accessToken
+			'AppAccessToken'    = $Appauth.AccessToken
 			'AppAuthHeader'     = $Appauth.createauthorizationheader()
-			'AppAccessTokenExo' = $AppauthExo.accessToken
+			'AppAccessTokenExo' = $AppauthExo.AccessToken
 			'AppAuthHeaderExo'  = $AppauthExo.createauthorizationheader()
 		} | Export-Clixml -Path $SimulateAndDeployGraphCredentialFile
 

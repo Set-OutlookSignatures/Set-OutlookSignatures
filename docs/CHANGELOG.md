@@ -18,6 +18,30 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.10.0" target="_blank">v4.10.0</a> - 2024-01-05
+_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+_**Attention, cloud mailbox users:**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
+### Changed
+- Graph connectivity: Update dependency MSAL.Net to v4.58.1
+### Added
+- Added to the description of each parameter in the script itself and the `.\docs\README` file:
+  - Allowed values
+  - Usage examples (PowerShell and Non-PowerShell)
+  - Information when a feature requires a Benefactor Circle license
+- Additional descriptions in template INI files
+- A specific warning when the template INI file contains references to templates with a wrong file extension (for example, .html instead of .htm)
+- New FAQs, see `.\docs\README` for details:
+  - `How can I deploy and run Set-OutlookSignatures using Microsoft Intune?`
+  - `Why does Set-OutlookSignatures run slower sometimes?`
+### Fixed
+- Correctly handle empty Outlook profiles and a no longer existing default profile
+- Graph authentication: Workaround for MSAL.Net "connection reset error" in browser. See `$GraphHtmlMessageSuccess` and `$GraphHtmlMessageError` in `.\config\default graph config.ps1` for details.
+- Graph authentication: Workaround for MSAL.Net returning the access token in a different format in interactive and silent authentication
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.9.0" target="_blank">v4.9.0</a> - 2023-12-02
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._

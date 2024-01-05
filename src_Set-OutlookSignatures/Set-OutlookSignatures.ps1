@@ -51,207 +51,498 @@ Github: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures
 
 .PARAMETER SignatureTemplatePath
 Path to centrally managed signature templates.
+
 Local and remote paths are supported.
+
 Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX').
+
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+
 Default value: '.\sample templates\Signatures DOCX'
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '.\sample templates\Signatures DOCX'
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '.\sample templates\Signatures DOCX'"
 
 .PARAMETER SignatureIniPath
 Path to ini file containing signature template tags.
-Must be UTF8 encoded.
+
+The file must be UTF8 encoded.
+
 See '.\sample templates\Signatures DOCX\_Signatures.ini' for a sample file with further explanations.
+
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX')
+
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+
 The currently logged-in user needs at least read access to the path
+
 Default value: '.\sample templates\Signatures DOCX\_Signatures.ini'
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureIniPath '.\templates\Signatures DOCX\_Signatures.ini'
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureIniPath '.\templates\Signatures DOCX\_Signatures.ini'"
 
 .PARAMETER ReplacementVariableConfigFile
 Path to a replacement variable config file.
-Must be UTF8 encoded.
+
+The file must be UTF8 encoded.
+
 Local and remote paths are supported.
+
 Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX').
+
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
-Default value: '.\config\default replacement variables.txt'
+
+Default value: '.\config\default replacement variables.ps1'
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ReplacementVariableConfigFile '.\config\default replacement variables.ps1'
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ReplacementVariableConfigFile '.\config\default replacement variables.ps1'"
 
 .PARAMETER GraphConfigFile
 Path to a Graph variable config file.
-Must be UTF8 encoded.
+
+The file must be UTF8 encoded.
+
 Local and remote paths are supported.
+
 Local paths can be absolute ('C:\config\default graph config.ps1') or relative to the software path ('.\config\default graph config.ps1')
+
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/config/default graph config.ps1' or '\\server.domain@SSL\SignatureSite\config\default graph config.ps1'
+
 The currently logged-in user needs at least read access to the path
+
 Default value: '.\config\default graph config.ps1'
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -GraphConfigFile '.\config\default graph config.ps1'
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 GraphConfigFile '.\config\default graph config.ps1'"
 
 .PARAMETER TrustsToCheckForGroups
 List of domains to check for group membership.
+
 If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
+
 If a string starts with a minus or dash ('-domain-a.local'), the domain after the dash or minus is removed from the list (no wildcards allowed).
+
 All domains belonging to the Active Directory forest of the currently logged-in user are always considered, but specific domains can be removed ('*', '-childA1.childA.user.forest').
+
 When a cross-forest trust is detected by the '*' option, all domains belonging to the trusted forest are considered but specific domains can be removed ('*', '-childX.trusted.forest').
+
 Default value: '*'
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -TrustsToCheckForGroups 'corp.example.com', 'corp.example.net'
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -TrustsToCheckForGroups 'corp.example.com', 'corp.example.net'"
 
 .PARAMETER IncludeMailboxForestDomainLocalGroups
 Shall the software consider group membership in domain local groups in the mailbox's AD forest?
+
 Per default, membership in domain local groups in the mailbox's forest is not considered as the required LDAP queries are slow and domain local groups are usually not used in Exchange.
+
 Domain local groups across trusts behave differently, they are always considered as soon as the trusted domain/forest is included in TrustsToCheckForGroups.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $false
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -IncludeMailboxForestDomainLocalGroups $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -IncludeMailboxForestDomainLocalGroups false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -IncludeMailboxForestDomainLocalGroups $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -IncludeMailboxForestDomainLocalGroups false"
 
 .PARAMETER DeleteUserCreatedSignatures
 Shall the software delete signatures which were created by the user itself?
+
+This feature requires a Benefactor Circle license.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $false
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DeleteUserCreatedSignatures $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DeleteUserCreatedSignatures false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DeleteUserCreatedSignatures $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DeleteUserCreatedSignatures false"
 
 .PARAMETER DeleteScriptCreatedSignaturesWithoutTemplate
 Shall the software delete signatures which were created by the software before but are no longer available as template?
-default value: $true
+
+This feature requires a Benefactor Circle license.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
+Default value: $true
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DeleteScriptCreatedSignaturesWithoutTemplate $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DeleteScriptCreatedSignaturesWithoutTemplate false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DeleteScriptCreatedSignaturesWithoutTemplate $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DeleteScriptCreatedSignaturesWithoutTemplate false"
 
 .PARAMETER SetCurrentUserOutlookWebSignature
 Shall the software set the Outlook Web signature of the currently logged-in user?
+
 If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the software can be used in environments where only Outlook Web is used.
+
+This feature requires a Benefactor Circle license.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $true
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SetCurrentUserOutlookWebSignature $true
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SetCurrentUserOutlookWebSignature true
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOutlookWebSignature $true"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOutlookWebSignature true"
 
 .PARAMETER SetCurrentUserOOFMessage
 Shall the software set the out of office (OOF) message of the currently logged-in user?
+
 If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the software can be used in environments where only Outlook Web is used.
+
+This feature requires a Benefactor Circle license.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $true
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SetCurrentUserOOFMessage $true
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SetCurrentUserOOFMessage true
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOOFMessage $true"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOOFMessage true"
 
 .PARAMETER OOFTemplatePath
 Path to centrally managed signature templates.
+
 Local and remote paths are supported.
+
 Local paths can be absolute ('C:\OOF templates') or relative to the software path ('.\sample templates\ Out of Office ').
+
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
+
 The currently logged-in user needs at least read access to the path.
+
 Default value: '.\sample templates\Out of Office DOCX'
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out of Office DOCX'
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out of Office DOCX'"
 
 .PARAMETER OOFIniPath
 Path to ini file containing signature template tags.
-Must be UTF8 encoded.
+
+The file must be UTF8 encoded.
+
 See '.\sample templates\Out of Office DOCX\_OOF.ini' for a sample file with further explanations.
+
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures')
+
 WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+
 The currently logged-in user needs at least read access to the path
+
 Default value: '.\sample templates\Out of Office DOCX\_OOF.ini'
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out of Office DOCX\_OOF.ini'
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out of Office DOCX\_OOF.ini'"
 
 .PARAMETER AdditionalSignaturePath
 An additional path that the signatures shall be copied to.
+
 Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
+
 This way, the user can easily copy-paste the preferred preconfigured signature for use in an email app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
+
 Local and remote paths are supported.
+
 Local paths can be absolute ('C:\Outlook signatures') or relative to the software path ('.\Outlook signatures').
+
 WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
+
 The currently logged-in user needs at least write access to the path.
+
 If the folder or folder structure does not exist, it is created.
+
 Also see related parameter 'EmbedImagesInHtmlAdditionalSignaturePath'.
-Default value: "$([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures'))"
+
+This feature requires a Benefactor Circle license (when used outside of simulation mode).
+
+Default value: "$(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) } catch {})"
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -AdditionalSignaturePath "$(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) } catch {})"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -AdditionalSignaturePath ""$(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) } catch {})
 
 .PARAMETER UseHtmTemplates
 With this parameter, the software searches for templates with the extension .htm instead of .docx.
+
 Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
+
 Templates in .htm format must be UTF8 encoded.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $false
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -UseHtmTemplates $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -UseHtmTemplates false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -UseHtmTemplates $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -UseHtmTemplates false"
+
 
 .PARAMETER SimulateUser
 SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged-in user.
-Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an email-address, but is not neecessarily one).
+
+Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an email-address, but is not necessarily one).
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SimulateUser "EXAMPLEDOMAIN\UserA"
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SimulateUser "user.a@example.com"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateUser ""EXAMPLEDOMAIN\UserA"""
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateUser ""user.a@example.com"""
 
 .PARAMETER SimulateMailboxes
 SimulateMailboxes is optional for simulation mode, although highly recommended.
+
 It is a comma separated list of email addresses replacing the list of mailboxes otherwise gathered from the simulated user's Outlook Web.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
+Default value: $null
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SimulateMailboxes 'user.b@example.com', 'user.b@example.net'
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateMailboxes 'user.a@example.com', 'user.b@example.net'"
 
 .PARAMETER SimulateTime
 Use a certain timestamp for simulation mode. This allows you to simulate time-based templates.
+
 Format: yyyyMMddHHmm (yyyy = year, MM = two-digit month, dd = two-digit day, HH = two-digit hour (0..24), mm = two-digit minute), local time
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $null
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SimulateTime "202312311859"
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SimulateUser "202312311859"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateUser ""202312311859"""
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateUser ""202312311859"""
 
 .PARAMETER SimulateAndDeploy
 Not only simulate, but deploy signatures while simulating
+
 Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
+
 See '.\sample code\SimulateAndDeploy.ps1' for an example how to use this parameter
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $false
 
 .PARAMETER SimulateAndDeployGraphCredentialFile
 Path to file containing Graph credential which should be used as alternative to other token acquisition methods
+
 Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
-See '.\sample code\SimulateAndDeploy.ps1' for an example how to create this file
+
+See '.\sample code\SimulateAndDeploy.ps1' for an example how to create and use this file
+
 Default value: $null
 
 .PARAMETER GraphOnly
 Try to connect to Microsoft Graph only, ignoring any local Active Directory.
+
 The default behavior is to try Active Directory first and fall back to Graph.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $false
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -GraphOnly $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -GraphOnly false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -GraphOnly $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -GraphOnly false"
 
 .PARAMETER CloudEnvironment
 The cloud environment to connect to.
+
 Allowed values:
 - 'Public' (or: 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC')
 - 'AzureUSGovernment' (or: 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4')
 - 'AzureUSGovernmentDOD' (or: 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5')
 - 'China' (or: 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')
+
 Default value: 'Public'
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -CloudEnvironment "Public"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -CloudEnvironment ""Public"""
 
 .PARAMETER CreateRtfSignatures
 Should signatures be created in RTF format?
-Default value: $true
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
+Default value: $false
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -CreateRtfSignatures $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -CreateRtfSignatures false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -CreateRtfSignatures $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -CreateRtfSignatures false"
 
 .PARAMETER CreateTxtSignatures
 Should signatures be created in TXT format?
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $true
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -CreateTxtSignatures $true
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -CreateTxtSignatures true
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -CreateTxtSignatures $true"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -CreateTxtSignatures true"
 
 .PARAMETER MoveCSSInline
 Move CSS to inline style attributes, for maximum email client compatibility.
+
 This parameter is enabled per default, as a workaround to Microsoft's problem with formatting in Outlook Web (M365 roaming signatures and font sizes, especially).
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $true
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MoveCSSInline $true
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MoveCSSInline true
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MoveCSSInline $true"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MoveCSSInline true"
 
 .PARAMETER EmbedImagesInHtml
 Should images be embedded into HTML files?
+
 Outlook 2016 and newer can handle images embedded directly into an HTML file as BASE64 string ('<img src="data:image/[...]"').
+
 Outlook 2013 and earlier can't handle these embedded images when composing HTML emails (there is no problem receiving such emails, or when composing RTF or TXT emails).
+
 When setting EmbedImagesInHtml to $false, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $false
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -EmbedImagesInHtml $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -EmbedImagesInHtml false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -EmbedImagesInHtml $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -EmbedImagesInHtml false"
 
 .PARAMETER EmbedImagesInHtmlAdditionalSignaturePath
 Some feature as 'EmbedImagesInHtml' parameter, but only valid for the path defined in AdditionalSignaturesPath when not in simulation mode.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $true
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -EmbedImagesInHtmlAdditionalSignaturePath $true
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -EmbedImagesInHtmlAdditionalSignaturePath true
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -EmbedImagesInHtmlAdditionalSignaturePath $true"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -EmbedImagesInHtmlAdditionalSignaturePath true"
 
 .PARAMETER DocxHighResImageConversion
 Enables or disables high resolution images in HTML signatures.
+
 When enabled, this parameter uses a workaround to overcome a Word limitation that results in low resolution images when converting to HTML. The price for high resolution images in HTML signatures are more time needed for document conversion and signature files requiring more storage space.
+
 Disabling this feature speeds up DOCX to HTML conversion, and HTML signatures require less storage space - at the cost of lower resolution images.
+
 Contrary to conversion to HTML, conversion to RTF always results in high resolution images.
+
+This feature requires a Benefactor Circle license.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $true
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DocxHighResImageConversion $true
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DocxHighResImageConversion true
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DocxHighResImageConversion $true"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DocxHighResImageConversion true"
 
 .PARAMETER SignaturesForAutomappedAndAdditionalMailboxes
 Deploy signatures for automapped mailboxes and additional mailboxes
+
 Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook
+
+This feature requires a Benefactor Circle license.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $true
 
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignaturesForAutomappedAndAdditionalMailboxes $true
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignaturesForAutomappedAndAdditionalMailboxes true
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignaturesForAutomappedAndAdditionalMailboxes $true"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignaturesForAutomappedAndAdditionalMailboxes true"
+
 .PARAMETER DisableRoamingSignatures
-Disable roaming signatures.
+Disable signature roaming in Outlook. Has no effect on signature roaming via the MirrorLocalSignaturesToCloud parameter.
+
+A value representing true disables roaming signatures, a value representing false enables roaming signatures, any other value leaves the setting as-is.
+
 Only sets HKCU registry key, does not override configuration set by group policy.
-Allowed values: $null, $true, $false
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no', $null, ''
+
 Default value: $true
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DisableRoamingSignatures $true
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DisableRoamingSignatures true
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DisableRoamingSignatures $true"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DisableRoamingSignatures true"
 
 .PARAMETER MirrorLocalSignaturesToCloud
 Should local signatures be uploaded as roaming signature for the current user?
+
 Possible for Exchange Online mailbox of currently logged-in user.
+
+This feature requires a Benefactor Circle license.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
 Default value: $false
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud false"
 
 .PARAMETER WordProcessPriority
 Define the Word process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
+
 Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
+
 Default value: 'Normal' ('32')
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -WordProcessPriority Normal
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -WordProcessPriority 32
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -WordProcessPriority Normal"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -WordProcessPriority 32"
 
 .PARAMETER ScriptProcessPriority
 Define the script process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
+
 Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
+
 Default value: 'Normal' ('32')
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ScriptProcessPriority Normal
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 32
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority Normal"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 32"
 
 .PARAMETER BenefactorCircleId
 The Benefactor Circle member Id matching your license file, which unlocks exclusive features.
+
 Default value: ''
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -BenefactorCircleId 00000000-0000-0000-0000-000000000000
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -BenefactorCircleId 00000000-0000-0000-0000-000000000000"
 
 .PARAMETER BenefactorCircleLicenseFile
 The Benefactor Circle license file matching your member Id, which unlocks exclusive features.
+
 Default value: ''
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -BenefactorCircleLicenseFile ".\license.dll"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -BenefactorCircleLicenseFile "".\license.dll"""
 
 .INPUTS
 None. You cannot pipe objects to Set-OutlookSignatures.ps1.
@@ -318,34 +609,39 @@ Param(
     [string]$SignatureIniPath = '.\sample templates\Signatures DOCX\_Signatures.ini',
 
     # Deploy signatures for automapped mailboxes and additional mailboxes
+    [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $SignaturesForAutomappedAndAdditionalMailboxes = $true,
 
     # Shall the software delete signatures which were created by the user itself?
+    [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $DeleteUserCreatedSignatures = $false,
 
     # Shall the software delete signatures which were created by the software before but are no longer available as template?
+    [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $DeleteScriptCreatedSignaturesWithoutTemplate = $true,
 
     # Shall the software set the Outlook Web signature of the currently logged-in user?
+    [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $SetCurrentUserOutlookWebSignature = $true,
 
     # An additional path that the signatures shall be copied to
+    [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'F: Simulation mode')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
-    [string]$AdditionalSignaturePath = $(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) }catch {}),
+    [string]$AdditionalSignaturePath = $(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) } catch {}),
 
     # Use templates in .HTM file format instead of .DOCX
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
@@ -355,6 +651,7 @@ Param(
     $UseHtmTemplates = $false,
 
     # Should HTML signatures contain high resolution images?
+    [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
@@ -391,6 +688,7 @@ Param(
     $EmbedImagesInHtmlAdditionalSignaturePath = $true,
 
     # Shall the software set the out of office (OOF) message(s) of the currently logged-in user?
+    [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'C: OOF messages')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
@@ -499,8 +797,10 @@ Param(
     $DisableRoamingSignatures = $true,
 
     # Should local signatures be uploaded as roaming signature for the current user?
+    [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'G: Outlook')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
+    [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $MirrorLocalSignaturesToCloud = $false,
 
     # Word process priority
@@ -1118,9 +1418,13 @@ function main {
         Write-Host 'Benefactor Circle Id and license file must both be set for access to exclusive features.' -ForegroundColor Red
         Write-Host 'Continuing without these exclusive features.' -ForegroundColor Red
         Write-Host "Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Red
-    } else {
+    }
+    
+    if (
+        (-not ($BenefactorCircleLicenseFile -and $BenefactorCircleId)) -or 
+        ($result -ilike 'License is not valid: *')
+    ) {
         Write-Host
-
         Write-Host @'
 Thank you for using the free and open-source version of Set-OutlookSignatures!
 
@@ -1191,7 +1495,7 @@ or visit 'https://explicitconsulting.at'.
             #   Office x86 on Windows x86
             #   Office x86 on Windows x64
             #   Any PowerShell process bitness
-            $OutlookFilePath = Get-ChildItem ((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry32)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0] -ErrorAction Stop
+            $OutlookFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry32)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '') -ErrorAction Stop
         } catch {
             try {
                 # [Microsoft.Win32.RegistryView]::Registry64 makes sure we view the registry as a 64 bit application would
@@ -1199,7 +1503,7 @@ or visit 'https://explicitconsulting.at'.
                 # Covers:
                 #   Office x64 on Windows x64
                 #   Any PowerShell process bitness
-                $OutlookFilePath = Get-ChildItem ((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry64)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0] -ErrorAction Stop
+                $OutlookFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry64)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '') -ErrorAction Stop
             } catch {
                 $OutlookFilePath = $null
             }
@@ -1248,7 +1552,12 @@ or visit 'https://explicitconsulting.at'.
         if ($null -ne $OutlookRegistryVersion) {
             try {
                 $OutlookDefaultProfile = (Get-ItemProperty "hkcu:\software\microsoft\office\$($OutlookRegistryVersion)\Outlook" -ErrorAction Stop -WarningAction SilentlyContinue).DefaultProfile
-                $OutlookProfiles = @(@($OutlookDefaultProfile) + @((Get-ChildItem "hkcu:\SOFTWARE\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles" -ErrorAction Stop -WarningAction SilentlyContinue).PSChildName | Where-Object { $_ -ine $OutlookDefaultProfile }))
+
+                $OutlookProfiles = @(@((Get-ChildItem "hkcu:\SOFTWARE\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles" -ErrorAction Stop -WarningAction SilentlyContinue).PSChildName) | Where-Object { $_ })
+
+                if ($OutlookDefaultProfile -and ($OutlookDefaultProfile -iin $OutlookProfiles)) {
+                    $OutlookProfiles = @(@($OutlookDefaultProfile) + @($OutlookProfiles | Where-Object { $_ -ine $OutlookDefaultProfile }))
+                }
             } catch {
                 $OutlookDefaultProfile = $null
                 $OutlookProfiles = @()
@@ -1358,7 +1667,7 @@ or visit 'https://explicitconsulting.at'.
         #   Office x86 on Windows x86
         #   Office x86 on Windows x64
         #   Any PowerShell process bitness
-        $WordFilePath = Get-ChildItem ((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry32)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0] -ErrorAction Stop
+        $WordFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry32)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '') -ErrorAction Stop
     } catch {
         try {
             # [Microsoft.Win32.RegistryView]::Registry64 makes sure we view the registry as a 64 bit application would
@@ -1366,7 +1675,7 @@ or visit 'https://explicitconsulting.at'.
             # Covers:
             #   Office x64 on Windows x64
             #   Any PowerShell process bitness
-            $WordFilePath = Get-ChildItem ((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry64)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0] -ErrorAction Stop
+            $WordFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry64)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '') -ErrorAction Stop
         } catch {
             $WordFilePath = $null
         }
@@ -1416,20 +1725,43 @@ or visit 'https://explicitconsulting.at'.
                     New-Item -Path $x -ItemType directory -Force | Out-Null
                 }
 
-                $SignaturePaths += $x
-                Write-Host "  $x"
+                if ($x -inotin $SignaturePaths) {
+                    $SignaturePaths += $x
+                    Write-Host "  $x"
+                }
             }
 
             Pop-Location
         }
     } else {
-        if ($OutlookUseNewOutlook -eq $true) {
-            Write-Host '  New Outlook is set as default Outlook, so use a temporary signature path'
-        } else {
-            Write-Host '  Outlook Web will be used, so use a temporary signature path'
+        $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname))
+        Write-Host "  $($SignaturePaths[-1]) (Outlook Web/New Outlook)"
+    }
+
+    # If Outlook is installed, synch profile folders anyway
+    # Also makes sure that signatures are already there when starting Outlook for the first time
+    if ((-not $SimulateUser) -and $OutlookFileVersion) {
+        $x = (Get-ItemProperty "hkcu:\software\microsoft\office\$($OutlookRegistryVersion)\common\general" -ErrorAction SilentlyContinue).'Signatures'
+
+        if ($x) {
+            Push-Location ((Join-Path -Path ($env:AppData) -ChildPath 'Microsoft'))
+            $x = ($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($x))
+
+            if (Test-Path $x -IsValid) {
+                if (-not (Test-Path $x -type container)) {
+                    New-Item -Path $x -ItemType directory -Force | Out-Null
+                }
+
+                if ($x -inotin $SignaturePaths) {
+                    $SignaturePaths += $x
+                    Write-Host "  $x"
+                }
+            }
+
+            Pop-Location
         }
 
-        $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname))
+        $SignaturePaths = @($SignaturePaths | Select-Object -Unique)
     }
 
 
@@ -1765,6 +2097,8 @@ or visit 'https://explicitconsulting.at'.
                 }
 
                 @(
+                    'displayName',
+                    'givenName',
                     'id',
                     'mail',
                     'mailNickname',
@@ -1776,6 +2110,8 @@ or visit 'https://explicitconsulting.at'.
                     'onPremisesSecurityIdentifier',
                     'onPremisesUserPrincipalName',
                     'proxyAddresses',
+                    'securityIdentifier',
+                    'surname',
                     'userPrincipalName'
                 ) | ForEach-Object {
                     if ($GraphUserProperties -inotcontains $_) {
@@ -1787,10 +2123,14 @@ or visit 'https://explicitconsulting.at'.
                     $GraphUserAttributeMapping = @{}
                 }
 
-                $GraphUserAttributeMapping['id'] = 'id'
-                $GraphUserAttributeMapping['onPremisesDomainName'] = 'onPremisesDomainName'
-                $GraphUserAttributeMapping['objectsid'] = 'onPremisesSecurityIdentifier'
                 $GraphUserAttributeMapping['distinguishedname'] = 'onPremisesDistinguishedName'
+                $GraphUserAttributeMapping['mailboxsettings'] = 'mailboxSettings'
+                $GraphUserAttributeMapping['mailnickname'] = 'mailNickname'
+                $GraphUserAttributeMapping['objectguid'] = 'id'
+                $GraphUserAttributeMapping['objectsid'] = 'securityIdentifier'
+                $GraphUserAttributeMapping['onpremisesdomainname'] = 'onPremisesDomainName'
+                $GraphUserAttributeMapping['onpremisessecurityidentifier'] = 'onPremisesSecurityIdentifier'
+                $GraphUserAttributeMapping['userprincipalname'] = 'userPrincipalName'
             } catch {
                 Write-Host "        Problem executing content of '$GraphConfigFile'. Exit." -ForegroundColor Red
                 $error[0]
@@ -1887,6 +2227,10 @@ or visit 'https://explicitconsulting.at'.
         } else {
             $CurrentUserSids += (New-Object system.security.principal.securityidentifier $($ADPropsCurrentUser.objectsid), 0).value
         }
+    }
+
+    if (($ADPropsCurrentUser.onpremisessecurityidentifier -ne '') -and ($null -ne $ADPropsCurrentUser.onpremisessecurityidentifier)) {
+        $CurrentUserSids += $ADPropsCurrentUser.onpremisessecurityidentifier.tostring()
     }
 
     foreach ($SidHistorySid in @($ADPropsCurrentUser.sidhistory | Where-Object { $_ })) {
@@ -2488,6 +2832,10 @@ or visit 'https://explicitconsulting.at'.
                     if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
                         Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) ini index #$($Enumerator)) found in ini but not in signature template path." -ForegroundColor Yellow
                     }
+
+                    if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotlike "*.$(if($UseHtmTemplates){'htm'}else{'docx'})")) {
+                        Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) ini index #$($Enumerator)) has the wrong file extension (-UseHtmTemplates true allows .htm, else .docx)" -ForegroundColor Yellow
+                    }
                 }
             }
 
@@ -2877,7 +3225,10 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
         # Start Word dummy object, set process priority, start real Word object, set process priority, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the software
         try {
+            $tempVerbosePreference = $VerbosePreference
+            $VerbosePreference = 'SilentlyContinue'
             $script:COMWordDummy = New-Object -ComObject Word.Application
+            $VerbosePreference = $tempVerbosePreference
             $script:COMWordDummy.Visible = $false
 
             if ($script:COMWordDummy) {
@@ -2891,7 +3242,10 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$script:COMWordDummyPid""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $WordProcessPriority }
             }
 
+            $tempVerbosePreference = $VerbosePreference
+            $VerbosePreference = 'SilentlyContinue'
             $script:COMWord = New-Object -ComObject Word.Application
+            $VerbosePreference = $tempVerbosePreference
             $script:COMWord.Visible = $false
 
             if ($script:COMWord) {
@@ -3903,7 +4257,7 @@ function EvaluateAndSetSignatures {
                 }
 
                 if ($tempAllowCount -eq 0) {
-                    Write-Host "$Indent          email address: Mailbox and current user do not have any allowed email address"
+                    Write-Host "$Indent          Email address: Mailbox and current user do not have any allowed email address"
                 }
             } elseif ($TemplateGroup -ieq 'replacementvariable') {
                 $tempAllowCount = 0
@@ -3983,7 +4337,7 @@ function EvaluateAndSetSignatures {
                 }
 
                 if ($tempDenyCount -eq 0) {
-                    Write-Host "$Indent          email address: Mailbox and current user do not have any denied email address"
+                    Write-Host "$Indent          Email address: Mailbox and current user do not have any denied email address"
                 }
 
                 # check for replacement variable deny
@@ -4143,7 +4497,10 @@ function SetSignatures {
         if ($UseHtmTemplates) {
             Write-Host "$Indent      Replace picture variables"
 
+            $tempVerbosePreference = $VerbosePreference
+            $VerbosePreference = 'SilentlyContinue'
             $html = New-Object -ComObject 'HTMLFile'
+            $VerbosePreference = $tempVerbosePreference
 
             try {
                 # PowerShell Desktop with Office
@@ -4606,7 +4963,11 @@ function SetSignatures {
 
         Write-Host "$Indent        Copy HTM image width and height attributes to style attribute"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+
+        $tempVerbosePreference = $VerbosePreference
+        $VerbosePreference = 'SilentlyContinue'
         $html = New-Object -ComObject 'HTMLFile'
+        $VerbosePreference = $tempVerbosePreference
 
         try {
             # PowerShell Desktop with Office
@@ -4632,8 +4993,9 @@ function SetSignatures {
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
             $tempFileContent = Get-Content -LiteralPath $path -Encoding UTF8 -Raw
 
-            # Use a separate job for PreMailer.Net, as there are DLL conflicts in PowerShell 5.x with Invoke-RestMethod
-            [System.IO.File]::WriteAllText($path, $((Start-Job -ScriptBlock { Import-Module (Join-Path -Path $using:script:PreMailerNetModulePath -ChildPath 'PreMailer.Net.dll'); [PreMailer.Net.PreMailer]::MoveCssInline($using:tempFileContent) } | Receive-Job -Wait -AutoRemoveJob).html), (New-Object System.Text.UTF8Encoding($False)))
+            # Use a separate runspace for PreMailer.Net, as there are DLL conflicts in PowerShell 5.x with Invoke-RestMethod
+            # Do not use jobs, as they fall back to Constrained Language Mode in secured environments, which makes Import-Module fail
+            [System.IO.File]::WriteAllText($path, $(MoveCssInline($tempFileContent)), (New-Object System.Text.UTF8Encoding($False)))
         }
 
         Write-Host "$Indent        Add marker to final HTM file"
@@ -4753,7 +5115,10 @@ function SetSignatures {
 
                 $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
+                $tempVerbosePreference = $VerbosePreference
+                $VerbosePreference = 'SilentlyContinue'
                 $html = New-Object -ComObject 'HTMLFile'
+                $VerbosePreference = $tempVerbosePreference
 
                 try {
                     # PowerShell Desktop with Office
@@ -4996,6 +5361,67 @@ function CheckADConnectivity {
 }
 
 
+function MoveCssInline {
+    param (
+        $HtmlCode
+    )
+    [void][runspacefactory]::CreateRunspacePool()
+    $RunspacePool = [runspacefactory]::CreateRunspacePool(1, 1)
+    $RunspacePool.Open()
+
+    $PowerShell = [powershell]::Create()
+    $PowerShell.RunspacePool = $RunspacePool
+
+    [void]$PowerShell.AddScript({
+            Param (
+                $HtmlCode,
+                $path
+            )
+
+            $DebugPreference = 'Continue'
+            Write-Debug "Start(Ticks) = $((Get-Date).Ticks)"
+
+            try {
+                Import-Module (Join-Path -Path $path -ChildPath 'PreMailer.Net.dll')
+                Write-Debug $([PreMailer.Net.PreMailer]::MoveCssInline($HtmlCode).html)
+            } catch {
+                Write-Debug 'Failed'
+            }
+        }).AddArgument($HtmlCode).AddArgument($script:PreMailerNetModulePath)
+    $Object = New-Object 'System.Management.Automation.PSDataCollection[psobject]'
+    $Handle = $PowerShell.BeginInvoke($Object, $Object)
+    $temp = '' | Select-Object PowerShell, Handle, Object, StartTime, Done
+    $temp.PowerShell = $PowerShell
+    $temp.Handle = $Handle
+    $temp.Object = $Object
+    $temp.StartTime = $null
+    $temp.Done = $false
+    [void]$script:jobs.Add($Temp)
+
+    while (($script:jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
+        foreach ($job in $script:jobs) {
+            if (($null -eq $job.StartTime) -and ($job.Powershell.Streams.Debug[0].Message -imatch 'Start')) {
+                $StartTicks = $job.powershell.Streams.Debug[0].Message -ireplace '[^0-9]'
+                $job.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
+            }
+
+            if ($null -ne $job.StartTime) {
+                if ((($job.handle.IsCompleted -eq $true) -and ($job.Done -eq $false)) -or (($job.Done -eq $false) -and ((New-TimeSpan -Start $job.StartTime -End (Get-Date)).TotalSeconds -ge 5))) {
+                    $data = $job.Object[0..$(($job.object).count - 1)]
+                    if ($job.Powershell.Streams.Debug[1].Message -imatch 'Failed') {
+                        $returnvalue = $HtmlCode
+                    } else {
+                        $returnvalue = $job.Powershell.Streams.Debug[1].Message
+                    }
+                    $job.Done = $true
+                }
+            }
+        }
+    }
+    return $returnvalue
+}
+
+
 function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $false) {
     if ($create -eq $false) {
         if (($path.StartsWith('https://', 'CurrentCultureIgnoreCase')) -or ($path -ilike '*@ssl\*')) {
@@ -5053,12 +5479,12 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
                     $app = New-Object -com shell.application
                     $i = 0
                     while ($i -lt 1) {
-                        $i += @($app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') }).count
+                        $i += @($app.windows() | Where-Object { $_.LocationURL -ilike ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') }).count
                         Start-Sleep -Milliseconds 50
                     }
 
                     # Wait until the corresponding URL is fully loaded, then close the tab
-                    foreach ($window in @($app.windows() | Where-Object { $_.LocationURL -like ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') })) {
+                    foreach ($window in @($app.windows() | Where-Object { $_.LocationURL -ilike ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') })) {
                         while ($window.busy) {
                             Start-Sleep -Milliseconds 50
                         }
@@ -5280,7 +5706,7 @@ No Graph authentication possible.
                     error             = $false
                     AccessToken       = $auth.AccessToken
                     AuthHeader        = $script:AuthorizationHeader
-                    AccessTokenExo    = $authExo.accessToken
+                    AccessTokenExo    = $authExo.AccessToken
                     AuthHeaderExo     = $authExo.createauthorizationheader()
                     AppAccessToken    = $null
                     AppAuthHeader     = $null
@@ -5290,9 +5716,9 @@ No Graph authentication possible.
             } catch {
                 return @{
                     error             = ($error[0] | Out-String)
-                    accessToken       = $null
+                    AccessToken       = $null
                     authHeader        = $null
-                    accessTokenExo    = $null
+                    AccessTokenExo    = $null
                     authHeaderExo     = $null
                     AppAccessToken    = $null
                     AppAuthHeader     = $null
@@ -5314,7 +5740,7 @@ function GraphGetMe {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Web.HttpUtility]::UrlEncode(($GraphUserProperties -join ', '))
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Web.HttpUtility]::UrlEncode(($GraphUserProperties -join ','))
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
