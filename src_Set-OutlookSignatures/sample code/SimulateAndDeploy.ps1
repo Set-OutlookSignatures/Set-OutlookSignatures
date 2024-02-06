@@ -81,12 +81,11 @@ Requirements
 
 Limitations
 	- Despitze parallelization, the software runtime can be unsuited for a higher number of users. The reason usually is the Word background process.
-		- If you require signatures in RTF and/or TXT format, Word is needed for document conversion and you can only shorten runtime by adding hardware (scale up or scale out)
-		- If you do need HTML signatures only, you can use the following workaround to avoid starting Word:
+		- If you use DOCX templates and/or require signatures in RTF format, Word is needed for document conversion and you can only shorten runtime by adding hardware (scale up or scale out)
+		- If you do need HTML and/or TXT signatures only, you can use the following workaround to avoid starting Word:
 			- Use HTM templates instead of DOCX templates (parameter '-UseHtmTemplates true')
 				There are features in DOCX templates that can not be replicated HTM templates, such as applying Word specific image and text filters
 			- Do not create signatures in RTF format (parameter '-CreateRtfSignatures false')
-			- Do not create signatures in TXT format (parameter '-CreateTxtSignatures false')
 	- Roaming signatures can currently not be deployed for shared mailboxes, as the API does not support this scenario.
 		- Roaming signatures for shared mailboxes pose a general problem, as only signatures with replacement variables from the $CurrentMailbox[...]$ namespace would make sense anyhow
 #>

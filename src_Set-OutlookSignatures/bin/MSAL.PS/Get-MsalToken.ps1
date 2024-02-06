@@ -2,7 +2,7 @@
 .SYNOPSIS
     Acquire a token using MSAL.NET library.
 .DESCRIPTION
-    This command will acquire OAuth tokens for both public and confidential clients. Public clients authentication can be interactive, integrated Windows auth, or silent (aka refresh token authentication).
+    This command will acquire OAuth tokens for both public and confidential clients. Public clients authentication can be interactive, Integrated Windows Authentication, or silent (aka refresh token authentication).
 .EXAMPLE
     PS C:\>Get-MsalToken -ClientId '00000000-0000-0000-0000-000000000000' -Scope 'https://graph.microsoft.com/User.Read','https://graph.microsoft.com/Files.ReadWrite'
     Get AccessToken (with MS Graph permissions User.Read and Files.ReadWrite) and IdToken using client id from application registration (public client).

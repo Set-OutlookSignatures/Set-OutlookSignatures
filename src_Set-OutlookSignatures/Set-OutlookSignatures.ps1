@@ -8,9 +8,7 @@ Email signatures and out-of-office replies are an integral part of corporate ide
 
 Central administration and distribution ensures that CI/CD guidelines are met, guarantees the use of correct and up-to-date data, helps to comply with legal requirements, relieves staff and also opens up an additional marketing channel.
 
-Many companies are not aware that business emails, similar to a web presence, are usually subject to an imprint obligation. The legal basis differs from country to country, and non-compliance can result in severe penalties.
-
-**With Set-OutlookSignatures, signatures and out-of-office replies can be:**
+**With Set-OutlookSignatures, you can do all this and even more. Signatures and out-of-office replies can be:**
 - Generated from **templates in DOCX or HTML** file format
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
@@ -757,7 +755,7 @@ Param(
     # Simulate another user as currently logged-in user
     [Parameter(Mandatory = $false, ParameterSetName = 'F: Simulation mode')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
-    [Alias('SimulationUser')]
+    [Alias('SimulationUser', 'WhatIf')]
     [validatescript({
             $tempSimulateUser = $_
             if ($tempSimulateUser -imatch '^\S+@\S+$|^\S+\\\S+$') {
@@ -935,7 +933,7 @@ function CheckFilenamePossiblyInvalid ([string] $Filename = '', [bool] $CheckOut
         }
     }
 
-    $InvalidCharacters = @(@($InvalidCharacters | Select-Object -Unique | Where-Object { $_ } | Sort-Object) | ForEach-Object { "'$($_)'" })
+    $InvalidCharacters = @(@($InvalidCharacters | Select-Object -Unique | Where-Object { $_ } | Sort-Object -Culture $TemplateFilesSortCulture) | ForEach-Object { "'$($_)'" })
 
     if ($InvalidCharacters) {
         return $InvalidCharacters -join ', '
@@ -971,7 +969,7 @@ function main {
         $GitHubReleasesSemVer += toSemVer $v
     }
 
-    $GitHubReleasesSemVerRanked = rankedSemVer($GitHubReleasesSemVer) | Sort-Object -Property Rank -Unique
+    $GitHubReleasesSemVerRanked = rankedSemVer($GitHubReleasesSemVer) | Sort-Object -Culture $TemplateFilesSortCulture -Property Rank -Unique
 
     $GitHubReleasesNewer = @(@($GitHubReleasesSemVerRanked | Where-Object { $_.Rank -gt ($GitHubReleasesSemVerRanked | Where-Object { $_.VersionString -ieq $ScriptVersion }).Rank }).VersionString)
 
@@ -1419,9 +1417,9 @@ function main {
         Write-Host 'Continuing without these exclusive features.' -ForegroundColor Red
         Write-Host "Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Red
     }
-    
+
     if (
-        (-not ($BenefactorCircleLicenseFile -and $BenefactorCircleId)) -or 
+        (-not ($BenefactorCircleLicenseFile -and $BenefactorCircleId)) -or
         ($result -ilike 'License is not valid: *')
     ) {
         Write-Host
@@ -1801,7 +1799,7 @@ or visit 'https://explicitconsulting.at'.
 
                 if ($TrustedDomains) {
                     $TrustedDomains = @(
-                        @($TrustedDomains) | Where-Object { $_ -ine $UserForest } | Sort-Object @{Expression = {
+                        @($TrustedDomains) | Where-Object { $_ -ine $UserForest } | Sort-Object -Culture $TemplateFilesSortCulture -Property @{Expression = {
                                 $TemporaryArray = @($_.properties.name.Split('.'))
                                 [Array]::Reverse($TemporaryArray)
                                 $TemporaryArray
@@ -1842,7 +1840,7 @@ or visit 'https://explicitconsulting.at'.
                                 }
 
                                 $temp = @(
-                                    @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Where-Object { $_ -ine $TrustedDomain.properties.name } | Select-Object -Unique | Sort-Object @{Expression = {
+                                    @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Where-Object { $_ -ine $TrustedDomain.properties.name } | Select-Object -Unique | Sort-Object -Culture $TemplateFilesSortCulture -Property @{Expression = {
                                             $TemporaryArray = @($_.Split('.'))
                                             [Array]::Reverse($TemporaryArray)
                                             $TemporaryArray
@@ -1923,7 +1921,7 @@ or visit 'https://explicitconsulting.at'.
                                             }
 
                                             $temp = @(
-                                                @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Where-Object { $_ -ine $TrustedDomain.properties.name } | Select-Object -Unique | Sort-Object @{Expression = {
+                                                @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Where-Object { $_ -ine $TrustedDomain.properties.name } | Select-Object -Unique | Sort-Object -Culture $TemplateFilesSortCulture -Property @{Expression = {
                                                         $TemporaryArray = @($_.Split('.'))
                                                         [Array]::Reverse($TemporaryArray)
                                                         $TemporaryArray
@@ -2013,10 +2011,13 @@ or visit 'https://explicitconsulting.at'.
                     $Search.SearchRoot = "GC://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
                     $ADPropsCurrentUser = $Search.FindOne().Properties
+                    $ADPropsCurrentUser = [hashtable]::new($ADPropsCurrentUser, [StringComparer]::OrdinalIgnoreCase)
 
                     $Search.SearchRoot = "LDAP://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
                     $ADPropsCurrentUserLdap = $Search.FindOne().Properties
+                    $ADPropsCurrentUserLdap = [hashtable]::new($ADPropsCurrentUserLdap, [StringComparer]::OrdinalIgnoreCase)
+
 
                     foreach ($keyName in @($ADPropsCurrentUserLdap.Keys)) {
                         if (
@@ -2040,10 +2041,12 @@ or visit 'https://explicitconsulting.at'.
                         $Search.SearchRoot = "GC://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                         $ADPropsCurrentUser = $Search.FindOne().Properties
+                        $ADPropsCurrentUser = [hashtable]::new($ADPropsCurrentUser, [StringComparer]::OrdinalIgnoreCase)
 
                         $Search.SearchRoot = "LDAP://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
                         $ADPropsCurrentUserLdap = $Search.FindOne().Properties
+                        $ADPropsCurrentUserLdap = [hashtable]::new($ADPropsCurrentUserLdap, [StringComparer]::OrdinalIgnoreCase)
 
                         foreach ($keyName in @($ADPropsCurrentUserLdap.Keys)) {
                             if (
@@ -2152,10 +2155,10 @@ or visit 'https://explicitconsulting.at'.
         $GraphToken = GraphGetToken
 
         if ($GraphToken.error -eq $false) {
-            Write-Verbose "        Graph Token: $($GraphToken.AccessToken)"
+            Write-Verbose "        Graph Token metadata: $((ParseJwtToken $GraphToken.AccessToken) | ConvertTo-Json)"
 
             if (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)) {
-                Write-Verbose "        EXO Token: $($GraphToken.AccessTokenExo)"
+                Write-Verbose "        EXO Token metadata: $((ParseJwtToken $GraphToken.AccessTokenExo) | ConvertTo-Json)"
 
                 if (-not $($GraphToken.AccessTokenExo)) {
                     Write-Host '      Problem connecting to Exchange Online with Graph token. Exit.' -ForegroundColor Red
@@ -2164,8 +2167,8 @@ or visit 'https://explicitconsulting.at'.
             }
 
             if ($SimulateAndDeployGraphCredentialFile) {
-                Write-Verbose "        App Graph Token: $($GraphToken.AppAccessToken)"
-                Write-Verbose "        App EXO Token: $($GraphToken.AppAccessTokenExo)"
+                Write-Verbose "        App Graph Token metadata: $((ParseJwtToken $GraphToken.AppAccessToken) | ConvertTo-Json)"
+                Write-Verbose "        App EXO Token metadata: $((ParseJwtToken $GraphToken.AppAccessTokenExo) | ConvertTo-Json)"
             }
 
             if ($SimulateUser) {
@@ -2286,10 +2289,13 @@ or visit 'https://explicitconsulting.at'.
                     $Search.SearchRoot = "GC://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
                     $ADPropsCurrentUserManager = $Search.FindOne().Properties
+                    $ADPropsCurrentUserManager = [hashtable]::new($ADPropsCurrentUserManager, [StringComparer]::OrdinalIgnoreCase)
+
 
                     $Search.SearchRoot = "LDAP://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
                     $ADPropsCurrentUserManagerLdap = $Search.FindOne().Properties
+                    $ADPropsCurrentUserManagerLdap = [hashtable]::new($ADPropsCurrentUserManagerLdap, [StringComparer]::OrdinalIgnoreCase)
 
                     foreach ($keyName in @($ADPropsCurrentUserManagerLdap.Keys)) {
                         if (
@@ -2433,7 +2439,9 @@ or visit 'https://explicitconsulting.at'.
 
                 if (-not $script:WebServicesDllPath) {
                     Write-Host '    Set up environment for connection to Outlook Web'
+
                     $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
+
                     try {
                         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
                         Unblock-File -LiteralPath $script:WebServicesDllPath
@@ -2446,6 +2454,7 @@ or visit 'https://explicitconsulting.at'.
                         #    Unblock-File -LiteralPath $script:WebServicesDllPath
                         #}
                     } catch {
+                        Write-Verbose $_
                     }
                 }
 
@@ -2453,17 +2462,31 @@ or visit 'https://explicitconsulting.at'.
 
                 try {
                     Import-Module -Name $script:WebServicesDllPath -Force -ErrorAction Stop
+
                     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
+
                     Write-Host '    Connect to Outlook Web'
                     try {
-                        Write-Verbose '      Try Windows Integrated Auth'
+                        Write-Verbose '      Try Integrated Windows Authentication'
+
+                        if (
+                            ($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile -and $GraphToken.AppAccessTokenExo) -or
+                            $GraphToken.AccessTokenExo
+                        ) {
+                            throw '        EXO access token available, skip Integrated Windows Authentication'
+                        }
+
                         $exchService.UseDefaultCredentials = $true
                         $exchService.ImpersonatedUserId = $null
                         $exchService.AutodiscoverUrl($MailAddresses[0], { $true }) | Out-Null
                     } catch {
                         try {
+                            Write-Verbose $_
+
                             Write-Verbose '      Try OAuth with Autodiscover'
+
                             $exchService.UseDefaultCredentials = $false
+
                             if ($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile) {
                                 $exchService.ImpersonatedUserId = New-Object Microsoft.Exchange.WebServices.Data.ImpersonatedUserId([Microsoft.Exchange.WebServices.Data.ConnectingIdType]::SmtpAddress, $MailAddresses[0])
                                 $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AppAccessTokenExo)
@@ -2471,10 +2494,15 @@ or visit 'https://explicitconsulting.at'.
                                 $exchService.ImpersonatedUserId = $null
                                 $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AccessTokenExo)
                             }
+
                             $exchService.AutodiscoverUrl($MailAddresses[0], { $true }) | Out-Null
                         } catch {
+                            Write-Verbose $_
+
                             Write-Verbose '      Try OAuth with fixed URL'
+
                             $exchService.UseDefaultCredentials = $false
+
                             if ($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile) {
                                 $exchService.ImpersonatedUserId = New-Object Microsoft.Exchange.WebServices.Data.ImpersonatedUserId([Microsoft.Exchange.WebServices.Data.ConnectingIdType]::SmtpAddress, $MailAddresses[0])
                                 $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AppAccessTokenExo)
@@ -2482,6 +2510,7 @@ or visit 'https://explicitconsulting.at'.
                                 $exchService.ImpersonatedUserId = $null
                                 $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AccessTokenExo)
                             }
+
                             $exchService.Url = "$($CloudEnvironmentExchangeOnlineEndpoint)/EWS/Exchange.asmx"
                         }
                     }
@@ -2585,10 +2614,12 @@ or visit 'https://explicitconsulting.at'.
                                 $Search.SearchRoot = "GC://$(($(([adsi]"$($u[0].path)").distinguishedname) -split ',DC=')[1..999] -join '.')"
                                 $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
                                 $ADPropsMailboxes[$AccountNumberRunning] = $Search.FindOne().Properties
+                                $ADPropsMailboxes[$AccountNumberRunning] = [hashtable]::new($ADPropsMailboxes[$AccountNumberRunning], [StringComparer]::OrdinalIgnoreCase)
 
                                 $Search.SearchRoot = "LDAP://$(($(([adsi]"$($u[0].path)").distinguishedname) -split ',DC=')[1..999] -join '.')"
                                 $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
                                 $tempLdap = $Search.FindOne().Properties
+                                $tempLdap = [hashtable]::new($tempLdap, [StringComparer]::OrdinalIgnoreCase)
 
                                 foreach ($keyName in @($tempLdap.Keys)) {
                                     if (
@@ -2823,7 +2854,7 @@ or visit 'https://explicitconsulting.at'.
         $TemplateIniPath = Get-Variable -Name "$($SigOrOOF)IniPath" -ValueOnly
         $TemplateIniSettings = Get-Variable -Name "$($SigOrOOF)IniSettings" -ValueOnly
 
-        $TemplateFiles = @((Get-ChildItem -LiteralPath $TemplateTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object)
+        $TemplateFiles = @((Get-ChildItem -LiteralPath $TemplateTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object -Culture $TemplateFilesSortCulture)
 
         if ($TemplateIniPath -ne '') {
             Write-Host "  Compare $($SigOrOOF) ini entries and file system"
@@ -3033,7 +3064,7 @@ or visit 'https://explicitconsulting.at'.
 
                             # Check cache
                             #   $TemplateFilesGroupSIDsOverall contains tags without prefix only: [xxx xxx]
-                            #   $TemplateFilesGroupSIDsOverall contains tag with extraced prefix: -:[xxx xxx]
+                            #   $TemplateFilesGroupSIDsOverall contains tag with extracted prefix: -:[xxx xxx]
 
                             if ($TemplateFilesGroupSIDsOverall.ContainsKey($($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$1$3'))) {
                                 $TemplateFileGroupSIDs.add($TemplateFilePartTag, "$($TemplateFilePartTag -ireplace '(?i)(^\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$2')$($TemplateFilesGroupSIDsOverall[$($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$1$3')])")
@@ -3632,17 +3663,31 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                     try {
                         Import-Module -Name $script:WebServicesDllPath -Force -ErrorAction Stop
+
                         $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
-                        Write-Host "  Connect to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+                        Write-Host '  Connect to Outlook Web'
                         try {
-                            Write-Verbose '    Try Windows Integrated Auth'
+                            Write-Verbose '    Try Integrated Windows Authentication'
+
+                            if (
+                                ($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile -and $GraphToken.AppAccessTokenExo) -or
+                                $GraphToken.AccessTokenExo
+                            ) {
+                                throw '      EXO access token available, skip Integrated Windows Authentication'
+                            }
+
                             $exchService.UseDefaultCredentials = $true
                             $exchService.ImpersonatedUserId = $null
                             $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
                         } catch {
                             try {
+                                Write-Verbose $_
+
                                 Write-Verbose '    Try OAuth with Autodiscover'
+
                                 $exchService.UseDefaultCredentials = $false
+
                                 if ($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile) {
                                     $exchService.ImpersonatedUserId = New-Object Microsoft.Exchange.WebServices.Data.ImpersonatedUserId([Microsoft.Exchange.WebServices.Data.ConnectingIdType]::SmtpAddress, $PrimaryMailboxAddress)
                                     $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AppAccessTokenExo)
@@ -3650,10 +3695,15 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                                     $exchService.ImpersonatedUserId = $null
                                     $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AccessTokenExo)
                                 }
+
                                 $exchService.AutodiscoverUrl($PrimaryMailboxAddress, { $true }) | Out-Null
                             } catch {
+                                Write-Verbose $_
+
                                 Write-Verbose '    Try OAuth with fixed URL'
+
                                 $exchService.UseDefaultCredentials = $false
+
                                 if ($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile) {
                                     $exchService.ImpersonatedUserId = New-Object Microsoft.Exchange.WebServices.Data.ImpersonatedUserId([Microsoft.Exchange.WebServices.Data.ConnectingIdType]::SmtpAddress, $PrimaryMailboxAddress)
                                     $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AppAccessTokenExo)
@@ -3661,11 +3711,13 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                                     $exchService.ImpersonatedUserId = $null
                                     $exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AccessTokenExo)
                                 }
+
                                 $exchService.Url = "$($CloudEnvironmentExchangeOnlineEndpoint)/EWS/Exchange.asmx"
                             }
                         }
 
                         $Calendar = [Microsoft.Exchange.WebServices.Data.Folder]::Bind($exchservice, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Calendar)
+
                         if ($Calendar.DisplayName) {
                             $error.clear()
                         } else {
@@ -4492,6 +4544,11 @@ function SetSignatures {
 
         if (-not $ProcessOOF) {
             $script:SignatureFilesDone += $Signature.Value
+
+            if ($OutlookDisableRoamingSignatures -eq 0) {
+                $script:SignatureFilesDone += ($Signature.Value -ireplace '\.htm$', " ($($PrimaryMailboxAddress)).htm")
+                #$script:SignatureFilesDone += ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
+            }
         }
 
         if ($UseHtmTemplates) {
@@ -4612,130 +4669,137 @@ function SetSignatures {
                 Write-Host "$Indent        Outlook does not support all formatting options of these images (e.g., behind the text)." -ForegroundColor Yellow
             }
 
-            foreach ($image in @($script:COMWord.ActiveDocument.Shapes + $script:COMWord.ActiveDocument.InlineShapes)) {
-                # Setting the values in word is very slow, so we use temporay variables
-                $tempImageIsDeleted = $false
-                $tempImageSourceFullname = $image.linkformat.sourcefullname
-                $tempImageAlternativeText = $image.alternativetext
-                $tempImageHyperlinkAddress = $image.hyperlink.Address
-                $tempImageHyperlinkSubAddress = $image.hyperlink.SubAddress
-                $tempImageHyperlinkEmailSubject = $image.hyperlink.EmailSubject
-                $tempImageHyperlinkScreenTip = $image.hyperlink.ScreenTip
+            try {
+                foreach ($image in @($script:COMWord.ActiveDocument.Shapes + $script:COMWord.ActiveDocument.InlineShapes)) {
+                    # Setting the values in word is very slow, so we use temporay variables
+                    $tempImageIsDeleted = $false
+                    $tempImageSourceFullname = $image.linkformat.sourcefullname
+                    $tempImageAlternativeText = $image.alternativetext
+                    $tempImageHyperlinkAddress = $image.hyperlink.Address
+                    $tempImageHyperlinkSubAddress = $image.hyperlink.SubAddress
+                    $tempImageHyperlinkEmailSubject = $image.hyperlink.EmailSubject
+                    $tempImageHyperlinkScreenTip = $image.hyperlink.ScreenTip
 
-                # Mailbox photos
-                if ($tempImageSourceFullname -or $tempImageAlternativeText) {
-                    foreach ($Variablename in (('$CurrentMailboxManagerPhoto$', $CurrentMailboxManagerPhotoGuid) , ('$CurrentMailboxPhoto$', $CurrentMailboxPhotoguid), ('$CurrentUserManagerPhoto$', $CurrentUserManagerPhotoGuid), ('$CurrentUserPhoto$', $CurrentUserPhotoGuid))) {
-                        if (
-                            $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($Variablename[0])*") }) -or
-                            $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($Variablename[0])*") })
-                        ) {
-                            if ($null -ne $ReplaceHash[$Variablename[0]]) {
-                                $tempImageSourceFullname = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
+                    # Mailbox photos
+                    if ($tempImageSourceFullname -or $tempImageAlternativeText) {
+                        foreach ($Variablename in (('$CurrentMailboxManagerPhoto$', $CurrentMailboxManagerPhotoGuid) , ('$CurrentMailboxPhoto$', $CurrentMailboxPhotoguid), ('$CurrentUserManagerPhoto$', $CurrentUserManagerPhotoGuid), ('$CurrentUserPhoto$', $CurrentUserPhotoGuid))) {
+                            if (
+                                $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($Variablename[0])*") }) -or
+                                $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($Variablename[0])*") })
+                            ) {
+                                if ($null -ne $ReplaceHash[$Variablename[0]]) {
+                                    $tempImageSourceFullname = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
+                                }
+                            } elseif (
+                                $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')*") }) -or
+                                $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')*") })
+                            ) {
+                                if ($null -ne $ReplaceHash[$Variablename[0]]) {
+                                    $tempImageSourceFullname = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
+                                } else {
+                                    $image.delete()
+                                    $tempImageIsDeleted = $true
+                                    break
+                                }
                             }
-                        } elseif (
-                            $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')*") }) -or
-                            $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')*") })
-                        ) {
-                            if ($null -ne $ReplaceHash[$Variablename[0]]) {
-                                $tempImageSourceFullname = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
-                            } else {
-                                $image.delete()
-                                $tempImageIsDeleted = $true
-                                break
+
+                            if ((-not $tempImageIsDeleted) -and ($tempImageAlternativeText)) {
+                                $tempImageAlternativeText = $($tempImageAlternativeText) -ireplace [Regex]::Escape($Variablename[0]), ''
+                                $tempImageAlternativeText = $($tempImageAlternativeText) -ireplace [Regex]::Escape($($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')), ''
                             }
                         }
 
-                        if ((-not $tempImageIsDeleted) -and ($tempImageAlternativeText)) {
-                            $tempImageAlternativeText = $($tempImageAlternativeText) -ireplace [Regex]::Escape($Variablename[0]), ''
-                            $tempImageAlternativeText = $($tempImageAlternativeText) -ireplace [Regex]::Escape($($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')), ''
+                        if ($tempImageIsDeleted) {
+                            continue
+                        }
+                    }
+
+                    # Other images
+                    if (
+                        $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike '*$*DELETEEMPTY$*') }) -or
+                        $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike '*$*DELETEEMPTY$*') })
+                    ) {
+                        foreach ($Variablename in  @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$CurrentMailboxManagerPhoto$', '$CurrentUserPhoto$', '$CurrentUserManagerPhoto$') })) {
+                            $tempImageVariableString = $Variablename -ireplace '\$$', 'DELETEEMPTY$'
+
+                            if (
+                                $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($tempImageVariableString)*") }) -or
+                                $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($tempImageVariableString)*") })
+                            ) {
+                                if ($ReplaceHash[$Variablename]) {
+                                    if ($tempImageAlternativeText) {
+                                        $tempImageAlternativeText = $tempImageAlternativeText -ireplace [Regex]::Escape($tempImageVariableString), ''
+                                    }
+                                } else {
+                                    $image.delete()
+                                    $tempImageIsDeleted = $true
+                                    break
+                                }
+                            }
                         }
                     }
 
                     if ($tempImageIsDeleted) {
                         continue
                     }
-                }
 
-                # Other images
-                if (
-                    $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike '*$*DELETEEMPTY$*') }) -or
-                    $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike '*$*DELETEEMPTY$*') })
-                ) {
-                    foreach ($Variablename in  @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$CurrentMailboxManagerPhoto$', '$CurrentUserPhoto$', '$CurrentUserManagerPhoto$') })) {
-                        $tempImageVariableString = $Variablename -ireplace '\$$', 'DELETEEMPTY$'
+                    foreach ($replaceKey in @($replaceHash.Keys | Where-Object { $_ -inotin ('$CurrentMailboxManagerPhoto$', '$CurrentMailboxPhoto$', '$CurrentUserManagerPhoto$', '$CurrentUserPhoto$', '$CurrentMailboxManagerPhotodeleteempty$', '$CurrentMailboxPhotodeleteempty$', '$CurrentUserManagerPhotodeleteempty$', '$CurrentUserPhotodeleteempty$') } | Sort-Object -Culture $TemplateFilesSortCulture)) {
+                        if ($replaceKey) {
+                            if ($null -ne $tempImageAlternativeText) {
+                                $tempImageAlternativeText = $tempImageAlternativeText -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
+                            }
 
-                        if (
-                            $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($tempImageVariableString)*") }) -or
-                            $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($tempImageVariableString)*") })
-                        ) {
-                            if ($ReplaceHash[$Variablename]) {
-                                if ($tempImageAlternativeText) {
-                                    $tempImageAlternativeText = $tempImageAlternativeText -ireplace [Regex]::Escape($tempImageVariableString), ''
-                                }
-                            } else {
-                                $image.delete()
-                                $tempImageIsDeleted = $true
-                                break
+                            if ($null -ne $tempimagehyperlinkAddress) {
+                                $tempimagehyperlinkAddress = $tempimagehyperlinkAddress -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
+                            }
+
+                            if ($null -ne $tempimagehyperlinkSubAddress) {
+                                $tempimagehyperlinkSubAddress = $tempimagehyperlinkSubAddress -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
+                            }
+
+                            if ($null -ne $tempimagehyperlinkEmailSubject) {
+                                $tempimagehyperlinkEmailSubject = $tempimagehyperlinkEmailSubject -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
+                            }
+
+                            if ($null -ne $tempimagehyperlinkScreenTip) {
+                                $tempimagehyperlinkScreenTip = $tempimagehyperlinkScreenTip -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
                             }
                         }
                     }
-                }
 
-                if ($tempImageIsDeleted) {
-                    continue
-                }
-
-                foreach ($replaceKey in @($replaceHash.Keys | Where-Object { $_ -inotin ('$CurrentMailboxManagerPhoto$', '$CurrentMailboxPhoto$', '$CurrentUserManagerPhoto$', '$CurrentUserPhoto$', '$CurrentMailboxManagerPhotodeleteempty$', '$CurrentMailboxPhotodeleteempty$', '$CurrentUserManagerPhotodeleteempty$', '$CurrentUserPhotodeleteempty$') } | Sort-Object -Culture $TemplateFilesSortCulture)) {
-                    if ($replaceKey) {
-                        if ($null -ne $tempImageAlternativeText) {
-                            $tempImageAlternativeText = $tempImageAlternativeText -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
-                        }
-
-                        if ($null -ne $tempimagehyperlinkAddress) {
-                            $tempimagehyperlinkAddress = $tempimagehyperlinkAddress -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
-                        }
-
-                        if ($null -ne $tempimagehyperlinkSubAddress) {
-                            $tempimagehyperlinkSubAddress = $tempimagehyperlinkSubAddress -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
-                        }
-
-                        if ($null -ne $tempimagehyperlinkEmailSubject) {
-                            $tempimagehyperlinkEmailSubject = $tempimagehyperlinkEmailSubject -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
-                        }
-
-                        if ($null -ne $tempimagehyperlinkScreenTip) {
-                            $tempimagehyperlinkScreenTip = $tempimagehyperlinkScreenTip -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
-                        }
-                    }
-                }
-
-                if (
+                    if (
                     ($tempImageSourceFullname) -and
                     ($image.linkformat.sourcefullname) -and
                     ($tempImageSourceFullname -ine $image.linkformat.sourcefullname)
-                ) {
-                    $image.linkformat.sourcefullname = $tempImageSourceFullname
-                }
+                    ) {
+                        $image.linkformat.sourcefullname = $tempImageSourceFullname
+                    }
 
-                if ($null -ne $tempImageAlternativeText) {
-                    $image.AlternativeText = $tempImageAlternativeText
-                }
+                    if ($null -ne $tempImageAlternativeText) {
+                        $image.AlternativeText = $tempImageAlternativeText
+                    }
 
-                if ($null -ne $tempimagehyperlinkAddress) {
-                    $image.hyperlink.Address = $tempImageHyperlinkAddress
-                }
+                    if ($null -ne $tempimagehyperlinkAddress) {
+                        $image.hyperlink.Address = $tempImageHyperlinkAddress
+                    }
 
-                if ($null -ne $tempimagehyperlinkSubAddress) {
-                    $image.hyperlink.SubAddress = $tempImageHyperlinkSubAddress
-                }
+                    if ($null -ne $tempimagehyperlinkSubAddress) {
+                        $image.hyperlink.SubAddress = $tempImageHyperlinkSubAddress
+                    }
 
-                if ($null -ne $tempimagehyperlinkEmailSubject) {
-                    $image.hyperlink.EmailSubject = $tempImageHyperlinkEmailSubject
-                }
+                    if ($null -ne $tempimagehyperlinkEmailSubject) {
+                        $image.hyperlink.EmailSubject = $tempImageHyperlinkEmailSubject
+                    }
 
-                if ($null -ne $tempimagehyperlinkScreenTip) {
-                    $image.hyperlink.ScreenTip = $tempImageHyperlinkScreenTip
+                    if ($null -ne $tempimagehyperlinkScreenTip) {
+                        $image.hyperlink.ScreenTip = $tempImageHyperlinkScreenTip
+                    }
                 }
+            } catch {
+                Write-Host "$Indent        Error replacing picture variables in Word. Exit." -ForegroundColor Red
+                Write-Host "$Indent        If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
+                $error[0]
+                exit 1
             }
 
             Write-Host "$Indent      Replace non-picture variables"
@@ -4753,36 +4817,43 @@ function SetSignatures {
 
             $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
 
-            # Replace in view without field codes
-            $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $false
+            try {
+                # Replace in view without field codes
+                $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $false
 
-            $script:COMWord.ActiveDocument.Select()
-            $tempWordText = $script:COMWord.Selection.Text
-            $script:COMWord.Selection.Collapse()
+                $script:COMWord.ActiveDocument.Select()
+                $tempWordText = $script:COMWord.Selection.Text
+                $script:COMWord.Selection.Collapse()
 
-            foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin ('$CurrentMailboxManagerPhoto$', '$CurrentMailboxPhoto$', '$CurrentUserManagerPhoto$', '$CurrentUserPhoto$', '$CurrentMailboxManagerPhotodeleteempty$', '$CurrentMailboxPhotodeleteempty$', '$CurrentUserManagerPhotodeleteempty$', '$CurrentUserPhotodeleteempty$')) -and ($tempWordText -imatch [regex]::escape($_)) } | Sort-Object -Culture $TemplateFilesSortCulture )) {
-                $script:COMWord.Selection.Find.Execute($replaceKey, $MatchCase, $MatchWholeWord, `
-                        $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
-                        $Wrap, $Format, $(($replaceHash.$replaceKey -ireplace "`r`n", '^p') -ireplace "`n", '^l'), $ReplaceAll) | Out-Null
-            }
-
-            # Restore original view
-            $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
-
-            $tempWordText = $null
-
-            # Replace in field codes
-            foreach ($field in $script:COMWord.ActiveDocument.Fields) {
-                $tempWordFieldCodeOriginal = $field.Code.Text
-                $tempWordFieldCodeNew = $tempWordFieldCodeOriginal
-
-                foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin ('$CurrentMailboxManagerPhoto$', '$CurrentMailboxPhoto$', '$CurrentUserManagerPhoto$', '$CurrentUserPhoto$', '$CurrentMailboxManagerPhotodeleteempty$', '$CurrentMailboxPhotodeleteempty$', '$CurrentUserManagerPhotodeleteempty$', '$CurrentUserPhotodeleteempty$')) } | Sort-Object -Culture $TemplateFilesSortCulture )) {
-                    $tempWordFieldCodeNew = $tempWordFieldCodeNew -ireplace [regex]::escape($replaceKey), $($replaceHash.$replaceKey)
+                foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin ('$CurrentMailboxManagerPhoto$', '$CurrentMailboxPhoto$', '$CurrentUserManagerPhoto$', '$CurrentUserPhoto$', '$CurrentMailboxManagerPhotodeleteempty$', '$CurrentMailboxPhotodeleteempty$', '$CurrentUserManagerPhotodeleteempty$', '$CurrentUserPhotodeleteempty$')) -and ($tempWordText -imatch [regex]::escape($_)) } | Sort-Object -Culture $TemplateFilesSortCulture )) {
+                    $script:COMWord.Selection.Find.Execute($replaceKey, $MatchCase, $MatchWholeWord, `
+                            $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
+                            $Wrap, $Format, $(($replaceHash.$replaceKey -ireplace "`r`n", '^p') -ireplace "`n", '^l'), $ReplaceAll) | Out-Null
                 }
 
-                if ($tempWordFieldCodeOriginal -ne $tempWordFieldCodeNew) {
-                    $field.Code.Text = $tempWordFieldCodeNew
+                # Restore original view
+                $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
+
+                $tempWordText = $null
+
+                # Replace in field codes
+                foreach ($field in $script:COMWord.ActiveDocument.Fields) {
+                    $tempWordFieldCodeOriginal = $field.Code.Text
+                    $tempWordFieldCodeNew = $tempWordFieldCodeOriginal
+
+                    foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin ('$CurrentMailboxManagerPhoto$', '$CurrentMailboxPhoto$', '$CurrentUserManagerPhoto$', '$CurrentUserPhoto$', '$CurrentMailboxManagerPhotodeleteempty$', '$CurrentMailboxPhotodeleteempty$', '$CurrentUserManagerPhotodeleteempty$', '$CurrentUserPhotodeleteempty$')) } | Sort-Object -Culture $TemplateFilesSortCulture )) {
+                        $tempWordFieldCodeNew = $tempWordFieldCodeNew -ireplace [regex]::escape($replaceKey), $($replaceHash.$replaceKey)
+                    }
+
+                    if ($tempWordFieldCodeOriginal -ne $tempWordFieldCodeNew) {
+                        $field.Code.Text = $tempWordFieldCodeNew
+                    }
                 }
+            } catch {
+                Write-Host "$Indent        Error replacing non-picture variables in Word. Exit." -ForegroundColor Red
+                Write-Host "$Indent        If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
+                $error[0]
+                exit 1
             }
 
 
@@ -5137,6 +5208,9 @@ function SetSignatures {
         if (-not $ProcessOOF) {
             foreach ($SignaturePath in $SignaturePaths) {
                 Write-Host "$Indent      Copy signature files to '$SignaturePath'"
+
+                RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))
+
                 foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
                     RemoveItemAlternativeRecurse -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $ConnectedFilesFolderName)
                 }
@@ -5150,12 +5224,14 @@ function SetSignatures {
                 }
 
                 if ($CreateRtfSignatures -eq $true) {
+                    RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.rtf')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))) -Force
                 } else {
                     RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))
                 }
 
                 if ($CreateTxtSignatures -eq $true) {
+                    RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
                 } else {
                     RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))
@@ -5203,15 +5279,16 @@ function SetSignatures {
                     if (-not $SimulateUser) {
                         if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
                             Write-Host "$Indent      Set signature as default for new messages (Outlook profile '$(($RegistryPaths[$j] -split '\\')[8])')"
+
                             if (($script:CurrentUserDummyMailbox -ne $true)) {
                                 if ($OutlookFileVersion -ge '16.0.0.0') {
                                     New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) -Force | Out-Null
                                 } else {
                                     New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
                                 }
-                            } else {
-                                $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                             }
+                        } else {
+                            $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                         }
                     } else {
                         $WshShell = New-Object -ComObject WScript.Shell
@@ -5243,15 +5320,16 @@ function SetSignatures {
                     if (-not $SimulateUser) {
                         if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
                             Write-Host "$Indent      Set signature as default for reply/forward messages (Outlook profile '$(($RegistryPaths[$j] -split '\\')[8])')"
+
                             if (($script:CurrentUserDummyMailbox -ne $true)) {
                                 if ($OutlookFileVersion -ge '16.0.0.0') {
                                     New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) -Force | Out-Null
                                 } else {
                                     New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
                                 }
-                            } else {
-                                $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                             }
+                        } else {
+                            $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                         }
                     } else {
                         $WshShell = New-Object -ComObject WScript.Shell
@@ -5464,6 +5542,11 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
             }
 
             if (($path -ilike '*@ssl\*') -and (-not (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue))) {
+                if (((Get-Service -ServiceName 'WebClient' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).Status -ieq 'Running') -eq $false) {
+                    Write-Host
+                    Write-Host 'WebClient service not running.' -ForegroundColor Red
+                }
+
                 Try {
                     # Add site to trusted sites in internet options
                     New-Item ('HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\' + (New-Object System.Uri -ArgumentList ($path -ireplace ('@SSL', ''))).Host) -Force | New-ItemProperty -Name * -Value 1 -Type DWORD -Force | Out-Null
@@ -5502,6 +5585,7 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
             if ($silent -eq $false) {
                 Write-Host ': ' -NoNewline
                 Write-Host "Problem connecting to or reading from folder '$path'. Exit." -ForegroundColor Red
+
                 exit 1
             } else {
                 return $false
@@ -5734,7 +5818,7 @@ No Graph authentication possible.
 function GraphGetMe {
     # https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http
     # Required permission(s)
-    #   Delegated: User.Read
+    #   Delegated: User.Read.All
     #   Application: User.Read.All (/me is not supported in applications)
 
     try {
@@ -5783,7 +5867,7 @@ function GraphGetMe {
 function GraphGetUpnFromSmtp($user) {
     # https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http
     # Required permission(s):
-    #   Delegated: User.Read
+    #   Delegated: User.Read.All
     #   Application: User.Read.All
 
     try {
@@ -5836,19 +5920,15 @@ function GraphGetUpnFromSmtp($user) {
 function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader) {
     # https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http
     # Required permission(s):
-    #   Delegated: User.Read
+    #   Delegated: User.Read.All
     #   Application: User.Read.All
 
     $user = GraphGetUpnFromSmtp($user)
 
     if ($user.properties.value.userprincipalname) {
         try {
-            $local:x = $GraphUserProperties
-            if (($user.properties.value.userprincipalname -ieq $script:CurrentUser) -and ((-not $SimulateUser) -or ($SimulateUser -and $SimulateAndDeployGraphCredentialFile -and ($authHeader -eq $script:AppAuthorizationHeader)))) {
-                $local:x += 'mailboxsettings'
-            }
+            $local:x = @($GraphUserProperties | Select-Object -Unique) -join ','
 
-            $local:x = @($local:x | Select-Object -Unique) -join ','
             $requestBody = @{
                 Method      = 'Get'
                 Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Web.HttpUtility]::UrlEncode($local:x)
@@ -5872,6 +5952,45 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
 
                 $local:uri = $local:pagedResults.'@odata.nextlink'
             } until (!($local:uri))
+
+
+            if (($user.properties.value.userprincipalname -ieq $script:CurrentUser) -and ((-not $SimulateUser) -or ($SimulateUser -and $SimulateAndDeployGraphCredentialFile -and ($authHeader -eq $script:AppAuthorizationHeader))) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true) -or ($MirrorLocalSignaturesToCloud -eq $true))) {
+                try {
+                    $requestBody = @{
+                        Method      = 'Get'
+                        Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=mailboxsettings"
+                        Headers     = $authHeader
+                        ContentType = 'Application/Json; charset=utf-8'
+                    }
+
+                    $OldProgressPreference = $ProgressPreference
+                    $ProgressPreference = 'SilentlyContinue'
+
+                    $local:y = @()
+                    $local:uri = $null
+
+                    do {
+                        if ($local:uri) {
+                            $requestBody['Uri'] = $local:uri
+                        }
+
+                        $local:pagedResults = Invoke-RestMethod @requestBody
+                        $local:y += $local:pagedResults
+
+                        $local:uri = $local:pagedResults.'@odata.nextlink'
+                    } until (!($local:uri))
+
+                    $local:x | Add-Member -MemberType NoteProperty -Name 'mailboxSettings' -Value $local:y.mailboxSettings
+                } catch {
+                    Write-Host "      Problem getting mailboxSettings for '$($script:CurrentUser)' from Microsoft Graph." -ForegroundColor Yellow
+                    $error[0]
+                    Write-Host '      This is a Microsoft Graph API problem, which can only be solved by Microsoft itself.' -ForegroundColor Yellow
+                    Write-Host '      To be able to continue, SetCurrentUserOutlookWebSignature and SetCurrentUserOOFMessage are now disabled.' -ForegroundColor Yellow
+
+                    $SetCurrentUserOutlookWebSignature = $false
+                    $SetCurrentUserOOFMessage = $false
+                }
+            }
 
             $ProgressPreference = $OldProgressPreference
         } catch {
@@ -5964,7 +6083,7 @@ function GraphGetUserManager($user) {
 function GraphGetUserTransitiveMemberOf($user) {
     # https://learn.microsoft.com/en-us/graph/api/user-list-transitivememberof?view=graph-rest-1.0&tabs=http
     # Required permission(s):
-    #   Delegated: User.Read
+    #   Delegated: User.Read.All
     #   Application: User.Read.All
 
     try {
@@ -6013,7 +6132,7 @@ function GraphGetUserTransitiveMemberOf($user) {
 function GraphGetUserPhoto($user) {
     # https://docs.microsoft.com/en-us/graph/api/profilephoto-get?view=graph-rest-1.0
     # Required permission(s):
-    #   Delegated: User.Read
+    #   Delegated: User.Read.All
     #   Application: User.Read.All
 
     try {
@@ -6067,6 +6186,7 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal, $authH
             if ($OOFExternal) { $Body.'automaticRepliesSetting'.add('externalReplyMessage', $OOFExternal) }
 
             $body = ConvertTo-Json -InputObject $body
+
             $requestBody = @{
                 Method      = 'Patch'
                 Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user)/mailboxsettings"
@@ -6074,6 +6194,7 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal, $authH
                 ContentType = 'Application/Json; charset=utf-8'
                 Body        = $body
             }
+
             $OldProgressPreference = $ProgressPreference
             $ProgressPreference = 'SilentlyContinue'
 
@@ -6335,10 +6456,10 @@ function RemoveItemAlternativeRecurse {
         foreach ($SinglePath in @(Get-Item -LiteralPath $Path)) {
             if (Test-Path -LiteralPath $SinglePath -PathType Container) {
                 if (-not $SkipFolder) {
-                    $local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Property PSIsContainer, @{expression = { $_.FullName.split('\').count }; descending = $true }, fullname)
+                    $local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture $TemplateFilesSortCulture -Property PSIsContainer, @{expression = { $_.FullName.split('\').count }; descending = $true }, fullname)
                     $local:ToDelete += @(Get-Item -LiteralPath $SinglePath -Force)
                 } else {
-                    $local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Property PSIsContainer, @{expression = { $_.FullName.split('\').count }; descending = $true }, fullname)
+                    $local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture $TemplateFilesSortCulture -Property PSIsContainer, @{expression = { $_.FullName.split('\').count }; descending = $true }, fullname)
                 }
             } elseif (Test-Path -LiteralPath $SinglePath -PathType Leaf) {
                 $local:ToDelete += (Get-Item -LiteralPath $SinglePath -Force)
@@ -6354,6 +6475,54 @@ function RemoveItemAlternativeRecurse {
         } catch {
             Write-Verbose "Could not delete $($SingleItemToDelete.FullName), error: $($_.Exception.Message)"
             Write-Verbose $_
+        }
+    }
+}
+
+
+function ParseJwtToken {
+    # Idea for this code: https://www.michev.info/blog/post/2140/decode-jwt-access-and-id-tokens-via-powershell
+
+    [cmdletbinding()]
+    param([Parameter(Mandatory = $true)][string]$token)
+
+    # Validate as per https://tools.ietf.org/html/rfc7519
+    # Access and ID tokens are fine, Refresh tokens will not work
+    if (!$token.Contains('.') -or !$token.StartsWith('eyJ')) {
+        return @{
+            error   = 'Invalid token'
+            header  = $null
+            payload = $null
+        }
+    } else {
+        # Header
+        $tokenheader = $token.Split('.')[0].Replace('-', '+').Replace('_', '/')
+
+        # Fix padding as needed, keep adding "=" until string length modulus 4 reaches 0
+        while ($tokenheader.Length % 4) { $tokenheader += '=' }
+
+        # Convert from Base64 encoded string to PSObject all at once
+        $tokenHeader = [System.Text.Encoding]::ASCII.GetString([system.convert]::FromBase64String($tokenheader)) | ConvertFrom-Json
+
+        # Payload
+        $tokenPayload = $token.Split('.')[1].Replace('-', '+').Replace('_', '/')
+
+        # Fix padding as needed, keep adding "=" until string length modulus 4 reaches 0
+        while ($tokenPayload.Length % 4) { $tokenPayload += '=' }
+
+        # Convert to Byte array
+        $tokenByteArray = [System.Convert]::FromBase64String($tokenPayload)
+
+        # Convert to string array
+        $tokenArray = [System.Text.Encoding]::ASCII.GetString($tokenByteArray)
+
+        # Convert from JSON to PSObject
+        $tokenPayload = $tokenArray | ConvertFrom-Json
+
+        return @{
+            error   = $false
+            header  = $tokenHeader
+            payload = $tokenPayload
         }
     }
 }

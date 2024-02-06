@@ -4,9 +4,6 @@
 #
 # Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to to define replacement variables and test it thoroughly.
 #
-# Active Directory property names are case sensitive.
-# It is required to use full lowercase Active Directory property names.
-#
 # A variable defined in this file overrides the definition of the same variable defined earlier in the software.
 #
 #
@@ -71,7 +68,7 @@
 #     Enable 'Allow public client flows'
 #       Identity > Applications > App registrations > your application > Advanced settings
 #       Enable "Allow public client flows"
-#       This enables SSO (single sign-on) for domain-joined Windows (Windows Integrated Auth Flow)
+#       This enables SSO (single sign-on) for domain-joined Windows (Integrated Windows Authentication Flow)
 $GraphClientID = 'beea8249-8c98-4c76-92f6-ce3c468a61e6'
 
 
@@ -152,34 +149,34 @@ $GraphUserAttributeMapping = @{
     co                         = 'country'
     company                    = 'companyName'
     department                 = 'department'
-    displayname                = 'displayName'
-    extensionattribute1        = 'onPremisesExtensionAttributes.extensionAttribute1'
-    extensionattribute2        = 'onPremisesExtensionAttributes.extensionAttribute2'
-    extensionattribute3        = 'onPremisesExtensionAttributes.extensionAttribute3'
-    extensionattribute4        = 'onPremisesExtensionAttributes.extensionAttribute4'
-    extensionattribute5        = 'onPremisesExtensionAttributes.extensionAttribute5'
-    extensionattribute6        = 'onPremisesExtensionAttributes.extensionAttribute6'
-    extensionattribute7        = 'onPremisesExtensionAttributes.extensionAttribute7'
-    extensionattribute8        = 'onPremisesExtensionAttributes.extensionAttribute8'
-    extensionattribute9        = 'onPremisesExtensionAttributes.extensionAttribute9'
-    extensionattribute10       = 'onPremisesExtensionAttributes.extensionAttribute10'
-    extensionattribute11       = 'onPremisesExtensionAttributes.extensionAttribute11'
-    extensionattribute12       = 'onPremisesExtensionAttributes.extensionAttribute12'
-    extensionattribute13       = 'onPremisesExtensionAttributes.extensionAttribute13'
-    extensionattribute14       = 'onPremisesExtensionAttributes.extensionAttribute14'
-    extensionattribute15       = 'onPremisesExtensionAttributes.extensionAttribute15'
-    facsimiletelephonenumber   = 'faxNumber'
-    givenname                  = 'givenName'
+    displayName                = 'displayName'
+    extensionAttribute1        = 'onPremisesExtensionAttributes.extensionAttribute1'
+    extensionAttribute2        = 'onPremisesExtensionAttributes.extensionAttribute2'
+    extensionAttribute3        = 'onPremisesExtensionAttributes.extensionAttribute3'
+    extensionAttribute4        = 'onPremisesExtensionAttributes.extensionAttribute4'
+    extensionAttribute5        = 'onPremisesExtensionAttributes.extensionAttribute5'
+    extensionAttribute6        = 'onPremisesExtensionAttributes.extensionAttribute6'
+    extensionAttribute7        = 'onPremisesExtensionAttributes.extensionAttribute7'
+    extensionAttribute8        = 'onPremisesExtensionAttributes.extensionAttribute8'
+    extensionAttribute9        = 'onPremisesExtensionAttributes.extensionAttribute9'
+    extensionAttribute10       = 'onPremisesExtensionAttributes.extensionAttribute10'
+    extensionAttribute11       = 'onPremisesExtensionAttributes.extensionAttribute11'
+    extensionAttribute12       = 'onPremisesExtensionAttributes.extensionAttribute12'
+    extensionAttribute13       = 'onPremisesExtensionAttributes.extensionAttribute13'
+    extensionAttribute14       = 'onPremisesExtensionAttributes.extensionAttribute14'
+    extensionAttribute15       = 'onPremisesExtensionAttributes.extensionAttribute15'
+    facsimileTelephoneNumber   = 'faxNumber'
+    givenName                  = 'givenName'
     l                          = 'city'
     mail                       = 'mail'
-    mailnickname               = 'mailNickname'
+    mailNickname               = 'mailNickname'
     mobile                     = 'mobilePhone'
-    physicaldeliveryofficename = 'officeLocation'
-    postalcode                 = 'postalCode'
-    proxyaddresses             = 'proxyAddresses'
+    physicalDeliveryOfficeName = 'officeLocation'
+    postalCode                 = 'postalCode'
+    proxyAddresses             = 'proxyAddresses'
     sn                         = 'surname'
     st                         = 'state'
-    streetaddress              = 'streetAddress'
-    telephonenumber            = 'businessPhones'
+    streetAddress              = 'streetAddress'
+    telephoneNumber            = 'businessPhones'
     title                      = 'jobTitle'
 }

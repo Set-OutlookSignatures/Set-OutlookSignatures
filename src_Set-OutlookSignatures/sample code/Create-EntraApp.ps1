@@ -52,7 +52,7 @@ Write-Host
 Write-Host "Connect to your Entra ID with a user being 'Application Adminstrator' or 'Global Administrator'"
 # Disconnect first, so that no existing connection is re-used. This forces to choose an account for the following connect.
 $null = Disconnect-MgGraph -ErrorAction SilentlyContinue
-Connect-MgGraph -NoWelcome
+Connect-MgGraph -Scopes 'Application.ReadWrite.All' -NoWelcome
 
 
 Write-Host

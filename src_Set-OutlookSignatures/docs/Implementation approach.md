@@ -229,14 +229,14 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
 **Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source license.  Please see `.\docs\Benefactor Circle` for details.  
 ## 1.7. Administration  
 ### 1.7.1. Client  
-- Outlook and Word, each from version 2010  
+- Outlook and Word (when using DOCX templates, and/or signatures in RTF format), each from version 2010  
 - the software must run in the security context of the user currently logged in.  
 - The software must be executed in "Full Language Mode". The "Constrained Language Mode" is not supported, as certain functions such as Base64 conversions are not available in this mode or require very slow alternatives.  
 - If AppLocker or comparable solutions are used, the software is already digitally signed.  
 - Network unlocks:  
 	- Ports 389 (LDAP) and 3268 (Global Catalog), TCP and UDP respectively, must be enabled between the client and all domain controllers. If this is not the case, signature-relevant information and variables cannot be retrieved. the software checks with each run whether access is possible.
 - To access the SMB share with the software components, the following ports are needed: 137 UDP, 138 UDP, 139 TCP, 445 TCP (details <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)" target="_blank">in this Microsoft article</a>).  
-	- Für access to WebDAV shares (e.g. SharePoint document libraries), port 443 TCP is needed.  
+	- Für access to WebDAV shares (e.g. SharePoint document libraries), port 443 TCP is needed. Firewalls and proxies must not block WebDAV HTTP extensions.  
 ### 1.7.2. Server  
 Required are:
 - An SMB file share in which the software and its components are stored. All users must have read access to this file share and its contents.  
@@ -342,7 +342,7 @@ All changes to signatures and out of office notifications are immediately visibl
 
 Word can be started, used or closed at will while the software is running.
 
-The software uses Word to replace variables in DOCX templates and to convert DOCX and HTML to RTF and TXT. Word is started as a separate invisible process. This process can practically not be influenced by the user and does not affect Word processes started by the user.
+The software uses Word to replace variables in DOCX templates and to convert DOCX and HTML to RTF. Word is started as a separate invisible process. This process can practically not be influenced by the user and does not affect Word processes started by the user.
 ## 1.8. Support from the service provider.  
 The service provider not only recommends the Set-OutlookSignatures software, but also offers its customers defined support free of charge.
 
@@ -598,14 +598,14 @@ Es ist **multimandantenfähig** durch die Verwendung verschiedener Vorlagenpfade
 Set-OutlookSignatures erfordert **keine Installation auf Servern oder Clients**. Sie benötigen lediglich eine Standard-Dateifreigabe auf einem Server sowie PowerShell und Office.
 ## 2.7. Administration  
 ### 2.7.1. Client  
-- Outlook und Word, jeweils ab Version 2010  
+- Outlook und Word (bei Verwendung von DOCX-Vorlagen, und/oder Signaturen im RTF-Format), jeweils ab Version 2010  
 - Die Software muss im Sicherheitskontext des aktuell angemeldeten Benutzers laufen.  
 - Die Software muss im „Full Language Mode” ausgeführt werden. Der „Constrained Language Mode“ wird nicht unterstützt, da gewisse Funktionen wie z. B. Base64-Konvertierungen in diesem Modus nicht verfügbar sind oder sehr langsame Alternativen benötigen.  
 - Falls AppLocker oder vergleichbare Lösungen zum Einsatz kommen, ist die Software bereits digital signiert.  
 - Netzwerkfreischaltungen:  
 	- Die Ports 389 (LDAP) and 3268 (Global Catalog), jeweils TCP and UDP, müssen zwischen Client und allen Domain Controllern freigeschaltet sein. Falls dies nicht der Fall ist, können signaturrelevante Informationen und Variablen nicht abgerufen werden. Die Software prüft bei jedem Lauf, ob der Zugriff möglich ist.  
 	- Für den Zugriff auf den SMB-File-Share mit den Software-Komponenten werden folgende Ports benötigt: 137 UDP, 138 UDP, 139 TCP, 445 TCP (Details <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)" target="_blank">in diesem Microsoft-Artikel</a>).  
-	- Für den Zugriff auf WebDAV-Shares (z. B. SharePoint Dokumentbibliotheken) wird Port 443 TCP benötigt.  
+	- Für den Zugriff auf WebDAV-Shares (z. B. SharePoint Dokumentbibliotheken) wird Port 443 TCP benötigt. Firewalls und Proxies dürfen WebDAV HTTP Extensions nicht blockieren.  
 ### 2.7.2. Server  
 Benötigt werden:
 - Ein SMB-File-Share, in den die Software und seine Komponenten abgelegt werden. Auf diesen File-Share und seine Inhalte müssen alle Benutzer lesend zugreifen können.  
@@ -711,7 +711,7 @@ Sämtliche Änderungen an Signaturen und Abwesenheits-Benachrichtigungen sind f�
 
 Word kann während der Ausführung der Software nach Belieben gestartet, verwendet oder geschlossen werden.
 
-Die Software nutzt Word zum Ersatz von Variablen in DOCX-Vorlagen und zum Konvertieren von DOCX und HTML nach RTF und TXT. Word wird dabei als eigener unsichtbarer Prozess gestartet. Dieser Prozess kann vom Benutzer praktisch nicht beeinflusst werden und beeinflusst vom Benutzer gestartete Word-Prozesse nicht.  
+Die Software nutzt Word zum Ersatz von Variablen in DOCX-Vorlagen und zum Konvertieren von DOCX und HTML nach RTF. Word wird dabei als eigener unsichtbarer Prozess gestartet. Dieser Prozess kann vom Benutzer praktisch nicht beeinflusst werden und beeinflusst vom Benutzer gestartete Word-Prozesse nicht.  
 ## 2.8. Unterstützung durch den Service-Provider  
 Der Service-Provider empfiehlt die Software Set-OutlookSignatures nicht nur, sondern bietet seinen Kunden auch definierte kostenlose Unterstützung an.
 

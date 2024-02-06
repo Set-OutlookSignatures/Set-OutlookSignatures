@@ -18,6 +18,30 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">v4.10.1</a> - 2024-02-06
+_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+_**Attention, cloud mailbox users:**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
+### Changed
+- Graph connectivity: Update dependency MSAL.Net to v4.59.0
+- Updated FAQ `How can I deploy and run Set-OutlookSignatures using Microsoft Intune?` in `.\docs\README`, and moved sample code from FAQ to `.\sample code` directory
+- Active Directory attribute names are no longer case sensitive, making it easier creating own replacement variables and adding custom schema extensions
+- Only use Integrated Windows Authentication for connection to Outlook Web when no cloud token is available
+- If the variable replacement in Word fails, an additional note is displayed about the possible mandatory use of Microsoft Purview Information Protection.
+- Updated sample templates
+### Added
+- New FAQs `Keep users from adding, editing and removing signatures` and `What is the recommended folder structure for script, license, template and config files?` in `.\docs\README`.
+### Fixed
+- Workaround for a Microsoft Graph API problem, which returns a HTTP 403 error when querying the settings of some mailboxes. This query now only happens when absolutely necessary. When this query fails, `SetCurrentUserOutlookWebSignature` and `SetCurrentUserOOFMessage` are disabled. Only Microsoft can fix the root cause of this problem.
+- More workarounds for timing problems with file operations in folders used by OneDrive
+- Verbose output no longer logs Graph tokens, only their properties (header and payload data only, no digital signature)
+- When an existing signature is overwritten by a new signature and the two signature names only differ in upper and lower case ("signature a" and "Signature A", for example), always use the casing of the new signature
+- Correctly detect automapped mailboxes in Outlook Web when New Outlook is not used
+- Add scope 'Application.ReadWrite.All' to sample script `.\sample code\Create-EntraApp.ps1`
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.10.0" target="_blank">v4.10.0</a> - 2024-01-05
 _**Some features are exclusive to the commercial Benefactor Circle add-on**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
