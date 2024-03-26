@@ -14,6 +14,9 @@ $params = [ordered]@{
 	GraphOnly                     = $false
 }
 
+$OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+
+Set-Location $PSScriptRoot
 
 ## User part
 

@@ -16,6 +16,10 @@ if ($appType -ieq 'Set-OutlookSignatures') {
 
 Clear-Host
 
+$OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+
+Set-Location $PSScriptRoot
+
 
 Write-Host 'Create Entra ID app for Set-OutlookSignatures'
 Write-Host "  App type: $($appType)"

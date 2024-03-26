@@ -8,6 +8,11 @@ $logFile = 'c:\path\to\the\user\specific\logfile.txt'
 $maximumAgeHours = 2
 
 
+$OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+
+Set-Location $PSScriptRoot
+
+
 If (-not (Test-Path $logFile)) {
     Write-Host 'Log file not found, Set-OutlookSignatures has not yet run.'
     Write-Host 'Exit with error code 1 to trigger remediation script.'

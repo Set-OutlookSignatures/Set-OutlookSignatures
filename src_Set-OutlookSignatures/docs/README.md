@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20commercial%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="commercial support by ExplicIT Consulting"></a>
 
 # Welcome!<!-- omit in toc -->
 If email signatures or out-of-office replies are on your agenda, the following is worth reading - whether you work in marketing, sales, corporate communications, the legal or the compliance department, as Exchange or client administrator, as CIO or IT lead, as key user or consultant.
@@ -8,7 +8,7 @@ Email signatures and out-of-office replies are an integral part of corporate ide
 
 Central management and deployment ensures that design guidelines are met, guarantees correct and up-to-date content, helps comply with legal requirements, relieves staff and creates an additional marketing and sales channel.
 
-**With Set-OutlookSignatures you can do all this and more.**
+**You can do all this, and more, with Set-OutlookSignatures and the Benefactor Circle add-on.**
 
 To get to know Set-OutlookSignatures, we recommend following the content flow of this README file: [Overview and features](#overview-and-features) > [Demo video](#demo-video) > [Requirements](#1-requirements) > [Quick Start Guide](#2-quick-start-guide) > [Table of Contents](#table-of-contents).
 
@@ -96,10 +96,11 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
   - [3.28. SignaturesForAutomappedAndAdditionalMailboxes](#328-signaturesforautomappedandadditionalmailboxes)
   - [3.29. DisableRoamingSignatures](#329-disableroamingsignatures)
   - [3.30. MirrorLocalSignaturesToCloud](#330-mirrorlocalsignaturestocloud)
-  - [3.31. WordProcessPriority](#331-wordprocesspriority)
-  - [3.32. ScriptProcessPriority](#332-scriptprocesspriority)
-  - [3.33. BenefactorCircleId](#333-benefactorcircleid)
-  - [3.34. BenefactorCircleLicenseFile](#334-benefactorcirclelicensefile)
+  - [3.31. MailboxSpecificSignatureNames](#331-mailboxspecificsignaturenames)
+  - [3.32. WordProcessPriority](#332-wordprocesspriority)
+  - [3.33. ScriptProcessPriority](#333-scriptprocesspriority)
+  - [3.34. BenefactorCircleId](#334-benefactorcircleid)
+  - [3.35. BenefactorCircleLicenseFile](#335-benefactorcirclelicensefile)
 - [4. Outlook signature path](#4-outlook-signature-path)
 - [5. Mailboxes](#5-mailboxes)
 - [6. Group membership](#6-group-membership)
@@ -143,7 +144,7 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
   - [17.14. What is the recommended approach for implementing the software?](#1714-what-is-the-recommended-approach-for-implementing-the-software)
   - [17.15. What is the recommended approach for custom configuration files?](#1715-what-is-the-recommended-approach-for-custom-configuration-files)
   - [17.16. Isn't a plural noun in the software name against PowerShell best practices?](#1716-isnt-a-plural-noun-in-the-software-name-against-powershell-best-practices)
-  - [17.17. the software hangs at HTM/RTF export, Word shows a security warning!?](#1717-the-software-hangs-at-htmrtf-export-word-shows-a-security-warning)
+  - [17.17. The software hangs at HTM/RTF export, Word shows a security warning!?](#1717-the-software-hangs-at-htmrtf-export-word-shows-a-security-warning)
   - [17.18. How to avoid blank lines when replacement variables return an empty string?](#1718-how-to-avoid-blank-lines-when-replacement-variables-return-an-empty-string)
   - [17.19. Is there a roadmap for future versions?](#1719-is-there-a-roadmap-for-future-versions)
   - [17.20. How to deploy signatures for "Send As", "Send On Behalf" etc.?](#1720-how-to-deploy-signatures-for-send-as-send-on-behalf-etc)
@@ -320,7 +321,7 @@ The parameter SignatureTemplatePath tells the software where signature template 
 
 Local and remote paths are supported. Local paths can be absolute (`C:\Signature templates`) or relative to the software path (`.\templates\Signatures`).
 
-WebDAV paths are supported (https only): `https://server.domain/SignatureSite/SignatureTemplates` or `\\server.domain@SSL\SignatureSite\SignatureTemplates`
+SharePoint document libraries are supported (https only): `https://server.domain/SignatureSite/SignatureTemplates` or `\\server.domain@SSL\SignatureSite\SignatureTemplates`
 
 The currently logged-in user needs at least read access to the path.
 
@@ -338,7 +339,7 @@ See '.\templates\Signatures DOCX\_Signatures.ini' for a sample file with further
 
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\templates\Signatures')
 
-WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 
 The currently logged-in user needs at least read access to the path
 
@@ -354,7 +355,7 @@ The file must be UTF8 encoded.
 
 Local and remote paths are supported. Local paths can be absolute (`C:\config\default replacement variables.ps1`) or relative to the software path (`.\config\default replacement variables.ps1`).
 
-WebDAV paths are supported (https only): `https://server.domain/SignatureSite/config/default replacement variables.ps1` or `\\server.domain@SSL\SignatureSite\config\default replacement variables.ps1`
+SharePoint document libraries are supported (https only): `https://server.domain/SignatureSite/config/default replacement variables.ps1` or `\\server.domain@SSL\SignatureSite\config\default replacement variables.ps1`
 
 The currently logged-in user needs at least read access to the file.
 
@@ -370,7 +371,7 @@ The file must be UTF8 encoded.
 
 Local and remote paths are supported. Local paths can be absolute (`C:\config\default graph config.ps1`) or relative to the software path (`.\config\default graph config.ps1`).
 
-WebDAV paths are supported (https only): `https://server.domain/SignatureSite/config/default graph config.ps1` or `\\server.domain@SSL\SignatureSite\config\default graph config.ps1`
+SharePoint document libraries are supported (https only): `https://server.domain/SignatureSite/config/default graph config.ps1` or `\\server.domain@SSL\SignatureSite\config\default graph config.ps1`
 
 The currently logged-in user needs at least read access to the file.
 
@@ -478,7 +479,7 @@ Local and remote paths are supported.
 
 Local paths can be absolute (`C:\OOF templates`) or relative to the software path (`.\templates\ Out of Office `).
 
-WebDAV paths are supported (https only): `https://server.domain/SignatureSite/OOFTemplates` or `\\server.domain@SSL\SignatureSite\OOFTemplates`
+SharePoint document libraries are supported (https only): `https://server.domain/SignatureSite/OOFTemplates` or `\\server.domain@SSL\SignatureSite\OOFTemplates`
 
 The currently logged-in user needs at least read access to the path.
 
@@ -496,7 +497,7 @@ See '.\templates\Out of Office DOCX\_OOF.ini' for a sample file with further exp
 
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\templates\Signatures')
 
-WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 
 The currently logged-in user needs at least read access to the path
 
@@ -515,7 +516,7 @@ Local and remote paths are supported.
 
 Local paths can be absolute (`C:\Outlook signatures`) or relative to the software path (`.\Outlook signatures`).
 
-WebDAV paths are supported (https only): `https://server.domain/User/Outlook signatures` or `\\server.domain@SSL\User\Outlook signatures`
+SharePoint document libraries are supported (https only): `https://server.domain/User/Outlook signatures` or `\\server.domain@SSL\User\Outlook signatures`
 
 The currently logged-in user needs at least write access to the path.
 
@@ -753,13 +754,16 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 ## 3.30. MirrorLocalSignaturesToCloud
 Should local signatures be uploaded as roaming signature for the current user?
 
-Possible for Exchange Online mailbox of currently logged-in user.
+Possible for Exchange Online mailboxes:
+- Download for every mailbox where the current user has full access
+- Upload and set default signaures for the mailbox of the current user
 
 Prerequisites:
-- Script parameter `SetCurrentUserOutlookWebSignature` is set to `true`
-- Mailbox is the mailbox of the currently logged-in user and is hosted in Exchange Online
-- Script parameter `MirrorLocalSignaturesToCloud` is set to `true`
-  - This is independent from the Outlook registry key `DisableRoamingSignatures`, but: It is recommended to disable the Outlook roaming feature by setting the software parameter `DisableRoamingSignatures` to `true` when MirrorLocalSignaturesToCloud is enabled. This avoids Outlook showing synced signatures twice (one as local one, one as roaming one).
+- Download
+  - Current user has full access to the mailbox
+- Upload, set default signatures
+  - Script parameter `SetCurrentUserOutlookWebSignature` is set to `true`
+  - Mailbox is the mailbox of the currently logged-in user and is hosted in Exchange Online
 
 Please note:
 - As there is no Microsoft official API, this feature is experimental, and you use it on your own risk.
@@ -767,9 +771,9 @@ Please note:
 
 The process is very simple and straight forward. Set-OutlookSignatures goes through the following steps:
 1. Check if all prerequisites are met
-2. Download all signatures stored in the Exchange Online mailbox of the currently logged-in user
+2. Download all signatures stored in the Exchange Online mailbox
   - This mimics Outlook's behavior: Roaming signatures are only manipulated in the cloud and then downloaded from there.
-  - Local signatures with identical names are overwritten with the content of the roaming signature
+  - Existing local signature are only overwritten when the roaming signature is newer
 3. Go through standard template and signature processing
   - Loop through the templates and their configuration, and convert them to signatures
   - Set default signatures for replies and forwards
@@ -782,6 +786,11 @@ This process is very simple and straight forward. It basically just mirrors the 
 
 Another advantage of this solution is that it makes roaming signatures available in Outlook versions that do not officially support them.
 
+What will not work:
+- Download from mailboxes where the current user does not have full access rights. This is not possible because of Microsoft API restrictions.
+- Download from and upload to shared mailboxes. This is not possible because of Microsoft API restrictions.
+- Uploading signatures other than device specific signatures and such assigned to the mailbox of the current user. Uploading is not implemented, because until now no way could be found that does not massively impact the user experience as soon as the Outlook integrated download process starts (signatures available multiple times, etc.)
+
 This feature requires a Benefactor Circle license.
 
 Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
@@ -793,7 +802,31 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesTo
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud $false"  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud false"
 
-## 3.31. WordProcessPriority
+## 3.31. MailboxSpecificSignatureNames
+Should signature names be mailbox specific by adding the e-mail address?
+
+For compatibility with Outlook storing signatures in the file system, Set-OutlookSignatures converts templates to signatures according to the following logic:
+1. Get all mailboxes and sort them: Mailbox of logged-on/simulated user, other mailboxes in default Outlook profile or Outlook Web, mailboxes from other Outlook profiles
+2. Get all template files, sort them by category (common, group specific, mailbox specific, replacement variable specific), and within each category by SortOrder and SortCulture defined in the INI file
+3. Loop through the mailbox list, and for each mailbox loop through the template list.
+4. If a template's conditions apply and if the template has not been used before, convert the template to a signature.
+
+The step 4 condition `if the template has not been used before` makes sure that a lower priority mailbox does not replace a signature with the same name which has already been created for a higher priority mailbox.
+
+With roaming signatures (signatures being stored in the Exchange Online mailbox itself) being used more and more, the step 4 condition `if the template has not been used before` makes less sense. By setting the `MailboxSpecificSignatureNames` parameter to `true`, this restriction no longer applies. To avoid naming collisions, the e-mail address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc.
+
+This naming convention intentionally matches Outlook's convention for naming roaming signatures. Before setting `MailboxSpecificSignatureNames` to `true`, consider the impact on the `DisableRoamingSignatures` and `MirrorLocalSignaturesToCloud` parameters - it is recommended to set both parameters to `true` to achieve the best user experience and to avoid problems with Outlook's own roaming signature synchronisation.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
+Default value: $false
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames false"
+
+## 3.32. WordProcessPriority
 Define the Word process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
 
 Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
@@ -805,7 +838,7 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -WordProcessPriority 32
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -WordProcessPriority Normal"  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -WordProcessPriority 32"
 
-## 3.32. ScriptProcessPriority
+## 3.33. ScriptProcessPriority
 Define the script process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
 
 Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
@@ -817,7 +850,7 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 3
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority Normal"  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 32"
 
-## 3.33. BenefactorCircleId
+## 3.34. BenefactorCircleId
 The Benefactor Circle member Id matching your license file, which unlocks exclusive features.
 
 Default value: ''
@@ -825,7 +858,7 @@ Default value: ''
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -BenefactorCircleId "00000000-0000-0000-0000-000000000000"  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -BenefactorCircleId ""00000000-0000-0000-0000-000000000000"""  
 
-## 3.34. BenefactorCircleLicenseFile
+## 3.35. BenefactorCircleLicenseFile
 The Benefactor Circle license file matching your member Id, which unlocks exclusive features.
 
 Default value: ''
@@ -1433,7 +1466,7 @@ The client needs the following ports to access a SMB file share on a Windows ser
 - 139 TCP
 - 445 TCP
 
-The client needs port 443 TCP to access a WebDAV share (a SharePoint document library, for example).  Firewalls and proxies must not block WebDAV HTTP extensions.  
+The client needs port 443 TCP to access a SharePoint document library. Firewalls and proxies must not block WebDAV HTTP extensions.  
 ## 17.6. Why is out of office abbreviated OOF and not OOO?  
 Back in the 1980s, Microsoft had a UNIX OS named Xenix ... but read yourself <a href="https://techcommunity.microsoft.com/t5/exchange-team-blog/why-is-oof-an-oof-and-not-an-ooo/ba-p/610191" target="_blank">here</a>.  
 ## 17.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
@@ -1675,7 +1708,7 @@ The following steps are recommended:
 Absolutely. PowerShell best practices recommend using singular nouns, but Set-OutlookSignatures contains a plural noun.
 
 We intentionally decided not to follow the singular noun convention, as another language as PowerShell was initially used for coding and the name of the tool was already defined. If this was a commercial enterprise project, marketing would have overruled development.
-## 17.17. the software hangs at HTM/RTF export, Word shows a security warning!?
+## 17.17. The software hangs at HTM/RTF export, Word shows a security warning!?
 When using a signature template with account pictures (linked and embedded), conversion to HTM hangs at "Export to HTM format" or "Export to RTF format". In the background, there is a window "Microsoft Word Security Notice" with the following text:
 ```
 Microsoft Office has identified a potential security concern.

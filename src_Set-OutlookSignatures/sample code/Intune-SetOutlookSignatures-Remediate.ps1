@@ -17,6 +17,11 @@ $parameters = @{
 }
 
 
+$OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+
+Set-Location $PSScriptRoot
+
+
 try {
     # Get currently installed version
     $currentVersion = $null

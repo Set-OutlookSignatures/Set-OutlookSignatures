@@ -54,7 +54,7 @@ Local and remote paths are supported.
 
 Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX').
 
-WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 
 Default value: '.\sample templates\Signatures DOCX'
 
@@ -70,7 +70,7 @@ See '.\sample templates\Signatures DOCX\_Signatures.ini' for a sample file with 
 
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX')
 
-WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 
 The currently logged-in user needs at least read access to the path
 
@@ -88,7 +88,7 @@ Local and remote paths are supported.
 
 Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX').
 
-WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 
 Default value: '.\config\default replacement variables.ps1'
 
@@ -104,7 +104,7 @@ Local and remote paths are supported.
 
 Local paths can be absolute ('C:\config\default graph config.ps1') or relative to the software path ('.\config\default graph config.ps1')
 
-WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/config/default graph config.ps1' or '\\server.domain@SSL\SignatureSite\config\default graph config.ps1'
+SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/config/default graph config.ps1' or '\\server.domain@SSL\SignatureSite\config\default graph config.ps1'
 
 The currently logged-in user needs at least read access to the path
 
@@ -212,7 +212,7 @@ Local and remote paths are supported.
 
 Local paths can be absolute ('C:\OOF templates') or relative to the software path ('.\sample templates\ Out of Office ').
 
-WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
+SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
 
 The currently logged-in user needs at least read access to the path.
 
@@ -230,7 +230,7 @@ See '.\sample templates\Out of Office DOCX\_OOF.ini' for a sample file with furt
 
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures')
 
-WebDAV paths are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
+SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 
 The currently logged-in user needs at least read access to the path
 
@@ -250,7 +250,7 @@ Local and remote paths are supported.
 
 Local paths can be absolute ('C:\Outlook signatures') or relative to the software path ('.\Outlook signatures').
 
-WebDAV paths are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
+SharePoint document libraries are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
 
 The currently logged-in user needs at least write access to the path.
 
@@ -489,7 +489,42 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 .PARAMETER MirrorLocalSignaturesToCloud
 Should local signatures be uploaded as roaming signature for the current user?
 
-Possible for Exchange Online mailbox of currently logged-in user.
+Possible for Exchange Online mailboxes:
+- Download for every mailbox where the current user has full access
+- Upload and set default signaures for the mailbox of the current user
+
+Prerequisites:
+- Download
+  - Current user has full access to the mailbox
+- Upload, set default signatures
+  - Script parameter `SetCurrentUserOutlookWebSignature` is set to `true`
+  - Mailbox is the mailbox of the currently logged-in user and is hosted in Exchange Online
+
+Please note:
+- As there is no Microsoft official API, this feature is experimental, and you use it on your own risk.
+- This feature does not work in simulation mode, because the user running the simulation does not have access to the signatures stored in another mailbox
+
+The process is very simple and straight forward. Set-OutlookSignatures goes through the following steps:
+1. Check if all prerequisites are met
+2. Download all signatures stored in the Exchange Online mailbox
+  - This mimics Outlook's behavior: Roaming signatures are only manipulated in the cloud and then downloaded from there.
+  - Existing local signature are only overwritten when the roaming signature is newer
+3. Go through standard template and signature processing
+  - Loop through the templates and their configuration, and convert them to signatures
+  - Set default signatures for replies and forwards
+  - If configured, delete signatures created by the user
+  - If configured, delete signatures created earlier by Set-OutlookSignatures but now no longer have a corresponding central configuration
+4. Delete all signatures in the cloud and upload all locally stored signatures to the user's personal mailbox as roaming signatures
+
+
+This process is very simple and straight forward. It basically just mirrors the locally available signatures as roaming signatures, so there may be too many signatures available in the cloud - in this case, having too many signatures is better than missing some.
+
+Another advantage of this solution is that it makes roaming signatures available in Outlook versions that do not officially support them.
+
+What will not work:
+- Download from mailboxes where the current user does not have full access rights. This is not possible because of Microsoft API restrictions.
+- Download from and upload to shared mailboxes. This is not possible because of Microsoft API restrictions.
+- Uploading signatures other than device specific signatures and such assigned to the mailbox of the current user. Uploading is not implemented, because until now no way could be found that does not massively impact the user experience as soon as the Outlook integrated download process starts (signatures available multiple times, etc.)
 
 This feature requires a Benefactor Circle license.
 
@@ -501,6 +536,30 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesTo
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud false
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud $false"
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud false"
+
+.PARAMETER MailboxSpecificSignatureNames
+Should signature names be mailbox specific by adding the e-mail address?
+
+For compatibility with Outlook storing signatures in the file system, Set-OutlookSignatures converts templates to signatures according to the following logic:
+1. Get all mailboxes and sort them: Mailbox of logged-on/simulated user, other mailboxes in default Outlook profile or Outlook Web, mailboxes from other Outlook profiles
+2. Get all template files, sort them by category (common, group specific, mailbox specific, replacement variable specific), and within each category by SortOrder and SortCulture defined in the INI file
+3. Loop through the mailbox list, and for each mailbox loop through the template list.
+4. If a template's conditions apply and if the template has not been used before, convert the template to a signature.
+
+The step 4 condition `if the template has not been used before` makes sure that a lower priority mailbox does not replace a signature with the same name which has already been created for a higher priority mailbox.
+
+With roaming signatures (signatures being stored in the Exchange Online mailbox itself) being used more and more, the step 4 condition `if the template has not been used before` makes less sense. By setting the `MailboxSpecificSignatureNames` parameter to `true`, this restriction no longer applies. To avoid naming collisions, the e-mail address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc.
+
+This naming convention intentionally matches Outlook's convention for naming roaming signatures. Before setting `MailboxSpecificSignatureNames` to `true`, consider the impact on the `DisableRoamingSignatures` and `MirrorLocalSignaturesToCloud` parameters - it is recommended to set both parameters to `true` to achieve the best user experience and to avoid problems with Outlook's own roaming signature synchronisation.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
+Default value: $false
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames false"
 
 .PARAMETER WordProcessPriority
 Define the Word process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
@@ -579,7 +638,26 @@ License : MIT license (see '.\LICENSE.txt' for details and copyright)
 #>
 
 
+# Suppress specific PSScriptAnalyzerRules for specific variables
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'SimulateAndDeployGraphCredentialFile')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'HTMLMarkerTag')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'ConnectedFilesFolderNames')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentEnvironmentName')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentGraphApiEndpoint')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentAutodiscoverSecureName')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentAzureADEndpoint')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'PrimaryMailboxAddress')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesDefaultNew')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesDefaultReplyFwd')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesWriteProtect')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFFilesInternal')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFFilesExternal')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'pathHtmlFolderSuffix')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'data')]
+
+
 [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'Z: All parameters')]
+
 
 Param(
     # Path to a Benefactor Circle license file
@@ -684,6 +762,11 @@ Param(
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $EmbedImagesInHtmlAdditionalSignaturePath = $true,
+
+    # Should signature names be mailbox specific by adding the e-mail address?
+    [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
+    $MailboxSpecificSignatureNames = $false,
 
     # Shall the software set the out of office (OOF) message(s) of the currently logged-in user?
     [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
@@ -942,17 +1025,48 @@ function CheckFilenamePossiblyInvalid ([string] $Filename = '', [bool] $CheckOut
 
 
 function main {
-    Set-Location $PSScriptRoot | Out-Null
-
     $ScriptVersion = 'XXXVersionStringXXX'
 
+    if ((Test-Path 'variable:IsWindows')) {
+        # Automatic variable $IsWindows is available, must be cross-platform PowerShell version >= v6
+        if ($IsWindows -eq $false) {
+            Write-Host "  Your OS: $($PSVersionTable.Platform), $($PSVersionTable.OS), $(Invoke-Expression '(lsb_release -ds || cat /etc/*release || uname -om) 2>/dev/null | head -n1')" -ForegroundColor Red
+            Write-Host '  This script is supported on Windows only. Exit.' -ForegroundColor Red
+            exit 1
+        }
+    } else {
+        # Automatic variable $IsWindows is not available, must be PowerShell < v6 running on Windows
+    }
+
+    if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
+        Write-Host "  This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+        Write-Host '  Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+        exit 1
+    }
+
+    # Enable all available security protocols (temporary for this PowerShell session)
+    $script:SystemNetServicePointManagerSecurityProtocolOld = [System.Net.ServicePointManager]::SecurityProtocol
+
+    [enum]::GetNames([System.Net.SecurityProtocolType]) | ForEach-Object {
+        try {
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol, $_
+        } catch {
+        }
+    }
+
+    Write-Host
+    Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+    Write-Host '  Software: Set-OutlookSignatures'
+    Write-Host "  Version : $ScriptVersion"
+
+    # Get version list from GitHub
     $OldProgressPreference = $ProgressPreference
     $ProgressPreference = 'SilentlyContinue'
 
     try {
         $GitHubReleases = @()
 
-        (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Set-OutlookSignatures/Set-OutlookSignatures/main/docs/releases.txt' -UseBasicParsing).Content -split '\r?\n' | Where-Object { $_ } | ForEach-Object {
+        (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Set-OutlookSignatures/Set-OutlookSignatures/main/docs/releases.txt' -UseBasicParsing -UseDefaultCredentials).Content -split '\r?\n' | Where-Object { $_ } | ForEach-Object {
             $GitHubReleases += $_
         }
     } catch {
@@ -960,9 +1074,7 @@ function main {
     }
 
     $ProgressPreference = $OldProgressPreference
-
     $GitHubReleases += $ScriptVersion
-
     $GitHubReleasesSemVer = @()
 
     foreach ($v in $GitHubReleases) {
@@ -970,13 +1082,7 @@ function main {
     }
 
     $GitHubReleasesSemVerRanked = rankedSemVer($GitHubReleasesSemVer) | Sort-Object -Culture $TemplateFilesSortCulture -Property Rank -Unique
-
     $GitHubReleasesNewer = @(@($GitHubReleasesSemVerRanked | Where-Object { $_.Rank -gt ($GitHubReleasesSemVerRanked | Where-Object { $_.VersionString -ieq $ScriptVersion }).Rank }).VersionString)
-
-    Write-Host
-    Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-    Write-Host '  Software: Set-OutlookSignatures'
-    Write-Host "  Version : $ScriptVersion"
 
     if ($GitHubReleasesNewer) {
         Write-Host "            At least one release newer than $($ScriptVersion) is available: $(@($GitHubReleasesNewer[0, -1] | Select-Object -Unique) -join $(if($GitHubReleasesNewer.Count -gt 2) { ', ..., ' } else {', '}))" -ForegroundColor Yellow
@@ -985,34 +1091,12 @@ function main {
     Write-Host '  Web     : https://github.com/Set-OutlookSignatures/Set-OutlookSignatures'
     Write-Host "  License : MIT license (see '.\LICENSE.txt' for details and copyright)"
 
-
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-
     Write-Host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.Platform), $($PSVersionTable.OS)) | Where-Object {$_}) -join "', '")'"
-
     Write-Host "  PowerShell bitness: $(if ([Environment]::Is64BitProcess -eq $false) {'Non-'})64-bit process on a $(if ([Environment]::Is64OperatingSystem -eq $false) {'Non-'})64-bit operating system"
-
     Write-Host "  PowerShell parameters: '$ScriptPassedParameters'"
-
     Write-Host "  Script path: '$PSCommandPath'"
-
-    if ((Test-Path 'variable:IsWindows')) {
-        # Automatic variable $IsWindows is available, must be cross-platform PowerShell version v6+
-        if ($IsWindows -eq $false) {
-            Write-Host "  Your OS: $($PSVersionTable.Platform), $($PSVersionTable.OS), $(Invoke-Expression '(lsb_release -ds || cat /etc/*release || uname -om) 2>/dev/null | head -n1')" -ForegroundColor Red
-            Write-Host '  This script is supported on Windows only. Exit.' -ForegroundColor Red
-            exit 1
-        }
-    } else {
-        # Automatic variable $IsWindows is not available, must be PowerShell <v6 running on Windows
-    }
-
-    if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-        Write-Host "  This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
-        Write-Host '  Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
-        exit 1
-    }
 
     $script:tempDir = [System.IO.Path]::GetTempPath()
     $script:jobs = New-Object System.Collections.ArrayList
@@ -1211,7 +1295,7 @@ function main {
     if ($MoveCSSInline) {
         $script:PreMailerNetModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
 
-        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\PreMailer.net\net462')) -Destination $script:PreMailerNetModulePath -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\PreMailer.net\net462')) -Destination $script:PreMailerNetModulePath -Recurse
 
         Get-ChildItem $script:PreMailerNetModulePath -Recurse | Unblock-File
     }
@@ -1306,6 +1390,13 @@ function main {
         $MirrorLocalSignaturesToCloud = $true
     } else {
         $MirrorLocalSignaturesToCloud = $false
+    }
+
+    Write-Host "  MailboxSpecificSignatureNames: '$($MailboxSpecificSignatureNames)'"
+    if ($MailboxSpecificSignatureNames -iin (1, '1', 'true', '$true', 'yes')) {
+        $MailboxSpecificSignatureNames = $true
+    } else {
+        $MailboxSpecificSignatureNames = $false
     }
 
     switch ($WordProcessPriority) {
@@ -1725,7 +1816,7 @@ or visit 'https://explicitconsulting.at'.
 
                 if ($x -inotin $SignaturePaths) {
                     $SignaturePaths += $x
-                    Write-Host "  $x"
+                    Write-Host "  '$x'"
                 }
             }
 
@@ -1733,7 +1824,7 @@ or visit 'https://explicitconsulting.at'.
         }
     } else {
         $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname))
-        Write-Host "  $($SignaturePaths[-1]) (Outlook Web/New Outlook)"
+        Write-Host "  '$($SignaturePaths[-1])' (Outlook Web/New Outlook)"
     }
 
     # If Outlook is installed, synch profile folders anyway
@@ -1752,7 +1843,7 @@ or visit 'https://explicitconsulting.at'.
 
                 if ($x -inotin $SignaturePaths) {
                     $SignaturePaths += $x
-                    Write-Host "  $x"
+                    Write-Host "  '$x'"
                 }
             }
 
@@ -2080,7 +2171,7 @@ or visit 'https://explicitconsulting.at'.
         Write-Host "    Set up environment for connection to Microsoft Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
         $script:CurrentUser = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\IdentityStore\Cache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)\IdentityCache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)" -Name 'UserName' -ErrorAction SilentlyContinue)
         $script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
-        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:MsalModulePath -ChildPath 'msal.ps') -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\msal.ps')) -Destination (Join-Path -Path $script:MsalModulePath -ChildPath 'msal.ps') -Recurse
         Get-ChildItem $script:MsalModulePath -Recurse | Unblock-File
         try {
             Import-Module (Join-Path -Path $script:MsalModulePath -ChildPath 'msal.ps') -Force -ErrorAction Stop
@@ -2871,6 +2962,7 @@ or visit 'https://explicitconsulting.at'.
             }
 
             $x = @(foreach ($Enumerator in $TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)]) { $Enumerator['<Set-OutlookSignatures template>'] })
+
             foreach ($TemplateFile in $TemplateFiles) {
                 if ($TemplateFile.name -inotin $x) {
                     Write-Host "    '$($TemplateFile.name)' found in $($SigOrOOF) template path but not in ini." -ForegroundColor Yellow
@@ -2878,11 +2970,7 @@ or visit 'https://explicitconsulting.at'.
             }
 
             Write-Host '  Sort template files according to configuration'
-            try {
-                $TemplateFilesSortCulture = (@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortCulture']
-            } catch {
-                $TemplateFilesSortCulture = $null
-            }
+            $TemplateFilesSortCulture = (@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortCulture']
 
             # Populate template files in the most complicated way first: SortOrder 'AsInThisFile'
             # This also considers that templates can be referenced multiple times in the INI file
@@ -2931,8 +3019,8 @@ or visit 'https://explicitconsulting.at'.
                         }
 
                         default {
-                            # same as 'ascending'
-                            $TemplateFiles = @($TemplateFiles | Sort-Object -Culture $TemplateFilesSortCulture -Property Name, @{expression = { [int]$_.TemplateIniSettingsIndex } })
+                            # same as 'AsInThisFile'
+                            # nothing to do, $TemplateFiles is already correctly populated and sorted
                         }
                     }
                 } else {
@@ -3847,9 +3935,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
     }
 
     # Upload local signatures to Exchange Online as roaming signatures
-    if ($MirrorLocalSignaturesToCloudDoUpload -eq $true) {
+    if ($MirrorLocalSignaturesToCloud -eq $true) {
         Write-Host
-        Write-Host "Uploading local signatures to Exchange Online as roaming signatures for current user @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+        Write-Host "Upload local signatures to Exchange Online as roaming signatures for current user @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
         if (-not $BenefactorCircleLicenseFile) {
             Write-Host "  The 'MirrorLocalSignaturesToCloud' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
             Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
@@ -4492,12 +4580,16 @@ function SetSignatures {
     }
 
     if (-not $ProcessOOF) {
-        $SignatureFileAlreadyDone = ($script:SignatureFilesDone -contains $TemplateIniSettingsIndex)
-
-        if ($SignatureFileAlreadyDone) {
-            Write-Host "$Indent      Template already processed before with higher priority, no need to update signature"
+        if ($MailboxSpecificSignatureNames) {
+            $SignatureFileAlreadyDone = $false
         } else {
-            $script:SignatureFilesDone += $TemplateIniSettingsIndex
+            $SignatureFileAlreadyDone = ($script:SignatureFilesDone -contains $TemplateIniSettingsIndex)
+
+            if ($SignatureFileAlreadyDone) {
+                Write-Host "$Indent      Template already processed before with higher priority, no need to update signature"
+            } else {
+                $script:SignatureFilesDone += $TemplateIniSettingsIndex
+            }
         }
     }
 
@@ -4542,13 +4634,21 @@ function SetSignatures {
 
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
 
+        if ($MailboxSpecificSignatureNames) {
+            if ($OutlookDisableRoamingSignatures -eq 0) {
+                $Signature.value = ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
+            } else {
+                $Signature.value = ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
+            }
+        }
+
         if (-not $ProcessOOF) {
             $script:SignatureFilesDone += $Signature.Value
 
-            if ($OutlookDisableRoamingSignatures -eq 0) {
-                $script:SignatureFilesDone += ($Signature.Value -ireplace '\.htm$', " ($($PrimaryMailboxAddress)).htm")
-                #$script:SignatureFilesDone += ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
-            }
+            #if ($OutlookDisableRoamingSignatures -eq 0) {
+            #    $script:SignatureFilesDone += ($Signature.Value -ireplace '\.htm$', " ($($PrimaryMailboxAddress)).htm")
+            #    #$script:SignatureFilesDone += ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
+            #}
         }
 
         if ($UseHtmTemplates) {
@@ -5206,6 +5306,21 @@ function SetSignatures {
         }
 
         if (-not $ProcessOOF) {
+            if ($MirrorLocalSignaturesToCloud -eq $true) {
+                Write-Host "$Indent      Upload signature to Exchange Online as roaming signature"
+                if (-not $BenefactorCircleLicenseFile) {
+                    Write-Host "$Indent        The 'MirrorLocalSignaturesToCloud' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                    Write-Host "$Indent        Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                } else {
+                    $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::RoamingSignaturesUpload()
+
+                    if ($FeatureResult -ne 'true') {
+                        Write-Host "$Indent        Error uploading roaming signatures to the cloud." -ForegroundColor Yellow
+                        Write-Host "$Indent        $FeatureResult" -ForegroundColor Yellow
+                    }
+                }
+            }
+
             foreach ($SignaturePath in $SignaturePaths) {
                 Write-Host "$Indent      Copy signature files to '$SignaturePath'"
 
@@ -5280,12 +5395,10 @@ function SetSignatures {
                         if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
                             Write-Host "$Indent      Set signature as default for new messages (Outlook profile '$(($RegistryPaths[$j] -split '\\')[8])')"
 
-                            if (($script:CurrentUserDummyMailbox -ne $true)) {
-                                if ($OutlookFileVersion -ge '16.0.0.0') {
-                                    New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) -Force | Out-Null
-                                } else {
-                                    New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
-                                }
+                            if ($OutlookFileVersion -ge '16.0.0.0') {
+                                New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) -Force | Out-Null
+                            } else {
+                                New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
                             }
                         } else {
                             $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
@@ -5321,12 +5434,10 @@ function SetSignatures {
                         if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
                             Write-Host "$Indent      Set signature as default for reply/forward messages (Outlook profile '$(($RegistryPaths[$j] -split '\\')[8])')"
 
-                            if (($script:CurrentUserDummyMailbox -ne $true)) {
-                                if ($OutlookFileVersion -ge '16.0.0.0') {
-                                    New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) -Force | Out-Null
-                                } else {
-                                    New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
-                                }
+                            if ($OutlookFileVersion -ge '16.0.0.0') {
+                                New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType String -Value ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) -Force | Out-Null
+                            } else {
+                                New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
                             }
                         } else {
                             $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
@@ -5553,30 +5664,35 @@ function CheckPath([string]$path, [switch]$silent = $false, [switch]$create = $f
 
                     # Open site in new IE process
                     $oIE = New-Object -com InternetExplorer.Application
+                    $oIE.Navigate('https://' + ((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
                     $oIE.Visible = $false
-                    $oIE.Navigate2('https://' + ((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))
-                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($oIE) | Out-Null
-                    Remove-Variable -Name 'oIE'
 
                     # Wait until an IE tab with the corresponding URL is open
                     $app = New-Object -com shell.application
+
                     $i = 0
+
                     while ($i -lt 1) {
-                        $i += @($app.windows() | Where-Object { $_.LocationURL -ilike ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') }).count
+                        $i += @($app.windows() | Where-Object { [uri]::UnescapeDataString($_.LocationURL) -ilike ('*' + ([uri]::EscapeUriString((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/'))) + '*') }).count
                         Start-Sleep -Milliseconds 50
                     }
 
                     # Wait until the corresponding URL is fully loaded, then close the tab
-                    foreach ($window in @($app.windows() | Where-Object { $_.LocationURL -ilike ('*' + ([uri]::EscapeUriString(((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/')))) + '*') })) {
-                        while ($window.busy) {
+                    @($app.windows() | Where-Object { [uri]::UnescapeDataString($_.LocationURL) -ilike ('*' + ([uri]::EscapeUriString((($path -ireplace ('@SSL', '')).replace('\\', '')).replace('\', '/'))) + '*') }) | ForEach-Object {
+                        while ($_.Busy) {
                             Start-Sleep -Milliseconds 50
                         }
-                        $window.quit([ref]$false)
+
+                        $_.Quit()
                     }
 
                     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($app) | Out-Null
+                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($oIE) | Out-Null
+
                     Remove-Variable -Name 'app'
+                    Remove-Variable -Name 'oIE'
                 } catch {
+                    $_
                 }
             }
         }
@@ -5757,7 +5873,7 @@ No Graph authentication possible.
        - Run Set-OutlookSignatures in a new PowerShell session
        - Check if a default browser is set and if "start https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" opens it
        - Make sure that Set-OutlookSignatures is executed in the security context of the currently logged-in user
-       - Make sure that the current PowerShell session allows TLS 1.2 (see https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85 for details)
+       - Make sure that the current PowerShell session allows TLS 1.2+ (see https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85 for details)
 3. Run Set-OutlookSignatures with the "-Verbose" parameter and check for authentication messages
 4. Delete the MSAL.PS Graph token cache file '$(try { [TokenCacheHelper]::CacheFilePath } catch { 'TokenCacheHelper error - file info not available!' } )'.
 "@)
@@ -6312,69 +6428,6 @@ function GraphFilterUsers($filter) {
 }
 
 
-function ExoGenericQuery ([Parameter(Mandatory = $true)] [string]$method, [Parameter(Mandatory = $true)] [uri]$uri, [Parameter(Mandatory = $true)] [AllowEmptyString()] [string]$body, [Parameter(Mandatory = $true)] [bool]$isLargeSetting ) {
-    $error.clear()
-    try {
-        $requestBody = @{
-            Method      = $method
-            Uri         = $uri
-            Headers     = $script:ExoAuthorizationHeader
-            ContentType = 'application/json; charset=utf-8'
-        }
-
-        if ($body) {
-            $requestBody['Body'] = $body
-        }
-
-        if ($isLargeSetting -eq $true) {
-            $requestBody['Headers']['x-islargesetting'] = 'true'
-        } else {
-            $requestBody['Headers']['x-islargesetting'] = 'false'
-        }
-
-        if ($PrimaryMailboxAddress) {
-            $requestBody['Headers']['x-anchormailbox'] = "SMTP:$($PrimaryMailboxAddress)"
-        }
-
-        $requestBody['Headers']['x-overridetimestamp'] = 'true'
-
-        $requestBody['Headers']['content-type'] = 'Application/Json; charset=utf-8'
-
-        $OldProgressPreference = $ProgressPreference
-        $ProgressPreference = 'SilentlyContinue'
-
-        $local:x = @()
-        $local:uri = $null
-
-        do {
-            if ($local:uri) {
-                $requestBody['Uri'] = $local:uri
-            }
-
-            $local:pagedResults = Invoke-RestMethod @requestBody
-            $local:x += $local:pagedResults
-
-            $local:uri = $local:pagedResults.'@odata.nextlink'
-        } until (!($local:uri))
-
-        $ProgressPreference = $OldProgressPreference
-    } catch {
-    }
-
-    if ($null -ne $local:x) {
-        return @{
-            error  = $false
-            result = $local:x
-        }
-    } else {
-        return @{
-            error  = $error[0] | Out-String
-            result = $null
-        }
-    }
-}
-
-
 function GetIniContent ($filePath) {
     $local:ini = [ordered]@{}
     $local:SectionIndex = -1
@@ -6422,6 +6475,49 @@ function GetIniContent ($filePath) {
             exit 1
         }
     }
+
+    # default values for <Set-OutlookSignatures configuration>
+    if (
+        $(
+            try {
+        ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))
+            } catch {
+                $false
+            }
+        )
+    ) {
+
+        if (
+            -not $(
+                try {
+        ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortOrder']
+                } catch {
+                    $false
+                }
+            )
+        ) {
+    ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortOrder'] = 'AsInThisFile'
+        }
+
+        if (
+            -not $(
+                try {
+        ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortCulture']
+                } catch {
+                    $false
+                }
+            )
+        ) {
+    ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortCulture'] = 'de-AT'
+        }
+    } else {
+        $local:ini["$($local:ini.Count)"] = @{
+            '<Set-OutlookSignatures template>' = '<Set-OutlookSignatures configuration>'
+            'SortOrder'                        = 'AsInThisFile'
+            'SortCulture'                      = 'de-AT'
+        }
+    }
+
     return $local:ini
 }
 
@@ -6537,6 +6633,10 @@ try {
     Write-Host
     Write-Host "Start script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
+    $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+
+    Set-Location $PSScriptRoot | Out-Null
+
     $ScriptPassedParameters = $MyInvocation.Line
 
     main
@@ -6548,7 +6648,8 @@ try {
 } finally {
     Write-Host
     Write-Host "Clean-up @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-    # Restore original security setting
+
+    # Restore original Word security setting
     if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
         Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
     } else {
@@ -6606,6 +6707,10 @@ try {
 
     if ($script:ScriptProcessPriorityOriginal) {
         $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$PID""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $script:ScriptProcessPriorityOriginal }
+    }
+
+    if ($script:SystemNetServicePointManagerSecurityProtocolOld) {
+        [System.Net.ServicePointManager]::SecurityProtocol = $script:SystemNetServicePointManagerSecurityProtocolOld
     }
 
     Write-Host

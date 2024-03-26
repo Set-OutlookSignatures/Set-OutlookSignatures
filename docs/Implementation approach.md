@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20additional%20features%20and%20support%20with-Benefactor%20Circle-gold" alt="add additional features and support with Benefactor Circle"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20commercial%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="commercial support by ExplicIT Consulting"></a>
 
 # What is the recommended approach for implementing the software? <!-- omit in toc -->
 There is certainly no definitive generic recommendation, but this document should be a good starting point.
@@ -236,11 +236,11 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
 - Network unlocks:  
 	- Ports 389 (LDAP) and 3268 (Global Catalog), TCP and UDP respectively, must be enabled between the client and all domain controllers. If this is not the case, signature-relevant information and variables cannot be retrieved. the software checks with each run whether access is possible.
 - To access the SMB share with the software components, the following ports are needed: 137 UDP, 138 UDP, 139 TCP, 445 TCP (details <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)" target="_blank">in this Microsoft article</a>).  
-	- Für access to WebDAV shares (e.g. SharePoint document libraries), port 443 TCP is needed. Firewalls and proxies must not block WebDAV HTTP extensions.  
+	- Für access to SharePoint document libraries, port 443 TCP is needed. Firewalls and proxies must not block WebDAV HTTP extensions.  
 ### 1.7.2. Server  
 Required are:
 - An SMB file share in which the software and its components are stored. All users must have read access to this file share and its contents.  
-- One or more SMB file shares or WEBDAV shares (e.g. SharePoint document libraries) in which the templates for signatures and out-of-office replies are stored and managed.
+- One or more SMB file shares or SharePoint document libraries in which the templates for signatures and out-of-office replies are stored and managed.
 
 If variables (e.g. first name, last name, phone number) are used in the templates, the corresponding values must be available in the Active Directory. In the case of Linked Mailboxes, a distinction can be made between the attributes of the current user and the attributes of the mailbox located in different AD forests.  
 
@@ -258,7 +258,7 @@ As long as all clients use the same version of the software and only configure i
 
 For maximum performance and flexibility, it is recommended that each client stores the software in its own SMB file share and, if necessary, replicates this across locations on different servers.
 ### 1.7.3. Storage of templates  
-As described in the system requirements, templates for signatures and out-of-office replies can be stored on SMB file shares or WebDAV shares (e.g. SharePoint document libraries) analogous to the software itself.
+As described in the system requirements, templates for signatures and out-of-office replies can be stored on SMB file shares or SharePoint document libraries analogous to the software itself.
 
 SharePoint document libraries have the advantage of optional versioning of files, so that in the event of an error, template administrators can quickly restore an earlier version of a template.
 
@@ -297,20 +297,20 @@ powershell.exe <PowerShell parameter> -file <path to Set-OutlookSignatures.ps1> 
 #### 1.7.5.1. Parameters  
 The behaviour of the software can be controlled via parameters. Particularly relevant are SignatureTemplatePath and OOFTemplatePath, which are used to specify the path to the signature and absence templates.
 
-The following is an example where the signature templates are on an SMB file share and the out of office provider templates are on a WebDAV share:  
+The following is an example where the signature templates are on an SMB file share and the out of office provider templates are in a SharePoint document library:  
 ```
-powershell.exe -file '\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' -SignatureTemplatePath '\DFS-Share\Common\Templates\Signatures Outlook' -OOFTemplatePath 'https://webdav.example.com/CorporateCommunications/Templates/Out of Office templates'  
+powershell.exe -file '\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' -SignatureTemplatePath '\DFS-Share\Common\Templates\Signatures Outlook' -OOFTemplatePath 'https://sharepoint.example.com/CorporateCommunications/Templates/Out of Office templates'  
 ```
 
 At the time of writing, other parameters were available. The following is a brief overview of the possibilities, for details please refer to the documentation of the software in the `README` file:  
-- SignatureTemplatePath: path to the signature templates. Can be an SMB or WebDAV share.  
-- ReplacementVariableConfigFile: Path to the file in which variables deviating from the standard are defined. Can be an SMB or WebDAV share.  
+- SignatureTemplatePath: path to the signature templates. Can be an SMB share or SharePoint document library.  
+- ReplacementVariableConfigFile: Path to the file in which variables deviating from the standard are defined. Can be an SMB share or SharePoint document library.  
 - TrustsToCheckForGroups: By default, all trusts are queried for mailbox information. This parameter can be used to remove specific domains and add non-trusted domains.  
 - DeleteUserCreatedSignatures: Should signatures created by the user be deleted? This is not done by default.  
 - SetCurrentUserOutlookWebSignature: By default, a signature is set in Outlook on the web for the logged-in user. This parameter can be used to prevent this.  
 - SetCurrentUserOOFMessage: By default, the text of the out-of-office replies is set. This parameter can be used to change this behaviour.  
-- OOFTemplatePath: Path to the absence templates. Can be an SMB or WebDAV share.  
-- AdditionalSignaturePath: Path to an additional share to which all signatures should be copied, e.g. for access from a mobile device and for simplified configuration of clients not supported by the software. Can be an SMB or WebDAV share.  
+- OOFTemplatePath: Path to the absence templates. Can be an SMB share or SharePoint document library.  
+- AdditionalSignaturePath: Path to an additional share to which all signatures should be copied, e.g. for access from a mobile device and for simplified configuration of clients not supported by the software. Can be an SMB share or SharePoint document library.  
 - UseHtmTemplates: By default, templates are processed in DOCX format. This switch can be used to switch to HTML (.htm).  
 The 'README' file contains further parameters.
 #### 1.7.5.2. Runtime and Visibility of the software  
@@ -421,7 +421,7 @@ The following services are covered by the product price:
 	- be allowed to run signed PowerShell scripts in full language mode
 	- have a mailbox  
 	- have full access to various test mailboxes (personal mailboxes or group mailboxes) that are, if possible, direct or indirect members of various groups or distribution lists. For full access, the user may be authorized to the other mailboxes accordingly, or the user name and password of the additional mailboxes are known.  
-- Customer shall provide at least one central SMB file or WebDAV share for template storage.  
+- Customer shall provide at least one central SMB share or SharePoint document library for template storage.  
 - Customer shall provide a central SMB file share for the storage of the software and its components.
 ### 1.8.2. Tests, pilot operation, rollout  
 The customer's project manager is responsible for planning and coordinating tests, pilot operation and rollout.
@@ -605,11 +605,11 @@ Set-OutlookSignatures erfordert **keine Installation auf Servern oder Clients**.
 - Netzwerkfreischaltungen:  
 	- Die Ports 389 (LDAP) and 3268 (Global Catalog), jeweils TCP and UDP, müssen zwischen Client und allen Domain Controllern freigeschaltet sein. Falls dies nicht der Fall ist, können signaturrelevante Informationen und Variablen nicht abgerufen werden. Die Software prüft bei jedem Lauf, ob der Zugriff möglich ist.  
 	- Für den Zugriff auf den SMB-File-Share mit den Software-Komponenten werden folgende Ports benötigt: 137 UDP, 138 UDP, 139 TCP, 445 TCP (Details <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)" target="_blank">in diesem Microsoft-Artikel</a>).  
-	- Für den Zugriff auf WebDAV-Shares (z. B. SharePoint Dokumentbibliotheken) wird Port 443 TCP benötigt. Firewalls und Proxies dürfen WebDAV HTTP Extensions nicht blockieren.  
+	- Für den Zugriff auf SharePoint Dokumentbibliotheken wird Port 443 TCP benötigt. Firewalls und Proxies dürfen WebDAV HTTP Extensions nicht blockieren.  
 ### 2.7.2. Server  
 Benötigt werden:
 - Ein SMB-File-Share, in den die Software und seine Komponenten abgelegt werden. Auf diesen File-Share und seine Inhalte müssen alle Benutzer lesend zugreifen können.  
-- Ein oder mehrere SMB-File-Shares oder WEBDAV-Shares (z. B. SharePoint Dokumentbibliotheken), in den die Vorlagen für Signaturen und Abwesenheitsnachrichten gespeichert und verwaltet werden.
+- Ein oder mehrere SMB-File-Shares oder SharePoint Dokumentbibliotheken, in den die Vorlagen für Signaturen und Abwesenheitsnachrichten gespeichert und verwaltet werden.
 
 Falls in den Vorlagen Variablen (z. B. Vorname, Nachname, Telefonnummer) genutzt werden, müssen die entsprechenden Werte im Active Directory vorhanden sein. Im Fall von Linked Mailboxes kann dabei zwischen den Attributen des aktuellen Benutzers und den Attributen des Postfachs, die sich in unterschiedlichen AD-Forests befinden, unterschieden werden.  
 
@@ -627,7 +627,7 @@ Solange alle Kunden die gleiche Version der Software einsetzen und diese nur üb
 
 Für maximale Leistung und Flexibilität wird empfohlen, dass jeder Kunde die Software in einem eigenen SMB-File-Share ablegt und diesen gegebenenfalls über Standorte hinweg auf verschiedene Server repliziert.  
 ### 2.7.3. Ablage der Vorlagen  
-Wie in den Systemanforderungen beschrieben, können Vorlagen für Signaturen und Abwesenheitsnachrichten analog zur Software selbst auf SMB-File-Shares oder WebDAV-Shares (z. B. SharePoint Dokumentbibliotheken) abgelegt werden.
+Wie in den Systemanforderungen beschrieben, können Vorlagen für Signaturen und Abwesenheitsnachrichten analog zur Software selbst auf SMB-File-Shares oder SharePoint Dokumentbibliotheken abgelegt werden.
 
 SharePoint-Dokumentbibliotheken haben den Vorteil der optionalen Versionierung von Dateien, so dass im Fehlerfall durch die Vorlagen-Verwalter rasch eine frühere Version einer Vorlage wiederhergestellt werden kann.
 
@@ -666,20 +666,20 @@ powershell.exe <PowerShell-Parameter> -file <Pfad zu Set-OutlookSignatures.ps1> 
 #### 2.7.5.1. Parameter  
 Das Verhalten der Software kann über Parameter gesteuert werden. Besonders relevant sind dabei SignatureTemplatePath und OOFTemplatePath, über die der Pfad zu den Signatur- und Abwesenheits-Vorlagen angegeben wird.
 
-Folgend ein Beispiel, bei dem die Signatur-Vorlagen auf einem SMB-File-Share und die AbwesenheService-Providerorlagen auf einem WebDAV-Share liegen:  
+Folgend ein Beispiel, bei dem die Signatur-Vorlagen auf einem SMB-File-Share und die Abwesenheits-Vorlagen in einer SharePoint Dokumentbibliothek liegen:  
 ```
-powershell.exe -file '\\example.com\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' –SignatureTemplatePath '\\example.com\DFS-Share\Common\Templates\Signatures Outlook' –OOFTemplatePath 'https://webdav.example.com/CorporateCommunications/Templates/Out of Office templates'  
+powershell.exe -file '\\example.com\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' –SignatureTemplatePath '\\example.com\DFS-Share\Common\Templates\Signatures Outlook' –OOFTemplatePath 'https://sharepoint.example.com/CorporateCommunications/Templates/Out of Office templates'  
 ```
 
 Zum Zeitpunkt der Erstellung dieses Dokuments waren noch weitere Parameter verfügbar. Folgend eine kurze Übersicht der Möglichkeit, für Details sei auf die Dokumentation der Software in der `README`-Datei verwiesen:  
-- SignatureTemplatePath: Pfad zu den Signatur-Vorlagen. Kann ein SMB- oder WebDAV-Share sein.  
-- ReplacementVariableConfigFile: Pfad zur Datei, in der vom Standard abweichende Variablen definiert werden. Kann ein SMB- oder WebDAV-Share sein.  
+- SignatureTemplatePath: Pfad zu den Signatur-Vorlagen. Kann ein SMB-Share oder eine SharePoint Dokumentbibliothek sein.  
+- ReplacementVariableConfigFile: Pfad zur Datei, in der vom Standard abweichende Variablen definiert werden. Kann ein SMB-Share oder eine SharePoint Dokumentbibliothek sein.  
 - TrustsToCheckForGroups: Standardmäßig werden alle Trusts nach Postfachinformationen abgefragt. Über diesen Parameter können bestimmte Domains entfernt und nicht-getrustete Domains hinzugefügt werden.  
 - DeleteUserCreatedSignatures: Sollen vom Benutzer selbst erstelle Signaturen gelöscht werden? Standardmäßig erfolgt dies nicht.  
 - SetCurrentUserOutlookWebSignature: Standardmäßig wird für den angemeldeten Benutzer eine Signatur in Outlook im Web gesetzt. Über diesen Parameter kann das verhindert werden.  
 - SetCurrentUserOOFMessage: Standardmäßig wird der Text der Abwesenheits-Nachrichten gesetzt. Über diesen Parameter kann dieses Verhalten geändert werden.  
-- OOFTemplatePath: Pfad zu den Abwesenheits-Vorlagen. Kann ein SMB- oder WebDAV-Share sein.  
-- AdditionalSignaturePath: Pfad zu einem zusätzlichen Share, in den alle Signaturen kopiert werden sollen, z. B. für den Zugriff von einem mobilen Gerät aus und zur vereinfachten Konfiguration nicht von der Software unterstützter Clients. Kann ein SMB- oder WebDAV-Share sein.  
+- OOFTemplatePath: Pfad zu den Abwesenheits-Vorlagen. Kann ein SMB-Share oder eine SharePoint Dokumentbibliothek sein.  
+- AdditionalSignaturePath: Pfad zu einem zusätzlichen Share, in den alle Signaturen kopiert werden sollen, z. B. für den Zugriff von einem mobilen Gerät aus und zur vereinfachten Konfiguration nicht von der Software unterstützter Clients. Kann ein SMB-Share oder eine SharePoint Dokumentbibliothek sein.  
 - UseHtmTemplates: Standardmäßig werden Vorlagen im DOCX-Format verarbeitet. Über diesen Schalter kann auf HTML (.htm) umgeschaltet werden.  
 Die `README`-Datei enthält weitere Parameter.
 #### 2.7.5.2. Laufzeit und Sichtbarkeit der software 
@@ -790,7 +790,7 @@ Folgende Leistungen sind mit dem Produktpreis abgedeckt:
 	- signierte PowerShell-Scripte im Full Language Mode ausführen dürfen
 	- über ein Mail-Postfach verfügen  
 	- Vollzugriff auf diverse Testpostfächer (persönliche Postfächer oder Gruppenpostfächer) haben, die nach Möglichkeit direkt oder indirekt Mitglied in diversen Gruppen oder Verteilerlisten sind. Für den Vollzugriff kann der Benutzer auf die anderen Postfächer entsprechend berechtigt sein, oder Benutzername und Passwort der zusätzlichen Postfächer sind bekannt.  
-- Der Kunde stellt mindestens einen zentralen SMB-File- oder WebDAV-Share für die Ablage der Vorlagen zur Verfügung.  
+- Der Kunde stellt mindestens einen zentralen SMB-Share oder eine SharePoint Dokumentbibliothek für die Ablage der Vorlagen zur Verfügung.  
 - Der Kunde stellt einen zentralen SMB-File-Share für die Ablage der Software und seiner Komponenten zur Verfügung.  
 ### 2.8.2. Tests, Pilotbetrieb, Rollout  
 Die Planung und Koordination von Tests, Pilotbetrieb und Rollout erfolgt durch den Vorhabens-Verantwortlichen des Kunden.
