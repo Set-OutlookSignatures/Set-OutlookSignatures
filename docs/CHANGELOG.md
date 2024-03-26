@@ -27,7 +27,6 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 ### Changed
 - Updated sample templates
 - Authentication against SharePoint document libraries containing templates or INI files has been adapted to Microsoft API changes not yet documented
-- ExplicIT Consulting's code signing certificate is now added to existing certificates. This increases security as you can now easily check that, for example, the DLL files of the dependency Microsoft Authentication Library (MSAL) are the original files published by Microsoft.
 ### Added
 - New parameter `MailboxSpecificSignatureNames`. By setting the `MailboxSpecificSignatureNames` parameter to `true`, the e-mail address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc. See`.\docs\README` for details.
 - When `MirrorLocalSignaturesToCloud` is enabled,
