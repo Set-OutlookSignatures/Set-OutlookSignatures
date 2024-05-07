@@ -92,8 +92,7 @@ function Write-HostPrompt {
                 'Fields' { return $Host.UI.Prompt($Caption, $Message, $listFields.ToArray()) }
                 'Choices' { return $Host.UI.PromptForChoice($Caption, $Message, $listChoices.ToArray(), $DefaultChoice - 1) + 1 }
             }
-        }
-        catch [System.Management.Automation.PSInvalidOperationException] {
+        } catch [System.Management.Automation.PSInvalidOperationException] {
             ## Write Non-Terminating Error When In Non-Interactive Mode.
             Write-Error -ErrorRecord $_ -CategoryActivity $MyInvocation.MyCommand
         }

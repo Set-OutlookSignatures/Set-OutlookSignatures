@@ -85,11 +85,10 @@ function New-MsalClientApplication {
     )
 
     switch -Wildcard ($PSCmdlet.ParameterSetName) {
-        "PublicClient*" {
+        'PublicClient*' {
             if ($PublicClientOptions) {
                 $ClientApplicationBuilder = [Microsoft.Identity.Client.PublicClientApplicationBuilder]::CreateWithApplicationOptions($PublicClientOptions)
-            }
-            else {
+            } else {
                 $ClientApplicationBuilder = [Microsoft.Identity.Client.PublicClientApplicationBuilder]::Create($ClientId)
             }
 
@@ -113,11 +112,10 @@ function New-MsalClientApplication {
 
             $ClientOptions = $PublicClientOptions
         }
-        "ConfidentialClient*" {
+        'ConfidentialClient*' {
             if ($ConfidentialClientOptions) {
                 $ClientApplicationBuilder = [Microsoft.Identity.Client.ConfidentialClientApplicationBuilder]::CreateWithApplicationOptions($ConfidentialClientOptions)
-            }
-            else {
+            } else {
                 $ClientApplicationBuilder = [Microsoft.Identity.Client.ConfidentialClientApplicationBuilder]::Create($ClientId)
             }
 
@@ -130,7 +128,7 @@ function New-MsalClientApplication {
 
             $ClientOptions = $ConfidentialClientOptions
         }
-        "*" {
+        '*' {
             if ($ClientId) { [void] $ClientApplicationBuilder.WithClientId($ClientId) }
             if ($AzureCloudInstance -and $TenantId) { [void] $ClientApplicationBuilder.WithAuthority($AzureCloudInstance, $TenantId) }
             elseif ($TenantId) { [void] $ClientApplicationBuilder.WithTenantId($TenantId) }

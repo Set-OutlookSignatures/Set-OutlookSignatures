@@ -17,10 +17,10 @@ function Import-Config {
     )
 
     ## Initialize
-    if (![IO.Path]::IsPathRooted($Path)) {
-        $AppDataDirectory = Join-Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ApplicationData)) 'MSAL.PS'
-        $Path = Join-Path $AppDataDirectory $Path
-    }
+    #if (![IO.Path]::IsPathRooted($Path)) {
+    #    $AppDataDirectory = Join-Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ApplicationData)) 'MSAL.PS'
+    #    $Path = Join-Path $AppDataDirectory $Path
+    #}
 
     if (Test-Path $Path) {
         ## Load from File

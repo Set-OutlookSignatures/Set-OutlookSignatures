@@ -1,3 +1,16 @@
+<#
+This sample code shows how to automate the creation of the Entra ID/Azure AD app required for Set-OutlookSignatures.
+
+Both types of apps are supported: The one for end users, and the one for SimulateAndDeploy.
+
+You have to adapt it to fit your environment.
+The sample code is written in a generic way, which allows for easy adaption.
+
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+#>
+
+[CmdletBinding()] param ()
+
 # Which type of app should be created?
 #   'Set-OutlookSignatures' for the default Set-OutlookSignatures app being accessed by end users runnding Set-OutlookSignatures
 #     Uses only delegated permissions, as described in '.\config\default graph config.ps1'

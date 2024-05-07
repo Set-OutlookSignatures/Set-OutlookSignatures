@@ -38,7 +38,7 @@ function Get-MsalClientApplication {
     [System.Collections.Generic.List[Microsoft.Identity.Client.IClientApplicationBase]] $listClientApplications = New-Object System.Collections.Generic.List[Microsoft.Identity.Client.IClientApplicationBase]
 
     switch -Wildcard ($PSCmdlet.ParameterSetName) {
-        "PublicClient*" {
+        'PublicClient*' {
             foreach ($PublicClientApplication in $PublicClientApplications) {
                 if ((!$ClientId -or $PublicClientApplication.ClientId -eq $ClientId) -and (!$RedirectUri -or $PublicClientApplication.AppConfig.RedirectUri -eq $RedirectUri) -and (!$TenantId -or $PublicClientApplication.AppConfig.TenantId -eq $TenantId) -and (!$Authority -or $PublicClientApplication.Authority -eq $Authority)) {
                     $listClientApplications.Add($PublicClientApplication)
@@ -47,17 +47,17 @@ function Get-MsalClientApplication {
 
             #$listClientApplications.AddRange(($PublicClientApplications | Where-Object ClientId -eq $ClientId))
         }
-        "*" {
+        '*' {
             foreach ($ConfidentialClientApplication in $ConfidentialClientApplications) {
                 if ((!$ClientId -or $ConfidentialClientApplication.ClientId -eq $ClientId) -and (!$RedirectUri -or $ConfidentialClientApplication.AppConfig.RedirectUri -eq $RedirectUri) -and (!$TenantId -or $ConfidentialClientApplication.AppConfig.TenantId -eq $TenantId) -and (!$Authority -or $ConfidentialClientApplication.Authority -eq $Authority)) {
                     switch ($PSCmdlet.ParameterSetName) {
-                        "ConfidentialClientSecret" {
+                        'ConfidentialClientSecret' {
                             if ($ConfidentialClientApplication.AppConfig.ClientSecret -eq $ClientSecret) {
                                 $listClientApplications.Add($ConfidentialClientApplication)
                             }
                             break
                         }
-                        "ConfidentialClientCertificate" {
+                        'ConfidentialClientCertificate' {
                             if ($ConfidentialClientApplication.AppConfig.ClientCredentialCertificate -eq $ClientCertificate) {
                                 $listClientApplications.Add($ConfidentialClientApplication)
                             }

@@ -33,18 +33,15 @@ function Get-ObjectPropertyValue {
                 if ($InputObject -is [hashtable]) {
                     if ($InputObject.ContainsKey($Property[$iProperty])) {
                         $PropertyValue = $InputObject[$Property[$iProperty]]
-                    }
-                    else { $PropertyValue = $null }
-                }
-                else {
+                    } else { $PropertyValue = $null }
+                } else {
                     $PropertyValue = Select-Object -InputObject $InputObject -ExpandProperty $Property[$iProperty] -ErrorAction Ignore
                 }
                 ## Check for more nested properties
                 if ($iProperty -lt $Property.Count - 1) {
                     $InputObject = $PropertyValue
                     if ($null -eq $InputObject) { break }
-                }
-                else {
+                } else {
                     Write-Output $PropertyValue
                 }
             }

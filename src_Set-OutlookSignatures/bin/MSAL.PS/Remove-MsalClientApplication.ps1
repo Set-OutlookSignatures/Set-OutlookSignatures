@@ -21,12 +21,12 @@ function Remove-MsalClientApplication {
     )
 
     switch ($PSCmdlet.ParameterSetName) {
-        "PublicClient" {
+        'PublicClient' {
             $ClientApplication = $PublicClientApplication
             $Result = $PublicClientApplications.Remove($ClientApplication)
             break
         }
-        "ConfidentialClient" {
+        'ConfidentialClient' {
             $ClientApplication = $ConfidentialClientApplication
             $Result = $ConfidentialClientApplications.Remove($ClientApplication)
             break

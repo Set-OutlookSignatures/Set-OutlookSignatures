@@ -177,17 +177,60 @@ $ReplaceHash['$CurrentMailboxManagerMailnickname$'] = [string]$ADPropsCurrentMai
 $ReplaceHash['$CurrentMailboxManagerDisplayname$'] = [string]$ADPropsCurrentMailboxManager.displayName
 
 
-# $CurrentUserNamewithtitles$, $CurrentUserManagerNamewithtitles$
-# $CurrentMailboxNamewithtitles$, $CurrentMailboxManagerNamewithtitles$
-# Academic titles according to standards in German speaking countries
-# <custom AD attribute 'svsTitelVorne'> <standard AD attribute 'givenname'> <standard AD attribute 'surname'>, <custom AD attribute 'svsTitelHinten'>
-# If one or more attributes are not set, unnecessary whitespaces and commas are avoided by using '-join'
+# Sample code: Full user name including honorific and academic titles
+#   $CurrentUserNameWithHonorifics$, $CurrentUserManagerNameWithHonorifics$, $CurrentMailboxNameWithHonorifics$, $CurrentMailboxManagerNameWithHonorifics$
+# According to standards in German speaking countries:
+#   "<custom AD attribute 'honorificPrefix'> <standard AD attribute 'givenname'> <standard AD attribute 'surname'>, <custom AD attribute 'honorificSuffix'>"
+# If one or more attributes are not set, unnecessary whitespaces and commas are avoided
 # Examples:
 #   Mag. Dr. John Doe, BA MA PhD
 #   Dr. John Doe
 #   John Doe, PhD
 #   John Doe
-$ReplaceHash['$CurrentUserNameWithTitles$'] = (((((([string]$ADPropsCurrentUser.svsTitelVorne, [string]$ADPropsCurrentUser.givenname, [string]$ADPropsCurrentUser.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUser.svsTitelHinten) | Where-Object { $_ -ne '' }) -join ', ')
-$ReplaceHash['$CurrentUserManagerNameWithTitles$'] = (((((([string]$ADPropsCurrentUserManager.svsTitelVorne, [string]$ADPropsCurrentUserManager.givenname, [string]$ADPropsCurrentUserManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUserManager.svsTitelHinten) | Where-Object { $_ -ne '' }) -join ', ')
-$ReplaceHash['$CurrentMailboxNameWithTitles$'] = (((((([string]$ADPropsCurrentMailbox.svsTitelVorne, [string]$ADPropsCurrentMailbox.givenname, [string]$ADPropsCurrentMailbox.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailbox.svsTitelHinten) | Where-Object { $_ -ne '' }) -join ', ')
-$ReplaceHash['$CurrentMailboxManagerNameWithTitles$'] = (((((([string]$ADPropsCurrentMailboxManager.svsTitelVorne, [string]$ADPropsCurrentMailboxManager.givenname, [string]$ADPropsCurrentMailboxManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailboxManager.svsTitelHinten) | Where-Object { $_ -ne '' }) -join ', ')
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+$ReplaceHash['$CurrentUserNameWithHonorifics$'] = (((((([string]$ADPropsCurrentUser.honorificPrefix, [string]$ADPropsCurrentUser.givenname, [string]$ADPropsCurrentUser.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUser.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
+$ReplaceHash['$CurrentUserManagerNameWithHonorifics$'] = (((((([string]$ADPropsCurrentUserManager.honorificPrefix, [string]$ADPropsCurrentUserManager.givenname, [string]$ADPropsCurrentUserManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUserManager.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
+$ReplaceHash['$CurrentMailboxNameWithHonorifics$'] = (((((([string]$ADPropsCurrentMailbox.honorificPrefix, [string]$ADPropsCurrentMailbox.givenname, [string]$ADPropsCurrentMailbox.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailbox.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
+$ReplaceHash['$CurrentMailboxManagerNameWithHonorifics$'] = (((((([string]$ADPropsCurrentMailboxManager.honorificPrefix, [string]$ADPropsCurrentMailboxManager.givenname, [string]$ADPropsCurrentMailboxManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailboxManager.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
+
+
+# Sample code: Create MeCard (vCard alternative) QR codes and save the images in the following replacement variables:
+#   $CurrentUserCustomImage1$, $CurrentUserManagerCustomImage1$, $CurrentMailboxCustomImage1$, $CurrentMailboxManagerCustomImage1$
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+@('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager') | ForEach-Object {
+    $QRCodeContent = @(
+        @(
+            @(
+                'MECARD:'
+                "N:$($ReplaceHash['$' + $_ + 'Surname$']),$($ReplaceHash['$' + $_ + 'Givenname$']);"
+                "NOTE:$($ReplaceHash['$' + $_ + 'Company$'])"
+                "$($ReplaceHash['$' + $_ + 'Title$']);"
+                "EMAIL:$($ReplaceHash['$' + $_ + 'Mail$']);"
+                "TEL:$($ReplaceHash['$' + $_ + 'Mobile$']);"
+                "ADR:$($ReplaceHash['$' + $_ + 'Streetaddress$'])"
+                "$("$($ReplaceHash['$' + $_ + 'Postalcode$']) $($ReplaceHash['$' + $_ + 'Location$'])")"
+                "$($ReplaceHash['$' + $_ + 'State$'])"
+                "$($ReplaceHash['$' + $_ + 'Country$']);"
+                'URL:explicitconsulting.at;'
+                ';'
+            ) | ForEach-Object { $_.trim() }
+        ) | Where-Object { $_ -and (-not $_.EndsWith(':;')) -and (-not $_.EndsWith(':,;')) }
+    ) -join ("`r`n") -replace ':\r\n;', ':;' -replace '\r\n(.*):;', ''
+
+    if ($QRCodeContent -notmatch '\r\nN:.*;\r\n') { $QRCodeContent = 'https://explicitconsulting.at' }
+
+    $ReplaceHash['$' + $_ + 'CustomImage1$'] = ((New-Object -TypeName QRCoder.PngByteQRCode -ArgumentList ((New-Object -TypeName QRCoder.QRCodeGenerator).CreateQrCode($QRCodeContent, 'L', $true))).GetGraphic(20, [byte[]]@(0, 0, 0), [byte[]]@(255, 255, 255), $false))
+}
+
+
+# Sample code: Create gender pronouns string from Extension Attribute 3
+#   $CurrentUserGenderPronouns$, $CurrentUserManagerGenderPronouns$, # $CurrentMailboxGenderPronouns$, $CurrentMailboxManagerGenderPronouns$
+# Format
+#   ExtensionAttribute3 contains at least three characters, and a forward slash somewhere between the first and last character: " (<ExtensionAttribute3>)"
+#     Examples: " (she/her)", " (he/him)"
+#   Else: '' (emtpy string)
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+$ReplaceHash['$CurrentUserGenderPronouns$'] = $(if (([string]$ADPropsCurrentUser.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentUser.ExtensionAttribute3)))" } else { '' })
+$ReplaceHash['$CurrentUserManagerGenderPronouns$'] = $(if (([string]$ADPropsCurrentUserManager.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentUserManager.ExtensionAttribute3)))" } else { '' })
+$ReplaceHash['$CurrentMailboxGenderPronouns$'] = $(if (([string]$ADPropsCurrentMailbox.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentMailbox.ExtensionAttribute3)))" } else { '' })
+$ReplaceHash['$CurrentMailboxManagerGenderPronouns$'] = $(if (([string]$ADPropsCurrentMailboxManager.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentMailboxManager.ExtensionAttribute3)))" } else { '' })

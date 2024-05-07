@@ -1,6 +1,20 @@
-# This script assumes that the trust to check is either a cross-forest trust,
-# or that the trusted domain is the only domain in it's forest
+<#
+This sample code is used to check AD trusts and AD connectivity from a client computer.
 
+Connection ist tested for every combination of
+- DNS name of domain and domain controllers
+- IP address of domain and domain controllers
+- Protocols LDAP and GC, with and without encryption
+
+This script assumes that the trust to check is either a cross-forest trust, or that the trusted domain is the only domain in it's forest
+
+You have to adapt it to fit your environment.
+The sample code is written in a generic way, which allows for easy adaption.
+
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+#>
+
+[CmdletBinding()]
 
 param (
     [string[]]$CrossForestTrustRootDomains = @('example.com'),
@@ -34,7 +48,7 @@ try {
     $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
     Set-Location $PSScriptRoot
-    
+
     Write-Host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.Platform), $($PSVersionTable.OS)) | Where-Object {$_}) -join "', '")'"
 
     Write-Host "  PowerShell bitness: $(if ([Environment]::Is64BitProcess -eq $false) {'Non-'})64-bit process on a $(if ([Environment]::Is64OperatingSystem -eq $false) {'Non-'})64-bit operating system"
@@ -52,15 +66,10 @@ try {
 
     Write-Host "  Script path: '$PSCommandPath'"
 
-    if ((Test-Path 'variable:IsWindows')) {
-        # Automatic variable $IsWindows is available, must be cross-platform PowerShell version v6+
-        if ($IsWindows -eq $false) {
-            Write-Host "  Your OS: $($PSVersionTable.Platform), $($PSVersionTable.OS), $(Invoke-Expression '(lsb_release -ds || cat /etc/*release || uname -om) 2>/dev/null | head -n1')" -ForegroundColor Red
-            Write-Host '  This script is supported on Windows only. Exit.' -ForegroundColor Red
-            exit 1
-        }
+    if ($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) {
     } else {
-        # Automatic variable $IsWindows is not available, must be PowerShell <v6 running on Windows
+        Write-Host "  Your OS: $($PSVersionTable.OS)" -ForegroundColor Red
+        Write-Host '  This script is supported on Windows only. Exit.' -ForegroundColor Red
     }
 
     if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {

@@ -14,12 +14,13 @@ function Get-DeviceRegistrationStatus {
 
     ## Get Device Registration Status
     [hashtable] $Dsreg = @{}
-    #if ([System.Environment]::OSVersion.Platform -eq 'Win32NT' -and [System.Environment]::OSVersion.Version -ge '10.0') {
-    try {
-        Dsregcmd /status | foreach { if ($_ -match '\s*(.+) : (.+)') { $Dsreg.Add($Matches[1], $Matches[2]) } }
+
+    if (([System.Environment]::OSVersion.Platform -eq 'Win32NT') -and ([System.Environment]::OSVersion.Version -ge '10.0') -and ([System.Environment]::OSVersion.Version.Build -ge 17134)) {
+        try {
+            dsregcmd /status | ForEach-Object { if ($_ -match '\s*(.+) : (.+)') { $Dsreg.Add($Matches[1], $Matches[2]) } }
+        } catch {
+        }
     }
-    catch {}
-    #}
 
     return $Dsreg
 }

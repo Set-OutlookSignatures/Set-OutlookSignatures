@@ -1,9 +1,7 @@
-<html>
-
-<head>
-<meta http-equiv=Content-Type content="text/html; charset=utf-8">
-<meta name=Generator content="Microsoft Word 15 (filtered)">
-<style>
+<HTML><HEAD>
+<META content="text/html; charset=utf-8" http-equiv=Content-Type>
+<META name=Generator content="Microsoft Word 15 (filtered)">
+<STYLE>
 <!--
  /* Font Definitions */
  @font-face
@@ -129,6 +127,8 @@ span.QuoteChar
 	mso-style-link:Quote;
 	color:#404040;
 	font-style:italic;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
 .MsoPapDefault
 	{margin-bottom:8.0pt;
 	line-height:107%;}
@@ -144,791 +144,612 @@ div.WordSection1
 ul
 	{margin-bottom:0cm;}
 -->
-</style>
-
-</head>
-
-<body lang=en-AT link="#0563C1" vlink="#954F72" style='word-wrap:break-word'>
-
-<div class=WordSection1>
-
-<p class=MsoTitle><span lang=EN-US>Sample signature template file</span></p>
-
-<h1><span lang=EN-US>Remarks</span></h1>
-
-<p class=MsoNormal><span lang=EN-US>This sample signature template file
-contains all default replacement variables defined in '.\config\default
-replacement variables.ps1'.<br>
-As this signature template file is not generated automatically, it may not be
-up to date. Should you find an error, please create a new issue at </span><span
-lang=DE-AT><a
-href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues"><span
-lang=EN-US>https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues</span></a></span><span
-lang=EN-US>.<br>
-If you have created custom replacement variables, these variables are not
-automatically included here.</span></p>
-
-<p class=MsoNormal><span lang=EN-US>This file also contains examples for more
-advanced features of Set-OutlookSignatures:</span></p>
-
-<p class=MsoListParagraphCxSpFirst style='text-indent:-18.0pt;line-height:105%'><span
-lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>User photos stored in your on-prem or Azure
-Active Directory</span></p>
-
-<p class=MsoListParagraphCxSpMiddle style='text-indent:-18.0pt;line-height:
-105%'><span lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Images formatted as shapes and inline shapes</span></p>
-
-<p class=MsoListParagraphCxSpMiddle style='text-indent:-18.0pt;line-height:
-105%'><span lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Conditional deletion of images and user photos
-based on replacement variables with the 'DeleteEmpty' option</span></p>
-
-<p class=MsoListParagraphCxSpLast style='text-indent:-18.0pt;line-height:105%'><span
-lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Avoid empty lines in signatures</span></p>
-
-<p class=MsoNormal><span lang=EN-US>Alle these topics are described in the
-'.\docs\README' file. Please read this file carefully before opening a new
-issue at GitHub.</span></p>
-
-<h1><span lang=EN-US>Currently logged-on user ($CurrentUser[…]$)</span></h1>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserGivenName: $CurrentUserGivenName$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserSurname: $CurrentUserSurname$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserNameWithTitles: $CurrentUserNameWithTitles$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserCompany: $CurrentUserCompany$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserDepartment:
-$CurrentUserDepartment$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserTitle: $CurrentUserTitle$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserOffice: $CurrentUserOffice$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserStreetAddress: $CurrentUserStreetAddress$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserPostalcode:
-$CurrentUserPostalcode$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserLocation:
-$CurrentUserLocation$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserState: $CurrentUserState$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserCountry: $CurrentUserCountry$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserTelephone: <a
-name="_Hlk140918950">$CurrentUserTelephone$</a> (as hyperlink: </span><span
-lang=DE-AT><a href="tel:$CurrentUserTelephone$" title="$CurrentUserTelephone$"><span
-lang=EN-US>$CurrentUserTelephone$</span></a></span><span lang=EN-US>)</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserFax: $CurrentUserFax$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserMobile: $CurrentUserMobile$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserMail: $CurrentUserMail$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserMailNickname: $CurrentUserMailNickname$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserDisplayName: $CurrentUserDisplayName$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr1: $CurrentUserExtAttr1$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr2: $CurrentUserExtAttr2$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr3: $CurrentUserExtAttr3$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr4: $CurrentUserExtAttr4$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr5: $CurrentUserExtAttr5$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr6: $CurrentUserExtAttr6$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr7: $CurrentUserExtAttr7$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr8: $CurrentUserExtAttr8$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr9: $CurrentUserExtAttr9$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr10: $CurrentUserExtAttr10$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr11: $CurrentUserExtAttr11$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr12: $CurrentUserExtAttr12$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr13: $CurrentUserExtAttr13$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr14: $CurrentUserExtAttr14$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserExtAttr15: $CurrentUserExtAttr15$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserPhoto, CurrentUserPhotoDeleteEmpty:
-See section ‘User photos ($Current[…]Photo[…]$)’ below</span></p>
-
-<h1><span lang=EN-US>Manager of currently logged-on user
-($CurrentUserManager[…]$)</span></h1>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerGivenName:
-$CurrentUserManagerGivenName$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerSurname:
-$CurrentUserManagerSurname$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerNameWithTitles:
-$CurrentUserManagerNameWithTitles$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerCompany:
-$CurrentUserManagerCompany$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerDepartment:
-$CurrentUserManagerDepartment$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerTitle:
-$CurrentUserManagerTitle$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerOffice:
-$CurrentUserManagerOffice$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerStreetAddress:
-$CurrentUserManagerStreetAddress$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerPostalcode:
-$CurrentUserManagerPostalcode$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerLocation:
-$CurrentUserManagerLocation$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerState:
-$CurrentUserManagerState$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerCountry:
-$CurrentUserManagerCountry$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerTelephone:
-$CurrentUserManagerTelephone$ (as hyperlink: </span><span lang=DE-AT><a
-href="tel:$CurrentUserManagerTelephone$" title="$CurrentUserManagerTelephone$"><span
-lang=EN-US>$CurrentUserManagerTelephone$</span></a></span><span lang=EN-US>)</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerFax:
-$CurrentUserManagerFax$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerMobile:
-$CurrentUserManagerMobile$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerMail:
-$CurrentUserManagerMail$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerMailNickname:
-$CurrentUserManagerMailNickname$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerDisplayName:
-$CurrentUserManagerDisplayName$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr1:
-$CurrentUserManagerExtAttr1$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr2:
-$CurrentUserManagerExtAttr2$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr3: $CurrentUserManagerExtAttr3$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr4:
-$CurrentUserManagerExtAttr4$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr5:
-$CurrentUserManagerExtAttr5$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr6:
-$CurrentUserManagerExtAttr6$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr7:
-$CurrentUserManagerExtAttr7$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr8:
-$CurrentUserManagerExtAttr8$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr9:
-$CurrentUserManagerExtAttr9$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr10:
-$CurrentUserManagerExtAttr10$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr11:
-$CurrentUserManagerExtAttr11$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr12:
-$CurrentUserManagerExtAttr12$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr13:
-$CurrentUserManagerExtAttr13$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr14:
-$CurrentUserManagerExtAttr14$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerExtAttr15:
-$CurrentUserManagerExtAttr15$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentUserManagerPhoto,
-CurrentUserManagerPhotoDeleteEmpty: See section ‘User photos
-($Current[…]Photo[…]$)’ below</span></p>
-
-<h1><span lang=EN-US>Current mailbox ($CurrentMailbox[…]$)</span></h1>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxGivenName: $CurrentMailboxGivenName$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxSurname:
-$CurrentMailboxSurname$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxNameWithTitles:
-$CurrentMailboxNameWithTitles$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxCompany:
-$CurrentMailboxCompany$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxDepartment:
-$CurrentMailboxDepartment$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxTitle:
-$CurrentMailboxTitle$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxStreetAddress:
-$CurrentMailboxStreetAddress$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxOffice:
-$CurrentMailboxOffice$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxPostalcode:
-$CurrentMailboxPostalcode$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxLocation:
-$CurrentMailboxLocation$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxState:
-$CurrentMailboxState$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxCountry:
-$CurrentMailboxCountry$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxTelephone:
-$CurrentMailboxTelephone$ (as hyperlink: </span><span lang=DE-AT><a
-href="tel:$CurrentMailboxTelephone$" title="$CurrentMailboxTelephone$"><span
-lang=EN-US>$CurrentMailboxTelephone$</span></a></span><span lang=EN-US>)</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxFax: $CurrentMailboxFax$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxMobile:
-$CurrentMailboxMobile$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxMail: $CurrentMailboxMail$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxMailNickname:
-$CurrentMailboxMailNickname$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxDisplayName:
-$CurrentMailboxDisplayName$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr1: $CurrentMailboxExtAttr1$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr2: $CurrentMailboxExtAttr2$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr3: $CurrentMailboxExtAttr3$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr4: $CurrentMailboxExtAttr4$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr5: $CurrentMailboxExtAttr5$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr6: $CurrentMailboxExtAttr6$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr7: $CurrentMailboxExtAttr7$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr8: $CurrentMailboxExtAttr8$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr9: $CurrentMailboxExtAttr9$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr10: $CurrentMailboxExtAttr10$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr11: $CurrentMailboxExtAttr11$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr12: $CurrentMailboxExtAttr12$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr13: $CurrentMailboxExtAttr13$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr14: $CurrentMailboxExtAttr14$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxExtAttr15: $CurrentMailboxExtAttr15$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxPhoto, CurrentMailboxPhotoDeleteEmpty:
-See section ‘User photos ($Current[…]Photo[…]$)’ below</span></p>
-
-<h1><span lang=EN-US>Manager of current mailbox ($CurrentMailboxManager[…]$)</span></h1>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerGivenName:
-$CurrentMailboxManagerGivenName$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerSurname:
-$CurrentMailboxManagerSurname$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerNameWithTitles: $CurrentMailboxManagerNameWithTitles$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerCompany:
-$CurrentMailboxManagerCompany$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerDepartment:
-$CurrentMailboxManagerDepartment$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerTitle:
-$CurrentMailboxManagerTitle$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerOffice:
-$CurrentMailboxManagerOffice$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerStreetAddress:
-$CurrentMailboxManagerStreetAddress$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerPostalcode:
-$CurrentMailboxManagerPostalcode$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerLocation:
-$CurrentMailboxManagerLocation$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerState:
-$CurrentMailboxManagerState$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerCountry:
-$CurrentMailboxManagerCountry$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerTelephone:
-$CurrentMailboxManagerTelephone$ (as hyperlink: </span><span lang=DE-AT><a
-href="tel:$CurrentMailboxManagerTelephone$"
-title="$CurrentMailboxManagerTelephone$"><span lang=EN-US>$CurrentMailboxManagerTelephone$</span></a></span><span
-lang=EN-US>)</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerFax:
-$CurrentMailboxManagerFax$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerMobile:
-$CurrentMailboxManagerMobile$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-GB>CurrentMailboxManagerMail:
-$CurrentMailboxManagerMail$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerMailNickname:
-$CurrentMailboxManagerMailNickname$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerDisplayName:
-$CurrentMailboxManagerDisplayName$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr1:
-$CurrentMailboxManagerExtAttr1$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr2:
-$CurrentMailboxManagerExtAttr2$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr3:
-$CurrentMailboxManagerExtAttr3$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr4:
-$CurrentMailboxManagerExtAttr4$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr5:
-$CurrentMailboxManagerExtAttr5$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr6:
-$CurrentMailboxManagerExtAttr6$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr7:
-$CurrentMailboxManagerExtAttr7$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr8:
-$CurrentMailboxManagerExtAttr8$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr9: $CurrentMailboxManagerExtAttr9$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr10:
-$CurrentMailboxManagerExtAttr10$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr11:
-$CurrentMailboxManagerExtAttr11$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr12:
-$CurrentMailboxManagerExtAttr12$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr13:
-$CurrentMailboxManagerExtAttr13$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr14:
-$CurrentMailboxManagerExtAttr14$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerExtAttr15:
-$CurrentMailboxManagerExtAttr15$</span></p>
-
-<p class=MsoNoSpacing><span lang=EN-US>CurrentMailboxManagerPhoto,
-CurrentMailboxManagerPhotoDeleteEmpty: See section ‘User photos
-($Current[…]Photo[…]$)’ below</span></p>
-
-<h1><a name="_Hlk125034287"><span lang=EN-GB>User photos ($Current[…]Photo</span></a><span
-lang=EN-US>[…]</span><span lang=EN-GB>$)</span></h1>
-
-<table class=MsoTable15Grid4Accent6 border=1 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;border:none'>
- <tr>
-  <td width=189 valign=top style='width:5.0cm;border:solid #70AD47 1.0pt;
-  border-right:none;background:#70AD47;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB style='color:white'>Scope</span></b></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:solid #70AD47 1.0pt;
-  border-left:none;border-bottom:solid #70AD47 1.0pt;border-right:none;
-  background:#70AD47;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB style='color:white'>$Current[…]Photo$</span></b></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB style='color:white'>&nbsp;</span></b></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:solid #70AD47 1.0pt;
-  border-left:none;border-bottom:solid #70AD47 1.0pt;border-right:none;
-  background:#70AD47;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB style='color:white'>$Current[…]PhotoDeleteEmpty$</span></b></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border:solid #70AD47 1.0pt;
-  border-left:none;background:#70AD47;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB style='color:white'>$Current[…]Photo$ with some fancy formatting</span></b></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB style='color:white'>&nbsp;</span></b></p>
-  </td>
- </tr>
- <tr>
-  <td width=189 valign=top style='width:5.0cm;border:solid #A8D08D 1.0pt;
-  border-top:none;background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB>&nbsp;</span></b></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>The pictures in this column are inserted with
-  embedding and linking, the alternate text is set to '$Current[…]Photo$'.</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB>&nbsp;</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>If the attribute thumbailPhoto of the Active
-  Directory object in scope has data, the sample picture is replaced.</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>If thumbnailPhoto does not have data, the
-  sample picture is shown.</span></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>The pictures in this column are inserted with
-  embedding and linking, the alternate text is set to '$Current[…]PhotoDeleteEmpty$'.</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB>&nbsp;</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>If the attribute thumbailPhoto of the Active
-  Directory object in scope has data, the sample picture is replaced.</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>If thumbnailPhoto does not have data, the
-  sample picture is deleted.</span></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>This column is only relevant when using DOCX
-  templates, as HTM templates do not support Word image effects.</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB>&nbsp;</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>The pictures in this column are inserted with
-  embedding and linking, the alternate text is set to '$Current[…]Photo$'. Additionally,
-  some Word image effects are applied.</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB>&nbsp;</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>If the attribute thumbailPhoto of the Active
-  Directory object in scope has data, the sample picture is replaced.</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>If thumbnailPhoto does not have data, the
-  sample picture is shown.</span></p>
-  </td>
- </tr>
- <tr>
-  <td width=189 valign=top style='width:5.0cm;border:solid #A8D08D 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB>Currently logged-on user</span></b></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB>$CurrentUserPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT><img border=0 width=160 height=160
-  src="Test%20all%20default%20replacement%20variables_files/image001.png"
-  alt="$CurrentUserPhoto$"></span></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB>$CurrentUserPhotoDeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT><img border=0 width=160 height=160
-  src="Test%20all%20default%20replacement%20variables_files/image002.png"
-  alt="$CurrentUserPhotoDeleteEmpty$"></span></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB>$CurrentUserPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT><img border=0 width=176 height=257 id="Picture 14"
-  src="Test%20all%20default%20replacement%20variables_files/image003.png"
-  alt="$CurrentUserPhoto$"></span></p>
-  </td>
- </tr>
- <tr>
-  <td width=189 valign=top style='width:5.0cm;border:solid #A8D08D 1.0pt;
-  border-top:none;background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB style='color:black'>Manager of currently logged-on user</span></b></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>$CurrentUserManagerPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT style='color:black'><img border=0 width=160 height=160
-  src="Test%20all%20default%20replacement%20variables_files/image004.png"
-  alt="$CurrentUserManagerPhoto$"></span></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>$CurrentUserManagerPhotoDeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT style='color:black'><img border=0 width=160 height=160
-  src="Test%20all%20default%20replacement%20variables_files/image005.png"
-  alt="$CurrentUserManagerPhotoDeleteEmpty$"></span></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>$CurrentUserManagerPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT style='color:black'><img border=0 width=160 height=218
-  id="Picture 11"
-  src="Test%20all%20default%20replacement%20variables_files/image006.png"
-  alt="$CurrentUserManagerPhoto$"></span></p>
-  </td>
- </tr>
- <tr>
-  <td width=189 valign=top style='width:5.0cm;border:solid #A8D08D 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB>Current mailbox</span></b></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB>$CurrentMailboxPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT><img border=0 width=160 height=160
-  src="Test%20all%20default%20replacement%20variables_files/image007.png"
-  alt="$CurrentMailboxPhoto$"></span></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB>$CurrentMailboxPhotoDeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT><img border=0 width=160 height=160
-  src="Test%20all%20default%20replacement%20variables_files/image008.png"
-  alt="$CurrentMailboxPhotoDeleteEmpty$"></span></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB>$CurrentMailboxPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT><img border=0 width=223 height=206 id="Picture 8"
-  src="Test%20all%20default%20replacement%20variables_files/image009.png"
-  alt="$CurrentMailboxPhoto$"></span></p>
-  </td>
- </tr>
- <tr>
-  <td width=189 valign=top style='width:5.0cm;border:solid #A8D08D 1.0pt;
-  border-top:none;background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
-  lang=EN-GB style='color:black'>Manager of current mailbox</span></b></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>$CurrentMailboxManagerPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT style='color:black'><img border=0 width=160 height=160
-  src="Test%20all%20default%20replacement%20variables_files/image010.png"
-  alt="$CurrentMailboxManagerPhoto$"></span></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>$CurrentMailboxManagerPhotoDeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT style='color:black'><img border=0 width=160 height=160
-  src="Test%20all%20default%20replacement%20variables_files/image011.png"
-  alt="$CurrentMailboxManagerPhotoDeleteEmpty$"></span></p>
-  </td>
-  <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
-  none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
-  background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=EN-GB style='color:black'>$CurrentMailboxManagerPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span
-  lang=DE-AT style='color:black'><img border=0 width=160 height=160
-  id="Picture 5"
-  src="Test%20all%20default%20replacement%20variables_files/image012.png"
-  alt="$CurrentMailboxManagerPhoto$"></span></p>
-  </td>
- </tr>
-</table>
-
-<h1><span lang=EN-GB>Shapes and inline shapes</span></h1>
-
-<p class=MsoNormal><span lang=EN-US>The following sample text contains two
-images which are shapes and not inline shapes: A person placeholder image behind
-the sample text, and a person placeholder image in front of the sample text.</span></p>
-
-<p class=MsoNormal><span lang=EN-US>The layout of the final signature file may
-be unexpected as only inline shapes are handled as if they are part of the
-text. In the concrete example, most browsers will correctly render the
-resulting HTM signature file, displaying the person placeholder images behind
-and in front of the text, but Outlook may: Display both person placeholder
-images at the beginning of the paragraph and treat them as inline shapes, or
-not display them at all, or show an error.</span></p>
-
-<p class=MsoNormal><span style='position:absolute;z-index:251657216;margin-left:
-276px;margin-top:30px;width:76px;height:76px'><img width=76 height=76
-src="Test%20all%20default%20replacement%20variables_files/image013.png"></span><span
-style='position:absolute;z-index:-1895825408;margin-left:103px;margin-top:30px;
-width:76px;height:76px'><img width=76 height=76
-src="Test%20all%20default%20replacement%20variables_files/image013.png"></span><span
-lang=EN-US>Set-OutlookSignatures shows a warning when non-inline shapes are
-found in a template.</span></p>
-
-<p class=MsoQuote><span lang=EN-US>Lorem ipsum dolor sit amet, consectetur
-adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua.
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate
-velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat
-cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est
-laborum.</span></p>
-
-<p class=MsoQuote><span lang=EN-US>Duis autem vel eum iriure dolor in hendrerit
-in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla
-facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent
-luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum
-dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod
-tincidunt ut laoreet dolore magna aliquam erat volutpat.</span></p>
-
-<p class=MsoQuote><span lang=EN-US>Ut wisi enim ad minim veniam, quis nostrud
-exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo
-consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
-molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et
-accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit
-augue duis dolore te feugait nulla facilisi.</span></p>
-
-<h1><span lang=EN-US>Conditional deletion of images</span></h1>
-
-<p class=MsoNormal><span lang=EN-US>Below this line, the template file contains
-four rectangles, each with a different color: Blue, red, yellow, and green.</span></p>
-
-<p class=MsoNormal><span lang=EN-US><img border=0 width=42 height=42
-id="Picture 4"
-src="Test%20all%20default%20replacement%20variables_files/image014.png"><img
-border=0 width=42 height=42 id="Picture 3"
-src="Test%20all%20default%20replacement%20variables_files/image015.png"
-alt="$CurrentUserTelephoneDeleteempty$"><img border=0 width=42 height=42
-id="Picture 2"
-src="Test%20all%20default%20replacement%20variables_files/image016.png"
-alt="$CurrentMailboxExtattr10Deleteempty$"><img border=0 width=42 height=42
-id="Picture 1"
-src="Test%20all%20default%20replacement%20variables_files/image017.png"
-alt="$CurrentMailboxManagerMailDeleteEmpty$"></span></p>
-
-<p class=MsoNormal><span lang=EN-US>In the resulting signature file, not all
-these rectangles may appear:</span></p>
-
-<p class=MsoListParagraphCxSpFirst style='text-indent:-18.0pt;line-height:105%'><span
-lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>The blue rectangle is always shown</span></p>
-
-<p class=MsoListParagraphCxSpMiddle style='text-indent:-18.0pt;line-height:
-105%'><span lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>The red rectangle is only shown when </span><span
-lang=EN-US>the CurrentUserTelephone replacement variable is not empty</span></p>
-
-<p class=MsoListParagraphCxSpMiddle style='text-indent:-18.0pt;line-height:
-105%'><span lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>The yellow rectangle is only shown when the
-CurrentMailboxExtAttr10 replacement variable is not empty</span></p>
-
-<p class=MsoListParagraphCxSpLast style='text-indent:-18.0pt;line-height:105%'><span
-lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>The green rectangle is only shown when the
-CurrentMailboxManagerMail replacement variable is not empty</span></p>
-
-<p class=MsoNormal><span lang=EN-US>You can use this, for example, to</span></p>
-
-<p class=MsoListParagraphCxSpFirst style='text-indent:-18.0pt;line-height:105%'><span
-lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>only show images with links to social networks
-when the corresponding link is available in an Active Directory/Entra ID/Azure
-AD/Graph attribute</span></p>
-
-<p class=MsoListParagraphCxSpLast style='text-indent:-18.0pt;line-height:105%'><span
-lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>show or hide pictures based on the group
-membership of the current mailbox (only use one template file instead of many
-only differing by the images used – see 'Delete images when attribute is empty,
-variable content based on group membership' in </span><span lang=EN-US>'.\docs\README'
-</span><span lang=EN-US>for details)</span></p>
-
-<p class=MsoNormal><span lang=EN-US>Search for </span><span lang=EN-US>'Delete
-images when attribute is empty, variable content based on group membership' in
-'.\docs\README' for configuration details.</span></p>
-
-<h1><span lang=EN-US>Avoid empty lines in signatures</span></h1>
-
-<p class=MsoNormal><span lang=EN-US>Search for </span><span lang=EN-US>'</span><span
-lang=EN-US>How to avoid blank lines when replacement variables return an empty
-string?</span><span lang=EN-US>' in '.\docs\README' for configuration details.</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-</div>
-
-</body>
-
-</html>
+</STYLE>
+</HEAD>
+<BODY style="WORD-WRAP: break-word" vLink=#954f72 link=#0563c1>
+<DIV class=WordSection1>
+<P class=MsoTitle><SPAN lang=EN-US>Sample signature template file</SPAN></P>
+<H1><SPAN lang=EN-US>Remarks</SPAN></H1>
+<P class=MsoNormal><SPAN lang=EN-US>This sample signature template file contains all default replacement variables defined in '.\config\default replacement variables.ps1'.<BR>As this signature template file is not generated automatically, it may not be up to date. Should you find an error, please create a new issue at </SPAN><SPAN lang=DE-AT><A title="Link to the issues page of Set-OutlookSignatures on GitHub" href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues"><SPAN lang=EN-US>https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues</SPAN></A></SPAN><SPAN lang=EN-US>.<BR>If you have created custom replacement variables, these variables are not automatically included here.</SPAN></P>
+<P class=MsoNoSpacing><SPAN lang=EN-US>This file also contains examples for more advanced features of Set-OutlookSignatures:</SPAN></P>
+<P class=MsoListParagraphCxSpFirst style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>User photos stored in your on-prem or Azure Active Directory</SPAN></P>
+<P class=MsoListParagraphCxSpMiddle style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>Custom images</SPAN></P>
+<P class=MsoListParagraphCxSpMiddle style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>Images formatted as shapes and inline shapes</SPAN></P>
+<P class=MsoListParagraphCxSpMiddle style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>Conditional deletion of images</SPAN></P>
+<P class=MsoListParagraphCxSpLast style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>Avoid empty lines in signatures</SPAN></P>
+<P class=MsoNormal style="LINE-HEIGHT: 105%"><SPAN lang=EN-US>You may also notice that all hyperlinks and images have additional description for maximum barrier-free accessibility with screen readers and comparable tools. To create these descriptions, use Word ScreenTips or the HTML title attribute for hyperlinks, and alt text for images. Replacement variables are supported. All links and images in sample templates in the sample templates are accessible barrier-free.</SPAN></P>
+<P class=MsoNormal><SPAN lang=EN-US>Alle these topics are described in the '.\docs\README' file. Please read this file carefully before opening a new issue at GitHub.</SPAN></P>
+<H1><SPAN lang=EN-US>Default replacement variables</SPAN></H1>
+<P class=MsoNormal><SPAN lang=EN-US>Default replacement variables are available for the current user, the current mailbox, and their managers.</SPAN></P>
+<TABLE class=MsoTable15Grid5DarkAccent6 style="BORDER-TOP: medium none; BORDER-RIGHT: medium none; BORDER-COLLAPSE: collapse; BORDER-BOTTOM: medium none; BORDER-LEFT: medium none" cellSpacing=0 cellPadding=0 border=1>
+<TBODY>
+<TR>
+<TD style="BORDER-TOP: white 1pt solid; BORDER-RIGHT: medium none; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">&nbsp;</SPAN></B></P></TD>
+<TD style="BORDER-TOP: white 1pt solid; BORDER-RIGHT: medium none; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><B><SPAN lang=EN-US style="COLOR: white">Currently logged-on user<BR>$CurrentUser…</SPAN></B></P></TD>
+<TD style="BORDER-TOP: white 1pt solid; BORDER-RIGHT: medium none; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><B><SPAN lang=EN-US style="COLOR: white">Manager of currently logged-on user<BR>$CurrentUserManager…</SPAN></B></P></TD>
+<TD style="BORDER-TOP: white 1pt solid; BORDER-RIGHT: medium none; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><B><SPAN lang=EN-US style="COLOR: white">Current mailbox<BR>$CurrentMailbox…</SPAN></B></P></TD>
+<TD style="BORDER-TOP: white 1pt solid; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><B><SPAN lang=EN-US style="COLOR: white">Manager of current mailbox<BR>$CurrentMailboxManager…</SPAN></B></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...GivenName$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserGivenName$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerGivenName$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxGivenName$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerGivenName$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Surname$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserSurname$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerSurname$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxSurname$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerSurname$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...NameWithHonorifics$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserNameWithHonorifics$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerNameWithHonorifics$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxNameWithHonorifics$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerNameWithHonorifics$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Company$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserCompany$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerCompany$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxCompany$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerCompany$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Department$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserDepartment$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerDepartment$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxDepartment$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerDepartment$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Title$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserTitle$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerTitle$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxTitle$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerTitle$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Office$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserOffice$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerOffice$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxOffice$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerOffice$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...StreetAddress$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserStreetAddress$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerStreetAddress$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxStreetAddress$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerStreetAddress$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Postalcode$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserPostalcode$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerPostalcode$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxPostalcode$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerPostalcode$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Location$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserLocation$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerLocation$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxLocation$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerLocation$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...State$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserState$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerState$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxState$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerState$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Country$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserCountry$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerCountry$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxCountry$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerCountry$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><A name=RANGE!A13><B><SPAN lang=EN-US style="COLOR: white">...Telephone</SPAN></B></A><B><SPAN lang=EN-US style="COLOR: white">$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserTelephone$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Call land line phone of current user: $CurrentUserTelephone$" href="tel:$CurrentUserTelephone$"><SPAN lang=EN-US>$CurrentUserTelephone$</SPAN></A></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerTelephone$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Call land line phone of current user manager: $CurrentUserManagerTelephone$" href="tel:$CurrentUserManagerTelephone$"><SPAN lang=EN-US>$CurrentUserManagerTelephone$</SPAN></A></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxTelephone$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Call land line phone of current mailbox: $CurrentMailboxTelephone$" href="tel:$CurrentMailboxTelephone$"><SPAN lang=EN-US>$CurrentMailboxTelephone$</SPAN></A></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerTelephone$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Call land line phone of current mailbox manager: $CurrentMailboxManagerTelephone$" href="tel:$CurrentMailboxManagerTelephone$"><SPAN lang=EN-US>$CurrentMailboxManagerTelephone$</SPAN></A></SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Fax$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserFax$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerFax$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxFax$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerFax$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Mobile$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserMobile$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Call mobile phone of current user: $CurrentUserMobile$" href="tel:$CurrentUserMobile$"><SPAN lang=EN-US>$CurrentUserMobile$</SPAN></A></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerMobile$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Call mobile phone of current user manager: $CurrentUserManagerMobile$" href="tel:$CurrentUserManagerMobile$"><SPAN lang=EN-US>$CurrentUserManagerMobile$</SPAN></A></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxMobile$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Call mobile phone of current mailbox: $CurrentMailboxMobile$" href="tel:$CurrentMailboxMobile$"><SPAN lang=EN-US>$CurrentMailboxMobile$</SPAN></A></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerMobile$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Call mobile phone of current mailbox manager: $CurrentMailboxManagerMobile$" href="tel:$CurrentMailboxManagerMobile$"><SPAN lang=EN-US>$CurrentMailboxManagerMobile$</SPAN></A></SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Mail$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserMail$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Send email to current user: $CurrentUserMail$" href="mailto:$CurrentUserMail$"><SPAN lang=EN-US>$CurrentUserMail$</SPAN></A></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerMail$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Send email to current user manager: $CurrentUserMail$" href="mailto:$CurrentUserManagerMail$"><SPAN lang=EN-US>$CurrentUserManagerMail$</SPAN></A></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxMail$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Send email to current mailbox: $CurrentUserManagerMail$" href="mailto:$CurrentMailboxMail$"><SPAN lang=EN-US>$CurrentMailboxMail$</SPAN></A></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-GB style="COLOR: black">$CurrentMailboxManagerMail$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=DE-AT style="COLOR: black"><A title="Send email to current mailbox manager: $CurrentMailboxManagerMail$" href="mailto:$CurrentMailboxManagerMail$"><SPAN lang=EN-US>$CurrentMailboxManagerMail$</SPAN></A></SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...MailNickname$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserMailNickname$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerMailNickname$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxMailNickname$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerMailNickname$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...DisplayName$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserDisplayName$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerDisplayName$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxDisplayName$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerDisplayName$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr1$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr1$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr1$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr1$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr1$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr2$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr2$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr2$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr2$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr2$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr3$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr3$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr3$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr3$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr3$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr4$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr4$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr4$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr4$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr4$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr5$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr5$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr5$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr5$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr5$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr6$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr6$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr6$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr6$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr6$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr7$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr7$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr7$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr7$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr7$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr8$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr8$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr8$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr8$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr8$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr9$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr9$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr9$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr9$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr9$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr10$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr10$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr10$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr10$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr10$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr11$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr11$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr11$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr11$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr11$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr12$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr12$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr12$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr12$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr12$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr13$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr13$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr13$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr13$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr13$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr14$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr14$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr14$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr14$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr14$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...ExtAttr15$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserExtAttr15$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerExtAttr15$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxExtAttr15$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxManagerExtAttr15$</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...Photo$,<BR>...PhotoDeleteEmpty$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">See ‘User photos’ below</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">See ‘User photos’ below</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">See ‘User photos’ below</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">See section ‘User photos’ below</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">...CustomImage[1..10]$,<BR>...CustomImage[1..10]DeleteEmpty$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">See ‘Custom images’ below</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">See section ‘Custom images’ below</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">See section ‘Custom images’ below</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">See section ‘Custom images’ below</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #70ad47; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: white 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; TEXT-ALIGN: right" align=right><B><SPAN lang=EN-US style="COLOR: white">…AnUndefinedVariable$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserAnUndefinedVariable$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentUserManagerAnUndefinedVariable$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxAnUndefinedVariable$</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: white 1pt solid; BACKGROUND: #e2efd9; BORDER-BOTTOM: white 1pt solid; PADDING-BOTTOM: 5.65pt; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm"><SPAN lang=EN-US style="COLOR: black">$CurrentMailboxAnUndefinedVariable$</SPAN></P></TD></TR></TBODY></TABLE>
+<H1><A name=_Hlk125034287><SPAN lang=EN-GB>User photos</SPAN></A></H1>
+<P class=MsoNormal><SPAN lang=EN-GB>User photos from Active Directory/Entra ID/Azure AD are automatically available via replacement variables.</SPAN></P>
+<TABLE class=MsoTable15Grid4Accent6 style="BORDER-TOP: medium none; BORDER-RIGHT: medium none; BORDER-COLLAPSE: collapse; BORDER-BOTTOM: medium none; BORDER-LEFT: medium none" cellSpacing=0 cellPadding=0 border=1>
+<TBODY>
+<TR>
+<TD style="BORDER-TOP: #70ad47 1pt solid; BORDER-RIGHT: medium none; WIDTH: 5cm; BACKGROUND: #70ad47; BORDER-BOTTOM: #70ad47 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #70ad47 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: white">Scope</SPAN></B></P></TD>
+<TD style="BORDER-TOP: #70ad47 1pt solid; BORDER-RIGHT: medium none; WIDTH: 255.1pt; BACKGROUND: #70ad47; BORDER-BOTTOM: #70ad47 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: white">$Current[…]Photo$</SPAN></B></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: white">&nbsp;</SPAN></B></P></TD>
+<TD style="BORDER-TOP: #70ad47 1pt solid; BORDER-RIGHT: medium none; WIDTH: 255.1pt; BACKGROUND: #70ad47; BORDER-BOTTOM: #70ad47 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: white">$Current[…]PhotoDeleteEmpty$</SPAN></B></P></TD>
+<TD style="BORDER-TOP: #70ad47 1pt solid; BORDER-RIGHT: #70ad47 1pt solid; WIDTH: 255.1pt; BACKGROUND: #70ad47; BORDER-BOTTOM: #70ad47 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: white">$Current[…]Photo$ with some fancy formatting</SPAN></B></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: white">&nbsp;</SPAN></B></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 5cm; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #a8d08d 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB>&nbsp;</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">The pictures in this column are inserted in Word with embedding and linking, the alternate text is set to '$Current[…]Photo$'.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>&nbsp;</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">If the attribute thumbailPhoto of the Active Directory object in scope has data, the sample picture is replaced.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">If thumbnailPhoto does not have data, the sample picture is shown.</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">The pictures in this column are inserted in Word with embedding and linking, the alternate text is set to '$Current[…]PhotoDeleteEmpty$'.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>&nbsp;</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">If the attribute thumbailPhoto of the Active Directory object in scope has data, the sample picture is replaced.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">If thumbnailPhoto does not have data, the sample picture is deleted.</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">This column is only relevant when using DOCX templates, as HTM templates do not support Word image effects.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>&nbsp;</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">The pictures in this column are inserted with embedding and linking, the alternate text is set to '$Current[…]Photo$'. Additionally, some Word image effects are applied.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>&nbsp;</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">If the attribute thumbailPhoto of the Active Directory object in scope has data, the sample picture is replaced.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">If thumbnailPhoto does not have data, the sample picture is shown.</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 5cm; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #a8d08d 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB>Currently logged-on user</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>$CurrentUserPhoto$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT><IMG border=0 alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$" src="Test all default replacement variables_files/image001.png" width=113 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>$CurrentUserPhotoDeleteEmpty$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT><IMG border=0 alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.$CurrentUserPhotoDeleteEmpty$" src="Test all default replacement variables_files/image001.png" width=113 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>$CurrentUserPhoto$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT><IMG id="Picture 14" border=0 alt="This is a placeholder image for the photo of the current user, with some fancy formatting that can only be used with DOCX templates. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$" src="Test all default replacement variables_files/image002.png" width=134 height=201></SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 5cm; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #a8d08d 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: black">Manager of currently logged-on user</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">$CurrentUserManagerPhoto$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT style="COLOR: black"><IMG border=0 alt="This is a placeholder image for the photo of the current user manager. If the current user manager has no photo, this placeholder is still shown.$CurrentUserManagerPhoto$" src="Test all default replacement variables_files/image001.png" width=113 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">$CurrentUserManagerPhotoDeleteEmpty$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT style="COLOR: black"><IMG border=0 alt="This is a placeholder image for the photo of the current user manager. If the current user manager has no photo, this placeholder is deleted.$CurrentUserManagerPhotoDeleteEmpty$" src="Test all default replacement variables_files/image001.png" width=113 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">$CurrentUserManagerPhoto$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT style="COLOR: black"><IMG id="Picture 11" border=0 alt="This is a placeholder image for the photo of the current user manager, with some fancy formatting that can only be used with DOCX templates. If the current user manager has no photo, this placeholder is still shown.&#10;$CurrentUserManagerPhoto$" src="Test all default replacement variables_files/image003.png" width=114 height=155></SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 5cm; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #a8d08d 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB>Current mailbox</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>$CurrentMailboxPhoto$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT><IMG border=0 alt="This is a placeholder image for the photo of the current mailbox. If the current mailbox has no photo, this placeholder is still shown.&#10;$CurrentMailboxPhoto$" src="Test all default replacement variables_files/image001.png" width=113 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>$CurrentMailboxPhotoDeleteEmpty$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT><IMG border=0 alt="This is a placeholder image for the photo of the current mailbox. If the current mailbox has no photo, this placeholder is deleted.&#10;$CurrentMailboxPhotoDeleteEmpty$" src="Test all default replacement variables_files/image001.png" width=113 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>$CurrentMailboxPhoto$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT><IMG id="Picture 8" border=0 alt="This is a placeholder image for the photo of the current mailbox, with some fancy formatting that can only be used with DOCX templates. If the current mailbox has no photo, this placeholder is still shown.&#10;$CurrentMailboxPhoto$" src="Test all default replacement variables_files/image004.png" width=168 height=154></SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 5cm; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #a8d08d 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: black">Manager of current mailbox</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">$CurrentMailboxManagerPhoto$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT style="COLOR: black"><IMG border=0 alt="This is a placeholder image for the photo of the current mailbox manager. If the current mailbox manager has no photo, this placeholder is still shown.$CurrentMailboxManagerPhoto$" src="Test all default replacement variables_files/image001.png" width=113 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">$CurrentMailboxManagerPhotoDeleteEmpty$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT style="COLOR: black"><IMG border=0 alt="This is a placeholder image for the photo of the current mailbox manager. If the current mailbox manager has no photo, this placeholder is deleted.&#10;$CurrentMailboxManagerPhotoDeleteEmpty$" src="Test all default replacement variables_files/image001.png" width=113 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">$CurrentMailboxManagerPhoto$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT style="COLOR: black"><IMG id="Picture 5" border=0 alt="This is a placeholder image for the photo of the current mailbox manager, with some fancy formatting that can only be used with DOCX templates. If the current mailbox manager has no photo, this placeholder is still shown.&#10;$CurrentMailboxManagerPhoto$" src="Test all default replacement variables_files/image005.png" width=114 height=114></SPAN></P></TD></TR></TBODY></TABLE>
+<H1><SPAN lang=EN-GB>Custom images</SPAN></H1>
+<P class=MsoNoSpacing><SPAN lang=EN-GB>Fore each replacement variable namespace, there are 10 variables you can fill with custom image data:</SPAN></P>
+<P class=MsoListParagraphCxSpFirst style="TEXT-INDENT: -18pt"><SPAN lang=EN-GB style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-GB>$CurrentUserCustomImage[1..10]$, $CurrentUserCustomImage[1..10]DeleteEmpty$</SPAN></P>
+<P class=MsoListParagraphCxSpMiddle style="TEXT-INDENT: -18pt"><SPAN lang=EN-GB style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-GB>$CurrentUserManagerCustomImage[1..10]$, $CurrentUserManagerCustomImage[1..10]DeleteEmpty$</SPAN></P>
+<P class=MsoListParagraphCxSpMiddle style="TEXT-INDENT: -18pt"><SPAN lang=EN-GB style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-GB>$CurrentMailboxCustomImage[1..10]$, $CurrentMailboxCustomImage[1..10]DeleteEmpty$</SPAN></P>
+<P class=MsoListParagraphCxSpLast style="TEXT-INDENT: -18pt"><SPAN lang=EN-GB style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-GB>$CurrentMailboxManagerCustomImage[1..10]$, $CurrentMailboxManagerCustomImage[1..10]DeleteEmpty$</SPAN></P>
+<P class=MsoNormal><SPAN lang=EN-GB>Per default, all custom image variables are empty, but CustomImage1 is a QR code with a vCard in MeCard format.</SPAN></P>
+<TABLE class=MsoTable15Grid4Accent6 style="BORDER-TOP: medium none; BORDER-RIGHT: medium none; BORDER-COLLAPSE: collapse; BORDER-BOTTOM: medium none; BORDER-LEFT: medium none" cellSpacing=0 cellPadding=0 border=1>
+<TBODY>
+<TR>
+<TD style="BORDER-TOP: #70ad47 1pt solid; BORDER-RIGHT: medium none; WIDTH: 5cm; BACKGROUND: #70ad47; BORDER-BOTTOM: #70ad47 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #70ad47 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: white">Scope</SPAN></B></P></TD>
+<TD style="BORDER-TOP: #70ad47 1pt solid; BORDER-RIGHT: medium none; WIDTH: 255.1pt; BACKGROUND: #70ad47; BORDER-BOTTOM: #70ad47 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: white">$Current[…]CustomImage1$</SPAN></B></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: white">&nbsp;</SPAN></B></P></TD>
+<TD style="BORDER-TOP: #70ad47 1pt solid; BORDER-RIGHT: #70ad47 1pt solid; WIDTH: 255.1pt; BACKGROUND: #70ad47; BORDER-BOTTOM: #70ad47 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: white">$Current[…]CustomImage1DeleteEmpty$</SPAN></B></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 5cm; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #a8d08d 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB>&nbsp;</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">The pictures in this column are inserted with embedding and linking, the alternate text is set to '$Current[…]CustomImage1$'.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>&nbsp;</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">If the replacement variable has data, the sample picture is replaced.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">If the replacement variable does not have data, the sample picture is shown.</SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">The pictures in this column are inserted with embedding and linking, the alternate text is set to '$Current[…]CustomImage1DeleteEmpty$'.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>&nbsp;</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">If the replacement variable has data, the sample picture is replaced.</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">If the replacement variable does not have data, the sample picture is deleted.</SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 5cm; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #a8d08d 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB>Currently logged-on user</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>$CurrentUserCustomImage1$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT><IMG border=0 alt="This is a placeholder image for CustomImage1 of the current user. If the current user has no CustomImage1, this placeholder is still shown.&#10;$CurrentUserCustomImage1$" src="Test all default replacement variables_files/image006.png" width=114 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>$CurrentUserCustomImage1DeleteEmpty$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT><IMG border=0 alt="This is a placeholder image for CustomImage1 of the current user. If the current user has no CustomImage1, this placeholder is deleted.&#10;$CurrentUserCustomImage1DeleteEmpty$" src="Test all default replacement variables_files/image006.png" width=114 height=114></SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 5cm; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #a8d08d 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: black">Manager of currently logged-on user</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">$CurrentUserManagerCustomImage1$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT style="COLOR: black"><IMG border=0 alt="This is a placeholder image for CustomImage1 of the current user manager. If the current user manager has no CustomImage1, this placeholder is still shown.&#10;$CurrentUserManagerCustomImage1$" src="Test all default replacement variables_files/image006.png" width=114 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">$CurrentUserManagerCustomImage1DeleteEmpty$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT style="COLOR: black"><IMG border=0 alt="This is a placeholder image for CustomImage1 of the current user manager. If the current user manager has no CustomImage1, this placeholder is deleted.&#10;$CurrentUserManagerCustomImage1DeleteEmpty$" src="Test all default replacement variables_files/image006.png" width=114 height=114></SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 5cm; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #a8d08d 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB>Current mailbox</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>$CurrentMailboxCustomImage1$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT><IMG border=0 alt="This is a placeholder image for CustomImage1 of the current mailbox. If the current mailbox has no CustomImage1, this placeholder is still shown.&#10;$CurrentMailboxCustomImage1$" src="Test all default replacement variables_files/image006.png" width=114 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB>$CurrentMailboxCustomImage1DeleteEmpty$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT><IMG border=0 alt="This is a placeholder image for CustomImage1 of the current mailbox. If the current mailbox has no CustomImage1, this placeholder is deleted.&#10;$CurrentMailboxCustomImage1DeleteEmpty$" src="Test all default replacement variables_files/image006.png" width=114 height=114></SPAN></P></TD></TR>
+<TR>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 5cm; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: #a8d08d 1pt solid; PADDING-RIGHT: 5.4pt" vAlign=top width=189>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><B><SPAN lang=EN-GB style="COLOR: black">Manager of current mailbox</SPAN></B></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">$CurrentMailboxManagerCustomImage1$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT style="COLOR: black"><IMG border=0 alt="This is a placeholder image for CustomImage1 of the current mailbox manager. If the current mailbox manager has no CustomImage1, this placeholder is still shown.&#10;$CurrentMailboxManagerCustomImage1$" src="Test all default replacement variables_files/image006.png" width=114 height=114></SPAN></P></TD>
+<TD style="BORDER-TOP: medium none; BORDER-RIGHT: #a8d08d 1pt solid; WIDTH: 255.1pt; BACKGROUND: #e2efd9; BORDER-BOTTOM: #a8d08d 1pt solid; PADDING-BOTTOM: 0cm; PADDING-TOP: 0cm; PADDING-LEFT: 5.4pt; BORDER-LEFT: medium none; PADDING-RIGHT: 5.4pt" vAlign=top width=340>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=EN-GB style="COLOR: black">$CurrentMailboxManagerCustomImage1DeleteEmpty$</SPAN></P>
+<P class=MsoNormal style="MARGIN-BOTTOM: 0cm; LINE-HEIGHT: normal"><SPAN lang=DE-AT style="COLOR: black"><IMG border=0 alt="This is a placeholder image for CustomImage1 of the current mailbox manager. If the current mailbox manager has no CustomImage1, this placeholder is deleted.&#10;$CurrentMailboxManagerCustomImage1DeleteEmpty$" src="Test all default replacement variables_files/image006.png" width=114 height=114></SPAN></P></TD></TR></TBODY></TABLE>
+<H1><SPAN lang=EN-US>Conditional deletion of images</SPAN></H1>
+<P class=MsoNormal><SPAN lang=EN-US>Below this line, the template file contains four rectangles, each with a different color: Blue, red, yellow, and green.</SPAN></P>
+<P class=MsoNormal><SPAN lang=EN-US><IMG id="Picture 4" border=0 alt="The blue rectangle is always shown." src="Test all default replacement variables_files/image007.png" width=42 height=42><IMG id="Picture 3" border=0 alt="The red rectangle is only shown when the CurrentUserTelephone replacement variable is not empty.&#10;$CurrentUserTelephoneDeleteempty$" src="Test all default replacement variables_files/image008.png" width=42 height=42><IMG id="Picture 2" border=0 alt="The yellow rectangle is only shown when the CurrentMailboxExtAttr10 replacement variable is not empty.&#10;$CurrentMailboxExtattr10Deleteempty$" src="Test all default replacement variables_files/image009.png" width=42 height=42><IMG id="Picture 1" border=0 alt="The green rectangle is only shown when the CurrentMailboxManagerMail replacement variable is not empty.&#10;$CurrentMailboxManagerMailDeleteEmpty$" src="Test all default replacement variables_files/image010.png" width=42 height=42></SPAN></P>
+<P class=MsoNormal><SPAN lang=EN-US>In the resulting signature file, not all these rectangles may appear:</SPAN></P>
+<P class=MsoListParagraphCxSpFirst style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>The blue rectangle is always shown</SPAN></P>
+<P class=MsoListParagraphCxSpMiddle style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>The red rectangle is only shown when </SPAN><SPAN lang=EN-US>the CurrentUserTelephone replacement variable is not empty</SPAN></P>
+<P class=MsoListParagraphCxSpMiddle style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>The yellow rectangle is only shown when the CurrentMailboxExtAttr10 replacement variable is not empty</SPAN></P>
+<P class=MsoListParagraphCxSpLast style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>The green rectangle is only shown when the CurrentMailboxManagerMail replacement variable is not empty</SPAN></P>
+<P class=MsoNormal><SPAN lang=EN-US>You can use this, for example, to</SPAN></P>
+<P class=MsoListParagraphCxSpFirst style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>only show images with links to social networks when the corresponding link is available in an Active Directory/Entra ID/Azure AD/Graph attribute</SPAN></P>
+<P class=MsoListParagraphCxSpLast style="LINE-HEIGHT: 105%; TEXT-INDENT: -18pt"><SPAN lang=EN-US style="FONT-FAMILY: Symbol">·<SPAN style='FONT: 7pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </SPAN></SPAN><SPAN lang=EN-US>show or hide pictures based on the group membership of the current mailbox (only use one template file instead of many only differing by the images used – see 'Delete images when attribute is empty, variable content based on group membership' in </SPAN><SPAN lang=EN-US>'.\docs\README' </SPAN><SPAN lang=EN-US>for details)</SPAN></P>
+<P class=MsoNormal><SPAN lang=EN-US>Search for </SPAN><SPAN lang=EN-US>'Delete images when attribute is empty, variable content based on group membership' in '.\docs\README' for configuration details.</SPAN></P>
+<H1><SPAN lang=EN-GB>Shapes and inline </SPAN><SPAN lang=EN-US>shapes</SPAN></H1>
+<P class=MsoNormal><SPAN lang=EN-US>The following sample text contains two images which are shapes and not inline shapes: A person placeholder image behind the sample text, and a person placeholder image in front of the sample text.</SPAN></P>
+<P class=MsoNormal><SPAN lang=EN-US>The layout of the final signature file may be unexpected as only inline shapes are handled as if they are part of the text. In the concrete example, most browsers will correctly render the resulting HTM signature file, displaying the person placeholder images behind and in front of the text, but Outlook may: Display both person placeholder images at the beginning of the paragraph and treat them as inline shapes, or not display them at all, or show an error.</SPAN></P>
+<P class=MsoNormal><SPAN style="HEIGHT: 76px; WIDTH: 76px; MARGIN-TOP: 75px; POSITION: absolute; MARGIN-LEFT: 276px; Z-INDEX: 251659264"><IMG alt="This is a non-inline shape placed before the text." src="Test all default replacement variables_files/image011.png" width=76 height=76></SPAN><SPAN style="HEIGHT: 76px; WIDTH: 76px; MARGIN-TOP: 75px; POSITION: absolute; MARGIN-LEFT: 103px; Z-INDEX: -1895823360"><IMG alt="This is a non-inline shape placed behind the text." src="Test all default replacement variables_files/image011.png" width=76 height=76></SPAN><SPAN lang=EN-US>Set-OutlookSignatures shows a warning when non-inline shapes are found in a template.</SPAN></P>
+<P class=MsoQuote><SPAN lang=EN-US>Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</SPAN></P>
+<P class=MsoQuote><SPAN lang=EN-US>Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</SPAN></P>
+<P class=MsoQuote><SPAN lang=EN-US>Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.</SPAN></P>
+<H1><SPAN lang=EN-US>Avoid empty lines in signatures</SPAN></H1>
+<P class=MsoNormal><SPAN lang=EN-US>Search for </SPAN><SPAN lang=EN-US>'</SPAN><SPAN lang=EN-US>How to avoid blank lines when replacement variables return an empty string?</SPAN><SPAN lang=EN-US>' in '.\docs\README' for configuration details.</SPAN></P>
+<P class=MsoNormal><SPAN lang=EN-US>&nbsp;</SPAN></P></DIV></BODY></HTML>

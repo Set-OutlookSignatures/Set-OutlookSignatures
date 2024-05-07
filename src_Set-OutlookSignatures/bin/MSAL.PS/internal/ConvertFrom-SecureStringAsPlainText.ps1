@@ -22,8 +22,7 @@ function ConvertFrom-SecureStringAsPlainText {
     try {
         [IntPtr] $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureString)
         Write-Output ([System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($BSTR))
-    }
-    finally {
+    } finally {
         [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR)
     }
 }

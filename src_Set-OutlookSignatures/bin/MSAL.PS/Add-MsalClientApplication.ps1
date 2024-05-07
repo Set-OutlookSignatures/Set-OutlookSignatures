@@ -27,23 +27,21 @@ function Add-MsalClientApplication {
     )
 
     switch ($PSCmdlet.ParameterSetName) {
-        "PublicClient" {
+        'PublicClient' {
             $ClientApplication = $PublicClientApplication
             if (!$PublicClientApplications.Contains($ClientApplication)) {
                 $PublicClientApplications.Add($ClientApplication)
-            }
-            else {
+            } else {
                 $Exception = New-Object ArgumentException -ArgumentList 'The client application provided already exists in the session cache.'
                 Write-Error -Exception $Exception -Category ([System.Management.Automation.ErrorCategory]::ResourceExists) -CategoryActivity $MyInvocation.MyCommand -ErrorId 'AddMsalClientApplicationFailureAlreadyExists' -TargetObject $ClientApplication #-ErrorAction Stop
             }
             break
         }
-        "ConfidentialClient" {
+        'ConfidentialClient' {
             $ClientApplication = $ConfidentialClientApplication
             if (!$ConfidentialClientApplications.Contains($ClientApplication)) {
                 $ConfidentialClientApplications.Add($ClientApplication)
-            }
-            else {
+            } else {
                 $Exception = New-Object ArgumentException -ArgumentList 'The client application provided already exists in the session cache.'
                 Write-Error -Exception $Exception -Category ([System.Management.Automation.ErrorCategory]::ResourceExists) -CategoryActivity $MyInvocation.MyCommand -ErrorId 'AddMsalClientApplicationFailureAlreadyExists' -TargetObject $ClientApplication #-ErrorAction Stop
             }

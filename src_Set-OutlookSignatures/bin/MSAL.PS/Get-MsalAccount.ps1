@@ -28,9 +28,8 @@ function Get-MsalAccount {
     }
 
     if ($Username) {
-        return $Accounts | Where-Object Username -eq $Username
-    }
-    else {
+        return $Accounts | Where-Object Username -EQ $Username
+    } else {
         return $Accounts
     }
 }

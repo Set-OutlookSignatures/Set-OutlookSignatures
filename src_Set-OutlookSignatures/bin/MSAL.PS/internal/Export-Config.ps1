@@ -43,8 +43,7 @@ function Export-Config {
         if ($Property.Name -in (Get-ObjectPropertyValue $ModuleConfigPersistent.psobject.Properties 'Name')) {
             ## Update previously persistent property value
             $ModuleConfigPersistent.($Property.Name) = $Property.Value
-        }
-        elseif ($IgnoreProperty -notcontains $Property.Name -and $Property.Value -ne (Get-ObjectPropertyValue $IgnoreDefaultValues $Property.Name)) {
+        } elseif ($IgnoreProperty -notcontains $Property.Name -and $Property.Value -ne (Get-ObjectPropertyValue $IgnoreDefaultValues $Property.Name)) {
             ## Add property with non-default value
             $ModuleConfigPersistent | Add-Member -Name $Property.Name -MemberType NoteProperty -Value $Property.Value
         }

@@ -262,7 +262,7 @@ function Get-MsalToken {
       'PublicClient*' {
         if ($PSBoundParameters.ContainsKey('UserCredential') -and $UserCredential) {
           $AquireTokenParameters = $PublicClientApplication.AcquireTokenByUsernamePassword($Scopes, $UserCredential.UserName, $UserCredential.Password)
-        } elseif ($PSBoundParameters.ContainsKey('DeviceCode') -and $DeviceCode -or ($Interactive -and !$script:ModuleFeatureSupport.WebView1Support -and !$script:ModuleFeatureSupport.WebView2Support -and $PublicClientApplication.AppConfig.RedirectUri -ne 'http://localhost') -or ($Interactive -and !$script:ModuleFeatureSupport.WebView1Support -and $PublicClientApplication.AppConfig.RedirectUri -eq 'urn:ietf:wg:oauth:2.0:oob')) {
+        } elseif ($PSBoundParameters.ContainsKey('DeviceCode') -and $DeviceCode -or ($Interactive -and !$script:ModuleFeatureSupport.WebView1Support -and !$script:ModuleFeatureSupport.WebView2Support -and $PublicClientApplication.AppConfig.RedirectUri -ne 'http://localhost/') -or ($Interactive -and !$script:ModuleFeatureSupport.WebView1Support -and $PublicClientApplication.AppConfig.RedirectUri -eq 'urn:ietf:wg:oauth:2.0:oob')) {
           $AquireTokenParameters = $PublicClientApplication.AcquireTokenWithDeviceCode($Scopes, [DeviceCodeHelper]::GetDeviceCodeResultCallback())
         } elseif ($PSBoundParameters.ContainsKey('Interactive') -and $Interactive) {
           $AquireTokenParameters = $PublicClientApplication.AcquireTokenInteractive($Scopes)

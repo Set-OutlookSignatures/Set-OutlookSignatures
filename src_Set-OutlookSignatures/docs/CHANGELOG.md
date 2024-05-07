@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20commercial%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="commercial support by ExplicIT Consulting"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="License"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with%20the-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20fee--based%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="get fee-based support from ExplicIT Consulting"></a>
 
 # Changelog
 <!--
@@ -18,16 +18,38 @@
 -->
 
 
-## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.11.0" target="_blank">v4.11.0</a> - 2024-03-26
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.0" target="_blank">v4.12.0</a> - 2024-05-07
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
+### Changed
+- Graph connectivity: Update dependency MSAL.Net to v4.60.3.
+- The Quick Start Guide is now easier to follow and clearer on requirements.
+- Updated sample templates (full barrier-free design, and other smaller changes).
+- Updated `Authentication` chapter in `.\docs\README`.
+- The API for saving photos and user-defined images has been changed, which significantly speeds up the creation of temporary files.
+### Added
+- Support for Linux and macOS. Some restrictions apply to Non-Windows platforms, see `Linux and macOS` in the `Requirements` chapter of `.\docs\README` for details.
+- Custom image replacement variables that you can fill yourself with a byte array: `$CurrentUserCustomImage[1..10]$`, `$CurrentUserManagerCustomImage[1..10]$`, `$CurrentMailboxCustomImage[1..10]$`, `$CurrentMailboxManagerCustomImage[1..10]$`. Usecases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/e-mail, etc.
+  - QR code vCard (MeCard) in custom image replacement variable `$Current[..]CustomImage1$`. See file `.\config\default replacement variables.ps1` for the easily customizable code used to create it. Also see `.\docs\README` for details.
+- Support for maximum barrier-free accessibility with screen readers and comparable tools. Use Word ScreenTips and HTML titles for hyperlinks, and alt text for images, replacement variables are supported. All sample templates have been updated accordingly. Just hover your mouse pointer over a hyperlink or image to see additional information.
+- Show a warning when authentication to Outlook Web (no matter if on-prem or in the cloud) is not possible via Autodiscover, as this means that Autodiscover is not configured correctly.
+- The `MirrorLocalSignaturesToCloud` parameter is now also available under the name `MirrorCloudSignatures`. The old name may be removed with the next major release (v5.0.0).
+### Fixed
+- When using HTM templates, image paths were not correctly modified when containing one of the reserved characters defined in RFC3986 (`:/?#[]@!$&'()*+,;=`, Uri.EscapeUriString vs. Uri.EscapeDataString).
+
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.11.0" target="_blank">v4.11.0</a> - 2024-03-26
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+_**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Changed
 - Updated sample templates
 - Authentication against SharePoint document libraries containing templates or INI files has been adapted to Microsoft API changes not yet documented
-- ExplicIT Consulting's code signing certificate is now added to existing certificates. This increases security as you can now easily check that, for example, the DLL files of the dependency Microsoft Authentication Library (MSAL) are the original files published by Microsoft.
 ### Added
 - New parameter `MailboxSpecificSignatureNames`. By setting the `MailboxSpecificSignatureNames` parameter to `true`, the e-mail address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc. See`.\docs\README` for details.
 - When `MirrorLocalSignaturesToCloud` is enabled,
@@ -42,10 +64,10 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.10.1" target="_blank">v4.10.1</a> - 2024-02-06
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Changed
 - Graph connectivity: Update dependency MSAL.Net to v4.59.0
@@ -66,10 +88,10 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.10.0" target="_blank">v4.10.0</a> - 2024-01-05
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Changed
 - Graph connectivity: Update dependency MSAL.Net to v4.58.1
@@ -90,10 +112,10 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.9.0" target="_blank">v4.9.0</a> - 2023-12-02
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Changed
 - Word is no longer required to convert signatures to TXT format, which reduces resource consumption and execution time
@@ -113,10 +135,10 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.1" target="_blank">v4.8.1</a> - 2023-11-24
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Fixed
 - Embedding images and loading the Graph config file is now much faster because of switching from PowerShell cmdlets to .Net system calls for conversions to Base64 (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/pull/95" target="_blank">#95</a>)
@@ -125,10 +147,10 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.0" target="_blank">v4.8.0</a> - 2023-11-20
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Changed
 - Updated dependency MSAL.Net to v4.57.0
@@ -147,10 +169,10 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.7.0" target="_blank">v4.7.0</a> - 2023-10-29
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Changed
 - Reduced minimum required Graph permissions: GroupMember.Read.All is now used instead of Group.Read.All, which reduces delegated app permissions.  
@@ -176,10 +198,10 @@ To compare the two permissions, see their description at [Microsoft Graph permis
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.1" target="_blank">v4.6.1</a> - 2023-10-27
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Fixed
 - Correctly detect and restore Word registry key 'DisableWarningOnIncludeFieldsUpdate'
@@ -189,10 +211,10 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.0" target="_blank">v4.6.0</a> - 2023-10-23
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Added
 - 'default graph config.ps1' now includes a description for each permission required by the Entra ID/Azure AD application for Graph access
@@ -217,10 +239,10 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.5.0" target="_blank">v4.5.0</a> - 2023-09-29
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
 _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._  
 _Set-OutlookSignatures can experimentally handle cloud roaming signatures since v4.0.0. See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Changed
@@ -235,10 +257,10 @@ _Set-OutlookSignatures can experimentally handle cloud roaming signatures since 
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.4.0" target="_blank">v4.4.0</a> - 2023-09-20
-_**Some features are exclusive to the commercial Benefactor Circle add-on**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
-_**Attention, cloud mailbox users:**_  
+_**Attention, Exchange Online admins**_  
 _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._  
 _Set-OutlookSignatures can experimentally handle cloud roaming signatures since v4.0.0. See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Added

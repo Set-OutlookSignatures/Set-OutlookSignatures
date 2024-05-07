@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20commercial%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="commercial support by ExplicIT Consulting"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="License"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with%20the-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20fee--based%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="get fee-based support from ExplicIT Consulting"></a>
 
 # Welcome!<!-- omit in toc -->
 If email signatures or out-of-office replies are on your agenda, the following is worth reading - whether you work in marketing, sales, corporate communications, the legal or the compliance department, as Exchange or client administrator, as CIO or IT lead, as key user or consultant.
@@ -26,25 +26,28 @@ With Set-OutlookSignatures, signatures and out-of-office replies can be:
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
+- Designed for **barrier-free accessibility** with custom link and image descriptions for screen readers and comparable tools
 - Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups**, specific **email addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes**  
-- Created with different names from the same template (e.g., **one template can be used for multiple shared mailboxes**)
+- Created with different names from the same template, **one template can be used for multiple shared mailboxes**
 - Assigned **time ranges** within which they are valid  
 - Set as **default signature** for new emails, or for replies and forwards (signatures only)  
 - Set as **default OOF message** for internal or external recipients (OOF messages only)  
 - Set in **Outlook Web** for the currently logged-in user, including mirroring signatures the the cloud as **roaming signatures**  
-- Centrally managed only or **exist along user-created signatures** (signatures only)  
-- Copied to an **alternate path** for easy access on mobile devices not directly supported by this script (signatures only)
-- **Write protected** (Outlook signatures only)
+- Centrally managed only, or **exist along user-created signatures** (signatures only)  
+- Copied to an **additional path** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook Windows/Mac/Web: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
+- **Write protected** (Outlook for Windows signatures only)
 
-Set-OutlookSignatures can be **executed by users on clients and terminal servers, or on a central system without end user interaction**.  
-On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.  
-Signatures and OOF messages can also be created and deployed centrally, without end user or client involvement.
+Set-OutlookSignatures can be **run by users on Windows, Linux and macOS clients, including shared devices and terminal servers - or on a central system with a service account**.  
+On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, shortcut or any other way of starting a program - **whatever your operating system and software deployment mechanism allows**.  
+Signatures and OOF messages can also be created and pushed into mailboxes centrally, **without end user or client involvement**.
 
-**Sample templates** for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
+**Sample templates** for signatures and OOF messages demonstrate many features and are provided as .docx and .htm files.
 
-**Simulation mode** allows content creators and admins to simulate the behavior of the software and to inspect the resulting signature files before going live.
-  
-The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.  
+**Simulation mode** allows content creators and admins to simulate the behavior of the software for a specific user at a specific point in time, and to inspect the resulting signature files before going live.
+
+**SimulateAndDeploy** allows to deploy signatures to Outlook Web/New Outlook without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
+
+The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and in cloud-only environments**.  
 All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).
 
 It is **multi-client capable** by using different template paths, configuration files and script parameters.
@@ -55,15 +58,17 @@ There is also **no telemetry** or "calling home", emails are **not routed throug
 A **documented implementation approach**, based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators.  
 The implementation approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
-The software core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\LICENSE.txt` for copyright and MIT license details.
+The software core is **Free and Open-Source Software (FOSS)**. It is published under a license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) and other popular licenses. Please see `.\LICENSE.txt` for copyright and license details.
 
-**Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source license. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.  
+**Some features are exclusive to the Benefactor Circle add-on.**
+ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and fee-based support, ensuring that the core of Set-OutlookSignatures can remain Free and Open-Source Software (FOSS) and continues to evolve. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.
 
 # Demo video<!-- omit in toc -->
 <a href="https://www.youtube-nocookie.com/embed/K9TrCjTdRUI" target="_blank"><img src="https://img.youtube.com/vi/K9TrCjTdRUI/hqdefault.jpg" height="300" title="Set-OutlookSignatures demo video" alt="Set-OutlookSignatures demo video"></a>
 
 # Table of Contents<!-- omit in toc -->
 - [1. Requirements](#1-requirements)
+  - [1.1. Linux and macOS](#11-linux-and-macos)
 - [2. Quick Start Guide](#2-quick-start-guide)
 - [3. Parameters](#3-parameters)
   - [3.1. SignatureTemplatePath](#31-signaturetemplatepath)
@@ -95,7 +100,7 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
   - [3.27. DocxHighResImageConversion](#327-docxhighresimageconversion)
   - [3.28. SignaturesForAutomappedAndAdditionalMailboxes](#328-signaturesforautomappedandadditionalmailboxes)
   - [3.29. DisableRoamingSignatures](#329-disableroamingsignatures)
-  - [3.30. MirrorLocalSignaturesToCloud](#330-mirrorlocalsignaturestocloud)
+  - [3.30. MirrorCloudSignatures](#330-mirrorcloudsignatures)
   - [3.31. MailboxSpecificSignatureNames](#331-mailboxspecificsignaturenames)
   - [3.32. WordProcessPriority](#332-wordprocesspriority)
   - [3.33. ScriptProcessPriority](#333-scriptprocesspriority)
@@ -120,6 +125,7 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
     - [13.1.2. When using HTM template files](#1312-when-using-htm-template-files)
     - [13.1.3. Common behavior](#1313-common-behavior)
   - [13.2. Delete images when attribute is empty, variable content based on group membership](#132-delete-images-when-attribute-is-empty-variable-content-based-on-group-membership)
+  - [13.3. Custom image replacement variables](#133-custom-image-replacement-variables)
 - [14. Outlook Web](#14-outlook-web)
 - [15. Hybrid and cloud-only support](#15-hybrid-and-cloud-only-support)
   - [15.1. Basic Configuration](#151-basic-configuration)
@@ -174,14 +180,24 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
   - [17.34. What is the recommended folder structure for script, license, template and config files?](#1734-what-is-the-recommended-folder-structure-for-script-license-template-and-config-files)
   
 # 1. Requirements  
-Outlook and Word are typically used, but not required in all constellations:
+You need Exchange Online or Exchange on-prem.
+
+Set-OutlookSignatures can run in two modes:
+- In the security context of the currently logged-in user. This is recommended for most scenarios.
+- On a central system, using a service account to push signatures into users mailboxes. This can be useful for accounts that only log on to the mail service, but not to a client (such as M365 F-licenses). See 'SimulateAndDeploy' in this document for details.
+
+A Linux, macOS or Windows system with PowerShell:
+- Windows: Windows PowerShell 5.1 ('powershell.exe', part of Windows) or PowerShell 7+ ('pwsh.exe')
+- Linux, macOS: PowerShell 7+ ('pwsh')
+
+On Windows, Outlook and Word are typically used, but not required in all constellations:
 - When Outlook 2010 or higher is installed and has profiles configured, Outlook is used as source for mailboxes to deploy signatures for.  
-  If Outlook is not installed or configured, New Outlook is used if available.
-  If New Outlook is configured as default application in Outlook, New Outlook is used.
-  In any other cases, Outlook Web is used as source for mailboxes.
+  - If Outlook is not installed or configured, New Outlook is used if available.
+  - If New Outlook is configured as default application in Outlook, New Outlook is used.
+  - In any other cases, Outlook Web is used as source for mailboxes.
 - Word 2010 or higher is required when templates in DOCX format are used, or when RTF signatures need to be created.
 
-The software must run in the security context of the currently logged-in user.
+Signature templates in DOCX (Windows) or HTML format (Windows, Linux, macOS). Set-OutlookSignatures comes with sample templates in both formats.
 
 The software must run in PowerShell Full Language mode. Constrained Language mode is not supported, as some features such as BASE64 conversions are not available in this mode or require very slow workarounds.
 
@@ -191,11 +207,39 @@ There are locked down environments, where all files matching the patterns `*.ps*
 **Thanks to our partnership with [ExplicIT Consulting](https://explicitconsulting.at), Set-OutlookSignatures and its components are digitally signed with an Extended Validation (EV) Code Signing Certificate (which is the highest code signing standard available).  
 This is not only available for Benefactor Circle members, but also the Free and Open Source core version is code signed.**
 
-Don't forget to unblock at least 'Set-OutlookSignatures.ps1' after extracting them from the downloaded ZIP file. You can use the PowerShell commandlet 'Unblock-File' for this.
+On Windows, do not forget to unblock at least 'Set-OutlookSignatures.ps1' after extracting the downloaded ZIP file. You can use the PowerShell commandlet 'Unblock-File' for this.
 
 The paths to the template files (SignatureTemplatePath, OOFTemplatePath) must be accessible by the currently logged-in user. The template files must be at least readable for the currently logged-in user.
 
-In cloud environments, you need to register Set-OutlookSignatures as app and provide admin consent for the required permissions. See the Quick Start Guide or '.\config\default graph config.ps1' for details.
+In cloud environments, you need to register Set-OutlookSignatures as Entra ID/Azure AD app and provide admin consent for the required permissions. See the Quick Start Guide or '.\config\default graph config.ps1' for details.
+## 1.1. Linux and macOS
+Not all features are yet available on Linux and macOS. Every parameter contains appropriate information, which can be summarized as follows:
+
+**Common restrictions and notes for Linux and macOS**
+- Only mailboxes hosted in Exchange Online are supported, no on-prem mailboxes.
+- Only Graph is supported, no local Active Directories.<br>The parameter `GraphOnly` is automatically set to `true` and Linux and macOS, which requires an Entra ID app - the Quick Start Guide in this document helps you implement this.
+- Signature and OOF templates must be in HTM format.<br>Microsoft Word is not available on Linux, and the file format conversion cannot be done without user impact on macOS.<br>The parameter `UseHtmTemplates` is automatically set to `true` on Linux and macOS.
+- Only already mounted paths can be accessed.<br>Set-OutlookSignatures cannot create mount points itself, as there are just too many possibilities.<br>This is important for the following parameters: `SignatureTemplatePath`, `SignatureIniPath`, `OOFTemplatePath`, `OOFIniPath`, `AdditionalSignaturePath`, `ReplacementVariableConfigFile`, `GraphConfigFile`. The default values for these parameters are automatically set correctly, so that you can follow the Quick Start Guide without additional configuration.<br>Consider one of the following options for production use:
+  - Deploy a software package that not only contains Set-OutlookSignatures, but also all required template and configuration files.
+  -	Place Set-OutlookSignatures, the templates and its configuration as ZIP file in a public place (such as your website), and use Intune with a remediation script to download and extract the ZIP file (this might not need your security requirements).
+  - Change your execution script or task, so that all required paths are mounted before Set-OutlookSignatures is run.
+
+**Linux specific restrictions and notes**
+- Users need to access their mailboxes via Outlook Web, as no other form of Outlook is available on Linux (use emulation tools such as Wine, CrossOver, PlayOnLinux, Proton, etc. at your own risk).
+  - Support for Outlook Web requires the Benefactor Circle add-on. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.
+- When using email clients such as Mozilla Thunderbird, GNOME Evolution, KDE KMail or others, you can still use signatures created by Set-OutlookSignatures with the Benefactor Circle add-on, as they are stored in the folder `$([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures'))` per default (parameter `AdditionalSignaturePath`).
+
+**macOS specific restrictions and notes**
+- Classic Outlook for Mac is supported
+  - Until Classic Outlook supports roaming signatures (which is very likely to never happen), it is treated like Outlook for Windows configured not to use roaming signatures. Consider using the '-MailboxSpecificSignatureNames' parameter.
+- New Outlook for Mac is supported
+  - Until New Outlook supports roaming signatures (not yet announced by Microsoft), it is treated like Outlook for Windows configured not to use roaming signatures. Consider using the '-MailboxSpecificSignatureNames' parameter.
+  - If New Outlook is enabled, an alternate method of account detection is used, as scripting is not yet supported by Microsoft (annound on the M365 roadmap for December 2024). This alternate method may detect accounts that are no longer used in Outlook (see software output for details).  
+  - If the alternate method does not find accounts, Outlook Web is used and existing signatures are synchronized with New Outlook for Mac.
+    - Support for Outlook Web requires the Benefactor Circle add-on. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.
+- Classic Outlook for Mac and New Outlook for Mac do not allow external software to set default signatures.
+- When using email clients such as Apple Mail or others, you can still use signatures created by Set-OutlookSignatures with the Benefactor Circle add-on, as they are stored in the folder `$([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures'))` per default (parameter `AdditionalSignaturePath`).
+
 # 2. Quick Start Guide
 If you already use Set-OutlookSignatures and plan to update to a newer version, start with the CHANGELOG document.
 
@@ -211,83 +255,49 @@ Read the following chapters in order:
 You now have a good theoretical overview.<br>If you want to know more before you start with the practical implementation, just read through the rest of the README file.
 
 **Set-OutlookSignatures is very well documented, which inevitably brings with it a lot of content.  
-If you are looking for someone with experience who can quickly train you and assist with evaluation, planning, implementation and ongoing operations: Our partner [ExplicIT Consulting](https://explicitconsulting.at) offers professional support and also the [Benefactor Circle add-on](https://explicitconsulting.at/open-source/set-outlooksignatures) with enhanced features.**
+If you are looking for someone with experience who can quickly train you and assist with evaluation, planning, implementation and ongoing operations: Our partner [ExplicIT Consulting](https://explicitconsulting.at) offers first-class fee-based support and also the commercial [Benefactor Circle add-on](https://explicitconsulting.at/open-source/set-outlooksignatures) with enhanced features.**
 
 To start with the practical implementation:
-1. Log on to a Windows client with a test user having an Exchange mailbox, and configure Outlook
+1. For a first test run, it is recommended to log on with a test user on a Windows system with Word and Outlook installed, and Outlook being configured with at least the test user's mailbox. This way, you get results fast and can experience the biggest set of features.
+   - You can also use Linux and macOS. On these platforms, only Outlook Web and New Outlook are supported due to technical reasons. Reading from and writing to Outlook Web and New Outlook requires the Benefactor Circle add-on (see <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details). Consider using simulation mode for first tests on Linux and macOS.
 2. Download Set-OutlookSignatures and extract the archive to a local folder
-3. Unblock the file 'Set-OutlookSignatures.ps1'.<br>You can use the PowerShell commandlet 'Unblock-File' for this, or right-click the file in File Explorer, select Properties and check 'Unblock'.
-4. If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell 'Set-OutlokSignatures.ps1'.  
-It is usually not necessary to sign the variable replacement configuration files, e. g. '.\config\default replacement variables.ps1'.  
-There are locked down environments, where all files matching the patterns `*.ps*1` and `*.dll` need to be digitially signed with a trusted certificate. 
-5. Now it is time to run Set-OutlookSignatures for the first time
-   - Mailbox is in Exchange on-prem and the logged-in user has access to the on-prem Active Directory: Run 'Set-OutlookSignatures.ps1' in PowerShell.<br>For best results, don't run the software by double clicking it in File Explorer, or via right-click and 'Run'. Instead, run the following command:
+   - On Windows, unblock the file 'Set-OutlookSignatures.ps1'. You can use the PowerShell cmdlet 'Unblock-File' for this, or right-click the file in File Explorer, select Properties and check 'Unblock'.
+3. If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell 'Set-OutlokSignatures.ps1'.
+   - It is usually not necessary to sign the variable replacement configuration files, e. g. '.\config\default replacement variables.ps1'.<br>There are locked down environments, where all files matching the patterns `*.ps*1` and `*.dll` need to be digitially signed with a trusted certificate. 
+4. Now it is time to run Set-OutlookSignatures for the first time
+   - If **all mailboxes are in Exchange on-prem only and the logged-in user has access to the on-prem Active Directory**<br>Just run 'Set-OutlookSignatures.ps1' in PowerShell.<br>For best results, don't run the software by double clicking it in File Explorer, or via right-click and 'Run'. Instead, run the following command:
       ```
       powershell.exe -noexit -file "c:\test\Set-OutlookSignatures.ps1" # adapt the file path as needed
       ```
-   - Mailbox is in Exchange Online and/or the logged-in user has no access to the on-prem Active Directory and/or your environment is cloud only: You need to register an Entra ID/Azure AD application first, because Set-OutlookSignatures needs permissions to access the Graph API.
-     1. An Entra ID/Azure AD administrator needs to register Set-OutlookSignatures as app and provide admin consent for the required permissions.
-        - Option A: Use app provided by the developer
-          - Option A1: Provide admin consent via URL
-            1. Open a browser, preferably in a private window
-            2. Open the URL 'https://login.microsoftonline.com/organizations/adminconsent?client_id=beea8249-8c98-4c76-92f6-ce3c468a61e6'
-            3. Log on with a user that has Global Admin or Client Application Administrator rights in your tenant
-            4. Accept the required permissions on behalf of your tenant
-               - You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[...]' could not be found or accessed. The reason for this message is that the Entra ID/Azure AD app is configured to only be able to authenticate against http://localhost.
-          - Option A2: Run Set-OutlookSignatures as admin
-            1. Log on to a client with a local user or with an Entra ID/Azure AD user with Global Admin or Application Administrator rights
-               - You might prefer a local user for security reasons
-            2. Remove previously cached access tokens by deleting the file '%LocalAppData%\MSAL.PS\MSAL.PS.msalcache.bin3'
-               - PowerShell command 
-                  ```
-                  @($(Join-Path -Path $env:LocalAppData -ChildPath '\MSAL.PS\MSAL.PS.msalcache.bin3')) | ForEach-Object {
-                      if (Test-Path $_) {
-                          Remove-Item $_ -Force
-                      }
-                  }
-                  ```
-                - Command line command
-                  ```
-                  del "%LocalAppData%\MSAL.PS\MSAL.PS.msalcache.bin3"
-                  ```
-            3. Run Set-OutlookSignatures with the '-GraphOnly true' parameter:
-                ```
-                powershell.exe -noexit -file "c:\test\Set-OutlookSignatures.ps1" -GraphOnly true # adapt the file path as needed
-                ```
-            5. When prompted for credentials, log on with a user that has Global Admin or Application Administrator rights in your tenant
-            6. Accept the required permissions on behalf of your tenant
-            7. After accepting the permissions, you may close the browser window and then stop Set-OutlookSignatures by pressing Ctrl+Z.
-            8. For security reasons, remove cached access tokens by deleting the file '%LocalAppData%\MSAL.PS\MSAL.PS.msalcache.bin3'
-               - PowerShell command 
-                  ```
-                  @($(Join-Path -Path $env:LocalAppData -ChildPath '\MSAL.PS\MSAL.PS.msalcache.bin3')) | ForEach-Object {
-                      if (Test-Path $_) {
-                          Remove-Item $_ -Force
-                      }
-                  }
-                  ```
-                - Command line command
-                  ```
-                  del "%LocalAppData%\MSAL.PS\MSAL.PS.msalcache.bin3"
-                  ```
-        - Option B: Create and use your own Entra ID/Azure AD ap
-          - As you create and host your own Entra ID/Azure AD application, this option is more secure than using the application provided by the developers.
-          - This is an option for experienced Entra ID/Azure AD administrators.  
-          If you lack this experience, but still want to use this option, [ExplicIT Consulting](https://explicitconsulting.at) offers commercial support also covering this topic.
+   - If **some or all mailboxes are in Exchange Online**:
+     1. You need to register an Entra ID/Azure AD application first, because Set-OutlookSignatures needs permissions to access the Graph API.<br>This is easier than it looks, and you can choose between two ways to do it.<br>You will need an Entra ID/Azure AD administrator (Global Admin or Client Application Administrator), and between 10 and 30 minutes of time.
+        - Option A: Use the Entra ID/Azure AD app provided by the developer<br>This is the fastest option. Since it requires trusting an external Entra ID application, this option may not be considered as secure as option B.
+          1. In a private browser window, navigate to 'https://login.microsoftonline.com/organizations/adminconsent?client_id=beea8249-8c98-4c76-92f6-ce3c468a61e6'<br>If you are not using the public Microsoft cloud, replace 'login.microsoftonline.com' with the URL matching your environment ('login.microsoftonline.us' for US Government and US Government DoD, 'login.partner.microsoftonline.cn' for M365/Azure China).
+          2. Log on with a user that has Global Admin or Client Application Administrator rights in your tenant and accept the required permissions on behalf of your tenant
+             - See the file '.\config\default graph config.ps1' for details about the required application permissions, endpoints and authentication methods. Only delegated permissions are used, so everyting runs in the context of the user.
+             - You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[...]' could not be found or accessed. The reason for this message is that the Entra ID/Azure AD app is configured to only be able to authenticate against http://localhost.
+        - Option B: Create and use your own Entra ID/Azure AD app
+          - As you create and host your own Entra ID/Azure AD application, this option is considered more secure than using the application provided by the developers.
+          - This is an option for advanced Entra ID/Azure AD administrators. If you do not have this experience yet but still want to use this option, [ExplicIT Consulting](https://explicitconsulting.at) offers fee-based support covering this topic.
           - See the file '.\config\default graph config.ps1' for details about the required application permissions, endpoints and authentication methods. This file also links to sample code that automates the creation of the required application in your tenant.
      2. Run Set-OutlookSignatures
-        - Cloud only, or hybrid without synced Exchange attributes (mail, legacyExchangeDN, msExchRecipientTypeDetails, msExchMailboxGuid, proxyAddresses):
+        - If your **mailboxes are in Exchange Online only, or you are in a hybrid environment _without_ synchronizing all required Exchange attributes to on-prem** (mail, legacyExchangeDN, msExchRecipientTypeDetails, msExchMailboxGuid, proxyAddresses):
           ```
           powershell.exe -noexit -file "c:\test\Set-OutlookSignatures.ps1" -GraphOnly true # adapt the file path as needed
           ```
-        - Hybrid with synced Exchange attributes (mail, legacyExchangeDN, msExchRecipientTypeDetails, msExchMailboxGuid, proxyAddresses):
+          Always choose this option if you are in **hybrid mode and directly create new mailboxes in Exchange Online**, as at least the required attribute msExchMailboxGuid is not synchronized to on-prem in this case. See https://learn.microsoft.com/en-US/exchange/troubleshoot/move-mailboxes/migrationpermanentexception-when-moving-mailboxes for details and two possible workarounds.
+
+          The '`-GraphOnly true`' parameter makes sure that on-prem Active Directory is ignored and only Graph/Entra ID/Azure AD is used to find mailboxes and their attributes.
+        - If your **mailboxes are in a hybrid environment _with_ synchronizing all required Exchange attributes to on-prem** (mail, legacyExchangeDN, msExchRecipientTypeDetails, msExchMailboxGuid, proxyAddresses):
           ```
           powershell.exe -noexit -file "c:\test\Set-OutlookSignatures.ps1" # adapt the file path as needed
           ```
-
+          This runs Set-OutlookSignatures with default parameters, preferring on-prem Active Directory to find mailboxes and their attributes, and only using Graph/Entra ID/Azure AD when neccessary.
+        - If you are not using the public Microsoft Cloud, add the `-CloudEnvironment [AzureUSGovernment|AzureUSGovernmentDoD|AzureChina|]` parameter.
+     
 Set-OutlookSignatures now runs using default settings and sample templates.<br>Because of the '-exit' parameter, the window hosting Set-OutlookSignatures will not close after the software completed. This is helpful for debugging and learning.
 
-Watch the output for errors and warnings, displayed in red or yellow when run in the PowerShell console.
+Next, check the script output for errors and warnings, displayed in red or yellow in the PowerShell console.
 - If there are errors or warnings:
   1. Read the messages carefully as they often contain hints on how to resolve the issue.  
   2. Check if the README file contains a hint.
@@ -302,7 +312,7 @@ When everything runs fine with default settings, it is time to start customizing
     - Signature template file naming
     - Template tags and ini files
   - Make sure to pass the parameters `SignatureTemplatePath`, `SignatureIniPath`, `OOFTemplatePath` and `OOFInipath` to Set-OutlookSignatures
-- Adopt other parameters you may find useful, or start experimenting with simulation mode.<br>The feature list and the parameter documentation show what's possible.
+- Adapt other parameters you may find useful, or start experimenting with simulation mode.<br>The feature list and the parameter documentation show what's possible.
 <br>
 <br>
 <p>  
@@ -311,7 +321,7 @@ It is strongly recommended to not change any Set-OutlookSignatures files and kee
 Regarding configuration files: Besides the template configuration files for signatures and OOF messages, there are the Graph configuration file and the replacement variable configuration file.  
 It is rarely needed to change the configuration within these files.<br>The configuration files themselves contain specific information on how to use them.<br>The configuration files are referenced in the documentation whenever there is a need or option to change them.
 
-**[Benefactor Circle members](https://explicitconsulting.at/open-source/set-outlooksignatures) have access to a document covering the organizational aspects of introducing Set-OutlookSignatures.**  
+You also have access to `'.\docs\Implementation approach'`, a document covering the organizational aspects of introducing Set-OutlookSignatures.
 The content is based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes.  
 It contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators. It is suited for service providers as well as for clients.  
 It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
@@ -323,9 +333,11 @@ Local and remote paths are supported. Local paths can be absolute (`C:\Signature
 
 SharePoint document libraries are supported (https only): `https://server.domain/SignatureSite/SignatureTemplates` or `\\server.domain@SSL\SignatureSite\SignatureTemplates`
 
-The currently logged-in user needs at least read access to the path.
+On Linux and macOS, only already mounted paths can be accessed, Set-OutlookSignatures cannot create mount points itself.
 
-Default value: `.\templates\Signatures DOCX`  
+On Linux and macOS, only already mounted paths can be accessed, Set-OutlookSignatures cannot create mount points itself.
+
+Default value: '.\sample templates\Signatures DOCX' on Windows, '.\sample templates\Signatures HTML' on Linux and macOS
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '.\sample templates\Signatures DOCX'  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '.\sample templates\Signatures DOCX'"
@@ -341,9 +353,9 @@ Local and remote paths are supported. Local paths can be absolute ('C:\Signature
 
 SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 
-The currently logged-in user needs at least read access to the path
+On Linux and macOS, only already mounted paths can be accessed, Set-OutlookSignatures cannot create mount points itself.
 
-Default value: `.\templates\Signatures DOCX\_Signatures.ini`
+Default value: '.\templates\Signatures DOCX\_Signatures.ini' on Windows, '.\templates\Signatures HTML\_Signatures.ini' on Linux and macOS
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureIniPath '.\templates\Signatures DOCX\_Signatures.ini'  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureIniPath '.\templates\Signatures DOCX\_Signatures.ini'"
@@ -357,7 +369,7 @@ Local and remote paths are supported. Local paths can be absolute (`C:\config\de
 
 SharePoint document libraries are supported (https only): `https://server.domain/SignatureSite/config/default replacement variables.ps1` or `\\server.domain@SSL\SignatureSite\config\default replacement variables.ps1`
 
-The currently logged-in user needs at least read access to the file.
+On Linux and macOS, only already mounted paths can be accessed, Set-OutlookSignatures cannot create mount points itself.
 
 Default value: `.\config\default replacement variables.ps1`  
 
@@ -373,7 +385,7 @@ Local and remote paths are supported. Local paths can be absolute (`C:\config\de
 
 SharePoint document libraries are supported (https only): `https://server.domain/SignatureSite/config/default graph config.ps1` or `\\server.domain@SSL\SignatureSite\config\default graph config.ps1`
 
-The currently logged-in user needs at least read access to the file.
+On Linux and macOS, only already mounted paths can be accessed, Set-OutlookSignatures cannot create mount points itself.
 
 Default value: `.\config\default graph config.ps1`  
 
@@ -391,6 +403,8 @@ All domains belonging to the Active Directory forest of the currently logged-in 
 
 When a cross-forest trust is detected by the '*' option, all domains belonging to the trusted forest are considered but specific domains can be removed (`*', '-childX.trusted.forest`).
 
+On Linux and macOS, this parameter is ignored because on-prem Active Directories are not supported (only Graph is supported).
+
 Default value: '*'
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -TrustsToCheckForGroups 'corp.example.com', 'corp.example.net'  
@@ -402,6 +416,8 @@ Shall the software consider group membership in domain local groups in the mailb
 Per default, membership in domain local groups in the mailbox's forest is not considered as the required LDAP queries are slow and domain local groups are usually not used in Exchange.
 
 Domain local groups across trusts behave differently, they are always considered as soon as the trusted domain/forest is included in TrustsToCheckForGroups.
+
+On Linux and macOS, this parameter is ignored because on-prem Active Directories are not supported (only Graph is supported).
 
 Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
 
@@ -481,9 +497,11 @@ Local paths can be absolute (`C:\OOF templates`) or relative to the software pat
 
 SharePoint document libraries are supported (https only): `https://server.domain/SignatureSite/OOFTemplates` or `\\server.domain@SSL\SignatureSite\OOFTemplates`
 
-The currently logged-in user needs at least read access to the path.
+On Linux and macOS, only already mounted paths can be accessed, Set-OutlookSignatures cannot create mount points itself.
 
-Default value: `.\templates\Out of Office DOCX`
+Default value: '.\templates\Signatures DOCX\_Signatures.ini' on Windows, '.\templates\Signatures DOCX\_Signatures.ini' on Linux and macOS
+
+Default value: `.\templates\Out of Office DOCX` on Windows, `.\templates\Out of Office DOCX` on Linux and macOS
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out of Office DOCX'  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out of Office DOCX'"
@@ -499,9 +517,9 @@ Local and remote paths are supported. Local paths can be absolute ('C:\Signature
 
 SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/SignatureTemplates' or '\\server.domain@SSL\SignatureSite\SignatureTemplates'
 
-The currently logged-in user needs at least read access to the path
+On Linux and macOS, only already mounted paths can be accessed, Set-OutlookSignatures cannot create mount points itself.
 
-Default value: `.\templates\Out of Office DOCX\_OOF.ini`
+Default value: `.\templates\Out of Office DOCX\_OOF.ini` on Windows, Default value: `.\templates\Out of Office HTML\_OOF.ini` on Linux and macOS
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out of Office DOCX\_OOF.ini'  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out of Office DOCX\_OOF.ini'"
@@ -522,6 +540,8 @@ The currently logged-in user needs at least write access to the path.
 
 If the folder or folder structure does not exist, it is created.
 
+On Linux and macOS, only already mounted paths can be accessed, Set-OutlookSignatures cannot create mount points itself.
+
 Also see related parameter 'EmbedImagesInHtmlAdditionalSignaturePath'.
 
 This feature requires a Benefactor Circle license (when used outside of simulation mode).
@@ -540,7 +560,7 @@ Each format has advantages and disadvantages, please see `Should I use .docx or 
 
 Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
 
-Default value: $false  
+Default value: $false on Windows, $true on Linux and macOS
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -UseHtmTemplates $false  
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -UseHtmTemplates false  
@@ -606,11 +626,11 @@ Default value: $null
 ## 3.20. GraphOnly
 Try to connect to Microsoft Graph only, ignoring any local Active Directory.
 
-The default behavior is to try Active Directory first and fall back to Graph.
+The default behavior is to try Active Directory first and fall back to Graph. On Linux and macOS, only Graph is supported.
 
 Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
 
-Default value: $false
+Default value: $false on Windows, $true on Linux and macOS
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -GraphOnly $false  
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -GraphOnly false  
@@ -736,9 +756,11 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignaturesForAutomappedAndAdditionalMailboxes true"
 
 ## 3.29. DisableRoamingSignatures
-Disable signature roaming in Outlook. Has no effect on signature roaming via the MirrorLocalSignaturesToCloud parameter.
+Disable signature roaming in Outlook. Only works on Windows. Has no effect on signature roaming via the MirrorCloudSignatures parameter.
 
 A value representing true disables roaming signatures, a value representing false enables roaming signatures, any other value leaves the setting as-is.
+
+Attention: When Outlook v16 and higher is allowed to sync signatures itself, it may overwrite signatures created by this software with their cloud versions. To avoid this, it is recommended to set the parameters DisableRoamingSignatures and MirrorCloudSignatures to true instead.
 
 Only sets HKCU registry key, does not override configuration set by group policy.
 
@@ -751,8 +773,8 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DisableRoamingSignature
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DisableRoamingSignatures $true"  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DisableRoamingSignatures true"
 
-## 3.30. MirrorLocalSignaturesToCloud
-Should local signatures be uploaded as roaming signature for the current user?
+## 3.30. MirrorCloudSignatures
+Should local signatures be mirrored with signatures in Exchange Online?
 
 Possible for Exchange Online mailboxes:
 - Download for every mailbox where the current user has full access
@@ -769,11 +791,11 @@ Please note:
 - As there is no Microsoft official API, this feature is experimental, and you use it on your own risk.
 - This feature does not work in simulation mode, because the user running the simulation does not have access to the signatures stored in another mailbox
 
-The process is very simple and straight forward. Set-OutlookSignatures goes through the following steps:
+The process is very simple and straight forward. Set-OutlookSignatures goes through the following steps for each mailbox:
 1. Check if all prerequisites are met
 2. Download all signatures stored in the Exchange Online mailbox
   - This mimics Outlook's behavior: Roaming signatures are only manipulated in the cloud and then downloaded from there.
-  - Existing local signature are only overwritten when the roaming signature is newer
+  - An existing local signature is only overwritten when the cloud signature is newer and when it has not been processed before for a mailbox with higher priority
 3. Go through standard template and signature processing
   - Loop through the templates and their configuration, and convert them to signatures
   - Set default signatures for replies and forwards
@@ -781,8 +803,7 @@ The process is very simple and straight forward. Set-OutlookSignatures goes thro
   - If configured, delete signatures created earlier by Set-OutlookSignatures but now no longer have a corresponding central configuration
 4. Delete all signatures in the cloud and upload all locally stored signatures to the user's personal mailbox as roaming signatures
 
-
-This process is very simple and straight forward. It basically just mirrors the locally available signatures as roaming signatures, so there may be too many signatures available in the cloud - in this case, having too many signatures is better than missing some.
+There may be too many signatures available in the cloud - in this case, having too many signatures is better than missing some.
 
 Another advantage of this solution is that it makes roaming signatures available in Outlook versions that do not officially support them.
 
@@ -791,16 +812,20 @@ What will not work:
 - Download from and upload to shared mailboxes. This is not possible because of Microsoft API restrictions.
 - Uploading signatures other than device specific signatures and such assigned to the mailbox of the current user. Uploading is not implemented, because until now no way could be found that does not massively impact the user experience as soon as the Outlook integrated download process starts (signatures available multiple times, etc.)
 
+Attention: When Outlook v16 and higher is allowed to sync signatures itself, it may overwrite signatures created by this software with their cloud versions. To avoid this, it is recommended to set the parameters DisableRoamingSignatures and MirrorCloudSignatures to true instead.
+
+Consider combining MirrorCloudSignatures with MailboxSpecificSignatureNames.
+
 This feature requires a Benefactor Circle license.
 
 Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
 
 Default value: $false
 
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud $false  
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud false  
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud $false"  
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorLocalSignaturesToCloud false"
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures $false  
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false  
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures $false"  
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false"
 
 ## 3.31. MailboxSpecificSignatureNames
 Should signature names be mailbox specific by adding the e-mail address?
@@ -815,7 +840,7 @@ The step 4 condition `if the template has not been used before` makes sure that 
 
 With roaming signatures (signatures being stored in the Exchange Online mailbox itself) being used more and more, the step 4 condition `if the template has not been used before` makes less sense. By setting the `MailboxSpecificSignatureNames` parameter to `true`, this restriction no longer applies. To avoid naming collisions, the e-mail address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc.
 
-This naming convention intentionally matches Outlook's convention for naming roaming signatures. Before setting `MailboxSpecificSignatureNames` to `true`, consider the impact on the `DisableRoamingSignatures` and `MirrorLocalSignaturesToCloud` parameters - it is recommended to set both parameters to `true` to achieve the best user experience and to avoid problems with Outlook's own roaming signature synchronisation.
+This naming convention intentionally matches Outlook's convention for naming roaming signatures. Before setting `MailboxSpecificSignatureNames` to `true`, consider the impact on the `DisableRoamingSignatures` and `MirrorCloudSignatures` parameters - it is recommended to set both parameters to `true` to achieve the best user experience and to avoid problems with Outlook's own roaming signature synchronisation.
 
 Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
 
@@ -875,11 +900,11 @@ If the relative path set in the registry would be a valid path but does not exis
 # 5. Mailboxes  
 The software only considers primary mailboxes per default, these are mailboxes added as separate accounts.
 
-This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
+This is the same way Outlook handles mailboxes from a signature perspective: Outlook cannot handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
 
-Setting the parameter `SignaturesForAutomappedAndAdditionalMailboxes` to `true` allows the software to detect automapped and additional mailboxes. Signatures can be deployed for these types of mailboxes, but they can not be set as default signatures due to technical restrictions in Outlook.
+Setting the parameter `SignaturesForAutomappedAndAdditionalMailboxes` to `true` allows the software to detect automapped and additional mailboxes. Signatures can be deployed for these types of mailboxes, but they cannot be set as default signatures due to technical restrictions in Outlook.
 
-The software is created for Exchange environments. Non-Exchange mailboxes can not have OOF messages, group or replacement variable specific signatures, but common and mailbox specific signatures.  
+The software is created for Exchange environments. Non-Exchange mailboxes cannot have OOF messages, group or replacement variable specific signatures, but common and mailbox specific signatures.  
 # 6. Group membership  
 Per default, the software considers all static security and distribution groups of group scopes global and universal the currently processed mailbox belongs to.
 
@@ -905,6 +930,8 @@ Signatures created manually by the user are not deleted by default, this behavio
 Error handling is implemented rudimentarily.  
 # 9. Run script while Outlook is running  
 Outlook and the software can run simultaneously.
+
+On Windows, Outlook is never run or stopped by Set-OutlookSignatures. On macOS, Outlook may be started in the background, as this is a required by Outlook's engine for script access.
 
 New and changed signatures can be used instantly in Outlook.
 
@@ -1087,7 +1114,7 @@ Tags are case insensitive.
         -:$CurrentUser-IsMemberOf-MarketingAndSales$
         ```
 - `writeProtect` (signature template files only)  
-    - Write protects the signature files. Works only in Outlook. Modifying the signature in Outlook's signature editor leads to an error on saving, but the signature can still be changed after it has been added to an email.  
+    - Write protects the signature files. Works only in Outlook on Windows. Modifying the signature in Outlook's signature editor leads to an error on saving, but the signature can still be changed after it has been added to an email.  
 - `defaultNew` (signature template files only)  
     - Set signature as default signature for new mails  
 - `defaultReplyFwd` (signature template files only)  
@@ -1209,7 +1236,7 @@ Variables are case sensitive.
 
 Variables are replaced everywhere, including links, QuickTips and alternative text of images.
 
-With this feature, you can not only show email addresses and telephone numbers in the signature and OOF message, but show them as links which open a new email message (`"mailto:"`) or dial the number (`"tel:"`) via a locally installed softphone when clicked.
+With this feature, you cannot only show email addresses and telephone numbers in the signature and OOF message, but show them as links which open a new email message (`"mailto:"`) or dial the number (`"tel:"`) via a locally installed softphone when clicked.
 
 Custom Active directory attributes are supported as well as custom replacement variables, see `.\config\default replacement variables.ps1` for details.  
 Attributes from Microsoft Graph need to be mapped, this is done in `.\config\default graph config.ps1`.
@@ -1343,7 +1370,16 @@ Examples:
       ```
   - Insert the image in the template, and add '$CurrentMailbox-IsMemberOf-MarketingDeleteempty$' to the description of the picture.
     - When using embedded and linked pictures, you can also set the file name to '$CurrentMailbox-IsMemberOf-MarketingDeleteempty$'
+## 13.3. Custom image replacement variables
+You can fill custom image replacement variables yourself with a byte array: `'$CurrentUserCustomImage[1..10]$'`, `'$CurrentUserManagerCustomImage[1..10]$'`, `'$CurrentMailboxCustomImage[1..10]$'`, `'$CurrentMailboxManagerCustomImage[1..10]$'`.
 
+Usecases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/e-mail, etc.
+
+Per default, `'$Current[..]CustomImage1$'` is a QR code containing a vCard (in MeCard format) - see file `'.\config\default replacement variables.ps1'` for the code behind it.
+
+The behavior of custom image replacement variables and the possible configuration options are the same as with replacement variables for account pictures from Active Directory/Entra ID/Azure AD.
+
+As practical as QR codes may be, they should contain as little information as possible. The more information they contain, the larger the image needs to be, which often has a negative impact on the layout and always has a negative impact on the size of the email.<br>QR codes with too much information and too small an image size become visually blurred, making them impossible to scan - for DOCX templates, `DocxHighResImageConversion` can help. Consider bigger image size, less content, less error correction, MeCard instead of vCard, and pointing to an URL containing the actual information.
 # 14. Outlook Web  
 If the currently logged-in user has configured his personal mailbox in Outlook, the default signature for new emails is configured in Outlook Web automatically.
 
@@ -1363,7 +1399,7 @@ Set-OutlookSignatures supports three directory environments:
 - Cloud-only. This environment has no Active Directory on premises, or does not sync mail attributes between the cloud and the on-prem enviroment. the software does not connect to your on-prem environment, only to the cloud via the Microsoft Graph API.
 
 The software parameter `GraphOnly` defines which directory environment is used:
-- `-GraphOnly false` or not passing the parameter: On-prem AD first, Entra ID/Azure AD only when on-prem AD can not be reached
+- `-GraphOnly false` or not passing the parameter: On-prem AD first, Entra ID/Azure AD only when on-prem AD cannot be reached
 - `-GraphOnly true`: Entra ID/Azure AD only, even when on-prem AD could be reached
 ## 15.1. Basic Configuration
 To allow communication between Microsoft Graph and Set-Outlooksignatures, both need to be configured for each other.
@@ -1402,11 +1438,40 @@ The virtual account is accessible as `$ADPropsCurrentUser[...]` in `.\config\def
 In hybrid and cloud-only scenarios, Set-OutlookSignatures automatically tries three stages of authentication.
 1. Integrated Windows Authentication  
   This works in hybrid scenarios. The credentials of the currently logged-in user are used to access Microsoft Graph without any further user interaction.
-2. Silent authentication  
-  If Integrated Windows Authentication fails, the User Principal Name of the currently logged-in user is determined. If an existing cached cloud credential for this UPN is found, it is used for authentication with Microsoft Graph.  
+2. Silent with login hint
+  If Integrated Windows Authentication fails, the User Principal Name of the currently logged-in user is determined. If an existing Graph refresh token for this UPN is found, it is used for authentication with Microsoft Graph.  
   A default browser window with an "Authentication successful" message may open, it can be closed anytime.
-1. User interaction  
-  If the other authentication methods fail, the user is interactively asked for credentials. No custom components are used, only the official Microsoft 365 authentication site and the user's default browser. 
+3. Prompt with login hint and timeout 
+  If the prior authentication attempts failed, the user is interactively asked for credentials. If a UPN is found, this account is pre-selected, but the user can choose another account. If authentication does not happen within five minutes, Set-OutlookSignatures assumes it failed.
+  
+No custom components are used, only the official Microsoft 365 authentication site and the user's default browser and the official Microsoft Authentication Library for .Net (MSAL.Net).
+
+After successful authentication the refresh token is stored for later use by step 2, silent authentication, as described above.
+- On Windows, the file is encrypted using the system's Data Protection API (DPAPI) and saved in the file `$(Join-Path -Path $([Environment]::GetFolderPath('LocalApplicationData')) -ChildPath 'MSAL.PS\MSAL.PS.msalcache.bin3')`, which usually translates to `'C:\Users\<username>\AppData\Local\MSAL.PS\MSAL.PS.msalcache.bin3'`.
+  - In the rare case that DPAPI is not available, Set-OutlookSignatures informs you about the unencrypted storage and MSAL.Net saves the file unencrypted.
+- On Linux, the refresh token is stored in the default keyring in the entry named 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net'. If the default keyring is locked, the user is asked to unlock it (the message can be customized in 'default graph config.ps1').
+  - Should the default keyring not be available, Set-OutlookSignatures informs you about the unencrypted storage and MSAL.Net saves the refresh token in the file `$(Join-Path -Path $(@($($env:HOME), $(Join-Path -Path '/home' -ChildPath '<username>')) | Where-Object { $_ } | Select-Object -First 1) -ChildPath 'MSAL.PS/MSAL.PS.msalcache.bin3')`, which usually translates to `'/home/<username>/MSAL.PS/MSAL.PS.msalcache.bin3'`.
+- On macOS, the refresh token is stored in the default keychain in the entry named 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net'. If the default keychain is locked, the user is asked to unlock it (the message can be customized in 'default graph config.ps1').
+  - Should the default keychain not be available, Set-OutlookSignatures informs you about the unencrypted storage and MSAL.Net saves the refresh token in the file `$(Join-Path -Path $(@($($env:HOME), $(Join-Path -Path '/Users' -ChildPath '<username>')) | Where-Object { $_ } | Select-Object -First 1) -ChildPath 'MSAL.PS/MSAL.PS.msalcache.bin3')`, which usually translates to `'/Users/<username>/MSAL.PS/MSAL.PS.msalcache.bin3'`.
+
+Set-OutlookSignatures always keeps you informed about where and how the token is stored, and how you can delete it to force re-authentication without using the cached refresh token:
+- Windows
+  - '`Encrypted file '$($cacheFilePath)', delete file to remove cached token`'
+  - '`Unencrypted file '$($cacheFilePath)', delete file to remove cached token`'
+- Linux
+  - '`Encrypted default keyring entry 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net', use keychain app to remove cached token`'
+  - '`Unencrypted file '$($cacheFilePath)', delete file to remove cached token`'
+- macOS
+  - '`Encrypted default keychain entry 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net', use 'security delete-generic-password "Set-OutlookSignatures Microsoft Graph token via MSAL.Net"' to remove cached token`'
+  - '`Unencrypted file '$($cacheFilePath)', delete file to remove cached token`'
+
+If you want to see more information around authentication, run Set-OutlookSignatures with the "-verbose" parameter.
+
+If a user executes Set-OutlookSignatures on a client several times in succession and is asked for authentication each time:
+- Run Set-OutlookSignatures with the "-verbose" parameter to see details about authentication.
+- Check your MFA configuration and Conditional Access Policies in Entra ID. You may have not considered script access in your policies (you should see a hint to that in the error message displayed when run with "-verbose").
+-	Ensure that Set-OutlookSignatures is run in the security context of the user, and not in another security context such as SYSTEM (which is a common mistake when using Intune remediation scripts).
+- Ensure that the cache file or keyring/keychain entry is not deleted between separate runs of Set-OutlookSignatures for the same user on the same machine.
 # 16. Simulation mode  
 Simulation mode is enabled when the parameter `SimulateUser` is passed to the software. It answers the question `"What will the signatures look like for user A, when Outlook is configured for the mailboxes X, Y and Z?"`.
 
@@ -1440,7 +1505,7 @@ The legacyExchangeDN search considers migration scenarios where the original leg
 If Outlook does not have information about the legacyExchangeDN of a mailbox (for example, when accessing a mailbox via protocols such as POP3 or IMAP4), the account behind a mailbox is searched by checking if the email address of the mailbox can be found in the proxyAddresses attribute of an account in Active Directory/Graph.
 
 If the account behind a mailbox is found, group membership information can be retrieved and group specific templates can be applied.
-If the account behind a mailbox is not found, group membership can not be retrieved, and group and replacement variable specific templates can not be applied. Such mailboxes can still receive common and mailbox specific signatures and OOF messages.  
+If the account behind a mailbox is not found, group membership cannot be retrieved, and group and replacement variable specific templates cannot be applied. Such mailboxes can still receive common and mailbox specific signatures and OOF messages.  
 ## 17.4. How is the personal mailbox of the currently logged-in user identified?  
 The personal mailbox of the currently logged-in user is preferred to other mailboxes, as it receives signatures first and is the only mailbox where the Outlook Web signature can be set.
 
@@ -1528,7 +1593,7 @@ $StartOnlyWithConnectionToOnPremAD = $false
 
 
 # Start transcript
-$TranscriptPath = Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Set-OutlookSignatures.txt'
+$TranscriptPath = Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures.txt'
 
 Start-Transcript -Path $TranscriptPath
 
@@ -1591,7 +1656,7 @@ if ($StartOnlyWithConnectionToOnPremAD -eq $true) {
             }
 
         } else {
-            Write-Host '    User on-prem AD can not be reached, do not go on with further tests.'
+            Write-Host '    User on-prem AD cannot be reached, do not go on with further tests.'
         }
     } else {
         Write-Host '  Currently logged-in user does not have a DNS domain, must be a local user, do not gon on with further tests.'
@@ -1685,7 +1750,7 @@ See `.\sample code\CreateDesktopIcon.ps1` for a code example. Don't forget to ad
 ## 17.14. What is the recommended approach for implementing the software?  
 The Quick Start Guide in this document is a good overall starting point for beginners.
 
-For the organizational aspects around Set-OutlookSignatures, Benefactor Circle members have access to the "Implementation Approach" document. The content is based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes.
+For the organizational aspects around Set-OutlookSignatures, read the "Implementation Approach" document. The content is based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes.
 
 It contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators. It is suited for service providers as well as for clients.
 
@@ -1775,9 +1840,9 @@ There is no binding roadmap for future versions, although we maintain a list of 
 
 Fixing issues has priority over new features, of course.
 ## 17.20. How to deploy signatures for "Send As", "Send On Behalf" etc.?
-The software only considers primary mailboxes, these are mailboxes added as separate accounts. This is the same way Outlook handles mailboxes from a signature perspective: Outlook can not handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
+The software only considers primary mailboxes, these are mailboxes added as separate accounts. This is the same way Outlook handles mailboxes from a signature perspective: Outlook cannot handle signatures for non-primary mailboxes (added via "Open these additional mailboxes").
 
-If you want to deploy signatures for non-primary mailboxes, sett the parameter `SignaturesForAutomappedAndAdditionalMailboxes` to `true` to allow the software to detect automapped and additional mailboxes. Signatures can be deployed for these types of mailboxes, but they can not be set as default signatures due to technical restrictions in Outlook.
+If you want to deploy signatures for non-primary mailboxes, sett the parameter `SignaturesForAutomappedAndAdditionalMailboxes` to `true` to allow the software to detect automapped and additional mailboxes. Signatures can be deployed for these types of mailboxes, but they cannot be set as default signatures due to technical restrictions in Outlook.
 
 If you want to deploy signatures for
 - mailboxes you don't add to Outlook but just use an assigned "Send As" or "Send on Behalf" right by choosing a different "From" address,
@@ -1835,7 +1900,7 @@ If dynamic groups would have to be considered, the only way would be to enumerat
 
 The LDAP queries defining dynamic groups are deemed expensive due to the potential load they put on Active Directory and their resulting runtime.  
 Microsoft does not recommend against dynamic groups, only not to use them heavily.  
-This is very likely the reason why dynamic groups can not be granted permissions on Exchange mailboxes and other Exchange objects, and why each dynamic group can be assigned an expansion server executing the LDAP query (expansion times of 15 minutes or more are not rare in the field).
+This is very likely the reason why dynamic groups cannot be granted permissions on Exchange mailboxes and other Exchange objects, and why each dynamic group can be assigned an expansion server executing the LDAP query (expansion times of 15 minutes or more are not rare in the field).
 
 Taking all these aspects into account, Set-OutlookSignatures will not consider membership in dynamic groups on premises until a reliable and efficient way of querying a user's dynamic group membership is available.
 
@@ -1875,11 +1940,11 @@ Mailboxes are taken from the first matching source:
   3. New Outlook is installed: Mailboxes from New Outlook (including manually added and automapped mailboxes for the currently logged-in user)
   4. If none of the above matches: Mailboxes from Outlook Web (including manually added mailboxes, automapped mailboxes follow when Microsoft updates Outlook Web to match the New Outlook experience)
 
-Default signatures can not be set locally or in Outlook Web until an Outlook profile has been configured, as the corresponding settings are stored in registry paths containing random numbers, which need to be created by Outlook.
+Default signatures cannot be set locally or in Outlook Web until an Outlook profile has been configured, as the corresponding settings are stored in registry paths containing random numbers, which need to be created by Outlook.
 ## 17.25. What if Outlook is not installed at all?
 If Outlook is not installed at all, Set-OutlookSignatures will still be useful: It determine the logged-in users email address, create the signatures for his personal mailbox in a temporary location, set a default signature in Outlook Web as well as the out-of-office replies.
 ## 17.26. What about the roaming signatures feature in Exchange Online?  
-Set-OutlookSignatures can handle roaming signatures since v4.0.0. See `MirrorLocalSignaturesToCloud` in this document for details.
+Set-OutlookSignatures can handle roaming signatures since v4.0.0. See `MirrorCloudSignatures` in this document for details.
 
 Set-OutlookSignatures supports romaing signatures independent from the Outlook version used. Roaming signatures are also supported in scenarios where only Outlook Web in the cloud or New Outlook is used.
 
@@ -1887,7 +1952,7 @@ As long as Microsoft does not publish an official API, this feature is marked as
 
 Storing signatures in the mailbox is a good idea, as this makes signatures available across devices and apps.
 
-As soon as Microsoft makes available a public API, more email clients will get support for this feature - which will close a gap, Set-OutlookSignatures can not fill because it is not running on exchange servers: Adding signatures to mails sent from apss besides Outlook on Windows.
+As soon as Microsoft makes available a public API, more email clients will get support for this feature - which will close a gap, Set-OutlookSignatures cannot fill because it is not running on exchange servers: Adding signatures to mails sent from apss besides Outlook on Windows, Outlook Web and New Outlook.
 
 Roaming signatures will very likely never be available for mailboxes on-prem, and it seems that it also will not be available for shared mailboxes in the cloud.
 
@@ -1918,12 +1983,12 @@ If you enforce setting sensitivity labels:
     - Documents labeled this way can be opened without having the Information Protection Add-In for Office installed. This is useful when not all of your Set-OutlookSignatures users are also Information Protection users and have the Add-In installed.
   - When using a template with an other sensitivity label, every client Set-OutlookSignatures runs on needs the Information Protection Add-In for Office installed, and the user running Set-OutlookSignatures needs permission to access the protected file.
   - The RTF signature file will be created with the same sensitivity label as the template. This is only relevant for the user composing a new email in RTF format, as the composing user needs to be able to open the RTF document and copy the content from it - the actual signature in the email does not have Information Protection applied.
-  - The .HTM and .TXT signature files will be created without a sensitivity label, as these documents can not be protected by Microsoft Information Protection.
+  - The .HTM and .TXT signature files will be created without a sensitivity label, as these documents cannot be protected by Microsoft Information Protection.
   - If you do not set a sensitivity label, Word will prompt the user to choose one each time the unlabeled local copy of a template is converted to .htm, .rtf or .txt.
     - The DOCX sample template files that come with Set-OutlookSignatures do not have a sensitivity label set.
 - When using HTM templates, no further actions are required.
-  - HTM files can not be assigned a sensitivity label, and converting HTM files to RTF is possible even when sensitivity labels are enforced.
-  - Converting HTM files to TXT is also no problem, as both file formats can not be assigned a sensitivity label. 
+  - HTM files cannot be assigned a sensitivity label, and converting HTM files to RTF is possible even when sensitivity labels are enforced.
+  - Converting HTM files to TXT is also no problem, as both file formats cannot be assigned a sensitivity label. 
 
 Additional information that might be of interest for your Information Protection configuration:
 - Template files are copied to the local temp directory of the user (PowerShell: `[System.IO.Path]::GetTempPath()`) for further use, with a randomly generated GUID as name. The extension is the one of the template (.docx or .htm).
@@ -1938,8 +2003,8 @@ The size of images in signatures may differ to the size of the very same image i
 
 In both cases, usually only emails composed HTML format are affected, but not emails in RTF format.
 
-When only the recipient is affected, it is very likely that the problem is to be found within the mail client of the recipient, as it very likely does not respect or interpret HTML width and height attributes correctly.  
-- This problem can not be solved on the sending side, only on the recipient side. But the sender side can implement a workaround: Do not scale images in templates (by resizing them in Word or using HTML width and height tags), but use the original size of the image. It may be neccessary to resize the images with tools like GIMP before using them in templates.
+When only the recipient is affected, it is very likely that the problem is to be found within the email client of the recipient, as it very likely does not respect or interpret HTML width and height attributes correctly.  
+- This problem cannot be solved on the sending side, only on the recipient side. But the sender side can implement a workaround: Do not scale images in templates (by resizing them in Word or using HTML width and height tags), but use the original size of the image. It may be neccessary to resize the images with tools like GIMP before using them in templates.
 
 When the problem can already be seen when composing a message, there may be different root causes and according solutions or workarounds.
 
@@ -1966,7 +2031,7 @@ Two workarounds are available when you do not want to or can't find and solve th
 - The problem may only appear when templates are converted to signatures on computers configured with a display scaling higher than 100 %. In this case, the problem is in the Word conversion module or the HTML rendering engine of Word (which is used by Outlook). The registry key described in <a href="https://learn.microsoft.com/en-US/outlook/troubleshoot/user-interface/graphics-file-attachment-grows-larger-in-recipient-email" target="_blank">this Microsoft article</a> may help here. After setting the registry key according to the article, Outlook and Word need to be restarted and Set-OutlookSignatures needs to run again.  
 Starting with v4.0.0, Set-OutlookSignatures sets the `DontUseScreenDpiOnOpen` registry key to the recommended value. 
 
-Nonetheless, some scaling and display problems simply can not be solved in the HTML code of the signature, because the problem is in the Word HRML rendering engine used by Outlook: For example, some Word builds ignore embedded image width and height attributes and always scale these images at 100% size, or sometimes display them with inverted colors or a black background.  
+Nonetheless, some scaling and display problems simply cannot be solved in the HTML code of the signature, because the problem is in the Word HRML rendering engine used by Outlook: For example, some Word builds ignore embedded image width and height attributes and always scale these images at 100% size, or sometimes display them with inverted colors or a black background.  
 In this case, you can influence how images are displayed and converted from DOCX to HTM with the parameters `EmbedImagesInHtml` and `DocxHighResImageConversion`:
 
 | Parameter  | Default value | Alternate<br>configuration A | Alternate<br>configuration B | Alternate<br>configuration C |
@@ -2072,7 +2137,7 @@ From this point of view, processing times do not really matter - slow execution 
 You can define the process priority with the `ScriptProcessPriority` and `WordProcessPriority` priority.
 ## 17.33. Keep users from adding, editing and removing signatures
 ### 17.33.1. Outlook
-You can disable GUI elements so that users can not add, edit and remove signatures in Outlook by using the 'Do not allow signatures for e-mail messages' Group Policy Object (GPO) setting.
+You can disable GUI elements so that users cannot add, edit and remove signatures in Outlook by using the 'Do not allow signatures for e-mail messages' Group Policy Object (GPO) setting.
 
 Caveats are:
 - Users can still add, edit and remove signatures in the file system
@@ -2086,7 +2151,7 @@ As an alternative, you may consider one or both of the following alternatives:
   - 22965: 'SignatureGallyery', the list of signatures in the 'SignatureInsertMenu'. Prohibits selecting another signature than the default one to add to an email, but still allows access to 'SignaturesStationeryDialog'.
   - 3766: 'SignaturesStationeryDialog', the GUI allowing users to add, edit and remove signatures. Also disables access to 'Personal Stationary' and 'Stationary and Fonts' - these settings should be controlled centrally anyway in order to comply with the corporate identity/corporate design guidelines.
 
-There is one thing you can not disable: Outlook always allows users to edit the copy of the signature after it was added to an email.
+There is one thing you cannot disable: Outlook always allows users to edit the copy of the signature after it was added to an email.
 ### 17.33.2. Outlook Web
 Unfortunately, Outlook Web cannot be configured as granularly as Outlook. In Exchange Online as well as in Exchange on-prem, the `Set-OwaMailboxPolicy` cmdlet does not allow you to configure signature settings in detail, but only to disable or enable signature features`SignaturesEnabled` for specific groups of mailboxes.
 

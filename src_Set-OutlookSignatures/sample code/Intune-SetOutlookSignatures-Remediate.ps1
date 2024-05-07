@@ -1,17 +1,29 @@
-# See FAQ 'How can I deploy and run Set-OutlookSignatures using Microsoft Intune?' in '.\docs\README' for details
+<#
+This sample code shows how to use Intune detect and remediation scripts to deploy and regularly run Set-OutlookSignatures.
+
+See FAQ 'How can I deploy and run Set-OutlookSignatures using Microsoft Intune?' in '.\docs\README' for details
+
+You have to adapt it to fit your environment.
+The sample code is written in a generic way, which allows for easy adaption.
+
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+#>
+
+[CmdletBinding()] param ()
 
 # Log file for Set-OutlookSignatures, must be identical in detection and remediation script
-$logFile = 'c:\path\to\the\user\specific\logfile.txt'
+$logFile = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures_log.txt')
 
 # Version of Set-OutlookSignatures to use/download
-$versionToUse = 'v4.10.0'
+$versionToUse = 'vX.X.X' # Must be a valid tag of a public release at https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases, for example 'v4.12.0'
 
 # Where to find Set-OutlookSignatures locally
 $softwarePath = 'c:\path\to\Set-OutlookSignatures'
 
 # Parameters for the later execution of Set-OutlookSignatures.ps1
 $parameters = @{
-    SignatureTemplatePath       = 'https://URI/to/SharePoint/Libary/with/Templates' # Path to SharePoint document library containing the templates, ini files, ...
+    SignatureTemplatePath       = 'c:\path\to\templates' # Path to folder containing the templates
+    # Add more parameters here
     BenefactorCircleId          = 'xxx'
     BenefactorCircleLicenseFile = 'xxx'
 }
@@ -71,7 +83,9 @@ try {
 
         Remove-Item -LiteralPath $tempFile -Force
 
-        Get-ChildItem $softwarePath -Recurse | Unblock-File
+        if ($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) {
+            Get-ChildItem $softwarePath -Recurse | Unblock-File
+        }
     }
 
 

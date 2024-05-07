@@ -41,8 +41,7 @@ function Set-Config {
         foreach ($Property in $InputObject.psobject.Properties) {
             if ($OutConfig.Value.psobject.Properties.Name -contains $Property.Name) {
                 $OutConfig.Value.($Property.Name) = $Property.Value
-            }
-            else {
+            } else {
                 Write-Warning ('Ignoring invalid configuration property [{0}].' -f $Property.Name)
             }
         }

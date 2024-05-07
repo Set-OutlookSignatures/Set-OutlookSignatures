@@ -64,11 +64,10 @@ function Select-PsBoundParameters {
             if ($CommandParameterSets) {
                 [System.Collections.Generic.List[string]] $listCommandParameters = New-Object System.Collections.Generic.List[string]
                 foreach ($CommandParameterSet in $CommandParameterSets) {
-                    $listCommandParameters.AddRange([string[]]($CommandInfo.ParameterSets | Where-Object Name -eq $CommandParameterSet | Select-Object -ExpandProperty Parameters | Select-Object -ExpandProperty Name))
+                    $listCommandParameters.AddRange([string[]]($CommandInfo.ParameterSets | Where-Object Name -EQ $CommandParameterSet | Select-Object -ExpandProperty Parameters | Select-Object -ExpandProperty Name))
                 }
                 $CommandParameters = $listCommandParameters | Select-Object -Unique
-            }
-            else {
+            } else {
                 $CommandParameters = $CommandInfo.Parameters.Keys
             }
         }

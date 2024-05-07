@@ -61,23 +61,20 @@ $ModuleManifest = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'MSAL.PS.ps
 [System.Collections.Generic.List[string]] $RequiredAssemblies = New-Object System.Collections.Generic.List[string]
 
 ## Select the correct assemblies for the PowerShell platform
-# Having .net5 and netcoreapp dlls causes an import error when they are both listed in the filelist.
-# if ($PSVersionTable.PSVersion -ge [version]'7.1' -and $IsWindows -and $PSVersionTable.OS -match '\d+(\.\d+)+$' -and [version]$matches[0] -ge [version]'10.0.17763') {
-#     foreach ($Path in ($ModuleManifest.FileList -like "*\Microsoft.Identity.Client.*\net5.0-windows10.0.17763\*.dll")) {
-#         $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
-#     }
-# }
-#if ($PSVersionTable.PSEdition -eq 'Core') {
-    foreach ($Path in ($ModuleManifest.FileList -ilike '*\netstandard2.0\*.dll')) {
+foreach ($Path in @($ModuleManifest.FileList -ilike '*\netstandard2.0\Microsoft.Identity.Client.dll')) {
+    $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
+}
+
+if ($PSVersionTable.PSEdition -eq 'Core') {
+    foreach ($Path in @($ModuleManifest.FileList -ilike '*\netstandard2.0\Microsoft.Identity*.dll')) {
         $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
     }
-#} elseif ($PSVersionTable.PSEdition -eq 'Desktop') {
-#    foreach ($Path in ($ModuleManifest.FileList -ilike '*\netframework\*.dll')) {
-#        $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
-#    }
-#}
+} elseif ($PSVersionTable.PSEdition -eq 'Desktop') {
+    foreach ($Path in @(@($ModuleManifest.FileList -ilike '*\netstandard2.0\Microsoft.Identity*.dll') | Where-Object { $_ -inotlike '*\netstandard2.0\Microsoft.Identity.Client.Desktop.dll' })) {
+        $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
+    }
+}
 
-## Load correct assemblies for the PowerShell platform
 foreach ($RequiredAssembly in $RequiredAssemblies) {
     try {
         Add-Type -LiteralPath $RequiredAssembly -IgnoreWarnings | Out-Null
@@ -87,46 +84,33 @@ foreach ($RequiredAssembly in $RequiredAssemblies) {
 }
 
 
-## Load TokenCacheHelper
+# Load TokenCacheHelper
 if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') {
-    foreach ($Path in ($ModuleManifest.FileList -like '*\internal\TokenCacheHelper.cs')) {
-        $srcTokenCacheHelper = Join-Path $PSScriptRoot $Path
-    }
-
-    if ($PSVersionTable.PSEdition -ieq 'Core') {
-        $RequiredAssemblies.AddRange([string[]]@('netstandard.dll', 'System.Threading.dll', 'System.Runtime.Extensions.dll', 'System.IO.FileSystem.dll', 'System.Security.Cryptography.ProtectedData.dll', 'mscorlib.dll'))
-
-        if (-not ('TokenCacheHelper' -as [type])) {
-            try {
-                Add-Type -LiteralPath $srcTokenCacheHelper -ReferencedAssemblies $RequiredAssemblies
-            } catch {
-                Write-Warning 'There was an error loading some dependencies. Storing TokenCache on disk will not function.'
-            }
+    if (-not ('TokenCacheHelper' -as [type])) {
+        foreach ($Path in ($ModuleManifest.FileList -like '*\internal\TokenCacheHelper.cs')) {
+            $srcTokenCacheHelper = Join-Path $PSScriptRoot $Path
         }
-    } else {
-        $RequiredAssemblies.AddRange([string[]]@('netstandard.dll', 'System.Security.dll'))
 
-        if (-not ('TokenCacheHelper' -as [type])) {
-            try {
-                Add-Type -LiteralPath $srcTokenCacheHelper -ReferencedAssemblies $RequiredAssemblies -IgnoreWarnings
-            } catch {
-                Write-Warning 'There was an error loading some dependencies. Storing TokenCache on disk will not function.'
-            }
+        if ($PSVersionTable.PSVersion -ge [version]'7.0') {
+            $RequiredAssemblies.AddRange([string[]]('netstandard.dll', 'System.Threading.dll', 'System.Runtime.Extensions.dll', 'System.IO.FileSystem.dll', 'System.Security.Cryptography.ProtectedData.dll'))
+            Add-Type -LiteralPath $srcTokenCacheHelper -ReferencedAssemblies $RequiredAssemblies
+        } elseif ($PSVersionTable.PSVersion -ge [version]'5.1') {
+            $RequiredAssemblies.AddRange([string[]]('netstandard.dll', 'System.Security.dll'))
+            Add-Type -LiteralPath $srcTokenCacheHelper -ReferencedAssemblies $RequiredAssemblies
         }
     }
 }
 
-## Load DeviceCodeHelper
-foreach ($Path in ($ModuleManifest.FileList -like '*\internal\DeviceCodeHelper.cs')) {
-    $srcDeviceCodeHelper = Join-Path $PSScriptRoot $Path
-}
-if ($PSVersionTable.PSVersion -ge [version]'6.0') {
-    $RequiredAssemblies.Add('System.Console.dll')
-    #$RequiredAssemblies.Add('System.ComponentModel.Primitives.dll')
-    #$RequiredAssemblies.Add('System.Diagnostics.Process.dll')
-}
 
+# Load DeviceCodeHelper
 if (-not ('DeviceCodeHelper' -as [type])) {
+    foreach ($Path in ($ModuleManifest.FileList -like '*\internal\DeviceCodeHelper.cs')) {
+        $srcDeviceCodeHelper = Join-Path $PSScriptRoot $Path
+    }
+    if ($PSVersionTable.PSVersion -ge [version]'6.0') {
+        $RequiredAssemblies.Add('System.Console.dll')
+    }
+
     try {
         Add-Type -LiteralPath $srcDeviceCodeHelper -ReferencedAssemblies $RequiredAssemblies -IgnoreWarnings -WarningAction SilentlyContinue
     } catch {

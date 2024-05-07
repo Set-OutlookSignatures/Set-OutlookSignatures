@@ -15,11 +15,9 @@ function Assert-DirectoryExists {
             ## InputObject Casting
             if ($InputObject -is [System.IO.DirectoryInfo]) {
                 [System.IO.DirectoryInfo] $DirectoryInfo = $InputObject
-            }
-            elseif ($InputObject -is [System.IO.FileInfo]) {
+            } elseif ($InputObject -is [System.IO.FileInfo]) {
                 [System.IO.DirectoryInfo] $DirectoryInfo = $InputObject.Directory
-            }
-            elseif ($InputObject -is [string]) {
+            } elseif ($InputObject -is [string]) {
                 [System.IO.DirectoryInfo] $DirectoryInfo = $InputObject
             }
 

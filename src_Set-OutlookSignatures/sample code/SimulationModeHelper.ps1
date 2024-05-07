@@ -1,3 +1,14 @@
+<#
+This sample code shows how to make it easier to use simulation mode for template creators.
+
+You have to adapt it to fit your environment.
+The sample code is written in a generic way, which allows for easy adaption.
+
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+#>
+
+[CmdletBinding()] param ()
+
 Write-Host 'Set-OutlookSignatures simulation mode helper'
 
 
@@ -45,7 +56,7 @@ do {
 Write-Host
 Write-Host '  Please enter the email addresses of the mailboxes to simulate'
 Write-Host '    Separate multiple mailboxes by spaces, commas or semicolons'
-Write-host '    Leave empty to get mailboxes from Outlook Web'
+Write-Host '    Leave empty to get mailboxes from Outlook Web'
 Write-Host '      Example: user.x@domain.com, user.a@domain.com, sharedmailbox.y@domain.com'
 
 do {

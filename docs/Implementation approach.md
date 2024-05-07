@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="MIT license"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20commercial%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="commercial support by ExplicIT Consulting"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="License"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with%20the-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20fee--based%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="get fee-based support from ExplicIT Consulting"></a>
 
 # What is the recommended approach for implementing the software? <!-- omit in toc -->
 There is certainly no definitive generic recommendation, but this document should be a good starting point.
@@ -191,42 +191,45 @@ The product is used for the central administration and local distribution of tex
 
 Integration into the client, which is secured with the help of AppLocker and other mechanisms such as Microsoft Purview Informatoin Protection, is technically and organisationally simple thanks to established measures (such as the digital signing of PowerShell scripts).
 ### 1.6.2. Features
-**Signatures and OOF messages can be:**
+With Set-OutlookSignatures, signatures and out-of-office replies can be:
 - Generated from **templates in DOCX or HTML** file format  
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
-- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups** or specific **email addresses**, for **every mailbox across all Outlook profiles** (**automapped and additional mailboxes** are optional)  
+- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups**, specific **email addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes**  
 - Created with different names from the same template (e.g., **one template can be used for multiple shared mailboxes**)
 - Assigned **time ranges** within which they are valid  
 - Set as **default signature** for new emails, or for replies and forwards (signatures only)  
 - Set as **default OOF message** for internal or external recipients (OOF messages only)  
-- Set in **Outlook Web** for the currently logged-in user  
+- Set in **Outlook Web** for the currently logged-in user, including mirroring signatures the the cloud as **roaming signatures**  
 - Centrally managed only or **exist along user-created signatures** (signatures only)  
-- Copied to an **alternate path** for easy access on mobile devices not directly supported by this software (signatures only)
+- Copied to an **alternate path** for easy access on mobile devices not directly supported (signatures only)
 - **Write protected** (Outlook signatures only)
-- Mirrored to the cloud as **roaming signatures**
 
-Set-Outlooksignatures can be **executed by users on clients, or on a server without end user interaction**.  
+Set-OutlookSignatures can be **run by users on Windows, Linux and macOS, as well as on terminal servers - or on a central system without client deployment and end user interaction**.  
 On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, link or any other way of starting a program.  
 Signatures and OOF messages can also be created and deployed centrally, without end user or client involvement.
 
 **Sample templates** for signatures and OOF messages demonstrate all available features and are provided as .docx and .htm files.
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the software and to inspect the resulting signature files before going live.
-  
-The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.
 
-It is **multi-client capable** by using different template paths, configuration files and software parameters.
+**SimulateAndDeploy** allows to deploy signatures to Outlook Web/New Outlook without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
 
-Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard file share on a server, and PowerShell and Office. 
+The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.  
+All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).
+
+It is **multi-client capable** by using different template paths, configuration files and script parameters.
+
+Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard SMB file share on a central system, and optionally Office on your clients.  
+There is also **no telemetry** or "calling home", emails are **not routed through a 3rd party data center or cloud service**, and there is **no need to change DNS records (MX, SPF) or mail flow**.
 
 A **documented implementation approach**, based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators.  
-The implementatin approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
+The implementation approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
-The software core is **Free and Open-Source Software (FOSS)**. It is published under the MIT license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) v3. Please see `.\LICENSE.txt` for copyright and MIT license details.
+The software core is **Free and Open-Source Software (FOSS)**. It is published under a license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) and other popular licenses. Please see `.\LICENSE.txt` for copyright and license details.
 
-**Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling the exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source license.  Please see `.\docs\Benefactor Circle` for details.  
+**Some features are exclusive to Benefactor Circle members.** Benefactor Circle members have access to an extension file enabling exclusive features. This extension file is chargeable, and it is distributed under a proprietary, non-free and non-open-source license. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.  
 ## 1.7. Administration  
 ### 1.7.1. Client  
 - Outlook and Word (when using DOCX templates, and/or signatures in RTF format), each from version 2010  
@@ -579,7 +582,7 @@ Die Einbindung in den mit Hilfe von AppLocker und anderen Mechanismen wie z. B. 
 - Als **Standard-OOF-Nachricht** für interne oder externe Empfänger festgelegt werden (nur OOF-Nachrichten)  
 - Nach **Outlook Web** für den aktuell angemeldeten Benutzer synchronisiert werden  
 - Nur zentral verwaltet sein oder **mit vom Benutzer erstellten Signaturen** koexistieren (nur Signaturen)  
-- In einen **alternativen Pfad** kopiert werden für einfachen Zugriff auf mobilen Geräten, die nicht direkt von dieser Softwware unterstützt werden (nur Signaturen)
+- In einen **alternativen Pfad** kopiert werden für einfachen Zugriff auf mobilen Geräten (nur Signaturen)
 - **Schreibgeschützt** (nur Outlook-Signaturen)
 - Gespiegelt in die Cloud als **Roaming-Signaturen**
 

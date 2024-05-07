@@ -76,14 +76,23 @@ $GraphClientID = 'beea8249-8c98-4c76-92f6-ce3c468a61e6'
 $GraphEndpointVersion = 'v1.0'
 
 
+# Message box text to show when Linux keyring or macOS keychain is not yet unlocked, and the system asks the user for the password to unlock it
+# Leave blank to not show message box at all
+# Defining a text is recommended to inform users why they are asked by the system to unlock their keyring or keychain
+#   Set-OutlookSignatures usually runs in the background, so the system request is a negative surprise for users
+# On Windows, the message box is shown on the very top of the active desktop and can not be sent to the background,
+#   but does not steal the focus
+$GraphUnlockKeyringKeychainMessageboxText = "You started Set-OutlookSignatures, or an administrator configured it to run for you to update your Outlook signatures and out-of-office replies.$([System.Environment]::NewLine)$([System.Environment]::NewLine)To look up a required security token for access to Microsoft 365, $(if($IsLinux){ $($PSVersionTable.OS) } elseif ($IsMacOS) { $("$(sw_vers -productName) $(sw_vers -productVersion)") }) will ask you to unlock your personal $( if($IsLinux){ 'keyring' } else { 'keychain' }) with your password.$([System.Environment]::NewLine)$([System.Environment]::NewLine)Should you choose to not unlock you personal $( if($IsLinux){ 'keyring' } else { 'keychain' }), the security token will be saved in an unencrypted file in your user directory."
+
+
 # Message box text to show before browser opens for authentication to Microsoft 365
 # Leave blank to not show message box at all
 # Defining a text is recommended to inform users about the upcoming opening of a new browser tab asking for authentication
 #   Set-OutlookSignatures usually runs in the background and the M365 logon screen can not show a hint to Set-OutlookSignatures,
 #   so the new tab is a negative surprise for users
-# The message box is shown on the very top of the active desktop and can not be sent to the background,
+# On Windows, the message box is shown on the very top of the active desktop and can not be sent to the background,
 #   but does not steal the focus
-$GraphHtmlMessageboxText = "You started Set-OutlookSignatures, or an administrator configured it to run for you to update your Outlook signatures and out-of-office replies.`r`n`r`nA required token for access to Microsoft 365 is not yet available.`r`n`The program may run for the first time on this client, a previous token may have expired or been deleted.`r`n`r`nTo create this required token, please login to Microsoft 365 with your account ""$($script:CurrentUser)"" in the new browser tab that will open after you close this message."
+$GraphHtmlMessageboxText = "You started Set-OutlookSignatures, or an administrator configured it to run for you to update your Outlook signatures and out-of-office replies.$([System.Environment]::NewLine)$([System.Environment]::NewLine)A required security token for access to Microsoft 365 is not yet available.$([System.Environment]::NewLine)$([System.Environment]::NewLine)The program may run for the first time on this client, a previous security token may have expired or been deleted.$([System.Environment]::NewLine)$([System.Environment]::NewLine)To create this required security token, please login to Microsoft 365 with your account$(if($script:CurrentUser){" '$($script:CurrentUser)'"}) in the new browser tab that will open after you close this message."
 
 
 # HTML message to show after successful browser authentication to Microsoft Graph
