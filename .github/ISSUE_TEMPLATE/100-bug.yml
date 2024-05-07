@@ -1,0 +1,55 @@
+name: Create a new issue report
+description: Create a new issue report for the Free and Open-Source (FOSS) core version of Set-OutlookSignatures.
+title: "<a short and pregnant title for your issue>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Thanks for taking the time to fill out this issue report!**
+
+        Support in this GitHub repository is free, voluntary and without guaranteed response times.
+
+        If the issue you want to report is for the Benefactor Circle add-on or you want to prioritize your request, please use [ExplicIT Consulting's **fee-based support**](https://explicitconsulting.at/open-source/set-outlooksignatures/#5-fee-based-support) instead of this form.
+  - type: checkboxes
+    id: usinglatestrelease
+    attributes:
+      label: Issue happens in the latest release
+      description: By submitting this issue, you confirm that the issue happens in the [latest release](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/latest) of Set-OutlookSignatures.
+      options:
+        - label: I confirm that the issue happens in the latest release of Set-OutlookSignatures
+          required: true
+  - type: checkboxes
+    id: previousissuesanddocumentation
+    attributes:
+      label: Previously solved issues and documentation
+      description: Before creating a new issue, look through [previously solved issues](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=) and the documentation ([README](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures) and associated documents).
+      options:
+        - label: I have searched through previous issues and documentation, but have not found an answer to my issue
+          required: true
+  - type: checkboxes
+    id: codeofconduct
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures?tab=coc-ov-file).
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us what you expected and how the problem can be reproduced.
+      placeholder: Tell us what what happened!
+    validations:
+      required: true
+  - type: textarea
+    id: verboselog
+    attributes:
+      label: Verbose log
+      description: |
+        Run Set-OutlookSignatures with the '-verbose' parameter and post the full text output here.
+        Do not refer to a log file attached in 'What happened?', but paste the text output here.
+      placeholder: Tell us what Set-OutlookSignatures says!
+      render: Text
+    validations:
+      required: true
