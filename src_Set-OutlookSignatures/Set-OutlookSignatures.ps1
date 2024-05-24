@@ -5,45 +5,45 @@ The open source gold standard to centrally manage and deploy email signatures an
 
 .DESCRIPTION
 With Set-OutlookSignatures, signatures and out-of-office replies can be:
-- Generated from **templates in DOCX or HTML** file format  
+- Generated from **templates in DOCX or HTML** file format
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
 - Designed for **barrier-free accessibility** with custom link and image descriptions for screen readers and comparable tools
-- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups**, specific **email addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes**  
-- Created with different names from the same template, **one template can be used for multiple shared mailboxes**
-- Assigned **time ranges** within which they are valid  
-- Set as **default signature** for new emails, or for replies and forwards (signatures only)  
-- Set as **default OOF message** for internal or external recipients (OOF messages only)  
-- Set in **Outlook Web** for the currently logged-in user, including mirroring signatures the the cloud as **roaming signatures**  
-- Centrally managed only, or **exist along user-created signatures** (signatures only)  
-- Copied to an **additional path** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook Windows/Mac/Web: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
+- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes¹**
+- Created with different names from the same template, **one template can be used for many mailboxes**
+- Assigned **time ranges** within which they are valid¹
+- Set as **default signature** for new emails, or for replies and forwards (signatures only)
+- Set as **default OOF message** for internal or external recipients (OOF messages only)
+- Set in **Outlook Web¹** for the currently logged-in user, including mirroring signatures to the cloud as **roaming signatures¹** (Linux/macOS/Windows, Classic and New Outlook)
+- Centrally managed only¹, or **exist along user-created signatures** (signatures only)
+- Copied to an **additional path¹** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook Windows/Mac/Web: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
 - **Write protected** (Outlook for Windows signatures only)
 
-Set-OutlookSignatures can be **run by users on Windows, Linux and macOS clients, including shared devices and terminal servers - or on a central system with a service account**.  
-On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, shortcut or any other way of starting a program - **whatever your operating system and software deployment mechanism allows**.  
-Signatures and OOF messages can also be created and pushed into mailboxes centrally, **without end user or client involvement**.
+Set-OutlookSignatures can be **run by users on Windows, Linux and macOS clients, including shared devices and terminal servers - or on a central system with a service account¹**.
+On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, shortcut or any other way of starting a program - **whatever your operating system and software deployment mechanism allows**.
+Signatures and OOF messages can also be created and pushed into mailboxes centrally, **without end user or client involvement¹**.
 
 **Sample templates** for signatures and OOF messages demonstrate many features and are provided as .docx and .htm files.
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the software for a specific user at a specific point in time, and to inspect the resulting signature files before going live.
 
-**SimulateAndDeploy** allows to deploy signatures to Outlook Web/New Outlook without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
+**SimulateAndDeploy¹** allows to deploy signatures to Outlook Web/New Outlook without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
 
-The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and in cloud-only environments**.  
+The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and in cloud-only environments**.
 All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).
 
 It is **multi-client capable** by using different template paths, configuration files and script parameters.
 
-Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard SMB file share on a central system, and optionally Office on your clients.  
+Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard SMB file share on a central system, and optionally Office on your clients.
 There is also **no telemetry** or "calling home", emails are **not routed through a 3rd party data center or cloud service**, and there is **no need to change DNS records (MX, SPF) or mail flow**.
 
-A **documented implementation approach**, based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators.  
+A **documented implementation approach**, based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators.
 The implementation approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
 The software core is **Free and Open-Source Software (FOSS)**. It is published under a license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) and other popular licenses. Please see `.\LICENSE.txt` for copyright and license details.
 
-**Some features are exclusive to the Benefactor Circle add-on.**
+¹**Some features are exclusive to the Benefactor Circle add-on.**
 ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and fee-based support, ensuring that the core of Set-OutlookSignatures can remain Free and Open-Source Software (FOSS) and continues to evolve. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.
 
 .LINK
@@ -546,9 +546,9 @@ Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
 
 Default value: $false
 
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures $false  
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false  
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures $false"  
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures $false"
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false"
 
 .PARAMETER MailboxSpecificSignatureNames
@@ -599,16 +599,16 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 3
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority Normal"
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 32"
 
-.PARAMETER BenefactorCircleId
-The Benefactor Circle member Id matching your license file, which unlocks exclusive features.
+.PARAMETER BenefactorCircleID
+The Benefactor Circle member ID matching your license file, which unlocks exclusive features.
 
 Default value: ''
 
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -BenefactorCircleId 00000000-0000-0000-0000-000000000000
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -BenefactorCircleId 00000000-0000-0000-0000-000000000000"
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -BenefactorCircleID 00000000-0000-0000-0000-000000000000
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -BenefactorCircleID 00000000-0000-0000-0000-000000000000"
 
 .PARAMETER BenefactorCircleLicenseFile
-The Benefactor Circle license file matching your member Id, which unlocks exclusive features.
+The Benefactor Circle license file matching your member ID, which unlocks exclusive features.
 
 Default value: ''
 
@@ -684,7 +684,7 @@ Param(
     [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateNotNullOrEmpty()]
-    [string]$BenefactorCircleId = '',
+    [string]$BenefactorCircleID = '',
 
     # Use templates in .HTM file format instead of .DOCX
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
@@ -1064,6 +1064,7 @@ function main {
         }
     }
 
+
     Write-Host
     Write-Host "Script notes @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
     Write-Host '  Software: Set-OutlookSignatures'
@@ -1133,6 +1134,103 @@ function main {
     #   https://docs.microsoft.com/en-us/office/vba/api/word.defaultWebOptions.foldersuffix
     $ConnectedFilesFolderNames = ('.files', '_archivos', '_arquivos', '_bestanden', '_bylos', '_datoteke', '_dosyalar', '_elemei', '_failid', '_fails', '_fajlovi', '_ficheiros', '_fichiers', '_file', '_files', '_fitxategiak', '_fitxers', '_pliki', '_soubory', '_tiedostot', '-Dateien', '-filer')
 
+
+    if ($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) {
+        if (-not ([System.Management.Automation.PSTypeName]'SetOutlookSignatures.ShellLink').Type) {
+            Add-Type -TypeDefinition @'
+namespace SetOutlookSignatures
+{
+    using System;
+    using System.Runtime.InteropServices;
+    using System.Runtime.InteropServices.ComTypes;
+    using System.Text;
+
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("000214F9-0000-0000-C000-000000000046")]
+    [CoClass(typeof(CShellLinkW))]
+    interface IShellLinkW
+    {
+        void GetPath([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszFile, int cchMaxPath, IntPtr pfd, uint fFlags);
+        IntPtr GetIDList();
+        void SetIDList(IntPtr pidl);
+        void GetDescription([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszFile, int cchMaxName);
+        void SetDescription([MarshalAs(UnmanagedType.LPWStr)] string pszName);
+        void GetWorkingDirectory([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszDir, int cchMaxPath);
+        void SetWorkingDirectory([MarshalAs(UnmanagedType.LPWStr)] string pszDir);
+        void GetArguments([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszArgs, int cchMaxPath);
+        void SetArguments([MarshalAs(UnmanagedType.LPWStr)] string pszArgs);
+        ushort GetHotKey();
+        void SetHotKey(ushort wHotKey);
+        uint GetShowCmd();
+        void SetShowCmd(uint iShowCmd);
+        void GetIconLocation([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszIconPath, int cchIconPath, out int piIcon);
+        void SetIconLocation([MarshalAs(UnmanagedType.LPWStr)] string pszIconPath, int iIcon);
+        void SetRelativePath([MarshalAs(UnmanagedType.LPWStr)] string pszPathRel, [Optional] uint dwReserved);
+        void Resolve(IntPtr hwnd, uint fFlags);
+        void SetPath([MarshalAs(UnmanagedType.LPWStr)] string pszFile);
+    }
+
+    [ComImport]
+    [Guid("00021401-0000-0000-C000-000000000046")]
+    [ClassInterface(ClassInterfaceType.None)]
+    class CShellLinkW { }
+
+    public static class ShellLink
+    {
+        public static void CreateShortcut(
+            string lnkPath,
+            string targetPath,
+            string arguments,
+            string workingDirectory,
+            string description,
+            string iconPath,
+            int iconIndex = 0,
+            uint showCmd = 1)
+        {
+            if (string.IsNullOrWhiteSpace(lnkPath))
+                throw new ArgumentNullException("lnkPath");
+
+            if (string.IsNullOrWhiteSpace(targetPath))
+                throw new ArgumentNullException("targetPath");
+
+            IShellLinkW link = new IShellLinkW();
+
+            link.SetPath(targetPath);
+
+            if (!string.IsNullOrWhiteSpace(arguments))
+            {
+                link.SetArguments(arguments);
+            }
+
+            if (!string.IsNullOrWhiteSpace(workingDirectory))
+            {
+                link.SetWorkingDirectory(workingDirectory);
+            }
+
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                link.SetDescription(description);
+            }
+
+            if (!(iconPath == null))
+            {
+                link.SetIconLocation(iconPath, iconIndex);
+            }
+
+            link.SetShowCmd(showCmd);
+
+            IPersistFile file = (IPersistFile)link;
+            file.Save(lnkPath, true);
+
+            Marshal.FinalReleaseComObject(file);
+            Marshal.FinalReleaseComObject(link);
+        }
+    }
+}
+'@
+        }
+    }
 
     Write-Host ('  TrustsToCheckForGroups: ' + ('''' + $($TrustsToCheckForGroups -join ''', ''') + ''''))
     if (-not $IsWindows) {
@@ -1530,12 +1628,12 @@ function main {
         Write-Host
     }
 
-    Write-Host "  BenefactorCircleId: '$BenefactorCircleId'"
+    Write-Host "  BenefactorCircleID: '$BenefactorCircleID'"
 
 
     if ($SimulateUser) {
         Write-Host
-        Write-Host 'Simulation mode enabled' -ForegroundColor Yellow
+        Write-Host 'Simulation mode enabled'
 
         if (-not $AdditionalSignaturePath) {
             Write-Host '  Simulation mode requires AdditionalSignaturePath. Exit.' -ForegroundColor Red
@@ -1543,7 +1641,7 @@ function main {
         }
 
         if (-not $SimulateMailboxes) {
-            Write-Host '  SimulateUser is defined, but not SimulateMailboxes.' -ForegroundColor Yellow
+            Write-Host '  SimulateUser is defined, but not SimulateMailboxes.'
         }
     } else {
         if ($SimulateMailboxes) {
@@ -1559,7 +1657,7 @@ function main {
         }
     }
 
-    if ($BenefactorCircleLicenseFile -and $BenefactorCircleId) {
+    if ($BenefactorCircleLicenseFile -and $BenefactorCircleID) {
         Write-Host
         Write-Host "Benefactor Circle license information @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
         $result = [SetOutlookSignatures.BenefactorCircle]::GetLicenseDetails()
@@ -1574,15 +1672,15 @@ function main {
                 Write-Host "  $($_)"
             }
         }
-    } elseif ($BenefactorCircleLicenseFile -or $BenefactorCircleId) {
+    } elseif ($BenefactorCircleLicenseFile -or $BenefactorCircleID) {
         Write-Host
-        Write-Host 'Benefactor Circle Id and license file must both be set for access to exclusive features.' -ForegroundColor Red
+        Write-Host 'Benefactor Circle ID and license file must both be set for access to exclusive features.' -ForegroundColor Red
         Write-Host 'Continuing without these exclusive features.' -ForegroundColor Red
         Write-Host "Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Red
     }
 
     if (
-        (-not ($BenefactorCircleLicenseFile -and $BenefactorCircleId)) -or
+        (-not ($BenefactorCircleLicenseFile -and $BenefactorCircleID)) -or
         ($result -ilike 'License is not valid: *')
     ) {
         Write-Host
@@ -1974,7 +2072,7 @@ end tell
         Write-Host '  Word'
         $WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
         if ($WordRegistryVersion.major -gt 16) {
-            Write-Host "    Word version $WordRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+            Write-Host "    Word version $($WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
             exit 1
         } elseif ($WordRegistryVersion.major -eq 16) {
             $WordRegistryVersion = '16.0'
@@ -1983,7 +2081,7 @@ end tell
         } elseif ($WordRegistryVersion.major -eq 14) {
             $WordRegistryVersion = '14.0'
         } elseif ($WordRegistryVersion.major -lt 14) {
-            Write-Host "    Word version $WordRegistryVersion is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+            Write-Host "    Word version $($WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
             exit 1
         }
 
@@ -2036,7 +2134,7 @@ end tell
     $SignaturePaths = @()
 
     if ($SimulateUser) {
-        Write-Host '  Simulation mode enabled. Skip task, use AdditionalSignaturePath instead' -ForegroundColor Yellow
+        Write-Host '  Simulation mode enabled. Skip task, use AdditionalSignaturePath instead'
         if ($AdditionalSignaturePath) {
             $SignaturePaths += $AdditionalSignaturePath
         }
@@ -2239,7 +2337,7 @@ end tell
 
                     if (-not ($y.StartsWith('-'))) {
                         if ($TrustsToCheckForGroups -icontains $y) {
-                            Write-Host '    Trusted domain/forest already in list.' -ForegroundColor Yellow
+                            Write-Host '    Trusted domain/forest already in list.'
                         } else {
                             if ($TrustedDomains.properties.name -icontains $y) {
                                 foreach ($TrustedDomain in @($TrustedDomains | Where-Object { $_.properties.name -ieq $y })) {
@@ -2341,7 +2439,7 @@ end tell
     if (-not $SimulateUser) {
         Write-Host '  Currently logged-in user'
     } else {
-        Write-Host "  Simulate '$SimulateUser' as currently logged-in user" -ForegroundColor Yellow
+        Write-Host "  Simulate '$SimulateUser' as currently logged-in user"
     }
 
     if ($GraphOnly -eq $false) {
@@ -2688,7 +2786,7 @@ end tell
     $LegacyExchangeDNs = @()
 
     if ($SimulateUser -and $SimulateMailboxes) {
-        Write-Host '  Simulation mode enabled, use SimulateMailboxes as mailbox list' -ForegroundColor Yellow
+        Write-Host '  Simulation mode enabled and SimulateMailboxes defined, use SimulateMailboxes as mailbox list'
         for ($i = 0; $i -lt $SimulateMailboxes.count; $i++) {
             $MailAddresses += $SimulateMailboxes[$i].ToLower()
             $RegistryPaths += ''
@@ -2853,7 +2951,7 @@ end tell
                         } catch {
                             Write-Verbose $_
 
-                            Write-Host '      Try OAuth with fixed URL, as OAuth with Autodiscover failed. Check you Autodiscover settings!' -ForegroundColor Yellow
+                            Write-Host '      Try OAuth with fixed URL, as OAuth with Autodiscover failed. Check your Exchange Autodiscover settings!' -ForegroundColor Yellow
 
                             $exchService.UseDefaultCredentials = $false
 
@@ -2902,7 +3000,7 @@ end tell
         # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
         # Maybe this is a pure Outlook Web user, so we will add a helper entry
         # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
-        Write-Host "  User's mailbox not found in email address list, but Outlook Web signature and/or OOF message should be set. Add dummy mailbox entry." -ForegroundColor Yellow
+        Write-Host "  User's mailbox not found in email address list, but Outlook Web signature and/or OOF message should be set. Adding dummy mailbox entry." -ForegroundColor Yellow
 
         if ($ADPropsCurrentUser.mail) {
             $script:CurrentUserDummyMailbox = $true
@@ -2913,7 +3011,7 @@ end tell
             $RegistryPaths = @('') + $RegistryPaths
             $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
         } else {
-            Write-Host '      User does not have mail attribute configured' -ForegroundColor Yellow
+            Write-Host '      User does not have mail attribute configured.' -ForegroundColor Yellow
             $script:CurrentUserDummyMailbox = $false
         }
     } else {
@@ -3240,7 +3338,7 @@ end tell
                     }
 
                     if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotlike "*.$(if($UseHtmTemplates){'htm'}else{'docx'})")) {
-                        Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) ini index #$($Enumerator)) has the wrong file extension (-UseHtmTemplates true allows .htm, else .docx)" -ForegroundColor Yellow
+                        Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) ini index #$($Enumerator)) has the wrong file extension ('-UseHtmTemplates true' allows .htm, else .docx)" -ForegroundColor Yellow
                     }
                 }
             }
@@ -3723,6 +3821,13 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     # Process each email address only once
     $script:SignatureFilesDone = @()
+
+    if ($SimulateUser) {
+        Get-ChildItem (Join-Path -Path ($SignaturePaths[0]) -ChildPath '___Mailbox *') -Attributes Directory | ForEach-Object {
+            RemoveItemAlternativeRecurse $($_.FullName)
+        }
+    }
+
     for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
         if (($AccountNumberRunning -eq $MailAddresses.IndexOf($MailAddresses[$AccountNumberRunning])) -and ($($MailAddresses[$AccountNumberRunning]) -like '*@*')) {
             Write-Host
@@ -3936,7 +4041,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                     }
                 }
             } else {
-                Write-Host '    Skipping, as mailbox could not be found in your environment in an earlier step' -ForegroundColor yellow
+                Write-Host '    Skipping, as mailbox could not be found in your environment in an earlier step.' -ForegroundColor yellow
             }
 
             $ADPropsCurrentMailbox | Add-Member -MemberType NoteProperty -Name 'GroupsSIDs' -Value $GroupsSIDs
@@ -3956,8 +4061,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 }
             } else {
                 $CurrentMailboxSmtpaddresses += $($MailAddresses[$AccountNumberRunning])
-                Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox' -ForegroundColor Yellow
-                Write-Host '    Use mailbox name as single known SMTP address' -ForegroundColor Yellow
+                Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox.' -ForegroundColor Yellow
+                Write-Host "    Using '$($MailAddresses[$AccountNumberRunning])' as single known SMTP address." -ForegroundColor Yellow
             }
 
             Write-Host "  Get data for replacement variables @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
@@ -4031,13 +4136,6 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             }
 
 
-            if ($SimulateUser) {
-                Get-ChildItem (Join-Path -Path ($SignaturePaths[0]) -ChildPath '___Mailbox *') -Attributes Directory | ForEach-Object {
-                    RemoveItemAlternativeRecurse $($_.FullName)
-                }
-            }
-
-
             EvaluateAndSetSignatures
 
 
@@ -4105,7 +4203,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                             } catch {
                                 Write-Verbose $_
 
-                                Write-Host '    Try OAuth with fixed URL, as OAuth with Autodiscover failed. Check you Autodiscover settings!' -ForegroundColor Yellow
+                                Write-Host '    Try OAuth with fixed URL, as OAuth with Autodiscover failed. Check you Exchange Autodiscover settings!' -ForegroundColor Yellow
 
                                 $exchService.UseDefaultCredentials = $false
 
@@ -4150,7 +4248,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                     Write-Host "  Set classic Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                     if ($SimulateUser -and (-not $SimulateAndDeploy)) {
-                        Write-Host '    Simulation mode enabled, skip task' -ForegroundColor Yellow
+                        Write-Host '    Simulation mode enabled, skipping task.' -ForegroundColor Yellow
                     } else {
                         if (-not $BenefactorCircleLicenseFile) {
                             Write-Host "    The 'SetCurrentUserOutlookWebSignature' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
@@ -4275,7 +4373,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         Write-Host "  '$AdditionalSignaturePath'"
 
         if ($SimulateUser) {
-            Write-Host '    Simulation mode enabled, AdditionalSignaturePath already used as output directory' -ForegroundColor Yellow
+            Write-Host '    Simulation mode enabled, AdditionalSignaturePath already used as output directory'
         } else {
             if (-not $BenefactorCircleLicenseFile) {
                 Write-Host "    The 'AdditionalSignaturePath' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
@@ -4903,7 +5001,8 @@ function SetSignatures {
             $SignatureFileAlreadyDone = ($script:SignatureFilesDone -contains $TemplateIniSettingsIndex)
 
             if ($SignatureFileAlreadyDone) {
-                Write-Host "$Indent      Template already processed before with higher priority, not overwriting signature (consider using parameter MailboxSpecificSignatureNames)"
+                Write-Host "$Indent      $($SigOrOOF) ini index #$($TemplateIniSettingsIndex) already processed before with higher priority mailbox"
+                Write-Host "$Indent        Not overwriting signature. Consider using parameter MailboxSpecificSignatureNames."
             } else {
                 $script:SignatureFilesDone += $TemplateIniSettingsIndex
             }
@@ -4957,7 +5056,7 @@ function SetSignatures {
 
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
 
-        if ($MailboxSpecificSignatureNames) {
+        if ($MailboxSpecificSignatureNames -and ($ProcessOOF -eq $false)) {
             if ($OutlookDisableRoamingSignatures -eq 0) {
                 $Signature.value = ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
             } else {
@@ -5288,18 +5387,10 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
                 # Restore original security setting
-                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                    Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                } else {
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                }
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             } catch {
                 # Restore original security setting after error
-                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                    Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                } else {
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                }
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 
                 Start-Sleep -Seconds 2
 
@@ -5318,11 +5409,7 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
                 # Restore original security setting
-                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                    Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                } else {
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                }
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             }
 
             # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
@@ -5371,18 +5458,10 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
                 # Restore original security setting
-                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                    Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                } else {
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                }
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             } catch {
                 # Restore original security setting after error
-                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                    Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                } else {
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                }
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 
                 Start-Sleep -Seconds 2
 
@@ -5401,11 +5480,7 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
                 # Restore original security setting
-                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                    Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                } else {
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                }
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             }
 
             # Restore original WebOptions
@@ -5576,18 +5651,10 @@ function SetSignatures {
                     $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
                     # Restore original security setting
-                    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                        Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                    } else {
-                        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                    }
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
                 } catch {
                     # Restore original security setting after error
-                    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                        Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                    } else {
-                        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                    }
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 
                     Start-Sleep -Seconds 2
 
@@ -5606,11 +5673,7 @@ function SetSignatures {
                     $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
 
                     # Restore original security setting
-                    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                        Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-                    } else {
-                        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-                    }
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
                 }
 
                 # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
@@ -5801,14 +5864,19 @@ end tell
                             if (Test-Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)"))) {
                                 $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
 
-                                if ($Iswindows) {
-                                    $WshShell = New-Object -ComObject WScript.Shell
-
+                                if ($IsWindows) {
                                     $ShortcutTempPath = Join-Path -Path $([System.IO.Path]::GetTempPath()) -ChildPath "$((New-Guid).guid).lnk"
 
-                                    $Shortcut = $WshShell.CreateShortcut($ShortcutTempPath)
-                                    $Shortcut.TargetPath = (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)"))
-                                    $Shortcut.Save()
+                                    [SetOutlookSignatures.ShellLink]::CreateShortcut(
+                                        $ShortcutTempPath, # lnkPath: Full path of the shortcut file to create
+                                        $(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")), # targetPath: Full path to the target file (the file the shortcut should open)
+                                        $null, # arguments: Arguments to pass to the target file
+                                        $null, # workingDirectory: Full path of the working directory
+                                        $null, # description: Description
+                                        $null, # iconPath: Full path to the icon file
+                                        $null, # iconIndex: Index of the icon within the icon file
+                                        $null # showCmd: Window mode: 1 = Normal, 3 = Maximized, 7 = Minimized
+                                    )
 
                                     Copy-Item -LiteralPath $ShortcutTempPath -Destination $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath "DefaultNew $($_).lnk")) -Force
 
@@ -5845,13 +5913,18 @@ end tell
                                 $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
 
                                 if ($IsWindows) {
-                                    $WshShell = New-Object -ComObject WScript.Shell
-
                                     $ShortcutTempPath = Join-Path -Path $([System.IO.Path]::GetTempPath()) -ChildPath "$((New-Guid).guid).lnk"
 
-                                    $Shortcut = $WshShell.CreateShortcut($ShortcutTempPath)
-                                    $Shortcut.TargetPath = (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)"))
-                                    $Shortcut.Save()
+                                    [SetOutlookSignatures.ShellLink]::CreateShortcut(
+                                        $ShortcutTempPath, # lnkPath: Full path of the shortcut file to create
+                                        $(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")), # targetPath: Full path to the target file (the file the shortcut should open)
+                                        $null, # arguments: Arguments to pass to the target file
+                                        $null, # workingDirectory: Full path of the working directory
+                                        $null, # description: Description
+                                        $null, # iconPath: Full path to the icon file
+                                        $null, # iconIndex: Index of the icon within the icon file
+                                        $null # showCmd: Window mode: 1 = Normal, 3 = Maximized, 7 = Minimized
+                                    )
 
                                     Copy-Item -LiteralPath $ShortcutTempPath -Destination $((Join-Path -Path ((New-Item -ItemType Directory (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath "DefaultReplyFwd $($_).lnk")) -Force
 
@@ -6420,6 +6493,10 @@ function GraphGetMe {
 
         $ProgressPreference = $OldProgressPreference
     } catch {
+        return @{
+            error = $error[0] | Out-String
+            me    = $null
+        }
     }
 
     if ($null -ne $local:x) {
@@ -6557,7 +6634,7 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
                     Write-Host "      Problem getting mailboxSettings for '$($script:CurrentUser)' from Microsoft Graph." -ForegroundColor Yellow
                     $error[0]
                     Write-Host '      This is a Microsoft Graph API problem, which can only be solved by Microsoft itself.' -ForegroundColor Yellow
-                    Write-Host '      To be able to continue, SetCurrentUserOutlookWebSignature and SetCurrentUserOOFMessage are now disabled.' -ForegroundColor Yellow
+                    Write-Host '      Disabling SetCurrentUserOutlookWebSignature and SetCurrentUserOOFMessage to be able to continue.' -ForegroundColor Yellow
 
                     $SetCurrentUserOutlookWebSignature = $false
                     $SetCurrentUserOOFMessage = $false
@@ -6635,6 +6712,10 @@ function GraphGetUserManager($user) {
 
         $ProgressPreference = $OldProgressPreference
     } catch {
+        return @{
+            error      = $error[0] | Out-String
+            properties = $null
+        }
     }
 
     if ($null -ne $local:x) {
@@ -6685,6 +6766,10 @@ function GraphGetUserTransitiveMemberOf($user) {
 
         $ProgressPreference = $OldProgressPreference
     } catch {
+        return @{
+            error    = $error[0] | Out-String
+            memberof = $null
+        }
     }
 
     if ($null -ne $local:x) {
@@ -6726,6 +6811,10 @@ function GraphGetUserPhoto($user) {
 
         Remove-Item $local:tempFile -Force -ErrorAction SilentlyContinue
     } catch {
+        return @{
+            error = $error[0] | Out-String
+            photo = $null
+        }
     }
 
     if ($null -ne $local:x) {
@@ -6819,6 +6908,10 @@ function GraphFilterGroups($filter) {
 
         $ProgressPreference = $OldProgressPreference
     } catch {
+        return @{
+            error  = $error[0] | Out-String
+            groups = $null
+        }
     }
 
     if ($null -ne $local:x) {
@@ -6868,6 +6961,10 @@ function GraphFilterUsers($filter) {
 
         $ProgressPreference = $OldProgressPreference
     } catch {
+        return @{
+            error = $error[0] | Out-String
+            users = $null
+        }
     }
 
     if ($null -ne $local:x) {
@@ -7113,11 +7210,7 @@ try {
     Write-Host "Clean-up @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
     # Restore original Word security setting
-    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-        Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
-    } else {
-        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
-    }
+    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
 
     if ($script:COMWord) {
         if ($script:COMWord.ActiveDocument) {

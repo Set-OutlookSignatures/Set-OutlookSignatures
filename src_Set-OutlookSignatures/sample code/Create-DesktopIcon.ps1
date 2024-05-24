@@ -17,16 +17,111 @@ Set-Location $PSScriptRoot
 $pathSetOutlookSignatures = (Split-Path $PSScriptRoot -Parent)
 
 if ($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) {
-    $WshShell = New-Object -ComObject WScript.Shell
-    $Shortcut = $WshShell.CreateShortcut((Join-Path -Path $([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Desktop)) -ChildPath 'Set Outlook signatures.lnk'))
-    $Shortcut.WorkingDirectory = $pathSetOutlookSignatures
-    $Shortcut.TargetPath = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
-    $Shortcut.Arguments = "-File $(Join-Path -Path $pathSetOutlookSignatures -ChildPath 'Set-OutlookSignatures.ps1')"
-    $Shortcut.IconLocation = $(Join-Path -Path $($pathSetOutlookSignatures) -ChildPath 'logo/Set-OutlookSignatures Icon.ico')
-    $Shortcut.Description = 'Set Outlook signatures using Set-OutlookSignatures.ps1'
-    $Shortcut.WindowStyle = 1 # 1 = undefined, 3 = maximized, 7 = minimized
-    $Shortcut.Hotkey = ''
-    $Shortcut.Save()
+    if (-not ([System.Management.Automation.PSTypeName]'SetOutlookSignatures.ShellLink').Type) {
+        Add-Type -TypeDefinition @'
+namespace SetOutlookSignatures
+{
+    using System;
+    using System.Runtime.InteropServices;
+    using System.Runtime.InteropServices.ComTypes;
+    using System.Text;
+
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("000214F9-0000-0000-C000-000000000046")]
+    [CoClass(typeof(CShellLinkW))]
+    interface IShellLinkW
+    {
+        void GetPath([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszFile, int cchMaxPath, IntPtr pfd, uint fFlags);
+        IntPtr GetIDList();
+        void SetIDList(IntPtr pidl);
+        void GetDescription([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszFile, int cchMaxName);
+        void SetDescription([MarshalAs(UnmanagedType.LPWStr)] string pszName);
+        void GetWorkingDirectory([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszDir, int cchMaxPath);
+        void SetWorkingDirectory([MarshalAs(UnmanagedType.LPWStr)] string pszDir);
+        void GetArguments([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszArgs, int cchMaxPath);
+        void SetArguments([MarshalAs(UnmanagedType.LPWStr)] string pszArgs);
+        ushort GetHotKey();
+        void SetHotKey(ushort wHotKey);
+        uint GetShowCmd();
+        void SetShowCmd(uint iShowCmd);
+        void GetIconLocation([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszIconPath, int cchIconPath, out int piIcon);
+        void SetIconLocation([MarshalAs(UnmanagedType.LPWStr)] string pszIconPath, int iIcon);
+        void SetRelativePath([MarshalAs(UnmanagedType.LPWStr)] string pszPathRel, [Optional] uint dwReserved);
+        void Resolve(IntPtr hwnd, uint fFlags);
+        void SetPath([MarshalAs(UnmanagedType.LPWStr)] string pszFile);
+    }
+
+    [ComImport]
+    [Guid("00021401-0000-0000-C000-000000000046")]
+    [ClassInterface(ClassInterfaceType.None)]
+    class CShellLinkW { }
+
+    public static class ShellLink
+    {
+        public static void CreateShortcut(
+            string lnkPath,
+            string targetPath,
+            string arguments,
+            string workingDirectory,
+            string description,
+            string iconPath,
+            int iconIndex = 0,
+            uint showCmd = 1)
+        {
+            if (string.IsNullOrWhiteSpace(lnkPath))
+                throw new ArgumentNullException("lnkPath");
+
+            if (string.IsNullOrWhiteSpace(targetPath))
+                throw new ArgumentNullException("targetPath");
+
+            IShellLinkW link = new IShellLinkW();
+
+            link.SetPath(targetPath);
+
+            if (!string.IsNullOrWhiteSpace(arguments))
+            {
+                link.SetArguments(arguments);
+            }
+            
+            if (!string.IsNullOrWhiteSpace(workingDirectory))
+            {
+                link.SetWorkingDirectory(workingDirectory);
+            }
+
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                link.SetDescription(description);
+            }
+
+            if (!(iconPath == null))
+            {
+                link.SetIconLocation(iconPath, iconIndex);
+            }
+
+            link.SetShowCmd(showCmd);
+
+            IPersistFile file = (IPersistFile)link;
+            file.Save(lnkPath, true);
+
+            Marshal.FinalReleaseComObject(file);
+            Marshal.FinalReleaseComObject(link);
+        }
+    }
+}
+'@
+    }
+
+    [SetOutlookSignatures.ShellLink]::CreateShortcut(
+        $(Join-Path -Path $([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Desktop)) -ChildPath 'Set Outlook signatures.lnk'), # lnkPath: Full path of the shortcut file to create
+        'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe', # targetPath: Full path to the target file (the file the shortcut should open)
+        "-File $(Join-Path -Path $pathSetOutlookSignatures -ChildPath 'Set-OutlookSignatures.ps1')", # arguments: Arguments to pass to the target file
+        $pathSetOutlookSignatures, # workingDirectory: Full path of the working directory
+        'Set Outlook signatures using Set-OutlookSignatures.ps1', # description: Description
+        $(Join-Path -Path $($pathSetOutlookSignatures) -ChildPath 'logo/Set-OutlookSignatures Icon.ico'), # iconPath: Full path to the icon file
+        0, # iconIndex: Index of the icon within the icon file
+        1 # showCmd: Window mode: 1 = Normal, 3 = Maximized, 7 = Minimized
+    )
 } elseif ($IsLinux) {
     $tempFile = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath 'Set Outlook signatures.desktop'
 

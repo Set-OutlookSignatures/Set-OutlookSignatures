@@ -9,13 +9,34 @@
 
   ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
   _Put Notice here_
-  _**Breaking:** Notice about breaking change_  
+  _**Breaking:** <Present tense verb> XXX_  
   ### Changed
-  - **Breaking:** XXX
+  - **Breaking:** <Present tense verb> XXX
+  - <Present tense verb> XXX
   ### Added
+  - <Present tense verb> XXX
   ### Removed
+  - <Present tense verb> XXX
   ### Fixed
+  - <Present tense verb> XXX
 -->
+
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.1" target="_blank">v4.12.1</a> - 2024-05-24
+_**Attention, Exchange Online admins**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
+
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- Update dependency MSAL.Net to v4.61.1.
+- Use pure .Net methods to create Windows shortcut files in sample code and in Set-OutlookSignatures, as Microsoft marked VBS (Visual Basic Script) as deprecated and will remove it in future versions of Windows. 
+### Fixed
+- Name temporary file names correctly when the `MailboxSpecificSignatureNames` parameter is enabled, so that out-of-office replies can be set in this mode.
+- Show the 'MSAL.PS Graph token cache info' when run in Windows PowerShell (PowerShell 5.x).
+- Fix simulation mode wrongly deleting all '___Mailbox *' folders in the output directory, but the last one.
+- Benefactor Circle only: Search for license groups in Entra ID via on-prem SIDs may fail because of a regression in checking the SID format.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.0" target="_blank">v4.12.0</a> - 2024-05-07
@@ -194,7 +215,7 @@ To compare the two permissions, see their description at [Microsoft Graph permis
 - The software now shows a hint at startup when a newer release is available on GitHub.
 ### Fixed
 - Implementation approach: Translated a sentence to English, which was only available in German (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/pull/89" target="_blank">#89</a>) (Thanks <a href="https://github.com/JeroenOortwijn" target="_blank">@JeroenOortwijn</a>!)
-- Update dependency MSAL.PS so that process id is correctly determined when run in Windows Terminal (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/88" target="_blank">#88</a>) (Thanks <a href="https://github.com/Ben-munich" target="_blank">@Ben-munich</a>!)
+- Update dependency MSAL.PS so that process ID is correctly determined when run in Windows Terminal (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/88" target="_blank">#88</a>) (Thanks <a href="https://github.com/Ben-munich" target="_blank">@Ben-munich</a>!)
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.1" target="_blank">v4.6.1</a> - 2023-10-27

@@ -24,7 +24,7 @@ $softwarePath = 'c:\path\to\Set-OutlookSignatures'
 $parameters = @{
     SignatureTemplatePath       = 'c:\path\to\templates' # Path to folder containing the templates
     # Add more parameters here
-    BenefactorCircleId          = 'xxx'
+    BenefactorCircleID          = 'xxx'
     BenefactorCircleLicenseFile = 'xxx'
 }
 

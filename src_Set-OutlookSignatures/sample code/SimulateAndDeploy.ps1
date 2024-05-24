@@ -111,7 +111,7 @@ param (
 	$ConnectOnpremInsteadOfCloud = $false,
 	[pscredential]$GraphUserCredential = (@(, @('SimulateAndDeployUser@example.com', 'P@ssw0rd!')) | ForEach-Object { New-Object System.Management.Automation.PSCredential ($_[0], $(ConvertTo-SecureString $_[1] -AsPlainText -Force)) }), # Use Get-Credential for interactive mode (MFA is not supported in any case)
 
-	$GraphClientId = 'The Client Id of the Entra ID/Azure AD application for SimulateAndDeploy', # not the same id as defined in 'default graph config.ps1' or a custom Graph config file
+	$GraphClientId = 'The Client ID of the Entra ID/Azure AD application for SimulateAndDeploy', # not the same ID as defined in 'default graph config.ps1' or a custom Graph config file
 	$GraphClientSecret = 'The Client Secret of the Entra ID/Azure AD application for SimulateAndDeploy',
 
 	[ValidateSet('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC', 'AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4', 'AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5', 'China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')]
@@ -124,7 +124,7 @@ param (
 		# ▼▼▼▼ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▼▼▼▼
 		# ▼▼▼▼ Without the license, signatures can not be read from and written to mailboxes ▼▼▼▼
 		BenefactorCircleLicenseFile                   = "'\\server\share\folder\license.dll'"
-		BenefactorCircleId                            = '<BenefactorCircleId>'
+		BenefactorCircleID                            = '<BenefactorCircleID>'
 		# ▲▲▲▲ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▲▲▲▲
 		# ▲▲▲▲ Without the license, signatures can not be read from and written to mailboxes ▲▲▲▲
 		#
@@ -141,7 +141,7 @@ param (
 		DeleteScriptCreatedSignaturesWithoutTemplate  = $true
 		SetCurrentUserOutlookWebSignature             = $true
 		SetCurrentUserOOFMessage                      = $true
-		MirrorCloudSignatures                  = $true #Set to $false if you do not want to use this feature
+		MirrorCloudSignatures                         = $true #Set to $false if you do not want to use this feature
 		CreateRtfSignatures                           = $false
 		CreateTxtSignatures                           = $true
 		DocxHighResImageConversion                    = $true
@@ -405,7 +405,7 @@ if (($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) -and ($SetOutlookSi
 	Write-Host "Export Word security setting and disable it @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 	$WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
 	if ($WordRegistryVersion.major -gt 16) {
-		Write-Host "    Word version $WordRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+		Write-Host "    Word version $($WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
 		exit 1
 	} elseif ($WordRegistryVersion.major -eq 16) {
 		$WordRegistryVersion = '16.0'
@@ -414,15 +414,18 @@ if (($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) -and ($SetOutlookSi
 	} elseif ($WordRegistryVersion.major -eq 14) {
 		$WordRegistryVersion = '14.0'
 	} elseif ($WordRegistryVersion.major -lt 14) {
-		Write-Host "    Word version $WordRegistryVersion is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+		Write-Host "    Word version $($WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
 		exit 1
 	}
 
-	$WordDisableWarningOnIncludeFieldsUpdate = Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+	if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
+		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+	}
+
+	$WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
 
 	if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-		New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -PropertyType DWord -Value 1 -ErrorAction Ignore | Out-Null
-		Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value 1 -ErrorAction Ignore | Out-Null
+		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
 	}
 }
 
@@ -585,11 +588,7 @@ do {
 if (($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
 	Write-Host "Restore original Word security setting @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
-	if ($null -eq $WordDisableWarningOnIncludeFieldsUpdate) {
-		Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-	} else {
-		Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$WordRegistryVersion\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
-	}
+	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 }
 
 Write-Host "Cleanup @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"

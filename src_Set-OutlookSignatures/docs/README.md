@@ -27,25 +27,25 @@ With Set-OutlookSignatures, signatures and out-of-office replies can be:
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
 - Designed for **barrier-free accessibility** with custom link and image descriptions for screen readers and comparable tools
-- Applied to all **mailboxes (including shared mailboxes)**, specific **mailbox groups**, specific **email addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes**  
-- Created with different names from the same template, **one template can be used for multiple shared mailboxes**
-- Assigned **time ranges** within which they are valid  
+- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes¹**  
+- Created with different names from the same template, **one template can be used for many mailboxes**
+- Assigned **time ranges** within which they are valid¹  
 - Set as **default signature** for new emails, or for replies and forwards (signatures only)  
 - Set as **default OOF message** for internal or external recipients (OOF messages only)  
-- Set in **Outlook Web** for the currently logged-in user, including mirroring signatures the the cloud as **roaming signatures**  
-- Centrally managed only, or **exist along user-created signatures** (signatures only)  
-- Copied to an **additional path** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook Windows/Mac/Web: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
+- Set in **Outlook Web¹** for the currently logged-in user, including mirroring signatures to the cloud as **roaming signatures¹** (Linux/macOS/Windows, Classic and New Outlook)  
+- Centrally managed only¹, or **exist along user-created signatures** (signatures only)  
+- Copied to an **additional path¹** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook Windows/Mac/Web: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
 - **Write protected** (Outlook for Windows signatures only)
 
-Set-OutlookSignatures can be **run by users on Windows, Linux and macOS clients, including shared devices and terminal servers - or on a central system with a service account**.  
+Set-OutlookSignatures can be **run by users on Windows, Linux and macOS clients, including shared devices and terminal servers - or on a central system with a service account¹**.  
 On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, shortcut or any other way of starting a program - **whatever your operating system and software deployment mechanism allows**.  
-Signatures and OOF messages can also be created and pushed into mailboxes centrally, **without end user or client involvement**.
+Signatures and OOF messages can also be created and pushed into mailboxes centrally, **without end user or client involvement¹**.
 
 **Sample templates** for signatures and OOF messages demonstrate many features and are provided as .docx and .htm files.
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the software for a specific user at a specific point in time, and to inspect the resulting signature files before going live.
 
-**SimulateAndDeploy** allows to deploy signatures to Outlook Web/New Outlook without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
+**SimulateAndDeploy¹** allows to deploy signatures to Outlook Web/New Outlook without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
 
 The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and in cloud-only environments**.  
 All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).
@@ -60,7 +60,7 @@ The implementation approach is **suited for service providers as well as for cli
 
 The software core is **Free and Open-Source Software (FOSS)**. It is published under a license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) and other popular licenses. Please see `.\LICENSE.txt` for copyright and license details.
 
-**Some features are exclusive to the Benefactor Circle add-on.**
+¹**Some features are exclusive to the Benefactor Circle add-on.**
 ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and fee-based support, ensuring that the core of Set-OutlookSignatures can remain Free and Open-Source Software (FOSS) and continues to evolve. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.
 
 # Demo video<!-- omit in toc -->
@@ -104,7 +104,7 @@ ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSi
   - [3.31. MailboxSpecificSignatureNames](#331-mailboxspecificsignaturenames)
   - [3.32. WordProcessPriority](#332-wordprocesspriority)
   - [3.33. ScriptProcessPriority](#333-scriptprocesspriority)
-  - [3.34. BenefactorCircleId](#334-benefactorcircleid)
+  - [3.34. BenefactorCircleID](#334-benefactorcircleid)
   - [3.35. BenefactorCircleLicenseFile](#335-benefactorcirclelicensefile)
 - [4. Outlook signature path](#4-outlook-signature-path)
 - [5. Mailboxes](#5-mailboxes)
@@ -875,16 +875,16 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 3
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority Normal"  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 32"
 
-## 3.34. BenefactorCircleId
-The Benefactor Circle member Id matching your license file, which unlocks exclusive features.
+## 3.34. BenefactorCircleID
+The Benefactor Circle member ID matching your license file, which unlocks exclusive features.
 
 Default value: ''
 
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -BenefactorCircleId "00000000-0000-0000-0000-000000000000"  
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -BenefactorCircleId ""00000000-0000-0000-0000-000000000000"""  
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -BenefactorCircleID "00000000-0000-0000-0000-000000000000"  
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -BenefactorCircleID ""00000000-0000-0000-0000-000000000000"""  
 
 ## 3.35. BenefactorCircleLicenseFile
-The Benefactor Circle license file matching your member Id, which unlocks exclusive features.
+The Benefactor Circle license file matching your Benefactor Circle ID, which unlocks exclusive features.
 
 Default value: ''
 
@@ -1535,8 +1535,10 @@ The client needs port 443 TCP to access a SharePoint document library. Firewalls
 ## 17.6. Why is out of office abbreviated OOF and not OOO?  
 Back in the 1980s, Microsoft had a UNIX OS named Xenix ... but read yourself <a href="https://techcommunity.microsoft.com/t5/exchange-team-blog/why-is-oof-an-oof-and-not-an-ooo/ba-p/610191" target="_blank">here</a>.  
 ## 17.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.  
-The software uses DOCX as default template format, as this seems to be the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications:  
-- Not all Word formatting options are supported in HTML, which can lead to signatures looking a bit different than templates. For example, images may be placed at a different position in the signature compared to the template - this is because the Outlook HTML component only supports the "in line with text" text wrapping option, while Word offers more options.  
+The software uses DOCX as default template format, as this is the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications:  
+- Not all Word formatting options are supported in HTML, which can lead to signatures looking a bit different than templates. For example:
+  - Images may be placed at a different position in the signature compared to the template - this is because the Outlook HTML component only supports the "in line with text" text wrapping option, while Word offers more options.
+  - When using a text style from the Word Styles Gallery, you still may want to set the font and it's properties. Else, your fonts and formatting may adapt to identically named styles of the recipient. To avoid this, set the font manually, so that Word does not show "Calibri (Body)" or "Calibri (Heading)" in the font selection, but only "Calibri".
 - On the other hand, the Outlook HTML renderer works better with templates in the DOCX format: The Outlook HTML renderer does not respect the HTML image tags "width" and "height" and displays all images in their original size. When using DOCX as template format, the images are resized when exported to the HTM format.
   
 It is recommended to start with .docx as template format and to only use .htm when the template maintainers have really good HTML knowledge.
@@ -1701,49 +1703,30 @@ If you provided your users a link so they can start Set-OutlookSignatures.ps1 wi
 
 Please see `.\sample code\Set-OutlookSignatures.cmd` for an example. Don't forget to adapt path names to your environment.
 ### 17.12.1. Start Set-OutlookSignatures in hidden/invisible mode
-Even when the `hidden` parameter is passed to PowerShell, a window is created and minimized. Even when this only takes some tenths of a second, it is not only optically disturbing, but the new window may also steal the keyboard focus.
+Even when the `hidden` parameter is passed to PowerShell, a window is created and minimized. Although this only takes some tenths of a second, it is not only optically disturbing, but the new window may also steal the keyboard focus.
 
-The only workaround is to start PowerShell from another program, which does not need an own console window. If you do not want to write such a program yourself, you can use the Windows Script Host for this.
+The only workaround is to start PowerShell from another program, which does not need an own console window. Some examples for such programs are:
+- Rob van der Woude's [RunNHide](https://www.robvanderwoude.com/csharpexamples.php#RunNHide)
+- NTWind Software's [HStart](https://www.ntwind.com/software/hstart.html)
+- wenshui2008's [RunHiddenConsole](https://github.com/wenshui2008/RunHiddenConsole)
+- stax76's [run-hidden](https://github.com/stax76/run-hidden)
+- As Microsoft has marked Visual Basic Script (VBS) as deprecated and will remove it completely from future Windows releases, the use of Windows Script Host (WSH) is not recommended. If you want to try it anyway, here is a working example:
+  - Create a .vbs (Visual Basic Script) file, paste and adapt the following code into it:
+    ```
+    command = "PowerShell.exe -Command ""& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"" "
 
-Create a .vbs (Visual Basic Script) file, paste and adapt the following code into it:
-```
-command = "PowerShell.exe -Command ""& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"" "
+    set shell = CreateObject("WScript.Shell")
 
-set shell = CreateObject("WScript.Shell")
-
-shell.Run command, 0
-'0  Hides the window and activates another window.
-'1  Activates and displays a window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when displaying the window for the first time.
-'2  Activates the window and displays it as a minimized window.
-'3  Activates the window and displays it as a maximized window.
-'4  Displays a window in its most recent size and position. The active window remains active.
-'5  Activates the window and displays it in its current size and position.
-'6  Minimizes the specified window and activates the next top-level window in the Z order.
-'7  Displays the window as a minimized window. The active window remains active.
-'8  Displays the window in its current state. The active window remains active.
-'9  Activates and displays the window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when restoring a minimized window.
-'10 Sets the show state based on the state of the program that started the application.
-```
-
-Then, run the .vbs file directly, without specifying cscript.exe as host (just execute `start.vbs`, not `cscript.exe start.vbs`).
+    shell.Run command, 0
+    ```
+  - Then, run the .vbs file directly, without specifying cscript.exe as host (just execute `start.vbs` or `wscript.exe start.vbs`, but not `cscript.exe start.vbs`).
 ## 17.13. How to create a shortcut to the software with parameters?  
 You may want to provide a link on the desktop or in the start menu, so they can start the software on their own.
 
 The Windows user interface does not allow you to create a shortcut with a combined length of full target path and arguments greater than 259 characters.
 
-You can overcome this user interface limitation by using PowerShell to create a shortcut (.lnk file):  
-```
-$WshShell = New-Object -ComObject WScript.Shell  
-$Shortcut = $WshShell.CreateShortcut((Join-Path -Path $([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Desktop)) -ChildPath 'Set Outlook signatures.lnk'))  
-$Shortcut.WorkingDirectory = '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Set-OutlookSignatures'  
-$Shortcut.TargetPath = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'  
-$Shortcut.Arguments = "-NoExit -Command ""& '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Set-OutlookSignatures\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Templates\Signatures DOCX' -OOFTemplatePath '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Templates\Out of Office DOCX'"""  
-$Shortcut.IconLocation = '\\Long-Server-Name\Long-Share-Name\Long-Folder-Name\Set-OutlookSignatures\logo\Set-OutlookSignatures Icon.ico'  
-$Shortcut.Description = 'Set Outlook signatures using Set-OutlookSignatures.ps1'  
-$Shortcut.WindowStyle = 1 # 1 = undefined, 3 = maximized, 7 = minimized  
-$Shortcut.Hotkey = ''  
-$Shortcut.Save()  
-```
+You can overcome this user interface limitation by using PowerShell to create a shortcut (.lnk file). See '`.\sample code\Create-DesktopIcon.ps1`' for a cross-platform example.
+
 **Attention**: When editing the shortcut created with the code above in the Windows user interface, the command to be executed is shortened to 259 characters without further notice. This already happens when just opening the properties of the created .lnk file, changing nothing and clicking OK.
 
 See `.\sample code\CreateDesktopIcon.ps1` for a code example. Don't forget to adapt path names to your environment. 

@@ -42,6 +42,8 @@ function Enable-MsalTokenCacheOnDisk {
             [TokenCacheHelper]::EnableSerialization($ClientApplication.AppTokenCache)
         }
         [TokenCacheHelper]::EnableSerialization($ClientApplication.UserTokenCache)
+
+        $ClientApplication | Add-Member -MemberType NoteProperty -Name 'cacheInfo' -Value "Encrypted file '$([TokenCacheHelper]::CacheFilePath)', delete file to remove cached token"
     } else {
         $cacheFilePath = [System.IO.Path]::Combine(
             [Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper]::UserRootDirectory,
