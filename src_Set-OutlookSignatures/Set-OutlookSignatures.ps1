@@ -4114,10 +4114,11 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 }
             }
 
-            # Export pictures if available
+            Write-Host '    Export available images'
             foreach ($VariableName in $PictureVariablesArray) {
-                if ($null -ne $ReplaceHash[$VariableName[0]]) {
-                    [IO.File]::WriteAllBytes($(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')))), $ReplaceHash[$VariableName[0]])
+                Write-Verbose "      $($VariableName[0]), $([math]::ceiling(($ReplaceHash[$VariableName[0]]).Length / 1KB)) KiB @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                if ($null -ne $($ReplaceHash[$VariableName[0]])) {
+                    [IO.File]::WriteAllBytes($(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')))), $($ReplaceHash[$VariableName[0]]))
                 }
             }
 
@@ -5090,7 +5091,7 @@ function SetSignatures {
                         $tempImageVariableString = $Variablename[0] -ireplace '\$$', 'DELETEEMPTY$'
 
                         if (($image.attributes['src'].value -ilike "*$($VariableName[0])*") -or ($image.attributes['alt'].value -ilike "*$($VariableName[0])*")) {
-                            if ($ReplaceHash[$VariableName[0]]) {
+                            if ($($ReplaceHash[$VariableName[0]])) {
                                 if ($EmbedImagesInHtml -eq $false) {
                                     Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                     Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
@@ -5106,7 +5107,7 @@ function SetSignatures {
                                 $image.attributes['src'].value = "$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))"
                             }
                         } elseif (($image.attributes['src'].value -ilike "*$($tempImageVariableString)*") -or ($image.attributes['alt'].value -ilike "*$($tempImageVariableString)*")) {
-                            if ($ReplaceHash[$VariableName[0]]) {
+                            if ($($ReplaceHash[$VariableName[0]])) {
                                 if ($EmbedImagesInHtml -eq $false) {
                                     Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                     Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
@@ -5143,7 +5144,7 @@ function SetSignatures {
                         $tempImageVariableString = $Variablename -ireplace '\$$', 'DELETEEMPTY$'
 
                         if (($image.attributes['src'].value -ilike "*$($tempImageVariableString)*") -or ($image.attributes['alt'].value -ilike "*$($tempImageVariableString)*")) {
-                            if ($ReplaceHash[$VariableName]) {
+                            if ($($ReplaceHash[$VariableName])) {
                                 if ($image.attributes['alt'].value) {
                                     $image.attributes['alt'].value = $($image.attributes['alt'].value) -ireplace [Regex]::Escape($tempImageVariableString), ''
                                 }
@@ -5198,14 +5199,14 @@ function SetSignatures {
                                 $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($Variablename[0])*") }) -or
                                 $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($Variablename[0])*") })
                             ) {
-                                if ($null -ne $ReplaceHash[$Variablename[0]]) {
+                                if ($null -ne $($ReplaceHash[$Variablename[0]])) {
                                     $tempImageSourceFullname = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
                                 }
                             } elseif (
                                 $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')*") }) -or
                                 $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')*") })
                             ) {
-                                if ($null -ne $ReplaceHash[$Variablename[0]]) {
+                                if ($null -ne $($ReplaceHash[$Variablename[0]])) {
                                     $tempImageSourceFullname = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
                                 } else {
                                     $image.delete()
@@ -5237,7 +5238,7 @@ function SetSignatures {
                                 $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($tempImageVariableString)*") }) -or
                                 $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($tempImageVariableString)*") })
                             ) {
-                                if ($ReplaceHash[$Variablename]) {
+                                if ($($ReplaceHash[$Variablename])) {
                                     if ($tempImageAlternativeText) {
                                         $tempImageAlternativeText = $tempImageAlternativeText -ireplace [Regex]::Escape($tempImageVariableString), ''
                                     }

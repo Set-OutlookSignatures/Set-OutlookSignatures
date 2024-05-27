@@ -22,6 +22,17 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.2" target="_blank">v4.12.2</a> - 2024-05-27
+_**Attention, Exchange Online admins**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
+
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Fixed
+- Convert account pictures from Active Directory for use in signatures without byte array conversion error.
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.1" target="_blank">v4.12.1</a> - 2024-05-24
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
