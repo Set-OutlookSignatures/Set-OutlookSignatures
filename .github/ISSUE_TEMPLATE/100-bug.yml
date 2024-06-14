@@ -40,8 +40,8 @@ body:
       label: What happened?
       description: |
         Tell us what you expected to happen, what really happened and how the problem can be reproduced.
-        Also run Set-OutlookSignatures with the '-verbose' parameter and add the full text output as attachment.
-        You can also add screenshots and other files as attachments.
+        Run Set-OutlookSignatures with the '-verbose' parameter and attach the full output as text file.
+        Additionally, you can upload screenshots and other files.
       placeholder:
     validations:
       required: true
