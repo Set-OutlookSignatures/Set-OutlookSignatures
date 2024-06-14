@@ -12,6 +12,3 @@ contact_links:
   - name: Discussions board
     url: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions
     about: You are welcome to share your experiences with Set-OutlookSignatures, exchange ideas with other users or suggest new features in our discussions board.
-  - name: Report security vulnerabilities
-    url: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures?tab=security-ov-file
-    about: Please report security vulnerabilities here.
