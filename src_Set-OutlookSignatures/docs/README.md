@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="License"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with%20the-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20fee--based%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="get fee-based support from ExplicIT Consulting"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, local and roaming, Windows, Web, Mac, Linux, Android, iOS<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="License"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with%20the-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20fee--based%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="get fee-based support from ExplicIT Consulting"></a>
 
 # Welcome!<!-- omit in toc -->
 If email signatures or out-of-office replies are on your agenda, the following is worth reading - whether you work in marketing, sales, corporate communications, the legal or the compliance department, as Exchange or client administrator, as CIO or IT lead, as key user or consultant.
@@ -34,7 +34,8 @@ With Set-OutlookSignatures, signatures and out-of-office replies can be:
 - Set as **default OOF message** for internal or external recipients (OOF messages only)  
 - Set in **Outlook Web¹** for the currently logged-in user, including mirroring signatures to the cloud as **roaming signatures¹** (Linux/macOS/Windows, Classic and New Outlook)  
 - Centrally managed only¹, or **exist along user-created signatures** (signatures only)  
-- Copied to an **additional path¹** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook Windows/Mac/Web: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
+- Copied to an **additional path¹** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
+- Create an **email draft containing all available signatures** in HTML and plain text for easy access in mail clients that do not have a signatures API
 - **Write protected** (Outlook for Windows signatures only)
 
 Set-OutlookSignatures can be **run by users on Windows, Linux and macOS clients, including shared devices and terminal servers - or on a central system with a service account¹**.  
@@ -104,8 +105,9 @@ ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSi
   - [3.31. MailboxSpecificSignatureNames](#331-mailboxspecificsignaturenames)
   - [3.32. WordProcessPriority](#332-wordprocesspriority)
   - [3.33. ScriptProcessPriority](#333-scriptprocesspriority)
-  - [3.34. BenefactorCircleID](#334-benefactorcircleid)
-  - [3.35. BenefactorCircleLicenseFile](#335-benefactorcirclelicensefile)
+  - [3.34. SignatureCollectionInDrafts](#334-signaturecollectionindrafts)
+  - [3.35. BenefactorCircleID](#335-benefactorcircleid)
+  - [3.36. BenefactorCircleLicenseFile](#336-benefactorcirclelicensefile)
 - [4. Outlook signature path](#4-outlook-signature-path)
 - [5. Mailboxes](#5-mailboxes)
 - [6. Group membership](#6-group-membership)
@@ -875,7 +877,21 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 3
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority Normal"  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 32"
 
-## 3.34. BenefactorCircleID
+## 3.34. SignatureCollectionInDrafts
+When enabled, this creates and updates an email message with the subject 'My signatures, powered by Set-OutlookSignatures Benefactor Circle' in the drafts folder of the current user, containing all available signatures in HTML and plain text for easy access in mail clients that do not have a signatures API.
+
+This feature requires a Benefactor Circle license.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
+Default value: $true
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts false"
+
+## 3.35. BenefactorCircleID
 The Benefactor Circle member ID matching your license file, which unlocks exclusive features.
 
 Default value: ''
@@ -883,7 +899,7 @@ Default value: ''
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -BenefactorCircleID "00000000-0000-0000-0000-000000000000"  
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -BenefactorCircleID ""00000000-0000-0000-0000-000000000000"""  
 
-## 3.35. BenefactorCircleLicenseFile
+## 3.36. BenefactorCircleLicenseFile
 The Benefactor Circle license file matching your Benefactor Circle ID, which unlocks exclusive features.
 
 Default value: ''

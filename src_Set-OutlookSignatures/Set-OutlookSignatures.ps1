@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
 Set-OutlookSignatures XXXVersionStringXXX
-The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange.
+Email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, Windows, Web, Mac, Linux, Android, iOS
 
 .DESCRIPTION
 With Set-OutlookSignatures, signatures and out-of-office replies can be:
@@ -17,7 +17,8 @@ With Set-OutlookSignatures, signatures and out-of-office replies can be:
 - Set as **default OOF message** for internal or external recipients (OOF messages only)
 - Set in **Outlook Web¹** for the currently logged-in user, including mirroring signatures to the cloud as **roaming signatures¹** (Linux/macOS/Windows, Classic and New Outlook)
 - Centrally managed only¹, or **exist along user-created signatures** (signatures only)
-- Copied to an **additional path¹** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook Windows/Mac/Web: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
+- Copied to an **additional path¹** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
+- Create an **email draft containing all available signatures** in HTML and plain text for easy access in mail clients that do not have a signatures API
 - **Write protected** (Outlook for Windows signatures only)
 
 Set-OutlookSignatures can be **run by users on Windows, Linux and macOS clients, including shared devices and terminal servers - or on a central system with a service account¹**.
@@ -599,6 +600,20 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 3
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority Normal"
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 32"
 
+.PARAMETER SignatureCollectionInDrafts
+When enabled, this creates and updates an email message with the subject 'My signatures, powered by Set-OutlookSignatures Benefactor Circle' in the drafts folder of the current user, containing all available signatures in HTML and plain text for easy access in mail clients that do not have a signatures API.
+
+This feature requires a Benefactor Circle license.
+
+Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
+
+Default value: $true
+
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts $false
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts false
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts $false"
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts false"
+
 .PARAMETER BenefactorCircleID
 The Benefactor Circle member ID matching your license file, which unlocks exclusive features.
 
@@ -909,7 +924,14 @@ Param(
     [Parameter(Mandatory = $false, ParameterSetName = 'I: Script')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet('', 'Idle', 64, 'BelowNormal', 16384, 'Normal', 32, 'AboveNormal', 32768, 'High', 128, 'RealTime', 256)]
-    $ScriptProcessPriority = ''
+    $ScriptProcessPriority = '',
+
+    # Should the 'SignatureCollectionInDrafts' email draft be created and updated?
+    [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'G: Outlook')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
+    [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
+    $SignatureCollectionInDrafts = $true
 )
 
 
@@ -1117,7 +1139,6 @@ function main {
     $script:tempDir = (New-Item -Path ([System.IO.Path]::GetTempPath()) -Name (New-Guid).Guid -ItemType Directory).FullName
     $script:jobs = New-Object System.Collections.ArrayList
     Add-Type -AssemblyName System.DirectoryServices.AccountManagement
-    Add-Type -AssemblyName System.Web
 
     if ($IsWindows) {
         $Search = New-Object DirectoryServices.DirectorySearcher
@@ -1539,6 +1560,13 @@ namespace SetOutlookSignatures
     if ((-not $IsWindows) -and (-not $MirrorCloudSignatures)) {
         Write-Host '    MirrorCloudSignatures is always enabled on Non-Windows platforms.' -ForegroundColor Yellow
         $MirrorCloudSignatures = $true
+    }
+
+    Write-Host "  SignatureCollectionInDrafts: '$($SignatureCollectionInDrafts)'"
+    if ($SignatureCollectionInDrafts -iin (1, '1', 'true', '$true', 'yes')) {
+        $SignatureCollectionInDrafts = $true
+    } else {
+        $SignatureCollectionInDrafts = $false
     }
 
     Write-Host "  MailboxSpecificSignatureNames: '$($MailboxSpecificSignatureNames)'"
@@ -2517,7 +2545,27 @@ end tell
     ) {
         Write-Host "    Set up environment for connection to Microsoft Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
         if ($IsWindows) {
-            $script:CurrentUser = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\IdentityStore\Cache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)\IdentityCache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)" -Name 'UserName' -ErrorAction SilentlyContinue)
+            Write-Verbose '      Determine current user via IdentityCache'
+
+            $script:CurrentUser = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\IdentityStore\Cache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)\IdentityCache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)" -Name 'UserName' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue)
+    
+            if (-not [string]::IsNullOrWhiteSpace($script:Currentuser)) {
+                Write-Verbose "        Result: $($script:CurrentUser)"
+            } else {
+                Write-Verbose "        Failed: $($error[0])"
+                $script:CurrentUser = $null
+
+                Write-Verbose '      Determine current user via whoami'
+
+                $script:CurrentUser = "$(whoami /upn *>&1)"
+
+                if ((-not [string]::IsNullOrWhiteSpace($script:CurrentUser)) -and ($script:CurrentUser -notmatch '\s')) {
+                    Write-Verbose "        Result: $($script:CurrentUser)"
+                } else {
+                    Write-Verbose "        Failed: $($error[0])"
+                    $script:CurrentUser = $null
+                }
+            }
         } else {
             $script:CurrentUser = $null
         }
@@ -4367,6 +4415,23 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         }
     }
 
+    # Create/update 'My signatures, powered by Set-OutlookSignatures Benefactor Circle' email draft
+    if ($SignatureCollectionInDrafts -eq $true) {
+        Write-Host
+        Write-Host "Create 'My signatures, powered by Set-OutlookSignatures Benefactor Circle' email draft for current user @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+        if (-not $BenefactorCircleLicenseFile) {
+            Write-Host "  The 'SignatureCollectionInDrafts' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+            Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+        } else {
+            $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SignatureCollectionInDrafts()
+
+            if ($FeatureResult -ne 'true') {
+                Write-Host '  Error creating ''My signatures, powered by Set-OutlookSignatures Benefactor Circle'' email draft.' -ForegroundColor Yellow
+                Write-Host "  $FeatureResult" -ForegroundColor Yellow
+            }
+        }
+    }
+
     # Copy signatures to additional path if $AdditionalSignaturePath is set
     if ($AdditionalSignaturePath) {
         Write-Host
@@ -5093,9 +5158,9 @@ function SetSignatures {
                         if (($image.attributes['src'].value -ilike "*$($VariableName[0])*") -or ($image.attributes['alt'].value -ilike "*$($VariableName[0])*")) {
                             if ($($ReplaceHash[$VariableName[0]])) {
                                 if ($EmbedImagesInHtml -eq $false) {
-                                    Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
+                                    Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Net.WebUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                     Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
-                                    $image.attributes['src'].value = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($VariableName[0]).jpeg")
+                                    $image.attributes['src'].value = [System.Net.WebUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($VariableName[0]).jpeg")
 
                                     if ($image.attributes['alt'].value) {
                                         $image.attributes['alt'].value = $($image.attributes['alt'].value) -ireplace [Regex]::Escape($VariableName[0]), ''
@@ -5104,14 +5169,14 @@ function SetSignatures {
                                     $image.attributes['src'].value = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([System.IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg'))))))
                                 }
                             } else {
-                                $image.attributes['src'].value = "$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))"
+                                $image.attributes['src'].value = "$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$([System.IO.Path]::GetFileName(([System.Net.WebUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))"
                             }
                         } elseif (($image.attributes['src'].value -ilike "*$($tempImageVariableString)*") -or ($image.attributes['alt'].value -ilike "*$($tempImageVariableString)*")) {
                             if ($($ReplaceHash[$VariableName[0]])) {
                                 if ($EmbedImagesInHtml -eq $false) {
-                                    Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
+                                    Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Net.WebUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                     Copy-Item (Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')) (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$($VariableName[0]).jpeg") -Force
-                                    $image.attributes['src'].value = [System.Web.HttpUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($VariableName[0]).jpeg")
+                                    $image.attributes['src'].value = [System.Net.WebUtility]::UrlDecode("$([System.IO.Path]::ChangeExtension($Signature.Value, '.files'))/$($VariableName[0]).jpeg")
 
                                     if ($image.attributes['alt'].value) {
                                         $image.attributes['alt'].value = $($image.attributes['alt'].value) -ireplace [Regex]::Escape($tempImageVariableString), ''
@@ -5120,7 +5185,7 @@ function SetSignatures {
                                     $image.attributes['src'].value = ('data:image/jpeg;base64,' + [Convert]::ToBase64String([System.IO.File]::ReadAllBytes(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg'))))))
                                 }
                             } else {
-                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
+                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Net.WebUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                 $image.Remove() | Out-Null
                                 $tempImageIsDeleted = $true
                                 break
@@ -5149,7 +5214,7 @@ function SetSignatures {
                                     $image.attributes['alt'].value = $($image.attributes['alt'].value) -ireplace [Regex]::Escape($tempImageVariableString), ''
                                 }
                             } else {
-                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Web.HttpUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
+                                Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files/$([System.IO.Path]::GetFileName(([System.Net.WebUtility]::UrlDecode(($image.attributes['src'].value -ireplace '^about:', '')))))") -Force -ErrorAction SilentlyContinue
                                 $image.remove() | Out-Null
                                 $tempImageIsDeleted = $true
                                 break
@@ -5173,7 +5238,7 @@ function SetSignatures {
             Write-Host "$Indent      Export to HTM format"
             $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
         } else {
-            $script:COMWord.Documents.Open($path, $false) | Out-Null
+            $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
 
             Write-Host "$Indent      Replace picture variables"
             if ($script:COMWord.ActiveDocument.Shapes.Count -gt 0) {
@@ -5385,7 +5450,7 @@ function SetSignatures {
                 }
 
                 # Save
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
 
                 # Restore original security setting
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -5407,7 +5472,7 @@ function SetSignatures {
                 }
 
                 # Save
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
 
                 # Restore original security setting
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -5416,12 +5481,12 @@ function SetSignatures {
             # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
             # Close the document to remove in-memory references to already deleted images
             $script:COMWord.ActiveDocument.Saved = $true
-            $script:COMWord.ActiveDocument.Close($false)
+            $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
             # Export to .htm
             Write-Host "$Indent      Export to HTM format"
             $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
-            $script:COMWord.Documents.Open($path, $false) | Out-Null
+            $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
 
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
@@ -5456,7 +5521,7 @@ function SetSignatures {
                 }
 
                 # Save
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
 
                 # Restore original security setting
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -5478,7 +5543,7 @@ function SetSignatures {
                 }
 
                 # Save
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
 
                 # Restore original security setting
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -5499,7 +5564,7 @@ function SetSignatures {
             if ($DocxHighResImageConversion) {
                 Write-Host "$Indent        Export high-res images"
                 if (-not $BenefactorCircleLicenseFile) {
-                    $script:COMWord.ActiveDocument.Close($false)
+                    $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
                     Write-Host "$Indent          The 'DocxHighResImageConversion' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
                     Write-Host "$Indent          Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
@@ -5508,7 +5573,7 @@ function SetSignatures {
 
                     if ($FeatureResult -ne 'true') {
                         try {
-                            $script:COMWord.ActiveDocument.Close($false)
+                            $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
                         } catch {
                         }
                         Write-Host "$Indent          Error converting high resolution images from DOCX template." -ForegroundColor Yellow
@@ -5516,7 +5581,7 @@ function SetSignatures {
                     }
                 }
             } else {
-                $script:COMWord.ActiveDocument.Close($false)
+                $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
             }
         }
 
@@ -5626,10 +5691,10 @@ function SetSignatures {
                 # If possible, use .docx file to avoid problems with MS Information Protection
                 if ($UseHtmTemplates) {
                     $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-                    $script:COMWord.Documents.Open($path, $false, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, 65001) | Out-Null
+                    $script:COMWord.Documents.Open($path, $false, $false, $false, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, 65001) | Out-Null
                 } else {
                     $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
-                    $script:COMWord.Documents.Open($path, $false) | Out-Null
+                    $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
                 }
 
 
@@ -5649,7 +5714,7 @@ function SetSignatures {
                     }
 
                     # Save
-                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
 
                     # Restore original security setting
                     Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -5671,7 +5736,7 @@ function SetSignatures {
                     }
 
                     # Save
-                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat)
+                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
 
                     # Restore original security setting
                     Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -5680,7 +5745,7 @@ function SetSignatures {
                 # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
                 # Close the document as conversion to .rtf happens from .htm
                 $script:COMWord.ActiveDocument.Saved = $true
-                $script:COMWord.ActiveDocument.Close($false)
+                $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
                 Write-Host "$Indent        Shrink RTF file"
                 $((Get-Content -LiteralPath $path -Raw -Encoding Ascii) -ireplace '\{\\nonshppict[\s\S]*?\}\}', '') | Set-Content -LiteralPath $path -Encoding Ascii
@@ -6385,6 +6450,8 @@ function GraphGetToken {
                         $MsalInteractiveParams.HtmlMessageError = $GraphHtmlMessageError
                     }
 
+
+                    Write-Host '      Opening new browser window and waiting for you to authenticate. Stopping script execution after five minutes.'
                     $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Interactive -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
                 } catch {
                     Write-Verbose '        No authentication possible'
@@ -6393,7 +6460,8 @@ function GraphGetToken {
                         error             = (($error[0] | Out-String) + @"
 No Graph authentication possible.
 1. Did you follow the Quick Start Guide in '.\docs\README' and configure the Entra ID/Azure AD app correctly?
-2. If the "Via Prompt with LoginHint and Timeout" authentication message is diplayed:
+2. Run Set-OutlookSignatures with the "-Verbose" parameter and check for authentication messages
+3. If the "Via Prompt with LoginHint and Timeout" authentication message is diplayed:
    - Does a browser (the system default browser, if configured) open and ask for authentication?
      - Yes:
        - Check if the correct user account is selected/entered and if the authentication is successful
@@ -6401,10 +6469,10 @@ No Graph authentication possible.
        - Ensure that access to 'http://localhost' is allowed ('https://localhost' is currently not technically feasible, see 'https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/System-Browser-on-.Net-Core' and 'https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/MSAL.NET-uses-web-browser' for details)
      - No:
        - Run Set-OutlookSignatures in a new PowerShell session
-       - Check if a default browser is set and if "start https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" opens it
+       - Check if a default browser is set and if 'start https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' opens it
        - Make sure that Set-OutlookSignatures is executed in the security context of the currently logged-in user
+       - Check your anti-malware configuration (Verbose messages such as 'An error occurred while sending the request' point at a problem there)
        - Make sure that the current PowerShell session allows TLS 1.2+ (see https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85 for details)
-3. Run Set-OutlookSignatures with the "-Verbose" parameter and check for authentication messages
 4. Delete the MSAL.PS Graph token cache: $($script:msalClientApp.cacheInfo).
 "@)
                         AccessToken       = $null
@@ -6470,7 +6538,7 @@ function GraphGetMe {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Web.HttpUtility]::UrlEncode(($GraphUserProperties -join ','))
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Net.WebUtility]::UrlEncode(($GraphUserProperties -join ','))
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -6581,7 +6649,7 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
 
             $requestBody = @{
                 Method      = 'Get'
-                Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Web.HttpUtility]::UrlEncode($local:x)
+                Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Net.WebUtility]::UrlEncode($local:x)
                 Headers     = $authHeader
                 ContentType = 'Application/Json; charset=utf-8'
             }
@@ -6885,7 +6953,7 @@ function GraphFilterGroups($filter) {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/groups?`$select=securityidentifier&`$filter=" + [System.Web.HttpUtility]::UrlEncode($filter)
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/groups?`$select=securityidentifier&`$filter=" + [System.Net.WebUtility]::UrlEncode($filter)
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -6938,7 +7006,7 @@ function GraphFilterUsers($filter) {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$select=securityidentifier&`$filter=" + [System.Web.HttpUtility]::UrlEncode($filter)
+            Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$select=securityidentifier&`$filter=" + [System.Net.WebUtility]::UrlEncode($filter)
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }

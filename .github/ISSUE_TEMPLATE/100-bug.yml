@@ -38,18 +38,10 @@ body:
     id: what-happened
     attributes:
       label: What happened?
-      description: Also tell us what you expected and how the problem can be reproduced.
-      placeholder: Tell us what what happened!
-    validations:
-      required: true
-  - type: textarea
-    id: verboselog
-    attributes:
-      label: Verbose log
       description: |
-        Run Set-OutlookSignatures with the '-verbose' parameter and post the full text output here.
-        Do not refer to a log file attached in 'What happened?', but paste the text output here.
-      placeholder: Tell us what Set-OutlookSignatures says!
-      render: Text
+        Tell us what you expected to happen, what really happened and how the problem can be reproduced.
+        Run Set-OutlookSignatures with the '-verbose' parameter and attach the full output as text file.
+        Additionally, you can upload screenshots and other files.
+      placeholder:
     validations:
       required: true

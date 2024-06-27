@@ -78,8 +78,8 @@ Write-Host '  Does not check if an app with the same name already exists'
 Write-Host "  App name: $($appName)"
 $params = @{
     DisplayName    = $appName
-    Description    = 'Set-OutlookSignatures: The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange'
-    Notes          = 'Set-OutlookSignatures: The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange'
+    Description    = 'Set-OutlookSignatures, email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, Windows, Web, Mac, Linux, Android, iOS'
+    Notes          = 'Set-OutlookSignatures, email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, Windows, Web, Mac, Linux, Android, iOS'
     SignInAudience = 'AzureADMyOrg'
 }
 

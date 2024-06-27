@@ -11,12 +11,14 @@ ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSi
   - Time-based campaigns by assigning time range constraints to templates
   - Signatures for automapped and additional mailboxes
   - Set current user Outlook Web signature (classic Outlook Web signature and roaming signatures)
-  - Download and upload roaming signatures
   - Set current user out-of-office replies
+  - Download and upload roaming signatures (Linux, macOS, Windows, Classic and New Outlook)
   - Delete signatures created by the software, for which the templates no longer exist or apply
   - Delete user-created signatures
-  - Additional signature path (when used outside of simulation mode)
+  - Copy signatures to additional signature path for use with email clients and apps besides Outlook: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others
+  - Create an email draft containing all available signatures in HTML and plain text for easy access in mail clients that do not have a signatures API
   - High resolution images from DOCX templates
+  - All components are digitally signed with an Extended Validation (EV) certificate for tamper protection and easy integration into locked-down environments.
 - Prioritized support and feature requests
   - Issues are handled with priority via a Benefactor Circle exclusive email address and a callback option.
   - Protected web storage allowing a secure upload of log files for analysis.

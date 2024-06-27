@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>The open source gold standard to centrally manage and deploy email signatures and out-of-office replies for Outlook and Exchange<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="License"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with%20the-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20fee--based%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="get fee-based support from ExplicIT Consulting"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, local and roaming, Windows, Web, Mac, Linux, Android, iOS<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="License"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with%20the-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20fee--based%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="get fee-based support from ExplicIT Consulting"></a>
 
 # Changelog
 <!--
@@ -20,6 +20,27 @@
   ### Fixed
   - <Present tense verb> XXX
 -->
+
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.13.0" target="_blank">v4.13.0</a> - 2024-06-27
+_**Attention, Exchange Online admins**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
+
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- Update dependency MSAL.Net to v4.61.3.
+- Update code in MSAL.PS used to detect active window handle, required for interactive login to Graph.
+- Do not add DOCX templates to the list of recent files in Word, and do not route the document to the next recipient if the document has a routing slip.
+### Added
+- Add a hint in INI files stating to not modify them directly but a copy of them, and to follow the README FAQ `What is the recommended folder structure for script, license, template and config files?`.
+- Add a fallback mechanism for detecting the User Principal Name of the currently logged-in user on Windows. This solves the rare case with unknown root cause where this information is not available in the registry. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/pull/116" target="_blank">#116</a>) (Thanks <a href="https://github.com/CarlInLV" target="_blank">@CarlInLV</a>!)
+- Add new parameter `SignatureCollectionInDrafts`. Enabled per default, this creates and updates an email message with the subject 'My signatures, powered by Set-OutlookSignatures Benefactor Circle' in the drafts folder of the current user, containing all available signatures in HTML and plain text for easy access in mail clients that do not have a signatures API. See `.\docs\README` for details.
+### Removed
+- Remove dependency to System.Web.dll for URL encode and decode operations.
+### Fixed
+- Truncate text signature for SignatureTextOnMobile when setting Outlook Web signature if it is longer than 512 characters, and show a warning message. SignatureTextOnMobile is only used when browsing Outlook Web on a mobile device. (Thanks <a href="https://github.com/bmartins-EMCDDA" target="_blank">@bmartins-EMCDDA</a>!)
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.2" target="_blank">v4.12.2</a> - 2024-05-27
