@@ -4164,8 +4164,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
             Write-Host '    Export available images'
             foreach ($VariableName in $PictureVariablesArray) {
-                Write-Verbose "      $($VariableName[0]), $([math]::ceiling(($ReplaceHash[$VariableName[0]]).Length / 1KB)) KiB @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
                 if ($null -ne $($ReplaceHash[$VariableName[0]])) {
+                    Write-Verbose "      $($VariableName[0]), $([math]::ceiling(($ReplaceHash[$VariableName[0]]).Length / 1KB)) KiB @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
                     [IO.File]::WriteAllBytes($(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')))), $($ReplaceHash[$VariableName[0]]))
                 }
             }
