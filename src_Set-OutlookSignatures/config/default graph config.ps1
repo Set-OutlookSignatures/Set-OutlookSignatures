@@ -2,7 +2,7 @@
 #
 # This script is executed as a whole once per Set-OutlookSignatures run.
 #
-# Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to to define replacement variables and test it thoroughly.
+# Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to define replacement variables and test it thoroughly.
 #
 # A variable defined in this file overrides the definition of the same variable defined earlier in the software.
 #
@@ -101,7 +101,7 @@ $GraphHtmlMessageSuccess = "<html><head><title>$(if ($BenefactorCircleLicenseFil
 # Example with automatically closing tab: $GraphHtmlMessageSuccess = "<html><head><script>window.close();</script><title>$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</title></head><body style=""font-family:sans-serif;""><h1><a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a></h1><p>Graph authentication successful at $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK').</p><p>&nbsp;</p><p><strong>Thank you for using <a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a>!</strong></p><p>&nbsp;</p><p>You can close this tab at any time.</p></body></html>"
 
 
-# When the user successfully authenticates in the browser, the browser will be redirected to to the given Uri
+# When the user successfully authenticates in the browser, the browser will be redirected to the given Uri
 # Takes precedence over $GraphHtmlMessageSuccess
 [uri] $GraphBrowserRedirectSuccess = ''
 
@@ -111,7 +111,7 @@ $GraphHtmlMessageSuccess = "<html><head><title>$(if ($BenefactorCircleLicenseFil
 $GraphHtmlMessageError = "<html><head><title>$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</title></head><body style=""font-family:sans-serif;""><h1><a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a></h1><p>Graph authentication failed at $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK').</p><p>You may want to inform your helpdesk or administrator about this problem.</p><p>&nbsp;</p><p>Error: {0}</p><p>Details: {1}</p><p>&nbsp;</p><p><strong>Thank you for using <a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a>!</strong></p></body></html>"
 
 
-# When the user fails to successfully authenticate in the browser, the browser will be redirected to to the given Uri
+# When the user fails to successfully authenticate in the browser, the browser will be redirected to the given Uri
 # Takes precedence over $GraphHtmlMessageError
 [uri] $GraphBrowserRedirectError = ''
 

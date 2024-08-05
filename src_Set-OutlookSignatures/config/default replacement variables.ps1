@@ -3,7 +3,7 @@
 # This script is executed as a whole once for each mailbox.
 # It allows for complex replacement variable handling (complex string transformations, retrieving information from web services and databases, etc.).
 #
-# Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to to define replacement variables and test it thoroughly.
+# Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to define replacement variables and test it thoroughly.
 #
 # Replacement variable names are not case sensitive.
 #
