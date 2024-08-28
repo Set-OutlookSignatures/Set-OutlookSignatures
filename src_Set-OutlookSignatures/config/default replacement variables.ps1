@@ -3,7 +3,7 @@
 # This script is executed as a whole once for each mailbox.
 # It allows for complex replacement variable handling (complex string transformations, retrieving information from web services and databases, etc.).
 #
-# Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to define replacement variables and test it thoroughly.
+# Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to to define replacement variables and test it thoroughly.
 #
 # Replacement variable names are not case sensitive.
 #
@@ -187,7 +187,7 @@ $ReplaceHash['$CurrentMailboxManagerDisplayname$'] = [string]$ADPropsCurrentMail
 #   Dr. John Doe
 #   John Doe, PhD
 #   John Doe
-# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
 $ReplaceHash['$CurrentUserNameWithHonorifics$'] = (((((([string]$ADPropsCurrentUser.honorificPrefix, [string]$ADPropsCurrentUser.givenname, [string]$ADPropsCurrentUser.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUser.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
 $ReplaceHash['$CurrentUserManagerNameWithHonorifics$'] = (((((([string]$ADPropsCurrentUserManager.honorificPrefix, [string]$ADPropsCurrentUserManager.givenname, [string]$ADPropsCurrentUserManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUserManager.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
 $ReplaceHash['$CurrentMailboxNameWithHonorifics$'] = (((((([string]$ADPropsCurrentMailbox.honorificPrefix, [string]$ADPropsCurrentMailbox.givenname, [string]$ADPropsCurrentMailbox.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailbox.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
@@ -196,7 +196,7 @@ $ReplaceHash['$CurrentMailboxManagerNameWithHonorifics$'] = (((((([string]$ADPro
 
 # Sample code: Create MeCard (vCard alternative) QR codes and save the images in the following replacement variables:
 #   $CurrentUserCustomImage1$, $CurrentUserManagerCustomImage1$, $CurrentMailboxCustomImage1$, $CurrentMailboxManagerCustomImage1$
-# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
 @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager') | ForEach-Object {
     $QRCodeContent = @(
         @(
@@ -229,7 +229,7 @@ $ReplaceHash['$CurrentMailboxManagerNameWithHonorifics$'] = (((((([string]$ADPro
 #   ExtensionAttribute3 contains at least three characters, and a forward slash somewhere between the first and last character: " (<ExtensionAttribute3>)"
 #     Examples: " (she/her)", " (he/him)"
 #   Else: '' (emtpy string)
-# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
 $ReplaceHash['$CurrentUserGenderPronouns$'] = $(if (([string]$ADPropsCurrentUser.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentUser.ExtensionAttribute3)))" } else { '' })
 $ReplaceHash['$CurrentUserManagerGenderPronouns$'] = $(if (([string]$ADPropsCurrentUserManager.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentUserManager.ExtensionAttribute3)))" } else { '' })
 $ReplaceHash['$CurrentMailboxGenderPronouns$'] = $(if (([string]$ADPropsCurrentMailbox.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentMailbox.ExtensionAttribute3)))" } else { '' })

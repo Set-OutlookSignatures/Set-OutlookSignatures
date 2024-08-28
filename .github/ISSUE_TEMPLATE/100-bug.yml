@@ -9,7 +9,7 @@ body:
 
         Support in this GitHub repository is free, voluntary and without guaranteed response times.
 
-        If the issue you want to report is for the Benefactor Circle add-on or you want to prioritize your request, please use [ExplicIT Consulting's **fee-based support**](https://explicitconsulting.at/open-source/set-outlooksignatures/#5-fee-based-support) instead of this form.
+        If the issue you want to report is for the Benefactor Circle add-on or you want to prioritize your request, please use [ExplicIT Consulting's **commercial support**](https://explicitconsulting.at/open-source/set-outlooksignatures/#5-commercial-support) instead of this form.
   - type: checkboxes
     id: usinglatestrelease
     attributes:
@@ -40,7 +40,7 @@ body:
       label: What happened?
       description: |
         Tell us what you expected to happen, what really happened and how the problem can be reproduced.
-        Run Set-OutlookSignatures with the '-verbose' parameter and attach the full output as text file.
+        Run Set-OutlookSignatures with the '-verbose' parameter and attach the full output as text file. You may not get support without a full unmodified verbose log.
         Additionally, you can upload screenshots and other files.
       placeholder:
     validations:

@@ -44,7 +44,7 @@ function New-MsalClientApplication {
         [Parameter(Mandatory = $true, ParameterSetName = 'ConfidentialClientClaims', ValueFromPipelineByPropertyName = $true)]
         [Parameter(Mandatory = $false, ParameterSetName = 'ConfidentialClient-InputObject', ValueFromPipelineByPropertyName = $true)]
         [hashtable] $ClientClaims,
-        # Set client assertion used to prove the identity of the application to Azure AD. This is a Base-64 encoded JWT.
+        # Set client assertion used to prove the identity of the application to Entra ID. This is a Base-64 encoded JWT.
         [Parameter(Mandatory = $true, ParameterSetName = 'ConfidentialClientAssertion', ValueFromPipelineByPropertyName = $true)]
         [Parameter(Mandatory = $false, ParameterSetName = 'ConfidentialClient-InputObject', ValueFromPipelineByPropertyName = $true)]
         [string] $ClientAssertion,

@@ -1,12 +1,12 @@
 <#
-This sample code shows how to automate the creation of the Entra ID/Azure AD app required for Set-OutlookSignatures.
+This sample code shows how to automate the creation of the Entra ID app required for Set-OutlookSignatures.
 
 Both types of apps are supported: The one for end users, and the one for SimulateAndDeploy.
 
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
 #>
 
 [CmdletBinding()] param ()
@@ -119,6 +119,15 @@ if ($appType -ieq 'Set-OutlookSignatures') {
                         'type' = 'Scope'
                     },
 
+                    # Delegated permission: Files.Read.All
+                    #   Allows the app to read all files the signed-in user can access.
+                    #   Required for access to templates and configuration files hosted on SharePoint Online.
+                    #   For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
+                    @{
+                        'id'   = 'df85f4d6-205c-4ac5-a5ea-6bf408dba283'
+                        'type' = 'Scope'
+                    },
+
                     # Delegated permission: GroupMember.Read.All
                     #   Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
                     #   Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
@@ -161,7 +170,7 @@ if ($appType -ieq 'Set-OutlookSignatures') {
 
                     # Delegated permission: User.Read.All
                     #   Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-                    #   Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
+                    #   Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
                     @{
                         'id'   = 'a154be20-db9c-4678-8ab7-66f6cc099a59'
                         'type' = 'Scope'
@@ -197,6 +206,15 @@ if ($appType -ieq 'Set-OutlookSignatures') {
                         'type' = 'Scope'
                     },
 
+                    # Delegated permission: Files.Read.All
+                    #   Allows the app to read all files the signed-in user can access.
+                    #   Required for access to SharePoint Online on Linux, macOS, and on Windows without WebDAV.
+                    #   You can use Files.SelectedOperations.Selected as alternative, requiring granting specific permission in SharePoint Online.
+                    @{
+                        'id'   = 'df85f4d6-205c-4ac5-a5ea-6bf408dba283'
+                        'type' = 'Scope'
+                    },
+
                     # Delegated permission: GroupMember.Read.All
                     #   Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
                     #   Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
@@ -239,9 +257,18 @@ if ($appType -ieq 'Set-OutlookSignatures') {
 
                     # Delegated permission: User.Read.All
                     #   Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-                    #   Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
+                    #   Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
                     @{
                         'id'   = 'a154be20-db9c-4678-8ab7-66f6cc099a59'
+                        'type' = 'Scope'
+                    },
+
+                    # Application permission: Files.Read.All
+                    #   Allows the app to read all files in all site collections without a signed in user.
+                    #   Required for access to templates and configuration files hosted on SharePoint Online.
+                    #   For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
+                    @{
+                        'id'   = 'df85f4d6-205c-4ac5-a5ea-6bf408dba283'
                         'type' = 'Scope'
                     },
 
@@ -263,7 +290,7 @@ if ($appType -ieq 'Set-OutlookSignatures') {
 
                     # Application permission: User.Read.All
                     #   Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-                    #   Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
+                    #   Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
                     @{
                         'id'   = 'df021288-bdef-4463-88db-98f22de89214'
                         'type' = 'Role'
@@ -316,11 +343,17 @@ if ($appType -ieq 'SimulateAndDeploy') {
         endDateTime = (Get-Date).AddMonths(24)
     }
 
-    $secret = Add-MgApplicationPassword -applicationId $app.Id -PasswordCredential $params
+    $secret = Add-MgApplicationPassword -ApplicationId $app.Id -PasswordCredential $params
 
     Write-Host "  Client secret for SimulateAndDeploy configuration: $($secret.SecretText)" -ForegroundColor Green
-    Write-Host "  Don't forget to renew client secret before $(Get-Date (Get-Date).AddMonths(24) -Format 'yyyy-MM-dd')" -ForegroundColor Green
+    Write-Host "  Don't forget to renew the client secret before $(Get-Date (Get-Date).AddMonths(24) -Format 'yyyy-MM-dd')" -ForegroundColor Green
 }
+
+
+Write-Host
+Write-Host "Consider restricting file access"
+Write-Host "  Consider switching from Files.Read.All to Files.SelectedOperations.Selected for added security."
+Write-host "  This requires granting specific permissions in SharePoint Online."
 
 
 Write-Host
@@ -335,9 +368,9 @@ Write-Host '  To grant admin consent, navigate to'
 Write-Host "    https://login.microsoftonline.com/$($app.PublisherDomain)/adminconsent?client_id=$($app.AppId)" -ForegroundColor Green
 Write-Host "    with a user being 'Application Adminstrator' or 'Global Administrator'"
 Write-Host '    and accept the required permissions on behalf of your tenant.'
-Write-Host "  You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[...]'"
+Write-Host "  You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[…]'"
 Write-Host '    could not be found or accessed. The reason for this message is that'
-Write-Host '    the Entra ID/Azure AD app is configured to only be able to authenticate against http://localhost.'
+Write-Host '    the Entra ID app is configured to only be able to authenticate against http://localhost.'
 
 
 Write-Host

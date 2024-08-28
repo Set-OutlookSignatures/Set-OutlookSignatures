@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Benefactor Circle add-on, prioritized support
-    url: https://explicitconsulting.at/open-source/set-outlooksignatures/#5-fee-based-support
-    about: If the issue you want to report is for the Benefactor Circle add-on or you want to prioritize your request, please use ExplicIT Consulting's fee-based support instead of this form.
+    url: https://explicitconsulting.at/open-source/set-outlooksignatures/#5-commercial-support
+    about: If the issue you want to report is for the Benefactor Circle add-on or you want to prioritize your request, please use ExplicIT Consulting's commercial support instead of this form.
   - name: Previously solved issues
     url: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=
     about: Before creating a new issue, look through previous issues.

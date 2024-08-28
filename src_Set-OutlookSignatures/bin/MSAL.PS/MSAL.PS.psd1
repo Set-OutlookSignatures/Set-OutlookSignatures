@@ -31,7 +31,7 @@
     # Description of the functionality provided by this module
     Description            = 'The MSAL.PS PowerShell module wraps MSAL.NET functionality into PowerShell-friendly cmdlets and is not supported by Microsoft. Microsoft support does not extend beyond the underlying MSAL.NET library. For any inquiries regarding the PowerShell module itself, you may contact the author on GitHub or PowerShell Gallery.
 
-MSAL.NET (Microsoft.Identity.Client) is an authentication library which enables you to acquire tokens from Azure AD, to access protected Web APIs (Microsoft APIs or applications registered with Azure Active Directory).'
+MSAL.NET (Microsoft.Identity.Client) is an authentication library which enables you to acquire tokens from Entra ID, to access protected Web APIs (Microsoft APIs or applications registered with Entra ID).'
 
     # Minimum version of the PowerShell engine required by this module
     PowerShellVersion      = '5.1'

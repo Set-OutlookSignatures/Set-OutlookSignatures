@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, local and roaming, Windows, Web, Mac, Linux, Android, iOS<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="License"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with%20the-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20fee--based%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="get fee-based support from ExplicIT Consulting"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, local and roaming, Windows, Web, Mac, Linux, Android, iOS<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="License"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with%20the-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20commercial%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="get commercial support from ExplicIT Consulting"></a>
 
 # Changelog
 <!--
@@ -12,21 +12,61 @@
   _**Breaking:** <Present tense verb> XXX_  
   ### Changed
   - **Breaking:** <Present tense verb> XXX
-  - <Present tense verb> XXX
+  - <Active present tense verb> XXX
   ### Added
-  - <Present tense verb> XXX
+  - <Active present tense verb> XXX
   ### Removed
-  - <Present tense verb> XXX
+  - <Active present tense verb> XXX
   ### Fixed
-  - <Present tense verb> XXX
+  - <Active present tense verb> XXX
 -->
+
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.14.0" target="_blank">v4.14.0</a> - 2024-08-28
+_**Attention, Exchange Online admins**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README`._
+
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+_**Tagline**_  
+_Starting with this release, a tagline is added to each signature deployed for mailboxes without a [Benefactor Circle](Benefactor%20Circle.md) license. See FAQ `How to disable the tagline in signatures?` in `.\docs\README` for details._
+
+### Changed
+- Make simulation mode results for defaultNew and defaultReplyFwd signatures cross-platform compatible by not creating shortcuts (Windows) or symbolic links (Linux, macOS), but actually copying the files.
+- Update handling of SharePoint WebDAV authentication to reflect not yet documented Microsoft API changes.
+- Update sample code `Create-EntraApp.ps1` for new `Files.Read.All` permission and add a hint to consider switching to `Files.SelectedOperations.Selected`.
+- Remove parameters and SharePoint sharing hints ('/:u:/r', etc.) from URLs passed as paths for template and configuration files: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' becomes 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
+- Update dependency MSAL.Net to v4.64.0.
+### Added
+- Add an Outlook add-in that can:  
+  - Automatically add signatures to new emails and reply emails (including Outlook on iOS and Outlook on Android)
+  - Automatically add signatures to new appointment invites
+
+  See `The Outlook add-in` in `.\docs\README` for details about features, usage, configuration, deployment and remarks.  
+  The Outlook add-in is available as part of the [Benefactor Circle](Benefactor%20Circle.md) license.
+- Detect if a template or configuration file path is hosted on SharePoint Online and use Microsoft Graph to access it. This enables SharePoint Online access on Linux and macOS.  
+  To use this, you need to update your Entra ID app with the delegated (not application) permission `Files.Read.All` (`Files.SelectedOperations.Selected` also works but requires additional configuration). You also need to set the new parameter `GraphClientID`, which is described below.  
+  Access to SharePoint on-prem is still limited to Windows and WebDAV with an authentication cookie created in Internet Explorer.
+- Add new parameter `GraphClientID`. Must be set when `GraphConfigFile` is hosted on SharePoint Online. See `.\docs\README` for details.
+- Show local and UTC time for SimulateTime parameter when in simulation mode.
+- Add a tagline to each signature deployed for mailboxes without a [Benefactor Circle](Benefactor%20Circle.md) license. See FAQ `How to disable the tagline in signatures?` in `.\docs\README` for details.
+- Remove trailing null character from file names being enumerated in SharePoint folders. .Net and the WebDAV client sometimes add a null character, which is not allowed in file and path names.
+- Detect corrupted Outlook on Windows installations by comparing the major part of the Outlook version information from the registry and from outlook.exe.
+- Add `Which group naming format should I choose?` recommendation to `.\docs\README` and INI files.
+- Add FAQ `Why is the out-of-office assistant not activated automatically?` to `.\docs\README`.
+### Fixed
+- Do not allow parameter `SignatureCollectionInDrafts` in simulation mode unless `SimulateAndDeploy` is enabled.
+- Fix a potential problem with paged Microsoft Graph queries which could lead to an infinite loop.
+- Fix search for Entra ID groups by their display name. (Thanks <a href="https://github.com/CoreyS222" target="_blank">@CoreyS222</a>!)
+- Fix on-prem group membership search not including non-security enabled distribution groups due to a regression.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.13.0" target="_blank">v4.13.0</a> - 2024-06-27
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
 
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -47,7 +87,7 @@ _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicito
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
 
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Fixed
@@ -58,7 +98,7 @@ _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicito
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
 
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -72,7 +112,7 @@ _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicito
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.0" target="_blank">v4.12.0</a> - 2024-05-07
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -95,7 +135,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.11.0" target="_blank">v4.11.0</a> - 2024-03-26
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -117,7 +157,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.10.1" target="_blank">v4.10.1</a> - 2024-02-06
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -141,7 +181,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.10.0" target="_blank">v4.10.0</a> - 2024-01-05
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -165,7 +205,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.9.0" target="_blank">v4.9.0</a> - 2023-12-02
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -188,7 +228,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.1" target="_blank">v4.8.1</a> - 2023-11-24
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -200,7 +240,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.0" target="_blank">v4.8.0</a> - 2023-11-20
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -210,7 +250,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 - Allow more alternate names for cloud environments. See `.\docs\README` for details about the `CloudEnvironment` parameter.
 ### Added
 - Graph token cache now not only works in Windows PowerShell 5.1, but also in PowerShell 7. 
-- A message box now informs the user before a new browser tab is opened for authentication, as Microsoft still does not show the Entra ID/Azure AD app name in the authentication prompt. The message text can be customized or disabled with the `$GraphHtmlMessageboxText` parameter in `.\config\default graph config.ps1`. See that file for details.
+- A message box now informs the user before a new browser tab is opened for authentication, as Microsoft still does not show the Entra ID app name in the authentication prompt. The message text can be customized or disabled with the `$GraphHtmlMessageboxText` parameter in `.\config\default graph config.ps1`. See that file for details.
 - The HTML message after a successful browser authentication can be customized with the `$GraphHtmlMessageSuccess` parameter in `.\config\default graph config.ps1`. See that file for details, and also consider `$GraphBrowserRedirectSuccess` for a redirection alternative.
 - The HTML message after an unsuccessful browser authentication can be customized with the `$GraphHtmlMessageError` parameter in `.\config\default graph config.ps1`. See that file for details, and also consider `$GraphBrowserRedirectError` for a redirection alternative.
 - New sample code `.\sample code\Create-EntraApp.ps1` automates the creation of the Entra app required to access Microsoft Graph.
@@ -222,7 +262,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.7.0" target="_blank">v4.7.0</a> - 2023-10-29
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -230,17 +270,17 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 ### Changed
 - Reduced minimum required Graph permissions: GroupMember.Read.All is now used instead of Group.Read.All, which reduces delegated app permissions.  
 To compare the two permissions, see their description at [Microsoft Graph permission reference](https://learn.microsoft.com/en-us/graph/permissions-reference).
-  - If you use an Entra ID/Azure AD app defined in your own tenant
+  - If you use an Entra ID app defined in your own tenant
     - If you want to use GroupMember.Read.All instead of Group.Read.All, you have to use at least v4.6.0 of Set-OutlookSignatures.  
     Remove admin consent for the Group.Read.All permission and remove it from the app, then add the delegated GroupMember.Read.All permission and grant admin consent for it.
-    - If you do not want to use GroupMember.Read.All instead of Group.Read.All, there is nothing to do: v4.6.0 and up just request all permissions defined in the Entra ID/Azure AD app, versions before v4.6.0 explicitly request Group.Read.All.
-  - If you use the Entra ID/Azure AD app provided by the developers (app ID 'beea8249-8c98-4c76-92f6-ce3c468a61e6')
+    - If you do not want to use GroupMember.Read.All instead of Group.Read.All, there is nothing to do: v4.6.0 and up just request all permissions defined in the Entra ID app, versions before v4.6.0 explicitly request Group.Read.All.
+  - If you use the Entra ID app provided by the developers (app ID 'beea8249-8c98-4c76-92f6-ce3c468a61e6')
     - If you want to use GroupMember.Read.All instead of Group.Read.All, you have to use at least v4.6.0 of Set-OutlookSignatures, and renew your admin consent for the new reduced permissions:
       1. Open a browser, preferably in a private window
       2. Open the URL 'https://login.microsoftonline.com/organizations/adminconsent?client_id=beea8249-8c98-4c76-92f6-ce3c468a61e6'
       3. Log on with a user that has Global Admin or Client Application Administrator rights in your tenant
-      4. Accept the required permissions on behalf of your tenant. You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[...]' could not be found or accessed.
-    - If you want to use a version older than v4.6.0, you need to create your own app in your own Entra ID/Azure AD tenant as detailed in `.\config\default graph config.ps1`.
+      4. Accept the required permissions on behalf of your tenant. You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[…]' could not be found or accessed.
+    - If you want to use a version older than v4.6.0, you need to create your own app in your own Entra ID tenant as detailed in `.\config\default graph config.ps1`.
     - For security and maintenance reasons, it is recommended to create you own app in your own tenant.
 ### Added
 - Support for all cloud environments via new parameter `CloudEnvironment`: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet). See `.\docs\README` for details.
@@ -251,7 +291,7 @@ To compare the two permissions, see their description at [Microsoft Graph permis
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.1" target="_blank">v4.6.1</a> - 2023-10-27
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -264,13 +304,13 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.0" target="_blank">v4.6.0</a> - 2023-10-23
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Added
-- 'default graph config.ps1' now includes a description for each permission required by the Entra ID/Azure AD application for Graph access
+- 'default graph config.ps1' now includes a description for each permission required by the Entra ID application for Graph access
 - Additional documentation: Implementation approach
   - The content is based on real-life experiences implementing the software in multi-client environments with a five-digit number of mailboxes.
   - Proven procedures and recommendations for product managers, architects, operations managers, account managers, mail and client administrators. Suited for service providers as well as for clients.
@@ -288,11 +328,11 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 - New parameter `WordProcessPriority`: Define the Word process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact. See `README` for details.
 ### Fixed
 - On-prem only: Make sure that Active Directory attributes of the current user, the current mailbox and their managers are available in environments where not every domain controller is also a global catalog server
-- Always connect to Entra ID/Azure AD/Graph when New Outlook is used 
+- Always connect to Entra ID/Graph when New Outlook is used 
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.5.0" target="_blank">v4.5.0</a> - 2023-09-29
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -310,7 +350,7 @@ _Set-OutlookSignatures can experimentally handle cloud roaming signatures since 
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.4.0" target="_blank">v4.4.0</a> - 2023-09-20
-_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -335,8 +375,8 @@ _**Attention, cloud mailbox users:**_
 - _Set-OutlookSignatures can experimentally handle roaming signatures since v4.0.0. See `MirrorLocalSignaturesToCloud` in `.\docs\README` for details._
 ### Added
 - When no mailboxes are configured in Outlook, additional mailboxes configured in Outlook Web are used. Thanks to our partner [ExplicIT Consulting](https://explicitconsulting.at) for donating this code, enabling another world-first feature and bringing us even closer to supporting the "new Outlook" client (codename "Monarch") in the future!
-- Add hint to TLS 1.2 when Entra ID/Azure AD/Graph authentication is not successful (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85" target="_blank">#85</a>) (Thanks <a href="https://github.com/halatovic" target="_blank">@halatovic</a>!)
-- Update '`Quick Start Guide`' in '`README`' file with clearer instructions on how to register the Entra ID/Azure AD app required for hybrid and cloud-only environments
+- Add hint to TLS 1.2 when Entra ID/Graph authentication is not successful (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85" target="_blank">#85</a>) (Thanks <a href="https://github.com/halatovic" target="_blank">@halatovic</a>!)
+- Update '`Quick Start Guide`' in '`README`' file with clearer instructions on how to register the Entra ID app required for hybrid and cloud-only environments
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.2.1" target="_blank">v4.2.1</a> - 2023-08-16
@@ -384,7 +424,6 @@ This is useful for delegate and boss-secretary scenarios - secretaries get speci
 - The attribute 'GroupsSIDs' is now also available in the `$AdPropsCurrentUser` replacement variable. It contains all the SIDs of the groups the mailbox of the current user is a member of, which allows for replacement variable content based on group membership, as well as assigning or denying templates for specific users. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
 - Replacement variables are no longer case sensitive. This eliminates a common error source and makes replacement variables in template files easier to read.
 - New chapter `Proposed template and signature naming convention` in `README` file. Thanks to [ExplicIT Consulting](https://explicitconsulting.at) for donating this piece of documentation!
-- Microsoft has renamed Azure AD to Entra ID. Documentation and code have been updated where possible. In configuration files, 'EntraID' and 'AzureAD' are interchangeable.
 ### Fixed
 - The attribute 'GroupsSIDs' is now reliably available in the `$AdPropsCurrentMailbox` replacement variable.
 - Correctly log group and email address specific exclusions (only an optical issue, no technical one)
@@ -423,7 +462,7 @@ When `EmbedimagesInHtml` is enabled, it now automatically enables the "Send pict
 - Thanks to our partnership with [ExplicIT Consulting](https://explicitconsulting.at), Set-OutlookSignatures and its components are digitally signed with an Extended Validation (EV) Code Signing Certificate (which is the highest code signing standard available).  
 This is not only available for Benefactor Circle members, but also the Free and Open Source core version is code signed. Code signing makes it much easier to implement Set-OutlookSignatures in environments being locked down with AppLocker or comparable tools.
 - All replacement variables now have the 'DELETEEMPTY' option, which allows for images to be kept only when an attribute has a value. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
-- The attribute 'GroupsSIDs' is now available in the `$CurrentMailbox...]` variable for use with replacement variables. It contains all the SIDs of the groups the current mailbox is a member of, which allows for replacement variable content based on group membership. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
+- The attribute 'GroupsSIDs' is now available in the `$CurrentMailbox…]` variable for use with replacement variables. It contains all the SIDs of the groups the current mailbox is a member of, which allows for replacement variable content based on group membership. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
 - A basic configuration user interface with grouped parameter sets, just run `Show-Command .\Set-OutlookSignatures.ps1` in PowerShell.
 - The new template tag `WriteProtect` write protects individual signature files. See `README` for details and restrictions.
 - The new script parameter `SimulateTime` allows to use a specific time when running simulation mode, which is handy for testing time-based templates.
@@ -432,7 +471,7 @@ This is not only available for Benefactor Circle members, but also the Free and 
 - Show a warning message when setting the Outlook Web signature is not possible because Outlook Web has not been initialized yet, making it impossible to set signature options in Outlook Web without breaking the first log in experience for this mailbox (getting asked for language, timezone, etc.)
 - Copy HTM image width and height attributes to style attribute
 - Show a warning when a template contains images formatted as non-inline shapes, as these image formatting options may not be supported by Outlook (e.g., behind the text)
-- Support for mailboxes in the user's Entra ID/Azure AD tenant with different UPN/user ID and primary SMTP address
+- Support for mailboxes in the user's Entra ID tenant with different UPN/user ID and primary SMTP address
 - The Word registry key `DontUseScreenDpiOnOpen` is set to `1` automatically, according to Microsoft documentation (see `README` for details). This helps avoid image sizing problems on devices with non-standard DPI settings.
 ### Fixed
 - Simulation mode
@@ -445,7 +484,7 @@ This is not only available for Benefactor Circle members, but also the Free and 
 - Benefactor Circle members only: Additional and automapped mailboxes have not been detected reliably
 - Categorizing template files is now much faster than before (two seconds instead of two minutes for 250 templates)
 - Replacing variables in DOCX templates is now faster than before, as only variables actually being used in the document are replaced
-- Realiably remove '$Current[...]Photo$' string from image alt text
+- Realiably remove '$Current[…]Photo$' string from image alt text
 - `SimulateAndDeploy.ps1`: Correctly convert HTML image tags with embedded images and additional options
 - Display sort order for was not handled correctly when primary smtp address of a mailboxes has been changed after it was already added to Outlook
 
@@ -580,8 +619,8 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v2.5.2" target="_blank">v2.5.2</a> - 2022-02-09
 ### Fixed
-- Use another Windows API to get the Active Directory object of the logged in user. This API also works when 'CN=Computers,DC=[...]' does not exist or the logged in user does not have read access to it. (Thanks <a href="https://www.linkedin.com/in/mariandanisek/" target="_blank">Marián Daníšek</a>!)
-- Correct handle objectSid and SidHistory returned from Graph. The format is no longer a byte array as from on-prem Active Directory, but a list of clear text strings ('S-1-[...]').
+- Use another Windows API to get the Active Directory object of the logged in user. This API also works when 'CN=Computers,DC=[…]' does not exist or the logged in user does not have read access to it. (Thanks <a href="https://www.linkedin.com/in/mariandanisek/" target="_blank">Marián Daníšek</a>!)
+- Correct handle objectSid and SidHistory returned from Graph. The format is no longer a byte array as from on-prem Active Directory, but a list of clear text strings ('S-1-[…]').
 - Validate SimulateUser and SimulateMailboxes input
 
 
@@ -603,7 +642,7 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - New FAQ: Why is no admin or user GUI available?
 ### Fixed
 - Don't throw an error when UseHtmTemplates is set to true and OOFIniFile is used, but there is no \*.htm file in OOFTemplatePath
-- Correct mapping of Graph businessPhones attribute, so the replacement variable `$Current[...]Telephone$` is populated (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/26" target="_blank">#26</a>)  (Thanks <a href="https://github.com/vitorpereira" target="_blank">@vitorpereira</a>!)
+- Correct mapping of Graph businessPhones attribute, so the replacement variable `$Current[…]Telephone$` is populated (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/26" target="_blank">#26</a>)  (Thanks <a href="https://github.com/vitorpereira" target="_blank">@vitorpereira</a>!)
 - Fix Outlook 2013 registry key handling and temporary folder handling in environments without Outlook or Outlook profile (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/27" target="_blank">#27</a>)  (Thanks <a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>!)
 ### Changed
 - Cache group SIDs across all types of templates to reduce network load and increase script speed
@@ -648,7 +687,7 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios (see '.\docs\README.html' and '.\config\default graph config.ps1' for details)
 - Possibility to use ini files instead of file name tags, including settings for template sort order, sort culture, and custom Outlook signature names (see parameters 'SignatureIniPath' and 'OOFIniPath' for details)
-- New default replacement variables `$Current[...]Office$` and `$Current[...]Company$`, including updated templates
+- New default replacement variables `$Current[…]Office$` and `$Current[…]Company$`, including updated templates
 - Enterprise ready workaround for Word security warning when converting documents with linked images
 - FAQ: the software hangs at HTM/RTF export, Word shows a security warning!?
 - FAQ: Isn't a plural noun in the software name against PowerShell best practices?

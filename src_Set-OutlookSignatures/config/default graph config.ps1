@@ -2,7 +2,7 @@
 #
 # This script is executed as a whole once per Set-OutlookSignatures run.
 #
-# Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to define replacement variables and test it thoroughly.
+# Attention: The configuration file is executed as part of Set-OutlookSignatures.ps1 and is not checked for any harmful content. Please only allow qualified technicians write access to this file, only use it to to define replacement variables and test it thoroughly.
 #
 # A variable defined in this file overrides the definition of the same variable defined earlier in the software.
 #
@@ -21,30 +21,34 @@
 
 
 # Client ID
-# The default client ID is defined in the developers Entra ID/Azure AD tenant as multi-tenant, so it can be used everywhere
+# The default client ID is defined in the developers Entra ID tenant as multi-tenant, so it can be used everywhere
 #   For security and maintenance reasons, it is recommended to create you own app in your own tenant
 # It can be replaced with the ID of an app created in your own tenant
 #   Option A: Create the app automatically by using the script '.\sample code\Create-EntraApp.ps1'
 #     The sample code creates the app with all required settings automatically, only providing admin consent is a manual task
 #   Option B: Create the Entra app manually
 #     Create an app in Entra admin center (https://entra.microsoft.com)
-#       Sign in as at least Cloud Application Administrator
+#       Sign in with an account that has Cloud Application Administrator or Global Admin permissions
 #       Identity > Applications > App registrations > New registration
 #       Enter at least a display name for your application
-#       Set "Supported account type" to "Accounts in this organizational directory only"
+#       Set "Supported account types" to "Accounts in this organizational directory only (<your tenant> - Single tenant)"
 #       Set Redirect URI to "Mobile and desktop applications" and 'http://localhost' (http, not https)
 #       The "Application (client) ID" is the value you need to set for $GraphClientID in this file
 #     Client secret
 #       There is no need to define a client secret, as we only work with delegated permissions, and not with application permissions
 #     Add the following delegated permissions (not application permissions)
-#       Identity > Applications > App registrations > your application > API permissions > Add a permission
-#       Microsoft Graph
+#       Identity > Applications > App registrations > your application > Manage > API permissions > Add a permission
+#       Microsoft Graph, delegated permissions
 #         email
 #           Allows the app to read your users' primary email address.
 #           Required to log on the current user.
 #         EWS.AccessAsUser.All
 #           Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
 #           Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
+#         Files.Read.All
+#           Allows the app to read all files the signed-in user can access.
+#           Required for access to templates and configuration files hosted on SharePoint Online.
+#           For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
 #         GroupMember.Read.All
 #           Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
 #           Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
@@ -62,14 +66,14 @@
 #           Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
 #         User.Read.All
 #           Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-#           Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
+#           Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
 #       Provide admin consent
-#         Click the "Grant admin consent for {your tenant}" button
+#         Click the "Grant admin consent for <your tenant>" button
 #     Enable 'Allow public client flows'
-#       Identity > Applications > App registrations > your application > Advanced settings
+#       Identity > Applications > App registrations > your application > Manage > Authentication > Advanced settings
 #       Enable "Allow public client flows"
-#       This enables SSO (single sign-on) for domain-joined Windows (Integrated Windows Authentication Flow)
-$GraphClientID = 'beea8249-8c98-4c76-92f6-ce3c468a61e6'
+#       This enables SSO (single sign-on) for domain-joined Windows clients
+if (-not $GraphClientID) { $GraphClientID = 'beea8249-8c98-4c76-92f6-ce3c468a61e6' }
 
 
 # Endpoint version
@@ -101,7 +105,7 @@ $GraphHtmlMessageSuccess = "<html><head><title>$(if ($BenefactorCircleLicenseFil
 # Example with automatically closing tab: $GraphHtmlMessageSuccess = "<html><head><script>window.close();</script><title>$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</title></head><body style=""font-family:sans-serif;""><h1><a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a></h1><p>Graph authentication successful at $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK').</p><p>&nbsp;</p><p><strong>Thank you for using <a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a>!</strong></p><p>&nbsp;</p><p>You can close this tab at any time.</p></body></html>"
 
 
-# When the user successfully authenticates in the browser, the browser will be redirected to the given Uri
+# When the user successfully authenticates in the browser, the browser will be redirected to to the given Uri
 # Takes precedence over $GraphHtmlMessageSuccess
 [uri] $GraphBrowserRedirectSuccess = ''
 
@@ -111,7 +115,7 @@ $GraphHtmlMessageSuccess = "<html><head><title>$(if ($BenefactorCircleLicenseFil
 $GraphHtmlMessageError = "<html><head><title>$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</title></head><body style=""font-family:sans-serif;""><h1><a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a></h1><p>Graph authentication failed at $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK').</p><p>You may want to inform your helpdesk or administrator about this problem.</p><p>&nbsp;</p><p>Error: {0}</p><p>Details: {1}</p><p>&nbsp;</p><p><strong>Thank you for using <a href=""$(if ($BenefactorCircleLicenseFile) { 'https://explicitconsulting.at/open-source/set-outlooksignatures' } else { 'https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' })"" target=""_blank"">$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })</a>!</strong></p></body></html>"
 
 
-# When the user fails to successfully authenticate in the browser, the browser will be redirected to the given Uri
+# When the user fails to successfully authenticate in the browser, the browser will be redirected to to the given Uri
 # Takes precedence over $GraphHtmlMessageError
 [uri] $GraphBrowserRedirectError = ''
 

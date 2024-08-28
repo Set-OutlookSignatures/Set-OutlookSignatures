@@ -1,5 +1,5 @@
 <#
-This sample code shows how to achieve two thing:
+This sample code shows how to achieve two things:
 	- Running simulation mode for multiple users
   	- How to use simulation mode together with the Benefactor Circle add-on to push signatures and out-of-office replies into mailboxes,
 	  without involving end users or their devices
@@ -7,7 +7,7 @@ This sample code shows how to achieve two thing:
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
 
 
 Features
@@ -20,7 +20,7 @@ Features
 
 Requirements
   	Follow the requirements exactly and in full. SimulateAndDeploy will not work correctly when even one requirement is not met.
-	Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+	Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
 
 	- For mailboxes on-prem
 		- The software needs to be run with an account that
@@ -35,7 +35,7 @@ Requirements
 			- MFA would require interactivity, breaking the possibility for complete automation
 			- Better configure a Conditional Access Policy that only allows logon from a controlled network and does not require MFA
 		- Service Principals are not supported by the API
-		- Create a new app registration in Entra ID/Azure AD
+		- Create a new app registration in Entra ID
 			- Option A: Create the app automatically by using the script '.\sample code\Create-EntraApp.ps1'
 				The sample code creates the app with all required settings automatically, only providing admin consent is a manual task
 			- Option B: Create the Entra app manually, with the following properties:
@@ -49,7 +49,7 @@ Requirements
 							Required to set out-of-office replies for the simulated mailboxes
 						- User.Read.All
 							Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-							Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
+							Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
 					- Office 365 Exchange Online
 						- full_access_as_app
 							Allows the app to have full access via Exchange Web Services to all mailboxes without a signed-in user.
@@ -80,7 +80,7 @@ Requirements
 							Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
 						- User.Read.All
 							Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-							Required for $CurrentUser[...]$ and $CurrentMailbox[...]$ replacement variables, and for simulation mode.
+							Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
 					- Define a client secret (and set a reminder to update it, because it will expire)
 						The code can easily be adapted for certificate authentication at application level (which is not possible for user authentication)
 					- Set supported account types to "Accounts in this organizational directory only" (for security reasons)
@@ -101,7 +101,7 @@ Limitations
 				There are features in DOCX templates that can not be replicated HTM templates, such as applying Word specific image and text filters
 			- Do not create signatures in RTF format (parameter '-CreateRtfSignatures false')
 	- Roaming signatures can currently not be deployed for shared mailboxes, as the API does not support this scenario.
-		- Roaming signatures for shared mailboxes pose a general problem, as only signatures with replacement variables from the $CurrentMailbox[...]$ namespace would make sense anyhow
+		- Roaming signatures for shared mailboxes pose a general problem, as only signatures with replacement variables from the $CurrentMailbox[…]$ namespace would make sense anyhow
 #>
 
 [CmdletBinding()]
@@ -111,8 +111,8 @@ param (
 	$ConnectOnpremInsteadOfCloud = $false,
 	[pscredential]$GraphUserCredential = (@(, @('SimulateAndDeployUser@example.com', 'P@ssw0rd!')) | ForEach-Object { New-Object System.Management.Automation.PSCredential ($_[0], $(ConvertTo-SecureString $_[1] -AsPlainText -Force)) }), # Use Get-Credential for interactive mode (MFA is not supported in any case)
 
-	$GraphClientId = 'The Client ID of the Entra ID/Azure AD application for SimulateAndDeploy', # not the same ID as defined in 'default graph config.ps1' or a custom Graph config file
-	$GraphClientSecret = 'The Client Secret of the Entra ID/Azure AD application for SimulateAndDeploy',
+	$GraphClientId = 'The Client ID of the Entra ID application for SimulateAndDeploy', # not the same ID as defined in 'default graph config.ps1' or a custom Graph config file
+	$GraphClientSecret = 'The Client Secret of the Entra ID application for SimulateAndDeploy',
 
 	[ValidateSet('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC', 'AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4', 'AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5', 'China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')]
 	[string]$CloudEnvironment = 'Public',
@@ -135,6 +135,7 @@ param (
 		OOFTemplatePath                               = "'.\sample templates\Out of Office DOCX'"
 		OOFIniPath                                    = "'.\sample templates\Out of Office DOCX\_OOF.ini'"
 		ReplacementVariableConfigFile                 = "'.\config\default replacement variables.ps1'"
+		GraphClientID                                 = $GraphClientId
 		GraphConfigFile                               = "'.\config\default graph config.ps1'"
 		SignaturesForAutomappedAndAdditionalMailboxes = $true
 		DeleteUserCreatedSignatures                   = $false
@@ -184,12 +185,12 @@ function CreateUpdateSimulateAndDeployGraphCredentialFile {
 
 	try {
 		# User authentication
-		$auth = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
-		$authExo = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
+		$auth = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default"
+		$authExo = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes "$($CloudEnvironmentExchangeOnlineEndpoint)/.default"
 
 		# App authentication
-		$Appauth = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://graph.microsoft.com/.default'
-		$AppauthExo = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes 'https://outlook.office.com/.default'
+		$Appauth = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default"
+		$AppauthExo = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes "$($CloudEnvironmentExchangeOnlineEndpoint)/.default"
 
 		$null = @{
 			'AccessToken'       = $auth.AccessToken

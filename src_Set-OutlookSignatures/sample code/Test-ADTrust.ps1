@@ -11,7 +11,7 @@ This script assumes that the trust to check is either a cross-forest trust, or t
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
 #>
 
 [CmdletBinding()]

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Get Azure AD Device Registration Status from current device
+    Get Entra ID Device Registration Status from current device
 .EXAMPLE
     PS C:\>Get-DeviceRegistrationStatus
-    Get Azure AD Device Registration Status from current device
+    Get Entra ID Device Registration Status from current device
 .INPUTS
     System.String
 #>
