@@ -65,6 +65,8 @@ Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://Y
 
 On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
 
+For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
+
 Default value: '.\sample templates\Signatures DOCX' on Windows, '.\sample templates\Signatures HTML' on Linux and macOS
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '.\sample templates\Signatures DOCX'
@@ -85,6 +87,8 @@ Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://Y
 
 On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
 
+For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
+
 Default value: '.\sample templates\Signatures DOCX\_Signatures.ini' on Windows, '.\sample templates\Signatures HTML\_Signatures.ini' on Linux and macOS
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureIniPath '.\templates\Signatures DOCX\_Signatures.ini'
@@ -104,6 +108,8 @@ SharePoint document libraries are supported (https only): 'https://server.domain
 Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' -> 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
 
 On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
+
+For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
 
 Default value: '.\config\default replacement variables.ps1'
 
@@ -138,6 +144,8 @@ Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://Y
 When GraphConfigFile is hosted on SharePoint Online, it is highly recommended to set the `GraphClientID` parameter. Else, access to GraphConfigFile will fail on Linux and macOS, and fall back to WebDAV with a required Internet Explorer authentication cookie on Windows.
 
 On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
+
+For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
 
 Default value: '.\config\default graph config.ps1'
 
@@ -253,6 +261,8 @@ Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://Y
 
 On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
 
+For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
+
 Default value: '.\sample templates\Out of Office DOCX' on Windows, '.\sample templates\Out of Office HTML' on Linux and macOS
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out of Office DOCX'
@@ -273,6 +283,8 @@ Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://Y
 
 On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
 
+For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
+
 Default value: '.\sample templates\Out of Office DOCX\_OOF.ini' on Windows, '.\sample templates\Out of Office HTML\_OOF.ini' on Linux and macOS
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out of Office DOCX\_OOF.ini'
@@ -289,11 +301,13 @@ Local and remote paths are supported.
 
 Local paths can be absolute ('C:\Outlook signatures') or relative to the software path ('.\Outlook signatures').
 
-SharePoint document libraries are supported (https only): 'https://server.domain/User' or '\\server.domain@SSL\User'
+SharePoint document libraries are supported (https only, no SharePoint Online): 'https://server.domain/User' or '\\server.domain@SSL\User'
 
 Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' -> 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
 
 On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
+
+For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
 
 If the folder or folder structure does not exist, it is created.
 
@@ -5380,7 +5394,7 @@ $CheckPathScriptblock = {
             ) {
                 # SharePoint Online with Graph client ID
                 if (-not $CheckPathSilent) {
-                    Write-Host ' (SharePoint with Graph, may be slow)' -NoNewline
+                    Write-Host ' (SharePoint via Graph, may be slow)' -NoNewline
                 }
 
                 $CheckPathPath = [uri]::UnescapeDataString($CheckPathPath.Trimend('/'))
