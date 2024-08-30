@@ -6889,7 +6889,7 @@ try {
 
     $script:SetOutlookSignaturesCommonDllFilePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
     Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Set-OutlookSignatures\Set-OutlookSignatures.Common.dll')) -Destination $script:SetOutlookSignaturesCommonDllFilePath
-    if ($IsWindows) {
+    if ($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) {
         Unblock-File -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath
     }
     try {
