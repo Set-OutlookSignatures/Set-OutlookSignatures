@@ -178,6 +178,11 @@ fenix.fish@example.com;fenix.fish@example.com,nat.nuts@example.com
 )
 
 
+#
+# Do not change anything from here on
+#
+
+
 # Functions
 function CreateUpdateSimulateAndDeployGraphCredentialFile {
 	# auth with user and app with delegated permissions
@@ -254,6 +259,12 @@ function RemoveItemAlternativeRecurse {
 
 # Start script
 Write-Host "Start script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+if ($psISE) {
+	Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+	Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
+	exit 1
+}
 
 
 # Folders and objects

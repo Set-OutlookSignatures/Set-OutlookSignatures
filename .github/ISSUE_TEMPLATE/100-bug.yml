@@ -22,9 +22,9 @@ body:
     id: previousissuesanddocumentation
     attributes:
       label: Previously solved issues and documentation
-      description: Before creating a new issue, look through [previously solved issues](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=) and the documentation ([README](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures) and associated documents).
+      description: Before creating a new issue, check the documentation ([README](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures) and associated documents), previous [issues](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=) and [discussions](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions?discussions_q=).
       options:
-        - label: I have searched through previous issues and documentation, but have not found an answer to my issue
+        - label: I have searched through issues, discussions and documentation, but have not found an answer to my issue
           required: true
   - type: checkboxes
     id: codeofconduct

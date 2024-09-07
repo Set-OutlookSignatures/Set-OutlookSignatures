@@ -45,6 +45,13 @@ try {
 
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+    
+    if ($psISE) {
+        Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+        Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
+        exit 1
+    }
+        
     $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
     Set-Location $PSScriptRoot

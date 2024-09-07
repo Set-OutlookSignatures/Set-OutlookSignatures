@@ -10,7 +10,7 @@ With Set-OutlookSignatures, signatures and out-of-office replies can be:
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
 - Designed for **barrier-free accessibility** with custom link and image descriptions for screen readers and comparable tools
-- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes¹**
+- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** (including alias and secondary addresses), or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes¹**
 - Created with different names from the same template, **one template can be used for many mailboxes**
 - Assigned **time ranges** within which they are valid¹
 - Set as **default signature** for new emails, or for replies and forwards (signatures only)
@@ -556,7 +556,7 @@ Prerequisites:
   - Mailbox is the mailbox of the currently logged-in user and is hosted in Exchange Online
 
 Please note:
-- As there is no Microsoft official API, this feature is experimental, and you use it on your own risk.
+- As there is no Microsoft official API, this feature is experimental and you use it at your own risk.
 - This feature does not work in simulation mode, because the user running the simulation does not have access to the signatures stored in another mailbox
 
 The process is very simple and straight forward. Set-OutlookSignatures goes through the following steps for each mailbox:
@@ -596,7 +596,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false"
 
 .PARAMETER MailboxSpecificSignatureNames
-Should signature names be mailbox specific by adding the e-mail address?
+Should signature names be mailbox specific by adding the email address?
 
 For compatibility with Outlook storing signatures in the file system, Set-OutlookSignatures converts templates to signatures according to the following logic:
 1. Get all mailboxes and sort them: Mailbox of logged-on/simulated user, other mailboxes in default Outlook profile or Outlook Web, mailboxes from other Outlook profiles
@@ -606,7 +606,7 @@ For compatibility with Outlook storing signatures in the file system, Set-Outloo
 
 The step 4 condition `if the template has not been used before` makes sure that a lower priority mailbox does not replace a signature with the same name which has already been created for a higher priority mailbox.
 
-With roaming signatures (signatures being stored in the Exchange Online mailbox itself) being used more and more, the step 4 condition `if the template has not been used before` makes less sense. By setting the `MailboxSpecificSignatureNames` parameter to `true`, this restriction no longer applies. To avoid naming collisions, the e-mail address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc.
+With roaming signatures (signatures being stored in the Exchange Online mailbox itself) being used more and more, the step 4 condition `if the template has not been used before` makes less sense. By setting the `MailboxSpecificSignatureNames` parameter to `true`, this restriction no longer applies. To avoid naming collisions, the email address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc.
 
 This naming convention intentionally matches Outlook's convention for naming roaming signatures. Before setting `MailboxSpecificSignatureNames` to `true`, consider the impact on the `DisableRoamingSignatures` and `MirrorCloudSignatures` parameters - it is recommended to set both parameters to `true` to achieve the best user experience and to avoid problems with Outlook's own roaming signature synchronisation.
 
@@ -712,25 +712,26 @@ License : See '.\LICENSE.txt' for details and copyright
 
 # Suppress specific PSScriptAnalyzerRules for specific variables
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'SimulateAndDeployGraphCredentialFile')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'HTMLMarkerTag')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'ConnectedFilesFolderNames')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentEnvironmentName')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentGraphApiEndpoint')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentAutodiscoverSecureName')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentAzureADEndpoint')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentEnvironmentName')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentGraphApiEndpoint')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentSharePointOnlineDomains')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'ConnectedFilesFolderNames')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CurrentTemplateisForAliasSmtp')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'data')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'HTMLMarkerTag')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFExternalValueBasename')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFFilesExternal')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFFilesInternal')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFInternalValueBasename')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'pathHtmlFolderSuffix')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'PrimaryMailboxAddress')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'ScriptVersion')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'ScriptInvocation')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'ScriptVersion')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesDefaultNew')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesDefaultReplyFwd')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesWriteProtect')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFFilesInternal')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFFilesExternal')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'pathHtmlFolderSuffix')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'data')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFInternalValueBasename')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFExternalValueBasename')]
 
 
 [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'Z: All parameters')]
@@ -840,7 +841,7 @@ Param(
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $EmbedImagesInHtmlAdditionalSignaturePath = $true,
 
-    # Should signature names be mailbox specific by adding the e-mail address?
+    # Should signature names be mailbox specific by adding the email address?
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     $MailboxSpecificSignatureNames = $false,
@@ -3606,21 +3607,14 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         }
     }
 
-    # Outlook add-in workaround
-    Write-Host
-    Write-Host "Workaround for Outlook add-in @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-    Write-Host '  This workaround is required because Microsoft currently actively blocks Outlook add-ins from using roaming signatures.'
-    if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('OutlookAddinWorkaround')))) {
-        Write-Host "  The 'Workaround for Outlook add-in' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
-        Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
-    } else {
-        $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::OutlookAddinWorkaround()
 
-        if ($FeatureResult -ne 'true') {
-            Write-Host '  Error creating workaround for Outlook add-in.' -ForegroundColor Yellow
-            Write-Host "  $FeatureResult" -ForegroundColor Yellow
-        }
-    }
+    # Prepare data for Outlook add-in
+    Write-Host
+    Write-Host "Prepare data for Outlook add-in @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+    Write-Host '  This is required because Microsoft actively blocks Outlook add-ins from using roaming signatures.'
+
+    [SetOutlookSignatures.Common]::PrepareOutlookAddinDataCommon()
+
 
     # Create/update 'My signatures, powered by Set-OutlookSignatures Benefactor Circle' email draft
     if ($SignatureCollectionInDrafts -eq $true) {
@@ -4416,7 +4410,7 @@ function SetSignatures {
             }
 
             Write-Host "$Indent      Export to HTM format"
-            $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
+            [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $tempFileContent)
         } else {
             $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
 
@@ -4630,7 +4624,7 @@ function SetSignatures {
                 }
 
                 # Save
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
+                $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -4652,7 +4646,7 @@ function SetSignatures {
                 }
 
                 # Save
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
+                $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -4701,7 +4695,7 @@ function SetSignatures {
                 }
 
                 # Save
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
+                $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -4723,7 +4717,7 @@ function SetSignatures {
                 }
 
                 # Save
-                $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
+                $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
                 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -4788,7 +4782,7 @@ function SetSignatures {
                 }
             }
 
-            $AngleSharpParsedDocument.documentelement.outerhtml | Out-File -LiteralPath $path -Encoding UTF8 -Force
+            [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $AngleSharpParsedDocument.documentelement.outerhtml)
         } else {
             $tempVerbosePreference = $VerbosePreference
             $VerbosePreference = 'SilentlyContinue'
@@ -4808,10 +4802,10 @@ function SetSignatures {
                 $image.style.setAttribute('height', ($image.attributes | Where-Object { $_.nodename -ieq 'height' }).textContent)
             }
 
-            $tempFileContent = $html.documentelement.outerhtml
+            [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $html.documentelement.outerhtml)
+
             [System.Runtime.Interopservices.Marshal]::ReleaseComObject($html) | Out-Null
             Remove-Variable -Name 'html'
-            $tempFileContent | Out-File -LiteralPath $path -Encoding UTF8 -Force
         }
 
         if ($MoveCSSInline) {
@@ -4892,7 +4886,7 @@ function SetSignatures {
                     }
 
                     # Save
-                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
+                    $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                     # Restore original security setting
                     Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -4914,7 +4908,7 @@ function SetSignatures {
                     }
 
                     # Save
-                    $script:COMWord.ActiveDocument.SaveAs($path, $saveFormat, $false)
+                    $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                     # Restore original security setting
                     Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
@@ -6692,8 +6686,8 @@ function GetIniContent ($filePath) {
             foreach ($line in @(Get-Content -LiteralPath $FilePath -Encoding UTF8 -ErrorAction Stop)) {
                 Write-Verbose "      $line"
                 switch -regex ($line) {
-                    # Comments starting with ; or #, or empty line, whitespace(s) before are ignored
-                    '(^\s*(;|#))|(^\s*$)' { continue }
+                    # Comments starting with ; or # or //, or empty line, whitespace(s) before are ignored
+                    '(^\s*(;|#|//))|(^\s*$)' { continue }
 
                     # Section in square brackets, whitespace(s) before and after brackets are ignored
                     '^\s*\[(.+)\]\s*' {
@@ -6892,6 +6886,12 @@ function ParseJwtToken {
 try {
     Write-Host
     Write-Host "Start script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+    if ($psISE) {
+        Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+        Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
+        exit 1
+    }
 
     $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 

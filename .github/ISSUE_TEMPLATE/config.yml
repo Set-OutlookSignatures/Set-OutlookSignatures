@@ -3,12 +3,12 @@ contact_links:
   - name: Benefactor Circle add-on, prioritized support
     url: https://explicitconsulting.at/open-source/set-outlooksignatures/#5-commercial-support
     about: If the issue you want to report is for the Benefactor Circle add-on or you want to prioritize your request, please use ExplicIT Consulting's commercial support instead of this form.
-  - name: Previously solved issues
-    url: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=
-    about: Before creating a new issue, look through previous issues.
   - name: Documentation
     url: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures
-    about: Before creating a new issue, look through documentation (README file and associated documents).
+    about: Before creating a new issue, check the documentation (README file and associated documents).
+  - name: Issues
+    url: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=
+    about: Before creating a new issue, search previous issues.
   - name: Discussions board
-    url: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions
-    about: You are welcome to share your experiences with Set-OutlookSignatures, exchange ideas with other users or suggest new features in our discussions board.
+    url: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions?discussions_q=
+    about: Before creating a new issue, search discussions. You are welcome to share your experiences with Set-OutlookSignatures, exchange ideas with other users or suggest new features in our discussions board.

@@ -27,7 +27,18 @@ if ($appType -ieq 'Set-OutlookSignatures') {
 }
 
 
+#
+# Do not change anything from here on
+#
+
+
 Clear-Host
+
+if ($psISE) {
+    Write-Host 'PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+    Write-Host 'Required features are not available in ISE. Exit.' -ForegroundColor Red
+    exit 1
+}
 
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
@@ -351,9 +362,9 @@ if ($appType -ieq 'SimulateAndDeploy') {
 
 
 Write-Host
-Write-Host "Consider restricting file access"
-Write-Host "  Consider switching from Files.Read.All to Files.SelectedOperations.Selected for added security."
-Write-host "  This requires granting specific permissions in SharePoint Online."
+Write-Host 'Consider restricting file access'
+Write-Host '  Consider switching from Files.Read.All to Files.SelectedOperations.Selected for added security.'
+Write-Host '  This requires granting specific permissions in SharePoint Online.'
 
 
 Write-Host

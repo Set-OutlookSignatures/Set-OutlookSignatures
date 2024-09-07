@@ -18,6 +18,17 @@ $logFile = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialF
 $maximumAgeHours = 2
 
 
+#
+# Do not change anything from here on
+#
+
+
+if ($psISE) {
+    Write-Host 'PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+    Write-Host 'Required features are not available in ISE. Exit.' -ForegroundColor Red
+    exit 1
+}
+
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
 Set-Location $PSScriptRoot

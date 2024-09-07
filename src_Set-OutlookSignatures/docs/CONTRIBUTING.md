@@ -26,13 +26,13 @@ I'm not a professional developer - if you are one and you notice something negat
 When contributing to Set-OutlookSignatures, please make sure to follow the Code of Conduct ('CODE_OF_CONDUCT.html' in the same directory as this document).
 # 2. Contribution opportunities
 ## 2.1. Sponsoring
-Being Free and Open-Source Software, Set-OutlookSignatures can save a business thousands or even tens of thousand Euros/US-Dollars per year in comparison to commercial software.  
+Dear companies, please do not forget:
+- Invest in the free and open-source software you depend on. Contributors are working behind the scenes to make open-source better for everyone. Give them the help and recognition they deserve.
+- Sponsor the free and open-source software your teams use to keep your business running. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
 
-Dear businesses, please don't forget:
-- Invest in the open-source projects you depend on. Contributors are working behind the scenes to make open-source better for everyone - give them the help and recognition they deserve.
-- Sponsor the open-source software your team has built its business on. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
+Being free and open-source software, Set-OutlookSignatures saves your company a remarkable amount of money compared to commercial software.
 
-You may consider to become a Benefactor Circle member to unlock additional features: See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license.
+Become a Benefactor Circle member to unlock additional features: See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and their benefits for your business.
 ## 2.2. Code refactoring
 There are optimization opportunities in error handling, de-duplicating code with functions, applying PowerShell best practices, and more.
 # 3. Branches

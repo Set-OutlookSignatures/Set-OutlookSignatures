@@ -21,7 +21,7 @@
   - <Active present tense verb> XXX
 -->
 
-## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.14.2" target="_blank">v4.14.2</a> - 2024-09-07
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README`._
 
@@ -29,9 +29,23 @@ _**Add features with the Benefactor Circle add-on and get commercial support fro
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
+- Update Outlook add-in dependency @azure/msal-browser to v3.23.0.
+- Update FAQ '`How to disable the tagline in signatures?`' in '`.\docs\README`' with lots of background information.
+- Update font formatting and phrasing in sample template files.
+- Switch from the SaveAs Word method to SaveAs2, as the first is no longer documented and the latter is supported since Word 2010.
 ### Added
+- Add hints in documentation that not only primary SMTP addresses are supported, but also alias and secondary addresses.
+- Add FAQ '`When should I refer on-prem groups and when Entra ID groups?`' to '`.\docs\README`'.
+- Add FAQ '`Why are signatures and out-of-office replies recreated even when their content has not changed?`' to '`.\docs\README`'.
+- Allow '`//`' as additional comment marker in INI files.
+- Add more comments in sample code files based on client feedback.
 ### Removed
 ### Fixed
+- Fix sample code '`Intune-SetOutlookSignatures-Remediate.ps1`' so that files and folders are extracted with the correct item type from the downloaded ZIP file. This avoids that some files are extracted as folders instead of files, leading to errors when Set-OutlookSignatures is started from the remediation script.
+- Update the workarounds to overcome Microsoft limitations for Outlook add-ins.
+- Fix handling of special characters when applying encoding corrections for Outlook signatures.
+- Prohibit running Set-OutlookSignatures and sample code in PowerShell ISE as this environment misses required features.
+- Add more information about deploying and debugging the Outlook add-in in the '`The Outlook add-in`' chapter in '`.\docs\README`' and in the Outlook add-in configuration file.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.14.1" target="_blank">v4.14.1</a> - 2024-08-29
@@ -150,7 +164,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 - The API for saving photos and user-defined images has been changed, which significantly speeds up the creation of temporary files.
 ### Added
 - Support for Linux and macOS. Some restrictions apply to Non-Windows platforms, see `Linux and macOS` in the `Requirements` chapter of `.\docs\README` for details.
-- Custom image replacement variables that you can fill yourself with a byte array: `$CurrentUserCustomImage[1..10]$`, `$CurrentUserManagerCustomImage[1..10]$`, `$CurrentMailboxCustomImage[1..10]$`, `$CurrentMailboxManagerCustomImage[1..10]$`. Usecases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/e-mail, etc.
+- Custom image replacement variables that you can fill yourself with a byte array: `$CurrentUserCustomImage[1..10]$`, `$CurrentUserManagerCustomImage[1..10]$`, `$CurrentMailboxCustomImage[1..10]$`, `$CurrentMailboxManagerCustomImage[1..10]$`. Usecases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/email, etc.
   - QR code vCard (MeCard) in custom image replacement variable `$Current[..]CustomImage1$`. See file `.\config\default replacement variables.ps1` for the easily customizable code used to create it. Also see `.\docs\README` for details.
 - Support for maximum barrier-free accessibility with screen readers and comparable tools. Use Word ScreenTips and HTML titles for hyperlinks, and alt text for images, replacement variables are supported. All sample templates have been updated accordingly. Just hover your mouse pointer over a hyperlink or image to see additional information.
 - Show a warning when authentication to Outlook Web (no matter if on-prem or in the cloud) is not possible via Autodiscover, as this means that Autodiscover is not configured correctly.
@@ -169,7 +183,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 - Updated sample templates
 - Authentication against SharePoint document libraries containing templates or INI files has been adapted to Microsoft API changes not yet documented
 ### Added
-- New parameter `MailboxSpecificSignatureNames`. By setting the `MailboxSpecificSignatureNames` parameter to `true`, the e-mail address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc. See`.\docs\README` for details.
+- New parameter `MailboxSpecificSignatureNames`. By setting the `MailboxSpecificSignatureNames` parameter to `true`, the email address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc. See`.\docs\README` for details.
 - When `MirrorLocalSignaturesToCloud` is enabled,
   - download signatures not only from the current user's mailbox, but from all mailboxes where possible (full access with current user's credentials, due to Microsoft restrictions)
   - upload personal signatures to Exchange Online mailbox of logged-on user right after they have been created and before they are even copied to a local signature path, avoiding a race condition with the internal download schedule of Outlook

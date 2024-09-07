@@ -19,6 +19,14 @@ if ((-not $IsMacOS) -or (-not (Test-Path '/Applications/Microsoft Outlook.app' -
     exit 1
 }
 
+if ($psISE) {
+    Write-Host 'PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+    Write-Host 'Required features are not available in ISE. Exit.' -ForegroundColor Red
+    exit 1
+}
+
+$OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+
 $macOSSignaturesScriptable = @(@($(
             @'
 tell application "Microsoft Outlook"

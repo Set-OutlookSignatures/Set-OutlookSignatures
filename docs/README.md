@@ -16,7 +16,7 @@ You may also be interested in the [changelog](CHANGELOG.md), an organizational [
 
 The `'sample code'` folder contains additional scripts mentioned in this README, as well as advanced usage examples, such as deploying signatures without user or client interaction.
 
-When facing a problem, look through [previously solved issues](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=), or create a new one.
+When facing a problem: Before creating a new issue, check the documentation ([README](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures) and associated documents), previous [issues](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=) and [discussions](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions?discussions_q=).
 
 You are welcome to share your experiences with Set-OutlookSignatures, exchange ideas with other users or suggest new features in our [discussions board](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions?discussions_q=).
 
@@ -27,7 +27,7 @@ With Set-OutlookSignatures, signatures and out-of-office replies can be:
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
 - Designed for **barrier-free accessibility** with custom link and image descriptions for screen readers and comparable tools
-- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes¹**  
+- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** (including alias and secondary addresses), or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes¹**  
 - Created with different names from the same template, **one template can be used for many mailboxes**
 - Assigned **time ranges** within which they are valid¹  
 - Set as **default signature** for new emails, or for replies and forwards (signatures only)  
@@ -774,7 +774,7 @@ Prerequisites:
   - Mailbox is the mailbox of the currently logged-in user and is hosted in Exchange Online
 
 Please note:
-- As there is no Microsoft official API, this feature is experimental, and you use it on your own risk.
+- As there is no Microsoft official API, this feature is experimental and you use it at your own risk.
 - This feature does not work in simulation mode, because the user running the simulation does not have access to the signatures stored in another mailbox
 
 The process is very simple and straight forward. Set-OutlookSignatures goes through the following steps for each mailbox:
@@ -814,7 +814,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false"
 
 ## 3.32. MailboxSpecificSignatureNames<!-- omit in toc -->
-Should signature names be mailbox specific by adding the e-mail address?
+Should signature names be mailbox specific by adding the email address?
 
 For compatibility with Outlook storing signatures in the file system, Set-OutlookSignatures converts templates to signatures according to the following logic:
 1. Get all mailboxes and sort them: Mailbox of logged-on/simulated user, other mailboxes in default Outlook profile or Outlook Web, mailboxes from other Outlook profiles
@@ -824,7 +824,7 @@ For compatibility with Outlook storing signatures in the file system, Set-Outloo
 
 The step 4 condition `if the template has not been used before` makes sure that a lower priority mailbox does not replace a signature with the same name which has already been created for a higher priority mailbox.
 
-With roaming signatures (signatures being stored in the Exchange Online mailbox itself) being used more and more, the step 4 condition `if the template has not been used before` makes less sense. By setting the `MailboxSpecificSignatureNames` parameter to `true`, this restriction no longer applies. To avoid naming collisions, the e-mail address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc.
+With roaming signatures (signatures being stored in the Exchange Online mailbox itself) being used more and more, the step 4 condition `if the template has not been used before` makes less sense. By setting the `MailboxSpecificSignatureNames` parameter to `true`, this restriction no longer applies. To avoid naming collisions, the email address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc.
 
 This naming convention intentionally matches Outlook's convention for naming roaming signatures. Before setting `MailboxSpecificSignatureNames` to `true`, consider the impact on the `DisableRoamingSignatures` and `MirrorCloudSignatures` parameters - it is recommended to set both parameters to `true` to achieve the best user experience and to avoid problems with Outlook's own roaming signature synchronisation.
 
@@ -893,8 +893,8 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 
 # 4. The Outlook add-in
 With a [Benefactor Circle](Benefactor%20Circle.md) license, you have access to the Set-OutlookSignatures add-in for Outlook. This Outlook add-in can:
-- Automatically add signatures when creating a new email or answering an email (including Outlook on Android and Outlook on iOS)
-- Automatically add signatures to appointment invites
+- Automatically add signatures when creating a new email or answering an email (including Outlook on Android and Outlook on iOS), also for alias and secondary email addresses
+- Automatically add signatures to appointment invites, also for alias and secondary email addresses
 
 The Outlook add-in is self-hosted by you. Compared to using a solution hosted by a 3rd party, this has several advantages:
 - Client specific configuration
@@ -902,7 +902,7 @@ The Outlook add-in is self-hosted by you. Compared to using a solution hosted by
 - Keeps license costs low
 - Is the preferred method from a data protection perspective
 
-The code is downloaded by the Outlook client and executed locally, in the security context of the mailbox. There are no middleware or proxy servers involved. Data is only transferred between your Outlook client, your authentication systems (Entra ID for Exchange Online) and your mailbox servers.
+The add-in code is downloaded by the Outlook client and executed locally, in the security context of the mailbox. There are no middleware or proxy servers involved. Data is only transferred between your Outlook client, your authentication systems (Entra ID for Exchange Online) and your mailbox servers.
 
 ## 4.1. Usage<!-- omit in toc -->
 From an end user perspective, basically nothing needs to be done or configured: When writing a new email, answering an email, or creating a new appointment, the add-in automatically adds the corresponding default signature.
@@ -937,6 +937,9 @@ Whatever web server you choose, the requirements are low:
 - In production, the server hosting the images shouldn't return a Cache-Control header specifying no-cache, no-store, or similar options in the HTTP response. In development, this may make sense.
 
 [Static website hosting in Azure Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) can be an uncomplicated, cheap and fast alternative.
+
+### 4.2.3 Set-OutlookSignatures<!-- omit in toc -->
+The add-in can add existing signatures, but is not able to create them itself on the fly. Set-OutlookSignatures v4.14.0 and higher prepares signature data in a way that it can be used by the Outlook add-in.
 
 ## 4.3. Configuration and deployment to the web server<!-- omit in toc -->
 With every new release of Set-OutlookSignatures, [Benefactor Circle](Benefactor%20Circle.md) members receive an updated license file and an updated Outlook add-in.
@@ -999,7 +1002,7 @@ Installation of add-ins may have been disabled by your administrators.
 Do not use the URLs mentioned above to remove custom add-ins, as this fails most times. Instead, use one of the following options:
 - Open Outlook on the web, draft a new mail, click on the "Apps" button, right-click the Set-OutlookSignatures add-in and select "Uninstall".
 - Remove the custom add-in in Outlook for Android or iOS.
-### 4.5.2 Microsoft 365 Centralized deployment or Integrated Apps<!-- omit in toc -->
+### 4.5.2 Microsoft 365 Centralized Deployment or Integrated Apps<!-- omit in toc -->
 Centralized Deployment and deployment via Integrated Apps both provide the following benefits:
 - An admin can deploy and assign an add-in directly to a user, to multiple users via a group, or to everyone in the organization.
 - When the relevant Microsoft 365 app starts, the add-in automatically downloads. If the add-in supports add-in commands, the add-in automatically appears in the ribbon within the Microsoft 365 app.
@@ -1013,6 +1016,7 @@ The Integrated Apps feature is the recommended way to deploy Outlook add-ins. It
 **General**
 - The add-in has access to the data of the last run of Set-OutlookSignatures v4.14.0 and higher.
 - Microsoft is currently actively blocking access to roaming signatures for Outlook add-ins. The add-in will be updated as soon as this block has been removed.
+- The easiest way to test the add-in and its basic functionality is to use the taskpane. For specific debugging on Android and iOS, you need to use the DEBUG option in `run_before_deployment.ps1`.
 
 **Outlook on iOS**
 - Only mailboxes hosted in Exchange Online are supported. This is because the mobile APIs do not allow programmatic access to mailboxes hosted on-prem.
@@ -1126,7 +1130,7 @@ DefaultNew
 Tags define properties for templates, such as
 - time ranges during which a template shall be applied or not applied
 - groups whose direct or indirect members are allowed or denied application of a template
-- specific email addresses which are are allowed or denied application of a template
+- specific email addresses (including alias and secondary addresses) which are are allowed or denied application of a template
 - specific replacement variables which allow or deny application of a template
 - an Outlook signature name that is different from the file name of the template
 - if a signature template shall be set as default signature for new emails or as default signature for replies and forwards
@@ -1269,7 +1273,7 @@ Tags are case insensitive.
     - Solution A: Use multiple templates (possible in all versions)
       - Instructions
         - Create a copy of the initial template for each shared mailbox.
-        - For each template copy, create a corresponding INI entry which assigns the template copy to a specific email address.
+        - For each template copy, create a corresponding INI entry which assigns the template copy to a specific email address (including alias and secondary addresses).
       - Result
         - Templates<br>One template file for each shared mailbox
           - `template shared mailbox A.docx`
@@ -1289,7 +1293,7 @@ Tags are case insensitive.
     - Solution B: Use only one template (possible with v3.1.0 and newer)
       - Instructions
         - Create a single initial template.
-        - For each shared mailbox, create a corresponding INI entry which assigns the template to a specific email address and defines a separate Outlook signature name.
+        - For each shared mailbox, create a corresponding INI entry which assigns the template to a specific email address (including alias and secondary addresses) and defines a separate Outlook signature name.
       - Result
         - Templates<br>One template file for all shared mailboxes
           - `template shared mailboxes.docx`
@@ -1496,7 +1500,7 @@ Examples:
 ## 9.3. Custom image replacement variables<!-- omit in toc -->
 You can fill custom image replacement variables yourself with a byte array: `'$CurrentUserCustomImage[1..10]$'`, `'$CurrentUserManagerCustomImage[1..10]$'`, `'$CurrentMailboxCustomImage[1..10]$'`, `'$CurrentMailboxManagerCustomImage[1..10]$'`.
 
-Usecases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/e-mail, etc.
+Usecases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/email, etc.
 
 Per default, `'$Current[..]CustomImage1$'` is a QR code containing a vCard (in MeCard format) - see file `'.\config\default replacement variables.ps1'` for the code behind it.
 
@@ -1651,6 +1655,9 @@ FAQs in this chapter:
 - [14.34. What is the recommended folder structure for script, license, template and config files?](#1434-what-is-the-recommended-folder-structure-for-script-license-template-and-config-files)
 - [14.35. How to disable the tagline in signatures?](#1435-how-to-disable-the-tagline-in-signatures)
 - [13.36 Why is the out-of-office assistant not activated automatically?](#1436-why-is-the-out-of-office-assistant-not-activated-automatically)
+- [14.37 When should I refer on-prem groups and when Entra ID groups?](#1437-when-should-i-refer-on-prem-groups-and-when-entra-id-groups)
+- [14.38 Why are signatures and out-of-office replies recreated even when their content has not changed?](#1438-why-are-signatures-and-out-of-office-replies-recreated-even-when-their-content-has-not-changed)
+
 ## 14.1. Where can I find the changelog?<!-- omit in toc -->
 The changelog is located in the `.\docs` folder, along with other documents related to Set-OutlookSignatures.
 ## 14.2. How can I contribute, propose a new feature or file a bug?<!-- omit in toc -->
@@ -2235,7 +2242,7 @@ Deployment is only the first step, as the software needs to be run regularly. Yo
 ### 14.31.2. Remediation script<!-- omit in toc -->
 With remediation, you have two scripts: One checking for a certain status, and another one running when the detection script exits with an error code of 1.
 
-Remediation scripts can be configured to run in the context of the current user, and you can define how often they should run.
+Remediation scripts can easily be configured to run in the context of the current user, which is required for Set-OutlookSignatures, and you can define how often they should run.
 
 For Set-OutlookSignatures, you could use the following scripts, which do not require the creation and deployment of an application package as an additional benefit.
 
@@ -2282,7 +2289,7 @@ From this point of view, processing times do not really matter - slow execution 
 You can define the process priority with the `ScriptProcessPriority` and `WordProcessPriority` priority.
 ## 14.33. Keep users from adding, editing and removing signatures<!-- omit in toc -->
 ### 14.33.1. Outlook<!-- omit in toc -->
-You can disable GUI elements so that users cannot add, edit and remove signatures in Outlook by using the 'Do not allow signatures for e-mail messages' Group Policy Object (GPO) setting.
+You can disable GUI elements so that users cannot add, edit and remove signatures in Outlook by using the 'Do not allow signatures for email messages' Group Policy Object (GPO) setting.
 
 Caveats are:
 - Users can still add, edit and remove signatures in the file system
@@ -2336,9 +2343,56 @@ Set-OutlookSignatures adds a tagline to each signature deployed for mailboxes wi
 
 Signatures for mailboxes with a [Benefactor Circle](Benefactor%20Circle.md) license do not get this tagline appended.
 
+Dear companies, please do not forget:
+- Invest in the free and open-source software you depend on. Contributors are working behind the scenes to make open-source better for everyone. Give them the help and recognition they deserve.
+- Sponsor the free and open-source software your teams use to keep your business running. Fund the projects that make up your software supply chain to improve its performance, reliability, and stability.
+
+Being free and open-source software, Set-OutlookSignatures saves your company a remarkable amount of money compared to commercial software.
+
+Become a Benefactor Circle member to unlock additional features: See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and their benefits for your business.
+
+### Why the tagline?<!-- omit in toc -->
+I initially created Set-OutlookSignatures to give back to the community by showing how to correctly script stuff that I have seen being done in wrong and incomplete ways over and over again:
+- Efficient queries for nested Active Directory group membership,
+- working with SID history,
+- working with AD queries in the most complex environments and across trusts,
+- parallel code execution in PowerShell,
+- working with Graph,
+- and - of course - a fresh approach on how to manage and deploy signatures for Outlook.
+
+Since the free version of Set-OutlookSignatures has first been published in 2021, dozens of features have been added - quickly scroll through the CHANGELOG to get an idea of what I am talking about.<br>I invested more than a thousand hours of my spare time developing them, and I spent a whole lot of money setting up and maintaining different test environments. And I plan to continue doing so and keeping the core of Set-OutlookSignatures free and open source software.
+
+You are probably an Exchange or client administrator, and as such you are part of the community I want to give something back to.
+
+I do not expect or request thank yous from fellow admins, as our community lives from both giving and taking.
+
+I draw the line where companies, rather than individuals, benefit one-sidedly. The tagline reminds companies that they benefit from open source software and that there is a way to ensure that Set-OutlookSignatures remains open source and is developed further by supporting it financially and at the same time gaining access to even more useful features.
+
+By the way: Companies often make wrong assumptions about free and open source software. Open source software absolutely can contain closed source code. The term "open source" does not automatically imply free usage or even free access to the code. The permission to use software for free does not imply free support.
+
+### Not sure if Set-OutlookSignatures is the right solution for your company?<!-- omit in toc -->
+The core of Set-OutlookSignatures is available free of charge as open-source software and can be used for as long and for as many mailboxes as your company wants.<br>All documentation is publicly available, and you can get free community support at GitHub or get first-class commercial support, training, workshops and more from [ExplicIT Consulting](https://explicitconsulting.at/open-source/set-outlooksignatures/).
+
+For a small annual fee per mailbox, the [Benefactor Circle add-on](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/blob/main/docs/Benefactor%20Circle.md) offers a whole bunch of additional features.<br>All documentation is publicly available, and the free 14-day trial version allows companies to test all additional features at no cost.
+
+Your company is not sure whether the add-on will pay off?<br>Visit https://explicitconsulting.at/open-source/set-outlooksignatures/#4-financial-benefits-of-centrally-managing-signatures-and-out-of-office-replies and learn how you can do the calculation tailored to the needs of your company.<br>Should your company come to the conclusion that the add-on does not pay off, it can still use the free and open source version of Set-OutlookSignatures.
+
 ## 14.36 Why is the out-of-office assistant not activated automatically?<!-- omit in toc -->
 OOF templates are only applied if the out of office assistant is currently disabled. If it is currently active or scheduled to be automatically activated in the future, OOF templates are not applied.
 
 The user has to activate the out-of-office assistant manually. Through the use of templates, the user only has to make no to only little changes to the text (such as the return date, possibly).
 
 The reason for this is that there is no generic way to detect when a user will be absent, when he will come back and how much in advance the out-of-office assistant should be activated. While you may have defined clear rules in your company and your users fully adhere to these rules, the rules and their usage may be handled completely different in other companies.
+
+## 14.37 When should I refer on-prem groups and when Entra ID groups?<!-- omit in toc -->
+The following is valid for using groups in INI files as well as for Benefactor Circle licensing groups:
+- When using the '-GraphOnly true' parameter, prefer Entra ID groups ('EntraID <…>'). You may also use on-prem groups ('<NetBiosDomain> <…>') as long as they are synchronized to Entra ID.
+- In hybrid environments without using the '-GraphOnly true' parameter, prefer on-prem groups ('<NetBiosDomain> <…>') synchronized to Entra ID. Pure entra ID groups ('EntraID <…>') only make sense when all mailboxes covered by Set-OutlookSignatures are hosted in Exchange Online.
+- Pure on-prem environments: You can only use on-prem groups ('<NetBiosDomain> <…>'). When moving to a hybrid environment, you do not need to adapt the configuration as long as you synchronize your on-prem groups to Entra ID.
+
+## 14.38 Why are signatures and out-of-office replies recreated even when their content has not changed?<!-- omit in toc -->
+Signatures and out-of-office replies are deliberately regenerated each time Set-OutlookSignatures runs. The effort required to check whether anything has changed since the last run would be greater than actually regernerating them.
+
+Changes affecting signatures and out-of-office replies may have been made on the user's client, in the users's mailbox, in Entra ID or Active Directory, in template files, and in configuration files.
+
+The only reliable way to detect changes in an environment where things can be modified in so many places would be to calculate what the new signatures would look like with current values and then compare these with the existing ones. But if you already have the new signatures and out-of-office replies anyway, overwriting the existing ones is faster than comparing them.
