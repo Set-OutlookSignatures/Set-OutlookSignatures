@@ -21,6 +21,35 @@
   - <Active present tense verb> XXX
 -->
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.15.0" target="_blank">v4.15.0</a> - 2024-09-27
+_**Attention, Exchange Online admins**_  
+_See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README`._
+
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- **Change the default value of the '`MirrorCloudSignatures`' parameter to 'true'.**<br>Although the Microsoft API is still not publicly available, it has been stable for more than two years and is being used by more and more Outlook editions.<br>This change only affects a small number of installations, as MirrorCloudSignatures is a Benefactor Circle exclusive feature that practically all clients with cloud mailboxes activate.
+- Try Integrated Windows Authentication first when connecting to Exchange, even when a cloud access token is available.<br>This is slower but ensures maximum compatibility for all architectures and combinations of access from internal or external networks, mailbox in cloud or on-prem, hybrid mode enabled (classic minimal/express/full, modern minimal/full) or disabled, Hybrid Modern Authentication enabled or disabled, and typical configuration issues.
+- Change sample templates font to Aptos, the new default font used by Microsoft.
+- Update dependency MSAL.Net to v4.65.0.
+- Update Outlook add-in dependency @azure/msal-browser to v3.24.0.
+### Added
+- Allow to select signature in the taskpane of the Outlook add-in. This is like having roaming signatures on-prem.
+- Make data preparation for Outlook add-in compatible with on-prem mailboxes. This does not (yet) remove the limitation that the add-in only works with cloud mailboxes on Outlook for Android and Outlook for iOS.
+- Add Outlook add-in support for images in signatures in Outlook Web on premises (will start working as soon as Microsoft fixes a bug in their office.js framework) 
+- Connect to Graph if only one Benefactor Circle license group is defined and this license group is an Entra ID group, and show a warning when the Benefactor Circle license group for a mailbox is an Entra ID group but there is no connection to Graph.
+- Add support for the new way of Exchange Online modifying the HTML code of roaming signatures to '`DeleteScriptCreatedSignaturesWithoutTemplate`' and '`DeleteuserCreatedSignatures`'.
+- Add support for the `OnAppointmentFromChanged event` in the `Outlook add-in`, as Microsoft has updated the office.js library accordingly.
+- Adapt the conversion of DOCX templates to HTML so that the different Outlook editions on different platforms render fonts and colors more consistently.
+- Show more detailed troubleshooting hints when Autodiscover fails.
+- Show if a mailbox is in a license group before mailbox specific Benefactor Circle features are run.
+### Removed
+### Fixed
+- Fix the problem in the Outlook add-in that led to images not being shown in the signature on the first run of the add-in for each new appointment.
+- Add more code to work around limitations for Outlook add-ins on Outlook Web on premises.
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.14.2" target="_blank">v4.14.2</a> - 2024-09-07
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README`._

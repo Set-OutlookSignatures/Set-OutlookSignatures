@@ -94,7 +94,7 @@ try {
 
         if (-not $ADForestRootDomain) {
             Write-Host "    Could not connect to '$($CrossForestTrustRootDomain)' via LDAP to query RootDSE. Skipping."
-            break
+            continue
         }
 
         if ($ADForestRootDomain -ine $CrossForestTrustRootDomain) {
@@ -113,7 +113,7 @@ try {
 
         if ($AllGCs.count -lt 1) {
             Write-Host '    No Global Catalog servers found. Check input and DNS resolution. Skipping.'
-            break
+            continue
         }
 
 

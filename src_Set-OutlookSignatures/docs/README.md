@@ -65,8 +65,42 @@ The software core is **Free and Open-Source Software (FOSS)**. It is published u
 Footnote 1 (¹): **Some features are exclusive to the Benefactor Circle add-on.**
 ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and commercial support, ensuring that the core of Set-OutlookSignatures can remain Free and Open-Source Software (FOSS) and continues to evolve. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.
 
+## Feature comparison<!-- omit in toc -->
+
+| Feature | Set&#8209;OutlookSignatures<br>with&nbsp;Benefactor&nbsp;Circle | Market Companion&nbsp;A | Market Companion&nbsp;B | Market Companion&nbsp;C |
+| :--- | :--- | :--- | :--- | :--- |
+| Free and Open-Source core | ✔️ | ❌ | ❌ | ❌ |
+| No email re-routing to a 3rd party datacenter | ✔️ | ❌ | ❌ | ❌ |
+| No transfer of Active Directory and Entra ID data to a 3rd party datacenter | ✔️ | ❌ | ❌ | ❌ |
+| No telemetry or usage data collection, direct or indirect | ✔️ | ❌ | ❌ | ❌ |
+| No auto-renewing subscription | ✔️ | ❌ | ❌ | ❌ |
+| Apply signatures to all emails | 〰️ <sub>Outlook clients only</sub> | ✔️ <sub>With email re-routing to a 3rd party datacenter</sub> | ✔️ <sub>With email re-routing to a 3rd party datacenter</sub> | ✔️ <sub>With email re-routing to a 3rd party datacenter</sub> |
+| Additional data sources besides Active Directory and Entra ID | ✔️ | 〰️ | ❌ | ❌ |
+| Support for Microsoft national clouds | ✔️ <sub>Global/Public, US Government L4, US Government L5 (DOD), China operated by 21Vianet</sub> | ❌ | ❌ | ❌ |
+| Support for Microsoft roaming signatures | ✔️ | ❌ | ❌ | ❌ |
+| Number of templates | ♾️ <sub>Unlimited</sub> | 1 <sub>💲 More charged extra</sub> | ♾️ <sub>Unlimited</sub> | ♾️ <sub>Unlimited</sub> |
+| Targeting and exclusion | ✔️ | 💲 <sub>Charged extra</sub> | ✔️ | ✔️ |
+| Scheduling | ✔️ | 💲 <sub>Charged extra</sub> | ✔️ | ✔️ |
+| Banners | ♾️ <sub>Unlimited</sub> | 1 <sub>💲 More charged extra</sub> | ♾️ <sub>Unlimited</sub> |  ♾️ <sub>Unlimited</sub> |
+| QR codes and vCards | ✔️ | 💲 <sub>Charged extra</sub> | 💲 <sub>Charged extra</sub> | ✔️ |
+| Signature visible while wrting | ✔️ | 〰️ | 〰️  | 〰️ |
+| Signature visible in Sent Items | ✔️ | 〰️ <sub>Cloud mailboxes only</sub> | 〰️ <sub>Cloud mailboxes only</sub> | 〰️ <sub>Cloud mailboxes only</sub> |
+| OOF reply messages | ✔️ | 💲 <sub>Charged extra</sub> | 〰️ <sub>Same for internal and external senders</sub> | 💲 <sub>Charged extra</sub> |
+| User-controlled email signatures | ✔️ | 〰️ | 〰️ | 〰️ |
+| Signatures for encrypted messages | ✔️ | 〰️ | 〰️ | 〰️ |
+| Signatures for delegates, shared, additional and automapped mailboxes | ✔️ | 〰️ <sub>No mixing of sender and delegate replacement variables</sub> | 〰️ <sub>No mixing of sender and delegate replacement variables</sub> | 〰️ <sub>No mixing of sender and delegate replacement variables</sub> |
+| Outlook add-in | 〰️ <sub>No on-prem mailboxes on mobile devices</sub> | 〰️ <sub>Not for appointments</sub> | 〰️ <sub>Not for appointments</sub> | ✔️ |
+| License includes support | ❌ <sub>💲 Rarely needed, fairly charged by usage</sub> | ✔️ <sub>💲 Charged regardless of use</sub> | ✔️ <sub>💲 Charged regardless of use</sub> | ✔️ <sub>💲 Charged regardless of use</sub> |
+| Software escrow | ✔️ <sub>To the Set&#8209;OutlookSignatures maintainers</sub> | ❌ | ❌ | ❌ |
+| License cost, 5 years, 100 mailboxes | appr. 1k | appr. 8k | appr. 7k | appr. 8k |
+| License cost, 5 years, 250 mailboxes | appr. 3k | appr. 20k | appr. 14k | appr. 18k |
+| License cost, 5 years, 500 mailboxes | appr. 5k | appr. 39k | appr. 22k | appr. 31k |
+| License cost, 5 years, 1,000 mailboxes | appr. 11k | appr. 78k | appr. 43k | appr. 52k |
+| License cost, 5 years, 10,000 mailboxes | appr. 105k | appr. 553k | appr. 325k | appr. 202k |
+
 # Demo video<!-- omit in toc -->
 <a href="https://www.youtube-nocookie.com/embed/K9TrCjTdRUI" target="_blank"><img src="https://img.youtube.com/vi/K9TrCjTdRUI/hqdefault.jpg" height="300" title="Set-OutlookSignatures demo video" alt="Set-OutlookSignatures demo video"></a>
+
 
 # Table of Contents<!-- omit in toc -->
 Top level chapters only.
@@ -122,7 +156,7 @@ In cloud environments, you need to register Set-OutlookSignatures as Entra ID ap
 Not all features are yet available on Linux and macOS. Every parameter contains appropriate information, which can be summarized as follows:
 
 **Common restrictions and notes for Linux and macOS**
-- Only mailboxes hosted in Exchange Online are supported, no on-prem mailboxes.
+- Only mailboxes hosted in Exchange Online are supported. On-prem mailboxes usually work when addressed via Exchange Online, but this is not guaranteed.
 - Only Graph is supported, no local Active Directories.<br>The parameter `GraphOnly` is automatically set to `true` and Linux and macOS, which requires an Entra ID app - the Quick Start Guide in this document helps you implement this.
 - Signature and OOF templates must be in HTM format.<br>Microsoft Word is not available on Linux, and the file format conversion cannot be done without user impact on macOS.<br>If you do not want to manually convert your DOCX files to HTM, remove incompatible and superfluous code and restore images to their original resolution: Our partner [ExplicIT Consulting](https://explicitconsulting.at) offers a commercial batch conversion service.<br>The parameter `UseHtmTemplates` is automatically set to `true` on Linux and macOS.
 - Only existing mount points and SharePoint Online paths can be accessed.<br>Set-OutlookSignatures cannot create mount points itself, as there are just too many possibilities.<br>This is important for all parameters pointing to folders or files (`SignatureTemplatePath`, `SignatureIniPath`, `OOFTemplatePath`, `OOFIniPath`, `AdditionalSignaturePath`, `ReplacementVariableConfigFile`, `GraphConfigFile`, etc.). The default values for these parameters are automatically set correctly, so that you can follow the Quick Start Guide without additional configuration. When hosting `GraphConfigFile` on SharePoint Online make sure you also define the `GraphClientID` parameter.<br><br>If SharePoint Online is not an option for you, consider one of the following options for production use:
@@ -201,14 +235,14 @@ To start with the practical implementation:
           This runs Set-OutlookSignatures with default parameters, preferring on-prem Active Directory to find mailboxes and their attributes, and only using Graph/Entra ID when neccessary.
         - If you are not using the public Microsoft Cloud, add the `-CloudEnvironment [AzureUSGovernment|AzureUSGovernmentDoD|AzureChina|]` parameter.
      
-Set-OutlookSignatures now runs using default settings and sample templates.<br>Because of the '-exit' parameter, the window hosting Set-OutlookSignatures will not close after the software completed. This is helpful for debugging and learning.
+Set-OutlookSignatures now runs using default settings and sample templates.<br>Because of the '-noexit' parameter, the window hosting Set-OutlookSignatures will not close after the software completed. This is helpful for debugging and learning.
 
 Next, check the script output for errors and warnings, displayed in red or yellow in the PowerShell console.
 - If there are errors or warnings:
   1. Read the messages carefully as they often contain hints on how to resolve the issue.  
   2. Check if the README file contains a hint.
   3. Check if someone has already reported the problem as and issue on [GitHub](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=is%3Aissue), and create a new one if you can't find any hint on how to solve it.
-- If there are no errors, switch to Outlook and have a look at the newly created signatures.
+- If there are no errors, switch to Outlook and have a look at the newly created signatures, especially to the showcase signature 'Test all default replacement variables'.
 
 When everything runs fine with default settings, it is time to start customizing the software behavior to your needs:
 - Create a folder with your own template files and signature configuration file.
@@ -774,7 +808,7 @@ Prerequisites:
   - Mailbox is the mailbox of the currently logged-in user and is hosted in Exchange Online
 
 Please note:
-- As there is no Microsoft official API, this feature is experimental and you use it at your own risk.
+- As there is no Microsoft official API yet, this feature is to be used at your own risk.
 - This feature does not work in simulation mode, because the user running the simulation does not have access to the signatures stored in another mailbox
 
 The process is very simple and straight forward. Set-OutlookSignatures goes through the following steps for each mailbox:
@@ -806,7 +840,7 @@ This feature requires a Benefactor Circle license.
 
 Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
 
-Default value: $false
+Default value: $true
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures $false  
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false  
@@ -895,6 +929,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 With a [Benefactor Circle](Benefactor%20Circle.md) license, you have access to the Set-OutlookSignatures add-in for Outlook. This Outlook add-in can:
 - Automatically add signatures when creating a new email or answering an email (including Outlook on Android and Outlook on iOS), also for alias and secondary email addresses
 - Automatically add signatures to appointment invites, also for alias and secondary email addresses
+- Allow to select signature in the taskpane of the Outlook add-in. This is like having roaming signatures on-prem.
 
 The Outlook add-in is self-hosted by you. Compared to using a solution hosted by a 3rd party, this has several advantages:
 - Client specific configuration
@@ -939,10 +974,12 @@ Whatever web server you choose, the requirements are low:
 [Static website hosting in Azure Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) can be an uncomplicated, cheap and fast alternative.
 
 ### 4.2.3 Set-OutlookSignatures<!-- omit in toc -->
-The add-in can add existing signatures, but is not able to create them itself on the fly. Set-OutlookSignatures v4.14.0 and higher prepares signature data in a way that it can be used by the Outlook add-in.
+The Outlook add-in can add existing signatures, but is not able to create them itself on the fly. Set-OutlookSignatures v4.14.0 and higher prepares signature data in a way that it can be used by the Outlook add-in.
 
 ## 4.3. Configuration and deployment to the web server<!-- omit in toc -->
-With every new release of Set-OutlookSignatures, [Benefactor Circle](Benefactor%20Circle.md) members receive an updated license file and an updated Outlook add-in.
+With every new release of Set-OutlookSignatures, [Benefactor Circle](Benefactor%20Circle.md) members not only receive an updated Benefactor Circle license file, but also an updated Outlook add-in.
+
+With every new release of the Outlook add-in, you need to update your add-in deployment (sideloading M365 Centralized Deployment, M365 Integrated Apps) so that Outlook can download and use the newest code.
 
 To configure the add-in and deploy it to your web server:
 - Open `run_before_deployment.ps1` and follow the instructions in it to configure the add-in to your needs.
@@ -1015,8 +1052,11 @@ The Integrated Apps feature is the recommended way to deploy Outlook add-ins. It
 ## 4.6. Remarks<!-- omit in toc -->
 **General**
 - The add-in has access to the data of the last run of Set-OutlookSignatures v4.14.0 and higher.
-- Microsoft is currently actively blocking access to roaming signatures for Outlook add-ins. The add-in will be updated as soon as this block has been removed.
+- Microsoft is currently actively blocking access to roaming signatures for Outlook add-ins. The add-in will be updated when this block has been removed.
 - The easiest way to test the add-in and its basic functionality is to use the taskpane. For specific debugging on Android and iOS, you need to use the DEBUG option in `run_before_deployment.ps1`.
+- The add-in can run automatically when one of the following events is launched by Outlook: OnNewMessageCompose, OnNewAppointmentOrganizer, OnMessageFromChanged, OnAppointmentFromChanged.
+  - Not all these events are supported on all platforms and editions of Outlook, see this [this Microsoft article](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/autolaunch#supported-events) for an up-to-date list.
+  - While not publicly documented, [Outlook currently does not support add-ins on calendar invite responses](https://github.com/OfficeDev/office-js/issues/4094#issuecomment-1923444325).
 
 **Outlook on iOS**
 - Only mailboxes hosted in Exchange Online are supported. This is because the mobile APIs do not allow programmatic access to mailboxes hosted on-prem.
@@ -1032,6 +1072,13 @@ The Integrated Apps feature is the recommended way to deploy Outlook add-ins. It
 **Outlook for Mac**
 - Use the New Outlook for Mac whenever possible.
 - While the APIs required for the Set-OutlookSignatures Outlook add-in are available in Classic Outlook for Mac, they are very unstable. Therefore, we only offer best-effort support for the add-in on Classic Outlook for Mac.
+
+**Outlook Web on-prem**
+- Launch events are not supported, so only the taskpane works.
+- Images are replaced with their alternate description. This will work as soon as Microsoft fixes a bug in their office.js framework.
+
+**Classic Outlook on Windows**
+- Things work fine for cloud mailboxes, but the same APIs seem to be much more unstable for on-prem mailboxes, especially regardings launch events (adding signature automatically). When in doubt, use the taskpane. 
 
 # 5. Group membership  
 When no Active Directory connection is available or the `GraphOnly` parameter is set to `true`, Microsoft Graph is queried for transitive group membership. This query includes security and distribution groups. In Microsoft Graph, membership in dynamic groups is considered, too.
@@ -2100,7 +2147,7 @@ Set-OutlookSignatures can handle roaming signatures since v4.0.0. See `MirrorClo
 
 Set-OutlookSignatures supports romaing signatures independent from the Outlook version used. Roaming signatures are also supported in scenarios where only Outlook Web in the cloud or New Outlook is used.
 
-As long as Microsoft does not publish an official API, this feature is marked as experimental and is not enabled by default.
+As there is no Microsoft official API yet, this feature is to be used at your own risk.
 
 Storing signatures in the mailbox is a good idea, as this makes signatures available across devices and apps.
 

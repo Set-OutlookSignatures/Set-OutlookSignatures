@@ -556,7 +556,7 @@ Prerequisites:
   - Mailbox is the mailbox of the currently logged-in user and is hosted in Exchange Online
 
 Please note:
-- As there is no Microsoft official API, this feature is experimental and you use it at your own risk.
+- As there is no Microsoft official API yet, this feature is to be used at your own risk.
 - This feature does not work in simulation mode, because the user running the simulation does not have access to the signatures stored in another mailbox
 
 The process is very simple and straight forward. Set-OutlookSignatures goes through the following steps for each mailbox:
@@ -588,7 +588,7 @@ This feature requires a Benefactor Circle license.
 
 Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
 
-Default value: $false
+Default value: $true
 
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures $false
 Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false
@@ -966,7 +966,7 @@ Param(
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     [Alias('MirrorLocalSignaturesToCloud')]
-    $MirrorCloudSignatures = $false,
+    $MirrorCloudSignatures = $true,
 
     # Word process priority
     [Parameter(Mandatory = $false, ParameterSetName = 'H: Word')]
@@ -1343,7 +1343,7 @@ function main {
 
             Write-Host '  New Outlook'
             Write-Host "    Version: $($NewOutlook.Version)"
-            Write-Verbose "    Status: $($NewOutlook.Status)"
+            Write-Host "    Status: $($NewOutlook.Status)"
             Write-Host "    UseNewOutlook: $OutlookUseNewOutlook"
         } elseif ($IsMacOS) {
             Write-Host '  Outlook'
@@ -1841,8 +1841,8 @@ end tell
                 $GraphOnly = $true
             }
         } catch {
+            Write-Verbose "  $($error[0])"
             $y = ''
-            Write-Verbose $error[0]
             Write-Host "  Problem connecting to logged-in user's Active Directory, use parameter '-verbose' to see error message." -ForegroundColor Yellow
             Write-Host '  Assuming Graph/Entra ID from now on.' -ForegroundColor Yellow
             $GraphOnly = $true
@@ -1913,7 +1913,7 @@ end tell
                             }
                         }
                     } catch {
-                        Write-Verbose $error[0]
+                        Write-Host "    $($error[0])"
                         Write-Host "    Simulation user '$($SimulateUser)' not found. Exit." -ForegroundColor REd
                         exit 1
                     }
@@ -1931,9 +1931,40 @@ end tell
         ($GraphOnly -eq $true) -or
         (($GraphOnly -eq $false) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true))) -or
         (($GraphOnly -eq $false) -and ($null -eq $ADPropsCurrentUser)) -or
-        ($OutlookUseNewOutlook -eq $true)
+        ($OutlookUseNewOutlook -eq $true) -or
+        $(
+            if (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('LicenseGroupRequiresGraph'))) {
+                $result = [SetOutlookSignatures.BenefactorCircle]::LicenseGroupRequiresGraph()
+
+                if ($result -ine 'false') {
+                    $true
+                } else {
+                    $false
+                }
+            } else {
+                $false
+            }
+        )
     ) {
         Write-Host "    Set up environment for connection to Microsoft Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+        Write-Verbose '      Required because at least one is true:'
+        Write-Verbose "        GraphOnly is true: $($GraphOnly -eq $true)"
+        Write-Verbose "        GraphOnly is false and mailbox is in cloud and SetCurrentUserOOFMessage or SetCurrentUserOutlookWebSignature is true: $(($GraphOnly -eq $false) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)))"
+        Write-Verbose "        GraphOnly is false and on-prem AD properties of current user are empty: $(($GraphOnly -eq $false) -and ($null -eq $ADPropsCurrentUser))"
+        Write-Verbose "        New Outlook is used: $($OutlookUseNewOutlook -eq $true)"
+        Write-Verbose "        The only Benefactor Circle license group is in Entra ID: $(
+            if (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('LicenseGroupRequiresGraph'))) {
+                $result = [SetOutlookSignatures.BenefactorCircle]::LicenseGroupRequiresGraph()
+
+                if ($result -ine 'false') {
+                    $true
+                } else {
+                    $false
+                }
+            } else {
+                $false
+            }
+        )"
 
         if (-not $GraphToken) {
             $GraphToken = GraphGetToken
@@ -2249,7 +2280,7 @@ end tell
                             Unblock-File -LiteralPath $script:WebServicesDllPath
                         }
                     } catch {
-                        Write-Verbose $_
+                        Write-Verbose "      $($_)"
                     }
                 }
 
@@ -3113,18 +3144,24 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             Write-Host "Mailbox $($MailAddresses[$AccountNumberRunning]) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
             $UserDomain = ''
-
-            Write-Host "  Get group membership of mailbox @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-            if ($($ADPropsMailboxesUserDomain[$AccountNumberRunning])) {
-                Write-Host "    $($ADPropsMailboxesUserDomain[$AccountNumberRunning]) (mailbox home domain/forest) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-            }
-
             $GroupsSIDs = @()
             $ADPropsCurrentMailbox = @()
             $ADPropsCurrentMailboxManager = @()
 
             if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
                 $ADPropsCurrentMailbox = $ADPropsMailboxes[$AccountNumberRunning]
+            }
+
+
+            Write-Host "  Mailbox is member of license group: $(try { [SetOutlookSignatures.BenefactorCircle]::CLCGM() -eq $true } catch { $false }) (verbose output for details)"
+
+
+            Write-Host "  Get group membership of mailbox @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+            if ($($ADPropsMailboxesUserDomain[$AccountNumberRunning])) {
+                Write-Host "    $($ADPropsMailboxesUserDomain[$AccountNumberRunning]) (mailbox home domain/forest) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+            }
+
+            if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
 
                 if ($null -ne $TrustsToCheckForGroups[0]) {
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($ADPropsMailboxesUserDomain[$AccountNumberRunning])")
@@ -3258,7 +3295,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                     if ($LdapFilterSids -ilike '*(objectsid=*') {
                         # Across each trust, search for all Foreign Security Principals matching a SID from our list
                         foreach ($TrustToCheckForFSPs in @(($LookupDomainsToTrusts.GetEnumerator() | Where-Object { $_.Value -ine $LookupDomainsToTrusts[$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')] }).value | Select-Object -Unique)) {
+
                             Write-Host "    $($TrustToCheckForFSPs) (trusted domain/forest of mailbox home forest) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
                             $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustToCheckForFSPs)")
                             $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
 
@@ -3329,7 +3368,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                             $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentMailboxManager.userprincipalname).photo
                             $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null
                         }
+
                         Write-Host '    Microsoft Graph'
+
                         foreach ($sid in @((GraphGetUserTransitiveMemberOf $ADPropsCurrentMailbox.userPrincipalName).memberof.value.securityidentifier | Where-Object { $_ })) {
                             $GroupsSIDs += $sid
                             Write-Verbose "      $sid"
@@ -3415,12 +3456,13 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
             Write-Host '    Export available images'
             foreach ($VariableName in $PictureVariablesArray) {
-                Write-Verbose "      $($VariableName[0]), $([math]::ceiling(($ReplaceHash[$VariableName[0]]).Length / 1KB)) KiB @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                Write-Verbose "    $($VariableName[0]), $([math]::ceiling(($ReplaceHash[$VariableName[0]]).Length / 1KB)) KiB @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
                 if ($null -ne $($ReplaceHash[$VariableName[0]])) {
                     [System.IO.File]::WriteAllBytes($(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')))), $($ReplaceHash[$VariableName[0]]))
                 }
             }
 
+            Write-Host "  Download roaming signatures from Exchange Online @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
             if ($MirrorCloudSignatures -eq $true) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesDownload')))) {
                     Write-Host "    The 'MirrorCloudSignatures' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
@@ -3469,8 +3511,6 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                     ConnectEWS -MailAddress $PrimaryMailboxAddress -Indent '  '
 
                     if (-not $script:exchService) {
-                        Write-Host "    Error connecting to Outlook Web: $_" -ForegroundColor Red
-
                         if ($SetCurrentUserOutlookWebSignature) {
                             Write-Host '    Outlook Web signature cannot be set' -ForegroundColor Red
                             $SetCurrentUserOutlookWebSignature = $false
@@ -3611,7 +3651,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
     # Prepare data for Outlook add-in
     Write-Host
     Write-Host "Prepare data for Outlook add-in @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-    Write-Host '  This is required because Microsoft actively blocks Outlook add-ins from using roaming signatures.'
+    Write-Host '  Required because Microsoft actively blocks Outlook add-ins from using roaming signatures'
 
     [SetOutlookSignatures.Common]::PrepareOutlookAddinDataCommon()
 
@@ -3863,6 +3903,7 @@ function GetBitness {
                     $stream = New-Object System.IO.FileStream -ArgumentList $file, Open, Read
                 } Catch {
                     $stream = $null
+
                     if (-not $quiet) {
                         Write-Verbose $_
                     }
@@ -4670,9 +4711,9 @@ function SetSignatures {
             $script:COMWord.ActiveDocument.WebOptions.TargetBrowser = 4 # IE6, which is the maximum
             $script:COMWord.ActiveDocument.WebOptions.BrowserLevel = 2 # IE6, which is the maximum
             $script:COMWord.ActiveDocument.WebOptions.AllowPNG = $true
-            $script:COMWord.ActiveDocument.WebOptions.OptimizeForBrowser = $true
-            $script:COMWord.ActiveDocument.WebOptions.RelyOnCSS = $true
-            $script:COMWord.ActiveDocument.WebOptions.RelyOnVML = $true
+            $script:COMWord.ActiveDocument.WebOptions.OptimizeForBrowser = $false
+            $script:COMWord.ActiveDocument.WebOptions.RelyOnCSS = $false
+            $script:COMWord.ActiveDocument.WebOptions.RelyOnVML = $false
             $script:COMWord.ActiveDocument.WebOptions.Encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
             $script:COMWord.ActiveDocument.WebOptions.OrganizeInFolder = $true
             $script:COMWord.ActiveDocument.WebOptions.PixelsPerInch = 96
@@ -5371,12 +5412,12 @@ $CheckPathScriptblock = {
     }
 
     if ($CheckPathCreate -eq $false) {
-        Write-Verbose "Try to access '$($CheckPathPath)'."
+        Write-Verbose "      Try to access '$($CheckPathPath)'."
 
         if ((Test-Path -LiteralPath $CheckPathPath -ErrorAction SilentlyContinue)) {
-            Write-Verbose "'$($CheckPathPath)' is accessible, nothing more to do."
+            Write-Verbose "        '$($CheckPathPath)' is accessible, nothing more to do."
         } else {
-            Write-Verbose "'$($CheckPathPath)' is not yet accessible."
+            Write-Verbose "        '$($CheckPathPath)' is not yet accessible."
 
             if (-not [System.Uri]::IsWellFormedUriString($CheckPathPath, [System.UriKind]::Absolute)) {
                 $CheckPathPath = ([uri]($CheckPathPath -ireplace '@SSL\\', '/' -ireplace '^\\\\', 'https://' -ireplace '\\', '/')).AbsoluteUri
@@ -5420,25 +5461,25 @@ $CheckPathScriptblock = {
                     exit 1
                 }
 
-                Write-Verbose 'Get SharePoint Online site ID'
+                Write-Verbose '      Get SharePoint Online site ID'
                 $siteId = (GraphGenericQuery -method 'Get' -uri "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/sites/$(([uri]$CheckPathPath).DnsSafeHost):/$($CheckPathPathSplitbySlash[2])/$($CheckPathPathSplitbySlash[3])").result.id
-                Write-Verbose "siteId: $($siteID)"
+                Write-Verbose "        siteId: $($siteID)"
 
                 if ($siteid) {
-                    Write-Verbose 'Get DocLib drive ID'
+                    Write-Verbose '      Get DocLib drive ID'
 
                     $docLibDriveId = ((GraphGenericQuery -method 'Get' -uri "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/sites/$($siteId)/drives").result.value | Where-Object { $_.name -ieq $($CheckPathPathSplitbySlash[4]) }).id
-                    Write-Verbose "docLibDriveId: $docLibDriveId"
+                    Write-Verbose "        docLibDriveId: $docLibDriveId"
 
                     if ($docLibDriveId) {
-                        Write-Verbose 'Get DocLib drive items'
+                        Write-Verbose '      Get DocLib drive items'
                         $docLibDriveItems = (GraphGenericQuery -method 'Get' -uri "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/drives/$($docLibDriveId)/list/items?`$expand=DriveItem").result.value
 
                         $tempDir = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
                         $null = New-Item $tempDir -ItemType Directory
 
                         if (($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).contentType.name -ieq 'Document') {
-                            Write-Verbose 'Download file to local temp folder'
+                            Write-Verbose '      Download file to local temp folder'
 
                             $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath $([uri]::UnEscapeDataString((Split-Path $($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).webUrl -Leaf))))
 
@@ -5447,10 +5488,10 @@ $CheckPathScriptblock = {
                                 $CheckPathPathNew
                             )
 
-                            Write-Verbose "'$($CheckPathRefPath.Value)' -> '$($CheckPathPathNew)'"
+                            Write-Verbose "        '$($CheckPathRefPath.Value)' -> '$($CheckPathPathNew)'"
                             $CheckPathPath = $CheckPathRefPath.Value = $CheckPathPathNew
                         } else {
-                            Write-Verbose 'Create temp folders locally'
+                            Write-Verbose '      Create temp folders locally'
 
                             @(
                                 @($docLibDriveItems | Where-Object { ($_.contentType.name -ieq 'Folder') -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }).webUrl | ForEach-Object {
@@ -5462,7 +5503,7 @@ $CheckPathScriptblock = {
                                 }
                             }
 
-                            Write-Verbose 'Create dummy files in local temp folders'
+                            Write-Verbose '        Create dummy files in local temp folders'
                             @($docLibDriveItems | Where-Object { ($_.contentType.name -ieq 'Document') -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }) | Sort-Object -Property { $_.webUrl } | ForEach-Object {
                                 $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath ([uri]::UnescapeDataString(($_.webUrl -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'))
 
@@ -5485,19 +5526,19 @@ $CheckPathScriptblock = {
                                     #>
                             }
 
-                            Write-Verbose "'$($CheckPathRefPath.Value)' -> '$($tempDir)'"
+                            Write-Verbose "        '$($CheckPathRefPath.Value)' -> '$($tempDir)'"
                             $CheckPathPath = $CheckPathRefPath.Value = $tempDir
                         }
                     } else {
-                        Write-Verbose 'No DriveID. Wrong path or missing permission in SharePoint?'
+                        Write-Verbose '        No DriveID. Wrong path or missing permission in SharePoint?'
                     }
                 } else {
-                    Write-Verbose 'No SiteID. Wrong path or missing permission in Graph app?'
+                    Write-Verbose '        No SiteID. Wrong path or missing permission in Graph app?'
                 }
             }
 
             if ((Test-Path -LiteralPath $CheckPathPath -ErrorAction SilentlyContinue)) {
-                Write-Verbose "'$($CheckPathPath)' is accessible, nothing more to do."
+                Write-Verbose "      '$($CheckPathPath)' is accessible, nothing more to do."
             } else {
                 # SharePoint Online without Graph client ID or SharePoint on-prem
                 if (-not $CheckPathSilent) {
@@ -5638,7 +5679,7 @@ $CheckPathScriptblock = {
             }
         }
     } else {
-        Write-Verbose "Try to create '$($CheckPathPath)'."
+        Write-Verbose "      Try to create '$($CheckPathPath)'."
 
         if ($CheckPathPath.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
             $CheckPathPath = ((([uri]::UnescapeDataString($CheckPathPath) -ireplace ('https://', '\\')) -ireplace ('(.*?)/(.*)', '${1}@SSL\$2')) -ireplace ('/', '\'))
@@ -5663,9 +5704,9 @@ $CheckPathScriptblock = {
                     }
                 }
             } else {
-                Write-Verbose "$CheckPathPathTemp does not exist"
+                Write-Verbose "        $CheckPathPathTemp does not exist"
                 $CheckPathPathTemp = Split-Path ($CheckPathPathTemp -ireplace '@SSL', '') -Parent
-                Write-Verbose "Next: Check $CheckPathPathTemp"
+                Write-Verbose "        Next: Check $CheckPathPathTemp"
             }
         }
 
@@ -5712,28 +5753,91 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
 
             $script:exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
 
+            $tempEwsRedirectUrl = $null
+
+            function ExchServiceEwsTraceHandler() {
+                $sourceCode = @'
+using System.Management.Automation;
+using System.Text;
+using System.Text.RegularExpressions;
+
+public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.ITraceListener
+{
+    public void Trace(System.String traceType, System.String traceMessage)
+    {
+        string tempEwsRedirectUrl = string.Empty;
+
+        Match match = Regex.Match(traceMessage, "Redirection URL found: '(.*?)'");
+
+        if (match.Success)
+        {
+            tempEwsRedirectUrl = match.Groups[1].Value;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        // sb.AppendLine("Write-Verbose \"$($Indent)      traceType: $($('" + System.Management.Automation.Language.CodeGeneration.EscapeSingleQuotedStringContent(traceType) + "'))\"");
+        // sb.AppendLine("Write-Verbose \"$($Indent)      traceMessage: $($('" + System.Management.Automation.Language.CodeGeneration.EscapeSingleQuotedStringContent(traceMessage) + "'))\"");
+        sb.AppendLine("$tempEwsRedirectUrl = $($('" + System.Management.Automation.Language.CodeGeneration.EscapeSingleQuotedStringContent(tempEwsRedirectUrl) + "'))");
+
+        var defRunspace = System.Management.Automation.Runspaces.Runspace.DefaultRunspace;
+        var pipeline = defRunspace.CreateNestedPipeline();
+        pipeline.Commands.AddScript(sb.ToString());
+        pipeline.Invoke();
+    }
+}
+'@
+
+                Add-Type -TypeDefinition $sourceCode -Language CSharp -ReferencedAssemblies $script:WebServicesDllPath, System.Management.Automation, System.Text.RegularExpressions
+                $ExchServiceEwsTraceListener = New-Object ExchServiceEwsTraceListener
+                return $ExchServiceEwsTraceListener
+            }
+
+            $script:exchService.TraceEnabled = $true
+            $script:exchService.TraceFlags = [Microsoft.Exchange.WebServices.Data.TraceFlags]::AutodiscoverConfiguration, [Microsoft.Exchange.WebServices.Data.TraceFlags]::AutodiscoverRequest, [Microsoft.Exchange.WebServices.Data.TraceFlags]::AutodiscoverResponse
+            $script:exchService.TraceListener = ExchServiceEwsTraceHandler
+
             try {
-                Write-Verbose "$($Indent)    Try Integrated Windows Authentication"
-
-                if (
-                    ($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile -and $GraphToken.AppAccessTokenExo) -or
-                    $GraphToken.AccessTokenExo
-                ) {
-                    throw '      EXO access token available, skip Integrated Windows Authentication'
-                }
-
-                if (-not $IsWindows) {
-                    throw "$($Indent)      Not running on Windows, skip Integrated Windows Authentication"
-                }
+                Write-Verbose "$($Indent)    Try Autodiscover with Integrated Windows Authentication"
 
                 $script:exchService.UseDefaultCredentials = $true
                 $script:exchService.ImpersonatedUserId = $null
                 $script:exchService.AutodiscoverUrl($MailAddress, { $true }) | Out-Null
             } catch {
-                try {
-                    Write-Verbose $_
+                Write-Verbose "$($Indent)      Autodiscover with Integrated Windows Authentication failed."
+                Write-Verbose "$($Indent)        $($_)"
+                Write-Verbose "$($Indent)      This is OK when:"
+                Write-Verbose "$($Indent)        - Not connected to internal network"
+                Write-Verbose "$($Indent)        - Connected to internal network with no Exchange on prem."
+                Write-Verbose "$($Indent)        - Connected to internal network with Exchange on prem, but your mailbox is in Exchange Online."
+                Write-Verbose "$($Indent)        - Connected to internal network but not logged-on with Active Directory credentials."
+                Write-Verbose "$($Indent)      Else, you should check your internal and/or external Autodiscover configuration:"
+                Write-Verbose "$($Indent)        - External: https://testconnectivity.microsoft.com"
+                Write-Verbose "$($Indent)        - Internal: https://learn.microsoft.com/en-us/exchange/architecture/client-access/autodiscover"
+                Write-Verbose "$($Indent)        - Check your loadbalancer configuration."
 
-                    Write-Verbose "$($Indent)    Try OAuth with Autodiscover"
+                if ([System.Uri]::IsWellFormedUriString($tempEwsRedirectUrl, [System.UriKind]::Absolute)) {
+                    Write-Verbose "$($Indent)      Anyhow:"
+                    Write-Verbose "$($Indent)        - Redirect URL '$($tempEwsRedirectUrl)' was returned."
+                    Write-Verbose "$($Indent)        - No need to try Autodiscver with OAuth, skipping to OAuth with fixed URL."
+                } else {
+                    $tempEwsRedirectUrl = $null
+                }
+
+                if (
+                    $($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile -and !$GraphToken.AppAccessTokenExo) -or
+                    !$GraphToken.AccessTokenExo
+                ) {
+                    throw 'Integrated Windows Authentication failed, and there is no EXO OAuth access token available.'
+                }
+
+                try {
+                    Write-Verbose "$($Indent)    Try Autodiscover with OAuth"
+
+                    if ([System.Uri]::IsWellFormedUriString($tempEwsRedirectUrl, [System.UriKind]::Absolute)) {
+                        throw 'Autodiscover with IWA failed before, but returned a redirect URL. We will use this fixed URL without Autodiscover.'
+                    } else {
+                        $tempEwsRedirectUrl = $null
+                    }
 
                     $script:exchService.UseDefaultCredentials = $false
 
@@ -5747,9 +5851,20 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
 
                     $script:exchService.AutodiscoverUrl($MailAddress, { $true }) | Out-Null
                 } catch {
-                    Write-Verbose $_
+                    if ([System.Uri]::IsWellFormedUriString($tempEwsRedirectUrl, [System.UriKind]::Absolute)) {
+                        Write-Verbose "$($Indent)      Skipping Autodiscover with OAuth because"
+                        Write-Verbose "$($Indent)        $($_)"
+                    } else {
+                        Write-Verbose "$($Indent)      Autodiscover with OAuth failed."
+                        Write-Verbose "$($Indent)        $($_)"
+                        Write-Verbose "$($Indent)      This is OK when"
+                        Write-Verbose "$($indent)        - Connected to internal network with Exchange on prem without Hybrid Modern Authentication"
+                        Write-Verbose "$($Indent)      Else, you should check your internal and/or external Autodiscover configuration:"
+                        Write-Verbose "$($Indent)        - External: https://testconnectivity.microsoft.com"
+                        Write-Verbose "$($Indent)        - Internal: https://learn.microsoft.com/en-us/exchange/architecture/client-access/autodiscover"
+                        Write-Verbose "$($Indent)        - Check your loadbalancer configuration."
+                    }
 
-                    Write-Verbose "$($Indent)      OAuth with Autodiscover failed."
                     Write-Verbose "$($Indent)    Try OAuth with fixed URL"
 
                     $script:exchService.UseDefaultCredentials = $false
@@ -5762,21 +5877,26 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
                         $script:exchService.Credentials = New-Object Microsoft.Exchange.WebServices.Data.OAuthCredentials -ArgumentList $($GraphToken.AccessTokenExo)
                     }
 
-                    $script:exchService.Url = "$($CloudEnvironmentExchangeOnlineEndpoint)/EWS/Exchange.asmx"
+                    if ([System.Uri]::IsWellFormedUriString($tempEwsRedirectUrl, [System.UriKind]::Absolute)) {
+                        $script:exchService.Url = "$(([uri]$tempEwsRedirectUrl).GetLeftPart([UriPartial]::Authority))/EWS/Exchange.asmx"
+                    } else {
+                        $script:exchService.Url = "$($CloudEnvironmentExchangeOnlineEndpoint)/EWS/Exchange.asmx"
+                    }
+
+                    Write-Verbose "$($Indent)      Fixed URL: '$($script:exchService.Url)'"
                 }
             }
 
             if (([Microsoft.Exchange.WebServices.Data.Folder]::Bind($script:exchService, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Inbox)).DisplayName) {
                 Add-Member -InputObject $script:exchService -MemberType NoteProperty -Name 'SetOutlookSignaturesMailaddress' -Value $MailAddress
             } else {
-                Write-Host "$($Indent)  Could not connect to Outlook Web, although the EWS DLL threw no error." -ForegroundColor Red
-                throw
+                throw 'Could not connect to Outlook Web, although the EWS DLL threw no error.'
             }
         } catch {
-            $script:exchService = $null
+            Write-Host "$($Indent)    Error connecting to Outlook Web: $($_)" -ForegroundColor Red
+            Write-Host "$($Indent)    Check verbose output for details and solution hints." -ForegroundColor Red
 
-            Write-Host "$($Indent)    Error connecting to Outlook Web: $_" -ForegroundColor Red
-            Write-Host "$($Indent)    Check verbose output for details." -ForegroundColor Red
+            $script:exchService = $null
         }
     }
 }
@@ -5966,6 +6086,7 @@ function GraphGetToken {
                 }
             } elseif ($IsMacOS) {
                 security unlock-keychain -p 'Set-OutlookSignatures dummy password' *>$null
+
                 if ($LastExitCode -ne 0) {
                     Write-Verbose $("display alert ""$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })"" message ""$($GraphUnlockKeyringKeychainMessageboxText)""  buttons { ""OK"" } default button 1" | osascript *>$1; '')
                 }
@@ -5977,20 +6098,20 @@ function GraphGetToken {
         try {
             Write-Verbose '        Try Integrated Windows Authentication'
 
-            if (-not $IsWindows) {
-                throw '          Not running on Windows, skip Integrated Windows Authentication'
-            }
+            # if (-not $IsWindows) {
+            #     throw '          Not running on Windows, skip Integrated Windows Authentication'
+            # }
 
             $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -IntegratedWindowsAuth -Timeout (New-TimeSpan -Minutes 1)
         } catch {
-            Write-Verbose $error[0]
+            Write-Verbose "          $($error[0])"
 
             try {
                 Write-Verbose '        Try Silent with LoginHint'
 
                 $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Silent -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
             } catch {
-                Write-Verbose $error[0]
+                Write-Verbose "          $($error[0])"
 
                 try {
                     Write-Verbose '        Try Prompt with LoginHint and Timeout'
