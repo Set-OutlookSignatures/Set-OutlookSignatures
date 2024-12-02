@@ -1,4 +1,4 @@
-<#
+﻿<#
 This sample code shows how to automate the creation of the Entra ID app required for Set-OutlookSignatures.
 
 Both types of apps are supported: The one for end users, and the one for SimulateAndDeploy.
@@ -149,7 +149,7 @@ if ($appType -ieq 'Set-OutlookSignatures') {
 
                     # Delegated permission: MailboxSettings.ReadWrite
                     #   Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-                    #   Required to detect the state of the out of office assistant and to set out-of-office replies.
+                    #   Required to detect the state of the out-of-office assistant and to set out-of-office replies.
                     @{
                         'id'   = '818c620a-27a9-40bd-a6a5-d96f7d610b4b'
                         'type' = 'Scope'
@@ -236,7 +236,7 @@ if ($appType -ieq 'Set-OutlookSignatures') {
 
                     # Delegated permission: MailboxSettings.ReadWrite
                     #   Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-                    #   Required to detect the state of the out of office assistant and to set out-of-office replies.
+                    #   Required to detect the state of the out-of-office assistant and to set out-of-office replies.
                     @{
                         'id'   = '818c620a-27a9-40bd-a6a5-d96f7d610b4b'
                         'type' = 'Scope'
@@ -293,7 +293,7 @@ if ($appType -ieq 'Set-OutlookSignatures') {
 
                     # Application permission: MailboxSettings.ReadWrite
                     #   Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-                    #   Required to detect the state of the out of office assistant and to set out-of-office replies.
+                    #   Required to detect the state of the out-of-office assistant and to set out-of-office replies.
                     @{
                         'id'   = '6931bccd-447a-43d1-b442-00a195474933'
                         'type' = 'Role'
@@ -329,11 +329,11 @@ Update-MgApplication -ApplicationId $app.Id -BodyParameter $params
 
 
 Write-Host
-Write-Host 'Add redirect URI to app registration'
+Write-Host 'Add redirect URIs to app registration'
 $params =	@{
     RedirectUris = @(
-        ,
-        'http://localhost'
+        'http://localhost',
+        "ms-appx-web://microsoft.aad.brokerplugin/$($app.ID)"
     )
 }
 

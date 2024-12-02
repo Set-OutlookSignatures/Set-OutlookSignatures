@@ -27,12 +27,12 @@ With Set-OutlookSignatures, signatures and out-of-office replies can be:
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
 - Designed for **barrier-free accessibility** with custom link and image descriptions for screen readers and comparable tools
-- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** (including alias and secondary addresses), or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes¹**  
+- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** (including alias and secondary addresses), or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook¹, Outlook Web¹)**, including **automapped and additional mailboxes¹**  
 - Created with different names from the same template, **one template can be used for many mailboxes**
 - Assigned **time ranges** within which they are valid¹  
 - Set as **default signature** for new emails, or for replies and forwards (signatures only)  
 - Set as **default OOF message** for internal or external recipients (OOF messages only)  
-- Set in **Outlook Web¹** for the currently logged-in user, including mirroring signatures to the cloud as **roaming signatures¹** (Linux/macOS/Windows, Classic and New Outlook)  
+- Set in **Outlook Web¹** for the currently logged-in user, including mirroring signatures to the cloud as **roaming signatures¹** (Linux/macOS/Windows, Classic and New Outlook¹)  
 - Centrally managed only¹, or **exist along user-created signatures** (signatures only)  
 - Automatically added to new emails, reply emails and appointments with the **Outlook add-in**¹  
 - Copied to an **additional path¹** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
@@ -47,7 +47,7 @@ Signatures and OOF messages can also be created and pushed into mailboxes centra
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the software for a specific user at a specific point in time, and to inspect the resulting signature files before going live.
 
-**SimulateAndDeploy¹** allows to deploy signatures to Outlook Web/New Outlook without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
+**SimulateAndDeploy¹** allows to deploy signatures to Outlook Web¹/New Outlook¹ without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
 
 The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and in cloud-only environments**.  
 All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).
@@ -69,34 +69,39 @@ ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSi
 
 | Feature | Set&#8209;OutlookSignatures<br>with&nbsp;Benefactor&nbsp;Circle | Market Companion&nbsp;A | Market Companion&nbsp;B | Market Companion&nbsp;C |
 | :--- | :--- | :--- | :--- | :--- |
-| Free and Open-Source core | ✔️ | ❌ | ❌ | ❌ |
-| No email re-routing to a 3rd party datacenter | ✔️ | ❌ | ❌ | ❌ |
-| No transfer of Active Directory and Entra ID data to a 3rd party datacenter | ✔️ | ❌ | ❌ | ❌ |
-| No telemetry or usage data collection, direct or indirect | ✔️ | ❌ | ❌ | ❌ |
-| No auto-renewing subscription | ✔️ | ❌ | ❌ | ❌ |
-| Apply signatures to all emails | 〰️ <sub>Outlook clients only</sub> | ✔️ <sub>With email re-routing to a 3rd party datacenter</sub> | ✔️ <sub>With email re-routing to a 3rd party datacenter</sub> | ✔️ <sub>With email re-routing to a 3rd party datacenter</sub> |
-| Additional data sources besides Active Directory and Entra ID | ✔️ | 〰️ | ❌ | ❌ |
-| Support for Microsoft national clouds | ✔️ <sub>Global/Public, US Government L4, US Government L5 (DOD), China operated by 21Vianet</sub> | ❌ | ❌ | ❌ |
-| Support for Microsoft roaming signatures | ✔️ | ❌ | ❌ | ❌ |
-| Number of templates | ♾️ <sub>Unlimited</sub> | 1 <sub>💲 More charged extra</sub> | ♾️ <sub>Unlimited</sub> | ♾️ <sub>Unlimited</sub> |
-| Targeting and exclusion | ✔️ | 💲 <sub>Charged extra</sub> | ✔️ | ✔️ |
-| Scheduling | ✔️ | 💲 <sub>Charged extra</sub> | ✔️ | ✔️ |
-| Banners | ♾️ <sub>Unlimited</sub> | 1 <sub>💲 More charged extra</sub> | ♾️ <sub>Unlimited</sub> |  ♾️ <sub>Unlimited</sub> |
-| QR codes and vCards | ✔️ | 💲 <sub>Charged extra</sub> | 💲 <sub>Charged extra</sub> | ✔️ |
-| Signature visible while wrting | ✔️ | 〰️ | 〰️  | 〰️ |
-| Signature visible in Sent Items | ✔️ | 〰️ <sub>Cloud mailboxes only</sub> | 〰️ <sub>Cloud mailboxes only</sub> | 〰️ <sub>Cloud mailboxes only</sub> |
-| OOF reply messages | ✔️ | 💲 <sub>Charged extra</sub> | 〰️ <sub>Same for internal and external senders</sub> | 💲 <sub>Charged extra</sub> |
-| User-controlled email signatures | ✔️ | 〰️ | 〰️ | 〰️ |
-| Signatures for encrypted messages | ✔️ | 〰️ | 〰️ | 〰️ |
-| Signatures for delegates, shared, additional and automapped mailboxes | ✔️ | 〰️ <sub>No mixing of sender and delegate replacement variables</sub> | 〰️ <sub>No mixing of sender and delegate replacement variables</sub> | 〰️ <sub>No mixing of sender and delegate replacement variables</sub> |
-| Outlook add-in | 〰️ <sub>No on-prem mailboxes on mobile devices</sub> | 〰️ <sub>Not for appointments</sub> | 〰️ <sub>Not for appointments</sub> | ✔️ |
-| License includes support | ❌ <sub>💲 Rarely needed, fairly charged by usage</sub> | ✔️ <sub>💲 Charged regardless of use</sub> | ✔️ <sub>💲 Charged regardless of use</sub> | ✔️ <sub>💲 Charged regardless of use</sub> |
-| Software escrow | ✔️ <sub>To the Set&#8209;OutlookSignatures maintainers</sub> | ❌ | ❌ | ❌ |
-| License cost, 5 years, 100 mailboxes | appr. 1k | appr. 8k | appr. 7k | appr. 8k |
-| License cost, 5 years, 250 mailboxes | appr. 3k | appr. 20k | appr. 14k | appr. 18k |
-| License cost, 5 years, 500 mailboxes | appr. 5k | appr. 39k | appr. 22k | appr. 31k |
-| License cost, 5 years, 1,000 mailboxes | appr. 11k | appr. 78k | appr. 43k | appr. 52k |
-| License cost, 5 years, 10,000 mailboxes | appr. 105k | appr. 553k | appr. 325k | appr. 202k |
+| Free and Open-Source core | 🟢 | 🔴 | 🔴 | 🔴 |
+| Emails stay in your environment (no re-routing to 3rd party datacenters) | 🟢 | 🔴 | 🔴 | 🔴 |
+| Is hosted and runs in environments that you already trust and for which you have established security and management structures | 🟢 | 🔴 | 🔴 | 🔴 |
+| Entra ID and Active Directory permissions | 🟢 <sub>User (a.k.a. delegated) permissions, least privilege principle</sub> | 🔴 <sub>Application permissions, read all directory data (and transfer all emails)</sub> | 🔴 <sub>Application permissions, read all directory data (and transfer all emails)</sub> | 🔴 <sub>Application permissions, read all directory data (and read all emails)</sub> |
+| Entra ID and Active Directory data stays in your environment (no transfer to 3rd party datacenters) | 🟢 | 🔴 | 🔴 | 🔴 |
+| Requires an Exchange configuration or adds a dependency to it | 🟢 | 🔴 | 🔴 | 🔴 |
+| Multiple independent instances can be run in the same environment | 🟢 | 🔴 | 🔴 | 🔴 |
+| No telemetry or usage data collection, direct or indirect | 🟢 | 🔴 | 🔴 | 🔴 |
+| No auto-renewing subscription | 🟢 | 🔴 | 🔴 | 🔴 |
+| IT can delegate signature management, e.g. to marketing | 🟢 | 🟢 | 🟢 | 🟢 |
+| Apply signatures to all emails | 🟡 <sub>Outlook clients only</sub> | 🟢 <sub>With email re-routing to a 3rd party datacenter</sub> | 🟢 <sub>With email re-routing to a 3rd party datacenter</sub> | 🟢 <sub>With email re-routing to a 3rd party datacenter</sub> |
+| Additional data sources besides Active Directory and Entra ID | 🟢 | 🟡 | 🔴 | 🔴 |
+| Support for Microsoft national clouds | 🟢 <sub>Global/Public, US Government L4 (GCC, GCC High), US Government L5 (DOD), China operated by 21Vianet</sub> | 🔴 | 🔴 | 🔴 |
+| Support for Microsoft roaming signatures (multiple signatures in Outlook Web and New Outlook) | 🟢 | 🔴 | 🔴 | 🔴 |
+| Number of templates | 🟢 <sub>Unlimited</sub> | 🔴 <sub>1, more charged extra</sub> | 🟢 <sub>Unlimited</sub> | 🟢 <sub>Unlimited</sub> |
+| Targeting and exclusion | 🟢 | 🔴 <sub>Charged extra</sub> | 🟢 | 🟢 |
+| Scheduling | 🟢 | 🔴 <sub>Charged extra</sub> | 🟢 | 🟢 |
+| Banners | 🟢 <sub>Unlimited</sub> | 🔴 <sub>1, more charged extra</sub> | 🟢 <sub>Unlimited</sub> | 🟢 <sub>Unlimited</sub> |
+| QR codes and vCards | 🟢 | 🔴 <sub>Charged extra</sub> | 🔴 <sub>Charged extra</sub> | 🟢 |
+| Signature visible while writing | 🟢 | 🟡 | 🟡  | 🟡 |
+| Signature visible in Sent Items | 🟢 | 🟡 <sub>Cloud mailboxes only</sub> | 🟡 <sub>Cloud mailboxes only</sub> | 🟡 <sub>Cloud mailboxes only</sub> |
+| Out-of-office reply messages | 🟢 | 🔴 <sub>Charged extra</sub> | 🟡 <sub>Same for internal and external senders</sub> | 🔴 <sub>Charged extra</sub> |
+| User-controlled email signatures | 🟢 | 🟡 | 🟡 | 🟡 |
+| Signatures for encrypted messages | 🟢 | 🟡 | 🟡 | 🟡 |
+| Signatures for delegates, shared, additional and automapped mailboxes | 🟢 | 🟡 <sub>No mixing of sender and delegate replacement variables</sub> | 🟡 <sub>No mixing of sender and delegate replacement variables</sub> | 🟡 <sub>No mixing of sender and delegate replacement variables</sub> |
+| Outlook add-in | 🟡 <sub>No on-prem mailboxes on mobile devices</sub> | 🟡 <sub>Not for appointments</sub> | 🟡 <sub>Not for appointments</sub> | 🟢 |
+| Support pricing model | 🟢 <sub>Charged per support hour</sub> | 🔴 <sub>Charged if used or not</sub> | 🔴 <sub>Charged if used or not</sub> | 🔴 <sub>Charged if used or not</sub> |
+| Software escrow | 🟢 <sub>To the free and open-source Set&#8209;OutlookSignatures project</sub> | 🔴 | 🔴 | 🔴 |
+| License cost, 100 mailboxes, 1 year    | 🟢 <sub>appr.   0.2k €</sub> | 🔴 <sub>appr.   1.6k €</sub> | 🟡 <sub>appr.   1.3k €</sub> | 🔴 <sub>appr.   1.6k €</sub> |
+| License cost, 250 mailboxes, 1 year    | 🟢 <sub>appr.   0.5k €</sub> | 🔴 <sub>appr.   4.0k €</sub> | 🟡 <sub>appr.   2.7k €</sub> | 🔴 <sub>appr.   3.6k €</sub> |
+| License cost, 500 mailboxes, 1 year    | 🟢 <sub>appr.   1.0k €</sub> | 🔴 <sub>appr.   8.0k €</sub> | 🟡 <sub>appr.   4.4k €</sub> | 🟡 <sub>appr.   6.2k €</sub> |
+| License cost, 1,000 mailboxes, 1 year  | 🟢 <sub>appr.   2.1k €</sub> | 🔴 <sub>appr.  15.7k €</sub> | 🟡 <sub>appr.   8.7k €</sub> | 🟡 <sub>appr.  10.5k €</sub> |
+| License cost, 10,000 mailboxes, 1 year | 🟢 <sub>appr.  21.0k €</sub> | 🔴 <sub>appr. 110.0k €</sub> | 🟡 <sub>appr.  65.0k €</sub> | 🟡 <sub>appr.  41.0k €</sub> |
 
 # Demo video<!-- omit in toc -->
 <a href="https://www.youtube-nocookie.com/embed/K9TrCjTdRUI" target="_blank"><img src="https://img.youtube.com/vi/K9TrCjTdRUI/hqdefault.jpg" height="300" title="Set-OutlookSignatures demo video" alt="Set-OutlookSignatures demo video"></a>
@@ -117,7 +122,7 @@ Top level chapters only.
 - [11. Outlook Web](#11-outlook-web)
 - [12. Hybrid and cloud-only support](#12-hybrid-and-cloud-only-support)
 - [13. Simulation mode](#13-simulation-mode)
-- [14. FAQ](#14-faq)
+- [14. FAQs](#14-faqs)
   
 # 1. Requirements  
 You need Exchange Online or Exchange on-prem.
@@ -147,7 +152,7 @@ There are locked down environments, where all files matching the patterns `*.ps*
 **Thanks to our partnership with [ExplicIT Consulting](https://explicitconsulting.at), Set-OutlookSignatures and its components are digitally signed with an Extended Validation (EV) Code Signing Certificate (which is the highest code signing standard available).  
 This is not only available for Benefactor Circle members, but also the Free and Open Source core version is code signed.**
 
-On Windows, do not forget to unblock at least 'Set-OutlookSignatures.ps1' after extracting the downloaded ZIP file. You can use the PowerShell commandlet 'Unblock-File' for this.
+On Windows and macOS, do not forget to unblock at least 'Set-OutlookSignatures.ps1' after extracting the downloaded ZIP file. You can use the PowerShell cmdlet 'Unblock-File' for this.
 
 The paths to the template and configuration files (SignatureTemplatePath, OOFTemplatePath, GraphConfigFile, etc.) must be accessible by the currently logged-in user. The files must be at least readable for the currently logged-in user.
 
@@ -201,7 +206,7 @@ To start with the practical implementation:
 1. For a first test run, it is recommended to log on with a test user on a Windows system with Word and Outlook installed, and Outlook being configured with at least the test user's mailbox. This way, you get results fast and can experience the biggest set of features.
    - You can also use Linux and macOS. On these platforms, only Outlook Web and New Outlook are supported due to technical reasons. Reading from and writing to Outlook Web and New Outlook requires the Benefactor Circle add-on (see <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details). Consider using simulation mode for first tests on Linux and macOS.
 2. Download Set-OutlookSignatures and extract the archive to a local folder
-   - On Windows, unblock the file 'Set-OutlookSignatures.ps1'. You can use the PowerShell cmdlet 'Unblock-File' for this, or right-click the file in File Explorer, select Properties and check 'Unblock'.
+   - On Windows and macOS, unblock the file 'Set-OutlookSignatures.ps1'. You can use the PowerShell cmdlet 'Unblock-File' for this, or right-click the file in File Explorer, select Properties and check 'Unblock'.
 3. If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell 'Set-OutlokSignatures.ps1'.
    - It is usually not necessary to sign the variable replacement configuration files, e. g. '.\config\default replacement variables.ps1'.<br>There are locked down environments, where all files matching the patterns `*.ps*1` and `*.dll` need to be digitially signed with a trusted certificate. 
 4. Now it is time to run Set-OutlookSignatures for the first time
@@ -327,7 +332,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 ## 3.2. SignatureIniPath<!-- omit in toc -->
 Template tags are placed in an ini file.
 
-The file must be UTF8 encoded.
+The file must be UTF-8 encoded (without BOM).
 
 See '.\templates\Signatures DOCX\_Signatures.ini' for a sample file with further explanations.
 
@@ -349,7 +354,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 ## 3.3. ReplacementVariableConfigFile<!-- omit in toc -->
 The parameter ReplacementVariableConfigFile tells the software where the file defining replacement variables is located.
 
-The file must be UTF8 encoded.
+The file must be UTF-8 encoded (without BOM).
 
 Local and remote paths are supported. Local paths can be absolute (`C:\config\default replacement variables.ps1`) or relative to the software path (`.\config\default replacement variables.ps1`).
 
@@ -381,7 +386,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 ## 3.5. GraphConfigFile<!-- omit in toc -->
 The parameter GraphConfigFile tells the software where the file defining Graph connection and configuration options is located.
 
-The file must be UTF8 encoded.
+The file must be UTF-8 encoded (without BOM).
 
 Local and remote paths are supported. Local paths can be absolute (`C:\config\default graph config.ps1`) or relative to the software path (`.\config\default graph config.ps1`).
 
@@ -481,7 +486,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOutlookWebSignature true"
 
 ## 3.11. SetCurrentUserOOFMessage<!-- omit in toc -->
-Shall the software set the out of office (OOF) message of the currently logged-in user?
+Shall the software set the out-of-office (OOF) message of the currently logged-in user?
 
 If the parameter is set to `$true` and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the software can be used in environments where only Outlook Web is used. 
 
@@ -497,11 +502,11 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOOFMessage true"
 
 ## 3.12. OOFTemplatePath<!-- omit in toc -->
-Path to centrally managed out of office templates.
+Path to centrally managed out-of-office templates.
 
 Local and remote paths are supported.
 
-Local paths can be absolute (`C:\OOF templates`) or relative to the software path (`.\templates\ Out of Office `).
+Local paths can be absolute (`C:\OOF templates`) or relative to the software path (`.\templates\ Out-of-office `).
 
 SharePoint document libraries are supported (https only): `https://server.domain/SignatureSite/OOFTemplates` or `\\server.domain@SSL\SignatureSite\OOFTemplates`
 
@@ -513,17 +518,17 @@ For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Fi
 
 Default value: '.\templates\Signatures DOCX\_Signatures.ini' on Windows, '.\templates\Signatures DOCX\_Signatures.ini' on Linux and macOS
 
-Default value: `.\templates\Out of Office DOCX` on Windows, `.\templates\Out of Office DOCX` on Linux and macOS
+Default value: `.\templates\Out-of-office DOCX` on Windows, `.\templates\Out-of-office DOCX` on Linux and macOS
 
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out of Office DOCX'  
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out of Office DOCX'"
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out-of-office DOCX'  
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out-of-office DOCX'"
 
 ## 3.13. OOFIniPath<!-- omit in toc -->
 Template tags are placed in an ini file.
 
-The file must be UTF8 encoded.
+The file must be UTF-8 encoded (without BOM).
 
-See '.\templates\Out of Office DOCX\_OOF.ini' for a sample file with further explanations.
+See '.\templates\Out-of-office DOCX\_OOF.ini' for a sample file with further explanations.
 
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\templates\Signatures')
 
@@ -535,10 +540,10 @@ On Linux and macOS, only already existing mount points and SharePoint Online pat
 
 For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
 
-Default value: `.\templates\Out of Office DOCX\_OOF.ini` on Windows, Default value: `.\templates\Out of Office HTML\_OOF.ini` on Linux and macOS
+Default value: `.\templates\Out-of-office DOCX\_OOF.ini` on Windows, Default value: `.\templates\Out-of-office HTML\_OOF.ini` on Linux and macOS
 
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out of Office DOCX\_OOF.ini'  
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out of Office DOCX\_OOF.ini'"
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out-of-office DOCX\_OOF.ini'  
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out-of-office DOCX\_OOF.ini'"
 
 ## 3.14. AdditionalSignaturePath<!-- omit in toc -->
 An additional path that the signatures shall be copied to.  
@@ -574,7 +579,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 ## 3.15. UseHtmTemplates<!-- omit in toc -->
 With this parameter, the software searches for templates with the extension .htm instead of .docx.
 
-Templates in .htm format must be UTF8 encoded and the charset must be set to UTF8 (`<META content="text/html; charset=utf-8">`).
+Templates in .htm format must be UTF-8 encoded (without BOM) and the charset must be set to UTF-8 (`<META content="text/html; charset=utf-8">`).
 
 Each format has advantages and disadvantages, please see `Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.` in this document for a quick overview.
 
@@ -1075,25 +1080,40 @@ The Integrated Apps feature is the recommended way to deploy Outlook add-ins. It
 
 **Outlook Web on-prem**
 - Launch events are not supported, so only the taskpane works.
-- Images are replaced with their alternate description. This will work as soon as Microsoft fixes a bug in their office.js framework.
+- Images are replaced with their alternate description. This will work as soon as Microsoft fixes a bug in their office.js framework. If you are interested in a workaround, please let us know!
 
 **Classic Outlook on Windows**
-- Things work fine for cloud mailboxes, but the same APIs seem to be much more unstable for on-prem mailboxes, especially regardings launch events (adding signature automatically). When in doubt, use the taskpane. 
+- Things work fine for mailboxes in Exchange Online, but the same APIs seem to be unstable for on-prem mailboxes, especially regarding launch events (adding signature automatically). When in doubt, use the taskpane. 
 
 # 5. Group membership  
-When no Active Directory connection is available or the `GraphOnly` parameter is set to `true`, Microsoft Graph is queried for transitive group membership. This query includes security and distribution groups. In Microsoft Graph, membership in dynamic groups is considered, too.
+## 5.1. Group membership in Entra ID<!-- omit in toc -->
+When no Active Directory connection is available or the `GraphOnly` parameter is set to `true`, Entra ID is queried for transitive group membership via the Graph API. This query includes security and distribution groups.
 
-When an Active Directory connection is available and the `GraphOnly` parameter ist not set to `true`, the software considers all static security and distribution groups of group scopes global and universal the currently processed mailbox belongs to.
+Transitive means that not only direct group membership is considered, but also the membership resulting of groups being members of other groups, a.k.a. nested or indirect membership.
+
+In Microsoft Graph, membership in dynamic groups is automatically considered.
+
+## 5.1. Group membership in Active Directory<!-- omit in toc -->
+When an Active Directory connection is available and the `GraphOnly` parameter ist not set to `true`, Active Directory is queried via LDAP.
+
+Per default, all static security and distribution groups of group scopes global and universal are considered.
 
 Group membership is evaluated against the whole Active Directory forest of the mailbox, and against all trusted domains (and their subdomains) the user has access to.
 
+Group membership is evaluated transitively. Transitive means that not only direct group membership is considered, but also the membership resulting of groups being members of other groups, a.k.a. nested or indirect membership.
+
+When Active Directory is used, SIDHistory is always included when evaluating group membership.
+
 In Exchange resource forest scenarios with linked mailboxes, the group membership of the linked account (as populated in msExchMasterAccountSID) is not considered, only the group membership of the actual mailbox.
 
-Group membership from Active Directory on-prem is retrieved by combining two queries:
-- Security and distribution groups, are queried via the tokenGroupsGlobalAndUniversal attribute. Querying this attribute is very fast, resource saving on client and server, and also considers sIDHistory. This query only includes groups with the global or universal scope type.
-- Group membership across trusts is always considered, as soon as the trusted domain/forest is included in TrustsToCheckForGroups. Cross-trust group membership is retrieved with an optimized LDAP query, considering the sID and sIDHistory of the group memberships retrieved in the steps before. This query only includes groups with the domain local scope type, as this is the only group type that allows for group membership across trusts.
-- Only static groups are considered. Please see the FAQ section for detailed information why dynamic groups are not included in group membership queries on-prem.
-- Per default, the mailbox's own forest is not checked for membership in domain local groups, no matter if of type security or distribution. This is because querying for domain local groups takes time, as every domain local group domain in the forest has to be queried for membership. Also, domain local groups are usually not used when granting permissions in Exchange. You can enable searching for domain local groups in the mailbox's forest by setting the parameter `IncludeMailboxForestDomainLocalGroups` to `$true`.
+Group membership from Active Directory on-prem is retrieved by combining queries:
+- Security groups are determined via the tokenGroupsGlobalAndUniversal attribute. Querying this attribute is nearly instant, resource saving on client and server, and also considers sIDHistory. This query includes security groups with the global or universal scope type in the whole forest.
+- Distribution groups are queried via special LDAP_MATCHING_RULE_IN_CHAIN query that allows for very fast searching of group membership in the whole forest.
+- Group membership across trusts is considered when the trusted domain/forest is included in TrustsToCheckForGroups, which is the default for all detected trusts. Cross-trust group membership is retrieved with an optimized LDAP query, considering the sID and sIDHistory of the group memberships retrieved in the steps before. This query only includes groups with the domain local scope type, as this is the only group type that can be used across trusts.
+
+Only static groups are considered. Please see the FAQ section for detailed information why dynamic groups are not included in group membership queries on-prem.
+
+Per default, the mailbox's own forest is not checked for membership in domain local groups, no matter if of type security or distribution. This is because querying for membership in domain local groups can not be done fast, as there is no cache and every domain local group domain in the forest has to be queried for membership. Also, domain local groups are usually not used when granting permissions in Exchange. You can enable searching for domain local groups in the mailbox's forest by setting the parameter `IncludeMailboxForestDomainLocalGroups` to `$true`.
 
 # 6. Run Set-OutlookSignatures while Outlook is running  
 Outlook and Set-OutlookSignatures can run simultaneously.
@@ -1191,39 +1211,39 @@ If you want to give template creators control over the ini file, place it in the
 
 Tags are case insensitive.
 ## 7.1. Allowed tags<!-- omit in toc -->
-- `<yyyyMMddHHmm-yyyyMMddHHmm>`, `-:<yyyyMMddHHmm-yyyyMMddHHmm>`
+- Time range: `<yyyyMMddHHmm-yyyyMMddHHmm>`, `-:<yyyyMMddHHmm-yyyyMMddHHmm>`
   - Make this template valid only during the specific time range (`yyyy` = year, `MM` = month, `dd` = day, `HH` = hour (00-24), `mm` = minute).
   - The `-:` prefix makes this template invalid during the specified time range.
   - Examples: `202112150000-202112262359` for the 2021 Christmas season, `-:202202010000-202202282359` for a deny in February 2022
   - If the software does not run after a template has expired, the template is still available on the client and can be used.
   - Time ranges are interpreted as local time per default, which means times depend on the user or client configuration. If you do not want to use local times, but global times just add 'Z' as time zone. For example: `202112150000Z-202112262359Z`
   - This feature requires a Benefactor Circle license
-- `<NetBiosDomain> <SamAccountName of group>`, `<NetBiosDomain> <Display name of group>`, `-:<NetBiosDomain> <SamAccountName of group>`, `-:<NetBiosDomain> <Display name of group>`
+- Assign template to group: `<DNS or NetBIOS name of AD domain> <SamAccountName of group>`, `<DNS or NetBIOS name of AD domain> <Display name of group>`, `-:<DNS or NetBIOS name of AD domain> <SamAccountName of group>`, `-:<DNS or NetBIOS name of AD domain> <Display name of group>`
   - Make this template specific for an Outlook mailbox being a direct or indirect member of this group or distribution list
   - The `-:` prefix makes this template invalid for the specified group.
   - Examples: `EXAMPLE Domain Users`, `-:Example GroupA`  
-  - Groups must be available in Active Directory and/or Entra ID. Groups like `Everyone` and `Authenticated Users` only exist locally, not in Active Directory
+  - Groups must be available in Active Directory and/or Entra ID. Groups like `Everyone` and `Authenticated Users` only exist locally, not in Active Directory or Entra ID.
   - This tag supports alternative formats, which are of special interest if you are in a cloud only or hybrid environmonent:
-    - `<NetBiosDomain> <SamAccountName of group>` and `<NetBiosDomain> <Display name of group>` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName. Use these formats when your environment is hybrid or on premises only.
-    - `EntraID <email-address-of-group@example.com>`, `EntraID <MailNickname of group>`, `EntraID <DisplayName of group>`, `AzureAD <email-address-of-group@example.com>`, `AzureAD <MailNickname of group>`, `AzureAD <DisplayName of group>` do not work with a local Active Directory, only with Microsoft Graph. They are queried in the order given. 'EntraID' and 'AzureAD' are the literal, case-insensitive strings 'EntraID' and 'AzureAD', not a variable. Use these formats when you are in a cloud only environment.
-  - '`<NetBiosDomain>`' and '`<EXAMPLE>`' are just examples. You need to replace them with the actual NetBios domain name of the Active Director domain containing the group.
+    - `<DNS or NetBIOS name of AD domain> <SamAccountName of group>` and `<DNS or NetBIOS name of AD domain> <Display name of group>` can be queried from Microsoft Graph if the groups are synced between on-prem and the cloud. SamAccountName is queried before DisplayName. Use these formats when your environment is hybrid or on premises.
+    - `EntraID <Object ID of group>`, `EntraID <securityIdenfifier of group>`, `EntraID <email-address-of-group@example.com>`, `EntraID <mailNickname of group>`, `EntraID <DisplayName of group>` do not work with a local Active Directory, only with Microsoft Graph. They are queried in the order given. You can use 'AzureAD' instead of 'EntraID'. 'EntraID' and 'AzureAD' are the literal, case-insensitive strings 'EntraID' and 'AzureAD', not a variable. Use these formats when you are in a hybrid or cloud only environment.
+  - '`<DNS or NetBIOS name of AD domain>`' and '`<EXAMPLE>`' are just examples. You need to replace them with the actual NetBios domain name of the Active Directory domain containing the group.
   - 'EntraID' and 'AzureAD' are not examples. If you want to assign a template to a group stored in Entra ID, you have to use 'EntraID' or 'AzureAD' as domain name.
   - When multiple groups are defined, membership in a single group is sufficient to be assigned the template - it is not required to be a member of all the defined groups.  
   - Which group naming format should I choose?
-    - When using the '`<NetBiosDomain> <…>`' format, use the SamAccountName whenever possible. The combination of domain name and SamAccountName is unique, while a display name may exist multiple times in a domain.
-    - When using the '`EntraID <…>`' format, use the email address whenever possible. Microsoft has multiple checks in place to make sure it is unique, wile MailNickname and DisplayName can exist multiple times in a tenant.
+    - When using the '`<DNS or NetBIOS name of AD domain> <…>`' format, use the SamAccountName whenever possible. The combination of domain name and SamAccountName is unique, while a display name may exist multiple times in a domain.
+    - When using the '`EntraID <…>`' format, prefer Object ID and securityIdentifier whenever possible. Object ID and securityIdentifier are always unique, email address and mailNickname can wrongly exist on multiple objects, and the uniqueness of displayName is in your hands.
   - When should I refer on-prem groups and when Entra ID groups?
-    - When using the '`-GraphOnly true`' parameter, prefer Entra ID groups ('`EntraID <…>`'). You may also use on-prem groups ('`<NetBiosDomain> <…>`') as long as they are synchronized to Entra ID.
-    - In hybrid environments without using the '`-GraphOnly true`' parameter, prefer on-prem groups ('`<NetBiosDomain> <…>`') synchronized to Entra ID. Pure entra ID groups ('`EntraID <…>`') only make sense when all mailboxes covered by Set-OutlookSignatures are hosted in Exchange Online.
-    - Pure on-prem environments: You can only use on-prem groups ('`<NetBiosDomain> <…>`'). When moving to a hybrid environment, you do not need to adapt the configuration as long as you synchronize your on-prem groups to Entra ID.
-- `CURRENTUSER:<NetBiosDomain> <GroupSamAccountName>`, `CURRENTUSER:<NetBiosDomain> <Display name of Group>`, `-CURRENTUSER:<NetBiosDomain> <GroupSamAccountName>`, `-CURRENTUSER:<NetBiosDomain> <Display name of Group>`, `CURRENTUSER:AzureAD <email-address-of-group@example.com>`, `CURRENTUSER:AzureAD <GroupMailNickname>`, `CURRENTUSER:AzureAD <GroupDisplayName>`, `-CURRENTUSER:AzureAD <email-address-of-group@example.com>`, `-CURRENTUSER:AzureAD <GroupMailNickname>`, `-CURRENTUSER:AzureAD <GroupDisplayName>`, `CURRENTUSER:EntraID <email-address-of-group@example.com>`, `CURRENTUSER:EntraID <GroupMailNickname>`, `CURRENTUSER:EntraID <GroupDisplayName>`, `-CURRENTUSER:EntraID <email-address-of-group@example.com>`, `-CURRENTUSER:EntraID <GroupMailNickname>`, `-CURRENTUSER:EntraID <GroupDisplayName>`
+    - When using the '`-GraphOnly true`' parameter, prefer Entra ID groups ('`EntraID <…>`'). You may also use on-prem groups ('`<DNS or NetBIOS name of AD domain> <…>`') as long as they are synchronized to Entra ID.
+    - In hybrid environments without using the '`-GraphOnly true`' parameter, prefer on-prem groups ('`<DNS or NetBIOS name of AD domain> <…>`') synchronized to Entra ID. Pure entra ID groups ('`EntraID <…>`') only make sense when all mailboxes covered by Set-OutlookSignatures are hosted in Exchange Online.
+    - Pure on-prem environments: You can only use on-prem groups ('`<DNS or NetBIOS name of AD domain> <…>`'). When moving to a hybrid environment, you do not need to adapt the configuration as long as you synchronize your on-prem groups to Entra ID.
+- Group membership of current user: `CURRENTUSER:<syntax of "Assign template to group">`
   - Make this template specific for the logged on user if his _personal_ mailbox (which does not need to be in Outlook) is a direct or indirect member of this group or distribution list
   - Example: Assign template to every mailbox, but not if the mailbox of the current user is member of the group EXAMPLE\Group
     ```
     [template.docx]
     -CURRENTUSER:EXAMPLE Group
     ```
-- `<SmtpAddress>`, `-:<SmtpAddress>`
+- Email address: `<SmtpAddress>`, `-:<SmtpAddress>`
   - Make this template specific for the assigned email address (all SMTP addresses of a mailbox are considered, not only the primary one)
   - The `-:` prefix makes this template invalid for the specified email address.
   - Examples: `office@example.com`, `-:test@example.com`
@@ -1255,7 +1275,7 @@ Tags are case insensitive.
     -CURRENTUSER:userX@example.com
     # Use a custom signature name instead of the template file name 
     OutlookSignatureName = Company EN external formal UserX@
-- `<ReplacementVariable>`, `-:<ReplacementVariable>`
+- Replacement variable: `<ReplacementVariable>`, `-:<ReplacementVariable>`
   - Make this template specific for the assigned replacement variable
   - The `-:` prefix makes this template invalid for the specified replacement variable.
   - Replacement variable are checked for true or false values. If a replacement variable is not a boolean (true or false) value per se, it is converted to the boolean data type first.
@@ -1287,16 +1307,16 @@ Tags are case insensitive.
         -:example@example.com
         -:$CurrentUser-IsMemberOf-MarketingAndSales$
         ```
-- `writeProtect` (signature template files only)  
-    - Write protects the signature files. Works only in Outlook on Windows. Modifying the signature in Outlook's signature editor leads to an error on saving, but the signature can still be changed after it has been added to an email.  
-- `defaultNew` (signature template files only)  
+- Write protect: `writeProtect`
+    - Write protects the signature files. Works only in Classic Outlook on Windows. Modifying the signature in Outlook's signature editor leads to an error on saving, but the signature can still be changed after it has been added to an email.  
+- Set signature as default for new emails: `defaultNew` (signature template files only)  
     - Set signature as default signature for new mails  
-- `defaultReplyFwd` (signature template files only)  
+- Set signature as default for replies and forwarded emails: `defaultReplyFwd` (signature template files only)  
     - Set signature as default signature for replies and forwarded mails  
-- `internal` (OOF template files only)  
+- Set OOF reply as default for internal recipients: `internal` (OOF template files only)  
     - Set template as default OOF message for internal recipients  
     - If neither `internal` nor `external` is defined, the template is set as default OOF message for internal and external recipients  
-- `external` (OOF template files only)  
+- Set OOF reply as default for external recipients: `external` (OOF template files only)  
     - Set template as default OOF message for external recipients  
     - If neither `internal` nor `external` is defined, the template is set as default OOF message for internal and external recipients  
     ```
@@ -1308,7 +1328,7 @@ Tags are case insensitive.
   Comment lines start with '#' or ';'  
 	Whitespace at the beginning and the end of a line is ignored  
   Empty lines are ignored  
-2. Use the ini files in `.\templates\Signatures DOCX with ini` and `.\templates\Out of Office DOCX with ini` as templates and starting point
+2. Use the ini files in `.\templates\Signatures DOCX with ini` and `.\templates\Out-of-office DOCX with ini` as templates and starting point
 3. Put file names with extensions in square brackets  
   Example: `[Company external English formal.docx]`  
   Putting file names in single or double quotes is possible, but not necessary.  
@@ -1404,7 +1424,7 @@ Each one of these templates groups can have one or more time range tags assigned
 - Within these template groups, templates are sorted according to the sort order and sort culture defines in the configuration file.
 - Every centrally stored signature template is only applied to the mailbox with the highest priority allowed to use it. This ensures that no mailbox with lower priority can overwrite a signature intended for a higher priority mailbox.
 
-OOF templates are only applied if the out of office assistant is currently disabled. If it is currently active or scheduled to be automatically activated in the future, OOF templates are not applied.  
+OOF templates are only applied if the out-of-office assistant is currently disabled. If it is currently active or scheduled to be automatically activated in the future, OOF templates are not applied.  
 # 10. Replacement variables  
 Replacement variables are case insensitive placeholders in templates which are replaced with actual user or mailbox values at runtime.
 
@@ -1419,11 +1439,11 @@ Variables can also be retrieved from other sources than Active Directory by addi
 
 Per default, `.\config\default replacement variables.ps1` contains the following replacement variables:  
 - Currently logged-in user  
-    - `$CurrentUserGivenname$`: Given name  
+    - `$CurrentUserGivenName$`: Given name  
     - `$CurrentUserSurname$`: Surname  
     - `$CurrentUserDepartment$`: Department  
     - `$CurrentUserTitle$`: (Job) Title  
-    - `$CurrentUserStreetaddress$`: Street address  
+    - `$CurrentUserStreetAddress$`: Street address  
     - `$CurrentUserPostalcode$`: Postal code  
     - `$CurrentUserLocation$`: Location  
     - `$CurrentUserState$`: State  
@@ -1433,12 +1453,12 @@ Per default, `.\config\default replacement variables.ps1` contains the following
     - `$CurrentUserMobile$`: Mobile phone  
     - `$CurrentUserMail$`: email address  
     - `$CurrentUserPhoto$`: Photo from Active Directory, see "[12.1 Photos from Active Directory](#121-photos-from-active-directory)" for details  
-    - `$CurrentUserPhotodeleteempty$`: Photo from Active Directory, see "[12.1 Photos from Active Directory](#121-photos-from-active-directory)" for details  
-    - `$CurrentUserExtattr1$` to `$CurrentUserExtattr15$`: Exchange extension attributes 1 to 15  
+    - `$CurrentUserPhotoDeleteEmpty$`: Photo from Active Directory, see "[12.1 Photos from Active Directory](#121-photos-from-active-directory)" for details  
+    - `$CurrentUserExtAttr1$` to `$CurrentUserExtAttr15$`: Exchange extension attributes 1 to 15  
     - `$CurrentUserOffice$`: Office room number (physicalDeliveryOfficeName)  
     - `$CurrentUserCompany$`: Company  
-    - `$CurrentUserMailnickname$`: Alias (mailNickname)  
-    - `$CurrentUserDisplayname$`: Display Name  
+    - `$CurrentUserMailNickname$`: Alias (mailNickname)  
+    - `$CurrentUserDisplayName$`: Display Name  
 - Manager of currently logged-in user  
     - Same variables as logged-in user, `$CurrentUserManager[…]$` instead of `$CurrentUser[…]$`  
 - Current mailbox  
@@ -1457,23 +1477,23 @@ To be able to apply Word image features such as sizing, cropping, frames, 3D eff
 1. Create a sample image file which will later be used as placeholder.  
 2. Optionally: If the sample image file name contains one of the following variable names, the software recognizes it and you do not need to add the value to the alternative text of the image in step 4:  
     - `$CurrentUserPhoto$`  
-    - `$CurrentUserPhotodeleteempty$`  
+    - `$CurrentUserPhotoDeleteEmpty$`  
     - `$CurrentUserManagerPhoto$`  
-    - `$CurrentUserManagerPhotodeleteempty$`  
+    - `$CurrentUserManagerPhotoDeleteEmpty$`  
     - `$CurrentMailboxPhoto$`  
-    - `$CurrentMailboxPhotodeleteempty$`  
+    - `$CurrentMailboxPhotoDeleteEmpty$`  
     - `$CurrentMailboxManagerPhoto$`  
-    - `$CurrentMailboxManagerPhotodeleteempty$`  
+    - `$CurrentMailboxManagerPhotoDeleteEmpty$`  
 3. Insert the image into the signature template. Make sure to use `Insert | Pictures | This device` (Word 2019, other versions have the same feature in different menus) and to select the option `Insert and Link` - if you forget this step, a specific Word property is not set and the software will not be able to replace the image.  
 4. If you did not follow optional step 2, please add one of the following variable names to the alternative text of the image in Word (these variables are removed from the alternative text in the final signature):  
     - `$CurrentUserPhoto$`  
-    - `$CurrentUserPhotodeleteempty$`  
+    - `$CurrentUserPhotoDeleteEmpty$`  
     - `$CurrentUserManagerPhoto$`  
-    - `$CurrentUserManagerPhotodeleteempty$`  
+    - `$CurrentUserManagerPhotoDeleteEmpty$`  
     - `$CurrentMailboxPhoto$`  
-    - `$CurrentMailboxPhotodeleteempty$`  
+    - `$CurrentMailboxPhotoDeleteEmpty$`  
     - `$CurrentMailboxManagerPhoto$`  
-    - `$CurrentMailboxManagerPhotodeleteempty$`  
+    - `$CurrentMailboxManagerPhotoDeleteEmpty$`  
 5. Format the image as wanted.
 
 For the software to recognize images to replace, you need to follow at least one of the steps 2 and 4. If you follow both, the software first checks for step 2 first. If you provide multiple image replacement variables, `$CurrentUser[…]$` has the highest priority, followed by `$CurrentUserManager[…]$`, `$CurrentMailbox[…]$` and `$CurrentMailboxManager[…]$`. It is recommended to use only one image replacement variable per image.  
@@ -1483,13 +1503,13 @@ The software will replace all images meeting the conditions described in the ste
 ### 9.1.2. When using HTM template files<!-- omit in toc -->
 Images are replaced when the `src` or `alt` property of the image tag contains one of the following strings:
 - `$CurrentUserPhoto$`  
-- `$CurrentUserPhotodeleteempty$`  
+- `$CurrentUserPhotoDeleteEmpty$`  
 - `$CurrentUserManagerPhoto$`  
-- `$CurrentUserManagerPhotodeleteempty$`  
+- `$CurrentUserManagerPhotoDeleteEmpty$`  
 - `$CurrentMailboxPhoto$`  
-- `$CurrentMailboxPhotodeleteempty$`  
+- `$CurrentMailboxPhotoDeleteEmpty$`  
 - `$CurrentMailboxManagerPhoto$`  
-- `$CurrentMailboxManagerPhotodeleteempty$`
+- `$CurrentMailboxManagerPhotoDeleteEmpty$`
 
 Be aware that Outlook does not support the full HTML feature set. For example:
 - Some (older) Outlook versions ignore the `width` and `height` properties for embedded images.  
@@ -1516,14 +1536,14 @@ If the link is not working, please visit the <a href="https://web.archive.org/we
 ## 9.2. Delete images when attribute is empty, variable content based on group membership<!-- omit in toc -->
 You can avoid creating multiple templates which only differ by the images contained by only creating one template containing all images and marking this images to be deleted when a certain replacement variable is empty.
 
-Just add the text `$<name of the replacement variable>DELETEEMPTY$` (for example: `$CurrentMailboxExtattr10deleteempty$` ) to the description or alt text of the image. Taking the example, the image is deleted when extension attribute 10 of the current mailbox is empty.
+Just add the text `$<name of the replacement variable>DELETEEMPTY$` (for example: `$CurrentMailboxExtAttr10DeleteEmpty$` ) to the description or alt text of the image. Taking the example, the image is deleted when extension attribute 10 of the current mailbox is empty.
 
 This can be combined with the `GroupsSIDs` attribute of the current mailbox or current user to only keep images when the mailbox is member of a certain group.
 
 Examples:
 - A signature should only show a social network icon with an associated link when there is data in the extension attribute 10 of the mailbox:
-  - Insert the icon of the social network in the template, set the hyperlink target to '$CurrentMailboxExtattr10$' and add '$CurrentMailboxExtattr10Deleteempty$' to the description of the picture.
-    - When using embedded and linked pictures, you can also set the file name to '$CurrentMailboxExtattr10Deleteempty$'
+  - Insert the icon of the social network in the template, set the hyperlink target to '$CurrentMailboxExtAttr10$' and add '$CurrentMailboxExtAttr10Deleteempty$' to the description of the picture.
+    - When using embedded and linked pictures, you can also set the file name to '$CurrentMailboxExtAttr10Deleteempty$'
 - A signature should only contain a certain image when the current mailbox is a member of the Marketing group:
   - Create a new replacement variable. We use '$CurrentMailbox-ismemberof-marketing$' in the following example.
     - Attention on-prem users: If Domain Local Active Directory groups are involved, you need to set the `IncludeMailboxForestDomainLocalGroups` parameter to `true` when running Set-OutlookSignatures, so that the SIDs of these groups are considered too.
@@ -1547,7 +1567,7 @@ Examples:
 ## 9.3. Custom image replacement variables<!-- omit in toc -->
 You can fill custom image replacement variables yourself with a byte array: `'$CurrentUserCustomImage[1..10]$'`, `'$CurrentUserManagerCustomImage[1..10]$'`, `'$CurrentMailboxCustomImage[1..10]$'`, `'$CurrentMailboxManagerCustomImage[1..10]$'`.
 
-Usecases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/email, etc.
+Use cases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/email, etc.
 
 Per default, `'$Current[..]CustomImage1$'` is a QR code containing a vCard (in MeCard format) - see file `'.\config\default replacement variables.ps1'` for the code behind it.
 
@@ -1611,24 +1631,29 @@ The Graph configuration file allows for additional, advanced configuration:
 - `$GraphUserAttributeMapping`: Graph and Active Directory attributes are not named identically. Set-OutlookSignatures therefore uses a "virtual" account. Use this hashtable to define which Graph attribute name is assigned to which attribute of the virtual account.  
 The virtual account is accessible as `$ADPropsCurrentUser[…]` in `.\config\default replacement variables.ps1`, and therefore has a direct impact on replacement variables.
 ## 11.3. Authentication<!-- omit in toc -->
-In hybrid and cloud-only scenarios, Set-OutlookSignatures automatically tries three stages of authentication.
-1. Integrated Windows Authentication  
-  This works in hybrid scenarios. The credentials of the currently logged-in user are used to access Microsoft Graph without any further user interaction.
-2. Silent with login hint
-  If Integrated Windows Authentication fails, the User Principal Name of the currently logged-in user is determined. If an existing Graph refresh token for this UPN is found, it is used for authentication with Microsoft Graph.  
-  A default browser window with an "Authentication successful" message may open, it can be closed anytime.
-3. Prompt with login hint and timeout 
-  If the prior authentication attempts failed, the user is interactively asked for credentials. If a UPN is found, this account is pre-selected, but the user can choose another account. If authentication does not happen within five minutes, Set-OutlookSignatures assumes it failed.
+In hybrid and cloud-only scenarios, Set-OutlookSignatures automatically tries multiple ways to authenticate the user. Non-interactive methods, also known as silent methods, are preferred as they are invisible to the user.
+1. Integrated Windows Authentication without login hint
+  This works in hybrid scenarios when you configured your hybrid connection in Entra Connect accordingly, and when the user is logged-on to a domain- or Entra-ID-joined computer with his domain credentials. The credentials of the currently logged-in user are used to access Microsoft Graph without any further user interaction.
+2. Integrated Windows Authentication with login hint
+  This is the same as the option before, but with a login hint taken from the last known successful authentication. Windows requires this in some scenarios.
+3. Silent with LoginHint and AuthBroker
+  The authentication broker of the operating system is asked to silently authenticate the user that was used to run Set-OutlookSignatures the last time.
+4. Silent with LoginHint but without AuthBroker
+  Entra ID is directly asked to silently authenticate the user that was used to run Set-OutlookSignatures the last time. Technically, Entra ID is asked to validate a cached refresh token and to issue an access token.
+5. Interactive authentication with AuthBroker
+  The authentication broker of the operating system opens, asks which account to use and takes care of authentication.
+6. Interactive authentication without AuthBroker
+  Authentication via browser. A default browser window with an "Authentication successful" message may open, it can be closed anytime. You can modify the browser message shown, see '.\config\default graph config.ps1' for details.
   
-No custom components are used, only the official Microsoft 365 authentication site and the user's default browser and the official Microsoft Authentication Library for .Net (MSAL.Net).
+No custom components are used, only the official Microsoft 365 authentication site, the user's default browser and the official Microsoft Authentication Library for .Net (MSAL.Net).
 
-After successful authentication the refresh token is stored for later use by step 2, silent authentication, as described above.
-- On Windows, the file is encrypted using the system's Data Protection API (DPAPI) and saved in the file `$(Join-Path -Path $([Environment]::GetFolderPath('LocalApplicationData')) -ChildPath 'MSAL.PS\MSAL.PS.msalcache.bin3')`, which usually translates to `'C:\Users\<username>\AppData\Local\MSAL.PS\MSAL.PS.msalcache.bin3'`.
-  - In the rare case that DPAPI is not available, Set-OutlookSignatures informs you about the unencrypted storage and MSAL.Net saves the file unencrypted.
+After successful authentication the refresh token is stored for later use by the silent authentication steps described above.
+- On Windows, the file is encrypted using the system's Data Protection API (DPAPI) and saved in the file `$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\MSAL.PS\MSAL.PS.msalcache.bin3')`.
+  - In the rare case that DPAPI is not available, Set-OutlookSignatures informs you and MSAL.Net saves the file unencrypted.
 - On Linux, the refresh token is stored in the default keyring in the entry named 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net'. If the default keyring is locked, the user is asked to unlock it (the message can be customized in 'default graph config.ps1').
-  - Should the default keyring not be available, Set-OutlookSignatures informs you about the unencrypted storage and MSAL.Net saves the refresh token in the file `$(Join-Path -Path $(@($($env:HOME), $(Join-Path -Path '/home' -ChildPath '<username>')) | Where-Object { $_ } | Select-Object -First 1) -ChildPath 'MSAL.PS/MSAL.PS.msalcache.bin3')`, which usually translates to `'/home/<username>/MSAL.PS/MSAL.PS.msalcache.bin3'`.
+  - Should the default keyring not be available, Set-OutlookSignatures informs you and MSAL.Net saves the refresh token in the file `$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\MSAL.PS\MSAL.PS.msalcache.bin3')`.
 - On macOS, the refresh token is stored in the default keychain in the entry named 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net'. If the default keychain is locked, the user is asked to unlock it (the message can be customized in 'default graph config.ps1').
-  - Should the default keychain not be available, Set-OutlookSignatures informs you about the unencrypted storage and MSAL.Net saves the refresh token in the file `$(Join-Path -Path $(@($($env:HOME), $(Join-Path -Path '/Users' -ChildPath '<username>')) | Where-Object { $_ } | Select-Object -First 1) -ChildPath 'MSAL.PS/MSAL.PS.msalcache.bin3')`, which usually translates to `'/Users/<username>/MSAL.PS/MSAL.PS.msalcache.bin3'`.
+  - Should the default keychain not be available, Set-OutlookSignatures informs you and MSAL.Net saves the refresh token in the file `$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\MSAL.PS\MSAL.PS.msalcache.bin3')`.
 
 Set-OutlookSignatures always keeps you informed about where and how the token is stored, and how you can delete it to force re-authentication without using the cached refresh token:
 - Windows
@@ -1664,14 +1689,14 @@ The template files are handled just as during a real script run, but only saved 
 `SimulateTime` is optional for simulation mode. Simulating a certain time is helpful when time-based templates are used.
 
 **Attention**: Simulation mode only works when the user starting the simulation is at least from the same Active Directory forest as the user defined in SimulateUser.  Users from other forests will not work.  
-# 14. FAQ
+# 14. FAQs
 FAQs in this chapter:
 - [14.1. Where can I find the changelog?](#141-where-can-i-find-the-changelog)
 - [14.2. How can I contribute, propose a new feature or file a bug?](#142-how-can-i-contribute-propose-a-new-feature-or-file-a-bug)
 - [14.3. How is the account of a mailbox identified?](#143-how-is-the-account-of-a-mailbox-identified)
 - [14.4. How is the personal mailbox of the currently logged-in user identified?](#144-how-is-the-personal-mailbox-of-the-currently-logged-in-user-identified)
 - [14.5. Which ports are required?](#145-which-ports-are-required)
-- [14.6. Why is out of office abbreviated OOF and not OOO?](#146-why-is-out-of-office-abbreviated-oof-and-not-ooo)
+- [14.6. Why is out-of-office abbreviated OOF and not OOO?](#146-why-is-out-of-office-abbreviated-oof-and-not-ooo)
 - [14.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.](#147-should-i-use-docx-or-htm-as-file-format-for-templates-signatures-in-outlook-sometimes-look-different-than-my-templates)
 - [14.8. How can I log the software output?](#148-how-can-i-log-the-software-output)
 - [14.9. How can I get more script output for troubleshooting?](#149-how-can-i-get-more-script-output-for-troubleshooting)
@@ -1748,7 +1773,7 @@ The client needs the following ports to access a SMB file share on a Windows ser
 - 445 TCP
 
 The client needs port 443 TCP to access a SharePoint document library. When not using SharePoint Online with Graph, firewalls and proxies must not block WebDAV HTTP extensions.  
-## 14.6. Why is out of office abbreviated OOF and not OOO?<!-- omit in toc -->
+## 14.6. Why is out-of-office abbreviated OOF and not OOO?<!-- omit in toc -->
 Back in the 1980s, Microsoft had a UNIX OS named Xenix … but read yourself <a href="https://techcommunity.microsoft.com/t5/exchange-team-blog/why-is-oof-an-oof-and-not-an-ooo/ba-p/610191" target="_blank">here</a>.  
 ## 14.7. Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates.<!-- omit in toc -->
 The software uses DOCX as default template format, as this is the easiest way to delegate the creation and management of templates to departments such as Marketing or Corporate Communications:  
@@ -1763,8 +1788,8 @@ With the parameter `UseHtmTemplates`, the software searches for .htm template fi
 
 The requirements for .htm files these files are harder to fulfill as it is the case with DOCX files:  
 - The template must have the file extension .htm, .html is not supported
-- The template must be UTF8 encoded, or at least only contain UTF8 compatible characters
-- The character set must be set to UTF8 with a meta tag: '`<meta http-equiv=Content-Type content="text/html; charset=utf-8">`'
+- The template must be UTF-8 encoded (without BOM), or at least only contain UTF-8 compatible characters
+- The character set must be set to UTF-8 with a meta tag: '`<meta http-equiv=Content-Type content="text/html; charset=utf-8">`'
 - The template should be a single file, additional files and folders are not recommended (but possible, see below)
 - Images should ideally either reference a public URL or be part of the template as Base64 encoded string
 - When storing images in a subfolder:
@@ -1777,43 +1802,36 @@ Possible approaches for fulfilling these requirements are:
 - Design the template in a HTML editor that supports all features required  
 - Design the template in Outlook  
   - Paste it into Word and save it as `"Website, filtered"`. The `"filtered"` is important here, as any other web format will not work.  
-  - Run the resulting file through a script that converts the Word output to a single UTF8 encoded HTML file. Alternatively, but not recommended, you can copy the .htm file and the associated folder containing images and other HTML information into the template folder.
+  - Run the resulting file through a script that converts the Word output to a single UTF-8 encoded (without BOM) HTML file. Alternatively, but not recommended, you can copy the .htm file and the associated folder containing images and other HTML information into the template folder.
 
-You can use the software function ConvertTo-SingleFileHTML for embedding:
-```
-Get-ChildItem '.\templates\Signatures HTML' -File | ForEach-Object {
-    $_.FullName  
-    ConvertTo-SingleFileHTML $_.FullName ($_.FullName -replace '.htm$', ' embedded.htm')
-}
-```
-
-The templates delivered with this script represent all possible formats:  
-- `.\templates\Out of Office DOCX` and `.\templates\signatures DOCX` contain templates in the DOCX format  
-- `.\templates\Out of Office HTML` contains templates in the HTML format as Word exports them when using `"Website, filtered"` as format. Note the additional folders for each signature.  
-- `.\templates\Signatures HTML` contains templates in the HTML format. Note that there are no additional folders, as the Word export files have been processed with ConvertTo-SingleFileHTML function to create a single HTMl file with all local images embedded.  
+The sample templates delivered with this script represent all possible formats:  
+- `.\sample templates\Out-of-Office DOCX` and `.\sample templates\Signatures DOCX` contain templates in the DOCX format  
+- `.\templates\Out-of-Office HTML` and `.\sample templates\Signatures HTML` contain templates in HTML format.  
 ## 14.8. How can I log the software output?<!-- omit in toc -->
-The software has no built-in logging option other than writing output to the host window.
+The software has a built-in logging option. Logs are saved in the folder '`$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs')`', the files follow the naming scheme '`$("Set-OutlookSignatures_Log_yyyyMMddTHHmmssffff.txt")`', and files older than 14 days are deleted with every run.
 
-You can, for example, use PowerShell's `Start-Transcript` and `Stop-Transcript` commands to create a logging wrapper around Set-OutlookSignatures.ps1.
+To centrally define for which users or computers verbose logging should be enabled, you can use the following simple approach:
 ```
-Start-Transcript -Path 'c:\path\to\your\logfile.txt'; & '\\server\share\folder\Set-OutlookSignatures.ps1'; Stop-Transcript
+& '\\server\share\folder\Set-OutlookSignatures.ps1' -verbose:$(([Environment]::UserName -iin @('UserA', 'UserB')) -or ([Environment]::MachineName -iin @('ComputerA', 'ComputerB')))
 ```
+
+If you want your own additional logging, you can, for example, use PowerShell's `Start-Transcript` and `Stop-Transcript` commands to create a logging wrapper around Set-OutlookSignatures.ps1:
+```
+Start-Transcript -Path 'c:\path\to\your\logfile.txt'
+& '\\server\share\folder\Set-OutlookSignatures.ps1' # Optionally add: -verbose:$(([Environment]::UserName -iin @('UserA', 'UserB')) -or ([Environment]::MachineName -iin @('ComputerA', 'ComputerB')))
+Stop-Transcript
+```
+
 ## 14.9. How can I get more script output for troubleshooting?<!-- omit in toc -->
 Start the software with the '-verbose' parameter to get the maximum output for troubleshooting.
 ## 14.10. How can I start the software only when there is a connection to the Active Directory on-prem?<!-- omit in toc -->
 ```
-# Start Set-OutlookSignatures and log all activities by using a PowerShell transcript
+# Start Set-OutlookSignatures
 # Optionally: Run script only when the currently logged-in user has a connection to it's on-prem AD and can query it
 
 
-# Should Set-OutlookSignatures only be started, when there is a connection to the on-prem Active Directory?
+# Should Set-OutlookSignatures only be started when there is a connection to the on-prem Active Directory?
 $StartOnlyWithConnectionToOnPremAD = $false
-
-
-# Start transcript
-$TranscriptPath = Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures.txt'
-
-Start-Transcript -Path $TranscriptPath
 
 
 # Preparations
@@ -1821,33 +1839,25 @@ Write-Host "Start on-prem Active Directory checks @$(Get-Date -Format 'yyyy-MM-d
 
 if ($StartOnlyWithConnectionToOnPremAD -eq $true) {
     $AllChecksPassed = $false
-} else {
-    $AllChecksPassed = $true
-}
 
+    try {
+        # Get basic info about currently logged-in user from client OS
+        Add-Type -AssemblyName System.DirectoryServices.AccountManagement
 
-# Get basic info about currently logged-in user from client OS
-Add-Type -AssemblyName System.DirectoryServices.AccountManagement
+        $CurrentUser = [System.DirectoryServices.AccountManagement.UserPrincipal]::Current
+        $CurrentUserDn = $CurrentUser.DistinguishedName
+        $CurrentUserDnsDomain = $(($CurrentUserDn -split ',DC=')[1..999] -join '.')
+    } catch {
+        $CurrentUser = $null
+        $CurrentUserDn = $null
+        $CurrentUserDnsDomain = $null
+    }
 
-try {
-    $CurrentUser = [System.DirectoryServices.AccountManagement.UserPrincipal]::Current
-    $CurrentUserDn = $CurrentUser.DistinguishedName
-    $CurrentUserDnsDomain = $(($CurrentUserDn -split ',DC=')[1..999] -join '.')
-} catch {
-    $CurrentUser = $null
-    $CurrentUserDn = $null
-    $CurrentUserDnsDomain = $null
-}
-
-
-# Check local AD connectivity
-if ($StartOnlyWithConnectionToOnPremAD -eq $true) {
-    # Perform checks against local AD
-    if ($null -ne $CurrentUserDnsDomain) {
-        Write-Host "  Currently logged-in user does have a DNS domain: $($CurrentUserDnsDomain)"
-        # Ping a random domain controller in the user's AD
-        if ((Test-Connection $CurrentUserDnsDomain -Count 1 -Quiet)) {
-            Write-Host '    User on-prem AD can be reached, perform test query against AD.'
+    # Check local AD connectivity
+    if ($CurrentUser) {
+        # Perform checks against local AD
+        if ($null -ne $CurrentUserDnsDomain) {
+            Write-Host "  Currently logged-in user does have a DNS domain: $($CurrentUserDnsDomain)"
 
             # Test AD connection against a random global catalog in the user's AD by querying the logged-on user's own AD object
             $ADPropsCurrentUser = $null
@@ -1872,27 +1882,22 @@ if ($StartOnlyWithConnectionToOnPremAD -eq $true) {
             } else {
                 Write-Host '      AD query failed, do not start Set-OutlookSignatures.'
             }
-
         } else {
-            Write-Host '    User on-prem AD cannot be reached, do not go on with further tests.'
+            Write-Host '  Currently logged-in user does not have a DNS domain, must be a local user, do not go on with further tests.'
         }
     } else {
-        Write-Host '  Currently logged-in user does not have a DNS domain, must be a local user, do not gon on with further tests.'
+        Write-Host "  Not required because `$StartOnlyWithConnectionToOnPremAD is not set to True."
     }
 } else {
-    Write-Host "  Not required because `$StartOnlyWithConnectionToOnPremAD is not set to True."
+    $AllChecksPassed = $true
 }
 
 
 # Start Set-OutlookSignatures here
-if ($AllChecksPassed = $true) {
+if ($AllChecksPassed -eq $true) {
     Write-Host 'Place code to start Set-OutlookSignatures below and delete this line'
     # & '..\Set-OutlookSignatures\Set-OutlookSignatures.ps1'
 }
-
-
-# Stop transcript
-Stop-Transcript
 ```
 ## 14.11. Can multiple script instances run in parallel?<!-- omit in toc -->
 The software is designed for being run in multiple instances at the same. You can combine any of the following scenarios:  
@@ -1906,7 +1911,7 @@ Passing arguments to PowerShell.exe from the command line or task scheduler can 
 
 A working example:
 ```
-PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"
+PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out-of-office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"
 ```
 You will find lots of information about this topic on the internet. The following links provide a first starting point:  
 - <a href="https://stackoverflow.com/questions/45760457/how-can-i-run-a-powershell-script-with-white-spaces-in-the-path-from-the-command" target="_blank">https://stackoverflow.com/questions/45760457/how-can-i-run-a-powershell-script-with-white-spaces-in-the-path-from-the-command</a>
@@ -1929,7 +1934,7 @@ The only workaround is to start PowerShell from another program, which does not 
 - As Microsoft has marked Visual Basic Script (VBS) as deprecated and will remove it completely from future Windows releases, the use of Windows Script Host (WSH) is not recommended. If you want to try it anyway, here is a working example:
   - Create a .vbs (Visual Basic Script) file, paste and adapt the following code into it:
     ```
-    command = "PowerShell.exe -Command ""& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"" "
+    command = "PowerShell.exe -Command ""& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -OOFTemplatePath '\\server\share\directory\templates\Out-of-office DOCX' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1'"" "
 
     set shell = CreateObject("WScript.Shell")
 
@@ -2082,28 +2087,27 @@ Membership in dynamic groups, no matter if they are of the security or distribut
 Dynamic group membership is not considered when using an on premises Active Directory. 
 
 The reason for this is that Graph and on-prem AD handle dynamic group membership differently:
-### 14.22.1. Graph<!-- omit in toc -->
-Microsoft Graph caches information about dynamic group membership at the group as well as at the user level.  
+### 14.22.1. Entra ID<!-- omit in toc -->
+Entra ID caches information about dynamic group membership at the group as well as at the user level. It regularly runs the LDAP queries defining dynamic groups and updates existing attributes with member information.
 
-Graph regularly executes the LDAP queries defining dynamic groups and updates existing attributes with member information.  
-Dynamic groups in Graph are therefore not strictly dynamic in terms of running the defining LDAP query every time a dynamic group is used and thus providing near real-time member information - they behave more like regularly updated static groups, which makes handling for scripts and applications much easier.
+Dynamic groups in Entra ID are therefore not strictly dynamic in terms of running the defining LDAP query every time a dynamic group is used and thus providing near real-time member information - they behave more like regularly updated static groups, which makes handling for scripts and applications much easier.
 
-For the usecases of Set-OutlookSignatures, there is no difference between a static and a dynamic group in Graph:
+For the use in Set-OutlookSignatures, there is no difference between a static and a dynamic group in Entra ID:
 - Querying the `transitiveMemberOf` attribute of a user returns static as well as dynamic group membership.
 - Querying the `members` attribute of a group returns the group's members, no matter if the group is static or dynamic.
 ### 14.22.2. Active Directory on premises<!-- omit in toc -->
-Active Directory on premises does not cache any information about membership in dynamic groups at the user level, so dynamic groups do not appear in attributes such as `memberOf` and `tokenGroups`.  
-Active Directory on premises also does not cache any information about members of dynamic groups at the group level, so the group attribute `members` is always empty. 
+Active Directory on premises does not cache any information about membership in dynamic groups at the user level, so dynamic groups do not appear in attributes such as `memberOf` and `tokenGroups`.
 
-If dynamic groups would have to be considered, the only way would be to enumerate all dynamic groups, to run the LDAP query that defines each group, and to finally evaluate the resulting group membership.
+Active Directory on premises also does not cache any information about members of dynamic groups at the group level, so the group attribute `members` is always empty.
 
+If dynamic groups would have to be considered, the only way would be to enumerate all dynamic groups, to run the LDAP query that defines each group, and to finally evaluate the resulting group membership.  
 The LDAP queries defining dynamic groups are deemed expensive due to the potential load they put on Active Directory and their resulting runtime.  
-Microsoft does not recommend against dynamic groups, only not to use them heavily.  
+Microsoft does not recommend against dynamic groups on-prem, only not to use them heavily.  
 This is very likely the reason why dynamic groups cannot be granted permissions on Exchange mailboxes and other Exchange objects, and why each dynamic group can be assigned an expansion server executing the LDAP query (expansion times of 15 minutes or more are not rare in the field).
 
 Taking all these aspects into account, Set-OutlookSignatures will not consider membership in dynamic groups on premises until a reliable and efficient way of querying a user's dynamic group membership is available.
 
-A possible way around this restriction is replacing dynamic groups with regularly updated static groups (which is what Microsoft Graph does automatically in the background):
+A possible way around this restriction is replacing dynamic groups with regularly updated static groups (which is what Entra ID does automatically in the background):
 - An Identity Management System (IDM) or a script regularly executes the LDAP query, which would otherwise define a dynamic group, and updates the member list of a static group.
 - These updates usually happen less frequent than a dynamic group is used. The static group might not be fully up-to-date when used, but other aspects outweigh this disadvantage most of the time:
   - Reduced load on Active Directory (partially transferred to IDM system or server running a script)
@@ -2425,7 +2429,7 @@ For a small annual fee per mailbox, the [Benefactor Circle add-on](https://githu
 Your company is not sure whether the add-on will pay off?<br>Visit https://explicitconsulting.at/open-source/set-outlooksignatures/#4-financial-benefits-of-centrally-managing-signatures-and-out-of-office-replies and learn how you can do the calculation tailored to the needs of your company.<br>Should your company come to the conclusion that the add-on does not pay off, it can still use the free and open source version of Set-OutlookSignatures.
 
 ## 14.36 Why is the out-of-office assistant not activated automatically?<!-- omit in toc -->
-OOF templates are only applied if the out of office assistant is currently disabled. If it is currently active or scheduled to be automatically activated in the future, OOF templates are not applied.
+OOF templates are only applied if the out-of-office assistant is currently disabled. If it is currently active or scheduled to be automatically activated in the future, OOF templates are not applied.
 
 The user has to activate the out-of-office assistant manually. Through the use of templates, the user only has to make no to only little changes to the text (such as the return date, possibly).
 
@@ -2433,13 +2437,13 @@ The reason for this is that there is no generic way to detect when a user will b
 
 ## 14.37 When should I refer on-prem groups and when Entra ID groups?<!-- omit in toc -->
 The following is valid for using groups in INI files as well as for Benefactor Circle licensing groups:
-- When using the '-GraphOnly true' parameter, prefer Entra ID groups ('EntraID <…>'). You may also use on-prem groups ('<NetBiosDomain> <…>') as long as they are synchronized to Entra ID.
-- In hybrid environments without using the '-GraphOnly true' parameter, prefer on-prem groups ('<NetBiosDomain> <…>') synchronized to Entra ID. Pure entra ID groups ('EntraID <…>') only make sense when all mailboxes covered by Set-OutlookSignatures are hosted in Exchange Online.
-- Pure on-prem environments: You can only use on-prem groups ('<NetBiosDomain> <…>'). When moving to a hybrid environment, you do not need to adapt the configuration as long as you synchronize your on-prem groups to Entra ID.
+- When using the '-GraphOnly true' parameter, prefer Entra ID groups ('EntraID <…>'). You may also use on-prem groups ('<DNS or NetBIOS name of AD domain> <…>') as long as they are synchronized to Entra ID.
+- In hybrid environments without using the '-GraphOnly true' parameter, prefer on-prem groups ('<DNS or NetBIOS name of AD domain> <…>') synchronized to Entra ID. Pure entra ID groups ('EntraID <…>') only make sense when all mailboxes covered by Set-OutlookSignatures are hosted in Exchange Online.
+- Pure on-prem environments: You can only use on-prem groups ('<DNS or NetBIOS name of AD domain> <…>'). When moving to a hybrid environment, you do not need to adapt the configuration as long as you synchronize your on-prem groups to Entra ID.
 
 ## 14.38 Why are signatures and out-of-office replies recreated even when their content has not changed?<!-- omit in toc -->
-Signatures and out-of-office replies are deliberately regenerated each time Set-OutlookSignatures runs. The effort required to check whether anything has changed since the last run would be greater than actually regernerating them.
+Signatures and out-of-office replies are deliberately recreated each time Set-OutlookSignatures runs. The effort required to check whether anything has changed since the last run would be greater than actually creating them new.
 
 Changes affecting signatures and out-of-office replies may have been made on the user's client, in the users's mailbox, in Entra ID or Active Directory, in template files, and in configuration files.
 
-The only reliable way to detect changes in an environment where things can be modified in so many places would be to calculate what the new signatures would look like with current values and then compare these with the existing ones. But if you already have the new signatures and out-of-office replies anyway, overwriting the existing ones is faster than comparing them.
+The only reliable way to detect changes in an environment where things can be modified in so many places would be to calculate what the new signatures would look like with current values and then compare these with the existing ones - but if you already have the new signatures and out-of-office replies anyway, overwriting the existing ones is faster than comparing them.

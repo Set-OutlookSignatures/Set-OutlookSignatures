@@ -1,4 +1,4 @@
-<#
+﻿<#
 This sample code does the following:
   - If New Outlook is running, ask the user to close it
   - Temporarily disable New Outlook in favor of Classic Outlook

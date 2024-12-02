@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Set-OutlookSignatures XXXVersionStringXXX
 Email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, Windows, Web, Mac, Linux, Android, iOS
@@ -10,12 +10,12 @@ With Set-OutlookSignatures, signatures and out-of-office replies can be:
   - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
   - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
 - Designed for **barrier-free accessibility** with custom link and image descriptions for screen readers and comparable tools
-- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** (including alias and secondary addresses), or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook, Outlook Web)**, including **automapped and additional mailboxes¹**
+- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** (including alias and secondary addresses), or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook¹, Outlook Web¹)**, including **automapped and additional mailboxes¹**
 - Created with different names from the same template, **one template can be used for many mailboxes**
 - Assigned **time ranges** within which they are valid¹
 - Set as **default signature** for new emails, or for replies and forwards (signatures only)
 - Set as **default OOF message** for internal or external recipients (OOF messages only)
-- Set in **Outlook Web¹** for the currently logged-in user, including mirroring signatures to the cloud as **roaming signatures¹** (Linux/macOS/Windows, Classic and New Outlook)
+- Set in **Outlook Web¹** for the currently logged-in user, including mirroring signatures to the cloud as **roaming signatures¹** (Linux/macOS/Windows, Classic and New Outlook¹)
 - Centrally managed only¹, or **exist along user-created signatures** (signatures only)
 - Automatically added to new emails, reply emails and appointments with the **Outlook add-in**¹
 - Copied to an **additional path¹** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
@@ -30,7 +30,7 @@ Signatures and OOF messages can also be created and pushed into mailboxes centra
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the software for a specific user at a specific point in time, and to inspect the resulting signature files before going live.
 
-**SimulateAndDeploy¹** allows to deploy signatures to Outlook Web/New Outlook without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
+**SimulateAndDeploy¹** allows to deploy signatures to Outlook Web¹/New Outlook¹ without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
 
 The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and in cloud-only environments**.
 All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).
@@ -233,7 +233,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOutlookWebSignature true"
 
 .PARAMETER SetCurrentUserOOFMessage
-Shall the software set the out of office (OOF) message of the currently logged-in user?
+Shall the software set the out-of-office (OOF) message of the currently logged-in user?
 
 If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the software can be used in environments where only Outlook Web is used.
 
@@ -253,7 +253,7 @@ Path to centrally managed signature templates.
 
 Local and remote paths are supported.
 
-Local paths can be absolute ('C:\OOF templates') or relative to the software path ('.\sample templates\ Out of Office ').
+Local paths can be absolute ('C:\OOF templates') or relative to the software path ('.\sample templates\ Out-of-office ').
 
 SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
 
@@ -263,17 +263,17 @@ On Linux and macOS, only already existing mount points and SharePoint Online pat
 
 For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
 
-Default value: '.\sample templates\Out of Office DOCX' on Windows, '.\sample templates\Out of Office HTML' on Linux and macOS
+Default value: '.\sample templates\Out-of-office DOCX' on Windows, '.\sample templates\Out-of-office HTML' on Linux and macOS
 
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out of Office DOCX'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out of Office DOCX'"
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out-of-office DOCX'
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out-of-office DOCX'"
 
 .PARAMETER OOFIniPath
 Path to ini file containing signature template tags.
 
 The file must be UTF8 encoded.
 
-See '.\sample templates\Out of Office DOCX\_OOF.ini' for a sample file with further explanations.
+See '.\sample templates\Out-of-office DOCX\_OOF.ini' for a sample file with further explanations.
 
 Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures')
 
@@ -285,10 +285,10 @@ On Linux and macOS, only already existing mount points and SharePoint Online pat
 
 For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
 
-Default value: '.\sample templates\Out of Office DOCX\_OOF.ini' on Windows, '.\sample templates\Out of Office HTML\_OOF.ini' on Linux and macOS
+Default value: '.\sample templates\Out-of-office DOCX\_OOF.ini' on Windows, '.\sample templates\Out-of-office HTML\_OOF.ini' on Linux and macOS
 
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out of Office DOCX\_OOF.ini'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out of Office DOCX\_OOF.ini'"
+Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out-of-office DOCX\_OOF.ini'
+Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFIniPath '.\templates\Out-of-office DOCX\_OOF.ini'"
 
 .PARAMETER AdditionalSignaturePath
 An additional path that the signatures shall be copied to.
@@ -697,7 +697,7 @@ PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\s
 
 .EXAMPLE
 Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. See '.\docs\README' for details.
-PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -SignatureTemplatePath '\\internal.example.com\share\Signature Templates\_Signatures.ini' -OOFTemplatePath '\\server\share\directory\templates\Out of Office DOCX' -OOFTemplatePath '\\internal.example.com\share\Signature Templates\_OOF.ini' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1' "
+PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -SignatureTemplatePath '\\internal.example.com\share\Signature Templates\_Signatures.ini' -OOFTemplatePath '\\server\share\directory\templates\Out-of-office DOCX' -OOFTemplatePath '\\internal.example.com\share\Signature Templates\_OOF.ini' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1' "
 
 .EXAMPLE
 Please see '.\docs\README' and https://github.com/Set-OutlookSignatures/Set-OutlookSignatures for more details.
@@ -846,24 +846,24 @@ Param(
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     $MailboxSpecificSignatureNames = $false,
 
-    # Shall the software set the out of office (OOF) message(s) of the currently logged-in user?
+    # Shall the software set the out-of-office (OOF) message(s) of the currently logged-in user?
     [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'C: OOF messages')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $SetCurrentUserOOFMessage = $true,
 
-    # Path to centrally managed out of office (OOF, automatic reply) templates
+    # Path to centrally managed out-of-office (OOF, automatic reply) templates
     [Parameter(Mandatory = $false, ParameterSetName = 'C: OOF messages')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateNotNullOrEmpty()]
-    [string]$OOFTemplatePath = $(if (($UseHtmTemplates -inotin @(1, 'true', '$true', 'yes')) -or (-not $UseHtmTemplates)) { '.\sample templates\Out of Office DOCX' } else { '.\sample templates\Out of Office HTML' }),
+    [string]$OOFTemplatePath = $(if (($UseHtmTemplates -inotin @(1, 'true', '$true', 'yes')) -or (-not $UseHtmTemplates)) { '.\sample templates\Out-of-office DOCX' } else { '.\sample templates\Out-of-office HTML' }),
 
     # Path to ini file containing OOF template tags
     [Parameter(Mandatory = $false, ParameterSetName = 'C: OOF messages')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateNotNullOrEmpty()]
-    [string]$OOFIniPath = $(if (($UseHtmTemplates -inotin @(1, 'true', '$true', 'yes')) -or (-not $UseHtmTemplates)) { '.\sample templates\Out of Office DOCX\_OOF.ini' } else { '.\sample templates\Out of Office HTML\_OOF.ini' }),
+    [string]$OOFIniPath = $(if (($UseHtmTemplates -inotin @(1, 'true', '$true', 'yes')) -or (-not $UseHtmTemplates)) { '.\sample templates\Out-of-office DOCX\_OOF.ini' } else { '.\sample templates\Out-of-office HTML\_OOF.ini' }),
 
     # Path to a replacement variable config file.
     [Parameter(Mandatory = $false, ParameterSetName = 'D: Replacement variables')]
@@ -1082,7 +1082,7 @@ function rankedSemVer($versions) {
         }
 
         $current = [PsObject]$versions[$i]
-        Add-Member -InputObject $current -MemberType NoteProperty -Name Rank -Value $rank
+        Add-Member -InputObject $current -MemberType NoteProperty -Name Rank -Value $rank -Force
     }
 
     return $versions
@@ -1115,8 +1115,116 @@ function CheckFilenamePossiblyInvalid ([string] $Filename = '', [bool] $CheckOut
 }
 
 
+### ▼▼▼ BlockSleep initiation code below ▼▼▼
+##
+#
+# Place this code in your main script, as early in the code as possible
+#
+# Call BlockSleep wherever you want the current process to block sleep
+#   BlockSleep
+#
+# On Windows, you can set three parameters:
+#   -RequireAwaymode: Allows Away mode (defaults to true when not set)
+#   -RequireDisplay: Requires the display to be on (defaults to false when not set)
+#   -RequireSystem: Requires the system to be on (default to true when not set)
+# On Linux, systemd-inhibit is required (should be available on most distributions)
+# On macOS, caffeinate is required (should be available built-in)
+#
+# To allow sleep again, call BlockSleep with the AllowSleep parameter:
+#   BlockSleep -AllowSleep
+#
+function BlockSleep {
+    param (
+        [switch]$AllowSleep,
+        [switch]$RequireAwayMode,
+        [switch]$RequireDisplay,
+        [switch]$RequireSystem
+    )
+
+    if ($AllowSleep) {
+        $RequireAwayMode = $false
+        $RequireDisplay = $false
+        $RequireSystem = $false
+    } else {
+        if (-not $PSBoundParameters.ContainsKey('RequireAwayMode')) {
+            $RequireAwayMode = $true
+        }
+
+        if (-not $PSBoundParameters.ContainsKey('RequireDisplay')) {
+            $RequireDisplay = $false
+        }
+
+        if (-not $PSBoundParameters.ContainsKey('RequireSystem')) {
+            $RequireSystem = $true
+        }
+
+        if (
+            ($RequireAwayMode -eq $false) -and
+            ($RequireDisplay -eq $false) -and
+            ($RequireSystem -eq $false)
+        ) {
+            $AllowSleep = $true
+        }
+    }
+
+    if ($isWindows -or (-not (Test-Path 'variable:IsWindows'))) {
+        $code = @'
+[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+public static extern void SetThreadExecutionState(uint esFlags);
+'@
+
+        $ste = Add-Type -MemberDefinition $code -Name System -Namespace Win32 -PassThru
+        $ES_CONTINUOUS = [uint32]'0x80000000'
+        $ES_AWAYMODE_REQUIRED = [uint32]'0x00000040'
+        $ES_DISPLAY_REQUIRED = [uint32]'0x00000002'
+        $ES_SYSTEM_REQUIRED = [uint32]'0x00000001'
+
+        $flags = $ES_CONTINUOUS
+
+        if (-not $AllowSleep) {
+            if ($RequireAwayMode) { $flags = $flags -bor $ES_AWAYMODE_REQUIRED }
+            if ($RequireDisplay) { $flags = $flags -bor $ES_DISPLAY_REQUIRED }
+            if ($RequireSystem) { $flags = $flags -bor $ES_SYSTEM_REQUIRED }
+        }
+
+        $ste::SetThreadExecutionState($flags)
+    } elseif ($isLinux) {
+        if (Get-Command systemd-inhibit -ErrorAction SilentlyContinue) {
+            if ($script:BlockSleepInhibitPID) {
+                Stop-Process -Id $script:BlockSleepInhibitPID -Force
+                Remove-Variable -Name BlockSleepInhibitPID -Scope script
+            }
+
+            if (-not $AllowSleep) {
+                $script:BlockSleepInhibitPID = Start-Process systemd-inhibit -ArgumentList "--what=idle --why=""Set-OutlookSignatures"" --who=""Set-OutlookSignatures"" tail --pid=$($PID) --follow /dev/null" -PassThru | Select-Object -ExpandProperty Id
+            }
+        } else {
+            Write-Host "  'systemd-inhibit' is not available."
+        }
+    } elseif ($isMacOS) {
+        if (Get-Command caffeinate -ErrorAction SilentlyContinue) {
+            if ($script:BlockSleepInhibitPID) {
+                Stop-Process -Id $script:BlockSleepInhibitPID -Force
+                Remove-Variable -Name BlockSleepInhibitPID -Scope script
+            }
+
+            if (-not $AllowSleep) {
+                $script:BlockSleepInhibitPID = Start-Process caffeinate -ArgumentList "-ims -w $($PID)" -PassThru | Select-Object -ExpandProperty Id
+            }
+        } else {
+            Write-Host "  'caffeinate' is not available."
+        }
+    }
+}
+#
+##
+### ▲▲▲ BlockSleep initiation code above ▲▲▲
+
+
 function main {
     $ScriptVersion = 'XXXVersionStringXXX'
+
+    try { WatchCatchableExitSignal } catch { }
 
     # Init default values
     if ($null -ne [SetOutlookSignatures.Common].GetMethod('Init')) {
@@ -1128,26 +1236,33 @@ function main {
         exit 1
     }
 
+    try { WatchCatchableExitSignal } catch { }
+
     # Import AngleSharp.CSS
     $script:AngleSharpCssNetModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
 
     if ($($PSVersionTable.PSEdition) -ieq 'Core') {
         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\AngleSharp.Css\netstandard2.0')) -Destination $script:AngleSharpCssNetModulePath -Recurse
-        if ($IsWindows) { Get-ChildItem $script:AngleSharpCssNetModulePath -Recurse | Unblock-File }
+        if (-not $IsLinux) { Get-ChildItem $script:AngleSharpCssNetModulePath -Recurse | Unblock-File }
         Import-Module (Join-Path -Path $script:AngleSharpCssNetModulePath -ChildPath 'AngleSharp.Css.dll')
         Import-Module (Join-Path -Path $script:AngleSharpCssNetModulePath -ChildPath 'AngleSharp.dll')
     } else {
         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\PreMailer.Net\net462')) -Destination $script:AngleSharpCssNetModulePath -Recurse
-        if ($IsWindows) { Get-ChildItem $script:AngleSharpCssNetModulePath -Recurse | Unblock-File }
+        if (-not $IsLinux) { Get-ChildItem $script:AngleSharpCssNetModulePath -Recurse | Unblock-File }
         Import-Module (Join-Path -Path $script:AngleSharpCssNetModulePath -ChildPath 'AngleSharp.dll')
     }
+
+    try { WatchCatchableExitSignal } catch { }
 
     # Import QRCoder
     $script:QRCoderModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
 
     Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\QRCoder\netstandard2.0')) -Destination $script:QRCoderModulePath -Recurse
-    if ($IsWindows) { Get-ChildItem $script:QRCoderModulePath -Recurse | Unblock-File }
+    if (-not $IsLinux) { Get-ChildItem $script:QRCoderModulePath -Recurse | Unblock-File }
     Import-Module (Join-Path -Path $script:QRCoderModulePath -ChildPath 'QRCoder.dll')
+
+
+    try { WatchCatchableExitSignal } catch { }
 
 
     Write-Host
@@ -1180,7 +1295,7 @@ function main {
                 #   Office x86 on Windows x86
                 #   Office x86 on Windows x64
                 #   Any PowerShell process bitness
-                $OutlookFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry32)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '') -ErrorAction Stop
+                $OutlookFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry32)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '').trim('"').trim('''') -ErrorAction Stop
             } catch {
                 try {
                     # [Microsoft.Win32.RegistryView]::Registry64 makes sure we view the registry as a 64 bit application would
@@ -1188,7 +1303,7 @@ function main {
                     # Covers:
                     #   Office x64 on Windows x64
                     #   Any PowerShell process bitness
-                    $OutlookFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry64)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '') -ErrorAction Stop
+                    $OutlookFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry64)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Outlook.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '').trim('"').trim('''') -ErrorAction Stop
                 } catch {
                     $OutlookFilePath = $null
                 }
@@ -1286,12 +1401,14 @@ function main {
 
                 $OutlookDisableRoamingSignatures = 0
 
-                foreach ($RegistryFolder in (
+                foreach ($RegistryFolder in @(
                         "registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup",
                         "registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup",
                         "registry::HKEY_CURRENT_USER\Software\Policies\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup",
                         "registry::HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup"
-                    )) {
+                    )
+                ) {
+                    try { WatchCatchableExitSignal } catch { }
 
                     $x = (Get-ItemProperty $RegistryFolder -ErrorAction SilentlyContinue).'DisableRoamingSignaturesTemporaryToggle'
 
@@ -1339,8 +1456,8 @@ function main {
                 Write-Host '      Outlook syncs signatures itself, so Outlook may overwrite signatures created by this software.' -ForegroundColor Yellow
                 Write-Host '      Consider setting parameters DisableRoamingSignatures and MirrorCloudSignatures to true instead.' -ForegroundColor Yellow
             }
-            Write-Host "    UseNewOutlook: $OutlookUseNewOutlook"
 
+            Write-Host "    UseNewOutlook: $OutlookUseNewOutlook"
             Write-Host '  New Outlook'
             Write-Host "    Version: $($NewOutlook.Version)"
             Write-Host "    Status: $($NewOutlook.Status)"
@@ -1359,6 +1476,8 @@ end tell
 
             Write-Host "    Version: $($OutlookFileVersion)"
 
+            try { WatchCatchableExitSignal } catch { }
+
             $macOSSignaturesScriptable = @(@($(
                         @'
 tell application "Microsoft Outlook"
@@ -1373,6 +1492,8 @@ tell application "Microsoft Outlook"
     end if
 end tell
 '@ | osascript *>&1)) | ForEach-Object { $_.tostring() })[0] -eq 'Success'
+
+            try { WatchCatchableExitSignal } catch { }
 
             $macOSOutlookMailboxes = @(@($(
                         @'
@@ -1422,6 +1543,8 @@ tell application "Microsoft Outlook"
 end tell
 '@ | osascript *>&1)) | ForEach-Object { $_.tostring() })
 
+            try { WatchCatchableExitSignal } catch { }
+
             $OutlookFilePath = $null
             $OutlookRegistryVersion = $null
             $OutlookDefaultProfile = $null
@@ -1429,7 +1552,7 @@ end tell
             $OutlookIsBetaversion = $false
             $OutlookDisableRoamingSignatures = 1
             $OutlookUseNewOutlook = $false
-            $WordRegistryVersion = $null
+            $script:WordRegistryVersion = $null
             $WordFilePath = $null
 
             if ($macOSSignaturesScriptable) {
@@ -1479,27 +1602,34 @@ end tell
             $OutlookIsBetaversion = $false
             $OutlookDisableRoamingSignatures = 1
             $OutlookUseNewOutlook = $true
-            $WordRegistryVersion = $null
+            $script:WordRegistryVersion = $null
             $WordFilePath = $null
         }
     }
 
-    if (($UseHtmTemplates -eq $true) -or (-not $IsWindows)) {
+    try { WatchCatchableExitSignal } catch { }
+
+    if ((($UseHtmTemplates -eq $true) -and (-not $CreateRtfSignatures)) -or (-not $IsWindows)) {
         Write-Host '  UseHtmTemplates set to true or not running on Windows, skip Word checks'
     } else {
         Write-Host '  Word'
-        $WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
-        if ($WordRegistryVersion.major -gt 16) {
-            Write-Host "    Word version $($WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+
+        $script:WordRegistryVersion = $null
+
+        $script:WordAlertIfNotDefaultOriginal = (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -ErrorAction SilentlyContinue).AlertIfNotDefault
+
+        $script:WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
+        if ($script:WordRegistryVersion.major -gt 16) {
+            Write-Host "    Word version $($script:WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
             exit 1
-        } elseif ($WordRegistryVersion.major -eq 16) {
-            $WordRegistryVersion = '16.0'
-        } elseif ($WordRegistryVersion.major -eq 15) {
-            $WordRegistryVersion = '15.0'
-        } elseif ($WordRegistryVersion.major -eq 14) {
-            $WordRegistryVersion = '14.0'
-        } elseif ($WordRegistryVersion.major -lt 14) {
-            Write-Host "    Word version $($WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+        } elseif ($script:WordRegistryVersion.major -eq 16) {
+            $script:WordRegistryVersion = '16.0'
+        } elseif ($script:WordRegistryVersion.major -eq 15) {
+            $script:WordRegistryVersion = '15.0'
+        } elseif ($script:WordRegistryVersion.major -eq 14) {
+            $script:WordRegistryVersion = '14.0'
+        } elseif ($script:WordRegistryVersion.major -lt 14) {
+            Write-Host "    Word version $($script:WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
             exit 1
         }
 
@@ -1510,7 +1640,7 @@ end tell
             #   Office x86 on Windows x86
             #   Office x86 on Windows x64
             #   Any PowerShell process bitness
-            $WordFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry32)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '') -ErrorAction Stop
+            $WordFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry32)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '').trim('"').trim('''') -ErrorAction Stop
         } catch {
             try {
                 # [Microsoft.Win32.RegistryView]::Registry64 makes sure we view the registry as a 64 bit application would
@@ -1518,7 +1648,7 @@ end tell
                 # Covers:
                 #   Office x64 on Windows x64
                 #   Any PowerShell process bitness
-                $WordFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry64)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '') -ErrorAction Stop
+                $WordFilePath = Get-ChildItem (((([Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::ClassesRoot, [Microsoft.Win32.RegistryView]::Registry64)).OpenSubKey("CLSID\$((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CLSID' -ErrorAction Stop).'(default)')\LocalServer32")).GetValue('') -split ' \/')[0].Split([IO.Path]::GetInvalidPathChars()) -join '').trim('"').trim('''') -ErrorAction Stop
             } catch {
                 $WordFilePath = $null
             }
@@ -1526,7 +1656,7 @@ end tell
 
         if ($WordFilePath) {
             Write-Host "    Set 'DontUseScreenDpiOnOpen' registry value to '1'"
-            $null = "HKCU:\Software\Microsoft\Office\$($WordRegistryVersion)\Word\Options" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DontUseScreenDpiOnOpen' -Type DWORD -Value 1 -Force
+            $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DontUseScreenDpiOnOpen' -Type DWORD -Value 1 -Force
 
             try {
                 $WordBitnessInfo = GetBitness -fullname $WordFilePath
@@ -1542,10 +1672,12 @@ end tell
             $WordFileVersion = $null
         }
 
-        Write-Host "    Registry version: $WordRegistryVersion"
+        Write-Host "    Registry version: $script:WordRegistryVersion"
         Write-Host "    File version: $WordFileVersion"
         Write-Host "    Bitness: $WordBitness"
     }
+
+    try { WatchCatchableExitSignal } catch { }
 
     Write-Host
     Write-Host "Get Outlook signature file path(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
@@ -1592,6 +1724,8 @@ end tell
         }
     }
 
+    try { WatchCatchableExitSignal } catch { }
+
     # If Outlook is installed, synch profile folders anyway
     # Also makes sure that signatures are already there when starting Outlook for the first time
     if ((-not $SimulateUser) -and $OutlookFileVersion) {
@@ -1619,6 +1753,9 @@ end tell
     }
 
 
+    try { WatchCatchableExitSignal } catch { }
+
+
     Write-Host
     Write-Host "Enumerate domains @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
     $x = $TrustsToCheckForGroups
@@ -1632,7 +1769,9 @@ end tell
             $objNT = $objTrans.GetType()
             $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $Null)) # 3 = ADS_NAME_INITTYPE_GC
             $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (12, $(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value))) # 12 = ADS_NAME_TYPE_SID_OR_SID_HISTORY_NAME
+            try { WatchCatchableExitSignal } catch { }
             $UserForest = (([ADSI]"LDAP://$(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1) -split ',DC=')[1..999] -join '.')/RootDSE").rootDomainNamingContext -ireplace [Regex]::Escape('DC='), '' -ireplace [Regex]::Escape(','), '.').tolower()
+            try { WatchCatchableExitSignal } catch { }
             [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
             Remove-Variable -Name 'objTrans'
             Remove-Variable -Name 'objNT'
@@ -1651,7 +1790,9 @@ end tell
                 $Search.SearchRoot = "GC://$($UserForest)"
                 $Search.Filter = '(ObjectClass=trustedDomain)'
 
+                try { WatchCatchableExitSignal } catch { }
                 $TrustedDomains = @($Search.FindAll())
+                try { WatchCatchableExitSignal } catch { }
 
                 if ($TrustedDomains) {
                     $TrustedDomains = @(
@@ -1664,6 +1805,8 @@ end tell
                     )
                 }
 
+                try { WatchCatchableExitSignal } catch { }
+
                 # Internal trusts
                 foreach ($TrustedDomain in $TrustedDomains) {
                     if (($TrustedDomain.properties.trustattributes -eq 32) -and ($TrustedDomain.properties.name -ine $UserForest) -and (-not $LookupDomainsToTrusts.ContainsKey($TrustedDomain.properties.name.tolower()))) {
@@ -1674,6 +1817,8 @@ end tell
                         }
                     }
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 # Other trusts
                 if ($x[0] -eq '*') {
@@ -1694,6 +1839,8 @@ end tell
                                         $LookupDomainsToTrusts.add($TrustedDomain.properties.name.tolower(), $TrustedDomain.properties.name.tolower())
                                     }
                                 }
+
+                                try { WatchCatchableExitSignal } catch { }
 
                                 $temp = @(
                                     @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Where-Object { $_ -ine $TrustedDomain.properties.name } | Select-Object -Unique | Sort-Object -Culture $TemplateFilesSortCulture -Property @{Expression = {
@@ -1776,6 +1923,8 @@ end tell
                                                 }
                                             }
 
+                                            try { WatchCatchableExitSignal } catch { }
+
                                             $temp = @(
                                                 @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Where-Object { $_ -ine $TrustedDomain.properties.name } | Select-Object -Unique | Sort-Object -Culture $TemplateFilesSortCulture -Property @{Expression = {
                                                         $TemporaryArray = @($_.Split('.'))
@@ -1827,9 +1976,15 @@ end tell
                 $TrustsToCheckForGroups = @($TrustsToCheckForGroups | Where-Object { $_ })
 
 
+                try { WatchCatchableExitSignal } catch { }
+
+
                 Write-Host
                 Write-Host "Check trusts for open LDAP port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
                 CheckADConnectivity @(@(@($TrustsToCheckForGroups) + @($LookupDomainsToTrusts.GetEnumerator() | ForEach-Object { $_.Name })) | Select-Object -Unique) 'LDAP' '  ' | Out-Null
+
+
+                try { WatchCatchableExitSignal } catch { }
 
 
                 Write-Host
@@ -1852,6 +2007,9 @@ end tell
     }
 
 
+    try { WatchCatchableExitSignal } catch { }
+
+
     Write-Host
     Write-Host "Get properties of currently logged-in user and assigned manager @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
     if (-not $SimulateUser) {
@@ -1866,14 +2024,17 @@ end tell
                 if (-not $SimulateUser) {
                     $Search.SearchRoot = "GC://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
+                    try { WatchCatchableExitSignal } catch { }
                     $ADPropsCurrentUser = $Search.FindOne().Properties
+                    try { WatchCatchableExitSignal } catch { }
                     $ADPropsCurrentUser = [hashtable]::new($ADPropsCurrentUser, [StringComparer]::OrdinalIgnoreCase)
 
                     $Search.SearchRoot = "LDAP://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
+                    try { WatchCatchableExitSignal } catch { }
                     $ADPropsCurrentUserLdap = $Search.FindOne().Properties
+                    try { WatchCatchableExitSignal } catch { }
                     $ADPropsCurrentUserLdap = [hashtable]::new($ADPropsCurrentUserLdap, [StringComparer]::OrdinalIgnoreCase)
-
 
                     foreach ($keyName in @($ADPropsCurrentUserLdap.Keys)) {
                         if (
@@ -1889,19 +2050,25 @@ end tell
                         $objNT = $objTrans.GetType()
                         $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $null))
                         $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (8, $SimulateUser))
+                        try { WatchCatchableExitSignal } catch { }
                         $SimulateUserDN = $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1)
+                        try { WatchCatchableExitSignal } catch { }
                         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
                         Remove-Variable -Name 'objTrans'
                         Remove-Variable -Name 'objNT'
 
                         $Search.SearchRoot = "GC://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
+                        try { WatchCatchableExitSignal } catch { }
                         $ADPropsCurrentUser = $Search.FindOne().Properties
+                        try { WatchCatchableExitSignal } catch { }
                         $ADPropsCurrentUser = [hashtable]::new($ADPropsCurrentUser, [StringComparer]::OrdinalIgnoreCase)
 
                         $Search.SearchRoot = "LDAP://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
+                        try { WatchCatchableExitSignal } catch { }
                         $ADPropsCurrentUserLdap = $Search.FindOne().Properties
+                        try { WatchCatchableExitSignal } catch { }
                         $ADPropsCurrentUserLdap = [hashtable]::new($ADPropsCurrentUserLdap, [StringComparer]::OrdinalIgnoreCase)
 
                         foreach ($keyName in @($ADPropsCurrentUserLdap.Keys)) {
@@ -1946,7 +2113,7 @@ end tell
             }
         )
     ) {
-        Write-Host "    Set up environment for connection to Microsoft Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+        Write-Host '    Graph connection is required'
         Write-Verbose '      Required because at least one is true:'
         Write-Verbose "        GraphOnly is true: $($GraphOnly -eq $true)"
         Write-Verbose "        GraphOnly is false and mailbox is in cloud and SetCurrentUserOOFMessage or SetCurrentUserOutlookWebSignature is true: $(($GraphOnly -eq $false) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)))"
@@ -1967,11 +2134,15 @@ end tell
         )"
 
         if (-not $GraphToken) {
-            $GraphToken = GraphGetToken
+            try {
+                $GraphToken = GraphGetToken
+            } catch {
+                $GraphToken = $null
+            }
         }
 
-        if (-not $SimulateAndDeployGraphCredentialFile) {
-            Write-Host "      MSAL.PS Graph token cache info: $($script:msalClientApp.cacheInfo)"
+        if ($GraphToken -and (-not $SimulateAndDeployGraphCredentialFile)) {
+            Write-Host "      Graph token cache info: $($script:msalClientApp.cacheInfo)"
         }
 
         if ($GraphToken.error -eq $false) {
@@ -1981,7 +2152,7 @@ end tell
                 Write-Verbose "      EXO Token metadata: $((ParseJwtToken $GraphToken.AccessTokenExo) | ConvertTo-Json)"
 
                 if (-not $($GraphToken.AccessTokenExo)) {
-                    Write-Host '      Problem connecting to Exchange Online with Graph token. Exit.' -ForegroundColor Red
+                    Write-Host '        Problem connecting to Exchange Online with Graph token. Exit.' -ForegroundColor Red
                     exit 1
                 }
             }
@@ -1990,60 +2161,54 @@ end tell
                 Write-Verbose "      App Graph Token metadata: $((ParseJwtToken $GraphToken.AppAccessToken) | ConvertTo-Json)"
                 Write-Verbose "      App EXO Token metadata: $((ParseJwtToken $GraphToken.AppAccessTokenExo) | ConvertTo-Json)"
             }
-
-            if ($SimulateUser) {
-                $script:CurrentUser = $SimulateUser
-            }
-
-            if ($null -eq $script:CurrentUser) {
-                $script:CurrentUser = (GraphGetMe).me.userprincipalname
-            }
-
-            $error.clear()
-
-            $x = (GraphGetUserProperties $script:CurrentUser)
-
-            if (($x.error -eq $false) -and ($x.properties.id)) {
-                $AADProps = $x.properties
-                $ADPropsCurrentUser = [PSCustomObject]@{}
-
-                foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
-                    $z = $AADProps
-
-                    foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
-                        $z = $z.$y
-                    }
-
-                    $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
-                }
-
-                $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $script:CurrentUser).photo
-                $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $script:CurrentUser).properties.userprincipalname
-            } else {
-                $_
-                Write-Host "      Problem getting data for '$($script:CurrentUser)' from Microsoft Graph. Exit." -ForegroundColor Red
-                exit 1
-            }
         } else {
             Write-Host '      Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
-            $GraphToken.error
+            Write-Host $GraphToken.error -ForegroundColor Red
+            exit 1
+        }
+
+        if ($SimulateUser) {
+            $script:GraphUser = $SimulateUser
+        }
+
+        $x = (GraphGetUserProperties $script:GraphUser)
+
+        if (($x.error -eq $false) -and ($x.properties.id)) {
+            $AADProps = $x.properties
+            $ADPropsCurrentUser = [PSCustomObject]@{}
+
+            foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
+                $z = $AADProps
+
+                foreach ($y in ($GraphUserAttributeMappingName.value -split '\.')) {
+                    $z = $z.$y
+                }
+
+                $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z -Force
+            }
+
+            $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $script:GraphUser).photo -Force
+            $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $script:GraphUser).properties.userprincipalname -Force
+        } else {
+            Write-Host "      Problem getting data for '$($script:GraphUser)' from Microsoft Graph. Exit." -ForegroundColor Red
+            Write-Host $x.error -ForegroundColor Red
             exit 1
         }
     }
 
-    if ($ADPropsCurrentUser.distinguishedname) {
-        Write-Host "    $($ADPropsCurrentUser.distinguishedname)"
-    } elseif ($ADPropsCurrentUser.userprincipalname) {
-        Write-Host "    $($ADPropsCurrentUser.userprincipalname.tolower())"
-    } elseif ($ADPropsCurrentUser.mail) {
-        Write-Host "    $($ADPropsCurrentUser.mail.tolower())"
+    if ($ADPropsCurrentUser) {
+        Write-Host "    DistinguishedName: $($ADPropsCurrentUser.distinguishedname)"
+        Write-Host "    UserPrincipalName: $($ADPropsCurrentUser.userprincipalname)"
+        Write-Host "    Mail: $($ADPropsCurrentUser.mail)"
+    } else {
+        Write-Host '    User not found'
     }
 
-    Write-Verbose "    distinguishedname: $($ADPropsCurrentUser.distinguishedname)"
-    Write-Verbose "    userprincipalname: $($ADPropsCurrentUser.userprincipalname)"
-    Write-Verbose "    mail: $($ADPropsCurrentUser.mail)"
+
+    try { WatchCatchableExitSignal } catch { }
 
     $CurrentUserSIDs = @()
+
     if (($ADPropsCurrentUser.objectsid -ne '') -and ($null -ne $ADPropsCurrentUser.objectsid)) {
         if ($ADPropsCurrentUser.objectsid.tostring().startswith('S-', 'CurrentCultureIgnorecase')) {
             $CurrentUserSids += $ADPropsCurrentUser.objectsid.tostring()
@@ -2057,6 +2222,8 @@ end tell
     }
 
     foreach ($SidHistorySid in @($ADPropsCurrentUser.sidhistory | Where-Object { $_ })) {
+        try { WatchCatchableExitSignal } catch { }
+
         if ($SidHistorySid.tostring().startswith('S-', 'CurrentCultureIgnorecase')) {
             $CurrentUserSids += $SidHistorySid.tostring()
         } else {
@@ -2090,11 +2257,11 @@ end tell
                         $z = $z.$y
                     }
 
-                    $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
+                    $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z -Force
                 }
 
-                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentUserManager.userprincipalname).photo
-                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null
+                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentUserManager.userprincipalname).photo -Force
+                $ADPropsCurrentUserManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null -Force
             } catch {
                 $ADPropsCurrentUserManager = $null
             }
@@ -2108,13 +2275,17 @@ end tell
                 try {
                     $Search.SearchRoot = "GC://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
+                    try { WatchCatchableExitSignal } catch { }
                     $ADPropsCurrentUserManager = $Search.FindOne().Properties
+                    try { WatchCatchableExitSignal } catch { }
                     $ADPropsCurrentUserManager = [hashtable]::new($ADPropsCurrentUserManager, [StringComparer]::OrdinalIgnoreCase)
 
 
                     $Search.SearchRoot = "LDAP://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
+                    try { WatchCatchableExitSignal } catch { }
                     $ADPropsCurrentUserManagerLdap = $Search.FindOne().Properties
+                    try { WatchCatchableExitSignal } catch { }
                     $ADPropsCurrentUserManagerLdap = [hashtable]::new($ADPropsCurrentUserManagerLdap, [StringComparer]::OrdinalIgnoreCase)
 
                     foreach ($keyName in @($ADPropsCurrentUserManagerLdap.Keys)) {
@@ -2137,20 +2308,15 @@ end tell
     }
 
     if ($ADPropsCurrentUserManager) {
-        if ($ADPropsCurrentUserManager.distinguishedname) {
-            Write-Host "    $($ADPropsCurrentUserManager.distinguishedname)"
-        } elseif ($ADPropsCurrentUserManager.userprincipalname) {
-            Write-Host "    $($ADPropsCurrentUserManager.userprincipalname)"
-        } elseif ($ADPropsCurrentUserManager.mail) {
-            Write-Host "    $($ADPropsCurrentUserManager.mail)"
-        }
-
-        Write-Verbose "    distinguishedname: $($ADPropsCurrentUserManager.distinguishedname)"
-        Write-Verbose "    userprincipalname: $($ADPropsCurrentUserManager.userprincipalname)"
-        Write-Verbose "    mail: $($ADPropsCurrentUserManager.mail)"
+        Write-Host "    DistinguishedName: $($ADPropsCurrentUserManager.distinguishedname)"
+        Write-Host "    UserPrincipalName: $($ADPropsCurrentUserManager.userprincipalname)"
+        Write-Host "    Mail: $($ADPropsCurrentUserManager.mail)"
     } else {
         Write-Host '    No manager found'
     }
+
+
+    try { WatchCatchableExitSignal } catch { }
 
 
     Write-Host
@@ -2170,8 +2336,13 @@ end tell
         Write-Host '  Get email addresses from Outlook'
 
         foreach ($OutlookProfile in $OutlookProfiles) {
+            try { WatchCatchableExitSignal } catch { }
+
             Write-Host "    Profile '$($OutlookProfile)'"
+
             foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\9375CFF0413111d3B88A00104B2A6676\*" -ErrorAction SilentlyContinue | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } })) {
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($OutlookFileVersion -ge '16.0.0.0') {
                     $MailAddresses += ($RegistryFolder.'Account Name').ToLower()
                 } else {
@@ -2198,9 +2369,12 @@ end tell
 
             if ($SignaturesForAutomappedAndAdditionalMailboxes) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignaturesForAutomappedAndAdditionalMailboxes')))) {
-                    Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                    Write-Host '    Automapped and additional mailboxes will not be found.' -ForegroundColor Yellow
+                    Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
                     Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
                 } else {
+                    try { WatchCatchableExitSignal } catch { }
+
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SignaturesForAutomappedAndAdditionalMailboxes()
 
                     if ($FeatureResult -ne 'true') {
@@ -2232,7 +2406,7 @@ end tell
         $OutlookProfiles = @()
         $OutlookDefaultProfile = $null
 
-        $script:CurrentUserDummyMailbox = $true
+        $script:GraphUserDummyMailbox = $true
 
         if ($IsWindows -and $OutlookUseNewOutlook -eq $true) {
             $x = @(
@@ -2254,7 +2428,7 @@ end tell
             }
         } else {
             Write-Host '    User does not have mail attribute configured' -ForegroundColor Yellow
-            $script:CurrentUserDummyMailbox = $false
+            $script:GraphUserDummyMailbox = $false
         }
 
         $x | ForEach-Object {
@@ -2272,11 +2446,13 @@ end tell
                 if (-not $script:WebServicesDllPath) {
                     Write-Host '    Set up environment for connection to Outlook Web'
 
+                    try { WatchCatchableExitSignal } catch { }
+
                     $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
 
                     try {
                         Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
-                        if ($IsWindows) {
+                        if (-not $IsLinux) {
                             Unblock-File -LiteralPath $script:WebServicesDllPath
                         }
                     } catch {
@@ -2288,9 +2464,12 @@ end tell
 
                 if ($SignaturesForAutomappedAndAdditionalMailboxes) {
                     if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignaturesForAutomappedAndAdditionalMailboxes')))) {
-                        Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                        Write-Host '    Automapped and additional mailboxes will not be found.' -ForegroundColor Yellow
+                        Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
                         Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
                     } else {
+                        try { WatchCatchableExitSignal } catch { }
+
                         $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SignaturesForAutomappedAndAdditionalMailboxes()
 
                         if ($FeatureResult -ne 'true') {
@@ -2303,6 +2482,8 @@ end tell
         }
     }
 
+    try { WatchCatchableExitSignal } catch { }
+
     if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -inotcontains $ADPropsCurrentUser.mail)) {
         # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
         # Maybe this is a pure Outlook Web user, so we will add a helper entry
@@ -2310,7 +2491,7 @@ end tell
         Write-Host "  User's mailbox not found in email address list, but Outlook Web signature and/or OOF message should be set. Adding dummy mailbox entry." -ForegroundColor Yellow
 
         if ($ADPropsCurrentUser.mail) {
-            $script:CurrentUserDummyMailbox = $true
+            $script:GraphUserDummyMailbox = $true
 
             $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
 
@@ -2319,10 +2500,10 @@ end tell
             $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
         } else {
             Write-Host '      User does not have mail attribute configured.' -ForegroundColor Yellow
-            $script:CurrentUserDummyMailbox = $false
+            $script:GraphUserDummyMailbox = $false
         }
     } else {
-        $script:CurrentUserDummyMailbox = $false
+        $script:GraphUserDummyMailbox = $false
     }
 
     if ($MailAddresses.count -eq 0) {
@@ -2331,6 +2512,9 @@ end tell
         Write-Host '  In simulation mode, this might be a permission problem.'
         exit 1
     }
+
+
+    try { WatchCatchableExitSignal } catch { }
 
 
     Write-Host
@@ -2350,6 +2534,8 @@ end tell
                 if ($null -ne $TrustsToCheckForGroups[0]) {
                     # Loop through domains until the first one knows the legacyExchangeDN or the proxy address
                     for ($DomainNumber = 0; (($DomainNumber -lt $TrustsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
+                        try { WatchCatchableExitSignal } catch { }
+
                         if (($TrustsToCheckForGroups[$DomainNumber] -ne '')) {
                             Write-Host "    Search for mailbox user object in domain/forest '$($TrustsToCheckForGroups[$DomainNumber])': " -NoNewline
                             $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
@@ -2359,7 +2545,9 @@ end tell
                                 $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(legacyExchangeDN=*)(proxyaddresses=smtp:$($MailAddresses[$AccountNumberRunning])))"
                             }
 
+                            try { WatchCatchableExitSignal } catch { }
                             $u = $Search.FindAll()
+                            try { WatchCatchableExitSignal } catch { }
 
                             if ($u.count -eq 0) {
                                 Write-Host 'Not found'
@@ -2380,12 +2568,16 @@ end tell
                             } else {
                                 $Search.SearchRoot = "GC://$(($(([adsi]"$($u[0].path)").distinguishedname) -split ',DC=')[1..999] -join '.')"
                                 $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
+                                try { WatchCatchableExitSignal } catch { }
                                 $ADPropsMailboxes[$AccountNumberRunning] = $Search.FindOne().Properties
+                                try { WatchCatchableExitSignal } catch { }
                                 $ADPropsMailboxes[$AccountNumberRunning] = [hashtable]::new($ADPropsMailboxes[$AccountNumberRunning], [StringComparer]::OrdinalIgnoreCase)
 
                                 $Search.SearchRoot = "LDAP://$(($(([adsi]"$($u[0].path)").distinguishedname) -split ',DC=')[1..999] -join '.')"
                                 $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
+                                try { WatchCatchableExitSignal } catch { }
                                 $tempLdap = $Search.FindOne().Properties
+                                try { WatchCatchableExitSignal } catch { }
                                 $tempLdap = [hashtable]::new($tempLdap, [StringComparer]::OrdinalIgnoreCase)
 
                                 foreach ($keyName in @($tempLdap.Keys)) {
@@ -2402,7 +2594,7 @@ end tell
                                 $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyexchangedn
                                 $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
                                 Write-Host 'Found'
-                                Write-Host "      distinguishedname: $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
+                                Write-Host "      distinguishedName: $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
                             }
                         }
                     }
@@ -2411,13 +2603,14 @@ end tell
                         Write-Host "    No matching mailbox object found in any Active Directory. Use parameter '-verbose' to see details." -ForegroundColor Yellow
                         Write-Host '    This message can be ignored if the mailbox in question is not part of your environment.' -ForegroundColor Yellow
                         Write-Verbose "      You may have restricted the accessible environment with the 'TrustsToCheckForGroups' parameter."
-                        Write-Verbose '    Else, check why the following Active Directory query did not return a result:'
-                        Write-Verbose "      $($Search.Filter)"
-                        Write-Verbose '      Usual root causes: Not following the documentation, Exchange data in Active Directory, firewall rules, DNS.'
-                        Write-Verbose "    In hybrid environments, check if all required attributes documented in the 'README' file are available on-prem and have values."
-                        Write-Verbose "      Look for 'msExchMailboxGuid' in the 'README' file for details about the required attributes."
-                        Write-Verbose '      This Microsoft article might be interesting for you: https://learn.microsoft.com/en-US/exchange/troubleshoot/move-mailboxes/migrationpermanentexception-when-moving-mailboxes.'
-                        Write-Verbose "      Consider using the '-GraphOnly true' parameter to not query on-prem Active Directory at all."
+                        Write-Verbose '      Else, check why the following Active Directory query did not return a result:'
+                        Write-Verbose "        $($Search.Filter)"
+                        Write-Verbose '      Usual root causes: Mailbox added in Outlook no longer exists or is not in your tenant, Exchange data in Active Directory is not complete, firewall rules, DNS.'
+                        Write-Verbose "      Check if all required attributes documented in the 'README' file are available in your on-prem Active Directory and have values."
+                        Write-Verbose "        Look for 'msExchMailboxGuid' in the 'README' file for details about the required attributes."
+                        Write-Verbose '      For hybrid environments:'
+                        Write-Verbose '        Add missing msExchMailboxGuid for cloud mailboxes to on-prem AD: https://learn.microsoft.com/en-US/exchange/troubleshoot/move-mailboxes/migrationpermanentexception-when-moving-mailboxes.'
+                        Write-Verbose "        Consider using the '-GraphOnly true' parameter to not query on-prem Active Directory at all."
                     }
 
                     if (-not $ADPropsMailboxes[$AccountNumberRunning]) {
@@ -2425,9 +2618,11 @@ end tell
                         $UserDomain = $null
                     }
                 } else {
-                    $AADProps = (GraphGetUserProperties $($MailAddresses[$AccountNumberRunning])).properties
+                    Write-Host '    Search for mailbox user object in Graph: ' -NoNewline
 
                     $ADPropsMailboxes[$AccountNumberRunning] = [PSCustomObject]@{}
+
+                    $AADProps = (GraphGetUserProperties $($MailAddresses[$AccountNumberRunning])).properties
 
                     if ($AADProps) {
                         foreach ($GraphUserAttributeMappingName in $GraphUserAttributeMapping.GetEnumerator()) {
@@ -2437,20 +2632,30 @@ end tell
                                 $z = $z.$y
                             }
 
-                            $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
+                            $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z -Force
                         }
 
-                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).photo
-                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).properties.userprincipalname
+                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).photo -Force
+                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).properties.userprincipalname -Force
 
                         if (-not $LegacyExchangeDNs[$AccountNumberRunning]) {
                             $LegacyExchangeDNs[$AccountNumberRunning] = 'dummy'
                         }
 
                         $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
+
+                        Write-Host 'Found'
+                        Write-Host "      userPrincipalName: $($ADPropsMailboxes[$AccountNumberRunning].userprincipalname)"
                     } else {
                         $LegacyExchangeDNs[$AccountNumberRunning] = ''
                         $UserDomain = $null
+
+                        Write-Host "    No matching mailbox object found via Graph/Entra ID. Use parameter '-verbose' to see details." -ForegroundColor Yellow
+                        Write-Host '    This message can be ignored if the mailbox in question is not part of your environment.' -ForegroundColor Yellow
+                        Write-Verbose '      Check why the following Graph queries return zero or more than 1 results, or do not contain any properties:'
+                        Write-Verbose "        UserPrincipalName from: $("$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$filter=proxyAddresses/any(x:x eq 'smtp:$($MailAddresses[$AccountNumberRunning])')")"
+                        Write-Verbose "        Replace XXX with UPN from query above: $("$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/XXX?`$select=" + [System.Net.WebUtility]::UrlEncode($(@($GraphUserProperties | Select-Object -Unique) -join ',')))"
+                        Write-Verbose '      Usual root causes: Mailbox added in Outlook no longer exists or is not in your tenant, firewall rules, DNS.'
                     }
                 }
             } else {
@@ -2464,10 +2669,15 @@ end tell
     }
 
 
+    try { WatchCatchableExitSignal } catch { }
+
+
     Write-Host
     Write-Host "Sort mailbox list: User's primary mailbox, mailboxes in default Outlook profile, others @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
     # Get users primary mailbox
     $p = $null
+
     # First, check if the user has a mail attribute set
     if ($ADPropsCurrentUser.mail) {
         Write-Host "  Mail attribute of currently logged-in or simulated user: '$($ADPropsCurrentUser.mail)'"
@@ -2495,6 +2705,8 @@ end tell
             # No mail attribute set, check for match(es) of user's objectSID and mailbox's msExchMasterAccountSid
             for ($i = 0; $i -lt $MailAddresses.count; $i++) {
                 if ($ADPropsMailboxes[$i].msexchmasteraccountsid) {
+                    try { WatchCatchableExitSignal } catch { }
+
                     if ((New-Object System.Security.Principal.SecurityIdentifier $ADPropsMailboxes[$i].msexchmasteraccountsid[0], 0).value -iin $CurrentUserSIDs) {
                         if ($p -ge 0) {
                             # $p already set before, there must be at least two matches, so set it to -1
@@ -2548,6 +2760,8 @@ end tell
             $CurrentOutlookProfileMailboxSortOrder = @()
 
             foreach ($RegistryFolder in @(Get-ItemProperty "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\0a0d020000000000c000000000000046" -ErrorAction SilentlyContinue | Where-Object { ($_.'11020458') })) {
+                try { WatchCatchableExitSignal } catch { }
+
                 try {
                     @(@(([regex]::Matches((@(ForEach ($char in @(($RegistryFolder.'11020458' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join ''), (@(@($MailAddressesToSearch) | ForEach-Object { [Regex]::Escape($_) }) -join '|'), [System.Text.RegularExpressions.RegexOptions]::IgnoreCase).captures.value).tolower()) | Select-Object -Unique) | ForEach-Object {
                         $CurrentOutlookProfileMailboxSortOrder += $MailAddressesToSearchLookup[$_]
@@ -2560,6 +2774,8 @@ end tell
                 Write-Verbose '  Outlook mailbox display sort order is defined and contains all found mail addresses.'
                 foreach ($CurrentOutlookProfileMailboxSortOrderMailbox in $CurrentOutlookProfileMailboxSortOrder) {
                     for ($i = 0; $i -le $RegistryPaths.count - 1; $i++) {
+                        try { WatchCatchableExitSignal } catch { }
+
                         if (($RegistryPaths[$i] -ilike "Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$OutlookProfile\*") -and ($i -ne $p)) {
                             if ($MailAddresses[$i] -ieq $CurrentOutlookProfileMailboxSortOrderMailbox) {
                                 $MailboxNewOrder += $i
@@ -2570,6 +2786,8 @@ end tell
                 }
             } else {
                 for ($i = 0; $i -le $RegistryPaths.count - 1; $i++) {
+                    try { WatchCatchableExitSignal } catch { }
+
                     if (($RegistryPaths[$i] -ilike "Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$OutlookProfile\*") -and ($i -ne $p)) {
                         $MailboxNewOrder += $i
                     }
@@ -2610,6 +2828,8 @@ end tell
         }
     }
 
+    try { WatchCatchableExitSignal } catch { }
+
     $TemplateFilesGroupSIDsOverall = @{}
 
     foreach ($SigOrOOF in ('signature', 'OOF')) {
@@ -2617,8 +2837,11 @@ end tell
             break
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         Write-Host
         Write-Host "Get all $($SigOrOOF) template files and categorize them @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
         $TemplateFilesCommon = @{}
         $TemplateFilesGroup = @{}
         $TemplateFilesGroupFilePart = @{}
@@ -2642,6 +2865,8 @@ end tell
         if ($TemplateIniPath -ne '') {
             Write-Host "  Compare $($SigOrOOF) ini entries and file system"
             foreach ($Enumerator in $TemplateIniSettings.GetEnumerator().name) {
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>']) {
                     if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
                         Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) ini index #$($Enumerator)) found in ini but not in signature template path." -ForegroundColor Yellow
@@ -2661,6 +2886,8 @@ end tell
                 }
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             Write-Host '  Sort template files according to configuration'
             $TemplateFilesSortCulture = (@($TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1)['SortCulture']
 
@@ -2669,7 +2896,7 @@ end tell
             # If the setting in the ini file is different, we only need to sort $TemplateFiles
             $TemplateFilesExisting = @(foreach ($Enumerator in $TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)]) { $Enumerator['<Set-OutlookSignatures template>'] })
             $TemplateFiles = @($TemplateFiles | Where-Object { $_.name -iin $TemplateFilesExisting })
-            $TemplateFiles | Add-Member -MemberType NoteProperty -Name TemplateIniSettingsIndex -Value $null
+            $TemplateFiles | Add-Member -MemberType NoteProperty -Name TemplateIniSettingsIndex -Value $null -Force
             $TemplateFilesSortOrder = @()
             $TemplateFilesIniIndex = @()
 
@@ -2721,7 +2948,11 @@ end tell
             }
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         foreach ($TemplateFile in $TemplateFiles) {
+            try { WatchCatchableExitSignal } catch { }
+
             $TemplateIniSettingsIndex = $TemplateFile.TemplateIniSettingsIndex
             $TemplateFileGroupSIDs = @{}
             Write-Host ("    '$($TemplateFile.Name)' ($($SigOrOOF) ini index #$($TemplateIniSettingsIndex))")
@@ -2780,14 +3011,18 @@ end tell
 
             $TemplateFilePartRegexKnown = '(' + (($TemplateFilePartRegexTimeAllow, $TemplateFilePartRegexTimeDeny, $TemplateFilePartRegexGroupAllow, $TemplateFilePartRegexGroupDeny, $TemplateFilePartRegexMailaddressAllow, $TemplateFilePartRegexMailaddressDeny, $TemplateFilePartRegexReplacementvariableAllow, $TemplateFilePartRegexReplacementvariableDeny, $TemplateFilePartRegexDefaultneworinternal, $TemplateFilePartRegexDefaultreplyfwdorexternal, $TemplateFilePartRegexWriteprotect) -join '|') + ')'
 
+            try { WatchCatchableExitSignal } catch { }
+
             # time based template
             $TemplateFileTimeActive = $true
             if (($TemplateFilePart -imatch $TemplateFilePartRegexTimeAllow) -or ($TemplateFilePart -imatch $TemplateFilePartRegexTimeDeny)) {
                 Write-Host '      Time based template'
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('TimeBasedTemplate')))) {
-                    Write-Host "        The 'time based template' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                    Write-Host '        Templates can not be activated or deactivated for specified time ranges.' -ForegroundColor Yellow
+                    Write-Host "        The 'time based template' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
                     Write-Host "        Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
                 } else {
+                    try { WatchCatchableExitSignal } catch { }
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::TimeBasedTemplate()
 
                     if ($FeatureResult -ne 'true') {
@@ -2800,6 +3035,8 @@ end tell
             if ($TemplateFileTimeActive -ne $true) {
                 continue
             }
+
+            try { WatchCatchableExitSignal } catch { }
 
             # common template
             if (($TemplateFilePart -inotmatch $TemplateFilePartRegexGroupAllow) -and ($TemplateFilePart -inotmatch $TemplateFilePartRegexMailaddressAllow) -and ($TemplateFilePart -inotmatch $TemplateFilePartRegexReplacementvariableAllow)) {
@@ -2819,6 +3056,8 @@ end tell
             }
 
             foreach ($TemplateClassificationDisplayOrderEntry in $TemplateClassificationDisplayOrder) {
+                try { WatchCatchableExitSignal } catch { }
+
                 # group specific template
                 if ($TemplateClassificationDisplayOrderEntry -ieq 'group') {
                     if (($TemplateFilePart -imatch $TemplateFilePartRegexGroupAllow) -or ($TemplateFilePart -imatch $TemplateFilePartRegexGroupDeny)) {
@@ -2874,6 +3113,8 @@ end tell
                     }
                 }
 
+                try { WatchCatchableExitSignal } catch { }
+
                 # mailbox specific template
                 if ($TemplateClassificationDisplayOrderEntry -ieq 'mail') {
                     if (($TemplateFilePart -imatch $TemplateFilePartRegexMailaddressAllow) -or ($TemplateFilePart -imatch $TemplateFilePartRegexMailaddressDeny)) {
@@ -2899,6 +3140,8 @@ end tell
                         }
                     }
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 # Replacement variable specific template
                 if ($TemplateClassificationDisplayOrderEntry -ieq 'replacementvariable') {
@@ -2926,6 +3169,8 @@ end tell
                     }
                 }
             }
+
+            try { WatchCatchableExitSignal } catch { }
 
             # DefaultNew, DefaultReplyFwd, Internal, External
             if ($TemplateFilePart -imatch $TemplateFilePartRegexDefaultneworinternal) {
@@ -2972,6 +3217,8 @@ end tell
                 }
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             # WriteProtect
             if ($TemplateFilePart -imatch $TemplateFilePartRegexWriteprotect) {
                 foreach ($TemplateFilePartTag in @(@([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexWriteprotect).captures.value) | Where-Object { $_ })) {
@@ -2985,6 +3232,8 @@ end tell
                 }
 
             }
+
+            try { WatchCatchableExitSignal } catch { }
 
             # unknown tags
             $x = ($TemplateFilePart -ireplace $TemplateFilePartRegexKnown, '').trim()
@@ -3001,6 +3250,7 @@ end tell
             Set-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -Value $TemplateFilesMailboxFilePart
             Set-Variable -Name "$($SigOrOOF)FilesReplacementvariable" -Value $TemplateFilesReplacementvariable
             Set-Variable -Name "$($SigOrOOF)FilesReplacementvariableFilePart" -Value $TemplateFilesReplacementvariableFilePart
+
             if ($SigOrOOF -ieq 'signature') {
                 $SignatureFilesDefaultNew = $TemplateFilesDefaultnewOrInternal
                 $SignatureFilesDefaultReplyFwd = $TemplateFilesDefaultreplyfwdOrExternal
@@ -3013,11 +3263,16 @@ end tell
     }
 
 
+    try { WatchCatchableExitSignal } catch { }
+
+
     if ($macOSSignaturesScriptable) {
         Write-Host
         Write-Host "Create copies of Outlook for Mac signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
         $SignaturePaths | ForEach-Object {
+            try { WatchCatchableExitSignal } catch { }
+
             @(@(@"
 tell application "Microsoft Outlook"
     set allSignatures to every signature
@@ -3057,6 +3312,9 @@ end tell
     }
 
 
+    try { WatchCatchableExitSignal } catch { }
+
+
     Write-Host
     Write-Host "Start Word background process @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
     if (($UseHtmTemplates -eq $true) -and (($CreateRtfSignatures -eq $false))) {
@@ -3080,13 +3338,23 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
         # Start Word dummy object, set process priority, start real Word object, set process priority, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the software
         try {
+            try { WatchCatchableExitSignal } catch { }
+
+            Set-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value 0 -ErrorAction SilentlyContinue
+
             $tempVerbosePreference = $VerbosePreference
             $VerbosePreference = 'SilentlyContinue'
             $script:COMWordDummy = New-Object -ComObject Word.Application
             $VerbosePreference = $tempVerbosePreference
             $script:COMWordDummy.Visible = $false
 
+            # Restore original Word AlertIfNotDefault setting
+            Set-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value $script:WordAlertIfNotDefaultOriginal -ErrorAction SilentlyContinue | Out-Null
+
+
             if ($script:COMWordDummy) {
+                try { WatchCatchableExitSignal } catch { }
+
                 # Set Word process priority
                 $script:COMWordDummyCaption = $script:COMWordDummy.Caption
                 $script:COMWordDummy.Caption = "Set-OutlookSignatures $([guid]::NewGuid())"
@@ -3097,13 +3365,23 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$script:COMWordDummyPid""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $WordProcessPriority }
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
+            Set-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value 0 -ErrorAction SilentlyContinue
+
             $tempVerbosePreference = $VerbosePreference
             $VerbosePreference = 'SilentlyContinue'
             $script:COMWord = New-Object -ComObject Word.Application
             $VerbosePreference = $tempVerbosePreference
             $script:COMWord.Visible = $false
 
+            # Restore original Word AlertIfNotDefault setting
+            Set-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value $script:WordAlertIfNotDefaultOriginal -ErrorAction SilentlyContinue | Out-Null
+
+
             if ($script:COMWord) {
+                try { WatchCatchableExitSignal } catch { }
+
                 # Set Word process priority
                 $script:COMWordCaption = $script:COMWord.Caption
                 $script:COMWord.Caption = "Set-OutlookSignatures $([guid]::NewGuid())"
@@ -3120,10 +3398,16 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 Remove-Variable COMWordDummy -Scope 'script'
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
         } catch {
             Write-Host '  Word not installed or not working correctly. Install or repair Word and the registry information about Word, or consider using HTM templates instead of DOCX tempates. Exit.' -ForegroundColor Red
             $error[0]
+
+            # Restore original Word AlertIfNotDefault setting
+            Set-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value $script:WordAlertIfNotDefaultOriginal -ErrorAction SilentlyContinue | Out-Null
+
             exit 1
         }
     }
@@ -3133,12 +3417,18 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
     $script:SignatureFilesDone = @()
 
     if ($SimulateUser) {
+        try { WatchCatchableExitSignal } catch { }
+
         Get-ChildItem (Join-Path -Path ($SignaturePaths[0]) -ChildPath '___Mailbox *') -Attributes Directory -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | ForEach-Object {
+            try { WatchCatchableExitSignal } catch { }
+
             RemoveItemAlternativeRecurse $($_.FullName)
         }
     }
 
     for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
+        try { WatchCatchableExitSignal } catch { }
+
         if (($AccountNumberRunning -eq $MailAddresses.IndexOf($MailAddresses[$AccountNumberRunning])) -and ($($MailAddresses[$AccountNumberRunning]) -like '*@*')) {
             Write-Host
             Write-Host "Mailbox $($MailAddresses[$AccountNumberRunning]) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
@@ -3152,7 +3442,6 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $ADPropsCurrentMailbox = $ADPropsMailboxes[$AccountNumberRunning]
             }
 
-
             Write-Host "  Mailbox is member of license group: $(try { [SetOutlookSignatures.BenefactorCircle]::CLCGM() -eq $true } catch { $false }) (verbose output for details)"
 
 
@@ -3162,17 +3451,22 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             }
 
             if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
+                try { WatchCatchableExitSignal } catch { }
 
                 if ($null -ne $TrustsToCheckForGroups[0]) {
                     $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($ADPropsMailboxesUserDomain[$AccountNumberRunning])")
 
                     try {
                         $Search.filter = "(distinguishedname=$($ADPropsCurrentMailbox.manager))"
+                        try { WatchCatchableExitSignal } catch { }
                         $ADPropsCurrentMailboxManager = ([ADSI]"$(($Search.FindOne()).path)").Properties
+                        try { WatchCatchableExitSignal } catch { }
 
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$($ADPropsMailboxesUserDomain[$AccountNumberRunning])")
                         $Search.filter = "(distinguishedname=$($ADPropsCurrentMailbox.manager))"
+                        try { WatchCatchableExitSignal } catch { }
                         $ADPropsCurrentMailboxManagerLdap = ([ADSI]"$(($Search.FindOne()).path)").Properties
+                        try { WatchCatchableExitSignal } catch { }
 
                         foreach ($keyName in @($ADPropsCurrentMailboxManagerLdap.Keys)) {
                             if (
@@ -3197,11 +3491,16 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         $SIDsToCheckInTrusts += (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value
                     }
 
+                    try { WatchCatchableExitSignal } catch { }
+
                     try {
                         # Security groups, global and universal, forest-wide
                         Write-Verbose "      LDAP query for security groups (global and universal, forest-wide, via tokengroupsglobalanduniversal) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
                         $UserAccount = [ADSI]"LDAP://$($ADPropsCurrentMailbox.distinguishedname)"
+                        try { WatchCatchableExitSignal } catch { }
                         $UserAccount.GetInfoEx(@('tokengroupsglobalanduniversal'), 0)
+                        try { WatchCatchableExitSignal } catch { }
+
                         foreach ($sidBytes in $UserAccount.Properties.tokengroupsglobalanduniversal) {
                             $sid = (New-Object System.Security.Principal.SecurityIdentifier($sidbytes, 0)).value
                             Write-Verbose "        $sid"
@@ -3209,11 +3508,19 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                             $SIDsToCheckInTrusts += $sid
                         }
 
+                        try { WatchCatchableExitSignal } catch { }
+
                         # Distribution groups (static only)
+                        try { WatchCatchableExitSignal } catch { }
                         Write-Verbose "      GC query for static distribution groups (global and universal, forest-wide) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
                         $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')")
                         $Search.filter = "(&(objectClass=group)(!(groupType:1.2.840.113556.1.4.803:=2147483648))(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
+
+                        try { WatchCatchableExitSignal } catch { }
+
                         foreach ($DistributionGroup in $search.findall()) {
+                            try { WatchCatchableExitSignal } catch { }
+
                             if ($DistributionGroup.properties.objectsid) {
                                 $sid = (New-Object System.Security.Principal.SecurityIdentifier $($DistributionGroup.properties.objectsid), 0).value
                                 Write-Verbose "        $sid"
@@ -3229,15 +3536,23 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                             }
                         }
 
+                        try { WatchCatchableExitSignal } catch { }
+
                         # Domain local groups
                         if ($IncludeMailboxForestDomainLocalGroups -eq $true) {
                             Write-Verbose "      LDAP query for domain local groups (security and distribution, one query per domain) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                             foreach ($DomainToCheckForDomainLocalGroups in @(($LookupDomainsToTrusts.GetEnumerator() | Where-Object { $_.Value -ieq $LookupDomainsToTrusts[$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')] }).name)) {
+                                try { WatchCatchableExitSignal } catch { }
                                 Write-Verbose "        $($DomainToCheckForDomainLocalGroups) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
                                 $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$($DomainToCheckForDomainLocalGroups)")
                                 $Search.filter = "(&(objectClass=group)(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($ADPropsCurrentMailbox.distinguishedname)))"
+
+                                try { WatchCatchableExitSignal } catch { }
+
                                 foreach ($LocalGroup in $search.findall()) {
+                                    try { WatchCatchableExitSignal } catch { }
+
                                     if ($LocalGroup.properties.objectsid) {
                                         $sid = (New-Object System.Security.Principal.SecurityIdentifier $($LocalGroup.properties.objectsid), 0).value
                                         Write-Verbose "          $sid"
@@ -3259,6 +3574,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         $error[0]
                     }
 
+                    try { WatchCatchableExitSignal } catch { }
+
                     $GroupsSIDs = @($GroupsSIDs | Select-Object -Unique | Sort-Object)
 
                     # Loop through all domains outside the mailbox account's home forest to check if the mailbox account has a group membership there
@@ -3271,6 +3588,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         $LdapFilterSIDs = '(|'
 
                         foreach ($SidToCheckInTrusts in $SIDsToCheckInTrusts) {
+                            try { WatchCatchableExitSignal } catch { }
+
                             try {
                                 $SidHex = @()
                                 $ot = New-Object System.Security.Principal.SecurityIdentifier($SidToCheckInTrusts)
@@ -3295,16 +3614,21 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                     if ($LdapFilterSids -ilike '*(objectsid=*') {
                         # Across each trust, search for all Foreign Security Principals matching a SID from our list
                         foreach ($TrustToCheckForFSPs in @(($LookupDomainsToTrusts.GetEnumerator() | Where-Object { $_.Value -ine $LookupDomainsToTrusts[$(($($ADPropsCurrentMailbox.distinguishedname) -split ',DC=')[1..999] -join '.')] }).value | Select-Object -Unique)) {
+                            try { WatchCatchableExitSignal } catch { }
 
                             Write-Host "    $($TrustToCheckForFSPs) (trusted domain/forest of mailbox home forest) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                             $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustToCheckForFSPs)")
                             $Search.filter = "(&(objectclass=foreignsecurityprincipal)$LdapFilterSIDs)"
 
+                            try { WatchCatchableExitSignal } catch { }
                             $fsps = $Search.FindAll()
+                            try { WatchCatchableExitSignal } catch { }
 
                             if ($fsps.count -gt 0) {
                                 foreach ($fsp in $fsps) {
+                                    try { WatchCatchableExitSignal } catch { }
+
                                     if (($fsp.path -ne '') -and ($null -ne $fsp.path)) {
                                         # A Foreign Security Principal (FSP) is created in each (sub)domain in which it is granted permissions
                                         # A FSP it can only be member of a domain local group - so we set the searchroot to the (sub)domain of the Foreign Security Principal
@@ -3317,10 +3641,14 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                                                 $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$((($fsp.path -split ',DC=')[1..999] -join '.'))")
                                                 $Search.filter = "(&(objectClass=group)(groupType:1.2.840.113556.1.4.803:=4)(member:1.2.840.113556.1.4.1941:=$($fsp.Properties.distinguishedname)))"
 
+                                                try { WatchCatchableExitSignal } catch { }
                                                 $fspGroups = $Search.FindAll()
+                                                try { WatchCatchableExitSignal } catch { }
 
                                                 if ($fspGroups.count -gt 0) {
                                                     foreach ($group in $fspgroups) {
+                                                        try { WatchCatchableExitSignal } catch { }
+
                                                         $sid = (New-Object System.Security.Principal.SecurityIdentifier $($group.properties.objectsid), 0).value
                                                         Write-Verbose "        $sid"
                                                         $GroupsSIDs += $sid
@@ -3362,12 +3690,14 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                                     $z = $z.$y
                                 }
 
-                                $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z
+                                $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name ($GraphUserAttributeMappingName.Name) -Value $z -Force
                             }
 
-                            $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentMailboxManager.userprincipalname).photo
-                            $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null
+                            $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $ADPropsCurrentMailboxManager.userprincipalname).photo -Force
+                            $ADPropsCurrentMailboxManager | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null -Force
                         }
+
+                        try { WatchCatchableExitSignal } catch { }
 
                         Write-Host '    Microsoft Graph'
 
@@ -3384,11 +3714,13 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 Write-Host '    Skipping, as mailbox could not be found in your environment in an earlier step.' -ForegroundColor yellow
             }
 
-            $ADPropsCurrentMailbox | Add-Member -MemberType NoteProperty -Name 'GroupsSIDs' -Value $GroupsSIDs
+            $ADPropsCurrentMailbox | Add-Member -MemberType NoteProperty -Name 'GroupsSIDs' -Value $GroupsSIDs -Force
 
             if ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress) {
-                $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'GroupsSIDs' -Value $GroupsSIDs
+                $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'GroupsSIDs' -Value $GroupsSIDs -Force
             }
+
+            try { WatchCatchableExitSignal } catch { }
 
             Write-Host "  Get SMTP addresses @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
             $CurrentMailboxSMTPAddresses = @()
@@ -3404,6 +3736,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox.' -ForegroundColor Yellow
                 Write-Host "    Using '$($MailAddresses[$AccountNumberRunning])' as single known SMTP address." -ForegroundColor Yellow
             }
+
+            try { WatchCatchableExitSignal } catch { }
 
             Write-Host "  Get data for replacement variables @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
             $ReplaceHash = @{}
@@ -3422,6 +3756,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 exit 1
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             $PictureVariablesArray = @()
 
             foreach ($VariableName in @(foreach ($VariableName in @(
@@ -3437,12 +3773,16 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                     }
                 )
             ) {
+                try { WatchCatchableExitSignal } catch { }
+
                 New-Variable -Name $($($VariableName).Trim('$') + 'Guid') -Value (New-Guid).Guid -Force
 
                 $PictureVariablesArray += , @($VariableName, $(Get-Variable -Name $($VariableName.Trim('$') + 'Guid') -ValueOnly))
             }
 
             foreach ($replaceKey in @($replaceHash.Keys | Sort-Object -Culture $TemplateFilesSortCulture)) {
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($replaceKey -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' })) {
                     if ($($replaceHash[$replaceKey])) {
                         Write-Verbose "    $($replaceKey): $($replaceHash[$replaceKey])"
@@ -3454,20 +3794,30 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 }
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             Write-Host '    Export available images'
             foreach ($VariableName in $PictureVariablesArray) {
+                try { WatchCatchableExitSignal } catch { }
+
                 Write-Verbose "    $($VariableName[0]), $([math]::ceiling(($ReplaceHash[$VariableName[0]]).Length / 1KB)) KiB @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
                 if ($null -ne $($ReplaceHash[$VariableName[0]])) {
                     [System.IO.File]::WriteAllBytes($(((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')))), $($ReplaceHash[$VariableName[0]]))
                 }
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             Write-Host "  Download roaming signatures from Exchange Online @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
             if ($MirrorCloudSignatures -eq $true) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesDownload')))) {
-                    Write-Host "    The 'MirrorCloudSignatures' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                    Write-Host '    Roaming signatures can not be downloaded from Exchange Online.' -ForegroundColor Yellow
+                    Write-Host "    The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
                     Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
                 } else {
+                    try { WatchCatchableExitSignal } catch { }
+
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::RoamingSignaturesDownload()
 
                     if ($FeatureResult -ne 'true') {
@@ -3477,6 +3827,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 }
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
 
             $CurrentTemplateIsForAliasSmtp = $null
 
@@ -3485,6 +3837,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
             # Delete photos from file system
             foreach ($VariableName in $PictureVariablesArray) {
+                try { WatchCatchableExitSignal } catch { }
+
                 Remove-Item -LiteralPath (((Join-Path -Path $script:tempDir -ChildPath ($VariableName[0] + $VariableName[1] + '.jpeg')))) -Force -ErrorAction SilentlyContinue
                 $ReplaceHash.Remove($VariableName[0])
                 $ReplaceHash.Remove(($VariableName[0][-999..-2] -join '') + 'DELETEEMPTY$')
@@ -3495,18 +3849,20 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             if (((($SetCurrentUserOutlookWebSignature -eq $true)) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
                 if ((-not $SimulateUser)) {
                     if (-not $script:WebServicesDllPath) {
+                        try { WatchCatchableExitSignal } catch { }
+
                         Write-Host "  Set up environment for connection to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
                         $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
                         try {
                             Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
-                            if ($IsWindows) {
+                            if (-not $IsLinux) {
                                 Unblock-File -LiteralPath $script:WebServicesDllPath
                             }
                         } catch {
                         }
                     }
 
-                    $error.clear()
+                    try { WatchCatchableExitSignal } catch { }
 
                     ConnectEWS -MailAddress $PrimaryMailboxAddress -Indent '  '
 
@@ -3517,12 +3873,10 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         }
 
                         if ($SetCurrentUserOOFMessage -and (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648))) {
-                            Write-Host '   out of office (OOF) message(s) cannot be set' -ForegroundColor Red
+                            Write-Host '   out-of-office (OOF) message(s) cannot be set' -ForegroundColor Red
                             $SetCurrentUserOOFMessage = $false
                         }
                     }
-                } else {
-                    $error.Clear()
                 }
 
                 if ($SetCurrentUserOutlookWebSignature) {
@@ -3532,9 +3886,12 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         Write-Host '    Simulation mode enabled, skipping task.' -ForegroundColor Yellow
                     } else {
                         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOutlookWebSignature')))) {
-                            Write-Host "    The 'SetCurrentUserOutlookWebSignature' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                            Write-Host '    Signature(s) can not be set in Outlook Web.' -ForegroundColor Yellow
+                            Write-Host "    The 'SetCurrentUserOutlookWebSignature' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
                             Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
                         } else {
+                            try { WatchCatchableExitSignal } catch { }
+
                             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SetCurrentUserOutlookWebSignature()
 
                             if ($FeatureResult -ne 'true') {
@@ -3547,9 +3904,12 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                             Write-Host "  Set roaming Outlook Web signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesSetDefaults')))) {
-                                Write-Host "    The 'MirrorCloudSignatures' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                                Write-Host '    Roaming signature(s) can not be set in Outlook Web. This also affects New Outlook on Windows.' -ForegroundColor Yellow
+                                Write-Host "    The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
                                 Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
                             } else {
+                                try { WatchCatchableExitSignal } catch { }
+
                                 $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::RoamingSignaturesSetDefaults()
 
                                 if ($FeatureResult -ne 'true') {
@@ -3562,16 +3922,19 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 }
 
                 if ($SetCurrentUserOOFMessage) {
-                    Write-Host "  Process out of office (OOF) auto replies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                    Write-Host "  Process out-of-office (OOF) auto replies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                     if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOOFMessage')))) {
-                        Write-Host "    The 'SetCurrentUserOOFMessage' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                        Write-Host '    The out-of-office replies can not be set.' -ForegroundColor Yellow
+                        Write-Host "    The 'SetCurrentUserOOFMessage' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
                         Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
                     } else {
+                        try { WatchCatchableExitSignal } catch { }
+
                         $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SetCurrentUserOOFMessage()
 
                         if ($FeatureResult -ne 'true') {
-                            Write-Host '    Error setting current user out of office message.' -ForegroundColor Yellow
+                            Write-Host '    Error setting current user out-of-office message.' -ForegroundColor Yellow
                             Write-Host "    $FeatureResult" -ForegroundColor Yellow
                         }
                     }
@@ -3580,6 +3943,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         }
     }
 
+    try { WatchCatchableExitSignal } catch { }
 
     # Close Word, as it is no longer needed
     if ($script:COMWord) {
@@ -3587,10 +3951,14 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
         } catch {
         }
+
         $script:COMWord.Quit([ref]$false)
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWord) | Out-Null
         Remove-Variable -Name 'COMWord' -Scope 'script'
     }
+
+
+    try { WatchCatchableExitSignal } catch { }
 
 
     # Delete old signatures created by this script, which are no longer available in $SignatureTemplatePath
@@ -3600,9 +3968,12 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         Write-Host "Remove old signatures created by this script, which are no longer centrally available @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DeleteScriptCreatedSignaturesWithoutTemplate')))) {
-            Write-Host "  The 'DeleteScriptCreatedSignaturesWithoutTemplate' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+            Write-Host '  Can not delete old signatures created by Set-OutlookSignatures, which are no longer centrally available.' -ForegroundColor Yellow
+            Write-Host "  The 'DeleteScriptCreatedSignaturesWithoutTemplate' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
             Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
         } else {
+            try { WatchCatchableExitSignal } catch { }
+
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::DeleteScriptCreatedSignaturesWithoutTemplate()
 
             if ($FeatureResult -ne 'true') {
@@ -3612,15 +3983,22 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         }
     }
 
+
+    try { WatchCatchableExitSignal } catch { }
+
+
     # Delete user-created signatures if $DeleteUserCreatedSignatures -eq $true
     if ($DeleteUserCreatedSignatures -eq $true) {
         Write-Host
         Write-Host "Remove user-created signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DeleteUserCreatedSignatures')))) {
-            Write-Host "  The 'DeleteUserCreatedSignatures' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+            Write-Host '  Can not remove user-created signatures.' -ForegroundColor Yellow
+            Write-Host "  The 'DeleteUserCreatedSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
             Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
         } else {
+            try { WatchCatchableExitSignal } catch { }
+
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::DeleteUserCreatedSignatures()
 
             if ($FeatureResult -ne 'true') {
@@ -3630,14 +4008,19 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         }
     }
 
+    try { WatchCatchableExitSignal } catch { }
+
     # Upload local signatures to Exchange Online as roaming signatures
     if ($MirrorCloudSignatures -eq $true) {
         Write-Host
         Write-Host "Upload local signatures to Exchange Online as roaming signatures for current user @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesUpload')))) {
-            Write-Host "  The 'MirrorCloudSignatures' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+            Write-Host '  Signature(s) can not be uploaded to Exchange Online. This affects Outlook Web and New Outlook on Windows.' -ForegroundColor Yellow
+            Write-Host "  The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
             Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
         } else {
+            try { WatchCatchableExitSignal } catch { }
+
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::RoamingSignaturesUpload()
 
             if ($FeatureResult -ne 'true') {
@@ -3648,6 +4031,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
     }
 
 
+    try { WatchCatchableExitSignal } catch { }
+
+
     # Prepare data for Outlook add-in
     Write-Host
     Write-Host "Prepare data for Outlook add-in @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
@@ -3656,14 +4042,20 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
     [SetOutlookSignatures.Common]::PrepareOutlookAddinDataCommon()
 
 
+    try { WatchCatchableExitSignal } catch { }
+
+
     # Create/update 'My signatures, powered by Set-OutlookSignatures Benefactor Circle' email draft
     if ($SignatureCollectionInDrafts -eq $true) {
         Write-Host
         Write-Host "Create 'My signatures, powered by Set-OutlookSignatures Benefactor Circle' email draft for current user @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignatureCollectionInDrafts')))) {
-            Write-Host "  The 'SignatureCollectionInDrafts' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+            Write-Host '  Can not create email draft containing all signatures.' -ForegroundColor Yellow
+            Write-Host "  The 'SignatureCollectionInDrafts' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
             Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
         } else {
+            try { WatchCatchableExitSignal } catch { }
+
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SignatureCollectionInDrafts()
 
             if ($FeatureResult -ne 'true') {
@@ -3672,6 +4064,10 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             }
         }
     }
+
+
+    try { WatchCatchableExitSignal } catch { }
+
 
     # Copy signatures to additional path if $AdditionalSignaturePath is set
     if ($AdditionalSignaturePath) {
@@ -3683,9 +4079,12 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             Write-Host '    Simulation mode enabled, AdditionalSignaturePath already used as output directory'
         } else {
             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('AdditionalSignaturePath')))) {
-                Write-Host "    The 'AdditionalSignaturePath' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                Write-Host '    Can not copy signatures to additional signature path.' -ForegroundColor Yellow
+                Write-Host "    The 'AdditionalSignaturePath' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
                 Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
             } else {
+                try { WatchCatchableExitSignal } catch { }
+
                 $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::AdditionalSignaturePath()
 
                 if ($FeatureResult -ne 'true') {
@@ -3696,8 +4095,10 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         }
     }
 
+    try { WatchCatchableExitSignal } catch { }
+
     if (
-        ($script:CurrentUserDummyMailbox -eq $true) -or
+        ($script:GraphUserDummyMailbox -eq $true) -or
         ($OutlookUseNewOutlook -eq $true)
     ) {
         RemoveItemAlternativeRecurse $SignaturePaths[0] -SkipFolder
@@ -3706,28 +4107,33 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
 
 function ResolveToSid($string) {
+    try { WatchCatchableExitSignal } catch { }
+
     # Find the last ':', use everything right from it and remove surrounding whitespace
     $string = (($string -split ':')[-1]).trim()
 
     if ($string.contains('\')) {
-        # is already a NT4 style format
+        # is already in pre-Windows 2000 format
         $local:NTName = $string
     } elseif ($string.contains(' ')) {
-        # make it a NT4 style format
+        # format it in pre-Windows 2000 format
         $local:NTName = ([regex]' ').replace($string, '\', 1)
     } else {
         # Invalid
         return $null
     }
 
-    if (($null -ne $TrustsToCheckForGroups[0]) -and (-not ($local:NTName -imatch '^(AzureAD\\|EntraID\\)'))) {
+    if (($null -ne $TrustsToCheckForGroups[0]) -and ($local:NTName -inotmatch '^(AzureAD\\|EntraID\\)')) {
         try {
+            try { WatchCatchableExitSignal } catch { }
             $local:x = (New-Object System.Security.Principal.NTAccount($local:NTName)).Translate([System.Security.Principal.SecurityIdentifier]).value
 
             if ($local:x) {
                 return $local:x
             }
         } catch {
+            try { WatchCatchableExitSignal } catch { }
+
             try {
                 # No group with this sAMAccountName found. Interpreting it as a display name.
 
@@ -3736,7 +4142,9 @@ function ResolveToSid($string) {
                 $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($local:NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
                 $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (4, ($local:NTName -split '\\')[1])) # 4 = ADS_NAME_TYPE_DISPLAY
 
+                try { WatchCatchableExitSignal } catch { }
                 $local:x = $(((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
+                try { WatchCatchableExitSignal } catch { }
 
                 [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
                 Remove-Variable -Name 'objTrans'
@@ -3746,6 +4154,8 @@ function ResolveToSid($string) {
                     return $local:x
                 }
             } catch {
+                try { WatchCatchableExitSignal } catch { }
+
                 try {
                     # Let the API guess what it is
 
@@ -3754,7 +4164,9 @@ function ResolveToSid($string) {
                     $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (1, ($local:NTName -split '\\')[0])) # 1 = ADS_NAME_INITTYPE_DOMAIN
                     $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (8, ($local:NTName -split '\\')[1])) # 8 = ADS_NAME_TYPE_UNKNOWN
 
+                    try { WatchCatchableExitSignal } catch { }
                     $local:x = $(((New-Object System.Security.Principal.NTAccount(($objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 3)))).Translate([System.Security.Principal.SecurityIdentifier])).value)
+                    try { WatchCatchableExitSignal } catch { }
 
                     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
                     Remove-Variable -Name 'objTrans'
@@ -3770,19 +4182,48 @@ function ResolveToSid($string) {
             }
         }
     } else {
-        $tempFilterOrder = @(
-            "((onPremisesNetBiosName eq '$($local:NTName.Split('\')[0])') and (onPremisesSamAccountName eq '$($local:NTName.Split('\')[1])'))"
-            "((onPremisesNetBiosName eq '$($local:NTName.Split('\')[0])') and (displayName eq '$($local:NTName.Split('\')[1])'))"
-            "((onPremisesDomainName eq '$($local:NTName.Split('\')[0])') and (onPremisesSamAccountName eq '$($local:NTName.Split('\')[1])'))"
-            "((onPremisesDomainName eq '$($local:NTName.Split('\')[0])') and (displayName eq '$($local:NTName.Split('\')[1])'))"
-            "(proxyAddresses/any(x:x eq 'smtp:$($local:NTName.Split('\')[1])'))"
-            "(mailNickname eq '$($local:NTName.Split('\')[1])')"
-            "(displayName eq '$($local:NTName.Split('\')[1])')"
-        )
+        $tempFilterOrder = @()
+
+        # Object ID
+        if ([guid]::TryParse($local:NTName.Split('\')[1], $([ref][guid]::Empty))) {
+            $tempFilterOrder += "(id eq '$($local:NTName.Split('\')[1])')"
+        }
+
+        # securityIdentifier
+        try {
+            $null = [System.Security.Principal.SecurityIdentifier]$($local:NTName.Split('\')[1])
+            $tempFilterOrder += "(securityIdentifier eq '$($local:NTName.Split('\')[1])')"
+        } catch {
+            # Do nothing
+        }
+
+
+        if ($local:NTName -inotmatch '^(AzureAD\\|EntraID\\)') {
+            if ($local:NTName.Split('\')[0] -inotlike '*.*') {
+                # NetBIOS domain name pattern
+                $tempFilterOrder += "((onPremisesNetBiosName eq '$($local:NTName.Split('\')[0])') and (onPremisesSamAccountName eq '$($local:NTName.Split('\')[1])'))"
+                $tempFilterOrder += "((onPremisesNetBiosName eq '$($local:NTName.Split('\')[0])') and (displayName eq '$($local:NTName.Split('\')[1])'))"
+            } else {
+                # DNS domain name pattern
+                $tempFilterOrder += "((onPremisesDomainName eq '$($local:NTName.Split('\')[0])') and (onPremisesSamAccountName eq '$($local:NTName.Split('\')[1])'))"
+                $tempFilterOrder += "((onPremisesDomainName eq '$($local:NTName.Split('\')[0])') and (displayName eq '$($local:NTName.Split('\')[1])'))"
+            }
+        }
+
+        # Email address pattern
+        if ($local:NTName.Split('\')[1] -ilike '*@*') {
+            $tempFilterOrder += "(proxyAddresses/any(x:x eq 'smtp:$($local:NTName.Split('\')[1])'))"
+        }
+
+        $tempFilterOrder += "(mailNickname eq '$($local:NTName.Split('\')[1])')"
+        $tempFilterOrder += "(displayName eq '$($local:NTName.Split('\')[1])')"
 
         # Search Graph for groups
         ForEach ($tempFilter in $tempFilterOrder) {
+            try { WatchCatchableExitSignal } catch { }
+
             $tempResults = (GraphFilterGroups $tempFilter)
+
             if (($tempResults.error -eq $false) -and ($tempResults.groups.count -eq 1) -and $($tempResults.groups[0].value)) {
                 if ($($tempResults.groups[0].value.securityidentifier)) {
                     return $($tempResults.groups[0].value.securityidentifier)
@@ -3792,7 +4233,10 @@ function ResolveToSid($string) {
 
         # Search Graph for users
         ForEach ($tempFilter in $tempFilterOrder) {
+            try { WatchCatchableExitSignal } catch { }
+
             $tempResults = (GraphFilterUsers $tempFilter)
+
             if (($tempResults.error -eq $false) -and ($tempResults.users.count -eq 1) -and $($tempResults.users[0].value)) {
                 if ($($tempResults.users[0].value.securityidentifier)) {
                     return $($tempResults.users[0].value.securityidentifier)
@@ -3823,6 +4267,8 @@ function GetBitness {
     )
 
     Begin {
+        try { WatchCatchableExitSignal } catch { }
+
         [int]$MACHINE_OFFSET = 4
         [int]$PE_POINTER_OFFSET = 60
 
@@ -3886,12 +4332,14 @@ function GetBitness {
     Process {
         ForEach ($file in $fullname) {
             Try {
+                try { WatchCatchableExitSignal } catch { }
                 $runtimeAssembly = [System.Reflection.Assembly]::ReflectionOnlyLoadFrom($file)
             } Catch {
                 $runtimeAssembly = $null
             }
 
             Try {
+                try { WatchCatchableExitSignal } catch { }
                 $assembly = [System.Reflection.AssemblyName]::GetAssemblyName($file)
             } Catch {
                 $assembly = $null
@@ -3899,6 +4347,7 @@ function GetBitness {
 
             if ((-not $dotnetOnly) -or ($assembly -and $runtimeAssembly)) {
                 $data = New-Object System.Byte[] 4096
+
                 Try {
                     $stream = New-Object System.IO.FileStream -ArgumentList $file, Open, Read
                 } Catch {
@@ -3910,8 +4359,11 @@ function GetBitness {
                 }
 
                 If ($stream) {
+                    try { WatchCatchableExitSignal } catch { }
+
                     [uint16]$machineUint = 0xffff
                     [int]$read = $stream.Read($data , 0 , $data.Count)
+
                     If ($read -gt $PE_POINTER_OFFSET) {
                         If (($data[0] -eq 0x4d) -and ($data[1] -eq 0x5a)) {
                             ## MZ
@@ -3930,6 +4382,8 @@ function GetBitness {
                                         $pekinds = $null
                                         $imageFileMachine = $null
                                     }
+
+                                    try { WatchCatchableExitSignal } catch { }
 
                                     [pscustomobject][ordered]@{
                                         'File'                = $file
@@ -3977,6 +4431,8 @@ function EvaluateAndSetSignatures {
     }
 
     foreach ($TemplateGroup in ('common', 'group', 'mailbox', 'replacementvariable')) {
+        try { WatchCatchableExitSignal } catch { }
+
         Write-Host "$Indent  Process $TemplateGroup $(if($TemplateGroup -iin ('group', 'mailbox', 'replacementvariable')){'specific '})templates @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
         if (-not (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly -ErrorAction SilentlyContinue)) {
@@ -3984,6 +4440,8 @@ function EvaluateAndSetSignatures {
         }
 
         for ($TemplateFileIndex = 0; $TemplateFileIndex -lt (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly).count; $TemplateFileIndex++) {
+            try { WatchCatchableExitSignal } catch { }
+
             $TemplateFile = (Get-Variable -Name "$($SigOrOOF)Files" -ValueOnly)[$TemplateFileIndex]
             $TemplateIniSettingsIndex = $TemplateFile.TemplateIniSettingsIndex
 
@@ -4003,6 +4461,7 @@ function EvaluateAndSetSignatures {
             $TemplateAllowed = $false
             $CurrentTemplateIsForAliasSmtp = $null
 
+            try { WatchCatchableExitSignal } catch { }
 
             # check for allow entries
             Write-Host "$Indent        Allows"
@@ -4010,6 +4469,8 @@ function EvaluateAndSetSignatures {
                 $TemplateAllowed = $true
                 Write-Host "$Indent          Common: Template is classified as common template valid for all mailboxes"
             } elseif ($TemplateGroup -ieq 'group') {
+                try { WatchCatchableExitSignal } catch { }
+
                 $tempAllowCount = 0
 
                 foreach ($GroupsSid in $GroupsSIDs) {
@@ -4020,6 +4481,8 @@ function EvaluateAndSetSignatures {
                         break
                     }
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 if ($tempAllowCount -eq 0) {
                     Write-Host "$Indent          No group match for current mailbox, checking current user specific allows"
@@ -4038,6 +4501,8 @@ function EvaluateAndSetSignatures {
                     Write-Host "$Indent          Group: Mailbox and current user are not member of any allowed group"
                 }
             } elseif ($TemplateGroup -ieq 'mailbox') {
+                try { WatchCatchableExitSignal } catch { }
+
                 $tempAllowCount = 0
 
                 foreach ($CurrentMailboxSmtpaddress in $CurrentMailboxSmtpAddresses) {
@@ -4050,8 +4515,12 @@ function EvaluateAndSetSignatures {
                     }
                 }
 
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($tempAllowCount -eq 0) {
                     Write-Host "$Indent          No email address match for current mailbox, checking current user specific allows"
+
+                    try { WatchCatchableExitSignal } catch { }
 
                     foreach ($CurrentUserSmtpaddress in $ADPropsCurrentUser.proxyaddresses) {
                         if ((Get-Variable -Name "$($SigOrOOF)FilesMailboxFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[CURRENTUSER:$($CurrentUserSmtpAddress -ireplace '^smtp:', '')``]*") {
@@ -4068,6 +4537,8 @@ function EvaluateAndSetSignatures {
                     Write-Host "$Indent          Email address: Mailbox and current user do not have any allowed email address"
                 }
             } elseif ($TemplateGroup -ieq 'replacementvariable') {
+                try { WatchCatchableExitSignal } catch { }
+
                 $tempAllowCount = 0
 
                 foreach ($replaceKey in @($replaceHash.Keys | Sort-Object -Culture $TemplateFilesSortCulture)) {
@@ -4086,6 +4557,7 @@ function EvaluateAndSetSignatures {
                 }
             }
 
+            try { WatchCatchableExitSignal } catch { }
 
             # check for deny entries
             if ($TemplateAllowed -eq $true) {
@@ -4102,6 +4574,8 @@ function EvaluateAndSetSignatures {
                     }
                 }
 
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($tempDenyCount -eq 0) {
                     Write-Host "$Indent          No group match for current mailbox, checking current user specific denies"
 
@@ -4113,11 +4587,15 @@ function EvaluateAndSetSignatures {
                             break
                         }
                     }
+
+                    try { WatchCatchableExitSignal } catch { }
                 }
 
                 if ($tempDenyCount -eq 0) {
                     Write-Host "$Indent          Group: Mailbox and current user are not member of any denied group"
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 # check for mail address deny
                 $tempDenyCount = 0
@@ -4131,6 +4609,8 @@ function EvaluateAndSetSignatures {
                     }
                 }
 
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($tempDenyCount -eq 0) {
                     Write-Host "$Indent          No email address match for current mailbox, checking current user specific denies"
 
@@ -4142,11 +4622,15 @@ function EvaluateAndSetSignatures {
                             break
                         }
                     }
+
+                    try { WatchCatchableExitSignal } catch { }
                 }
 
                 if ($tempDenyCount -eq 0) {
                     Write-Host "$Indent          Email address: Mailbox and current user do not have any denied email address"
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 # check for replacement variable deny
                 $tempDenyCount = 0
@@ -4167,6 +4651,8 @@ function EvaluateAndSetSignatures {
                 }
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             # result
             if ($Template -and ($TemplateAllowed -eq $true)) {
                 Write-Host "$Indent        Use template as there is at least one allow and no deny"
@@ -4182,6 +4668,9 @@ function EvaluateAndSetSignatures {
                     }
                 } else {
                     $Signature = $Template
+
+                    try { WatchCatchableExitSignal } catch { }
+
                     SetSignatures -ProcessOOF:$ProcessOOF
                 }
             } else {
@@ -4189,6 +4678,8 @@ function EvaluateAndSetSignatures {
             }
         }
     }
+
+    try { WatchCatchableExitSignal } catch { }
 
     if ($ProcessOOF) {
         # Internal OOF message
@@ -4211,13 +4702,19 @@ function EvaluateAndSetSignatures {
                 $Signature.value = "$OOFInternalGUID OOFInternal.docx"
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             SetSignatures -ProcessOOF:$ProcessOOF
+
+            try { WatchCatchableExitSignal } catch { }
 
             if ($OOFExternal -eq $OOFInternal) {
                 Copy-Item -Path (Join-Path -Path $script:tempDir -ChildPath "$OOFInternalGUID OOFInternal.htm") -Destination (Join-Path -Path $script:tempDir -ChildPath "$OOFExternalGUID OOFExternal.htm")
             }
         }
     }
+
+    try { WatchCatchableExitSignal } catch { }
 
     # External OOF message
     if ($OOFExternal -and ($OOFExternal -ne $OOFInternal)) {
@@ -4231,8 +4728,12 @@ function EvaluateAndSetSignatures {
             $Signature.value = "$OOFExternalGUID OOFExternal.docx"
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         SetSignatures -ProcessOOF:$ProcessOOF
     }
+
+    try { WatchCatchableExitSignal } catch { }
 }
 
 
@@ -4240,6 +4741,8 @@ function SetSignatures {
     Param(
         [switch]$ProcessOOF = $false
     )
+
+    try { WatchCatchableExitSignal } catch { }
 
     if ($ProcessOOF) {
         $Indent = '  '
@@ -4284,29 +4787,42 @@ function SetSignatures {
 
         $pathConnectedFolderNames = $pathConnectedFolderNames | Select-Object -Unique
 
+        try { WatchCatchableExitSignal } catch { }
+
         if ($UseHtmTemplates) {
             try {
                 if ($script:SpoDownloadUrls -and $script:SpoDownloadUrls["$($Signature.name)"]) {
+                    try { WatchCatchableExitSignal } catch { }
+
                     $(New-Object Net.WebClient).DownloadFile(
                         $script:SpoDownloadUrls["$($Signature.name)"],
                         $path
                     )
                 } else {
+                    try { WatchCatchableExitSignal } catch { }
                     Copy-Item -LiteralPath $Signature.name -Destination $path -Force
                 }
 
+                try { WatchCatchableExitSignal } catch { }
+
                 foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                    try { WatchCatchableExitSignal } catch { }
+
                     $pathTemp = (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderName")
 
                     if (Test-Path $pathTemp) {
                         @(Get-ChildItem $pathTemp -Recurse -File) | ForEach-Object {
                             if ($script:SpoDownloadUrls -and $script:SpoDownloadUrls["$($_.FullName)"]) {
+                                try { WatchCatchableExitSignal } catch { }
+
                                 $(New-Object Net.WebClient).DownloadFile(
                                     $script:SpoDownloadUrls["$($_.FullName)"],
                                     $_.FullName
                                 )
                             }
                         }
+
+                        try { WatchCatchableExitSignal } catch { }
 
                         Copy-Item (Join-Path -Path (Split-Path $signature.name) -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.name))$ConnectedFilesFolderName") (Join-Path -Path (Split-Path $path) -ChildPath "$($pathGUID).files") -Recurse -Force
                         break
@@ -4321,6 +4837,8 @@ function SetSignatures {
             $path = $([System.IO.Path]::ChangeExtension($($path), '.docx'))
 
             try {
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($script:SpoDownloadUrls -and $script:SpoDownloadUrls["$($Signature.name)"]) {
                     $(New-Object Net.WebClient).DownloadFile(
                         $script:SpoDownloadUrls["$($Signature.name)"],
@@ -4335,6 +4853,8 @@ function SetSignatures {
             }
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
 
         if ($MailboxSpecificSignatureNames -and ($ProcessOOF -eq $false)) {
@@ -4347,12 +4867,9 @@ function SetSignatures {
 
         if (-not $ProcessOOF) {
             $script:SignatureFilesDone += $Signature.Value
-
-            #if ($OutlookDisableRoamingSignatures -eq 0) {
-            #    $script:SignatureFilesDone += ($Signature.Value -ireplace '\.htm$', " ($($PrimaryMailboxAddress)).htm")
-            #    #$script:SignatureFilesDone += ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
-            #}
         }
+
+        try { WatchCatchableExitSignal } catch { }
 
         if ($UseHtmTemplates) {
             Write-Host "$Indent      Replace picture variables"
@@ -4363,11 +4880,15 @@ function SetSignatures {
             $AngleSharpParsedDocument = $AngleSharpHtmlParser.ParseDocument("$(Get-Content -LiteralPath $path -Encoding UTF8 -Raw)")
 
             foreach ($image in @($AngleSharpParsedDocument.images)) {
+                try { WatchCatchableExitSignal } catch { }
+
                 $tempImageIsDeleted = $false
 
                 if (($image.attributes['src'].value -ilike '*$*$*') -or ($image.attributes['alt'].value -ilike '*$*$*')) {
                     # Mailbox photos
                     foreach ($VariableName in $PictureVariablesArray) {
+                        try { WatchCatchableExitSignal } catch { }
+
                         $tempImageVariableString = $Variablename[0] -ireplace '\$$', 'DELETEEMPTY$'
 
                         if (($image.attributes['src'].value -ilike "*$($VariableName[0])*") -or ($image.attributes['alt'].value -ilike "*$($VariableName[0])*")) {
@@ -4418,9 +4939,13 @@ function SetSignatures {
                     }
                 }
 
+                try { WatchCatchableExitSignal } catch { }
+
                 # Other images
                 if (($image.attributes['src'].value -ilike '*$*DELETEEMPTY$*') -or ($image.attributes['alt'].value -ilike '*$*DELETEEMPTY$*')) {
                     foreach ($VariableName in @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$CurrentMailboxManagerPhoto$', '$CurrentUserPhoto$', '$CurrentUserManagerPhoto$') })) {
+                        try { WatchCatchableExitSignal } catch { }
+
                         $tempImageVariableString = $Variablename -ireplace '\$$', 'DELETEEMPTY$'
 
                         if (($image.attributes['src'].value -ilike "*$($tempImageVariableString)*") -or ($image.attributes['alt'].value -ilike "*$($tempImageVariableString)*")) {
@@ -4443,6 +4968,8 @@ function SetSignatures {
                 }
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             Write-Host "$Indent      Replace non-picture variables"
             $tempFileContent = $AngleSharpParsedDocument.documentelement.outerhtml
 
@@ -4450,10 +4977,16 @@ function SetSignatures {
                 $tempFileContent = $tempFileContent -ireplace [Regex]::Escape($replacekey), $replaceHash.$replaceKey
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             Write-Host "$Indent      Export to HTM format"
             [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $tempFileContent)
         } else {
+            try { WatchCatchableExitSignal } catch { }
+
             $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
+
+            try { WatchCatchableExitSignal } catch { }
 
             Write-Host "$Indent      Replace picture variables"
             if ($script:COMWord.ActiveDocument.Shapes.Count -gt 0) {
@@ -4463,6 +4996,8 @@ function SetSignatures {
 
             try {
                 foreach ($image in @($script:COMWord.ActiveDocument.Shapes + $script:COMWord.ActiveDocument.InlineShapes)) {
+                    try { WatchCatchableExitSignal } catch { }
+
                     # Setting the values in word is very slow, so we use temporay variables
                     $tempImageIsDeleted = $false
                     $tempImageSourceFullname = $image.linkformat.sourcefullname
@@ -4475,6 +5010,8 @@ function SetSignatures {
                     # Mailbox photos
                     if ($tempImageSourceFullname -or $tempImageAlternativeText) {
                         foreach ($VariableName in $PictureVariablesArray) {
+                            try { WatchCatchableExitSignal } catch { }
+
                             if (
                                 $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($Variablename[0])*") }) -or
                                 $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($Variablename[0])*") })
@@ -4506,12 +5043,16 @@ function SetSignatures {
                         }
                     }
 
+                    try { WatchCatchableExitSignal } catch { }
+
                     # Other images
                     if (
                         $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike '*$*DELETEEMPTY$*') }) -or
                         $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike '*$*DELETEEMPTY$*') })
                     ) {
                         foreach ($Variablename in @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$CurrentMailboxManagerPhoto$', '$CurrentUserPhoto$', '$CurrentUserManagerPhoto$') })) {
+                            try { WatchCatchableExitSignal } catch { }
+
                             $tempImageVariableString = $Variablename -ireplace '\$$', 'DELETEEMPTY$'
 
                             if (
@@ -4536,6 +5077,8 @@ function SetSignatures {
                     }
 
                     foreach ($replaceKey in @($replaceHash.Keys | Where-Object { $_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' }) } | Sort-Object -Culture $TemplateFilesSortCulture)) {
+                        try { WatchCatchableExitSignal } catch { }
+
                         if ($replaceKey) {
                             if ($null -ne $tempImageAlternativeText) {
                                 $tempImageAlternativeText = $tempImageAlternativeText -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
@@ -4560,9 +5103,9 @@ function SetSignatures {
                     }
 
                     if (
-                    ($tempImageSourceFullname) -and
-                    ($image.linkformat.sourcefullname) -and
-                    ($tempImageSourceFullname -ine $image.linkformat.sourcefullname)
+                        $($tempImageSourceFullname) -and
+                        $($image.linkformat.sourcefullname) -and
+                        $($tempImageSourceFullname -ine $image.linkformat.sourcefullname)
                     ) {
                         $image.linkformat.sourcefullname = $tempImageSourceFullname
                     }
@@ -4594,6 +5137,10 @@ function SetSignatures {
                 exit 1
             }
 
+
+            try { WatchCatchableExitSignal } catch { }
+
+
             Write-Host "$Indent      Replace non-picture variables"
             $wdFindContinue = 1
             $MatchCase = $false
@@ -4618,6 +5165,8 @@ function SetSignatures {
                 $script:COMWord.Selection.Collapse()
 
                 foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' })) -and ($tempWordText -imatch [regex]::escape($_)) } | Sort-Object -Culture $TemplateFilesSortCulture )) {
+                    try { WatchCatchableExitSignal } catch { }
+
                     $script:COMWord.Selection.Find.Execute($replaceKey, $MatchCase, $MatchWholeWord, `
                             $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
                             $Wrap, $Format, $(($replaceHash.$replaceKey -ireplace "`r`n", '^p') -ireplace "`n", '^l'), $ReplaceAll) | Out-Null
@@ -4628,8 +5177,12 @@ function SetSignatures {
 
                 $tempWordText = $null
 
+                try { WatchCatchableExitSignal } catch { }
+
                 # Replace in field codes
                 foreach ($field in $script:COMWord.ActiveDocument.Fields) {
+                    try { WatchCatchableExitSignal } catch { }
+
                     $tempWordFieldCodeOriginal = $field.Code.Text
                     $tempWordFieldCodeNew = $tempWordFieldCodeOriginal
 
@@ -4648,60 +5201,80 @@ function SetSignatures {
                 exit 1
             }
 
+            try { WatchCatchableExitSignal } catch { }
 
             # Save changed document, it's later used for export to .htm, .rtf and .txt
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatDocumentDefault')
 
+            try { WatchCatchableExitSignal } catch { }
+
             try {
                 # Overcome Word security warning when export contains embedded pictures
-                if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                if ($null -eq (Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                 }
 
-                $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
+                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                }
 
                 if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 # Save
                 $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
-                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             } catch {
                 # Restore original security setting after error
-                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 
                 Start-Sleep -Seconds 2
 
                 # Overcome Word security warning when export contains embedded pictures
-                if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                if ($null -eq (Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                 }
 
-                $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
+                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                }
 
                 if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 # Save
                 $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
-                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             }
+
+            try { WatchCatchableExitSignal } catch { }
 
             # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
             # Close the document to remove in-memory references to already deleted images
             $script:COMWord.ActiveDocument.Saved = $true
             $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
+            try { WatchCatchableExitSignal } catch { }
+
             # Export to .htm
             Write-Host "$Indent      Export to HTM format"
             $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
+
+            try { WatchCatchableExitSignal } catch { }
+
             $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
+
+            try { WatchCatchableExitSignal } catch { }
 
             $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatFilteredHTML')
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
@@ -4725,44 +5298,54 @@ function SetSignatures {
 
             try {
                 # Overcome Word security warning when export contains embedded pictures
-                if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                if ($null -eq (Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                 }
 
-                $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
+                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                }
 
                 if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 # Save
                 $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
-                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             } catch {
                 # Restore original security setting after error
-                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 
                 Start-Sleep -Seconds 2
 
                 # Overcome Word security warning when export contains embedded pictures
-                if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                if ($null -eq (Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                 }
 
-                $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
+                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                }
 
                 if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 # Save
                 $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
-                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             }
+
+            try { WatchCatchableExitSignal } catch { }
 
             # Restore original WebOptions
             try {
@@ -4773,6 +5356,8 @@ function SetSignatures {
                 }
             } catch {}
 
+            try { WatchCatchableExitSignal } catch { }
+
             # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
             $script:COMWord.ActiveDocument.Saved = $true
 
@@ -4781,9 +5366,12 @@ function SetSignatures {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DocxHighResImageConversion')))) {
                     $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
-                    Write-Host "$Indent          The 'DocxHighResImageConversion' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                    Write-Host "$Indent          Can not export high-res images." -ForegroundColor Yellow
+                    Write-Host "$Indent          The 'DocxHighResImageConversion' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
                     Write-Host "$Indent          Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
                 } else {
+                    try { WatchCatchableExitSignal } catch { }
+
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::DocxHighResImageConversion()
 
                     if ($FeatureResult -ne 'true') {
@@ -4799,6 +5387,8 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
             }
         }
+
+        try { WatchCatchableExitSignal } catch { }
 
         Write-Host "$Indent        Copy HTM image width and height attributes to style attribute"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
@@ -4849,6 +5439,8 @@ function SetSignatures {
             Remove-Variable -Name 'html'
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         if ($MoveCSSInline) {
             Write-Host "$Indent        Move CSS inline"
 
@@ -4866,6 +5458,8 @@ function SetSignatures {
             }
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         Write-Host "$Indent        Add marker to final HTM file"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
         $tempFileContent = Get-Content -LiteralPath $path -Encoding UTF8 -Raw
@@ -4878,15 +5472,20 @@ function SetSignatures {
             }
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         Write-Host "$Indent        Modify connected folder name"
 
         foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
+            try { WatchCatchableExitSignal } catch { }
+
             $tempFileContent = $tempFileContent -ireplace ('(\s*src=")(' + [regex]::escape($pathConnectedFolderName) + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
             Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
         }
 
         [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $tempFileContent)
 
+        try { WatchCatchableExitSignal } catch { }
 
         if (-not $ProcessOOF) {
             if ($EmbedImagesInHtml) {
@@ -4898,71 +5497,89 @@ function SetSignatures {
             [SetOutlookSignatures.Common]::ConvertToSingleFileHtml($path, ((Join-Path -Path $script:tempDir -ChildPath $Signature.Value)))
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         if (-not $ProcessOOF) {
             if ($CreateRtfSignatures) {
                 Write-Host "$Indent      Export to RTF format"
-                # If possible, use .docx file to avoid problems with MS Information Protection
-                if ($UseHtmTemplates) {
-                    $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-                    $script:COMWord.Documents.Open($path, $false, $false, $false, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, 65001) | Out-Null
-                } else {
-                    $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
-                    $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
-                }
 
+                try { WatchCatchableExitSignal } catch { }
+
+                # If possible, use .docx file to avoid problems with MS Information Protection
+                $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+                $script:COMWord.Documents.Open($path, $false, $false, $false, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, 65001) | Out-Null
+
+                try { WatchCatchableExitSignal } catch { }
 
                 $saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], 'wdFormatRTF')
                 $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
 
                 try {
                     # Overcome Word security warning when export contains embedded pictures
-                    if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                    if ($null -eq (Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                     }
 
-                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
+                        $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                    }
 
                     if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                     }
+
+                    try { WatchCatchableExitSignal } catch { }
 
                     # Save
                     $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                     # Restore original security setting
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
                 } catch {
                     # Restore original security setting after error
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 
                     Start-Sleep -Seconds 2
 
                     # Overcome Word security warning when export contains embedded pictures
-                    if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                    if ($null -eq (Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                     }
 
-                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                    if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
+                        $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                    }
 
                     if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                     }
+
+                    try { WatchCatchableExitSignal } catch { }
 
                     # Save
                     $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                     # Restore original security setting
-                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
                 # Close the document as conversion to .rtf happens from .htm
                 $script:COMWord.ActiveDocument.Saved = $true
                 $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
+                # Restore original security setting
+                Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+
+                try { WatchCatchableExitSignal } catch { }
+
                 Write-Host "$Indent        Shrink RTF file"
                 $((Get-Content -LiteralPath $path -Raw -Encoding Ascii) -ireplace '\{\\nonshppict[\s\S]*?\}\}', '') | Set-Content -LiteralPath $path -Encoding Ascii
             }
+
+            try { WatchCatchableExitSignal } catch { }
 
             if ($CreateTxtSignatures) {
                 Write-Host "$Indent      Export to TXT format"
@@ -4989,6 +5606,8 @@ function SetSignatures {
                     }
                 }
 
+                try { WatchCatchableExitSignal } catch { }
+
                 $path = $([System.IO.Path]::ChangeExtension($path, '.txt'))
 
                 if ($($PSVersionTable.PSEdition) -ieq 'Core') {
@@ -5006,13 +5625,18 @@ function SetSignatures {
             }
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         if (-not $ProcessOOF) {
             if ($MirrorCloudSignatures -eq $true) {
                 Write-Host "$Indent      Upload signature to Exchange Online as roaming signature"
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesUpload')))) {
-                    Write-Host "$Indent        The 'MirrorCloudSignatures' feature is reserved for Benefactor Circle members." -ForegroundColor Yellow
+                    Write-Host "$Indent        Can not upload signature to Exchange Online." -ForegroundColor Yellow
+                    Write-Host "$Indent        The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
                     Write-Host "$Indent        Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
                 } else {
+                    try { WatchCatchableExitSignal } catch { }
+
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::RoamingSignaturesUpload()
 
                     if ($FeatureResult -ne 'true') {
@@ -5023,21 +5647,29 @@ function SetSignatures {
             }
 
             foreach ($SignaturePath in $SignaturePaths) {
+                try { WatchCatchableExitSignal } catch { }
+
                 Write-Host "$Indent      Copy signature files to '$SignaturePath'"
 
                 RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))
 
                 foreach ($ConnectedFilesFolderName in $ConnectedFilesFolderNames) {
+                    try { WatchCatchableExitSignal } catch { }
+
                     RemoveItemAlternativeRecurse -LiteralPath ((Join-Path -Path $SignaturePath -ChildPath "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value))") + $ConnectedFilesFolderName)
                 }
 
-                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
+                Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.htm')) -Destination $((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.htm')))) -Force
+
+                try { WatchCatchableExitSignal } catch { }
 
                 if ($EmbedImagesInHtml -eq $false) {
                     if (Test-Path (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))")) {
                         Copy-Item -LiteralPath (Join-Path -Path (Split-Path $path) -ChildPath "$([System.IO.Path]::ChangeExtension($Signature.value, '.files'))") -Destination $SignaturePath -Force -Recurse
                     }
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 if ($CreateRtfSignatures -eq $true) {
                     RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))
@@ -5046,6 +5678,8 @@ function SetSignatures {
                     RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.rtf')))
                 }
 
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($CreateTxtSignatures -eq $true) {
                     RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))
                     Copy-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, '.txt')) -Destination ((Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))) -Force
@@ -5053,6 +5687,7 @@ function SetSignatures {
                     RemoveItemAlternativeRecurse (Join-Path -Path ($SignaturePath) -ChildPath $([System.IO.Path]::ChangeExtension($Signature.Value, '.txt')))
                 }
 
+                try { WatchCatchableExitSignal } catch { }
 
                 if ($SignatureFilesWriteProtect.containskey($TemplateIniSettingsIndex)) {
                     Write-Host "$Indent      Write protect signature files"
@@ -5063,6 +5698,8 @@ function SetSignatures {
                         }
                     }
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 if ($macOSSignaturesScriptable) {
                     Write-Host "$Indent      Create Outlook for Mac signature"
@@ -5100,17 +5737,24 @@ end tell
             }
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         Write-Host "$Indent      Remove temporary files"
         foreach ($extension in ('.docx', '.htm', '.rtf', '.txt')) {
             Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($path, $extension)) -ErrorAction SilentlyContinue | Out-Null
+
             if ($pathHighResHtml) {
                 Remove-Item -LiteralPath $([System.IO.Path]::ChangeExtension($pathHighResHtml, $extension)) -ErrorAction SilentlyContinue | Out-Null
             }
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         Foreach ($file in @(Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
             Remove-Item -LiteralPath $file -Force -Recurse -ErrorAction SilentlyContinue
         }
+
+        try { WatchCatchableExitSignal } catch { }
 
         if ($pathHighResHtml) {
             Foreach ($file in @(Get-ChildItem -Path ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($pathHighResHtml) + '*') -Directory).FullName) {
@@ -5118,13 +5762,19 @@ end tell
             }
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         Remove-Item (Join-Path -Path (Split-Path $path) -ChildPath $([System.IO.Path]::ChangeExtension($signature.value, '.files'))) -Force -Recurse -ErrorAction SilentlyContinue
     }
+
+    try { WatchCatchableExitSignal } catch { }
 
     if ((-not $ProcessOOF)) {
         # Set default signature for new emails
         if ($SignatureFilesDefaultNew.containskey($TemplateIniSettingsIndex)) {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if ($CurrentTemplateIsForAliasSmtp) {
                         $NewSigExpected."$($CurrentTemplateIsForAliasSmtp.ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
@@ -5142,12 +5792,12 @@ end tell
                                 New-ItemProperty -Path $RegistryPaths[$j] -Name 'New Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
                             }
                         } else {
-                            $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                            $script:GraphUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                         }
                     } else {
                         @('htm', 'rtf', 'txt') | ForEach-Object {
                             if (Test-Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)"))) {
-                                $script:CurrentUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                                $script:GraphUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
 
                                 if ($_ -ieq 'htm') {
                                     [SetOutlookSignatures.Common]::ConvertToSingleFileHtml($(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")), $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath "DefaultNew.$($_)")))
@@ -5161,9 +5811,15 @@ end tell
             }
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
         # Set default signature for replies and forwarded emails
+        try { WatchCatchableExitSignal } catch { }
+
         if ($SignatureFilesDefaultReplyFwd.containskey($TemplateIniSettingsIndex)) {
             for ($j = 0; $j -lt $MailAddresses.count; $j++) {
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if ($CurrentTemplateIsForAliasSmtp) {
                         $ReplySigExpected."$($CurrentTemplateIsForAliasSmtp.ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
@@ -5181,12 +5837,12 @@ end tell
                                 New-ItemProperty -Path $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
                             }
                         } else {
-                            $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                            $script:GraphUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                         }
                     } else {
                         @('htm', 'rtf', 'txt') | ForEach-Object {
                             if (Test-Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)"))) {
-                                $script:CurrentUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                                $script:GraphUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
 
                                 if ($_ -ieq 'htm') {
                                     [SetOutlookSignatures.Common]::ConvertToSingleFileHtml($(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")), $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath "DefaultReplyFwd.$($_)")))
@@ -5200,6 +5856,8 @@ end tell
             }
         }
     }
+
+    try { WatchCatchableExitSignal } catch { }
 }
 
 
@@ -5209,11 +5867,16 @@ function CheckADConnectivity {
         [string]$CheckProtocolText,
         [string]$Indent
     )
+
+    try { WatchCatchableExitSignal } catch { }
+
     [void][runspacefactory]::CreateRunspacePool()
     $RunspacePool = [runspacefactory]::CreateRunspacePool(1, 25)
     $RunspacePool.Open()
 
     for ($DomainNumber = 0; $DomainNumber -lt $CheckDomains.count; $DomainNumber++) {
+        try { WatchCatchableExitSignal } catch { }
+
         if ($($CheckDomains[$DomainNumber]) -eq '') {
             continue
         }
@@ -5234,12 +5897,15 @@ function CheckADConnectivity {
                 $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("$($CheckProtocolText)://$CheckDomain")
                 $Search.filter = '(objectclass=user)'
                 try {
+                    try { WatchCatchableExitSignal } catch { }
                     $null = ([ADSI]"$(($Search.FindOne()).path)")
+                    try { WatchCatchableExitSignal } catch { }
                     Write-Output 'QueryPassed'
                 } catch {
                     Write-Output 'QueryFailed'
                 }
             }).AddArgument($($CheckDomains[$DomainNumber])).AddArgument($CheckProtocolText)
+
         $Object = New-Object 'System.Management.Automation.PSDataCollection[psobject]'
         $Handle = $PowerShell.BeginInvoke($Object, $Object)
         $temp = '' | Select-Object PowerShell, Handle, Object, StartTime, Done
@@ -5250,8 +5916,13 @@ function CheckADConnectivity {
         $temp.Done = $false
         [void]$script:jobs.Add($Temp)
     }
+
     while (($script:jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
+        try { WatchCatchableExitSignal } catch { }
+
         foreach ($job in $script:jobs) {
+            try { WatchCatchableExitSignal } catch { }
+
             if (($null -eq $job.StartTime) -and ($job.Powershell.Streams.Debug[0].Message -imatch 'Start')) {
                 $StartTicks = $job.powershell.Streams.Debug[0].Message -ireplace '[^0-9]'
                 $job.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
@@ -5260,7 +5931,9 @@ function CheckADConnectivity {
             if ($null -ne $job.StartTime) {
                 if ((($job.handle.IsCompleted -eq $true) -and ($job.Done -eq $false)) -or (($job.Done -eq $false) -and ((New-TimeSpan -Start $job.StartTime -End (Get-Date)).TotalSeconds -ge 5))) {
                     $data = $job.Object[0..$(($job.object).count - 1)]
+
                     Write-Host "$Indent$($data[0])"
+
                     if ($data -icontains 'QueryPassed') {
                         Write-Host "$Indent  $CheckProtocolText query successful"
                         $returnvalue = $true
@@ -5276,11 +5949,17 @@ function CheckADConnectivity {
 
                         $returnvalue = $false
                     }
+
                     $job.Done = $true
                 }
             }
         }
+
+        Start-Sleep -Seconds 1
     }
+
+    try { WatchCatchableExitSignal } catch { }
+
     return $returnvalue
 }
 
@@ -5289,6 +5968,9 @@ function MoveCssInline {
     param (
         $HtmlCode
     )
+
+    try { WatchCatchableExitSignal } catch { }
+
     [void][runspacefactory]::CreateRunspacePool()
     $RunspacePool = [runspacefactory]::CreateRunspacePool(1, 1)
     $RunspacePool.Open()
@@ -5313,6 +5995,7 @@ function MoveCssInline {
                 Write-Debug "Failed: $MoveCSSInlineError"
             }
         }).AddArgument($HtmlCode).AddArgument($script:PreMailerNetModulePath)
+
     $Object = New-Object 'System.Management.Automation.PSDataCollection[psobject]'
     $Handle = $PowerShell.BeginInvoke($Object, $Object)
     $temp = '' | Select-Object PowerShell, Handle, Object, StartTime, Done
@@ -5324,7 +6007,11 @@ function MoveCssInline {
     [void]$script:jobs.Add($Temp)
 
     while (($script:jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
+        try { WatchCatchableExitSignal } catch { }
+
         foreach ($job in $script:jobs) {
+            try { WatchCatchableExitSignal } catch { }
+
             if (($null -eq $job.StartTime) -and ($job.Powershell.Streams.Debug[0].Message -imatch 'Start')) {
                 $StartTicks = $job.powershell.Streams.Debug[0].Message -ireplace '[^0-9]'
                 $job.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
@@ -5342,7 +6029,12 @@ function MoveCssInline {
                 }
             }
         }
+
+        Start-Sleep -Seconds 1
     }
+
+    try { WatchCatchableExitSignal } catch { }
+
     return $returnvalue
 }
 
@@ -5354,13 +6046,17 @@ $CheckPathScriptblock = {
     param (
         [ref]$CheckPathRefPath,
         [switch]$CheckPathSilent = $false,
-        [switch]$CheckPathCreate = $false
+        [switch]$CheckPathCreate = $false,
+        [string]$ExpectedPathType = "Container"
     )
+
+    try { WatchCatchableExitSignal } catch { }
 
     $CheckPathPath = $CheckPathRefPath.Value
 
     try {
         Write-Verbose "      Execute config file '$GraphConfigFile'"
+
         if (Test-Path -LiteralPath $GraphConfigFile -PathType Leaf) {
             . ([System.Management.Automation.ScriptBlock]::Create((Get-Content -LiteralPath $GraphConfigFile -Encoding UTF8 -Raw)))
         } elseif (Test-Path -LiteralPath $(Join-Path -Path $PSScriptRoot -ChildPath '.\config\default graph config.ps1') -PathType Leaf) {
@@ -5369,6 +6065,8 @@ $CheckPathScriptblock = {
         } else {
             Write-Verbose '        Not accessible, and default Graph config file not found'
         }
+
+        try { WatchCatchableExitSignal } catch { }
 
         @(
             'displayName',
@@ -5399,7 +6097,7 @@ $CheckPathScriptblock = {
 
         $GraphUserAttributeMapping['distinguishedname'] = 'onPremisesDistinguishedName'
         $GraphUserAttributeMapping['mailboxsettings'] = 'mailboxSettings'
-        $GraphUserAttributeMapping['mailnickname'] = 'mailNickname'
+        $GraphUserAttributeMapping['mailNickname'] = 'mailNickname'
         $GraphUserAttributeMapping['objectguid'] = 'id'
         $GraphUserAttributeMapping['objectsid'] = 'securityIdentifier'
         $GraphUserAttributeMapping['onpremisesdomainname'] = 'onPremisesDomainName'
@@ -5411,10 +6109,28 @@ $CheckPathScriptblock = {
         exit 1
     }
 
+    try { WatchCatchableExitSignal } catch { }
+
     if ($CheckPathCreate -eq $false) {
         Write-Verbose "      Try to access '$($CheckPathPath)'."
 
-        if ((Test-Path -LiteralPath $CheckPathPath -ErrorAction SilentlyContinue)) {
+        if (
+            -not $(
+                $(
+                    (((
+                            [uri]$(
+                                if (-not [System.Uri]::IsWellFormedUriString($CheckPathPath, [System.UriKind]::Absolute)) {
+                                    $([uri]($CheckPathPath -ireplace '@SSL\\', '/' -ireplace '^\\\\', 'https://' -ireplace '\\', '/')).AbsoluteUri
+                                } else {
+                                    $CheckPathPath
+                                }
+                            )
+                        ).DnsSafeHost -split '\.')[1..999] -join '.') -iin $CloudEnvironmentSharePointOnlineDomains
+                ) -and
+                $GraphClientID
+            ) -and
+            $(Test-Path -LiteralPath $CheckPathPath -ErrorAction SilentlyContinue)
+        ) {
             Write-Verbose "        '$($CheckPathPath)' is accessible, nothing more to do."
         } else {
             Write-Verbose "        '$($CheckPathPath)' is not yet accessible."
@@ -5429,47 +6145,54 @@ $CheckPathScriptblock = {
             ) {
                 # SharePoint Online with Graph client ID
                 if (-not $CheckPathSilent) {
-                    Write-Host ' (SharePoint via Graph, may be slow)' -NoNewline
+                    Write-Host '    SharePoint via Graph, may be slow'
                 }
 
                 $CheckPathPath = [uri]::UnescapeDataString($CheckPathPath.Trimend('/'))
                 $CheckPathPathSplitBySlash = @($CheckPathPath -split '\/' | Where-Object { $_ })
 
+                try { WatchCatchableExitSignal } catch { }
+
                 # graph auth
-                if (-not ($GraphToken.error -eq $false)) {
-                    $GraphToken = GraphGetToken
+                if (-not $GraphToken) {
+                    try {
+                        $GraphToken = GraphGetToken
+                    } catch {
+                        $GraphToken = $null
+                    }
+
+                    if ($GraphToken.error -eq $false) {
+                        Write-Verbose "      Graph Token metadata: $((ParseJwtToken $GraphToken.AccessToken) | ConvertTo-Json)"
+
+                        if ($SimulateAndDeployGraphCredentialFile) {
+                            Write-Verbose "      App Graph Token metadata: $((ParseJwtToken $GraphToken.AppAccessToken) | ConvertTo-Json)"
+                        }
+                    } else {
+                        Write-Host '      Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
+                        Write-Host $GraphToken.error -ForegroundColor Red
+                        exit 1
+                    }
                 }
 
-                if ($GraphToken.error -eq $false) {
-                    Write-Verbose "      Graph Token metadata: $((ParseJwtToken $GraphToken.AccessToken) | ConvertTo-Json)"
-
-                    if ($SimulateAndDeployGraphCredentialFile) {
-                        Write-Verbose "      App Graph Token metadata: $((ParseJwtToken $GraphToken.AppAccessToken) | ConvertTo-Json)"
-                        Write-Verbose "      App EXO Token metadata: $((ParseJwtToken $GraphToken.AppAccessTokenExo) | ConvertTo-Json)"
-                    }
-
-                    if ($SimulateUser) {
-                        $script:CurrentUser = $SimulateUser
-                    }
-
-                    if ($null -eq $script:CurrentUser) {
-                        $script:CurrentUser = (GraphGetMe).me.userprincipalname
-                    }
-                } else {
-                    Write-Host '      Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
-                    $GraphToken.error
-                    exit 1
+                if ($SimulateUser) {
+                    $script:GraphUser = $SimulateUser
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 Write-Verbose '      Get SharePoint Online site ID'
                 $siteId = (GraphGenericQuery -method 'Get' -uri "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/sites/$(([uri]$CheckPathPath).DnsSafeHost):/$($CheckPathPathSplitbySlash[2])/$($CheckPathPathSplitbySlash[3])").result.id
                 Write-Verbose "        siteId: $($siteID)"
+
+                try { WatchCatchableExitSignal } catch { }
 
                 if ($siteid) {
                     Write-Verbose '      Get DocLib drive ID'
 
                     $docLibDriveId = ((GraphGenericQuery -method 'Get' -uri "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/sites/$($siteId)/drives").result.value | Where-Object { $_.name -ieq $($CheckPathPathSplitbySlash[4]) }).id
                     Write-Verbose "        docLibDriveId: $docLibDriveId"
+
+                    try { WatchCatchableExitSignal } catch { }
 
                     if ($docLibDriveId) {
                         Write-Verbose '      Get DocLib drive items'
@@ -5478,56 +6201,62 @@ $CheckPathScriptblock = {
                         $tempDir = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
                         $null = New-Item $tempDir -ItemType Directory
 
-                        if (($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).contentType.name -ieq 'Document') {
-                            Write-Verbose '      Download file to local temp folder'
+                        switch (($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).contentType.name) {
+                            'document' {
+                                Write-Verbose '      Download file to local temp folder'
 
-                            $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath $([uri]::UnEscapeDataString((Split-Path $($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).webUrl -Leaf))))
+                                $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath $([uri]::UnEscapeDataString((Split-Path $($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).webUrl -Leaf))))
 
-                            $(New-Object Net.WebClient).DownloadFile(
-                                $($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).driveItem.'@microsoft.graph.downloadUrl',
-                                $CheckPathPathNew
-                            )
-
-                            Write-Verbose "        '$($CheckPathRefPath.Value)' -> '$($CheckPathPathNew)'"
-                            $CheckPathPath = $CheckPathRefPath.Value = $CheckPathPathNew
-                        } else {
-                            Write-Verbose '      Create temp folders locally'
-
-                            @(
-                                @($docLibDriveItems | Where-Object { ($_.contentType.name -ieq 'Folder') -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }).webUrl | ForEach-Object {
-                                    [uri]::UnescapeDataString(($_ -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'
-                                }
-                            ) | Sort-Object | ForEach-Object {
-                                if (-not (Test-Path (Join-Path -Path $tempDir -ChildPath $_) -PathType Container)) {
-                                    $null = New-Item -ItemType Directory -Path (Join-Path -Path $tempDir -ChildPath $_)
-                                }
-                            }
-
-                            Write-Verbose '        Create dummy files in local temp folders'
-                            @($docLibDriveItems | Where-Object { ($_.contentType.name -ieq 'Document') -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }) | Sort-Object -Property { $_.webUrl } | ForEach-Object {
-                                $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath ([uri]::UnescapeDataString(($_.webUrl -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'))
-
-                                if (-not $script:SpoDownloadUrls) {
-                                    $script:SpoDownloadUrls = @{}
-                                }
-
-                                $script:SpoDownloadUrls.Add(
-                                    $CheckPathPathNew,
-                                    $_.driveItem.'@microsoft.graph.downloadUrl'
+                                $(New-Object Net.WebClient).DownloadFile(
+                                    $($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).driveItem.'@microsoft.graph.downloadUrl',
+                                    $CheckPathPathNew
                                 )
 
-                                $null = New-Item -Path $CheckPathPathNew -ItemType File
+                                Write-Verbose "        '$($CheckPathRefPath.Value)' -> '$($CheckPathPathNew)'"
+                                $CheckPathPath = $CheckPathRefPath.Value = $CheckPathPathNew
 
-                                <#
-                                    $(New-Object Net.WebClient).DownloadFile(
-                                        $_.driveItem.'@microsoft.graph.downloadUrl',
-                                        $(Join-Path -Path $tempDir -ChildPath ([uri]::UnescapeDataString(($_.webUrl -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'))
-                                    )
-                                    #>
+                                break
                             }
 
-                            Write-Verbose "        '$($CheckPathRefPath.Value)' -> '$($tempDir)'"
-                            $CheckPathPath = $CheckPathRefPath.Value = $tempDir
+                            'folder' {
+                                Write-Verbose '      Create temp folders locally'
+
+                                @(
+                                    @($docLibDriveItems | Where-Object { ($_.contentType.name -ieq 'Folder') -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }).webUrl | ForEach-Object {
+                                        [uri]::UnescapeDataString(($_ -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'
+                                    }
+                                ) | Sort-Object | ForEach-Object {
+                                    if (-not (Test-Path (Join-Path -Path $tempDir -ChildPath $_) -PathType Container)) {
+                                        $null = New-Item -ItemType Directory -Path (Join-Path -Path $tempDir -ChildPath $_)
+                                    }
+                                }
+
+                                Write-Verbose '        Create dummy files in local temp folders'
+                                @($docLibDriveItems | Where-Object { ($_.contentType.name -ieq 'Document') -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }) | Sort-Object -Property { $_.webUrl } | ForEach-Object {
+                                    $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath ([uri]::UnescapeDataString(($_.webUrl -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'))
+
+                                    if (-not $script:SpoDownloadUrls) {
+                                        $script:SpoDownloadUrls = @{}
+                                    }
+
+                                    $script:SpoDownloadUrls.Add(
+                                        $CheckPathPathNew,
+                                        $_.driveItem.'@microsoft.graph.downloadUrl'
+                                    )
+
+                                    $null = New-Item -Path $CheckPathPathNew -ItemType File
+                                }
+
+                                Write-Verbose "        '$($CheckPathRefPath.Value)' -> '$($tempDir)'"
+                                $CheckPathPath = $CheckPathRefPath.Value = $tempDir
+
+                                break
+                            }
+
+                            default {
+                                Write-Host " '$($CheckPathPath)' does not exist. Exiting." -ForegroundColor Red
+                                exit 1
+                            }
                         }
                     } else {
                         Write-Verbose '        No DriveID. Wrong path or missing permission in SharePoint?'
@@ -5537,13 +6266,13 @@ $CheckPathScriptblock = {
                 }
             }
 
+            try { WatchCatchableExitSignal } catch { }
+
             if ((Test-Path -LiteralPath $CheckPathPath -ErrorAction SilentlyContinue)) {
                 Write-Verbose "      '$($CheckPathPath)' is accessible, nothing more to do."
             } else {
                 # SharePoint Online without Graph client ID or SharePoint on-prem
-                if (-not $CheckPathSilent) {
-                }
-                # SharePoint on-prem
+
                 if ($IsWindows) {
                     # Windows. Use old way with "net use", Internet-Explorer-Cookie.
 
@@ -5570,22 +6299,33 @@ $CheckPathScriptblock = {
                         # Reconnect already connected network drives at the OS level
                         # New-PSDrive is not enough for this
                         foreach ($NetworkConnection in @(Get-CimInstance Win32_NetworkConnection)) {
+                            try { WatchCatchableExitSignal } catch { }
                             & net use $NetworkConnection.LocalName $NetworkConnection.RemoteName 2>&1 | Out-Null
                         }
 
                         if (-not (Test-Path -LiteralPath $CheckPathPath -ErrorAction SilentlyContinue)) {
+                            try { WatchCatchableExitSignal } catch { }
+
                             # Connect network drives
                             $([System.Environment]::NewLine) | & net use "$CheckPathPath" 2>&1 | Out-Null
+
+                            try { WatchCatchableExitSignal } catch { }
 
                             try {
                                 (Test-Path -LiteralPath $CheckPathPath -ErrorAction Stop) | Out-Null
                             } catch {
                                 if ($_.CategoryInfo.Category -eq 'PermissionDenied') {
+                                    try { WatchCatchableExitSignal } catch { }
                                     & net use "$CheckPathPath" 2>&1
                                 }
                             }
+
+                            try { WatchCatchableExitSignal } catch { }
+
                             & net use "$CheckPathPath" /d 2>&1 | Out-Null
                         }
+
+                        try { WatchCatchableExitSignal } catch { }
 
                         if (($CheckPathPath -ilike '*@ssl\*') -and (-not (Test-Path -LiteralPath $CheckPathPath -ErrorAction SilentlyContinue))) {
                             if ((Get-Service -ServiceName 'WebClient' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).Status -ine 'Running') {
@@ -5599,16 +6339,29 @@ $CheckPathScriptblock = {
                                         if ($IsWindows -and (-not (Test-Path env:SSH_CLIENT))) {
                                             Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
 
-                                            $window = New-Object System.Windows.Window
-                                            $window.Width = 1
-                                            $window.Height = 1
-                                            $window.WindowStartupLocation = [System.Windows.WindowStartupLocation]::CenterOwner
-                                            $window.ShowActivated = $false
-                                            $window.Topmost = $true
+                                            $window = New-Object System.Windows.Window -Property @{
+                                                Width                 = 1
+                                                Height                = 1
+                                                WindowStartupLocation = [System.Windows.WindowStartupLocation]::CenterScreen
+                                                ShowActivated         = $false
+                                                Topmost               = $true
+                                            }
+
                                             $window.Show()
                                             $window.Hide()
-                                            $null = [System.Windows.MessageBox]::Show($window, "$($GraphHtmlMessageboxText)", $(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }), [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Information, [System.Windows.MessageBoxResult]::None)
-                                            $window.close()
+
+                                            $MessageBoxResult = [System.Windows.MessageBox]::Show($window, "$($GraphHtmlMessageboxText)", $(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }), [System.Windows.MessageBoxButton]::OKCancel, [System.Windows.MessageBoxImage]::Information, [System.Windows.MessageBoxResult]::None)
+
+                                            if ($MessageBoxResult -ieq 'Cancel') {
+                                                $window.Close()
+
+                                                Write-Host
+                                                Write-Host 'Authentication cancelled by user. Exiting.' -ForegroundColor Red
+
+                                                exit 1
+                                            }
+
+                                            $window.Close()
                                         }
                                     }
 
@@ -5632,15 +6385,20 @@ $CheckPathScriptblock = {
                                             ([uri]::UnescapeDataString([uri]::UnescapeDataString($_.LocationURL)) -ilike $compareurl)
                                             }).count
 
-                                        Start-Sleep -Milliseconds 50
+                                        Start-Sleep -Seconds 1
+
+                                        try { WatchCatchableExitSignal } catch { }
                                     }
 
                                     # Wait until the corresponding URL is fully loaded, then close the tab
                                     @($app.windows() | Where-Object {
                                         ([uri]::UnescapeDataString([uri]::UnescapeDataString($_.LocationURL)) -ilike $compareurl)
                                         }) | ForEach-Object {
+
                                         while ($_.Busy) {
-                                            Start-Sleep -Milliseconds 50
+                                            Start-Sleep -Milliseconds 100
+
+                                            try { WatchCatchableExitSignal } catch { }
                                         }
 
                                         $_.Quit()
@@ -5663,17 +6421,19 @@ $CheckPathScriptblock = {
             }
         }
 
-        if ((Test-Path -LiteralPath $CheckPathPath) -eq $false) {
+        try { WatchCatchableExitSignal } catch { }
+
+        if ((Test-Path -LiteralPath $CheckPathPath -PathType $ExpectedPathType) -eq $false) {
             if ($CheckPathSilent -eq $false) {
                 Write-Host ': ' -NoNewline
-                Write-Host "Problem connecting or reading '$CheckPathPath'. Exit." -ForegroundColor Red
+                Write-Host "Problem connecting or reading $($ExpectedPathType) '$($CheckPathPath)'. Exit." -ForegroundColor Red
                 exit 1
             } else {
                 return $false
             }
         } else {
             if ($CheckPathSilent -eq $false) {
-                Write-Host
+                # Write-Host
             } else {
                 return $true
             }
@@ -5685,11 +6445,20 @@ $CheckPathScriptblock = {
             $CheckPathPath = ((([uri]::UnescapeDataString($CheckPathPath) -ireplace ('https://', '\\')) -ireplace ('(.*?)/(.*)', '${1}@SSL\$2')) -ireplace ('/', '\'))
         }
 
-        $CheckPathPathTemp = $CheckPathPathTarget = $CheckPathPath
-        for ($i = (($CheckPathPathTarget.ToCharArray() | Where-Object { $_ -eq [IO.Path]::DirectorySeparatorChar } | Measure-Object).Count); $i -ge 0; $i--) {
+
+        $CheckPathPathTarget = $CheckPathPath
+
+        for (
+            $i = 1
+            $i -lt @($CheckPathPathTarget -split [regex]::escape([IO.Path]::DirectorySeparatorChar)).count
+            $i++
+        ) {
+            try { WatchCatchableExitSignal } catch { }
+
+            $CheckPathPathTemp = @($CheckPathPathTarget -split [regex]::escape([IO.Path]::DirectorySeparatorChar))[0..$i] -join [IO.Path]::DirectorySeparatorChar
+
             if ((. $CheckPathScriptblock ([ref]$CheckPathPathTemp) -CheckPathSilent) -eq $true) {
-                if (-not (Test-Path $CheckPathPathTemp -PathType Container -ErrorAction SilentlyContinue)) {
-                    Write-Host ': ' -NoNewline
+                if (-not (Test-Path $CheckPathPathTemp -PathType Directory -ErrorAction SilentlyContinue)) {
                     Write-Host "'$CheckPathPathTemp' is a file, '$CheckPathPathTarget' is not valid. Exit." -ForegroundColor Red
                     exit 1
                 }
@@ -5697,16 +6466,16 @@ $CheckPathScriptblock = {
                 if ($CheckPathPathTemp -eq $CheckPathPathTarget) {
                     break
                 } else {
+                    try { WatchCatchableExitSignal } catch { }
+
+                    Write-Verbose "      Try to create '$($CheckPathPathTarget)'."
+
                     New-Item -ItemType Directory -Path $CheckPathPathTarget -ErrorAction SilentlyContinue | Out-Null
 
                     if (Test-Path -Path $CheckPathPathTarget -PathType Container) {
                         break
                     }
                 }
-            } else {
-                Write-Verbose "        $CheckPathPathTemp does not exist"
-                $CheckPathPathTemp = Split-Path ($CheckPathPathTemp -ireplace '@SSL', '') -Parent
-                Write-Verbose "        Next: Check $CheckPathPathTemp"
             }
         }
 
@@ -5715,13 +6484,17 @@ $CheckPathScriptblock = {
             Write-Host "Problem connecting or reading '$CheckPathPathTarget'. Exit." -ForegroundColor Red
             exit 1
         } else {
-            Write-Host
+            # Write-Host
         }
     }
+
+    try { WatchCatchableExitSignal } catch { }
 }
 
 
 function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = '') {
+    try { WatchCatchableExitSignal } catch { }
+
     Write-Host "$($Indent)Connect to Outlook Web"
 
     $local:exchServiceAvailable = $false
@@ -5729,8 +6502,8 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
     if ($script:exchService) {
         try {
             if (
-            ($script:exchService.SetOutlookSignaturesMailaddress -ieq $MailAddress) -and
-            (([Microsoft.Exchange.WebServices.Data.Folder]::Bind($script:exchService, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Inbox)).DisplayName)
+                $($script:exchService.SetOutlookSignaturesMailaddress -ieq $MailAddress) -and
+                $(([Microsoft.Exchange.WebServices.Data.Folder]::Bind($script:exchService, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Inbox)).DisplayName)
             ) {
                 Write-Host "$($Indent)  Existing connection matches required parameters and is working"
 
@@ -5743,6 +6516,8 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
         }
     }
 
+    try { WatchCatchableExitSignal } catch { }
+
     if ($local:exchServiceAvailable -eq $false) {
         Write-Host "$($Indent)  Creating new connection"
 
@@ -5751,7 +6526,11 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
         try {
             Import-Module -Name $script:WebServicesDllPath -Force -ErrorAction Stop
 
+            try { WatchCatchableExitSignal } catch { }
+
             $script:exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
+
+            try { WatchCatchableExitSignal } catch { }
 
             $tempEwsRedirectUrl = $null
 
@@ -5796,12 +6575,15 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
             $script:exchService.TraceFlags = [Microsoft.Exchange.WebServices.Data.TraceFlags]::AutodiscoverConfiguration, [Microsoft.Exchange.WebServices.Data.TraceFlags]::AutodiscoverRequest, [Microsoft.Exchange.WebServices.Data.TraceFlags]::AutodiscoverResponse
             $script:exchService.TraceListener = ExchServiceEwsTraceHandler
 
+            try { WatchCatchableExitSignal } catch { }
+
             try {
                 Write-Verbose "$($Indent)    Try Autodiscover with Integrated Windows Authentication"
 
                 $script:exchService.UseDefaultCredentials = $true
                 $script:exchService.ImpersonatedUserId = $null
                 $script:exchService.AutodiscoverUrl($MailAddress, { $true }) | Out-Null
+
             } catch {
                 Write-Verbose "$($Indent)      Autodiscover with Integrated Windows Authentication failed."
                 Write-Verbose "$($Indent)        $($_)"
@@ -5827,8 +6609,10 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
                     $($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile -and !$GraphToken.AppAccessTokenExo) -or
                     !$GraphToken.AccessTokenExo
                 ) {
-                    throw 'Integrated Windows Authentication failed, and there is no EXO OAuth access token available.'
+                    throw "Integrated Windows Authentication failed, and there is no EXO OAuth access token available. Did you forget '-GraphOnly true' or are you missing AD attributes?"
                 }
+
+                try { WatchCatchableExitSignal } catch { }
 
                 try {
                     Write-Verbose "$($Indent)    Try Autodiscover with OAuth"
@@ -5865,6 +6649,8 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
                         Write-Verbose "$($Indent)        - Check your loadbalancer configuration."
                     }
 
+                    try { WatchCatchableExitSignal } catch { }
+
                     Write-Verbose "$($Indent)    Try OAuth with fixed URL"
 
                     $script:exchService.UseDefaultCredentials = $false
@@ -5888,7 +6674,7 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
             }
 
             if (([Microsoft.Exchange.WebServices.Data.Folder]::Bind($script:exchService, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Inbox)).DisplayName) {
-                Add-Member -InputObject $script:exchService -MemberType NoteProperty -Name 'SetOutlookSignaturesMailaddress' -Value $MailAddress
+                Add-Member -InputObject $script:exchService -MemberType NoteProperty -Name 'SetOutlookSignaturesMailaddress' -Value $MailAddress -Force
             } else {
                 throw 'Could not connect to Outlook Web, although the EWS DLL threw no error.'
             }
@@ -5899,6 +6685,8 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
             $script:exchService = $null
         }
     }
+
+    try { WatchCatchableExitSignal } catch { }
 }
 
 
@@ -5913,7 +6701,7 @@ function GraphGenericQuery {
         [uri]$uri
     )
 
-    $error.clear()
+    try { WatchCatchableExitSignal } catch { }
 
     try {
         $requestBody = @{
@@ -5930,6 +6718,8 @@ function GraphGenericQuery {
         $local:uri = $null
 
         do {
+            try { WatchCatchableExitSignal } catch { }
+
             if ($local:uri) {
                 $requestBody['Uri'] = $local:uri
             }
@@ -5967,10 +6757,28 @@ function GraphGenericQuery {
 
 
 function GraphGetToken {
-    Write-Verbose '      Authentication'
+    try { WatchCatchableExitSignal } catch { }
+
+    Write-Host '    Graph authentication'
+
+    try {
+        Invoke-WebRequest $CloudEnvironmentAzureADEndpoint -UseBasicParsing -TimeoutSec 5
+    } catch {
+        return @{
+            error             = "Authentication endpoint '$($CloudEnvironmentAzureADEndpoint)' is not accessible: $($_)"
+            AccessToken       = $null
+            authHeader        = $null
+            AccessTokenExo    = $null
+            authHeaderExo     = $null
+            AppAccessToken    = $null
+            AppAuthHeader     = $null
+            AppAccessTokenExo = $null
+            AppAuthHeaderExo  = $null
+        }
+    }
 
     if ($SimulateAndDeployGraphCredentialFile) {
-        Write-Verbose "        Via SimulateAndDeployGraphCredentialFile '$SimulateAndDeployGraphCredentialFile'"
+        Write-Host "        Via SimulateAndDeployGraphCredentialFile '$SimulateAndDeployGraphCredentialFile'"
 
         try {
             try {
@@ -6021,53 +6829,59 @@ function GraphGetToken {
             }
         }
     } else {
-        if ($IsWindows) {
-            Write-Verbose '      Determine current user via IdentityCache'
-
-            $script:CurrentUser = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\IdentityStore\Cache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)\IdentityCache\$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value)" -Name 'UserName' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue)
-
-            if (-not [string]::IsNullOrWhiteSpace($script:Currentuser)) {
-                Write-Verbose "        Result: $($script:CurrentUser)"
-            } else {
-                Write-Verbose "        Failed: $($error[0])"
-                $script:CurrentUser = $null
-
-                Write-Verbose '      Determine current user via whoami'
-
-                $script:CurrentUser = "$(whoami /upn *>&1)"
-
-                if ((-not [string]::IsNullOrWhiteSpace($script:CurrentUser)) -and ($script:CurrentUser -notmatch '\s')) {
-                    Write-Verbose "        Result: $($script:CurrentUser)"
-                } else {
-                    Write-Verbose "        Failed: $($error[0])"
-                    $script:CurrentUser = $null
-                }
-            }
-        } else {
-            $script:CurrentUser = $null
-        }
-
+        Write-Host '      Load MSAL.PS'
         if (-not  $script:MsalModulePath) {
             $script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
             Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\MSAL.PS')) -Destination (Join-Path -Path $script:MsalModulePath -ChildPath 'MSAL.PS') -Recurse
 
-            if ($IsWindows) {
+            if (-not $IsLinux) {
                 Get-ChildItem $script:MsalModulePath -Recurse | Unblock-File
             }
+
+            try { WatchCatchableExitSignal } catch { }
 
             try {
                 Import-Module (Join-Path -Path $script:MsalModulePath -ChildPath 'MSAL.PS') -Force -ErrorAction Stop
             } catch {
-                Write-Host '      Problem importing MSAL.PS module. Exit.' -ForegroundColor Red
+                Write-Host '        Problem importing MSAL.PS module. Exit.' -ForegroundColor Red
                 $error[0]
                 exit 1
             }
         }
 
-        if (-not $SimulateAndDeployGraphCredentialFile) {
-            Write-Verbose "      Current user: $($script:CurrentUser)"
+        try { WatchCatchableExitSignal } catch { }
+
+        try {
+            Write-Host '      Search for LoginHint in Graph token cache'
+
+            $script:GraphUser = $null
+
+            $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' -AuthenticationBroker | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+
+            $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+
+            Write-Host "        Graph token cache info: $($script:msalClientApp.cacheInfo)"
+            Write-Host "        Result: '$($script:GraphUser)'"
+        } catch {
+            return @{
+                error             = ($error[0] | Out-String)
+                AccessToken       = $null
+                AuthHeader        = $null
+                AccessTokenExo    = $null
+                AuthHeaderExo     = $null
+                AppAccessToken    = $null
+                AppAuthHeader     = $null
+                AppAccessTokenExo = $null
+                AppAuthHeaderExo  = $null
+            }
         }
 
+        try { WatchCatchableExitSignal } catch { }
+
+
+        Write-Host '      Authentication'
+
+        # On Linux/macOS, unlock keyring/keychain if required
         if (-not [string]::IsNullOrWhitespace($GraphUnlockKeyringKeychainMessageboxText)) {
             if ($IsLinux) {
                 if ($((gdbus call -e -d org.freedesktop.secrets -o /org/freedesktop/secrets/collection/login -m org.freedesktop.DBus.Properties.Get org.freedesktop.Secret.Collection Locked *>&1) -ieq '(<true>,)')) {
@@ -6081,133 +6895,238 @@ function GraphGetToken {
                             --title=$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }) `
                             --text="$($GraphUnlockKeyringKeychainMessageboxText)"
                     } else {
-                        Write-Verbose "          Neither kdialog nor zenity found, so no message box could be shown: $($GraphUnlockKeyringKeychainMessageboxText)"
+                        Write-Host "        Neither kdialog nor zenity found, so no message box could be shown: $($GraphUnlockKeyringKeychainMessageboxText)"
                     }
                 }
             } elseif ($IsMacOS) {
                 security unlock-keychain -p 'Set-OutlookSignatures dummy password' *>$null
 
                 if ($LastExitCode -ne 0) {
-                    Write-Verbose $("display alert ""$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })"" message ""$($GraphUnlockKeyringKeychainMessageboxText)""  buttons { ""OK"" } default button 1" | osascript *>$1; '')
+                    Write-Host $("display alert ""$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })"" message ""$($GraphUnlockKeyringKeychainMessageboxText)""  buttons { ""OK"" } default button 1" | osascript *>$1; '')
                 }
             }
         }
 
-        $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId $(if ($script:CurrentUser) { ($script:CurrentUser -split '@')[1] } else { 'organizations' }) -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+        try { WatchCatchableExitSignal } catch { }
 
+        # Graph authentication
         try {
-            Write-Verbose '        Try Integrated Windows Authentication'
+            Write-Host '        Try Integrated Windows Authentication without LoginHint'
 
-            # if (-not $IsWindows) {
-            #     throw '          Not running on Windows, skip Integrated Windows Authentication'
-            # }
+            $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -IntegratedWindowsAuth -Timeout (New-TimeSpan -Minutes 1)
 
-            $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -IntegratedWindowsAuth -Timeout (New-TimeSpan -Minutes 1)
+            Write-Host '          Success'
         } catch {
-            Write-Verbose "          $($error[0])"
+            Write-Host "          Failed: $($error[0])"
+
+            try { WatchCatchableExitSignal } catch { }
 
             try {
-                Write-Verbose '        Try Silent with LoginHint'
+                Write-Host '        Try Integrated Windows Authentication with LoginHint'
+                # Required, because IWA without LoginHint may fail when account enumeration is blocked at OS level
 
-                $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Silent -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
+                if (-not ([string]::IsNullOrWhiteSpace($script:GraphUser))) {
+                    $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $script:GraphUser -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -IntegratedWindowsAuth -Timeout (New-TimeSpan -Minutes 1)
+                } else {
+                    throw 'No LoginHint found before'
+                }
+
+                Write-Host '          Success'
             } catch {
-                Write-Verbose "          $($error[0])"
+                Write-Host "          Failed: $($error[0])"
+
+                try { WatchCatchableExitSignal } catch { }
 
                 try {
-                    Write-Verbose '        Try Prompt with LoginHint and Timeout'
+                    Write-Host '        Try Silent with LoginHint and AuthBroker'
+                    # Silent without login hint does not make sense in this scenario because
+                    # either $script:GraphUser already contains the account that was successfully used for the last authentication
+                    # or $scriptCurrentUser is empty, which means there was no success auth before and there is no cache available anyhow
 
-                    if (-not [string]::IsNullOrWhitespace($GraphHtmlMessageboxText)) {
-                        if ($IsWindows -and (-not (Test-Path env:SSH_CLIENT))) {
-                            Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
-
-                            $window = New-Object System.Windows.Window
-                            $window.Width = 1
-                            $window.Height = 1
-                            $window.WindowStartupLocation = [System.Windows.WindowStartupLocation]::CenterOwner
-                            $window.ShowActivated = $false
-                            $window.Topmost = $true
-                            $window.Show()
-                            $window.Hide()
-                            $null = [System.Windows.MessageBox]::Show($window, "$($GraphHtmlMessageboxText)", $(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }), [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Information, [System.Windows.MessageBoxResult]::None)
-                            $window.close()
-                        } elseif ($IsLinux -and ((Test-Path env:DISPLAY))) {
-                            if ($(Get-Command -Name 'kdialog' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue)) {
-                                $null = kdialog `
-                                    --title $(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }) `
-                                    --msgbox "$($GraphHtmlMessageboxText)"
-                            } elseif ($(Get-Command -Name 'zenity' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue)) {
-                                $null = zenity `
-                                    --info `
-                                    --title=$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }) `
-                                    --text="$($GraphHtmlMessageboxText)"
-                            } else {
-                                Write-Verbose "          Neither kdialog nor zenity found, so no message box could be shown: $($GraphHtmlMessageboxText)"
-                            }
-                        } elseif ($IsMacOS -and ((Test-Path env:DISPLAY))) {
-                            Write-Verbose $("display alert ""$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })"" message ""$($GraphHtmlMessageboxText)""  buttons { ""OK"" } default button 1" | osascript *>&1; '')
-                        }
+                    if (-not ([string]::IsNullOrWhiteSpace($script:GraphUser))) {
+                        $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $script:GraphUser -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Silent -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
+                    } else {
+                        throw 'No LoginHint found before'
                     }
 
-                    $MsalInteractiveParams = @{}
-
-                    if (-not [string]::IsNullOrWhiteSpace($GraphBrowserRedirectSuccess)) {
-                        $MsalInteractiveParams.BrowserRedirectSuccess = $GraphBrowserRedirectSuccess
-                    }
-
-                    if (-not [string]::IsNullOrWhiteSpace($GraphBrowserRedirectError)) {
-                        $MsalInteractiveParams.BrowserRedirectError = $GraphBrowserRedirectError
-                    }
-
-                    if (-not [string]::IsNullOrWhiteSpace($GraphHtmlMessageSuccess)) {
-                        $MsalInteractiveParams.HtmlMessageSuccess = $GraphHtmlMessageSuccess
-                    }
-
-                    if (-not [string]::IsNullOrWhiteSpace($GraphHtmlMessageError)) {
-                        $MsalInteractiveParams.HtmlMessageError = $GraphHtmlMessageError
-                    }
-
-
-                    Write-Host '      Opening new browser window and waiting for you to authenticate. Stopping script execution after five minutes.'
-                    $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Interactive -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
+                    Write-Host '          Success'
                 } catch {
-                    Write-Verbose '        No authentication possible'
-                    $auth = $null
-                    return @{
-                        error             = (($error[0] | Out-String) + @"
+                    Write-Host "          Failed: $($error[0])"
+
+                    try {
+                        Write-Host '        Try Silent with LoginHint but without AuthBroker'
+                        # Silent without login hint does not make sense in this scenario because
+                        # either $script:GraphUser already contains the account that was successfully used for the last authentication
+                        # or $scriptCurrentUser is empty, which means there was no success auth before and there is no cache available anyhow
+
+                        $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+
+                        if (-not ([string]::IsNullOrWhiteSpace($script:GraphUser))) {
+                            $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $script:GraphUser -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Silent -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
+                        } else {
+                            throw 'No LoginHint found before'
+                        }
+
+                        Write-Host '          Success'
+                    } catch {
+                        Write-Host "          Failed: $($error[0])"
+
+                        try { WatchCatchableExitSignal } catch { }
+
+                        # Interactive authentication methods
+                        Write-Host '        All silent authentication methods failed, switching to interactive authentication methods.'
+
+                        if (-not [string]::IsNullOrWhitespace($GraphHtmlMessageboxText)) {
+                            if ($IsWindows -and (-not (Test-Path env:SSH_CLIENT))) {
+                                Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
+
+                                $window = New-Object System.Windows.Window -Property @{
+                                    Width                 = 1
+                                    Height                = 1
+                                    WindowStartupLocation = [System.Windows.WindowStartupLocation]::CenterScreen
+                                    ShowActivated         = $false
+                                    Topmost               = $true
+                                }
+
+                                $window.Show()
+                                $window.Hide()
+
+                                $MessageBoxResult = [System.Windows.MessageBox]::Show($window, "$($GraphHtmlMessageboxText)", $(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }), [System.Windows.MessageBoxButton]::OKCancel, [System.Windows.MessageBoxImage]::Information, [System.Windows.MessageBoxResult]::None)
+
+                                $window.Close()
+
+                                if ($MessageBoxResult -ieq 'Cancel') {
+                                    return @{
+                                        error             = 'Authentication cancelled by user. Exiting.'
+                                        AccessToken       = $null
+                                        authHeader        = $null
+                                        AccessTokenExo    = $null
+                                        authHeaderExo     = $null
+                                        AppAccessToken    = $null
+                                        AppAuthHeader     = $null
+                                        AppAccessTokenExo = $null
+                                        AppAuthHeaderExo  = $null
+                                    }
+                                }
+                            } elseif ($IsLinux -and ((Test-Path env:DISPLAY))) {
+                                if ($(Get-Command -Name 'kdialog' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue)) {
+                                    $null = kdialog `
+                                        --title $(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }) `
+                                        --msgbox "$($GraphHtmlMessageboxText)"
+                                } elseif ($(Get-Command -Name 'zenity' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue)) {
+                                    $null = zenity `
+                                        --info `
+                                        --title=$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }) `
+                                        --text="$($GraphHtmlMessageboxText)"
+                                } else {
+                                    Write-Host "          Neither kdialog nor zenity found, so no message box could be shown: $($GraphHtmlMessageboxText)"
+                                }
+                            } elseif ($IsMacOS -and ((Test-Path env:DISPLAY))) {
+                                Write-Host $("display alert ""$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })"" message ""$($GraphHtmlMessageboxText)""  buttons { ""OK"" } default button 1" | osascript *>&1; '')
+                            }
+
+                            try { WatchCatchableExitSignal } catch { }
+                        }
+
+                        $MsalInteractiveParams = @{}
+
+                        if (-not [string]::IsNullOrWhiteSpace($GraphBrowserRedirectSuccess)) {
+                            $MsalInteractiveParams.BrowserRedirectSuccess = $GraphBrowserRedirectSuccess
+                        }
+
+                        if (-not [string]::IsNullOrWhiteSpace($GraphBrowserRedirectError)) {
+                            $MsalInteractiveParams.BrowserRedirectError = $GraphBrowserRedirectError
+                        }
+
+                        if (-not [string]::IsNullOrWhiteSpace($GraphHtmlMessageSuccess)) {
+                            $MsalInteractiveParams.HtmlMessageSuccess = $GraphHtmlMessageSuccess
+                        }
+
+                        if (-not [string]::IsNullOrWhiteSpace($GraphHtmlMessageError)) {
+                            $MsalInteractiveParams.HtmlMessageError = $GraphHtmlMessageError
+                        }
+
+                        try { WatchCatchableExitSignal } catch { }
+
+                        try {
+                            Write-Host '        Try interactive authentication with AuthBroker'
+
+                            if (-not $IsWindows) {
+                                throw 'Interactive with AuthBroker on Linux/macOS only works in the console. Browser is preferred for better user experience.'
+                            }
+
+                            $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' -AuthenticationBroker | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+
+                            Write-Host '          Opening authentication broker window and waiting for you to authenticate. Stopping script execution after five minutes.'
+                            $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:GraphUser) { $script:GraphUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Interactive -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
+
+                            Write-Host '          Success'
+                        } catch {
+                            Write-Host "          Failed: $($error[0])"
+
+                            try {
+                                Write-Host '        Try interactive authentication without AuthBroker'
+
+                                $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+                                Write-Host '          Opening new browser window and waiting for you to authenticate. Stopping script execution after five minutes.'
+                                $auth = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:GraphUser) { $script:GraphUser } else { '' }) -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default" -Interactive -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
+
+                                Write-Host '          Success'
+                            } catch {
+                                Write-Host "          Failed: $($error[0])"
+                                Write-Host '        No authentication possible'
+
+                                $auth = $null
+
+                                return @{
+                                    error             = (($error[0] | Out-String) + @"
 No Graph authentication possible.
 1. Did you follow the Quick Start Guide in '.\docs\README' and configure the Entra ID app correctly?
 2. Run Set-OutlookSignatures with the "-Verbose" parameter and check for authentication messages
-3. If the "Via Prompt with LoginHint and Timeout" authentication message is diplayed:
-   - Does a browser (the system default browser, if configured) open and ask for authentication?
-     - Yes:
+3. If the "Try interactive authentication" message is displayed:
+   - When using an authentication broker (which is preferred on supported platforms):
+     - Does the account picker window show up?
+     - Check if authentication happens within five minutes
+     - Check if your firewall or anti-malware software blocks Set-OutlookSignatures from creating a temporary listener port for localhost.
+     - Check if the correct user account is selected/entered and if the authentication is successful
+   - When not using an authentication broker (on a system without support for it, or when broker auth failed):
+     - Does a browser (the system default browser, if configured) open and ask for authentication?
+      - Yes:
+       - Check if authentication happens within five minutes
+       - Ensure that your browser does not block access to 'http://localhost', errors such as 'connection refused' point to this problem. ('https://localhost' is currently not technically feasible, see 'https://learn.microsoft.com/en-us/entra/msal/dotnet/acquiring-tokens/using-web-browsers' and 'https://learn.microsoft.com/en-us/entra/msal/dotnet/acquiring-tokens/using-web-browsers' for details)
+         This is typically due to enforced redirection to HTTPS being applied to localhost. If not configured via policies: edge://net-internals/#hsts or chrome://net-internals/#hsts, delete domain security policies for localhost.
+       - Check if your firewall or anti-malware software blocks Set-OutlookSignatures from creating a temporary listener port for localhost.
        - Check if the correct user account is selected/entered and if the authentication is successful
-       - Check if authentication happens within two minutes
-       - Ensure that access to 'http://localhost' is allowed ('https://localhost' is currently not technically feasible, see 'https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/System-Browser-on-.Net-Core' and 'https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/MSAL.NET-uses-web-browser' for details)
      - No:
-       - Run Set-OutlookSignatures in a new PowerShell session
-       - Check if a default browser is set and if 'start https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' opens it
+       - Check if a default browser is set and if the PowerShell command 'start https://github.com/Set-OutlookSignatures/Set-OutlookSignatures' opens it
        - Make sure that Set-OutlookSignatures is executed in the security context of the currently logged-in user
-       - Check your anti-malware configuration (Verbose messages such as 'An error occurred while sending the request' point at a problem there)
+       - Run Set-OutlookSignatures in a new PowerShell session
+       - Check your anti-malware configuration (errors such as 'error sending the request' or 'connection refused' point at a problem there)
        - Make sure that the current PowerShell session allows TLS 1.2+ (see https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85 for details)
-4. Delete the MSAL.PS Graph token cache: $($script:msalClientApp.cacheInfo).
+4. Delete the Graph token cache: $($script:msalClientApp.cacheInfo).
 "@)
-                        AccessToken       = $null
-                        AuthHeader        = $null
-                        AccessTokenExo    = $null
-                        AuthHeaderExo     = $null
-                        AppAccessToken    = $null
-                        AppAuthHeader     = $null
-                        AppAccessTokenExo = $null
-                        AppAuthHeaderExo  = $null
+                                    AccessToken       = $null
+                                    AuthHeader        = $null
+                                    AccessTokenExo    = $null
+                                    AuthHeaderExo     = $null
+                                    AppAccessToken    = $null
+                                    AppAuthHeader     = $null
+                                    AppAccessTokenExo = $null
+                                    AppAuthHeaderExo  = $null
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
         if ($auth) {
-            $authExo = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $(if ($script:CurrentUser) { $script:CurrentUser } else { '' }) -Scopes "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" -Silent -ForceRefresh
-
             try {
+                $script:GraphUser = $auth.account.username
+
+                $authExo = $script:msalClientApp | Get-MsalToken -AzureCloudInstance $CloudEnvironmentEnvironmentName -LoginHint $script:GraphUser -Scopes "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" -Silent -ForceRefresh
+
                 $script:AuthorizationHeader = @{
                     Authorization = $auth.CreateAuthorizationHeader()
                 }
@@ -6251,6 +7170,8 @@ function GraphGetMe {
     #   Delegated: User.Read.All
     #   Application: User.Read.All (/me is not supported in applications)
 
+    try { WatchCatchableExitSignal } catch { }
+
     try {
         $requestBody = @{
             Method      = 'Get'
@@ -6266,6 +7187,8 @@ function GraphGetMe {
         $local:uri = $null
 
         do {
+            try { WatchCatchableExitSignal } catch { }
+
             if ($local:uri) {
                 $requestBody['Uri'] = $local:uri
             }
@@ -6308,6 +7231,8 @@ function GraphGetUpnFromSmtp($user) {
     #   Delegated: User.Read.All
     #   Application: User.Read.All
 
+    try { WatchCatchableExitSignal } catch { }
+
     try {
         $requestBody = @{
             Method      = 'Get'
@@ -6323,6 +7248,8 @@ function GraphGetUpnFromSmtp($user) {
         $local:uri = $null
 
         do {
+            try { WatchCatchableExitSignal } catch { }
+
             if ($local:uri) {
                 $requestBody['Uri'] = $local:uri
             }
@@ -6365,15 +7292,15 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
     #   Delegated: User.Read.All
     #   Application: User.Read.All
 
+    try { WatchCatchableExitSignal } catch { }
+
     $user = GraphGetUpnFromSmtp($user)
 
     if ($user.properties.value.userprincipalname) {
         try {
-            $local:x = @($GraphUserProperties | Select-Object -Unique) -join ','
-
             $requestBody = @{
                 Method      = 'Get'
-                Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Net.WebUtility]::UrlEncode($local:x)
+                Uri         = "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Net.WebUtility]::UrlEncode($(@($GraphUserProperties | Select-Object -Unique) -join ','))
                 Headers     = $authHeader
                 ContentType = 'Application/Json; charset=utf-8'
             }
@@ -6385,6 +7312,8 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
             $local:uri = $null
 
             do {
+                try { WatchCatchableExitSignal } catch { }
+
                 if ($local:uri) {
                     $requestBody['Uri'] = $local:uri
                 }
@@ -6400,7 +7329,7 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
             } until (!($local:uri))
 
 
-            if (($user.properties.value.userprincipalname -ieq $script:CurrentUser) -and ((-not $SimulateUser) -or ($SimulateUser -and $SimulateAndDeployGraphCredentialFile -and ($authHeader -eq $script:AppAuthorizationHeader))) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true) -or ($MirrorCloudSignatures -eq $true))) {
+            if (($user.properties.value.userprincipalname -ieq $script:GraphUser) -and ((-not $SimulateUser) -or ($SimulateUser -and $SimulateAndDeployGraphCredentialFile -and ($authHeader -eq $script:AppAuthorizationHeader))) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true) -or ($MirrorCloudSignatures -eq $true))) {
                 try {
                     $requestBody = @{
                         Method      = 'Get'
@@ -6415,6 +7344,8 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
                     $local:y = @()
 
                     do {
+                        try { WatchCatchableExitSignal } catch { }
+
                         if ($local:uri) {
                             $requestBody['Uri'] = $local:uri
                         }
@@ -6429,9 +7360,9 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
                         }
                     } until (!($local:uri))
 
-                    $local:x | Add-Member -MemberType NoteProperty -Name 'mailboxSettings' -Value $local:y.mailboxSettings
+                    $local:x | Add-Member -MemberType NoteProperty -Name 'mailboxSettings' -Value $local:y.mailboxSettings -Force
                 } catch {
-                    Write-Host "      Problem getting mailboxSettings for '$($script:CurrentUser)' from Microsoft Graph." -ForegroundColor Yellow
+                    Write-Host "      Problem getting mailboxSettings for '$($script:GraphUser)' from Microsoft Graph." -ForegroundColor Yellow
                     $error[0]
                     Write-Host '      This is a Microsoft Graph API problem, which can only be solved by Microsoft itself.' -ForegroundColor Yellow
                     Write-Host '      Disabling SetCurrentUserOutlookWebSignature and SetCurrentUserOOFMessage to be able to continue.' -ForegroundColor Yellow
@@ -6449,7 +7380,9 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
             }
         }
 
-        if (($user.properties.value.userprincipalname -ieq $script:CurrentUser) -and ($SimulateUser -and $SimulateAndDeployGraphCredentialFile -and ($authHeader -eq $script:AuthorizationHeader))) {
+        try { WatchCatchableExitSignal } catch { }
+
+        if (($user.properties.value.userprincipalname -ieq $script:GraphUser) -and ($SimulateUser -and $SimulateAndDeployGraphCredentialFile -and ($authHeader -eq $script:AuthorizationHeader))) {
             $temp = GraphGetUserProperties -user $($user.properties.value.userprincipalname) -authHeader $script:AppAuthorizationHeader
 
             if ($temp.error -eq $false) {
@@ -6485,6 +7418,8 @@ function GraphGetUserManager($user) {
     #   Delegated: User.Read.All
     #   Application: User.Read.All
 
+    try { WatchCatchableExitSignal } catch { }
+
     try {
         $requestBody = @{
             Method      = 'Get'
@@ -6500,6 +7435,8 @@ function GraphGetUserManager($user) {
         $local:uri = $null
 
         do {
+            try { WatchCatchableExitSignal } catch { }
+
             if ($local:uri) {
                 $requestBody['Uri'] = $local:uri
             }
@@ -6543,6 +7480,8 @@ function GraphGetUserTransitiveMemberOf($user) {
     #   Delegated: User.Read.All
     #   Application: User.Read.All
 
+    try { WatchCatchableExitSignal } catch { }
+
     try {
         $requestBody = @{
             Method      = 'Get'
@@ -6558,6 +7497,8 @@ function GraphGetUserTransitiveMemberOf($user) {
         $local:uri = $null
 
         do {
+            try { WatchCatchableExitSignal } catch { }
+
             if ($local:uri) {
                 $requestBody['Uri'] = $local:uri
             }
@@ -6600,6 +7541,8 @@ function GraphGetUserPhoto($user) {
     #   Delegated: User.Read.All
     #   Application: User.Read.All
 
+    try { WatchCatchableExitSignal } catch { }
+
     try {
         $requestBody = @{
             Method      = 'Get'
@@ -6607,6 +7550,7 @@ function GraphGetUserPhoto($user) {
             Headers     = $script:AuthorizationHeader
             ContentType = 'image/jpg'
         }
+
         $local:tempFile = (Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ((New-Guid).Guid))
         $OldProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
@@ -6614,6 +7558,8 @@ function GraphGetUserPhoto($user) {
         $null = Invoke-RestMethod @requestBody -OutFile $local:tempFile
 
         $ProgressPreference = $OldProgressPreference
+
+        try { WatchCatchableExitSignal } catch { }
 
         $local:x = [System.IO.File]::ReadAllBytes($local:tempFile)
 
@@ -6644,6 +7590,8 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal, $authH
     # Required permission(s):
     #   Delegated: Mailboxsettings.ReadWrite
     #   Application: Mailboxsettings.ReadWrite
+
+    try { WatchCatchableExitSignal } catch { }
 
     try {
         if ($OOFInternal -or $OOFExternal) {
@@ -6689,6 +7637,8 @@ function GraphFilterGroups($filter) {
     #   Delegated: GroupMember.Read.All
     #   Application: GroupMember.Read.All
 
+    try { WatchCatchableExitSignal } catch { }
+
     try {
         $requestBody = @{
             Method      = 'Get'
@@ -6704,6 +7654,8 @@ function GraphFilterGroups($filter) {
         $local:uri = $null
 
         do {
+            try { WatchCatchableExitSignal } catch { }
+
             if ($local:uri) {
                 $requestBody['Uri'] = $local:uri
             }
@@ -6746,6 +7698,8 @@ function GraphFilterUsers($filter) {
     #   Delegated: User.Read.All
     #   Application: User.Read.All
 
+    try { WatchCatchableExitSignal } catch { }
+
     try {
         $requestBody = @{
             Method      = 'Get'
@@ -6761,6 +7715,8 @@ function GraphFilterUsers($filter) {
         $local:uri = $null
 
         do {
+            try { WatchCatchableExitSignal } catch { }
+
             if ($local:uri) {
                 $requestBody['Uri'] = $local:uri
             }
@@ -6798,8 +7754,11 @@ function GraphFilterUsers($filter) {
 
 
 function GetIniContent ($filePath) {
+    try { WatchCatchableExitSignal } catch { }
+
     $local:ini = [ordered]@{}
     $local:SectionIndex = -1
+
     if ($filePath -ne '') {
         try {
             Write-Verbose '    Original ini content'
@@ -6838,12 +7797,14 @@ function GetIniContent ($filePath) {
                 }
             }
         } catch {
-            Write-Host
+            # Write-Host
             Write-Host "Error accessing '$FilePath'. Exit." -ForegroundColor red
             $Error[0]
             exit 1
         }
     }
+
+    try { WatchCatchableExitSignal } catch { }
 
     # default values for <Set-OutlookSignatures configuration>
     if (
@@ -6859,25 +7820,25 @@ function GetIniContent ($filePath) {
         if (
             -not $(
                 try {
-        ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortOrder']
+                    $((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortOrder']
                 } catch {
                     $false
                 }
             )
         ) {
-    ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortOrder'] = 'AsInThisFile'
+            $((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortOrder'] = 'AsInThisFile'
         }
 
         if (
             -not $(
                 try {
-        ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortCulture']
+                    $((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortCulture']
                 } catch {
                     $false
                 }
             )
         ) {
-    ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortCulture'] = 'de-AT'
+            $((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortCulture'] = 'de-AT'
         }
     } else {
         $local:ini["$($local:ini.Count)"] = [ordered]@{
@@ -6887,11 +7848,15 @@ function GetIniContent ($filePath) {
         }
     }
 
+    try { WatchCatchableExitSignal } catch { }
+
     return $local:ini
 }
 
 
 function ConvertPath ([ref]$path) {
+    try { WatchCatchableExitSignal } catch { }
+
     if ($path) {
         if (($path.value.StartsWith('https://', 'CurrentCultureIgnoreCase')) -or ($path.value -ilike '*@ssl\*')) {
             if (-not [System.Uri]::IsWellFormedUriString($path.value, [System.UriKind]::Absolute)) {
@@ -6910,6 +7875,8 @@ function ConvertPath ([ref]$path) {
             }
         }
     }
+
+    try { WatchCatchableExitSignal } catch { }
 }
 
 
@@ -6921,10 +7888,14 @@ function RemoveItemAlternativeRecurse {
         [switch] $SkipFolder # when $Path is a folder, do not delete $path, only it's content
     )
 
+    try { WatchCatchableExitSignal } catch { }
+
     $local:ToDelete = @()
 
     if (Test-Path -LiteralPath $path) {
         foreach ($SinglePath in @(Get-Item -LiteralPath $Path)) {
+            try { WatchCatchableExitSignal } catch { }
+
             if (Test-Path -LiteralPath $SinglePath -PathType Container) {
                 if (-not $SkipFolder) {
                     $local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture $TemplateFilesSortCulture -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
@@ -6941,13 +7912,19 @@ function RemoveItemAlternativeRecurse {
     }
 
     foreach ($SingleItemToDelete in $local:ToDelete) {
+        try { WatchCatchableExitSignal } catch { }
+
         try {
-            Remove-Item $SingleItemToDelete.FullName -Force -Recurse
+            if ((Test-Path $SingleItemToDelete.FullName) -eq $true) {
+                Remove-Item $SingleItemToDelete.FullName -Force -Recurse
+            }
         } catch {
             Write-Verbose "Could not delete $($SingleItemToDelete.FullName), error: $($_.Exception.Message)"
             Write-Verbose $_
         }
     }
+
+    try { WatchCatchableExitSignal } catch { }
 }
 
 
@@ -6956,6 +7933,8 @@ function ParseJwtToken {
 
     [cmdletbinding()]
     param([Parameter(Mandatory = $true)][string]$token)
+
+    try { WatchCatchableExitSignal } catch { }
 
     # Validate as per https://tools.ietf.org/html/rfc7519
     # Access and ID tokens are fine, Refresh tokens will not work
@@ -6973,7 +7952,7 @@ function ParseJwtToken {
         while ($tokenheader.Length % 4) { $tokenheader += '=' }
 
         # Convert from Base64 encoded string to PSObject all at once
-        $tokenHeader = [System.Text.Encoding]::ASCII.GetString([system.convert]::FromBase64String($tokenheader)) | ConvertFrom-Json
+        $tokenHeader = [System.Text.Encoding]::UTF8.GetString([system.convert]::FromBase64String($tokenheader)) | ConvertFrom-Json
 
         # Payload
         $tokenPayload = $token.Split('.')[1].Replace('-', '+').Replace('_', '/')
@@ -6985,7 +7964,7 @@ function ParseJwtToken {
         $tokenByteArray = [System.Convert]::FromBase64String($tokenPayload)
 
         # Convert to string array
-        $tokenArray = [System.Text.Encoding]::ASCII.GetString($tokenByteArray)
+        $tokenArray = [System.Text.Encoding]::UTF8.GetString($tokenByteArray)
 
         # Convert from JSON to PSObject
         $tokenPayload = $tokenArray | ConvertFrom-Json
@@ -6999,20 +7978,233 @@ function ParseJwtToken {
 }
 
 
+### ▼▼▼ WatchCatchableExitSignal initiation code below ▼▼▼
+##
+#
+# Place this code in your main script, as early in the code as possible
+#
+# Call WatchCatchableExitSignal wherever you want to gracefully exit in case of
+#   - a Logoff/Reboot/Shutdown message on Windows
+#   - a catchable POSIX signal on Linux and macOS
+#
+# If $WatchCatchableExitSignalNonExitScriptBlock is of type [scriptblock],
+#   it is executed when no catchable exit signal is detected.
+#
+# Clean-up is triggered by WatchCatchableExitSignal running the "exit 1" command
+#   This triggers the Finally part of a Try/Catch/Finally block
+#
+# Place the following two lines of code at the end of your clean-up routine
+#   WatchCatchableExitSignal -CleanupDone
+#
+
+$global:WatchCatchableExitSignalStatus = [hashtable]::Synchronized(@{})
+$global:WatchCatchableExitSignalStatus.0 = 'Nothing detected yet'
+# Possible values for $global:WatchCatchableExitSignalStatus.0
+#   "Nothing detected yet" when no catchable exit signal has been found until now
+#   "Detected '<description>', initiate clean-up and exit" when a catchable exit signal has been found
+#   "Clean-up done" after clean-up is done
+
+$WatchCatchableExitSignalRunspace = [runspacefactory]::CreateRunspace()
+$WatchCatchableExitSignalRunspace.Open()
+$WatchCatchableExitSignalRunspace.SessionStateProxy.SetVariable('WatchCatchableExitSignalStatus', $global:WatchCatchableExitSignalStatus)
+$WatchCatchableExitSignalPowershell = [powershell]::Create()
+$WatchCatchableExitSignalPowershell.Runspace = $WatchCatchableExitSignalRunspace
+
+if ($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) {
+    $WatchCatchableExitSignalForm = $null
+
+    $WatchCatchableExitSignalRunspace.SessionStateProxy.SetVariable('WatchCatchableExitSignalForm', [ref]$WatchCatchableExitSignalForm)
+
+    $null = $WatchCatchableExitSignalPowershell.AddScript(
+        {
+            Add-Type -AssemblyName System.Windows.Forms
+            Add-Type -TypeDefinition @'
+            using System;
+            using System.Windows.Forms;
+            using System.Management.Automation;
+            using System.Management.Automation.Runspaces;
+            using System.Collections.ObjectModel;
+
+            public class CustomForm : Form {
+                public event Action<Message> EndSessionInitiateCleanup;
+
+                protected override CreateParams CreateParams {
+                    // Hide the window from Alt-Tab
+                    get {
+                        CreateParams cp = base.CreateParams;
+                        cp.ExStyle |= 0x80;  // WS_EX_TOOLWINDOW
+                        return cp;
+                    }
+                }
+
+                protected override void WndProc(ref Message m) {
+                    if (EndSessionInitiateCleanup != null) {
+                        EndSessionInitiateCleanup.Invoke(m);
+                    }
+
+                    base.WndProc(ref m);
+                }
+            }
+'@ -ReferencedAssemblies $(
+                if ($($PSVersionTable.PSEdition) -ieq 'Core') {
+                    $(@('System.Windows.Forms', 'System.ComponentModel.Primitives', 'System.Management.Automation', 'System.Windows.Forms.Primitives'))
+                } else {
+                    $(@('System.Windows.Forms', 'System.ComponentModel.Primitives', 'System.Management.Automation'))
+                }
+            )
+
+            $formRef = $ExecutionContext.SessionState.PSVariable.GetValue('WatchCatchableExitSignalForm')
+            $formRef.Value = [CustomForm]::new()
+            $formRef.Value.Text = 'Set-OutlookSignatures non-blocking window for WM_* detection'
+            $formRef.Value.Width = 300
+            $formRef.Value.Height = 300
+            $formRef.Value.ShowInTaskbar = $false
+            $formRef.Value.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::None
+            $formRef.Value.Opacity = 0
+            $formRef.Value.WindowState = [System.Windows.Forms.FormWindowState]::Minimized
+
+            # Event handler
+            $formRef.Value.add_EndSessionInitiateCleanup(
+                {
+                    param($message)
+
+                    $WindowsMessagesByDecimal = @{
+                        0 = 'WM_NULL'; 2 = 'WM_DESTROY'; 3 = 'WM_MOVE'; 5 = 'WM_SIZE'; 6 = 'WM_ACTIVATE'; 7 = 'WM_SETFOCUS'; 8 = 'WM_KILLFOCUS'; 10 = 'WM_ENABLE'; 11 = 'WM_SETREDRAW'; 12 = 'WM_SETTEXT'; 13 = 'WM_GETTEXT'; 14 = 'WM_GETTEXTLENGTH'; 15 = 'WM_PAINT'; 16 = 'WM_CLOSE'; 17 = 'WM_QUERYENDSESSION'; 18 = 'WM_QUIT'; 19 = 'WM_QUERYOPEN'; 20 = 'WM_ERASEBKGND'; 21 = 'WM_SYSCOLORCHANGE'; 22 = 'WM_ENDSESSION'; 23 = 'WM_SYSTEMERROR'; 24 = 'WM_SHOWWINDOW'; 25 = 'WM_CTLCOLOR'; 26 = 'WM_SETTINGCHANGE'; 27 = 'WM_DEVMODECHANGE'; 28 = 'WM_ACTIVATEAPP'; 29 = 'WM_FONTCHANGE'; 30 = 'WM_TIMECHANGE'; 31 = 'WM_CANCELMODE'; 32 = 'WM_SETCURSOR'; 33 = 'WM_MOUSEACTIVATE'; 34 = 'WM_CHILDACTIVATE'; 35 = 'WM_QUEUESYNC'; 36 = 'WM_GETMINMAXINFO'; 38 = 'WM_PAINTICON'; 39 = 'WM_ICONERASEBKGND'; 40 = 'WM_NEXTDLGCTL'; 42 = 'WM_SPOOLERSTATUS'; 43 = 'WM_DRAWITEM'; 44 = 'WM_MEASUREITEM'; 45 = 'WM_DELETEITEM'; 46 = 'WM_VKEYTOITEM'; 47 = 'WM_CHARTOITEM'; 48 = 'WM_SETFONT'; 49 = 'WM_GETFONT'; 50 = 'WM_SETHOTKEY'; 51 = 'WM_GETHOTKEY'; 55 = 'WM_QUERYDRAGICON'; 57 = 'WM_COMPAREITEM'; 65 = 'WM_COMPACTING'; 70 = 'WM_WINDOWPOSCHANGING'; 71 = 'WM_WINDOWPOSCHANGED'; 72 = 'WM_POWER'; 74 = 'WM_COPYDATA'; 75 = 'WM_CANCELJOURNAL'; 78 = 'WM_NOTIFY'; 80 = 'WM_INPUTLANGCHANGEREQUEST'; 81 = 'WM_INPUTLANGCHANGE'; 82 = 'WM_TCARD'; 83 = 'WM_HELP'; 84 = 'WM_USERCHANGED'; 85 = 'WM_NOTIFYFORMAT'; 123 = 'WM_CONTEXTMENU'; 124 = 'WM_STYLECHANGING'; 125 = 'WM_STYLECHANGED'; 126 = 'WM_DISPLAYCHANGE'; 127 = 'WM_GETICON'; 128 = 'WM_SETICON'; 129 = 'WM_NCCREATE'; 130 = 'WM_NCDESTROY'; 131 = 'WM_NCCALCSIZE'; 132 = 'WM_NCHITTEST'; 133 = 'WM_NCPAINT'; 134 = 'WM_NCACTIVATE'; 135 = 'WM_GETDLGCODE'; 160 = 'WM_NCMOUSEMOVE'; 161 = 'WM_NCLBUTTONDOWN'; 162 = 'WM_NCLBUTTONUP'; 163 = 'WM_NCLBUTTONDBLCLK'; 164 = 'WM_NCRBUTTONDOWN'; 165 = 'WM_NCRBUTTONUP'; 166 = 'WM_NCRBUTTONDBLCLK'; 167 = 'WM_NCMBUTTONDOWN'; 168 = 'WM_NCMBUTTONUP'; 169 = 'WM_NCMBUTTONDBLCLK'; 256 = 'WM_KEYDOWN'; 257 = 'WM_KEYUP'; 258 = 'WM_CHAR'; 259 = 'WM_DEADCHAR'; 260 = 'WM_SYSKEYDOWN'; 261 = 'WM_SYSKEYUP'; 262 = 'WM_SYSCHAR'; 263 = 'WM_SYSDEADCHAR'; 264 = 'WM_KEYLAST'; 269 = 'WM_IME_STARTCOMPOSITION'; 270 = 'WM_IME_ENDCOMPOSITION'; 271 = 'WM_IME_COMPOSITION'; 272 = 'WM_INITDIALOG'; 273 = 'WM_COMMAND'; 274 = 'WM_SYSCOMMAND'; 275 = 'WM_TIMER'; 276 = 'WM_HSCROLL'; 277 = 'WM_VSCROLL'; 278 = 'WM_INITMENU'; 279 = 'WM_INITMENUPOPUP'; 287 = 'WM_MENUSELECT'; 288 = 'WM_MENUCHAR'; 289 = 'WM_ENTERIDLE'; 306 = 'WM_CTLCOLORMSGBOX'; 307 = 'WM_CTLCOLOREDIT'; 308 = 'WM_CTLCOLORLISTBOX'; 309 = 'WM_CTLCOLORBTN'; 310 = 'WM_CTLCOLORDLG'; 311 = 'WM_CTLCOLORSCROLLBAR'; 312 = 'WM_CTLCOLORSTATIC'; 512 = 'WM_MOUSEMOVE'; 513 = 'WM_LBUTTONDOWN'; 514 = 'WM_LBUTTONUP'; 515 = 'WM_LBUTTONDBLCLK'; 516 = 'WM_RBUTTONDOWN'; 517 = 'WM_RBUTTONUP'; 518 = 'WM_RBUTTONDBLCLK'; 519 = 'WM_MBUTTONDOWN'; 520 = 'WM_MBUTTONUP'; 521 = 'WM_MBUTTONDBLCLK'; 522 = 'WM_MOUSEWHEEL'; 526 = 'WM_MOUSEHWHEEL'; 528 = 'WM_PARENTNOTIFY'; 529 = 'WM_ENTERMENULOOP'; 530 = 'WM_EXITMENULOOP'; 531 = 'WM_NEXTMENU'; 532 = 'WM_SIZING'; 533 = 'WM_CAPTURECHANGED'; 534 = 'WM_MOVING'; 536 = 'WM_POWERBROADCAST'; 537 = 'WM_DEVICECHANGE'; 544 = 'WM_MDICREATE'; 545 = 'WM_MDIDESTROY'; 546 = 'WM_MDIACTIVATE'; 547 = 'WM_MDIRESTORE'; 548 = 'WM_MDINEXT'; 549 = 'WM_MDIMAXIMIZE'; 550 = 'WM_MDITILE'; 551 = 'WM_MDICASCADE'; 552 = 'WM_MDIICONARRANGE'; 553 = 'WM_MDIGETACTIVE'; 560 = 'WM_MDISETMENU'; 561 = 'WM_ENTERSIZEMOVE'; 562 = 'WM_EXITSIZEMOVE'; 563 = 'WM_DROPFILES'; 564 = 'WM_MDIREFRESHMENU'; 641 = 'WM_IME_SETCONTEXT'; 642 = 'WM_IME_NOTIFY'; 643 = 'WM_IME_CONTROL'; 644 = 'WM_IME_COMPOSITIONFULL'; 645 = 'WM_IME_SELECT'; 646 = 'WM_IME_CHAR'; 656 = 'WM_IME_KEYDOWN'; 657 = 'WM_IME_KEYUP'; 673 = 'WM_MOUSEHOVER'; 674 = 'WM_NCMOUSELEAVE'; 675 = 'WM_MOUSELEAVE'; 768 = 'WM_CUT'; 769 = 'WM_COPY'; 770 = 'WM_PASTE'; 771 = 'WM_CLEAR'; 772 = 'WM_UNDO'; 773 = 'WM_RENDERFORMAT'; 774 = 'WM_RENDERALLFORMATS'; 775 = 'WM_DESTROYCLIPBOARD'; 776 = 'WM_DRAWCLIPBOARD'; 777 = 'WM_PAINTCLIPBOARD'; 778 = 'WM_VSCROLLCLIPBOARD'; 779 = 'WM_SIZECLIPBOARD'; 780 = 'WM_ASKCBFORMATNAME'; 781 = 'WM_CHANGECBCHAIN'; 782 = 'WM_HSCROLLCLIPBOARD'; 783 = 'WM_QUERYNEWPALETTE'; 784 = 'WM_PALETTEISCHANGING'; 785 = 'WM_PALETTECHANGED'; 786 = 'WM_HOTKEY'; 791 = 'WM_PRINT'; 792 = 'WM_PRINTCLIENT'; 856 = 'WM_HANDHELDFIRST'; 863 = 'WM_HANDHELDLAST'; 896 = 'WM_PENWINFIRST'; 911 = 'WM_PENWINLAST'; 912 = 'WM_COALESCE_FIRST'; 927 = 'WM_COALESCE_LAST'; 992 = 'WM_DDE_INITIATE'; 993 = 'WM_DDE_TERMINATE'; 994 = 'WM_DDE_ADVISE'; 995 = 'WM_DDE_UNADVISE'; 996 = 'WM_DDE_ACK'; 997 = 'WM_DDE_DATA'; 998 = 'WM_DDE_REQUEST'; 999 = 'WM_DDE_POKE'; 1000 = 'WM_DDE_EXECUTE'
+                    }
+
+                    if (
+                        $(
+                            $($WindowsMessagesByDecimal[$($message.Msg)] -ieq 'WM_ENDSESSION') -and
+                            $($message.WParam -ne [IntPtr]::Zero)
+                        ) -or
+                        $($WindowsMessagesByDecimal[$($message.Msg)] -ieq 'WM_QUERYENDSESSION')
+                    ) {
+                        # Logoff/Reboot/Shutdown will happen.
+                        # Set status, wait for clean-up and then return 0.
+                        $global:WatchCatchableExitSignalStatus.0 = "Detected '$(@(@($($message.Msg), $($WindowsMessagesByDecimal[$($message.Msg)]), $($message.WParam), $($message.LParam)) | Where-Object {$_})-join ', ')', initiate clean-up and exit"
+
+                        until (
+                            $($global:WatchCatchableExitSignalStatus.0 -ieq 'Clean-up done')
+                        ) {
+                            Start-Sleep -Milliseconds 100
+                        }
+
+                        $message.Result = [IntPtr]::Zero
+
+                        $formRef.Value.Close()
+                    }
+                }
+            )
+
+            $formRef.Value.ShowDialog()
+        }
+    )
+
+} elseif ($IsLinux -or $IsMacOS) {
+    $null = $WatchCatchableExitSignalPowershell.AddScript(
+        {
+            # Use trap instead of try/catch, because trap reacts to catchable POSIX signals
+            trap {
+                $global:WatchCatchableExitSignalStatus.0 = "Detected '$($_)', initiate clean-up and exit"
+
+                until ($global:WatchCatchableExitSignalStatus.0 -ieq 'Clean-up done') {
+                    Start-Sleep -Milliseconds 100
+                }
+            }
+
+            while ($true) {
+                Start-Sleep -Milliseconds 100
+            }
+        }
+    )
+}
+
+$null = $WatchCatchableExitSignalPowershell.BeginInvoke()
+
+
+function global:WatchCatchableExitSignal {
+    param (
+        [ScriptBlock]$NonExitScriptBlock,
+        [switch]$CleanupDone
+    )
+
+    if ($CleanupDone) {
+        $global:WatchCatchableExitSignalStatus.0 = 'Clean-up done'
+    }
+
+    if ($WatchCatchableExitSignalForm -and $CleanupDone) {
+        $WatchCatchableExitSignalForm.Close()
+    } elseif ($global:WatchCatchableExitSignalStatus.0 -ilike "Detected '*', initiate clean-up and exit") {
+        Write-Host
+        Write-Host "WatchCatchableExitSignal: $($global:WatchCatchableExitSignalStatus.0)" -ForegroundColor Yellow
+
+        exit 1
+    } else {
+        if ($WatchCatchableExitSignalNonExitScriptBlock -and ($WatchCatchableExitSignalNonExitScriptBlock -is [ScriptBlock])) {
+            try {
+                . $WatchCatchableExitSignalNonExitScriptBlock
+            } catch {
+                # Do nothing
+            }
+        }
+    }
+}
+#
+##
+### ▲▲▲ WatchCatchableExitSignal initiation code above ▲▲▲
+
+
+$WatchCatchableExitSignalNonExitScriptBlock = {
+    try {
+        $script:COMWord.Visible = $false
+    } catch {
+    }
+
+    try {
+        $script:COMWordDummy.Visible = $false
+    } catch {
+    }
+}
+
+
 #
 # All functions have been defined above
 # Initially executed code starts here
 #
 
 try {
+    try {
+        $TranscriptFullName = Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs') -ChildPath $("Set-OutlookSignatures_Log_$(Get-Date $([DateTime]::UtcNow) -Format FileDateTimeUniversal).txt")
+        $TranscriptFullName = (Start-Transcript -LiteralPath $TranscriptFullName -Force).Path
+
+        "This folder contains log files generated by Set-OutlookSignatures.$([Environment]::NewLine)Each file is named according to the pattern ""Set-OutlookSignatures_Log_yyyyMMddTHHmmssffffZ.txt"".$([Environment]::NewLine)Files older than 14 days are automatically deleted with each execution of Set-OutlookSignatures." | Out-File -LiteralPath $(Join-Path -Path (Split-Path -Path $TranscriptFullName) -ChildPath '_README.txt') -Encoding utf8 -Force
+    } catch {
+        $TranscriptFullName = $null
+    }
+
+
     Write-Host
     Write-Host "Start script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+    if ($TranscriptFullName) {
+        Write-Host "  Log file: '$TranscriptFullName'"
+
+        try {
+            Get-ChildItem -LiteralPath $(Split-Path -LiteralPath $TranscriptFullName) -File -Force | Where-Object { $_.CreationTime -lt (Get-Date).AddDays(-14) } | ForEach-Object {
+                Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue
+            }
+        } catch {
+        }
+    }
 
     if ($psISE) {
         Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
         Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
         exit 1
     }
+
+    BlockSleep
+    try { WatchCatchableExitSignal } catch { }
 
     $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
@@ -7024,9 +8216,10 @@ try {
 
     $script:SetOutlookSignaturesCommonDllFilePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
     Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\Set-OutlookSignatures\Set-OutlookSignatures.Common.dll')) -Destination $script:SetOutlookSignaturesCommonDllFilePath
-    if ($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) {
+    if (-not $IsLinux) {
         Unblock-File -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath
     }
+
     try {
         Import-Module -Name $script:SetOutlookSignaturesCommonDllFilePath -Force -ErrorAction Stop
     } catch {
@@ -7034,6 +8227,9 @@ try {
         $error[0]
         exit 1
     }
+
+
+    try { WatchCatchableExitSignal } catch { }
 
     main
 } catch {
@@ -7045,8 +8241,11 @@ try {
     Write-Host
     Write-Host "Clean-up @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
+    # Restore original Word AlertIfNotDefault setting
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value $script:WordAlertIfNotDefaultOriginal -ErrorAction SilentlyContinue | Out-Null
+
     # Restore original Word security setting
-    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
+    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
 
     if ($script:COMWord) {
         if ($script:COMWord.ActiveDocument) {
@@ -7125,6 +8324,22 @@ try {
         Remove-Item $script:tempDir -Recurse -Force -ErrorAction SilentlyContinue
     }
 
+    if ($TranscriptFullName) {
+        Write-Host
+        Write-Host 'Log file'
+        Write-Host "  '$TranscriptFullName'"
+    }
+
     Write-Host
     Write-Host "End script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+    if ($TranscriptFullName) {
+        Stop-Transcript | Out-Null
+    }
+
+    # Allow sleep
+    BlockSleep -AllowSleep
+
+    # Stop watching for catchable exit signals
+    try { WatchCatchableExitSignal -CleanupDone } catch { }
 }

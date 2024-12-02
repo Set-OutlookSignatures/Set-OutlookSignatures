@@ -21,13 +21,6 @@ public static class DeviceCodeHelper
             // * The developing application calls the Cancel() method on a CancellationToken sent into the method.
             //   If this occurs, an OperationCanceledException will be thrown (see catch below for more details).
             Console.WriteLine(deviceCodeResult.Message);
-            //Console.WriteLine("ExpiresOn: " + deviceCodeResult.ExpiresOn.ToLocalTime());
-            // try {
-            //     Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = deviceCodeResult.VerificationUrl });
-            //     //Clipboard.SetData(DataFormats.Text, (Object)deviceCodeResult.UserCode);
-            //     Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "cmd", Arguments = "/c echo " + deviceCodeResult.UserCode + " | clip" });
-            // }
-            // catch {}
             return Task.FromResult(0);
         };
     }

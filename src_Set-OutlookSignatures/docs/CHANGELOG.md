@@ -21,6 +21,55 @@
   - <Active present tense verb> XXX
 -->
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.16.0" target="_blank">v4.16.0</a> - 2024-12-02
+_**Attention, Exchange Online admins**_  
+_See '`What about the roaming signatures feature in Exchange Online?`' in '`.\docs\README`' for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see '`MirrorCloudSignatures`' in '`.\docs\README`'._
+
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- **Prefer an authentication broker over browser-based authentication (browser auth is still used as fallback and on non-supported systems). This helps overcome issues with Entra ID MFA re-authentication as well as browser authentication problems such as being denied access to http://localhost. Make sure to add the redirect URL '`ms-appx-web://microsoft.aad.brokerplugin/<Object ID of your app>`' to your Set-OutlookSignatures Entra ID app.** The Entra ID app provided by the developers already has the additional redirect URL set ('`ms-appx-web://microsoft.aad.brokerplugin/beea8249-8c98-4c76-92f6-ce3c468a61e6`').
+- Change the path of the Graph token cache file to '`$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\MSAL.PS\MSAL.PS.msalcache.bin3')`' on all platforms. This change requires one-time re-authentication towards Graph on Windows, Linux and macOS when Integrated Windows Authentication does not work. The change is introduced to fix the following problems and to anticipate upcoming changes across all supported platforms:
+  - On Windows, not only Set-OutlookSignatures uses the default MSAL.Net/MSAL.PS cache file path. This is a good idea but most software handles the cache as if it was application specific, replacing all other tokens with their own instead of sharing them.
+  - On Linux (and macOS), MSAL.Net does not rely on .Net to determine the path for LocalApplicationData but uses own logic, which leads to inconsistent results on different Linux distributions and does not always match XDG specifications.
+  - On macOS, .Net 8 returns a different path for LocalApplicationData than earlier versions, requiring a change anyhow.
+- Simplify the taskpane user interface of the Outlook add-in
+  - Show only default actions when opening the taskpane: A big button to set the signature, and a dropdown list to override the automatically chosen signature with a manual selection.
+  - Show advanced options when scrolling down: Choosing a debug mode, an option to ignore host and platform, and a new textbox containing the log output of the add-in.
+- Format plain text signatures in the system's monospace font when the '`-SignatureCollectionInDrafts true`' parameter is used.
+- Speed up connecting to SharePoint Online paths by directly trying to access them via Graph when GraphClientID is available, instead of waiting for the Test-Path timeout.
+- Change the encoding of all '.ps1' files which are intended to be executed directly by a user from UTF-8 to UTF-8 with BOM. This ensures that Unicode characters are correctly written to the console not only on PowerShell 7+, but also on Windows PowerShell. This is a pure optical fix without any functional changes and has no impact on the encoding of custom configuration and template files.
+- Decode the Graph token as UTF-8 instead of ASCII to ensure that verbose output of the token correctly displays Unicode characters. This is a pure optical change without any functional impact.
+- Update the sample code for Intune detect and remediate scripts to use the log file of the new logging feature of Set-OutlookSignatures.
+- Update the README chapter '`Group membership`' to better point out that group membership includes transitive/nested/indirect membership.
+- Update the sample code in FAQ '`How can I start the software only when there is a connection to the Active Directory on-prem?`'.
+- Update Outlook add-in dependency @azure/msal-browser to v3.27.0.
+- Update dependency MSAL.Net to v4.66.2.
+### Added
+- Log every run of Set-OutlookSignatures. Logs are saved in the folder '`$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs')`', the files follow the naming scheme '`$("Set-OutlookSignatures_Log_yyyyMMddTHHmmssffff.txt")`', and files older than 14 days are deleted with every run.
+- Check connectivity to the Graph authentication endpoint before trying to access Graph. This not only catches connection errors as early as possible, but also avoids prompting users with authentication pop-ups in scenarios where they are offline or access to Graph is blocked at the firewall or proxy level.
+- Allow using Active Directory DNS domain names when assigning templates to groups in INI files. As Microsoft Graph started exposing the corresponding attributes for groups, the DNS domain name format now not only works on-prem but also in hybrid environments. This means that there is no longer anything in Set-OutlookSignatures for which a NetBIOS domain name is mandatory.
+- Allow assignment of templates to Entra ID groups by their Object ID and their securityIdentifier, in addition to existing properties such as email address, mailNickname and displayName.
+- Display hints if the search for the properties of a mailbox via Graph returns nothing or more than one result, analogous to the case where the same search in Active Directory on-prem fails.
+- Reduce the number of Graph queries required to find the security identifier of a group defined in a template tag. This is done by a simple check of domain name and group name format, and avoiding queries which would not work anyhow (for example, querying Graph for a NetBIOS domain name when the given format is a DNS domain name).
+- Prevent the system from going to sleep right before the first template file is opened, and allow sleep again as soon as the process running Set-OutlookSignatures ends.
+- Detect termination signals that allow for a graceful exit, and start clean-up tasks as soon as possible. Around 500 exit points are defined in the code. On Linux and macOS, signals such as SIGINT, SIGTERM, SIGQUIT and SIGHUP are recognized; on Windows, an imminent logout, shutdown or restart is also recognized.
+- Added sample code showing how to selectively enable verbose logging for specific users or computers to FAQ '`How can I log the software output?`' in '`.\docs\README`'.
+- Animate the company logo in signature sample templates.
+- Add a workaround that avoids errors when using DOCX templates with older versions of Word detecting that they are not the default program for all the file types they feel responsible for. Word displays an information dialog, the error message is '`Call was rejected by callee, 0x80010001 (RPC_E_CALL_REJECTED)`'.
+- Add information to the '`Authentication`' chapter in '`.\docs\README`'.
+- Add support for unblocking files on macOS using the PowerShell cmdlet 'Unblock-File'. Unblock-File is supported on Windows and macOS.
+### Removed
+- Removed attributes from '`$GraphUserProperties`' array in '`.\config\default graph config.ps1`' which were not used for default replacement variables. There should not be any side effect for you custom Graph configuration. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/130" target="_blank">#130</a>)
+- Remove the QR code from signature sample templates. The feature to create QR codes according to your specifications is unchanged, as you can see in sample template 'Test all default replacement variables'.
+### Fixed
+- Fix a problem where roaming signatures downloaded from additional and automapped mailboxes overwrite identically signatures which were created by Set-OutlookSignatures for a mailbox with higher priority.
+- Correctly handle paths to outlook.exe and winword.exe stored in the registry in enclosing quotes.
+- Update login hint detection logic for Graph authentication to handle cases where the UPN used to log on does not match the UPN in Entra ID.
+- Add more code to work around limitations for Outlook add-ins on Outlook Web on premises. Microsoft has silently removed on-prem support for several features in office.js in the last few weeks - if this goes on, on-prem signature add-ins will soon not be realizable any more.
+- Fix the workaround to not show Word security warning when converting documents with linked images when using '`-CreateRTFSignatures true`'.
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.15.0" target="_blank">v4.15.0</a> - 2024-09-27
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README`._
@@ -46,7 +95,7 @@ _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicito
 - Show if a mailbox is in a license group before mailbox specific Benefactor Circle features are run.
 ### Removed
 ### Fixed
-- Fix the problem in the Outlook add-in that led to images not being shown in the signature on the first run of the add-in for each new appointment.
+- Fix the problem in the Outlook add-in that led to images not being shown in the signature on the first run of the add-in for a new appointment.
 - Add more code to work around limitations for Outlook add-ins on Outlook Web on premises.
 
 
@@ -193,7 +242,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 - The API for saving photos and user-defined images has been changed, which significantly speeds up the creation of temporary files.
 ### Added
 - Support for Linux and macOS. Some restrictions apply to Non-Windows platforms, see `Linux and macOS` in the `Requirements` chapter of `.\docs\README` for details.
-- Custom image replacement variables that you can fill yourself with a byte array: `$CurrentUserCustomImage[1..10]$`, `$CurrentUserManagerCustomImage[1..10]$`, `$CurrentMailboxCustomImage[1..10]$`, `$CurrentMailboxManagerCustomImage[1..10]$`. Usecases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/email, etc.
+- Custom image replacement variables that you can fill yourself with a byte array: `$CurrentUserCustomImage[1..10]$`, `$CurrentUserManagerCustomImage[1..10]$`, `$CurrentMailboxCustomImage[1..10]$`, `$CurrentMailboxManagerCustomImage[1..10]$`. Use cases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/email, etc.
   - QR code vCard (MeCard) in custom image replacement variable `$Current[..]CustomImage1$`. See file `.\config\default replacement variables.ps1` for the easily customizable code used to create it. Also see `.\docs\README` for details.
 - Support for maximum barrier-free accessibility with screen readers and comparable tools. Use Word ScreenTips and HTML titles for hyperlinks, and alt text for images, replacement variables are supported. All sample templates have been updated accordingly. Just hover your mouse pointer over a hyperlink or image to see additional information.
 - Show a warning when authentication to Outlook Web (no matter if on-prem or in the cloud) is not possible via Autodiscover, as this means that Autodiscover is not configured correctly.
@@ -657,7 +706,7 @@ _Attention cloud mailbox users: Microsoft will make roaming signatures available
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.1.0" target="_blank">v3.1.0</a> - 2022-06-26
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Changed
-- Each template reference in an INI file is now considered individually, not just the last entry. See 'How to work with ini files' in README for a usecase example.
+- Each template reference in an INI file is now considered individually, not just the last entry. See 'How to work with ini files' in README for a use case example.
 - Additional output is now fully available in the verbose stream, and no longer scattered around the debug and the verbose streams
 - Rewrite FAQ "Why is dynamic group membership not considered on premises?" to reflect recent substantial changes in Microsoft Graph, which make Set-OutlookSignatures automatically support dynamic groups in the cloud. See the FAQ in README for more details and the reason why dynamic groups are not supported on premises.
 - Extend FAQ "How to avoid blank lines when replacement variables return an empty string?" with new examples and sample code that automatically differentiates between DOCX and HTM templates
@@ -677,7 +726,7 @@ If you copied and/or modified the sample files delivered with earlier versions o
   - List of group membership security identifiers (SIDs)
   - List of SMTP addresses
   - Final data of replacement variables
-- Update documentation to make clear that 'NetBiosDomain' and 'Example' are just examples which need to be replaced with actual NetBIOS domain names, but 'EntraID' and 'AzureAD' are not examples
+- Update documentation to make clear that 'DNS or NetBIOS name of AD domain' and 'Example' are just examples which need to be replaced with actual AD domain names, but 'EntraID' and 'AzureAD' are not examples
 ### Removed
 - **Breaking:** File name based tags are no longer supported. Use ini files instead.  
 This change has been announced with the release of v2.5.0 on 2022-01-14.

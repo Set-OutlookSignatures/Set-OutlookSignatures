@@ -1,4 +1,4 @@
-<#
+﻿<#
 This sample code is used to check AD trusts and AD connectivity from a client computer.
 
 Connection ist tested for every combination of

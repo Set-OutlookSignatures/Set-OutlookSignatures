@@ -1,4 +1,4 @@
-<#
+﻿<#
 This sample code shows how to use Intune detect and remediation scripts to deploy and regularly run Set-OutlookSignatures.
 
 See FAQ 'How can I deploy and run Set-OutlookSignatures using Microsoft Intune?' in '.\docs\README' for details
@@ -9,10 +9,9 @@ The sample code is written in a generic way, which allows for easy adaption.
 Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
 #>
 
+
 [CmdletBinding()] param ()
 
-# Log file for Set-OutlookSignatures, must be identical in detection and remediation script
-$LogFile = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures_log.txt')
 
 # Version of Set-OutlookSignatures to use/download
 # Must be a valid tag of a public release from https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases, for example 'XXXVersionStringXXX'
@@ -28,7 +27,7 @@ $SoftwarePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+Spe
 $ForceDownload = $true
 
 # Parameters for the execution of Set-OutlookSignatures
-$SOSParameters = @{
+$SetOutlookSignaturesParameters = @{
     # Add/modify parameters below
     SignatureTemplatePath       = 'c:\path\to\templates' # Path to folder containing the templates
     BenefactorCircleID          = 'xxx'
@@ -120,18 +119,13 @@ try {
 
         Remove-Item -LiteralPath $tempFile -Force
 
-        if ($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) {
+        if (-not $IsLinux) {
             Get-ChildItem $SoftwarePath -Recurse | Unblock-File
         }
     }
 
-
     # Run Set-OutlookSignatures
-    Start-Transcript -LiteralPath $LogFile -Force # Required for detection script
-
-    & (Join-Path -Path $SoftwarePath -ChildPath 'Set-OutlookSignatures.ps1') @SOSParameters
-
-    Stop-Transcript
+    & (Join-Path -Path $SoftwarePath -ChildPath 'Set-OutlookSignatures.ps1') @SetOutlookSignaturesParameters
 } catch {
     $error[0]
 

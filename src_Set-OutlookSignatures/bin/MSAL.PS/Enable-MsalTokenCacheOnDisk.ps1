@@ -45,11 +45,7 @@ function Enable-MsalTokenCacheOnDisk {
 
         $ClientApplication | Add-Member -MemberType NoteProperty -Name 'cacheInfo' -Value "Encrypted file '$([TokenCacheHelper]::CacheFilePath)', delete file to remove cached token"
     } else {
-        $cacheFilePath = [System.IO.Path]::Combine(
-            [Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper]::UserRootDirectory,
-            'MSAL.PS',
-            'MSAL.PS.msalcache.bin3'
-        )
+        $cacheFilePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\MSAL.PS\MSAL.PS.msalcache.bin3')
         $cacheFileName = [System.IO.Path]::GetFileName($cacheFilePath)
         $cacheDir = [System.IO.Path]::GetDirectoryName($cacheFilePath)
 

@@ -16,6 +16,7 @@ public static class TokenCacheHelper
     /// </summary>
     public static readonly string CacheFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "Set-OutlookSignatures",
         "MSAL.PS",
         "MSAL.PS.msalcache.bin3"
     );

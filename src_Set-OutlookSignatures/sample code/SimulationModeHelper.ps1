@@ -1,4 +1,4 @@
-<#
+﻿<#
 This sample code shows how to make it easier to use simulation mode for template creators.
 
 You have to adapt it to fit your environment.
@@ -18,8 +18,8 @@ Write-Host 'Set-OutlookSignatures simulation mode helper'
 $params = [ordered]@{
 	SignatureTemplatePath         = '.\sample templates\Signatures DOCX'
 	SignatureIniPath              = '.\sample templates\Signatures DOCX\_Signatures.ini'
-	OOFTemplatePath               = '.\sample templates\Out of Office DOCX'
-	OOFIniPath                    = '.\sample templates\Out of Office DOCX\_OOF.ini'
+	OOFTemplatePath               = '.\sample templates\Out-of-office DOCX'
+	OOFIniPath                    = '.\sample templates\Out-of-office DOCX\_OOF.ini'
 	ReplacementVariableConfigFile = '.\config\default replacement variables.ps1'
 	GraphConfigFile               = '.\config\default graph config.ps1'
 	GraphOnly                     = $false
@@ -47,7 +47,7 @@ Write-Host
 Write-Host '  Please enter the login name of the user to simulate'
 Write-Host '    Allowed formats:'
 Write-Host '      user.x@example.com (UPN, a.k.a. User Principal Name)'
-Write-Host '      EXAMPLE\User (NT4 style NetBIOS domain name and logon name)'
+Write-Host '      EXAMPLE\User (pre-Windows 2000 logon name)'
 
 do {
 	$tempSimulateUser = Read-Host '    Your input'

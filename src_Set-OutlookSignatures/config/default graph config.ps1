@@ -32,7 +32,9 @@
 #       Identity > Applications > App registrations > New registration
 #       Enter at least a display name for your application
 #       Set "Supported account types" to "Accounts in this organizational directory only (<your tenant> - Single tenant)"
-#       Set Redirect URI to "Mobile and desktop applications" and 'http://localhost' (http, not https)
+#       Set Redirect URI to "Mobile and desktop applications" and add
+#         'http://localhost' (http, not https) for browser authentication
+#         'ms-appx-web://microsoft.aad.brokerplugin/<Object ID of your app>' for AuthenticationBroker authentication
 #       The "Application (client) ID" is the value you need to set for $GraphClientID in this file
 #     Client secret
 #       There is no need to define a client secret, as we only work with delegated permissions, and not with application permissions
@@ -54,7 +56,7 @@
 #           Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
 #         MailboxSettings.ReadWrite
 #           Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-#           Required to detect the state of the out of office assistant and to set out-of-office replies.
+#           Required to detect the state of the out-of-office assistant and to set out-of-office replies.
 #         offline_access
 #           Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
 #           Required to get a refresh token from Graph.
@@ -96,7 +98,7 @@ $GraphUnlockKeyringKeychainMessageboxText = "You started Set-OutlookSignatures, 
 #   so the new tab is a negative surprise for users
 # On Windows, the message box is shown on the very top of the active desktop and can not be sent to the background,
 #   but does not steal the focus
-$GraphHtmlMessageboxText = "You started Set-OutlookSignatures, or an administrator configured it to run for you to update your Outlook signatures and out-of-office replies.$([System.Environment]::NewLine)$([System.Environment]::NewLine)A required security token for access to Microsoft 365 is not yet available.$([System.Environment]::NewLine)$([System.Environment]::NewLine)The program may run for the first time on this client, a previous security token may have expired or been deleted.$([System.Environment]::NewLine)$([System.Environment]::NewLine)To create this required security token, please login to Microsoft 365 with your account$(if($script:CurrentUser){" '$($script:CurrentUser)'"}) in the new browser tab that will open after you close this message."
+$GraphHtmlMessageboxText = "You started Set-OutlookSignatures, or an administrator configured it to run for you to update your Outlook signatures and out-of-office replies.$([System.Environment]::NewLine)$([System.Environment]::NewLine)A required security token for access to Microsoft 365 is not yet available.$([System.Environment]::NewLine)$([System.Environment]::NewLine)The program may run for the first time on this client, a previous security token may have expired or been deleted.$([System.Environment]::NewLine)$([System.Environment]::NewLine)To create this required security token, please login to Microsoft 365 with your account in the new window or browser tab that will open after you click OK in this message."
 
 
 # HTML message to show after successful browser authentication to Microsoft Graph
@@ -123,7 +125,6 @@ $GraphHtmlMessageError = "<html><head><title>$(if ($BenefactorCircleLicenseFile)
 # User properties to select
 # Custom Graph attributes: 'extension_<AppID owning the extension attribute>_<attribute name>'
 $GraphUserProperties = @(
-    'aboutMe',
     'businessPhones',
     'city',
     'companyName',
@@ -137,20 +138,12 @@ $GraphUserProperties = @(
     'mailNickname',
     'mobilePhone',
     'officeLocation',
-    'onPremisesDistinguishedName',
-    'onPremisesDomainName',
     'onPremisesExtensionAttributes',
-    'onPremisesImmutableId',
-    'onPremisesSamAccountName',
-    'onPremisesSecurityIdentifier',
-    'onPremisesUserPrincipalName',
     'postalCode',
     'proxyAddresses',
     'state',
     'streetAddress',
-    'surname',
-    'usageLocation',
-    'userPrincipalName'
+    'surname'
 )
 
 

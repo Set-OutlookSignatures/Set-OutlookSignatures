@@ -106,8 +106,15 @@ function New-MsalClientApplication {
                 else { [void] $ClientApplicationBuilder.WithDefaultRedirectUri() }
             }
             if ($PSBoundParameters.ContainsKey('AuthenticationBroker')) {
-                if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') { [void] [Microsoft.Identity.Client.Desktop.WamExtension]::WithWindowsBroker($ClientApplicationBuilder, $AuthenticationBroker) }
-                else { [void] $ClientApplicationBuilder.WithBroker($AuthenticationBroker) }
+                #if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') { [void] [Microsoft.Identity.Client.Desktop.WamExtension]::WithWindowsBroker($ClientApplicationBuilder, $AuthenticationBroker) }
+                #else { [void] $ClientApplicationBuilder.WithBroker($AuthenticationBroker) }
+                $allOperatingSystems = [enum]::GetValues([Microsoft.Identity.Client.BrokerOptions+OperatingSystems])
+                $combinedOperatingSystems = 0
+                foreach ($os in $allOperatingSystems) {
+                    $combinedOperatingSystems = $combinedOperatingSystems -bor $os
+                }
+                $AuthenticationBrokerOptions = [Microsoft.Identity.Client.BrokerOptions]::new($combinedOperatingSystems)
+                [void] [Microsoft.Identity.Client.Broker.BrokerExtension]::WithBroker($ClientApplicationBuilder, $AuthenticationBrokerOptions)
             }
 
             $ClientOptions = $PublicClientOptions

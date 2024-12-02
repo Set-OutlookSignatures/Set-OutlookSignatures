@@ -268,40 +268,20 @@ function Get-MsalToken {
           $AquireTokenParameters = $PublicClientApplication.AcquireTokenInteractive($Scopes)
           [IntPtr] $ParentWindow = [System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle
           if ($ParentWindow -eq [System.IntPtr]::Zero -and [System.Environment]::OSVersion.Platform -eq 'Win32NT') {
-            # Define the necessary DLL imports
-            Add-Type -TypeDefinition @'
-using System;
-using System.Runtime.InteropServices;
+            Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
 
-public class User32
-{
-    [DllImport("user32.dll", ExactSpelling = true)]
-    public static extern IntPtr GetAncestor(IntPtr hwnd, GetAncestorFlags flags);
-}
-
-public class Kernel32
-{
-    [DllImport("kernel32.dll")]
-    public static extern IntPtr GetConsoleWindow();
-}
-
-public enum GetAncestorFlags
-{
-    GetParent = 1,
-    GetRoot = 2,
-    GetRootOwner = 3
-}
-'@
-
-            # Define the function to get the console or terminal window
-            function GetConsoleOrTerminalWindow {
-              $consoleHandle = [Kernel32]::GetConsoleWindow()
-              $handle = [User32]::GetAncestor($consoleHandle, [GetAncestorFlags]::GetRootOwner)
-  
-              return $handle
+            $window = New-Object System.Windows.Window -Property @{
+              Width                 = 1
+              Height                = 1
+              WindowStartupLocation = [System.Windows.WindowStartupLocation]::CenterScreen
+              ShowActivated         = $false
+              Topmost               = $true
             }
 
-            [IntPtr] $ParentWindow = (GetConsoleOrTerminalWindow)
+            $window.Show()
+            $window.Hide()
+
+            [IntPtr] $ParentWindow = [System.Windows.Interop.WindowInteropHelper]::new($window).Handle
           }
           if ($ParentWindow -ne [System.IntPtr]::Zero) { [void] $AquireTokenParameters.WithParentActivityOrWindow($ParentWindow) }
           #if ($Account) { [void] $AquireTokenParameters.WithAccount($Account) }
@@ -411,6 +391,8 @@ public enum GetAncestorFlags
             $endTime = [datetime]::Now.Add($Timeout)
             while (!$taskAuthenticationResult.IsCompleted) {
               if ($Timeout -eq [timespan]::Zero -or [datetime]::Now -lt $endTime) {
+                try { WatchCatchableExitSignal } catch { }
+
                 Start-Sleep -Seconds 1
               } else {
                 $tokenSource.Cancel()

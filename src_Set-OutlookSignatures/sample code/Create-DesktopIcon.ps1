@@ -1,4 +1,4 @@
-<#
+﻿<#
 This sample code shows how to create a desktop icon in Windows, allowing the user to start Set-OutlookSignatures.
 
 You have to adapt it to fit your environment.

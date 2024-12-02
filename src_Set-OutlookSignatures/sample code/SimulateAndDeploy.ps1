@@ -1,4 +1,4 @@
-<#
+﻿<#
 This sample code shows how to achieve two things:
 	- Running simulation mode for multiple users
   	- How to use simulation mode together with the Benefactor Circle add-on to push signatures and out-of-office replies into mailboxes,
@@ -14,7 +14,7 @@ Features
 	- Automate simulation mode for all given mailboxes
 	- A configurable number of Set-OutlookSignatures instances run in parallel for better performance
 	- Set default signature in Outlook Web, no matter if classic signature or roaming signatures (requires the Benefacot Circle add-on)
-	- Set internal and external out of office (OOF) message (requires the Benefacot Circle add-on)
+	- Set internal and external out-of-office (OOF) message (requires the Benefacot Circle add-on)
 	- Supports on-prem, hybrid and cloud-only environments
 
 
@@ -68,7 +68,7 @@ Requirements
 							Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
 						- MailboxSettings.ReadWrite
 							Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-							Required to detect the state of the out of office assistant and to set out-of-office replies.
+							Required to detect the state of the out-of-office assistant and to set out-of-office replies.
 						- offline_access
 							Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
 							Required to get a refresh token from Graph.
@@ -121,19 +121,19 @@ param (
 	$SetOutlookSignaturesScriptParameters = @{
 		# Do not use: SimulateUser, SimulateMailboxes, AdditionalSignaturePath, SimulateAndDeployGraphCredentialFile
 		#
-		# ▼▼▼▼ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▼▼▼▼
-		# ▼▼▼▼ Without the license, signatures can not be read from and written to mailboxes ▼▼▼▼
+		# ▼▼▼ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▼▼▼
+		# ▼▼▼ Without the license, signatures can not be read from and written to mailboxes ▼▼▼
 		BenefactorCircleLicenseFile                   = "'\\server\share\folder\license.dll'"
 		BenefactorCircleID                            = '<BenefactorCircleID>'
-		# ▲▲▲▲ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▲▲▲▲
-		# ▲▲▲▲ Without the license, signatures can not be read from and written to mailboxes ▲▲▲▲
+		# ▲▲▲ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▲▲▲▲
+		# ▲▲▲ Without the license, signatures can not be read from and written to mailboxes ▲▲▲
 		#
 		SimulateAndDeploy                             = $false # $false simulates but does not deploy, $true simulates and deploys
 		UseHtmTemplates                               = $false
 		SignatureTemplatePath                         = "'.\sample templates\Signatures DOCX'"
 		SignatureIniPath                              = "'.\sample templates\Signatures DOCX\_Signatures.ini'"
-		OOFTemplatePath                               = "'.\sample templates\Out of Office DOCX'"
-		OOFIniPath                                    = "'.\sample templates\Out of Office DOCX\_OOF.ini'"
+		OOFTemplatePath                               = "'.\sample templates\Out-of-office DOCX'"
+		OOFIniPath                                    = "'.\sample templates\Out-of-office DOCX\_OOF.ini'"
 		ReplacementVariableConfigFile                 = "'.\config\default replacement variables.ps1'"
 		GraphClientID                                 = $GraphClientId
 		GraphConfigFile                               = "'.\config\default graph config.ps1'"
@@ -162,7 +162,7 @@ param (
 	$UpdateInterval = [timespan]::FromMinutes(1),
 
 	# List of users and mailboxes to simulate
-	#   SimulateUser: UPN, or NT4 style NetBIOS domain name and logon name
+	#   SimulateUser: Logon name in UPN or pre-Windows 2000 format
 	#   SimulateMailboxes: Separate multiple mailboxes by spaces or commas. Leave empty to get mailboxes from Outlook Web (recommended).
 	#   Examples:
 	#     ExampleDomain\ExampleUser;
@@ -248,7 +248,9 @@ function RemoveItemAlternativeRecurse {
 
 	foreach ($SingleItemToDelete in $local:ToDelete) {
 		try {
-			Remove-Item $SingleItemToDelete.FullName -Force -Recurse
+			if ((Test-Path $SingleItemToDelete.FullName) -eq $true) {
+				Remove-Item $SingleItemToDelete.FullName -Force -Recurse
+			}
 		} catch {
 			Write-Verbose "Could not delete $($SingleItemToDelete.FullName), error: $($_.Exception.Message)"
 			Write-Verbose $_
@@ -415,29 +417,31 @@ if (-not $SimulateListCheckPositive) {
 # As a workaround, we define the setting before running the jobs
 if (($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
 	Write-Host "Export Word security setting and disable it @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-	$WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
-	if ($WordRegistryVersion.major -gt 16) {
-		Write-Host "    Word version $($WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+	$script:WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
+	if ($script:WordRegistryVersion.major -gt 16) {
+		Write-Host "    Word version $($script:WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
 		exit 1
-	} elseif ($WordRegistryVersion.major -eq 16) {
-		$WordRegistryVersion = '16.0'
-	} elseif ($WordRegistryVersion.major -eq 15) {
-		$WordRegistryVersion = '15.0'
-	} elseif ($WordRegistryVersion.major -eq 14) {
-		$WordRegistryVersion = '14.0'
-	} elseif ($WordRegistryVersion.major -lt 14) {
-		Write-Host "    Word version $($WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+	} elseif ($script:WordRegistryVersion.major -eq 16) {
+		$script:WordRegistryVersion = '16.0'
+	} elseif ($script:WordRegistryVersion.major -eq 15) {
+		$script:WordRegistryVersion = '15.0'
+	} elseif ($script:WordRegistryVersion.major -eq 14) {
+		$script:WordRegistryVersion = '14.0'
+	} elseif ($script:WordRegistryVersion.major -lt 14) {
+		Write-Host "    Word version $($script:WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
 		exit 1
 	}
 
-	if ((Test-Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security\DisableWarningOnIncludeFieldsUpdate") -eq $false) {
-		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+	if ($null -eq (Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
 	}
 
-	$WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+	if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
+		$script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+	}
 
-	if (($null -eq $WordDisableWarningOnIncludeFieldsUpdate) -or ($WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+	if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
+		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
 	}
 }
 
@@ -453,7 +457,7 @@ $JobsToStartOpen = ($SimulateList | Measure-Object).count
 $JobsStarted = 0
 $JobsCompleted = 0
 
-Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
 
 $UpdateTime = (Get-Date).Add($UpdateInterval)
@@ -549,7 +553,7 @@ do {
 		$JobsToStartOpen--
 		$JobsStarted++
 
-		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+		Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 	}
 
 	foreach ($x in (Get-Job | Where-Object { $_.State -ieq 'Running' -and (((Get-Date) - $_.PSBeginTime) -gt $JobTimeout) })) {
@@ -562,7 +566,7 @@ do {
 
 		$JobsCompleted++
 
-		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+		Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 	}
 
 	foreach ($x in (Get-Job -State Completed)) {
@@ -584,11 +588,11 @@ do {
 
 		$JobsCompleted++
 
-		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+		Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 	}
 
 	if ((Get-Date) -ge $UpdateTime) {
-		Write-Host "  $JobstoStartTotal jobs total: $JobsStarted started ($JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress), $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+		Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 		$UpdateTime = (Get-Date).Add($UpdateInterval)
 	}
 
@@ -600,7 +604,7 @@ do {
 if (($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
 	Write-Host "Restore original Word security setting @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
-	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 }
 
 Write-Host "Cleanup @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"

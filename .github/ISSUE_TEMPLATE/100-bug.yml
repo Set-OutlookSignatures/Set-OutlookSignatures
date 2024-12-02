@@ -40,8 +40,10 @@ body:
       label: What happened?
       description: |
         Tell us what you expected to happen, what really happened and how the problem can be reproduced.
-        Run Set-OutlookSignatures with the '-verbose' parameter and attach the full output as text file. You may not get support without a full unmodified verbose log.
-        Additionally, you can upload screenshots and other files.
+        Attach the appropriate log file from '`$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs')`'.
+        Verbose logs are preferred, see README FAQ "How can I log the software output?" for details.
+        You may not get support without a full unmodified log.
+        Additionally, upload screenshots and other files that may help analyze the problem.
       placeholder:
     validations:
       required: true

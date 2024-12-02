@@ -280,7 +280,7 @@ The software can process templates in DOCX or HTML format. For a start, the use 
 The `README` file supplied with the software provides an overview of how to administer templates so that they are  
 - apply only to certain groups or mailboxes  
 - be set as the default signature for new mails or replies and forwards  
-- be set as an internal or external out of office message
+- be set as an internal or external out-of-office message
 - and much more
 
 In `README` and the sample templates, the replaceable variables, the extension with user-defined variables and the handling of photos from the Active Directory are also described.
@@ -300,9 +300,9 @@ powershell.exe <PowerShell parameter> -file <path to Set-OutlookSignatures.ps1> 
 #### 1.7.5.1. Parameters  
 The behaviour of the software can be controlled via parameters. Particularly relevant are SignatureTemplatePath and OOFTemplatePath, which are used to specify the path to the signature and absence templates.
 
-The following is an example where the signature templates are on an SMB file share and the out of office provider templates are in a SharePoint document library:  
+The following is an example where the signature templates are on an SMB file share and the out-of-office provider templates are in a SharePoint document library:  
 ```
-powershell.exe -file '\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' -SignatureTemplatePath '\DFS-Share\Common\Templates\Signatures Outlook' -OOFTemplatePath 'https://sharepoint.example.com/CorporateCommunications/Templates/Out of Office templates'  
+powershell.exe -file '\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' -SignatureTemplatePath '\DFS-Share\Common\Templates\Signatures Outlook' -OOFTemplatePath 'https://sharepoint.example.com/CorporateCommunications/Templates/Out-of-office templates'  
 ```
 
 At the time of writing, other parameters were available. The following is a brief overview of the possibilities, for details please refer to the documentation of the software in the `README` file:  
@@ -322,7 +322,7 @@ The software is designed for fast runtime and minimal network load. Nevertheless
 - Number of mailboxes configured in Outlook  
 - Number of trusted domains  
 - Response time of the domain controllers and file servers  
-- Response time of Exchange servers (setting signatures in Outlook Web, out of office notifications)  
+- Response time of Exchange servers (setting signatures in Outlook Web, out-of-office notifications)  
 - Number of templates and complexity of variables in them (e.g. photos)
 
 Under the following general conditions, a reproducible runtime of approx. 30 seconds was measured:  
@@ -341,7 +341,7 @@ The software does not start Outlook, all queries and configurations are done via
 
 Outlook can be started, used or closed at will while the software is running.
 
-All changes to signatures and out of office notifications are immediately visible and usable for the user, with one exception: If the name of the default signature to be used for new emails or for replies and forwardings changes, this change will only take effect the next time Outlook is started. If only the content changes, but not the name of one of the default signatures, this change is available immediately.
+All changes to signatures and out-of-office notifications are immediately visible and usable for the user, with one exception: If the name of the default signature to be used for new emails or for replies and forwardings changes, this change will only take effect the next time Outlook is started. If only the content changes, but not the name of one of the default signatures, this change is available immediately.
 
 Word can be started, used or closed at will while the software is running.
 
@@ -376,7 +376,7 @@ The following services are covered by the product price:
 - naming conventions  
 - Application order (general, group-specific, mailbox-specific, alphabetical in each group)  
 - Definition of default signatures for new emails and for replies and forwards  
-- Definition of out of office texts for internal and external recipients.  
+- Definition of out-of-office texts for internal and external recipients.  
 - Determination of the temporal validity of templates  
 - Variables and user photos in templates  
 - Differences between DOCX and HTML formats  
@@ -671,7 +671,7 @@ Das Verhalten der Software kann über Parameter gesteuert werden. Besonders rele
 
 Folgend ein Beispiel, bei dem die Signatur-Vorlagen auf einem SMB-File-Share und die Abwesenheits-Vorlagen in einer SharePoint Dokumentbibliothek liegen:  
 ```
-powershell.exe -file '\\example.com\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' –SignatureTemplatePath '\\example.com\DFS-Share\Common\Templates\Signatures Outlook' –OOFTemplatePath 'https://sharepoint.example.com/CorporateCommunications/Templates/Out of Office templates'  
+powershell.exe -file '\\example.com\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' –SignatureTemplatePath '\\example.com\DFS-Share\Common\Templates\Signatures Outlook' –OOFTemplatePath 'https://sharepoint.example.com/CorporateCommunications/Templates/Out-of-office templates'  
 ```
 
 Zum Zeitpunkt der Erstellung dieses Dokuments waren noch weitere Parameter verfügbar. Folgend eine kurze Übersicht der Möglichkeit, für Details sei auf die Dokumentation der Software in der `README`-Datei verwiesen:  
