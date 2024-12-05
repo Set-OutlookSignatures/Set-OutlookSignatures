@@ -71,12 +71,6 @@ Install-Module Microsoft.Graph.Applications -Scope CurrentUser -Force
 
 
 Write-Host
-Write-Host 'Import modules'
-Import-Module Microsoft.Graph.Authentication
-Import-Module Microsoft.Graph.Applications
-
-
-Write-Host
 Write-Host "Connect to your Entra ID with a user being 'Application Adminstrator' or 'Global Administrator'"
 # Disconnect first, so that no existing connection is re-used. This forces to choose an account for the following connect.
 $null = Disconnect-MgGraph -ErrorAction SilentlyContinue
@@ -333,7 +327,7 @@ Write-Host 'Add redirect URIs to app registration'
 $params =	@{
     RedirectUris = @(
         'http://localhost',
-        "ms-appx-web://microsoft.aad.brokerplugin/$($app.ID)"
+        "ms-appx-web://microsoft.aad.brokerplugin/$($app.AppId)"
     )
 }
 

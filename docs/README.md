@@ -78,7 +78,7 @@ ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSi
 | Multiple independent instances can be run in the same environment | 🟢 | 🔴 | 🔴 | 🔴 |
 | No telemetry or usage data collection, direct or indirect | 🟢 | 🔴 | 🔴 | 🔴 |
 | No auto-renewing subscription | 🟢 | 🔴 | 🔴 | 🔴 |
-| IT can delegate signature management, e.g. to marketing | 🟢 | 🟢 | 🟢 | 🟢 |
+| IT can delegate signature management, e.g. to marketing | 🟢 | 🟢 | 🟡 <sub>Not at signature level</sub> | 🟡 <sub>Not at signature level</sub> |
 | Apply signatures to all emails | 🟡 <sub>Outlook clients only</sub> | 🟢 <sub>With email re-routing to a 3rd party datacenter</sub> | 🟢 <sub>With email re-routing to a 3rd party datacenter</sub> | 🟢 <sub>With email re-routing to a 3rd party datacenter</sub> |
 | Additional data sources besides Active Directory and Entra ID | 🟢 | 🟡 | 🔴 | 🔴 |
 | Support for Microsoft national clouds | 🟢 <sub>Global/Public, US Government L4 (GCC, GCC High), US Government L5 (DOD), China operated by 21Vianet</sub> | 🔴 | 🔴 | 🔴 |
@@ -947,7 +947,7 @@ The add-in code is downloaded by the Outlook client and executed locally, in the
 ## 4.1. Usage<!-- omit in toc -->
 From an end user perspective, basically nothing needs to be done or configured: When writing a new email, answering an email, or creating a new appointment, the add-in automatically adds the corresponding default signature.
 
-For advanced usage and debug logging, a taskpane is available in all Outlook versions supporting this feature. The taskpane allows to manually trigger setting the signature, and to temporarily override admin-defined settings for debug logging and Outlook host restrictions. The taskpane can be accessed through:
+For advanced usage and debug logging, a taskpane is available in all Outlook versions supporting this feature. The taskpane allows to manually choose a signature, trigger setting the signature, and to temporarily override admin-defined settings for debug logging and Outlook host restrictions. The taskpane can be accessed through:
 - Outlook Web, and New Outlook on Windows and Mac:
   - New mail, reply mail: "Message" tab, "Apps" icon
   - New appointment: Ribbon, "…" menu
@@ -968,12 +968,12 @@ The following Outlook clients are supported:
 - New Outlook on Mac: Full support in all versions of Office supported by Microsoft
 - Outlook on the Web: Full support for mailboxes hosted in Exchange Online and for mailboxes hosted on-prem on Exchange Server 2019.
 
-See the `Remarks` chapter in this section for possible restrictions that may apply.
+See the '`Remarks`' chapter in this section for possible restrictions that may apply.
 ### 4.2.2. Web server and domain<!-- omit in toc -->
 Whatever web server you choose, the requirements are low:
 - Reachable from mobile devices via the public internet
 - Use a dedicated host name ("https://outlookaddin01.example.com"), do not use subdirectories ("https://addins.example.com/outlook01")
-- A valid SSL/TLS certificate. Self-signed certificates can be used for development and testing, so long as the certificate is trusted on the local machine.
+- A valid SSL/TLS certificate. Self-signed certificates can be used for development and testing, as long as the certificate is trusted by the client used for testing.
 - In production, the server hosting the images shouldn't return a Cache-Control header specifying no-cache, no-store, or similar options in the HTTP response. In development, this may make sense.
 
 [Static website hosting in Azure Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) can be an uncomplicated, cheap and fast alternative.
@@ -987,37 +987,38 @@ With every new release of Set-OutlookSignatures, [Benefactor Circle](Benefactor%
 With every new release of the Outlook add-in, you need to update your add-in deployment (sideloading M365 Centralized Deployment, M365 Integrated Apps) so that Outlook can download and use the newest code.
 
 To configure the add-in and deploy it to your web server:
-- Open `run_before_deployment.ps1` and follow the instructions in it to configure the add-in to your needs.
+- Open '`run_before_deployment.ps1`' and follow the instructions in it to configure the add-in to your needs.
 - You can configure the following settings:
   - The version number.
     Outlook add-ins have four version number parts. The first three parts match the version number of Set-OutlookSignatures, the last part is up to you.
   - The URL you deploy the add-in to.
-  - On which Outlook clients signatures shall be added automatically for new emails and email replies.
-  - On which Outlook clients signatures shall be added automatically for new appointments.
-  - If you want to disable client signatures configured by your users.
+  - On which Outlook hosts and platforms signatures shall be added automatically for new emails and email replies.
+  - On which Outlook hosts and platforms signatures shall be added automatically for new appointments.
+  - If you want or do not want to disable client signatures configured by your users.
   - Your cloud environment and the ID of the Entra ID application (required for Exchange Online mailboxes only).
   - Enable or disable debug logging.
-- Run `run_before_deployment.ps1` in PowerShell.
-- Upload the content of the `publish` folder to your web server.
+- Run '`run_before_deployment.ps1`' in PowerShell.
+- Upload the content of the '`publish`' folder to your web server.
 
-When the manifest.xml changes, you also need to update your app deployment in Exchange, so that your clients will pick up the changes. This is required when:
+When the '`manifest.xml`' file changes, you also need to update your app deployment in Exchange, so that your clients will pick up the changes automatically. This is required when:
 - A new release of the Outlook add-in is published by [ExplicIT Consulting](https://explicitconsulting.at).
-- You change a configuration option in the `run_before_deployment.ps1` file which is marked to require an updated deployment.
-- You modify the manifest.xml file manually.
+- You change a configuration option in the '`run_before_deployment.ps1`' file which is marked to require an updated deployment.
+- You modify the '`manifest.xml`' file manually.
 
 ## 4.4 Entra ID application<!-- omit in toc -->
 When mailboxes are hosted in Exchange Online, the Outlook add-in needs an Entra ID application to access the mailbox.
 
-You can modify the self-created app you already use for Set-OutlookSignatures, or you can create a separate one for this Outlook add-in.  
-Creating a separate application for the Outlook add-in is recommended. You can use the instructions in `.\config\default graph config.ps1` as guideline, or get commercial support from [ExplicIT Consulting](https://explicitconsulting.at).
+You can modify the self-created app you already use for Set-OutlookSignatures, or you can create a separate one for this Outlook add-in.
+
+Creating a separate application for the Outlook add-in is recommended. You can use the instructions in '`.\config\default graph config.ps1`' as guideline, or get commercial support from [ExplicIT Consulting](https://explicitconsulting.at).
 
 The required minimum settings for the Entra ID app are:
 - A name of your choice.
 - A supported account type (it is strongly recommended to only allow access from users of your tenant).
-- Authentication platform 'Single-page application' with a redirect URi of "brk-multihub://Your_Deployment_Domain".
-  If your DEPLOYMENT_URL is "https://outlook-addin-01.example.com", the redirect URI must be "brk-multihub://outlook-addin-01.example.com".
-- Access to the following delegated (not appplication!) Graph API permissions:
-  - Mail.Read
+- Authentication platform '`Single-page application`' with a redirect URI of '`brk-multihub://<your_deployment_domain>`'.
+  If your DEPLOYMENT_URL is 'https://outlook-addin-01.example.com', the redirect URI must be '`brk-multihub://outlook-addin-01.example.com`'.
+- Access to the following '`delegated`' (not application!) '`Graph API`' permissions:
+  - '`Mail.Read`'
     Allows to read emails in mailbox of the currently logged-on user (and in no other mailboxes).
     Required because of Microsoft restrictions accessing roaming signatures - this will change in the future, the date is unknown.
 - Grant admin consent for all permissions
@@ -1025,24 +1026,24 @@ The required minimum settings for the Entra ID app are:
 ## 4.5. Deployment to mailboxes<!-- omit in toc -->
 ### 4.5.1 Individual installation through users<!-- omit in toc -->
 For mailboxes in Exchange Online:
-- Open "https://outlook.office.com/mail/inclientstore".
-- Click on "My add-ins".
-- Under "Custom Addins", click on "Add a custom add-in" and on "Add from file".
-- In the file selection dialog, enter the manifest.xml file URL as file name and click "Open".
-- Click on "Install".
+- Open 'https://outlook.office.com/mail/inclientstore'.
+- Click on 'My add-ins'.
+- Below 'Custom Addins', click on 'Add a custom add-in' and on 'Add from file'.
+- In the file selection dialog, enter the manifest.xml file URL as file name and click on 'Open'.
+- Click on 'Install'.
 - Refresh the browser window.
 
  For mailboxes hosted on-prem:
- - Open "https://YourMailServer.example.com/owa/#path=/options/manageapps".
-- Click on the plus sign to add an add-in, and choose "Add from file".
-- In the file selection dialog, enter the manifest.xml file URL as file name and click "Open".
-- Click on "Install".
+ - Open 'https://YourMailServer.example.com/owa/#path=/options/manageapps'.
+- Click on the plus sign to add an add-in, and choose 'Add from file'.
+- In the file selection dialog, enter the manifest.xml file URL as file name and click on 'Open'.
+- Click on 'Install'.
 - Refresh the browser window.
 
 Installation of add-ins may have been disabled by your administrators.
 
 Do not use the URLs mentioned above to remove custom add-ins, as this fails most times. Instead, use one of the following options:
-- Open Outlook on the web, draft a new mail, click on the "Apps" button, right-click the Set-OutlookSignatures add-in and select "Uninstall".
+- Open Outlook on the web, draft a new mail, click on the 'Apps' button, right-click the Set-OutlookSignatures add-in and select 'Uninstall'.
 - Remove the custom add-in in Outlook for Android or iOS.
 ### 4.5.2 Microsoft 365 Centralized Deployment or Integrated Apps<!-- omit in toc -->
 Centralized Deployment and deployment via Integrated Apps both provide the following benefits:
@@ -1050,17 +1051,17 @@ Centralized Deployment and deployment via Integrated Apps both provide the follo
 - When the relevant Microsoft 365 app starts, the add-in automatically downloads. If the add-in supports add-in commands, the add-in automatically appears in the ribbon within the Microsoft 365 app.
 - Add-ins no longer appear for users if the admin turns off or deletes the add-in, or if the user is removed from Microsoft Entra ID or from a group that the add-in is assigned to.
 
-The Integrated Apps feature is the recommended way to deploy Outlook add-ins. It is not available for tenants in sovereign and government clouds, use Centralized Deployment instead.
-- Details on Integrated Apps: https://learn.microsoft.com/en-us/microsoft-365/admin/manage/test-and-deploy-microsoft-365-apps?view=o365-worldwide
-- Details on Centralized Deployment: https://learn.microsoft.com/en-us/microsoft-365/admin/manage/centralized-deployment-of-add-ins?view=o365-worldwide
+The Integrated Apps feature is the recommended way to deploy Outlook add-ins. It is not yet available for tenants in sovereign and government clouds, so in these environments you have to use Centralized Deployment instead.
+- Details about Integrated Apps: https://learn.microsoft.com/en-us/microsoft-365/admin/manage/test-and-deploy-microsoft-365-apps?view=o365-worldwide
+- Details about Centralized Deployment: https://learn.microsoft.com/en-us/microsoft-365/admin/manage/centralized-deployment-of-add-ins?view=o365-worldwide
 
 ## 4.6. Remarks<!-- omit in toc -->
 **General**
 - The add-in has access to the data of the last run of Set-OutlookSignatures v4.14.0 and higher.
 - Microsoft is currently actively blocking access to roaming signatures for Outlook add-ins. The add-in will be updated when this block has been removed.
-- The easiest way to test the add-in and its basic functionality is to use the taskpane. For specific debugging on Android and iOS, you need to use the DEBUG option in `run_before_deployment.ps1`.
+- The easiest way to test the add-in and its basic functionality is to use the taskpane (see 'Usage' for details). For specific debugging on Android and iOS, you need to use the DEBUG option in '`run_before_deployment.ps1`'.
 - The add-in can run automatically when one of the following events is launched by Outlook: OnNewMessageCompose, OnNewAppointmentOrganizer, OnMessageFromChanged, OnAppointmentFromChanged.
-  - Not all these events are supported on all platforms and editions of Outlook, see this [this Microsoft article](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/autolaunch#supported-events) for an up-to-date list.
+  - Not all these events are supported on all platforms and editions of Outlook, see [this Microsoft article](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/autolaunch#supported-events) for an up-to-date list.
   - While not publicly documented, [Outlook currently does not support add-ins on calendar invite responses](https://github.com/OfficeDev/office-js/issues/4094#issuecomment-1923444325).
 
 **Outlook on iOS**
@@ -1083,7 +1084,7 @@ The Integrated Apps feature is the recommended way to deploy Outlook add-ins. It
 - Images are replaced with their alternate description. This will work as soon as Microsoft fixes a bug in their office.js framework. If you are interested in a workaround, please let us know!
 
 **Classic Outlook on Windows**
-- Things work fine for mailboxes in Exchange Online, but the same APIs seem to be unstable for on-prem mailboxes, especially regarding launch events (adding signature automatically). When in doubt, use the taskpane. 
+- Things work fine for mailboxes in Exchange Online, but the same APIs seem to be unstable for on-prem mailboxes, especially regarding launch events (adding signatures automatically). When in doubt, use the taskpane. 
 
 # 5. Group membership  
 ## 5.1. Group membership in Entra ID<!-- omit in toc -->

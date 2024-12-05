@@ -21,6 +21,19 @@
   - <Active present tense verb> XXX
 -->
 
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.16.1" target="_blank">v4.16.1</a> - 2024-12-05
+_**Attention, Exchange Online admins**_  
+_See '`What about the roaming signatures feature in Exchange Online?`' in '`.\docs\README`' for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see '`MirrorCloudSignatures`' in '`.\docs\README`'._
+
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Fixed
+- Fix '`.\sample code\Create-EntraApp.ps1`' so that the redirect URI for broker authentication contains the Application ID and not the Object ID of the newly created app. When you have already used the sample code, make sure to manually change the redirect URI of the Entra ID app from the Object ID to the Application ID.
+- Change the text color in the sample templates to match the latest accessibility recommendations for contrast.
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.16.0" target="_blank">v4.16.0</a> - 2024-12-02
 _**Attention, Exchange Online admins**_  
 _See '`What about the roaming signatures feature in Exchange Online?`' in '`.\docs\README`' for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see '`MirrorCloudSignatures`' in '`.\docs\README`'._
@@ -29,7 +42,7 @@ _**Add features with the Benefactor Circle add-on and get commercial support fro
 _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
-- **Prefer an authentication broker over browser-based authentication (browser auth is still used as fallback and on non-supported systems). This helps overcome issues with Entra ID MFA re-authentication as well as browser authentication problems such as being denied access to http://localhost. Make sure to add the redirect URL '`ms-appx-web://microsoft.aad.brokerplugin/<Object ID of your app>`' to your Set-OutlookSignatures Entra ID app.** The Entra ID app provided by the developers already has the additional redirect URL set ('`ms-appx-web://microsoft.aad.brokerplugin/beea8249-8c98-4c76-92f6-ce3c468a61e6`').
+- **Prefer an authentication broker over browser-based authentication (browser auth is still used as fallback and on non-supported systems). This helps overcome issues with Entra ID MFA re-authentication as well as browser authentication problems such as being denied access to http://localhost. Make sure to add the Redirect URI '`ms-appx-web://microsoft.aad.brokerplugin/<Application ID of your app>`' to your Set-OutlookSignatures Entra ID app.** Make sure to use the Application ID and not the Object ID. The Entra ID app provided by the developers already has the additional Redirect URI set ('`ms-appx-web://microsoft.aad.brokerplugin/beea8249-8c98-4c76-92f6-ce3c468a61e6`').
 - Change the path of the Graph token cache file to '`$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\MSAL.PS\MSAL.PS.msalcache.bin3')`' on all platforms. This change requires one-time re-authentication towards Graph on Windows, Linux and macOS when Integrated Windows Authentication does not work. The change is introduced to fix the following problems and to anticipate upcoming changes across all supported platforms:
   - On Windows, not only Set-OutlookSignatures uses the default MSAL.Net/MSAL.PS cache file path. This is a good idea but most software handles the cache as if it was application specific, replacing all other tokens with their own instead of sharing them.
   - On Linux (and macOS), MSAL.Net does not rely on .Net to determine the path for LocalApplicationData but uses own logic, which leads to inconsistent results on different Linux distributions and does not always match XDG specifications.
@@ -69,6 +82,7 @@ _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explic
 - Update login hint detection logic for Graph authentication to handle cases where the UPN used to log on does not match the UPN in Entra ID.
 - Add more code to work around limitations for Outlook add-ins on Outlook Web on premises. Microsoft has silently removed on-prem support for several features in office.js in the last few weeks - if this goes on, on-prem signature add-ins will soon not be realizable any more.
 - Fix the workaround to not show Word security warning when converting documents with linked images when using '`-CreateRTFSignatures true`'.
+
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.15.0" target="_blank">v4.15.0</a> - 2024-09-27
 _**Attention, Exchange Online admins**_  
