@@ -3,33 +3,28 @@ This sample code shows how to automate the creation of the Entra ID app required
 
 Both types of apps are supported: The one for end users, and the one for SimulateAndDeploy.
 
-You have to adapt it to fit your environment.
+You can adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
 Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
 #>
 
-[CmdletBinding()] param ()
+[CmdletBinding()]
 
-# Which type of app should be created?
-#   'Set-OutlookSignatures' for the default Set-OutlookSignatures app being accessed by end users runnding Set-OutlookSignatures
-#     Uses only delegated permissions, as described in '.\config\default graph config.ps1'
-#   'SimulateAndDeploy' for use in the "simulate and deploy" scenario
-#     Uses delegated permissions and application permissions, as described in '.\sample code\SimulateAndDeploy.ps1'
-#   For security reasons, the app type has no default value and needs to be set manually
-$appType = 'Please set $appType in the script'
+param (
+    # Which type of app should be created?
+    #   'Set-OutlookSignatures' for the default Set-OutlookSignatures app being accessed by end users runnding Set-OutlookSignatures
+    #     Uses only delegated permissions, as described in '.\config\default graph config.ps1'
+    #   'SimulateAndDeploy' for use in the "simulate and deploy" scenario
+    #     Uses delegated permissions and application permissions, as described in '.\sample code\SimulateAndDeploy.ps1'
+    #   For security reasons, the app type has no default value and needs to be set manually
+    [ValidateSet('Set-OutlookSignatures', 'SimulateAndDeploy')]
+    $AppType = $null,
 
-# Name of the app to create
-if ($appType -ieq 'Set-OutlookSignatures') {
-    $appName = 'Set-OutlookSignatures'
-} else {
-    $appName = 'Set-OutlookSignatures SimulateAndDeploy'
-}
+    [ValidateNotNullOrEmpty()]
+    $AppName = $null
 
-
-#
-# Do not change anything from here on
-#
+)
 
 
 Clear-Host
@@ -44,30 +39,41 @@ $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Obj
 
 Set-Location $PSScriptRoot
 
+if ($AppName) {
+    $AppName = $AppName.trim()
+}
 
 Write-Host 'Create Entra ID app for Set-OutlookSignatures'
-Write-Host "  App type: $($appType)"
+Write-Host "  App type: $($AppType)"
+Write-Host "  App name: $($AppName)"
 
-if ($appType -inotin @('Set-OutlookSignatures', 'SimulateAndDeploy')) {
-    Write-Host "  App type is not 'Set-OutlookSignatures' or 'SimulateAndDeploy', exiting." -ForegroundColor Red
-    exit 1
+if ([string]::IsNullOrWhiteSpace($AppType)) {
+    Write-Host
+    Write-Host '  App type not defined, exiting.' -ForegroundColor Red
+    Write-Host "  Add parameter '-AppType' with one of the following values: $(($PSCmdlet.MyInvocation.MyCommand.Parameters['AppType'].Attributes |
+    Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }).ValidValues -join ', ') " -ForegroundColor Red
 }
 
-$appName = $appName.trim()
-
-Write-Host "  App name: $($appName)"
-
-if ([string]::IsNullOrWhiteSpace($appName)) {
+if ([string]::IsNullOrWhiteSpace($AppName)) {
+    Write-Host
     Write-Host '  App name not defined, exiting.' -ForegroundColor Red
-    exit 1
+    Write-Host "  Add parameter '-AppName' with a name for the Entra ID app to be created." -ForegroundColor Red
 }
 
+if ([string]::IsNullOrWhiteSpace($AppType) -or [string]::IsNullOrWhiteSpace($AppName)) {
+    exit 1
+}
 
 
 Write-Host
 Write-Host 'Install Microsoft.Graph PowerShell modules'
-Install-Module Microsoft.Graph.Authentication -Scope CurrentUser -Force
-Install-Module Microsoft.Graph.Applications -Scope CurrentUser -Force
+foreach ($MicrosoftGraphPowerShellModule in @('Microsoft.Graph.Authentication', 'Microsoft.Graph.Applications')) {
+    if (Get-Module -ListAvailable -Name $MicrosoftGraphPowerShellModule) {
+        Update-Module $MicrosoftGraphPowerShellModule -Scope CurrentUser
+    } else {
+        Install-Module $MicrosoftGraphPowerShellModule -Scope CurrentUser -Force -AllowClobber
+    }
+}
 
 
 Write-Host
@@ -80,9 +86,9 @@ Connect-MgGraph -Scopes 'Application.ReadWrite.All' -NoWelcome
 Write-Host
 Write-Host 'Create a new app registration'
 Write-Host '  Does not check if an app with the same name already exists'
-Write-Host "  App name: $($appName)"
+Write-Host "  App name: $($AppName)"
 $params = @{
-    DisplayName    = $appName
+    DisplayName    = $AppName
     Description    = 'Set-OutlookSignatures, email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, Windows, Web, Mac, Linux, Android, iOS'
     Notes          = 'Set-OutlookSignatures, email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, Windows, Web, Mac, Linux, Android, iOS'
     SignInAudience = 'AzureADMyOrg'
@@ -90,7 +96,7 @@ $params = @{
 
 $app = New-MgApplication @params
 
-if ($appType -ieq 'Set-OutlookSignatures') {
+if ($AppType -ieq 'Set-OutlookSignatures') {
     Write-Host "  App Client ID for Set-OutlookSignatures graph config file: $($app.AppId)" -ForegroundColor Green
 } else {
     Write-Host "  App Client ID for SimulateAndDeploy configuration: $($app.AppId)" -ForegroundColor Green
@@ -99,7 +105,7 @@ if ($appType -ieq 'Set-OutlookSignatures') {
 
 Write-Host
 Write-Host 'Add required permissions to app registration'
-if ($appType -ieq 'Set-OutlookSignatures') {
+if ($AppType -ieq 'Set-OutlookSignatures') {
     $params = @{
         RequiredResourceAccess = @(
             @{
@@ -339,7 +345,7 @@ Write-Host 'Enable public client flow'
 Update-MgApplication -ApplicationId $app.Id -IsFallbackPublicClient
 
 
-if ($appType -ieq 'SimulateAndDeploy') {
+if ($AppType -ieq 'SimulateAndDeploy') {
     Write-Host
     Write-Host 'Add client secret to app registration'
 
@@ -358,24 +364,24 @@ if ($appType -ieq 'SimulateAndDeploy') {
 Write-Host
 Write-Host 'Consider restricting file access'
 Write-Host '  Consider switching from Files.Read.All to Files.SelectedOperations.Selected for added security.'
-Write-Host '  This requires granting specific permissions in SharePoint Online.'
+Write-Host '    This requires granting specific permissions in SharePoint Online.'
 
 
 Write-Host
 Write-Host 'Grant admin consent'
-Write-Host '  This creates an enterprise application from the app registration and makes the app accessible to ' -NoNewline
-if ($appType -ieq 'Set-OutlookSignatures') {
-    Write-Host 'end users running Set-OutlookSignatures'
-} else {
-    Write-Host 'the account running Set-OutlookSignatures in SimulateAndDeploy mode'
-}
+Write-Host ('  This creates an enterprise application from the app registration and makes the app accessible to ' + $(
+        if ($AppType -ieq 'Set-OutlookSignatures') {
+            Write-Host 'end users running Set-OutlookSignatures'
+        } else {
+            Write-Host 'the account running Set-OutlookSignatures in SimulateAndDeploy mode'
+        }
+    )
+)
 Write-Host '  To grant admin consent, navigate to'
 Write-Host "    https://login.microsoftonline.com/$($app.PublisherDomain)/adminconsent?client_id=$($app.AppId)" -ForegroundColor Green
-Write-Host "    with a user being 'Application Adminstrator' or 'Global Administrator'"
-Write-Host '    and accept the required permissions on behalf of your tenant.'
+Write-Host '    with a user being 'Application Adminstrator' or 'Global Administrator' and accept the required permissions on behalf of your tenant.'
 Write-Host "  You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[…]'"
-Write-Host '    could not be found or accessed. The reason for this message is that'
-Write-Host '    the Entra ID app is configured to only be able to authenticate against http://localhost.'
+Write-Host '    could not be found or accessed. The reason for this message is that the Entra ID app is configured to only be able to authenticate against http://localhost.'
 
 
 Write-Host

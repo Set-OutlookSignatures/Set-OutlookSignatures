@@ -37,13 +37,14 @@ function Enable-MsalTokenCacheOnDisk {
         }
     }
 
+
     if ([System.Environment]::OSVersion.Platform -eq 'Win32NT' -and $PSVersionTable.PSVersion -lt [version]'6.0') {
         if ($ClientApplication -is [Microsoft.Identity.Client.IConfidentialClientApplication]) {
             [TokenCacheHelper]::EnableSerialization($ClientApplication.AppTokenCache)
         }
         [TokenCacheHelper]::EnableSerialization($ClientApplication.UserTokenCache)
 
-        $ClientApplication | Add-Member -MemberType NoteProperty -Name 'cacheInfo' -Value "Encrypted file '$([TokenCacheHelper]::CacheFilePath)', delete file to remove cached token"
+        $ClientApplication | Add-Member -MemberType NoteProperty -Name 'cacheInfo' -Value "Encrypted file '$([TokenCacheHelper]::CacheFilePath)'"
     } else {
         $cacheFilePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\MSAL.PS\MSAL.PS.msalcache.bin3')
         $cacheFileName = [System.IO.Path]::GetFileName($cacheFilePath)
@@ -55,8 +56,8 @@ function Enable-MsalTokenCacheOnDisk {
                 $cacheDir
             ).
             WithCacheChangedEvent(
-                $ClientApplication.ClientId,
-                $ClientApplication.Authority
+                $ClientApplication.AppConfig.ClientId,
+                $ClientApplication.AppConfig.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri
             ).
             CustomizeLockRetry(1000, 3).
             Build()
@@ -66,8 +67,8 @@ function Enable-MsalTokenCacheOnDisk {
                 $cacheDir
             ).
             WithCacheChangedEvent(
-                $ClientApplication.ClientId,
-                $ClientApplication.Authority
+                $ClientApplication.AppConfig.ClientId,
+                $ClientApplication.AppConfig.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri
             ).
             WithLinuxKeyring(
                 'at.explicitconsulting.setoutlooksignatures.tokencache',
@@ -84,8 +85,8 @@ function Enable-MsalTokenCacheOnDisk {
                 $cacheDir
             ).
             WithCacheChangedEvent(
-                $ClientApplication.ClientId,
-                $ClientApplication.Authority
+                $ClientApplication.AppConfig.ClientId,
+                $ClientApplication.AppConfig.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri
             ).
             WithMacKeyChain(
                 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net',
@@ -106,11 +107,11 @@ function Enable-MsalTokenCacheOnDisk {
 
             $ClientApplication | Add-Member -MemberType NoteProperty -Name 'cacheInfo' -Value $(
                 if ($IsWindows) {
-                    "Encrypted file '$($cacheFilePath)', delete file to remove cached token"
+                    "Encrypted file '$($cacheFilePath)'"
                 } elseif ($IsLinux) {
-                    "Encrypted default keyring entry 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net', use keychain app to remove cached token"
+                    "Encrypted default keyring entry 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net'"
                 } elseif ($IsMacOS) {
-                    "Encrypted default keychain entry 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net', use 'security delete-generic-password ""Set-OutlookSignatures Microsoft Graph token via MSAL.Net""' to remove cached token"
+                    "Encrypted default keychain entry 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net'"
                 }
             )
         } catch {
@@ -120,8 +121,8 @@ function Enable-MsalTokenCacheOnDisk {
                     $cacheDir
                 ).
                 WithCacheChangedEvent(
-                    $ClientApplication.ClientId,
-                    $ClientApplication.Authority
+                    $ClientApplication.AppConfig.ClientId,
+                    $ClientApplication.AppConfig.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri
                 ).
                 WithUnprotectedFile().
                 CustomizeLockRetry(1000, 3).
@@ -132,8 +133,8 @@ function Enable-MsalTokenCacheOnDisk {
                     $cacheDir
                 ).
                 WithCacheChangedEvent(
-                    $ClientApplication.ClientId,
-                    $ClientApplication.Authority
+                    $ClientApplication.AppConfig.ClientId,
+                    $ClientApplication.AppConfig.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri
                 ).
                 WithLinuxUnprotectedFile().
                 CustomizeLockRetry(1000, 3).
@@ -147,7 +148,7 @@ function Enable-MsalTokenCacheOnDisk {
             GetResult()
 
             $ClientApplication | Add-Member -MemberType NoteProperty -Name 'cacheInfo' -Value $(
-                "Unencrypted file '$($cacheFilePath)', delete file to remove cached token"
+                "Unencrypted file '$($cacheFilePath)'"
             )
         }
 

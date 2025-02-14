@@ -62,12 +62,10 @@ try {
 
     Write-Host '  Parameters'
     foreach ($parameter in (Get-Command -Name $PSCommandPath).Parameters.keys) {
-        Write-Host "    $($parameter): " -NoNewline
-
         if ((Get-Variable -Name $parameter -EA SilentlyContinue -ValueOnly) -is [hashtable]) {
-            Write-Host "'$(@((Get-Variable -Name $parameter -ValueOnly).GetEnumerator() | ForEach-Object { "$($_.Name)=$($_.Value)" }) -join ', ')'"
+            Write-Host "    $($parameter): '$(@((Get-Variable -Name $parameter -ValueOnly).GetEnumerator() | ForEach-Object { "$($_.Name)=$($_.Value)" }) -join ', ')'"
         } else {
-            Write-Host "'$((Get-Variable -Name $parameter -EA SilentlyContinue -ValueOnly) -join ', ')'"
+            Write-Host "    $($parameter): '$((Get-Variable -Name $parameter -EA SilentlyContinue -ValueOnly) -join ', ')'"
         }
     }
 
@@ -361,8 +359,8 @@ try {
         }
     }
 } catch {
+    Write-Host $error[0]
     Write-Host
-    $error[0]
     Write-Host "Unknown error, exiting. @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
     Exit 1
 

@@ -93,7 +93,7 @@ function Write-HostPrompt {
                 'Choices' { return $Host.UI.PromptForChoice($Caption, $Message, $listChoices.ToArray(), $DefaultChoice - 1) + 1 }
             }
         } catch [System.Management.Automation.PSInvalidOperationException] {
-            ## Write Non-Terminating Error When In Non-Interactive Mode.
+            ## Write Non-Terminating Error When In Silent Mode.
             Write-Error -ErrorRecord $_ -CategoryActivity $MyInvocation.MyCommand
         }
     }

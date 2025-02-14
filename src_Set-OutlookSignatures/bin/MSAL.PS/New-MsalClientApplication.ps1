@@ -105,7 +105,7 @@ function New-MsalClientApplication {
                 if ($script:ModuleState.UseWebView2) { [void] $ClientApplicationBuilder.WithRedirectUri('https://login.microsoftonline.com/common/oauth2/nativeclient') }
                 else { [void] $ClientApplicationBuilder.WithDefaultRedirectUri() }
             }
-            if ($PSBoundParameters.ContainsKey('AuthenticationBroker')) {
+            if ($PSBoundParameters.ContainsKey('AuthenticationBroker') -and $AuthenticationBroker) {
                 #if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') { [void] [Microsoft.Identity.Client.Desktop.WamExtension]::WithWindowsBroker($ClientApplicationBuilder, $AuthenticationBroker) }
                 #else { [void] $ClientApplicationBuilder.WithBroker($AuthenticationBroker) }
                 $allOperatingSystems = [enum]::GetValues([Microsoft.Identity.Client.BrokerOptions+OperatingSystems])

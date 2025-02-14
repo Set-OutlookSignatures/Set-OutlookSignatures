@@ -17,9 +17,9 @@ Write-Host 'Set-OutlookSignatures simulation mode helper'
 ## It is sufficient to only list parameters where the default value should not be used
 $params = [ordered]@{
 	SignatureTemplatePath         = '.\sample templates\Signatures DOCX'
-	SignatureIniPath              = '.\sample templates\Signatures DOCX\_Signatures.ini'
+	SignatureIniFile              = '.\sample templates\Signatures DOCX\_Signatures.ini'
 	OOFTemplatePath               = '.\sample templates\Out-of-office DOCX'
-	OOFIniPath                    = '.\sample templates\Out-of-office DOCX\_OOF.ini'
+	OOFIniFile                    = '.\sample templates\Out-of-office DOCX\_OOF.ini'
 	ReplacementVariableConfigFile = '.\config\default replacement variables.ps1'
 	GraphConfigFile               = '.\config\default graph config.ps1'
 	GraphOnly                     = $false

@@ -131,9 +131,9 @@ param (
 		SimulateAndDeploy                             = $false # $false simulates but does not deploy, $true simulates and deploys
 		UseHtmTemplates                               = $false
 		SignatureTemplatePath                         = "'.\sample templates\Signatures DOCX'"
-		SignatureIniPath                              = "'.\sample templates\Signatures DOCX\_Signatures.ini'"
+		SignatureIniFile                              = "'.\sample templates\Signatures DOCX\_Signatures.ini'"
 		OOFTemplatePath                               = "'.\sample templates\Out-of-office DOCX'"
-		OOFIniPath                                    = "'.\sample templates\Out-of-office DOCX\_OOF.ini'"
+		OOFIniFile                                    = "'.\sample templates\Out-of-office DOCX\_OOF.ini'"
 		ReplacementVariableConfigFile                 = "'.\config\default replacement variables.ps1'"
 		GraphClientID                                 = $GraphClientId
 		GraphConfigFile                               = "'.\config\default graph config.ps1'"
@@ -153,6 +153,7 @@ param (
 		TrustsToCheckForGroups                        = @('*')
 		IncludeMailboxForestDomainLocalGroups         = $false
 		WordProcessPriority                           = "'Normal'"
+		Verbose                                       = $($VerbosePreference -ne [System.Management.Automation.ActionPreference]::SilentlyContinue)
 	},
 
 	$SimulateResultPath = 'c:\test\SimulateAndDeploy',
@@ -531,7 +532,7 @@ do {
 					Write-Host 'xxxSimulateAndDeployExitCode999xxx'
 				}
 			} catch {
-				$error[0]
+				Write-Host $error[0]
 				Write-Host 'xxxSimulateAndDeployExitCode999xxx'
 			}
 

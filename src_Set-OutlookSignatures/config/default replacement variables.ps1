@@ -223,14 +223,15 @@ $ReplaceHash['$CurrentMailboxManagerNameWithHonorifics$'] = (((((([string]$ADPro
 }
 
 
-# Sample code: Create gender pronouns string from Extension Attribute 3
-#   $CurrentUserGenderPronouns$, $CurrentUserManagerGenderPronouns$, # $CurrentMailboxGenderPronouns$, $CurrentMailboxManagerGenderPronouns$
+# Sample code: Take salutation or gender pronouns string from Extension Attribute 3
+#   $CurrentUserSalutation$, $CurrentUserManagerSalutation$, $CurrentMailboxSalutation$, $CurrentMailboxManagerSalutation$
+#   $CurrentUserGenderPronouns$, $CurrentUserManagerGenderPronouns$, $CurrentMailboxGenderPronouns$, $CurrentMailboxManagerGenderPronouns$
 # Format
-#   ExtensionAttribute3 contains at least three characters, and a forward slash somewhere between the first and last character: " (<ExtensionAttribute3>)"
-#     Examples: " (she/her)", " (he/him)"
+#   If ExtensionAttribute3 is not empty or whitespace, put it in brackets and add a leading space
+#     Examples: " (Mr.)", " (Ms.)", " (she/her)"
 #   Else: '' (emtpy string)
 # Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
-$ReplaceHash['$CurrentUserGenderPronouns$'] = $(if (([string]$ADPropsCurrentUser.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentUser.ExtensionAttribute3)))" } else { '' })
-$ReplaceHash['$CurrentUserManagerGenderPronouns$'] = $(if (([string]$ADPropsCurrentUserManager.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentUserManager.ExtensionAttribute3)))" } else { '' })
-$ReplaceHash['$CurrentMailboxGenderPronouns$'] = $(if (([string]$ADPropsCurrentMailbox.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentMailbox.ExtensionAttribute3)))" } else { '' })
-$ReplaceHash['$CurrentMailboxManagerGenderPronouns$'] = $(if (([string]$ADPropsCurrentMailboxManager.ExtensionAttribute3) -imatch '.+\/.+') { " ($(([string]$ADPropsCurrentMailboxManager.ExtensionAttribute3)))" } else { '' })
+$ReplaceHash['$CurrentUserSalutation$'] = $ReplaceHash['$CurrentUserGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentUser.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentUser.extensionattribute3))" })
+$ReplaceHash['$CurrentUserManagerSalutation$'] = $ReplaceHash['$CurrentUserManagerGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentUserManager.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentUserManager.extensionattribute3))" })
+$ReplaceHash['$CurrentMailboxSalutation$'] = $ReplaceHash['$CurrentMailboxGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentMailbox.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentMailbox.extensionattribute3))" })
+$ReplaceHash['$CurrentMailboxManagerSalutation$'] = $ReplaceHash['$CurrentMailboxManagerGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentMailboxManager.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentMailboxManager.extensionattribute3))" })

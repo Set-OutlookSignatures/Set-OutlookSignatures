@@ -40,7 +40,7 @@ function Get-MsalClientApplication {
     switch -Wildcard ($PSCmdlet.ParameterSetName) {
         'PublicClient*' {
             foreach ($PublicClientApplication in $PublicClientApplications) {
-                if ((!$ClientId -or $PublicClientApplication.ClientId -eq $ClientId) -and (!$RedirectUri -or $PublicClientApplication.AppConfig.RedirectUri -eq $RedirectUri) -and (!$TenantId -or $PublicClientApplication.AppConfig.TenantId -eq $TenantId) -and (!$Authority -or $PublicClientApplication.Authority -eq $Authority)) {
+                if ((!$ClientId -or $PublicClientApplication.AppConfig.ClientId -eq $ClientId) -and (!$RedirectUri -or $PublicClientApplication.AppConfig.RedirectUri -eq $RedirectUri) -and (!$TenantId -or $PublicClientApplication.AppConfig.TenantId -eq $TenantId) -and (!$Authority -or $PublicClientApplication.AppConfig.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri -eq $Authority)) {
                     $listClientApplications.Add($PublicClientApplication)
                 }
             }
@@ -49,7 +49,7 @@ function Get-MsalClientApplication {
         }
         '*' {
             foreach ($ConfidentialClientApplication in $ConfidentialClientApplications) {
-                if ((!$ClientId -or $ConfidentialClientApplication.ClientId -eq $ClientId) -and (!$RedirectUri -or $ConfidentialClientApplication.AppConfig.RedirectUri -eq $RedirectUri) -and (!$TenantId -or $ConfidentialClientApplication.AppConfig.TenantId -eq $TenantId) -and (!$Authority -or $ConfidentialClientApplication.Authority -eq $Authority)) {
+                if ((!$ClientId -or $ConfidentialClientApplication.AppConfig.ClientId -eq $ClientId) -and (!$RedirectUri -or $ConfidentialClientApplication.AppConfig.RedirectUri -eq $RedirectUri) -and (!$TenantId -or $ConfidentialClientApplication.AppConfig.TenantId -eq $TenantId) -and (!$Authority -or $ConfidentialClientApplication.AppConfig.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri -eq $Authority)) {
                     switch ($PSCmdlet.ParameterSetName) {
                         'ConfidentialClientSecret' {
                             if ($ConfidentialClientApplication.AppConfig.ClientSecret -eq $ClientSecret) {

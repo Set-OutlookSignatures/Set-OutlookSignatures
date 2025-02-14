@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, local and roaming, Windows, Web, Mac, Linux, Android, iOS<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures" alt="License"></a> <!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features%20with%20the-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/get%20commercial%20support%20from-ExplicIT%20Consulting-lawngreen?labelColor=deepskyblue" alt="get commercial support from ExplicIT Consulting"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy.<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black&color=informational" alt="License"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational&labelColor=black" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/commercial%20support-ExplicIT%20Consulting-lawngreen?labelColor=black" alt="get commercial support from ExplicIT Consulting"></a>
 
 # Changelog
 <!--
@@ -22,6 +22,44 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.17.0" target="_blank">v4.17.0</a> - 2025-02-14
+
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- Enable '`Ignore host and platform`' per default when using the taskpane of the Outlook add-in.
+- Update dependency MSAL.Net to v4.68.0.
+- Update Outlook add-in dependency @azure/msal-browser to v4.2.1.
+### Added
+- Add the new silent authentication mode '`Silent via Authentication Broker without login hint`'. This allows for silent login to Graph in environments where Integrated Windows Authentication does not work. See the '`Authentication`' chapter in '`.\docs\README`' for details.
+- Connecting to Exchange Online now goes through the same authentication steps as connecting to Graph.
+- Add virtual mailboxes and dynamically create signature and out-of-office INI lines through code
+  - Add parameter '`VirtualMailboxConfigFile`'. Virtual mailboxes are mailboxes that are not available in Outlook but are treated by Set-OutlookSignatures as if they were. This is an option for scenarios where you want to deploy signatures and out-of-office replies with not only the '`$CurrentUser...$`' but also '`$CurrentMailbox...$`' replacement variables for mailboxes that have not been added to Outlook, such as in Send As or Send On Behalf scenarios, where users often only change the from address but do not add the mailbox to Outlook. See '`.\docs\README`' for details about the new parameter and sample code. This feature requires a Benefactor Circle license. It is best used together with [Export-RecipientPermissions](https://github.com/Export-RecipientPermissions).
+  - Add a way to dynamically define signature INI and out-of-office INI file entries via the '`VirtualMailboxConfigFile`' parameter. This enables multiple scenarios for advanced usage - for example you can automate INI file entries for delegate scenarios in combination with [Export-RecipientPermissions](https://github.com/Export-RecipientPermissions). See '`.\docs\README`' for details about the new parameter and sample code.
+- Add a signature preview to the taskpane of the Outlook add-in.
+- Add info to '`Authentication`' chapter in '`.\docs\README`':
+  - Integrated Windows Authentication only works for federated users in domains with an authentication type of "federated".
+  - Description of 'Silent via Authentication Broker without login hint'.
+- Add more workarounds for WebDAV client or .Net returning file and folder names with trailing NULL characters as well as other invalid file and folder names.
+- Support SharePoint paths where the actual name of the document library is not reflected in the URL. This typically happens when renaming a document library.
+- Allow setting '`$VersionToUse`' in '`.\sample code\Intune-setOutlookSignatures-Remediate.ps1`' to an empty value, so that no download occurs and you can use a Set-OutlookSignatures instance previously deployed with an other mechanism.
+- Add to '`.\sample code\SimulateAndDeploy.ps1`': The verbose mode setting of SimulateAndDeploy.ps1 is now passed on to Set-OutlookSignatures.ps1 per default.
+- Make signatures more compatible with Non-Outlook clients when using DOCX templates.
+- Add new FAQ '`Empty lines contain an underlined space character`' to '`.\docs\README`'.
+- Show exit code and, if available, the specific exit code description in script output. The exit code is 0 for success and a number between 1 and 255 in case of an error.
+- Show the source for each security identifier in verbose output. This helps troubleshooting as it shows to which type of group a security identifier belongs to. Values for On-prem: Global or universal group, domain local group, static distribution group, domain local group across trust (including a hint to sIDHistory where possible). Values for cloud: Entra ID group, on-prem group.
+- Include onPremisesSecurityIdentifier SIDs when getting group membership for mailboxes.
+- Add support for .Net 9 and PowerShell 7.5.0, which is based on .Net 9.
+### Fixed
+- Check INI file paths for the correct type ('Leaf' instead of 'File'). This is a pure optical change.
+- Update '`$SoftwarePath`' in '`.\sample code\Intune-SetoutlookSignatures-Remediate.ps1`', so that the resulting folder structure is easier to understand. This is a pure optical change.
+- Avoid race conditions that can lead to a .Net Framework pop-up error ('`The pipeline has been stopped`') when detecting termination signals that allow for a graceful exit.
+- Fixed '`.\sample code\Intune-setOutlookSignatures-Remediate.ps1`' trying to stop a non-existing transcript.
+- Fix '`DeleteScriptCreatedSignaturesWithoutTemplate`' not deleting outdated signatures if they were downloaded from Exchange Online.
+- Detect default Linux keyring instead of relying on a fixed name when checking availability and lock state of keyring.
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.16.1" target="_blank">v4.16.1</a> - 2024-12-05
 _**Attention, Exchange Online admins**_  
 _See '`What about the roaming signatures feature in Exchange Online?`' in '`.\docs\README`' for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see '`MirrorCloudSignatures`' in '`.\docs\README`'._
@@ -31,7 +69,7 @@ _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explic
 
 ### Fixed
 - Fix '`.\sample code\Create-EntraApp.ps1`' so that the redirect URI for broker authentication contains the Application ID and not the Object ID of the newly created app. When you have already used the sample code, make sure to manually change the redirect URI of the Entra ID app from the Object ID to the Application ID.
-- Change the text color in the sample templates to match the latest accessibility recommendations for contrast.
+- Correct the text color in the sample templates to match the latest accessibility recommendations for contrast.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.16.0" target="_blank">v4.16.0</a> - 2024-12-02
@@ -191,6 +229,7 @@ _Starting with this release, a tagline is added to each signature deployed for m
 - Fix a potential problem with paged Microsoft Graph queries which could lead to an infinite loop.
 - Fix search for Entra ID groups by their display name. (Thanks <a href="https://github.com/CoreyS222" target="_blank">@CoreyS222</a>!)
 - Fix on-prem group membership search not including non-security enabled distribution groups due to a regression.
+- Fix not finding a site ID for SharePoint Online paths directly in the root default site collection and not in /sites or /teams.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.13.0" target="_blank">v4.13.0</a> - 2024-06-27
@@ -593,7 +632,7 @@ When `EmbedimagesInHtml` is enabled, it now automatically enables the "Send pict
 - Thanks to our partnership with [ExplicIT Consulting](https://explicitconsulting.at), Set-OutlookSignatures and its components are digitally signed with an Extended Validation (EV) Code Signing Certificate (which is the highest code signing standard available).  
 This is not only available for Benefactor Circle members, but also the Free and Open Source core version is code signed. Code signing makes it much easier to implement Set-OutlookSignatures in environments being locked down with AppLocker or comparable tools.
 - All replacement variables now have the 'DELETEEMPTY' option, which allows for images to be kept only when an attribute has a value. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
-- The attribute 'GroupsSIDs' is now available in the `$CurrentMailbox…]` variable for use with replacement variables. It contains all the SIDs of the groups the current mailbox is a member of, which allows for replacement variable content based on group membership. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
+- The attribute 'GroupsSIDs' is now available in the `$CurrentMailbox` variable for use with replacement variables. It contains all the SIDs of the groups the current mailbox is a member of, which allows for replacement variable content based on group membership. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
 - A basic configuration user interface with grouped parameter sets, just run `Show-Command .\Set-OutlookSignatures.ps1` in PowerShell.
 - The new template tag `WriteProtect` write protects individual signature files. See `README` for details and restrictions.
 - The new script parameter `SimulateTime` allows to use a specific time when running simulation mode, which is handy for testing time-based templates.
@@ -817,7 +856,7 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - Contribution opportunities in '.\docs\CONTRIBUTING.html'
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios (see '.\docs\README.html' and '.\config\default graph config.ps1' for details)
-- Possibility to use ini files instead of file name tags, including settings for template sort order, sort culture, and custom Outlook signature names (see parameters 'SignatureIniPath' and 'OOFIniPath' for details)
+- Possibility to use ini files instead of file name tags, including settings for template sort order, sort culture, and custom Outlook signature names (see parameters 'SignatureIniFile' and 'OOFIniFile' for details)
 - New default replacement variables `$Current[…]Office$` and `$Current[…]Company$`, including updated templates
 - Enterprise ready workaround for Word security warning when converting documents with linked images
 - FAQ: the software hangs at HTM/RTF export, Word shows a security warning!?

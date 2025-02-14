@@ -133,7 +133,7 @@ function Get-MsalToken {
     # HtmlMessageError
     [string] $HtmlMessageError,
 
-    # Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
+    # Silent request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
     [Parameter(Mandatory = $true, ParameterSetName = 'PublicClient-IntegratedWindowsAuth')]
     [Parameter(Mandatory = $false, ParameterSetName = 'PublicClient-InputObject')]
     [switch] $IntegratedWindowsAuth,
@@ -225,6 +225,8 @@ function Get-MsalToken {
     }
 
     function Coalesce([psobject[]]$objects) { foreach ($object in $objects) { if ($object -notin $null, [string]::Empty) { return $object } } return $null }
+
+    $InteractiveAuthTopLevelParentWindow = $null
   }
 
   process {
@@ -270,7 +272,7 @@ function Get-MsalToken {
           if ($ParentWindow -eq [System.IntPtr]::Zero -and [System.Environment]::OSVersion.Platform -eq 'Win32NT') {
             Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
 
-            $window = New-Object System.Windows.Window -Property @{
+            $InteractiveAuthTopLevelParentWindow = New-Object System.Windows.Window -Property @{
               Width                 = 1
               Height                = 1
               WindowStartupLocation = [System.Windows.WindowStartupLocation]::CenterScreen
@@ -278,10 +280,10 @@ function Get-MsalToken {
               Topmost               = $true
             }
 
-            $window.Show()
-            $window.Hide()
+            $InteractiveAuthTopLevelParentWindow.Show()
+            $InteractiveAuthTopLevelParentWindow.Hide()
 
-            [IntPtr] $ParentWindow = [System.Windows.Interop.WindowInteropHelper]::new($window).Handle
+            [IntPtr] $ParentWindow = [System.Windows.Interop.WindowInteropHelper]::new($InteractiveAuthTopLevelParentWindow).Handle
           }
           if ($ParentWindow -ne [System.IntPtr]::Zero) { [void] $AquireTokenParameters.WithParentActivityOrWindow($ParentWindow) }
           #if ($Account) { [void] $AquireTokenParameters.WithAccount($Account) }
@@ -324,14 +326,19 @@ function Get-MsalToken {
           if ($LoginHint) {
             $AquireTokenParameters = $PublicClientApplication.AcquireTokenSilent($Scopes, $LoginHint)
           } else {
-            [Microsoft.Identity.Client.IAccount] $Account = $PublicClientApplication.GetAccountsAsync().GetAwaiter().GetResult() | Select-Object -First 1
+            if ($AuthenticationBroker) {
+              [Microsoft.Identity.Client.IAccount] $Account = [Microsoft.Identity.Client.PublicClientApplication]::OperatingSystemAccount
+            } else {
+              [Microsoft.Identity.Client.IAccount] $Account = $PublicClientApplication.GetAccountsAsync().GetAwaiter().GetResult() | Select-Object -First 1
+            }
+
             $AquireTokenParameters = $PublicClientApplication.AcquireTokenSilent($Scopes, $Account)
           }
           if ($PSBoundParameters.ContainsKey('ForceRefresh')) { [void] $AquireTokenParameters.WithForceRefresh($ForceRefresh) }
         } else {
           $paramGetMsalToken = Select-PsBoundParameters -NamedParameter $PSBoundParameters -CommandName 'Get-MsalToken' -CommandParameterSet 'PublicClient-InputObject' -ExcludeParameters 'PublicClientApplication'
           ## Try Silent Authentication
-          Write-Verbose ('Attempting Silent Authentication to Application with ClientId [{0}]' -f $ClientApplication.ClientId)
+          Write-Verbose ('Attempting Silent Authentication to Application with ClientId [{0}]' -f $ClientApplication.AppConfig.ClientId)
           try {
             $AuthenticationResult = Get-MsalToken -Silent -PublicClientApplication $PublicClientApplication @paramGetMsalToken
             ## Check for requested scopes
@@ -341,7 +348,7 @@ function Get-MsalToken {
           } catch [Microsoft.Identity.Client.MsalUiRequiredException] {
             Write-Debug ('{0}: {1}' -f $_.Exception.GetType().Name, $_.Exception.Message)
             ## Try Integrated Windows Authentication
-            Write-Verbose ('Attempting Integrated Windows Authentication to Application with ClientId [{0}]' -f $ClientApplication.ClientId)
+            Write-Verbose ('Attempting Integrated Windows Authentication to Application with ClientId [{0}]' -f $ClientApplication.AppConfig.ClientId)
             try {
               $AuthenticationResult = Get-MsalToken -IntegratedWindowsAuth -PublicClientApplication $PublicClientApplication @paramGetMsalToken
               ## Check for requested scopes
@@ -351,7 +358,7 @@ function Get-MsalToken {
             } catch {
               Write-Debug ('{0}: {1}' -f $_.Exception.GetType().Name, $_.Exception.Message)
               ## Revert to Interactive Authentication
-              Write-Verbose ('Attempting Interactive Authentication to Application with ClientId [{0}]' -f $ClientApplication.ClientId)
+              Write-Verbose ('Attempting Interactive Authentication to Application with ClientId [{0}]' -f $ClientApplication.AppConfig.ClientId)
               $AuthenticationResult = Get-MsalToken -Interactive -PublicClientApplication $PublicClientApplication @paramGetMsalToken
             }
           }
@@ -374,12 +381,12 @@ function Get-MsalToken {
       '*' {
         if ($AzureCloudInstance -and $TenantId) { [void] $AquireTokenParameters.WithAuthority($AzureCloudInstance, $TenantId) }
         elseif ($AzureCloudInstance) { [void] $AquireTokenParameters.WithAuthority($AzureCloudInstance, 'common') }
-        elseif ($TenantId) { [void] $AquireTokenParameters.WithAuthority(('https://{0}' -f $ClientApplication.AppConfig.Authority.AuthorityInfo.Host), $TenantId) }
+        elseif ($TenantId) { [void] $AquireTokenParameters.WithAuthority($ClientApplication.AppConfig.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri, $TenantId) }
         if ($Authority) { [void] $AquireTokenParameters.WithAuthority($Authority.AbsoluteUri) }
         if ($CorrelationId) { [void] $AquireTokenParameters.WithCorrelationId($CorrelationId) }
         if ($ExtraQueryParameters) { [void] $AquireTokenParameters.WithExtraQueryParameters((ConvertTo-Dictionary $ExtraQueryParameters -KeyType ([string]) -ValueType ([string]))) }
         if ($ProofOfPossession) { [void] $AquireTokenParameters.WithProofOfPosession($ProofOfPossession) }
-        Write-Debug ('Aquiring Token for Application with ClientId [{0}]' -f $ClientApplication.ClientId)
+        Write-Debug ('Aquiring Token for Application with ClientId [{0}]' -f $ClientApplication.AppConfig.ClientId)
         if (!$Timeout) { $Timeout = [timespan]::Zero }
 
         ## Wait for async task to complete
@@ -403,10 +410,19 @@ function Get-MsalToken {
             }
           } finally {
             if (!$taskAuthenticationResult.IsCompleted) {
-              Write-Debug ('Canceling Token Acquisition for Application with ClientId [{0}]' -f $ClientApplication.ClientId)
+              Write-Debug ('Canceling Token Acquisition for Application with ClientId [{0}]' -f $ClientApplication.AppConfig.ClientId)
               $tokenSource.Cancel()
             }
+
             $tokenSource.Dispose()
+
+            if ($InteractiveAuthTopLevelParentWindow) {
+              try {
+                $InteractiveAuthTopLevelParentWindow.Close()
+              } catch {
+                # Do nothing
+              }
+            }
           }
 
           ## Parse task results
