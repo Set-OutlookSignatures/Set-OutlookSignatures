@@ -13,8 +13,8 @@ Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offe
 Features
 	- Automate simulation mode for all given mailboxes
 	- A configurable number of Set-OutlookSignatures instances run in parallel for better performance
-	- Set default signature in Outlook Web, no matter if classic signature or roaming signatures (requires the Benefacot Circle add-on)
-	- Set internal and external out-of-office (OOF) message (requires the Benefacot Circle add-on)
+	- Set default signature in Outlook Web, no matter if classic signature or roaming signatures (requires the Benefactor Circle add-on)
+	- Set internal and external out-of-office (OOF) message (requires the Benefactor Circle add-on)
 	- Supports on-prem, hybrid and cloud-only environments
 
 
@@ -44,6 +44,9 @@ Requirements
 						- GroupMember.Read.All
 							Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
 							Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+						- Mail.ReadWrite
+							Allows the app to create, read, update, and delete mail in all mailboxes without a signed-in user. Does not include permission to send mail.
+							Required to connect to Outlook Web and to set Outlook signatures.
 						- MailboxSettings.ReadWrite
 							Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
 							Required to set out-of-office replies for the simulated mailboxes
@@ -66,6 +69,9 @@ Requirements
 						- GroupMember.Read.All
 							Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
 							Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+						- Mail.ReadWrite
+							Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
+							Required to connect to Outlook Web and to set Outlook signatures.
 						- MailboxSettings.ReadWrite
 							Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
 							Required to detect the state of the out-of-office assistant and to set out-of-office replies.
@@ -102,6 +108,14 @@ Limitations
 			- Do not create signatures in RTF format (parameter '-CreateRtfSignatures false')
 	- Roaming signatures can currently not be deployed for shared mailboxes, as the API does not support this scenario.
 		- Roaming signatures for shared mailboxes pose a general problem, as only signatures with replacement variables from the $CurrentMailbox[…]$ namespace would make sense anyhow
+	- SimulateAndDeploy can not solve problems around the Classic Outlook for Windows roaming signature sync engine, only Microsoft can do this (but unfortunately does not since years).
+		- Until Microsoft solves this in Classic Outlook for Windows, expect problems with character encoding (umlauts, diacritics, emojis, etc.) and more.
+		- These Outlook-internal problems will come and go depending on the patch level of Outlook.
+		- These Outlook-internal problems can also be observed when Set-OutlookSignatures is not involved at all.
+		- The only workaround currently known is to disable the Classic Outlook for Windows sync engine and let Set-OutlookSignatures do it by running it on the client regularly.
+    - Signatures are directly usable in Outlook Web and New Outlook (when based on Outlook Web). Other Outlook editions may work, but are not supported.
+	    - Consider using the Outlook add-in to access signatures created by SimulateAndDeploy on other editions of Outlook in a supported way. See '.\docs\README' for details.
+		- Also see FAQ '`Roaming signatures in Classic Outlook for Windows look different`' in '`.\docs\README`'.
 #>
 
 [CmdletBinding()]

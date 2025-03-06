@@ -4,731 +4,14 @@ Set-OutlookSignatures XXXVersionStringXXX
 Email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, Windows, Web, Mac, Linux, Android, iOS
 
 .DESCRIPTION
-With Set-OutlookSignatures, signatures and out-of-office replies can be:
-- Generated from **templates in DOCX or HTML** file format
-- Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
-  - Variables are available for the **currently logged-on user, this user's manager, each mailbox and each mailbox's manager**
-  - Images in signatures can be **bound to the existence of certain variables** (useful for optional social network icons, for example)
-- Designed for **barrier-free accessibility** with custom link and image descriptions for screen readers and comparable tools
-- Applied to all **mailboxes (including shared mailboxes¹)**, specific **mailbox groups**, specific **email addresses** (including alias and secondary addresses), or specific **user or mailbox properties**, for **every mailbox across all Outlook profiles (Outlook, New Outlook¹, Outlook Web¹)**, including **automapped and additional mailboxes¹**
-- Created with different names from the same template, **one template can be used for many mailboxes**
-- Assigned **time ranges** within which they are valid¹
-- Set as **default signature** for new emails, or for replies and forwards (signatures only)
-- Set as **default OOF message** for internal or external recipients (OOF messages only)
-- Set in **Outlook Web¹** for the currently logged-in user, including mirroring signatures to the cloud as **roaming signatures¹** (Linux/macOS/Windows, Classic and New Outlook¹)
-- Centrally managed only¹, or **exist along user-created signatures** (signatures only)
-- Automatically added to new emails, reply emails and appointments with the **Outlook add-in**¹
-- Copied to an **additional path¹** for easy access to signatures on mobile devices or for use with email clients and apps besides Outlook: Apple Mail, Google Gmail, Samsung Mail, Mozilla Thunderbird, GNOME Evolution, KDE KMail, and others.
-- Create an **email draft containing all available signatures** in HTML and plain text for easy access in mail clients that do not have a signatures API
-- **Write protected** (Outlook for Windows signatures only)
-
-Set-OutlookSignatures can be **run by users on Windows, Linux and macOS clients, including shared devices and terminal servers - or on a central system with a service account¹**.
-On clients, it can run as part of the logon script, as scheduled task, or on user demand via a desktop icon, start menu entry, shortcut or any other way of starting a program - **whatever your operating system and software deployment mechanism allows**.
-Signatures and OOF messages can also be created and pushed into mailboxes centrally, **without end user or client involvement¹**.
-
-**Sample templates** for signatures and OOF messages demonstrate many features and are provided as .docx and .htm files.
-
-**Simulation mode** allows content creators and admins to simulate the behavior of the software for a specific user at a specific point in time, and to inspect the resulting signature files before going live.
-
-**SimulateAndDeploy¹** allows to deploy signatures to Outlook Web¹/New Outlook¹ without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
-
-The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and in cloud-only environments**.
-All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).
-
-It is **multi-client capable** by using different template paths, configuration files and script parameters.
-
-Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard SMB file share on a central system, and optionally Office on your clients.
-There is also **no telemetry** or "calling home", emails are **not routed through a 3rd party data center or cloud service**, and there is **no need to change DNS records (MX, SPF) or mail flow**.
-
-A **documented implementation approach**, based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators.
-The implementation approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
-
-The software core is **Free and Open-Source Software (FOSS)**. It is published under a license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) and other popular licenses. Please see `.\LICENSE.txt` for copyright and license details.
-
-Footnote 1 (¹): **Some features are exclusive to the Benefactor Circle add-on.**
-ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and commercial support, ensuring that the core of Set-OutlookSignatures can remain Free and Open-Source Software (FOSS) and continues to evolve. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.
+See the file '.\docs\README' for details.
 
 .LINK
 Github: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures
-Benefactor Circle add-on: https://explicitconsulting.at/Set-OutlookSignatures
-
-.PARAMETER SignatureTemplatePath
-Path to centrally managed signature templates.
-
-Local and remote paths are supported.
-
-Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX').
-
-SharePoint document libraries are supported (https only): 'https://server.domain/sites/SignatureSite/SignatureDocLib/SignatureFolder' or '\\server.domain@SSL\sites\SignatureSite\SignatureDocLib\SignatureFolder'
-
-Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' -> 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
-
-On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
-
-For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
-
-Default value: '.\sample templates\Signatures DOCX' on Windows, '.\sample templates\Signatures HTML' on Linux and macOS
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '.\sample templates\Signatures DOCX'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '.\sample templates\Signatures DOCX'"
-
-.PARAMETER SignatureIniFile
-Path to ini file containing signature template tags.
-
-The file must be UTF8 encoded.
-
-See '.\sample templates\Signatures DOCX\_Signatures.ini' for a sample file with further explanations.
-
-Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX')
-
-SharePoint document libraries are supported (https only): 'https://server.domain/sites/SignatureSite/SignatureDocLib/SignatureFolder' or '\\server.domain@SSL\sites\SignatureSite\SignatureDocLib\SignatureFolder'
-
-Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' -> 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
-
-On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
-
-For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
-
-Default value: '.\sample templates\Signatures DOCX\_Signatures.ini' on Windows, '.\sample templates\Signatures HTML\_Signatures.ini' on Linux and macOS
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureIniFile '.\templates\Signatures DOCX\_Signatures.ini'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureIniFile '.\templates\Signatures DOCX\_Signatures.ini'"
-
-.PARAMETER ReplacementVariableConfigFile
-Path to a replacement variable config file.
-
-The file must be UTF8 encoded.
-
-Local and remote paths are supported.
-
-Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures DOCX').
-
-SharePoint document libraries are supported (https only): 'https://server.domain/sites/SignatureSite/SignatureDocLib/SignatureFolder' or '\\server.domain@SSL\sites\SignatureSite\SignatureDocLib\SignatureFolder'
-
-Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' -> 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
-
-On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
-
-For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
-
-Default value: '.\config\default replacement variables.ps1'
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ReplacementVariableConfigFile '.\config\default replacement variables.ps1'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ReplacementVariableConfigFile '.\config\default replacement variables.ps1'"
-
-.PARAMETER GraphClientID
-ID of the Entra ID app to use for Graph authentication.
-
-This parameter must be used when the parameter GraphConfigFile points to a SharePoint Online location.
-
-Per default, GraphClientID is not overwritten by the configuration defined in GraphConfigFile, but you can change this in the Graph config file itself.
-
-Default value: $null
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 GraphClientID '3dc5f201-6c36-4b94-98ca-c66156a686a8'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 GraphClientID '3dc5f201-6c36-4b94-98ca-c66156a686a8'"
-
-.PARAMETER GraphConfigFile
-Path to a Graph variable config file.
-
-The file must be UTF8 encoded.
-
-Local and remote paths are supported.
-
-Local paths can be absolute ('C:\config\default graph config.ps1') or relative to the software path ('.\config\default graph config.ps1')
-
-SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/config/default graph config.ps1' or '\\server.domain@SSL\SignatureSite\config\default graph config.ps1'
-
-Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' -> 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
-
-When GraphConfigFile is hosted on SharePoint Online, it is highly recommended to set the `GraphClientID` parameter. Else, access to GraphConfigFile will fail on Linux and macOS, and fall back to WebDAV with a required Internet Explorer authentication cookie on Windows.
-
-On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
-
-For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
-
-Default value: '.\config\default graph config.ps1'
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -GraphConfigFile '.\config\default graph config.ps1'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 GraphConfigFile '.\config\default graph config.ps1'"
-
-.PARAMETER TrustsToCheckForGroups
-List of domains to check for group membership.
-
-If the first entry in the list is '*', all outgoing and bidirectional trusts in the current user's forest are considered.
-
-If a string starts with a minus or dash ('-domain-a.local'), the domain after the dash or minus is removed from the list (no wildcards allowed).
-
-All domains belonging to the Active Directory forest of the currently logged-in user are always considered, but specific domains can be removed ('*', '-childA1.childA.user.forest').
-
-When a cross-forest trust is detected by the '*' option, all domains belonging to the trusted forest are considered but specific domains can be removed ('*', '-childX.trusted.forest').
-
-On Linux and macOS, this parameter is ignored because on-prem Active Directories are not supported (only Graph is supported).
-
-Default value: '*'
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -TrustsToCheckForGroups 'corp.example.com', 'corp.example.net'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -TrustsToCheckForGroups 'corp.example.com', 'corp.example.net'"
-
-.PARAMETER IncludeMailboxForestDomainLocalGroups
-Shall the software consider group membership in domain local groups in the mailbox's AD forest?
-
-Per default, membership in domain local groups in the mailbox's forest is not considered as the required LDAP queries are slow and domain local groups are usually not used in Exchange.
-
-Domain local groups across trusts behave differently, they are always considered as soon as the trusted domain/forest is included in TrustsToCheckForGroups.
-
-On Linux and macOS, this parameter is ignored because on-prem Active Directories are not supported (only Graph is supported).
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $false
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -IncludeMailboxForestDomainLocalGroups $false
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -IncludeMailboxForestDomainLocalGroups false
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -IncludeMailboxForestDomainLocalGroups $false"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -IncludeMailboxForestDomainLocalGroups false"
-
-.PARAMETER DeleteUserCreatedSignatures
-Shall the software delete signatures which were created by the user itself?
-
-This feature requires a Benefactor Circle license.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $false
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DeleteUserCreatedSignatures $false
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DeleteUserCreatedSignatures false
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DeleteUserCreatedSignatures $false"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DeleteUserCreatedSignatures false"
-
-.PARAMETER DeleteScriptCreatedSignaturesWithoutTemplate
-Shall the software delete signatures which were created by the software before but are no longer available as template?
-
-This feature requires a Benefactor Circle license.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DeleteScriptCreatedSignaturesWithoutTemplate $false
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DeleteScriptCreatedSignaturesWithoutTemplate false
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DeleteScriptCreatedSignaturesWithoutTemplate $false"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DeleteScriptCreatedSignaturesWithoutTemplate false"
-
-.PARAMETER SetCurrentUserOutlookWebSignature
-Shall the software set the Outlook Web signature of the currently logged-in user?
-
-If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the software can be used in environments where only Outlook Web is used.
-
-This feature requires a Benefactor Circle license.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SetCurrentUserOutlookWebSignature $true
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SetCurrentUserOutlookWebSignature true
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOutlookWebSignature $true"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOutlookWebSignature true"
-
-.PARAMETER SetCurrentUserOOFMessage
-Shall the software set the out-of-office (OOF) message of the currently logged-in user?
-
-If the parameter is set to '$true' and the current user's mailbox is not configured in any Outlook profile, the current user's mailbox is considered nevertheless. If no Outlook mailboxes are configured at all, additional mailbox configured in Outlook Web are used. This way, the software can be used in environments where only Outlook Web is used.
-
-This feature requires a Benefactor Circle license.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SetCurrentUserOOFMessage $true
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SetCurrentUserOOFMessage true
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOOFMessage $true"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SetCurrentUserOOFMessage true"
-
-.PARAMETER OOFTemplatePath
-Path to centrally managed signature templates.
-
-Local and remote paths are supported.
-
-Local paths can be absolute ('C:\OOF templates') or relative to the software path ('.\sample templates\ Out-of-office ').
-
-SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/OOFTemplates' or '\\server.domain@SSL\SignatureSite\OOFTemplates'
-
-Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' -> 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
-
-On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
-
-For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
-
-Default value: '.\sample templates\Out-of-office DOCX' on Windows, '.\sample templates\Out-of-office HTML' on Linux and macOS
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out-of-office DOCX'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out-of-office DOCX'"
-
-.PARAMETER OOFIniFile
-Path to ini file containing signature template tags.
-
-The file must be UTF8 encoded.
-
-See '.\sample templates\Out-of-office DOCX\_OOF.ini' for a sample file with further explanations.
-
-Local and remote paths are supported. Local paths can be absolute ('C:\Signature templates') or relative to the software path ('.\sample templates\Signatures')
-
-SharePoint document libraries are supported (https only): 'https://server.domain/sites/SignatureSite/SignatureDocLib/SignatureFolder' or '\\server.domain@SSL\sites\SignatureSite\SignatureDocLib\SignatureFolder'
-
-Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' -> 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
-
-On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
-
-For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
-
-Default value: '.\sample templates\Out-of-office DOCX\_OOF.ini' on Windows, '.\sample templates\Out-of-office HTML\_OOF.ini' on Linux and macOS
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFIniFile '.\templates\Out-of-office DOCX\_OOF.ini'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFIniFile '.\templates\Out-of-office DOCX\_OOF.ini'"
-
-.PARAMETER AdditionalSignaturePath
-An additional path that the signatures shall be copied to.
-
-Ideally, this path is available on all devices of the user, for example via Microsoft OneDrive or Nextcloud.
-
-This way, the user can easily copy-paste the preferred preconfigured signature for use in an email app not supported by this script, such as Microsoft Outlook Mobile, Apple Mail, Google Gmail or Samsung Email.
-
-Local and remote paths are supported.
-
-Local paths can be absolute ('C:\Outlook signatures') or relative to the software path ('.\Outlook signatures').
-
-SharePoint document libraries are supported (https only, no SharePoint Online): 'https://server.domain/User' or '\\server.domain@SSL\User'
-
-Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' -> 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
-
-On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
-
-For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
-
-If the folder or folder structure does not exist, it is created.
-
-Also see related parameter 'EmbedImagesInHtmlAdditionalSignaturePath'.
-
-This feature requires a Benefactor Circle license (when used outside of simulation mode).
-
-Default value: "$(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) } catch {})"
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -AdditionalSignaturePath "$(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) } catch {})"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -AdditionalSignaturePath ""$(try { $([IO.Path]::Combine([environment]::GetFolderPath('MyDocuments'), 'Outlook Signatures')) } catch {})
-
-.PARAMETER UseHtmTemplates
-With this parameter, the software searches for templates with the extension .htm instead of .docx.
-
-Each format has advantages and disadvantages, please see "Should I use .docx or .htm as file format for templates? Signatures in Outlook sometimes look different than my templates." for a quick overview.
-
-Templates in .htm format must be UTF8 encoded.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $false on Windows, $true on Linux and macOS
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -UseHtmTemplates $false
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -UseHtmTemplates false
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -UseHtmTemplates $false"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -UseHtmTemplates false"
-
-
-.PARAMETER SimulateUser
-SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged-in user.
-
-Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an email-address, but is not necessarily one).
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SimulateUser "EXAMPLEDOMAIN\UserA"
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SimulateUser "user.a@example.com"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateUser ""EXAMPLEDOMAIN\UserA"""
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateUser ""user.a@example.com"""
-
-.PARAMETER SimulateMailboxes
-SimulateMailboxes is optional for simulation mode, although highly recommended.
-
-It is a comma separated list of email addresses replacing the list of mailboxes otherwise gathered from the simulated user's Outlook Web.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $null
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SimulateMailboxes 'user.b@example.com', 'user.b@example.net'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateMailboxes 'user.a@example.com', 'user.b@example.net'"
-
-.PARAMETER SimulateTime
-Use a certain timestamp for simulation mode. This allows you to simulate time-based templates.
-
-Format: yyyyMMddHHmm (yyyy = year, MM = two-digit month, dd = two-digit day, HH = two-digit hour (0..24), mm = two-digit minute), local time
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $null
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SimulateTime "202312311859"
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SimulateUser "202312311859"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateUser ""202312311859"""
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateUser ""202312311859"""
-
-.PARAMETER SimulateAndDeploy
-Not only simulate, but deploy signatures while simulating
-
-Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
-
-See '.\sample code\SimulateAndDeploy.ps1' for an example how to use this parameter
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $false
-
-.PARAMETER SimulateAndDeployGraphCredentialFile
-Path to file containing Graph credential which should be used as alternative to other token acquisition methods
-
-Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
-
-See '.\sample code\SimulateAndDeploy.ps1' for an example how to create and use this file
-
-Default value: $null
-
-.PARAMETER GraphOnly
-Try to connect to Microsoft Graph only, ignoring any local Active Directory. On Linux and macOS, only Graph is supported.
-
-The default behavior is to try Active Directory first and fall back to Graph.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $false on Windows, $true on Linux and macOS
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -GraphOnly $false
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -GraphOnly false
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -GraphOnly $false"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -GraphOnly false"
-
-.PARAMETER CloudEnvironment
-The cloud environment to connect to.
-
-Allowed values:
-- 'Public' (or: 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC')
-- 'AzureUSGovernment' (or: 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4')
-- 'AzureUSGovernmentDOD' (or: 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5')
-- 'China' (or: 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')
-
-Default value: 'Public'
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -CloudEnvironment "Public"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -CloudEnvironment ""Public"""
-
-.PARAMETER CreateRtfSignatures
-Should signatures be created in RTF format?
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $false
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -CreateRtfSignatures $false
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -CreateRtfSignatures false
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -CreateRtfSignatures $false"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -CreateRtfSignatures false"
-
-.PARAMETER CreateTxtSignatures
-Should signatures be created in TXT format?
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -CreateTxtSignatures $true
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -CreateTxtSignatures true
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -CreateTxtSignatures $true"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -CreateTxtSignatures true"
-
-.PARAMETER MoveCSSInline
-Move CSS to inline style attributes, for maximum email client compatibility.
-
-This parameter is enabled per default, as a workaround to Microsoft's problem with formatting in Outlook Web (M365 roaming signatures and font sizes, especially).
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MoveCSSInline $true
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MoveCSSInline true
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MoveCSSInline $true"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MoveCSSInline true"
-
-.PARAMETER EmbedImagesInHtml
-Should images be embedded into HTML files?
-
-Outlook 2016 and newer can handle images embedded directly into an HTML file as BASE64 string ('<img src="data:image/[…]"').
-
-Outlook 2013 and earlier can't handle these embedded images when composing HTML emails (there is no problem receiving such emails, or when composing RTF or TXT emails).
-
-When setting EmbedImagesInHtml to $false, consider setting the Outlook registry value "Send Pictures With Document" to 1 to ensure that images are sent to the recipient (see https://support.microsoft.com/en-us/topic/inline-images-may-display-as-a-red-x-in-outlook-704ae8b5-b9b6-d784-2bdf-ffd96050dfd6 for details).
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $false
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -EmbedImagesInHtml $false
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -EmbedImagesInHtml false
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -EmbedImagesInHtml $false"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -EmbedImagesInHtml false"
-
-.PARAMETER EmbedImagesInHtmlAdditionalSignaturePath
-Some feature as 'EmbedImagesInHtml' parameter, but only valid for the path defined in AdditionalSignaturesPath when not in simulation mode.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -EmbedImagesInHtmlAdditionalSignaturePath $true
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -EmbedImagesInHtmlAdditionalSignaturePath true
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -EmbedImagesInHtmlAdditionalSignaturePath $true"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -EmbedImagesInHtmlAdditionalSignaturePath true"
-
-.PARAMETER DocxHighResImageConversion
-Enables or disables high resolution images in HTML signatures.
-
-When enabled, this parameter uses a workaround to overcome a Word limitation that results in low resolution images when converting to HTML. The price for high resolution images in HTML signatures are more time needed for document conversion and signature files requiring more storage space.
-
-Disabling this feature speeds up DOCX to HTML conversion, and HTML signatures require less storage space - at the cost of lower resolution images.
-
-Contrary to conversion to HTML, conversion to RTF always results in high resolution images.
-
-This feature requires a Benefactor Circle license.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DocxHighResImageConversion $true
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DocxHighResImageConversion true
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DocxHighResImageConversion $true"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DocxHighResImageConversion true"
-
-.PARAMETER SignaturesForAutomappedAndAdditionalMailboxes
-Deploy signatures for automapped mailboxes and additional mailboxes
-
-Signatures can be deployed for these mailboxes, but not set as default signature due to technical restrictions in Outlook
-
-This feature requires a Benefactor Circle license.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignaturesForAutomappedAndAdditionalMailboxes $true
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignaturesForAutomappedAndAdditionalMailboxes true
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignaturesForAutomappedAndAdditionalMailboxes $true"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignaturesForAutomappedAndAdditionalMailboxes true"
-
-.PARAMETER DisableRoamingSignatures
-Disable signature roaming in Outlook. Onyl works on Windows. Has no effect on signature mirroring via the MirrorCloudSignatures parameter.
-
-A value representing true disables roaming signatures, a value representing false enables roaming signatures, any other value leaves the setting as-is.
-
-Only sets HKCU registry key, does not override configuration set by group policy.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no', $null, ''
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DisableRoamingSignatures $true
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -DisableRoamingSignatures true
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DisableRoamingSignatures $true"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -DisableRoamingSignatures true"
-
-.PARAMETER MirrorCloudSignatures
-Should local signatures be mirrored with signatures in Exchange Online?
-
-Possible for Exchange Online mailboxes:
-- Download for every mailbox where the current user has full access
-- Upload and set default signatures for the mailbox of the current user
-
-Prerequisites:
-- Download
-  - Current user has full access to the mailbox
-- Upload, set default signatures
-  - Script parameter `SetCurrentUserOutlookWebSignature` is set to `true`
-  - Mailbox is the mailbox of the currently logged-in user and is hosted in Exchange Online
-
-Please note:
-- As there is no Microsoft official API yet, this feature is to be used at your own risk.
-- This feature does not work in simulation mode, because the user running the simulation does not have access to the signatures stored in another mailbox
-
-The process is very simple and straight forward. Set-OutlookSignatures goes through the following steps for each mailbox:
-1. Check if all prerequisites are met
-2. Download all signatures stored in the Exchange Online mailbox
-  - This mimics Outlook's behavior: Roaming signatures are only manipulated in the cloud and then downloaded from there.
-  -   - An existing local signature is only overwritten when the cloud signature is newer and when it has not been processed before for a mailbox with higher priority
-3. Go through standard template and signature processing
-  - Loop through the templates and their configuration, and convert them to signatures
-  - Set default signatures for replies and forwards
-  - If configured, delete signatures created by the user
-  - If configured, delete signatures created earlier by Set-OutlookSignatures but now no longer have a corresponding central configuration
-4. Delete all signatures in the cloud and upload all locally stored signatures to the user's personal mailbox as roaming signatures
-
-There may be too many signatures available in the cloud - in this case, having too many signatures is better than missing some.
-
-Another advantage of this solution is that it makes roaming signatures available in Outlook versions that do not officially support them.
-
-What will not work:
-- Download from mailboxes where the current user does not have full access rights. This is not possible because of Microsoft API restrictions.
-- Download from and upload to shared mailboxes. This is not possible because of Microsoft API restrictions.
-- Uploading signatures other than device specific signatures and such assigned to the mailbox of the current user. Uploading is not implemented, because until now no way could be found that does not massively impact the user experience as soon as the Outlook integrated download process starts (signatures available multiple times, etc.)
-
-Attention: When Outlook v16 and higher is allowed to sync signatures itself, it may overwrite signatures created by this software with their cloud versions. To avoid this, it is recommended to set the parameters DisableRoamingSignatures and MirrorCloudSignatures to true instead.
-
-Consider combining MirrorCloudSignatures with MailboxSpecificSignatureNames.
-
-This feature requires a Benefactor Circle license.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures $false
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures $false"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MirrorCloudSignatures false"
-
-.PARAMETER MailboxSpecificSignatureNames
-Should signature names be mailbox specific by adding the email address?
-
-For compatibility with Outlook storing signatures in the file system, Set-OutlookSignatures converts templates to signatures according to the following logic:
-1. Get all mailboxes and sort them: Mailbox of logged-on/simulated user, other mailboxes in default Outlook profile or Outlook Web, mailboxes from other Outlook profiles
-2. Get all template files, sort them by category (common, group specific, mailbox specific, replacement variable specific), and within each category by SortOrder and SortCulture defined in the INI file
-3. Loop through the mailbox list, and for each mailbox loop through the template list.
-4. If a template's conditions apply and if the template has not been used before, convert the template to a signature.
-
-The step 4 condition `if the template has not been used before` makes sure that a lower priority mailbox does not replace a signature with the same name which has already been created for a higher priority mailbox.
-
-With roaming signatures (signatures being stored in the Exchange Online mailbox itself) being used more and more, the step 4 condition `if the template has not been used before` makes less sense. By setting the `MailboxSpecificSignatureNames` parameter to `true`, this restriction no longer applies. To avoid naming collisions, the email address of the current mailbox is added to the name of the signature - instead of a single `Signature A` file, Set-OutlookSignatures can create a separate signature file for each mailbox: `Signature A (user.a@example.com)`, `Signature A (mailbox.b@example.net)`, etc.
-
-This naming convention intentionally matches Outlook's convention for naming roaming signatures. Before setting `MailboxSpecificSignatureNames` to `true`, consider the impact on the `DisableRoamingSignatures` and `MirrorCloudSignatures` parameters - it is recommended to set both parameters to `true` to achieve the best user experience and to avoid problems with Outlook's own roaming signature synchronisation.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $false
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames $false
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames false
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames $false"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -MailboxSpecificSignatureNames false"
-
-.PARAMETER WordProcessPriority
-Define the Word process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
-
-Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
-
-Default value: 'Normal' ('32')
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -WordProcessPriority Normal
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -WordProcessPriority 32
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -WordProcessPriority Normal"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -WordProcessPriority 32"
-
-.PARAMETER ScriptProcessPriority
-Define the script process priority. With lower values, Set-OutlookSignatures runs longer but minimizes possible performance impact
-
-Allowed values (ascending priority): Idle, 64, BelowNormal, 16384, Normal, 32, AboveNormal, 32768, High, 128, RealTime, 256
-
-Default value: 'Normal' ('32')
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ScriptProcessPriority Normal
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 32
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority Normal"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -ScriptProcessPriority 32"
-
-.PARAMETER SignatureCollectionInDrafts
-When enabled, this creates and updates an email message with the subject 'My signatures, powered by Set-OutlookSignatures Benefactor Circle' in the drafts folder of the current user, containing all available signatures in HTML and plain text for easy access in mail clients that do not have a signatures API.
-
-This feature requires a Benefactor Circle license.
-
-Allowed values: 1, 'true', '$true', 'yes', 0, 'false', '$false', 'no'
-
-Default value: $true
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts $false
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts false
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts $false"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureCollectionInDrafts false"
-
-.PARAMETER BenefactorCircleID
-The Benefactor Circle member ID matching your license file, which unlocks exclusive features.
-
-Default value: ''
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -BenefactorCircleID 00000000-0000-0000-0000-000000000000
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -BenefactorCircleID 00000000-0000-0000-0000-000000000000"
-
-.PARAMETER BenefactorCircleLicenseFile
-The Benefactor Circle license file matching your member ID, which unlocks exclusive features.
-
-Default value: ''
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -BenefactorCircleLicenseFile ".\license.dll"
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -BenefactorCircleLicenseFile "".\license.dll"""
-
-.PARAMETER VirtualMailboxConfigFile
-Path a PowerShell file containing the logic to define virtual mailboxes. You can also use the VirtualMailboxConfigFile to dynamically define signature INI file entries.
-
-Virtual mailboxes are mailboxes that are not available in Outlook but are treated by Set-OutlookSignatures as if they were.
-
-This is an option for scenarios where you want to deploy signatures with not only the '`$CurrentUser...$`' but also '`$CurrentMailbox...$`' replacement variables for mailboxes that have not been added to Outlook, such as in Send As or Send On Behalf scenarios, where users often only change the from address but do not add the mailbox to Outlook.
-
-See '`.\sample code\VirtualMailboxConfigFile.ps1`' for sample code showing the most relevant use cases.
-
-For maximum automation, use VirtualMailboxConfigFile together with [Export-RecipientPermissions](https://github.com/Export-RecipientPermissions).
-
-This feature requires a Benefactor Circle license.
-
-Local and remote paths are supported. Local paths can be absolute ('C:\VirtualMailboxConfigFile.ps1') or relative to the software path ('.\sample code\VirtualMailboxConfigFile')
-
-SharePoint document libraries are supported (https only): 'https://server.domain/SignatureSite/config/VirtualMailboxConfigFile.ps1' or '\\server.domain@SSL\SignatureSite\config\VirtualMailboxConfigFile.ps1'
-
-Parameters and SharePoint sharing hints ('/:u:/r', etc.) are removed: 'https://YourTenant.sharepoint.com/:u:/r/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini?SomeParam1=1&SomeParam2=2' -> 'https://yourtenant.sharepoint.com/sites/SomeSite/SomeLibrary/SomeFolder/SomeFile.ini'
-
-On Linux and macOS, only already existing mount points and SharePoint Online paths can be accessed. Set-OutlookSignatures cannot create mount points itself, and access to SharePoint on-prem paths is a Windows-only feature.
-
-For access to SharePoint Online, the Entra ID app needs the Files.Read.All or Files.SelectedOperations.Selected permission, and you need to pass the 'GraphClientID' parameter to Set-OutlookSignatures.
-
-Default value: ''
-
-Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -VirtualMailboxConfigFile '.\sample code\VirtualMailboxConfigFile.ps1'
-Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -VirtualMailboxConfigFile '.\sample code\VirtualMailboxConfigFile.ps1'"
-
-.INPUTS
-None. You cannot pipe objects to Set-OutlookSignatures.ps1.
-
-.OUTPUTS
-Set-OutlookSignatures.ps1 writes the current activities, warnings and error messages to the standard output stream.
+Benefactor Circle add-on and commercial support: https://explicitconsulting.at/Set-OutlookSignatures
 
 .EXAMPLE
-Run Set-OutlookSignatures with default values and sample templates
-PS> .\Set-OutlookSignatures.ps1
-
-.EXAMPLE
-Use custom signature templates and custom ini file
-PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -SignatureIniFile '\\internal.example.com\share\Signature Templates\_Signatures.ini'
-
-.EXAMPLE
-Use custom signature templates, ignore trust to internal-test.example.com
-PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -SignatureTemplatePath '\\internal.example.com\share\Signature Templates\_Signatures.ini' -TrustsToCheckForGroups '*', '-internal-test.example.com'
-
-.EXAMPLE
-Use custom signature templates, only check domains/trusts internal-test.example.com and company.b.com
-PS> .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '\\internal.example.com\share\Signature Templates' -SignatureTemplatePath '\\internal.example.com\share\Signature Templates\_Signatures.ini' -TrustsToCheckForGroups 'internal-test.example.com', 'company.b.com'
-
-.EXAMPLE
-Passing arguments to PowerShell.exe from the command line or task scheduler can be very tricky when spaces are involved. See '.\docs\README' for details.
-PowerShell.exe -Command "& '\\server\share\directory\Set-OutlookSignatures.ps1' -SignatureTemplatePath '\\server\share\directory\templates\Signatures DOCX' -SignatureTemplatePath '\\internal.example.com\share\Signature Templates\_Signatures.ini' -OOFTemplatePath '\\server\share\directory\templates\Out-of-office DOCX' -OOFTemplatePath '\\internal.example.com\share\Signature Templates\_OOF.ini' -ReplacementVariableConfigFile '\\server\share\directory\config\default replacement variables.ps1' "
-
-.EXAMPLE
-Please see '.\docs\README' and https://github.com/Set-OutlookSignatures/Set-OutlookSignatures for more details.
+See the file '.\docs\README' for details.
 
 .NOTES
 Software: Set-OutlookSignatures
@@ -791,7 +74,7 @@ Param(
     [ValidateNotNullOrEmpty()]
     [string]$SignatureTemplatePath = $(if (($UseHtmTemplates -inotin @(1, 'true', '$true', 'yes')) -or (-not $UseHtmTemplates)) { '.\sample templates\Signatures DOCX' } else { '.\sample templates\Signatures HTML' }),
 
-    # Path to ini file containing signature template tags
+    # Path to INI file containing signature template tags
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateNotNullOrEmpty()]
@@ -888,7 +171,7 @@ Param(
     [ValidateNotNullOrEmpty()]
     [string]$OOFTemplatePath = $(if (($UseHtmTemplates -inotin @(1, 'true', '$true', 'yes')) -or (-not $UseHtmTemplates)) { '.\sample templates\Out-of-office DOCX' } else { '.\sample templates\Out-of-office HTML' }),
 
-    # Path to ini file containing OOF template tags
+    # Path to INI file containing OOF template tags
     [Parameter(Mandatory = $false, ParameterSetName = 'C: OOF messages')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateNotNullOrEmpty()]
@@ -1024,6 +307,23 @@ Param(
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $SignatureCollectionInDrafts = $true
 )
+
+
+function ConvertToPSCustomObject {
+    param($item)
+
+    if ($item.PSObject.Methods.Name -contains 'GetEnumerator') {
+        $tempHashtable = [hashtable]::new([System.StringComparer]::OrdinalIgnoreCase)
+
+        foreach ($prop in $item.getenumerator()) {
+            $tempHashtable.add($prop.name, $($prop.value))
+        }
+
+        return [PSCustomObject]$tempHashtable
+    } else {
+        return $item
+    }
+}
 
 
 function ToSemVer($version) {
@@ -2050,7 +1350,7 @@ end tell
         } catch {
             Write-Verbose "  $($error[0])"
             $y = ''
-            Write-Host "  Problem connecting to logged-in user's Active Directory, use parameter '-verbose' to see error message." -ForegroundColor Yellow
+            Write-Host "  Problem connecting to logged-in user's Active Directory, see verbose output for details." -ForegroundColor Yellow
             Write-Host '  Assuming Graph/Entra ID from now on.' -ForegroundColor Yellow
             $GraphOnly = $true
         }
@@ -2076,22 +1376,30 @@ end tell
                 if (-not $SimulateUser) {
                     $Search.SearchRoot = "GC://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
+
                     try { WatchCatchableExitSignal } catch { }
+
                     $ADPropsCurrentUser = $Search.FindOne().Properties
+
                     try { WatchCatchableExitSignal } catch { }
+
                     $ADPropsCurrentUser = [hashtable]::new($ADPropsCurrentUser, [StringComparer]::OrdinalIgnoreCase)
 
                     $Search.SearchRoot = "LDAP://$((([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$(([System.DirectoryServices.AccountManagement.UserPrincipal]::Current).DistinguishedName)))"
+
                     try { WatchCatchableExitSignal } catch { }
+
                     $ADPropsCurrentUserLdap = $Search.FindOne().Properties
+
                     try { WatchCatchableExitSignal } catch { }
+
                     $ADPropsCurrentUserLdap = [hashtable]::new($ADPropsCurrentUserLdap, [StringComparer]::OrdinalIgnoreCase)
 
                     foreach ($keyName in @($ADPropsCurrentUserLdap.Keys)) {
                         if (
-                            ($keyName -inotin $ADPropsCurrentUser.Keys) -or
-                            (-not ($ADPropsCurrentUser[$keyName]) -and ($ADPropsCurrentUserLdap[$keyName]))
+                            $($keyName -inotin $ADPropsCurrentUser.Keys) -or
+                            $(-not ($ADPropsCurrentUser[$keyName]) -and ($ADPropsCurrentUserLdap[$keyName]))
                         ) {
                             $ADPropsCurrentUser[$keyName] = $ADPropsCurrentUserLdap[$keyName]
                         }
@@ -2102,31 +1410,43 @@ end tell
                         $objNT = $objTrans.GetType()
                         $objNT.InvokeMember('Init', 'InvokeMethod', $Null, $objTrans, (3, $null))
                         $objNT.InvokeMember('Set', 'InvokeMethod', $Null, $objTrans, (8, $SimulateUser))
+
                         try { WatchCatchableExitSignal } catch { }
+
                         $SimulateUserDN = $objNT.InvokeMember('Get', 'InvokeMethod', $Null, $objTrans, 1)
+
                         try { WatchCatchableExitSignal } catch { }
+
                         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($objTrans) | Out-Null
                         Remove-Variable -Name 'objTrans'
                         Remove-Variable -Name 'objNT'
 
                         $Search.SearchRoot = "GC://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
+
                         try { WatchCatchableExitSignal } catch { }
+
                         $ADPropsCurrentUser = $Search.FindOne().Properties
+
                         try { WatchCatchableExitSignal } catch { }
+
                         $ADPropsCurrentUser = [hashtable]::new($ADPropsCurrentUser, [StringComparer]::OrdinalIgnoreCase)
 
                         $Search.SearchRoot = "LDAP://$(($SimulateUserDN -split ',DC=')[1..999] -join '.')"
                         $Search.Filter = "((distinguishedname=$SimulateUserDN))"
+
                         try { WatchCatchableExitSignal } catch { }
+
                         $ADPropsCurrentUserLdap = $Search.FindOne().Properties
+
                         try { WatchCatchableExitSignal } catch { }
+
                         $ADPropsCurrentUserLdap = [hashtable]::new($ADPropsCurrentUserLdap, [StringComparer]::OrdinalIgnoreCase)
 
                         foreach ($keyName in @($ADPropsCurrentUserLdap.Keys)) {
                             if (
-                                ($keyName -inotin $ADPropsCurrentUser.Keys) -or
-                                (-not ($ADPropsCurrentUser[$keyName]) -and ($ADPropsCurrentUserLdap[$keyName]))
+                                $($keyName -inotin $ADPropsCurrentUser.Keys) -or
+                                $(-not ($ADPropsCurrentUser[$keyName]) -and ($ADPropsCurrentUserLdap[$keyName]))
                             ) {
                                 $ADPropsCurrentUser[$keyName] = $ADPropsCurrentUserLdap[$keyName]
                             }
@@ -2139,6 +1459,8 @@ end tell
                         exit
                     }
                 }
+
+                $ADPropsCurrentUser = ConvertToPSCustomObject -item $ADPropsCurrentUser
             } catch {
                 Write-Host $error[0]
                 $ADPropsCurrentUser = $null
@@ -2169,13 +1491,12 @@ end tell
             }
         )
     ) {
-        Write-Host '    Graph connection is required'
-        Write-Verbose '      Required because at least one is true:'
-        Write-Verbose "        GraphOnly is true: $($GraphOnly -eq $true)"
-        Write-Verbose "        GraphOnly is false and mailbox is in cloud and SetCurrentUserOOFMessage or SetCurrentUserOutlookWebSignature is true: $(($GraphOnly -eq $false) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)))"
-        Write-Verbose "        GraphOnly is false and on-prem AD properties of current user are empty: $(($GraphOnly -eq $false) -and ($null -eq $ADPropsCurrentUser))"
-        Write-Verbose "        New Outlook is used: $($OutlookUseNewOutlook -eq $true)"
-        Write-Verbose "        The only Benefactor Circle license group is in Entra ID: $(
+        Write-Host "    Enforcing Graph$(if ($null -ne $TrustsToCheckForGroups[0]) { ' instead of Active Directory' }) because at least one condition is true:"
+        Write-Host "      GraphOnly is true: $($GraphOnly -eq $true)"
+        Write-Host "      GraphOnly is false, mailbox is in cloud, SetCurrentUserOOFMessage and/or SetCurrentUserOutlookWebSignature is true: $(($GraphOnly -eq $false) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)))"
+        Write-Host "      GraphOnly is false and on-prem AD properties of current user are empty: $(($GraphOnly -eq $false) -and ($null -eq $ADPropsCurrentUser))"
+        Write-Host "      New Outlook is used: $($OutlookUseNewOutlook -eq $true)"
+        Write-Host "      The only Benefactor Circle license group is in Entra ID: $(
             if (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('LicenseGroupRequiresGraph'))) {
                 $result = [SetOutlookSignatures.BenefactorCircle]::LicenseGroupRequiresGraph()
 
@@ -2189,9 +1510,12 @@ end tell
             }
         )"
 
+        $GraphOnly = $true
+        [System.Collections.ArrayList]$TrustsToCheckForGroups = @()
+
         if (-not $GraphToken) {
             try {
-                $GraphToken = GraphGetToken
+                $GraphToken = GraphGetToken -indent '    '
             } catch {
                 $GraphToken = $null
             }
@@ -2204,20 +1528,12 @@ end tell
         if ($GraphToken.error -eq $false) {
             Write-Verbose "      Graph Token metadata: $((ParseJwtToken $GraphToken.AccessToken) | ConvertTo-Json)"
 
-            if (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)) {
-                Write-Verbose "      EXO Token metadata: $((ParseJwtToken $GraphToken.AccessTokenExo) | ConvertTo-Json)"
-
-                if (-not $($GraphToken.AccessTokenExo)) {
-                    Write-Host '        Problem connecting to Exchange Online with Graph token. Exit.' -ForegroundColor Red
-                    $script:ExitCode = 13
-                    $script:ExitCodeDescription = 'Problem connecting to Exchange Online with Graph token.'
-                    exit
-                }
-            }
+            Write-Verbose "      Graph Token EXO metadata: $((ParseJwtToken $GraphToken.AccessTokenExo) | ConvertTo-Json)"
 
             if ($SimulateAndDeployGraphCredentialFile) {
                 Write-Verbose "      App Graph Token metadata: $((ParseJwtToken $GraphToken.AppAccessToken) | ConvertTo-Json)"
-                Write-Verbose "      App EXO Token metadata: $((ParseJwtToken $GraphToken.AppAccessTokenExo) | ConvertTo-Json)"
+
+                Write-Verbose "      App Graph Token EXO metadata: $((ParseJwtToken $GraphToken.AppAccessTokenExo) | ConvertTo-Json)"
             }
         } else {
             Write-Host '      Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
@@ -2275,7 +1591,7 @@ end tell
         if ($ADPropsCurrentUser.objectsid.tostring().startswith('S-', 'CurrentCultureIgnorecase')) {
             $CurrentUserSids += $ADPropsCurrentUser.objectsid.tostring()
         } else {
-            $CurrentUserSids += (New-Object system.security.principal.securityidentifier $($ADPropsCurrentUser.objectsid), 0).value
+            $CurrentUserSids += (New-Object system.security.principal.securityidentifier($ADPropsCurrentUser.objectsid, 0)).value
         }
     }
 
@@ -2289,7 +1605,7 @@ end tell
         if ($SidHistorySid.tostring().startswith('S-', 'CurrentCultureIgnorecase')) {
             $CurrentUserSids += $SidHistorySid.tostring()
         } else {
-            $CurrentUserSids += (New-Object system.security.principal.securityidentifier $SidHistorySid, 0).value
+            $CurrentUserSids += (New-Object system.security.principal.securityidentifier($SidHistorySid, 0)).value
         }
     }
 
@@ -2337,23 +1653,31 @@ end tell
                 try {
                     $Search.SearchRoot = "GC://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
+
                     try { WatchCatchableExitSignal } catch { }
+
                     $ADPropsCurrentUserManager = $Search.FindOne().Properties
+
                     try { WatchCatchableExitSignal } catch { }
+
                     $ADPropsCurrentUserManager = [hashtable]::new($ADPropsCurrentUserManager, [StringComparer]::OrdinalIgnoreCase)
 
 
                     $Search.SearchRoot = "LDAP://$(($ADPropsCurrentUser.manager -split ',DC=')[1..999] -join '.')"
                     $Search.Filter = "((distinguishedname=$($ADPropsCurrentUser.manager)))"
+
                     try { WatchCatchableExitSignal } catch { }
+
                     $ADPropsCurrentUserManagerLdap = $Search.FindOne().Properties
+
                     try { WatchCatchableExitSignal } catch { }
+
                     $ADPropsCurrentUserManagerLdap = [hashtable]::new($ADPropsCurrentUserManagerLdap, [StringComparer]::OrdinalIgnoreCase)
 
                     foreach ($keyName in @($ADPropsCurrentUserManagerLdap.Keys)) {
                         if (
-                        ($keyName -inotin $ADPropsCurrentUserManager.Keys) -or
-                        (-not ($ADPropsCurrentUserManager[$keyName]) -and ($ADPropsCurrentUserManagerLdap[$keyName]))
+                            $($keyName -inotin $ADPropsCurrentUserManager.Keys) -or
+                            $(-not ($ADPropsCurrentUserManager[$keyName]) -and ($ADPropsCurrentUserManagerLdap[$keyName]))
                         ) {
                             $ADPropsCurrentUserManager[$keyName] = $ADPropsCurrentUserManagerLdap[$keyName]
                         }
@@ -2361,6 +1685,8 @@ end tell
                 } catch {
                     $ADPropsCurrentUserManager = $null
                 }
+
+                $ADPropsCurrentUserManager = ConvertToPSCustomObject -item $ADPropsCurrentUserManager
             } else {
                 $ADPropsCurrentUserManager = $null
 
@@ -2507,25 +1833,6 @@ end tell
             if ($ADPropsCurrentUser.mail -and ($_ -ieq $ADPropsCurrentUser.mail)) {
                 $PrimaryMailboxAddress = $ADPropsCurrentUser.mail
 
-                if (-not $script:WebServicesDllPath) {
-                    Write-Host '    Set up environment for connection to Outlook Web'
-
-                    try { WatchCatchableExitSignal } catch { }
-
-                    $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
-
-                    try {
-                        Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
-                        if (-not $IsLinux) {
-                            Unblock-File -LiteralPath $script:WebServicesDllPath
-                        }
-                    } catch {
-                        Write-Verbose "      $($_)"
-                    }
-                }
-
-                ConnectEWS -MailAddress $MailAddresses[0] -Indent '    '
-
                 if ($SignaturesForAutomappedAndAdditionalMailboxes) {
                     if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignaturesForAutomappedAndAdditionalMailboxes')))) {
                         Write-Host '    Automapped and additional mailboxes will not be found.' -ForegroundColor Yellow
@@ -2614,7 +1921,9 @@ end tell
         if (
             $null -eq $CurrentMailboxAlreadyFoundFirstIndex
         ) {
-            if ((($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '') -or ($($MailAddresses[$AccountNumberRunning]) -ne ''))) {
+            if (
+                (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '') -or ($($MailAddresses[$AccountNumberRunning]) -ne ''))
+            ) {
                 if ($null -ne $TrustsToCheckForGroups[0]) {
                     # Loop through domains until the first one knows the legacyExchangeDN or the proxy address
                     for ($DomainNumber = 0; (($DomainNumber -lt $TrustsToCheckForGroups.count) -and ($UserDomain -eq '')); $DomainNumber++) {
@@ -2622,7 +1931,9 @@ end tell
 
                         if (($TrustsToCheckForGroups[$DomainNumber] -ne '')) {
                             Write-Host "    Search for mailbox user object in domain/forest '$($TrustsToCheckForGroups[$DomainNumber])'"
+
                             $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
+
                             if (($($LegacyExchangeDNs[$AccountNumberRunning]) -ne '')) {
                                 $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(|(legacyExchangeDN=$($LegacyExchangeDNs[$AccountNumberRunning]))(&(legacyExchangeDN=*)(proxyaddresses=x500:$($LegacyExchangeDNs[$AccountNumberRunning])))))"
                             } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
@@ -2654,16 +1965,24 @@ end tell
                             } else {
                                 $Search.SearchRoot = "GC://$(($(([adsi]"$($u[0].path)").distinguishedname) -split ',DC=')[1..999] -join '.')"
                                 $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
+
                                 try { WatchCatchableExitSignal } catch { }
+
                                 $ADPropsMailboxes[$AccountNumberRunning] = $Search.FindOne().Properties
+
                                 try { WatchCatchableExitSignal } catch { }
+
                                 $ADPropsMailboxes[$AccountNumberRunning] = [hashtable]::new($ADPropsMailboxes[$AccountNumberRunning], [StringComparer]::OrdinalIgnoreCase)
 
                                 $Search.SearchRoot = "LDAP://$(($(([adsi]"$($u[0].path)").distinguishedname) -split ',DC=')[1..999] -join '.')"
                                 $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
+
                                 try { WatchCatchableExitSignal } catch { }
+
                                 $tempLdap = $Search.FindOne().Properties
+
                                 try { WatchCatchableExitSignal } catch { }
+
                                 $tempLdap = [hashtable]::new($tempLdap, [StringComparer]::OrdinalIgnoreCase)
 
                                 foreach ($keyName in @($tempLdap.Keys)) {
@@ -2675,11 +1994,13 @@ end tell
                                     }
                                 }
 
+                                $ADPropsMailboxes[$AccountNumberRunning] = ConvertToPSCustomObject -item $ADPropsMailboxes[$AccountNumberRunning]
+
                                 $UserDomain = $TrustsToCheckForGroups[$DomainNumber]
                                 $ADPropsMailboxesUserDomain[$AccountNumberRunning] = $TrustsToCheckForGroups[$DomainNumber]
                                 $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyexchangedn
                                 $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
-                                Write-Host "      distinguishedName: $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
+                                Write-Host "      DistinguishedName: $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
                                 Write-Host "      UserPrincipalName: $($ADPropsMailboxes[$AccountNumberRunning].userprincipalname)"
                                 Write-Host "      Mail: $($ADPropsMailboxes[$AccountNumberRunning].mail)"
                                 Write-Host "      Manager: $($ADPropsMailboxes[$AccountNumberRunning].manager)"
@@ -2688,7 +2009,7 @@ end tell
                     }
 
                     if ($u.count -eq 0) {
-                        Write-Host "      No matching mailbox object found in any Active Directory. Use parameter '-verbose' to see details." -ForegroundColor Yellow
+                        Write-Host '      No matching mailbox object found in any Active Directory. See verbose output for details.' -ForegroundColor Yellow
                         Write-Host '      This message can be ignored if the mailbox in question is not part of your environment.' -ForegroundColor Yellow
                         Write-Verbose "        You may have restricted the accessible environment with the 'TrustsToCheckForGroups' parameter."
                         Write-Verbose '        Else, check why the following Active Directory query did not return a result:'
@@ -2709,8 +2030,11 @@ end tell
 
                         try {
                             $Search.filter = "(distinguishedname=$($ADPropsMailboxes[$AccountNumberRunning].manager))"
+
                             try { WatchCatchableExitSignal } catch { }
+
                             $ADPropsMailboxManagers[$AccountNumberRunning] = ([ADSI]"$(($Search.FindOne()).path)").Properties
+
                             try { WatchCatchableExitSignal } catch { }
 
                             $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$($ADPropsMailboxesUserDomain[$AccountNumberRunning])")
@@ -2731,7 +2055,9 @@ end tell
                                 }
                             }
 
-                            Write-Host "        distinguishedName: $($ADPropsMailboxManagers[$AccountNumberRunning].distinguishedname)"
+                            $ADPropsMailboxManagers[$AccountNumberRunning] = ConvertToPSCustomObject -item $ADPropsMailboxManagers[$AccountNumberRunning]
+
+                            Write-Host "        DistinguishedName: $($ADPropsMailboxManagers[$AccountNumberRunning].distinguishedname)"
                             Write-Host "        UserPrincipalName: $($ADPropsMailboxManagers[$AccountNumberRunning].userprincipalname)"
                             Write-Host "        Mail: $($ADPropsMailboxManagers[$AccountNumberRunning].mail)"
                         } catch {
@@ -2828,7 +2154,7 @@ end tell
                             }
                         }
                     } else {
-                        Write-Host "      No matching mailbox object found via Graph/Entra ID. Use parameter '-verbose' to see details." -ForegroundColor Yellow
+                        Write-Host '      No matching mailbox object found via Graph/Entra ID. See verbose output for details.' -ForegroundColor Yellow
                         Write-Host '      This message can be ignored if the mailbox in question is not part of your environment.' -ForegroundColor Yellow
                         Write-Verbose '        Check why the following Graph queries return zero or more than 1 results, or do not contain any properties:'
                         Write-Verbose "          UserPrincipalName from: $("$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$filter=proxyAddresses/any(x:x eq 'smtp:$($MailAddresses[$AccountNumberRunning])')")"
@@ -2837,7 +2163,7 @@ end tell
 
                         $LegacyExchangeDNs[$AccountNumberRunning] = ''
                         $UserDomain = $null
-                        $ADPropsMailboxManagers[$AccountNumberRunning] = ''
+                        $ADPropsMailboxManagers[$AccountNumberRunning] = $null
                     }
                 }
 
@@ -2854,11 +2180,11 @@ end tell
                         $SIDsToCheckInTrusts = @()
 
                         if ($ADPropsMailboxes[$AccountNumberRunning].objectsid) {
-                            $SIDsToCheckInTrusts += (New-Object System.Security.Principal.SecurityIdentifier $($ADPropsMailboxes[$AccountNumberRunning].objectsid), 0).value
+                            $SIDsToCheckInTrusts += (New-Object System.Security.Principal.SecurityIdentifier($ADPropsMailboxes[$AccountNumberRunning].objectsid, 0)).value
                         }
 
                         foreach ($SidHistorySid in @($ADPropsMailboxes[$AccountNumberRunning].sidhistory | Where-Object { $_ })) {
-                            $SIDsToCheckInTrusts += (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value
+                            $SIDsToCheckInTrusts += (New-Object System.Security.Principal.SecurityIdentifier($SidHistorySid, 0)).value
                         }
 
                         try { WatchCatchableExitSignal } catch { }
@@ -2892,14 +2218,14 @@ end tell
                                 try { WatchCatchableExitSignal } catch { }
 
                                 if ($DistributionGroup.properties.objectsid) {
-                                    $sid = (New-Object System.Security.Principal.SecurityIdentifier $($DistributionGroup.properties.objectsid), 0).value
+                                    $sid = (New-Object System.Security.Principal.SecurityIdentifier($DistributionGroup.properties.objectsid[0], 0)).value
                                     Write-Verbose "            $($sid) (static distribution group)"
                                     $GroupsSIDs += $sid
                                     $SIDsToCheckInTrusts += $sid
                                 }
 
                                 foreach ($SidHistorySid in @($DistributionGroup.properties.sidhistory | Where-Object { $_ })) {
-                                    $sid = (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value
+                                    $sid = (New-Object System.Security.Principal.SecurityIdentifier($SidHistorySid, 0)).value
                                     Write-Verbose "            $($sid) (static distribution group sIDHistory)"
                                     $GroupsSIDs += $sid
                                     $SIDsToCheckInTrusts += $sid
@@ -2924,14 +2250,14 @@ end tell
                                         try { WatchCatchableExitSignal } catch { }
 
                                         if ($LocalGroup.properties.objectsid) {
-                                            $sid = (New-Object System.Security.Principal.SecurityIdentifier $($LocalGroup.properties.objectsid), 0).value
+                                            $sid = (New-Object System.Security.Principal.SecurityIdentifier($LocalGroup.properties.objectsid[0], 0)).value
                                             Write-Verbose "            $($sid) (domain local group)"
                                             $GroupsSIDs += $sid
                                             $SIDsToCheckInTrusts += $sid
                                         }
 
                                         foreach ($SidHistorySid in @($LocalGroup.properties.sidhistory | Where-Object { $_ })) {
-                                            $sid = (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value
+                                            $sid = (New-Object System.Security.Principal.SecurityIdentifier($SidHistorySid, 0)).value
                                             Write-Verbose "            $($sid) (domain local group sIDHistory)"
                                             $GroupsSIDs += $sid
                                             $SIDsToCheckInTrusts += $sid
@@ -3019,12 +2345,12 @@ end tell
                                                         foreach ($group in $fspgroups) {
                                                             try { WatchCatchableExitSignal } catch { }
 
-                                                            $sid = (New-Object System.Security.Principal.SecurityIdentifier $($group.properties.objectsid), 0).value
+                                                            $sid = (New-Object System.Security.Principal.SecurityIdentifier($group.properties.objectsid[0], 0)).value
                                                             Write-Verbose "          $($sid) (domain local group across trust)"
                                                             $GroupsSIDs += $sid
 
                                                             foreach ($SidHistorySid in @($group.properties.sidhistory | Where-Object { $_ })) {
-                                                                $sid = (New-Object System.Security.Principal.SecurityIdentifier $SidHistorySid, 0).value
+                                                                $sid = (New-Object System.Security.Principal.SecurityIdentifier($SidHistorySid, 0)).value
                                                                 Write-Verbose "          $($sid) (domain local group sIDHistory across trust)"
                                                                 $GroupsSIDs += $sid
                                                             }
@@ -3150,7 +2476,7 @@ end tell
                 if ($ADPropsMailboxes[$i].msexchmasteraccountsid) {
                     try { WatchCatchableExitSignal } catch { }
 
-                    if ((New-Object System.Security.Principal.SecurityIdentifier $ADPropsMailboxes[$i].msexchmasteraccountsid[0], 0).value -iin $CurrentUserSIDs) {
+                    if ((New-Object System.Security.Principal.SecurityIdentifier($ADPropsMailboxes[$i].msexchmasteraccountsid[0], 0)).value -iin $CurrentUserSIDs) {
                         if ($p -ge 0) {
                             # $p already set before, there must be at least two matches, so set it to -1
                             $p = -1
@@ -3306,17 +2632,17 @@ end tell
         $TemplateFiles = @(@(@(@(Get-ChildItem -LiteralPath $TemplateTemplatePath -File) | Where-Object { $_.Extension -iin $(if ($UseHtmTemplates) { @('.htm', ".htm$([char]0)") } else { @('*.docx', ".docx$([char]0)") }) }) | Select-Object -Property @{n = 'FullName'; e = { $_.FullName.ToString() -ireplace '\x00$', '' } }, @{n = 'Name'; Expression = { $_.Name.ToString() -ireplace '\x00$', '' } }) | Sort-Object -Property FullName, Name -Culture $TemplateFilesSortCulture)
 
         if ($TemplateIniFile -ne '') {
-            Write-Host "  Compare $($SigOrOOF) ini entries and file system"
+            Write-Host "  Compare $($SigOrOOF) INI entries and file system"
             foreach ($Enumerator in $TemplateIniSettings.GetEnumerator().name) {
                 try { WatchCatchableExitSignal } catch { }
 
                 if ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>']) {
                     if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
-                        Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) ini index #$($Enumerator)) found in ini but not in signature template path." -ForegroundColor Yellow
+                        Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) INI index #$($Enumerator)) found in INI but not in signature template path." -ForegroundColor Yellow
                     }
 
                     if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotlike "*.$(if($UseHtmTemplates){'htm'}else{'docx'})")) {
-                        Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) ini index #$($Enumerator)) has the wrong file extension ('-UseHtmTemplates true' allows .htm, else .docx)" -ForegroundColor Yellow
+                        Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) INI index #$($Enumerator)) has the wrong file extension ('-UseHtmTemplates true' allows .htm, else .docx)" -ForegroundColor Yellow
                     }
                 }
             }
@@ -3336,7 +2662,7 @@ end tell
 
             # Populate template files in the most complicated way first: SortOrder 'AsInThisFile'
             # This also considers that templates can be referenced multiple times in the INI file
-            # If the setting in the ini file is different, we only need to sort $TemplateFiles
+            # If the setting in the INI file is different, we only need to sort $TemplateFiles
             $TemplateFilesExisting = @(foreach ($Enumerator in $TemplateIniSettings[($TemplateIniSettings.GetEnumerator().name)]) { $Enumerator['<Set-OutlookSignatures template>'] })
             $TemplateFiles = @($TemplateFiles | Where-Object { $_.name -iin $TemplateFilesExisting })
             $TemplateFiles | Add-Member -MemberType NoteProperty -Name TemplateIniSettingsIndex -Value $null -Force
@@ -3398,7 +2724,7 @@ end tell
 
             $TemplateIniSettingsIndex = $TemplateFile.TemplateIniSettingsIndex
             $TemplateFileGroupSIDs = @{}
-            Write-Host ("    '$($TemplateFile.Name)' ($($SigOrOOF) ini index #$($TemplateIniSettingsIndex))")
+            Write-Host ("    '$($TemplateFile.Name)' ($($SigOrOOF) INI index #$($TemplateIniSettingsIndex))")
 
             if ($TemplateIniSettings[$TemplateIniSettingsIndex]['<Set-OutlookSignatures template>'] -ieq $TemplateFile.name) {
                 $TemplateFilePart = (@(@($TemplateIniSettings[$TemplateIniSettingsIndex].GetEnumerator().Name) | Sort-Object -Culture $TemplateFilesSortCulture) -join '] [')
@@ -3522,22 +2848,22 @@ end tell
                             }
 
                             Write-Host "        $(($TemplateFilePartTag -ireplace '^\[', '') -ireplace '\]$', '')"
-                            $NTName = $TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|)(.*?) (.*)(\])$', '$3\$4'
+                            $NTName = $TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|)(.*?) (.*)(\])$', '${3}\${4}'
 
                             # Check cache
                             #   $TemplateFilesGroupSIDsOverall contains tags without prefix only: [xxx xxx]
                             #   $TemplateFilesGroupSIDsOverall contains tag with extracted prefix: -:[xxx xxx]
 
-                            if ($TemplateFilesGroupSIDsOverall.ContainsKey($($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$1$3'))) {
-                                $TemplateFileGroupSIDs.add($TemplateFilePartTag, "$($TemplateFilePartTag -ireplace '(?i)(^\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$2')$($TemplateFilesGroupSIDsOverall[$($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$1$3')])")
+                            if ($TemplateFilesGroupSIDsOverall.ContainsKey($($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '${1}${3}'))) {
+                                $TemplateFileGroupSIDs.add($TemplateFilePartTag, "$($TemplateFilePartTag -ireplace '(?i)(^\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '${2}')$($TemplateFilesGroupSIDsOverall[$($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '${1}${3}')])")
                             }
 
                             if ((-not $TemplateFileGroupSIDs.ContainsKey($TemplateFilePartTag))) {
                                 $tempSid = ResolveToSid($NTName)
 
                                 if ($tempSid) {
-                                    $TemplateFilesGroupSIDsOverall.add($($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$1$3'), $tempSid)
-                                    $TemplateFileGroupSIDs.add($TemplateFilePartTag, "$($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$2')$($TemplateFilesGroupSIDsOverall[$($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$1$3')])")
+                                    $TemplateFilesGroupSIDsOverall.add($($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '${1}${3}'), $tempSid)
+                                    $TemplateFileGroupSIDs.add($TemplateFilePartTag, "$($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '${2}')$($TemplateFilesGroupSIDsOverall[$($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '${1}${3}')])")
                                 }
                             }
 
@@ -3550,7 +2876,7 @@ end tell
                                 }
                             } else {
                                 Write-Host '          Not found' -ForegroundColor Yellow
-                                $TemplateFilesGroupSIDsOverall.add($($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '$1$3'), $null)
+                                $TemplateFilesGroupSIDsOverall.add($($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '${1}${3}'), $null)
                             }
                         }
                     }
@@ -3652,11 +2978,13 @@ end tell
 
             if ($SigOrOOF -ieq 'OOF') {
                 if (($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultreplyfwdorexternal) -and ($TemplateFilePart -notmatch $TemplateFilePartRegexDefaultneworinternal)) {
+                    Write-Host '      Default internal OOF message (neither internal nor external tag specified)'
                     $TemplateFilesDefaultnewOrInternal.add($TemplateIniSettingsIndex, @{})
                     $TemplateFilesDefaultnewOrInternal[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
-                    Write-Host '      Default internal OOF message (neither internal nor external tag specified)'
-                    $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateFile.FullName, $TemplateFileTargetName)
+
                     Write-Host '      Default external OOF message (neither internal nor external tag specified)'
+                    $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateIniSettingsIndex, @{})
+                    $TemplateFilesDefaultreplyfwdOrExternal[$TemplateIniSettingsIndex].add($TemplateFile.FullName, $TemplateFileTargetName)
                 }
             }
 
@@ -4039,46 +3367,17 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
 
             # Set OOF message and Outlook Web signature
-            if (((($SetCurrentUserOutlookWebSignature -eq $true)) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)) {
-                if ((-not $SimulateUser)) {
-                    if (-not $script:WebServicesDllPath) {
-                        try { WatchCatchableExitSignal } catch { }
-
-                        Write-Host "  Set up environment for connection to Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-                        $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
-                        try {
-                            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
-                            if (-not $IsLinux) {
-                                Unblock-File -LiteralPath $script:WebServicesDllPath
-                            }
-                        } catch {
-                        }
-                    }
-
-                    try { WatchCatchableExitSignal } catch { }
-
-                    ConnectEWS -MailAddress $PrimaryMailboxAddress -Indent '  '
-
-                    if (-not $script:exchService) {
-                        if ($SetCurrentUserOutlookWebSignature) {
-                            Write-Host '    Outlook Web signature cannot be set' -ForegroundColor Red
-                            $SetCurrentUserOutlookWebSignature = $false
-                        }
-
-                        if ($SetCurrentUserOOFMessage -and (($null -ne $TrustsToCheckForGroups[0]) -and ($ADPropsCurrentMailbox.msexchrecipienttypedetails -lt 2147483648))) {
-                            Write-Host '   out-of-office (OOF) message(s) cannot be set' -ForegroundColor Red
-                            $SetCurrentUserOOFMessage = $false
-                        }
-                    }
-                }
-
+            if (
+                ((($SetCurrentUserOutlookWebSignature -eq $true)) -or ($SetCurrentUserOOFMessage -eq $true)) -and
+                ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
+            ) {
                 Write-Host "  Set default signature(s) in Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                 if ($SetCurrentUserOutlookWebSignature) {
                     if ($SimulateUser -and (-not $SimulateAndDeploy)) {
                         Write-Host '      Simulation mode enabled, skipping task.' -ForegroundColor Yellow
                     } else {
-                        Write-Host "    Set default classic Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                        Write-Host "    Set default classic (not roaming) Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOutlookWebSignature')))) {
                             Write-Host '      Default classic Outlook Web signature can not be set.' -ForegroundColor Yellow
@@ -4668,7 +3967,7 @@ function EvaluateAndSetSignatures {
                 $Template = (Get-Variable -Name "$($SigOrOOF)Files$($TemplateGroup)" -ValueOnly)[$TemplateIniSettingsIndex].GetEnumerator() | Select-Object -First 1
             }
 
-            Write-Host "$Indent    '$([System.IO.Path]::GetFileName($Template.key))' ($($SigOrOOF) ini index #$($TemplateIniSettingsIndex)) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+            Write-Host "$Indent    '$([System.IO.Path]::GetFileName($Template.key))' ($($SigOrOOF) INI index #$($TemplateIniSettingsIndex)) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
             Write-Host "$Indent      Check permissions"
 
             $TemplateAllowed = $false
@@ -4690,7 +3989,7 @@ function EvaluateAndSetSignatures {
                     if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[$($GroupsSid)``]*") {
                         $TemplateAllowed = $true
                         $tempAllowCount++
-                        Write-Host "$Indent          First group match: $(@(@($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $GroupsSid }).name -ireplace '^\[(.*)\]$', '$1') -join '|') = $($GroupsSid) (current mailbox)"
+                        Write-Host "$Indent          First group match: $(@(@($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $GroupsSid }).name -ireplace '^\[(.*)\]$', '${1}') -join '|') = $($GroupsSid) (current mailbox)"
                         break
                     }
                 }
@@ -4704,7 +4003,7 @@ function EvaluateAndSetSignatures {
                         if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[CURRENTUSER:$($GroupsSid)``]*") {
                             $TemplateAllowed = $true
                             $tempAllowCount++
-                            Write-Host "$Indent          First group match: $(@(@($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $GroupsSid }).name -ireplace '^\[(.*)\]$', 'CURRENTUSER:$1') -join '|') = $($GroupsSid) (current user)"
+                            Write-Host "$Indent          First group match: $(@(@($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $GroupsSid }).name -ireplace '^\[(.*)\]$', 'CURRENTUSER:${1}') -join '|') = $($GroupsSid) (current user)"
                             break
                         }
                     }
@@ -4782,7 +4081,7 @@ function EvaluateAndSetSignatures {
                     if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-:$($GroupsSid)``]*") {
                         $TemplateAllowed = $false
                         $tempDenyCount++
-                        Write-Host "$Indent          First group match: $(@(@($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $GroupsSid }).name -ireplace '^\[(.*)\]$', '-:$1') -join '|') = $($GroupsSid) (current mailbox)"
+                        Write-Host "$Indent          First group match: $(@(@($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $GroupsSid }).name -ireplace '^\[(.*)\]$', '-:${1}') -join '|') = $($GroupsSid) (current mailbox)"
                         break
                     }
                 }
@@ -4796,7 +4095,7 @@ function EvaluateAndSetSignatures {
                         if ((Get-Variable -Name "$($SigOrOOF)FilesGroupFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-CURRENTUSER:$($GroupsSid)``]*") {
                             $TemplateAllowed = $false
                             $tempDenyCount++
-                            Write-Host "$Indent          First group match: $(@(@($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $GroupsSid }).name -ireplace '^\[(.*)\]$', '-CURRENTUSER:$1') -join '|') = $($GroupsSid) (current user)"
+                            Write-Host "$Indent          First group match: $(@(@($TemplateFilesGroupSIDsOverall.getenumerator() | Where-Object { $_.value -ieq $GroupsSid }).name -ireplace '^\[(.*)\]$', '-CURRENTUSER:${1}') -join '|') = $($GroupsSid) (current user)"
                             break
                         }
                     }
@@ -4972,7 +4271,7 @@ function SetSignatures {
             $SignatureFileAlreadyDone = ($script:SignatureFilesDone -contains $TemplateIniSettingsIndex)
 
             if ($SignatureFileAlreadyDone) {
-                Write-Host "$Indent      $($SigOrOOF) ini index #$($TemplateIniSettingsIndex) already processed before with higher priority mailbox"
+                Write-Host "$Indent      $($SigOrOOF) INI index #$($TemplateIniSettingsIndex) already processed before with higher priority mailbox"
                 Write-Host "$Indent        Not overwriting signature. Consider using parameter MailboxSpecificSignatureNames."
             } else {
                 $script:SignatureFilesDone += $TemplateIniSettingsIndex
@@ -5733,6 +5032,89 @@ function SetSignatures {
 
         try { WatchCatchableExitSignal } catch { }
 
+        Write-Host "$Indent        Remove empty CSS properties and resolve multiple assignments in style attributes"
+        $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+
+        if ($($PSVersionTable.PSEdition) -ieq 'Core') {
+            $AngleSharpConfig = [AngleSharp.CssConfigurationExtensions]::WithCss([AngleSharp.Configuration]::Default)
+            $AngleSharpBrowsingContext = [AngleSharp.BrowsingContext]::New($AngleSharpConfig)
+            $AngleSharpHtmlParser = $AngleSharpBrowsingContext.GetType().GetMethod('GetService').MakeGenericMethod([AngleSharp.Html.Parser.IHtmlParser]).Invoke($AngleSharpBrowsingContext, $null)
+            $AngleSharpParsedDocument = $AngleSharpHtmlParser.ParseDocument("$(Get-Content -LiteralPath $path -Encoding UTF8 -Raw)")
+
+            foreach ($element in @($AngleSharpParsedDocument.all)) {
+                if (-not $element.Attributes['style']) {
+                    $element.SetAttribute('style', '')
+                }
+
+                $tempHash = [ordered]@{}
+
+                foreach ($match in ([regex]'(?<attr>[^:\s]*)\s*:\s*(?<val>(?:[^;&]*(?<html>&)?[^;&]*(?(html);(?<-html>)))+)(?:;|$)').Matches($element.GetAttribute('style'))) {
+                    $tempProp = $match.Groups['attr'].Value
+                    $tempPropValue = $match.Groups['val'].Value
+
+                    if (
+                        [string]::IsNullOrWhiteSpace($tempPropValue)
+                    ) {
+                        if ($tempHash.Contains($tempProp)) {
+                            $tempHash.Remove($tempProp)
+                        }
+                    } else {
+                        if ($tempHash.Contains($tempProp)) {
+                            $tempHash.Remove($tempProp)
+                        }
+
+                        $tempHash.Add($tempProp, $tempPropValue)
+                    }
+                }
+
+                $element.SetAttribute('style', $(
+                        @(
+                            $tempHash.GetEnumerator() | ForEach-Object {
+                                "$($_.Key): $($_.Value);"
+                            }
+                        ) -join ' '
+                    )
+                )
+            }
+
+            [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $AngleSharpParsedDocument.documentelement.outerhtml)
+        } else {
+            $tempVerbosePreference = $VerbosePreference
+            $VerbosePreference = 'SilentlyContinue'
+            $html = New-Object -ComObject 'HTMLFile'
+            $VerbosePreference = $tempVerbosePreference
+
+            try {
+                # PowerShell Desktop with Office
+                $html.IHTMLDocument2_write((Get-Content -LiteralPath $path -Encoding UTF8 -Raw))
+            } catch {
+                # PowerShell Desktop without Office, PowerShell 6+
+                $html.write([System.Text.Encoding]::Unicode.GetBytes((Get-Content -LiteralPath $path -Encoding UTF8 -Raw)))
+            }
+
+            foreach ($element in $html.all) {
+                foreach ($match in ([regex]'(?<attr>[^:\s]*)\s*:\s*(?<val>(?:[^;&]*(?<html>&)?[^;&]*(?(html);(?<-html>)))+)(?:;|$)').Matches($element.style.csstext)) {
+                    $tempProp = $match.Groups['attr'].Value
+                    $tempPropValue = $match.Groups['val'].Value
+
+                    if (
+                        $([string]::IsNullOrWhiteSpace($tempPropValue))
+                    ) {
+                        $null = $element.style.removeAttribute($tempProp)
+                    } else {
+                        $null = $element.style.setAttribute($tempProp, $tempPropValue)
+                    }
+                }
+            }
+
+            [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $html.documentelement.outerhtml)
+
+            [System.Runtime.Interopservices.Marshal]::ReleaseComObject($html) | Out-Null
+            Remove-Variable -Name 'html'
+        }
+
+        try { WatchCatchableExitSignal } catch { }
+
         Write-Host "$Indent        Add marker to final HTM file"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
         $tempFileContent = Get-Content -LiteralPath $path -Encoding UTF8 -Raw
@@ -5752,7 +5134,7 @@ function SetSignatures {
         foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
             try { WatchCatchableExitSignal } catch { }
 
-            $tempFileContent = $tempFileContent -ireplace ('(\s*src=")(' + [regex]::escape($pathConnectedFolderName) + '\/)'), ('$1' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
+            $tempFileContent = $tempFileContent -ireplace ('(\s*src=")(' + [regex]::escape($pathConnectedFolderName) + '\/)'), ('${1}' + "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files/")
             Rename-Item (Join-Path -Path (Split-Path $path) -ChildPath $($pathConnectedFolderName)) $([System.IO.Path]::GetFileNameWithoutExtension($Signature.value) + '.files') -ErrorAction SilentlyContinue
         }
 
@@ -6439,16 +5821,16 @@ $CheckPathScriptblock = {
                 # graph auth
                 if (-not $GraphToken) {
                     try {
-                        $GraphToken = GraphGetToken
+                        $GraphToken = GraphGetToken -indent '      '
                     } catch {
                         $GraphToken = $null
                     }
 
                     if ($GraphToken.error -eq $false) {
-                        Write-Verbose "      Graph Token metadata: $((ParseJwtToken $GraphToken.AccessToken) | ConvertTo-Json)"
+                        Write-Verbose "        Graph Token metadata: $((ParseJwtToken $GraphToken.AccessToken) | ConvertTo-Json)"
 
                         if ($SimulateAndDeployGraphCredentialFile) {
-                            Write-Verbose "      App Graph Token metadata: $((ParseJwtToken $GraphToken.AppAccessToken) | ConvertTo-Json)"
+                            Write-Verbose "        Graph Token App metadata: $((ParseJwtToken $GraphToken.AppAccessToken) | ConvertTo-Json)"
                         }
                     } else {
                         Write-Host '      Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
@@ -6476,7 +5858,7 @@ $CheckPathScriptblock = {
                 ) | ForEach-Object {
                     Write-Verbose "      Query: '$($_)'"
 
-                    $siteId = (GraphGenericQuery -method 'Get' -uri $_).result.id
+                    $siteId = (GraphGenericQuery -method 'Get' -uri $_ -body $null).result.id
 
                     Write-Verbose "      siteId: $($siteID)"
                 }
@@ -6488,7 +5870,7 @@ $CheckPathScriptblock = {
                     Write-Verbose '    Get DocLib drive ID'
 
                     "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/sites/$($siteId)/drives" | ForEach-Object {
-                        $docLibDriveIdQueryResult = (GraphGenericQuery -method 'Get' -uri $_).result.value
+                        $docLibDriveIdQueryResult = (GraphGenericQuery -method 'Get' -uri $_ -body $null).result.value
                         $docLibDriveId = ($docLibDriveIdQueryResult | Where-Object {
                                 $_.webUrl -ieq $(
                                     if ($CheckPathPathSplitbySlash[2] -iin @('sites', 'teams')) {
@@ -6511,7 +5893,7 @@ $CheckPathScriptblock = {
 
                     if ($docLibDriveId) {
                         Write-Verbose '      Get DocLib drive items'
-                        $docLibDriveItems = (GraphGenericQuery -method 'Get' -uri "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/drives/$($docLibDriveId)/list/items?`$expand=DriveItem").result.value
+                        $docLibDriveItems = (GraphGenericQuery -method 'Get' -uri "$($CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/drives/$($docLibDriveId)/list/items?`$expand=DriveItem" -body $null).result.value
 
                         $tempDir = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
                         $null = New-Item $tempDir -ItemType Directory
@@ -6598,7 +5980,7 @@ $CheckPathScriptblock = {
                         Write-Host '    SharePoint via WebDAV, may be slow and path length problems may occur (fully qualified file names must be less than 260 characters).' -ForegroundColor Yellow
                         $CheckPathPath = $CheckPathPath -ireplace '@SSL\\', '\'
                         $CheckPathPath = ([uri]::UnescapeDataString($CheckPathPath) -ireplace ('https://', '\\'))
-                        $CheckPathPath = ([System.URI]$CheckPathPath).AbsoluteURI -ireplace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\$2' -ireplace '/', '\'
+                        $CheckPathPath = ([System.URI]$CheckPathPath).AbsoluteURI -ireplace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\${2}' -ireplace '/', '\'
                         $CheckPathPath = [uri]::UnescapeDataString($CheckPathPath)
                     } else {
                         try {
@@ -6767,7 +6149,7 @@ $CheckPathScriptblock = {
         Write-Verbose "      Try to create '$($CheckPathPath)'."
 
         if ($CheckPathPath.StartsWith('https://', 'CurrentCultureIgnoreCase')) {
-            $CheckPathPath = ((([uri]::UnescapeDataString($CheckPathPath) -ireplace ('https://', '\\')) -ireplace ('(.*?)/(.*)', '${1}@SSL\$2')) -ireplace ('/', '\'))
+            $CheckPathPath = ((([uri]::UnescapeDataString($CheckPathPath) -ireplace ('https://', '\\')) -ireplace ('(.*?)/(.*)', '${1}@SSL\${2}')) -ireplace ('/', '\'))
         } else {
             # '@SSL' seems to be case sensitive, so we make sure that the first occurrence is in uppercase letters
             $CheckPathPath = ([regex]"(?i)$([regex]::escape('@ssl\'))").replace($CheckPathPath, '@SSL\', 1)
@@ -6823,9 +6205,24 @@ $CheckPathScriptblock = {
 
 
 function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = '') {
-    try { WatchCatchableExitSignal } catch { }
-
     Write-Host "$($Indent)Connect to Outlook Web"
+
+    if (-not $script:WebServicesDllPath) {
+        Write-Host "$Indent  Set up environment for connection to Outlook Web"
+
+        try { WatchCatchableExitSignal } catch { }
+
+        $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
+
+        try {
+            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+            if (-not $IsLinux) {
+                Unblock-File -LiteralPath $script:WebServicesDllPath
+            }
+        } catch {
+            Write-Verbose "$Indent    $($_)"
+        }
+    }
 
     $local:exchServiceAvailable = $false
 
@@ -6859,6 +6256,8 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
             try { WatchCatchableExitSignal } catch { }
 
             $script:exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService
+
+            $script:exchService.Timeout = 25000
 
             try { WatchCatchableExitSignal } catch { }
 
@@ -6908,14 +6307,15 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
             try { WatchCatchableExitSignal } catch { }
 
             try {
-                Write-Verbose "$($Indent)    Try Autodiscover with Integrated Windows Authentication"
+                Write-Host "$($Indent)    Try Autodiscover with Integrated Windows Authentication"
 
                 $script:exchService.UseDefaultCredentials = $true
                 $script:exchService.ImpersonatedUserId = $null
                 $script:exchService.AutodiscoverUrl($MailAddress, { $true }) | Out-Null
 
+                Write-Host "$($Indent)      Success"
             } catch {
-                Write-Verbose "$($Indent)      Autodiscover with Integrated Windows Authentication failed."
+                Write-Host "$($Indent)      Failed. See verbose output for details."
                 Write-Verbose "$($Indent)        $($_)"
                 Write-Verbose "$($Indent)      This is OK when:"
                 Write-Verbose "$($Indent)        - Not connected to internal network"
@@ -6937,7 +6337,7 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
 
                 if (
                     $($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile -and !$GraphToken.AppAccessTokenExo) -or
-                    !$GraphToken.AccessTokenExo
+                    -not $GraphToken.AccessTokenExo
                 ) {
                     throw "Integrated Windows Authentication failed, and there is no EXO OAuth access token available. Did you forget '-GraphOnly true' or are you missing AD attributes?"
                 }
@@ -6945,7 +6345,7 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
                 try { WatchCatchableExitSignal } catch { }
 
                 try {
-                    Write-Verbose "$($Indent)    Try Autodiscover with OAuth"
+                    Write-Host "$($Indent)    Try Autodiscover with OAuth"
 
                     if ([System.Uri]::IsWellFormedUriString($tempEwsRedirectUrl, [System.UriKind]::Absolute)) {
                         throw 'Autodiscover with IWA failed before, but returned a redirect URL. We will use this fixed URL without Autodiscover.'
@@ -6964,12 +6364,14 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
                     }
 
                     $script:exchService.AutodiscoverUrl($MailAddress, { $true }) | Out-Null
+
+                    Write-Host "$($Indent)      Success"
                 } catch {
                     if ([System.Uri]::IsWellFormedUriString($tempEwsRedirectUrl, [System.UriKind]::Absolute)) {
-                        Write-Verbose "$($Indent)      Skipping Autodiscover with OAuth because"
-                        Write-Verbose "$($Indent)        $($_)"
+                        Write-Host "$($Indent)      Skipping Autodiscover with OAuth because"
+                        Write-Host "$($Indent)        $($_)"
                     } else {
-                        Write-Verbose "$($Indent)      Autodiscover with OAuth failed."
+                        Write-Host "$($Indent)      Failed.  See verbose output for details."
                         Write-Verbose "$($Indent)        $($_)"
                         Write-Verbose "$($Indent)      This is OK when"
                         Write-Verbose "$($indent)        - Connected to internal network with Exchange on prem without Hybrid Modern Authentication"
@@ -6981,7 +6383,7 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
 
                     try { WatchCatchableExitSignal } catch { }
 
-                    Write-Verbose "$($Indent)    Try OAuth with fixed URL"
+                    Write-Host "$($Indent)    Try OAuth with fixed URL"
 
                     $script:exchService.UseDefaultCredentials = $false
 
@@ -6999,7 +6401,8 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
                         $script:exchService.Url = "$($CloudEnvironmentExchangeOnlineEndpoint)/EWS/Exchange.asmx"
                     }
 
-                    Write-Verbose "$($Indent)      Fixed URL: '$($script:exchService.Url)'"
+                    Write-Host "$($Indent)      Success"
+                    Write-Host "$($Indent)      Fixed URL: '$($script:exchService.Url)'"
                 }
             }
 
@@ -7020,136 +6423,27 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
 }
 
 
-function GraphGenericQuery {
-    [CmdletBinding()]
-
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$method,
-
-        [Parameter(Mandatory = $true)]
-        [uri]$uri
-    )
-
-    try { WatchCatchableExitSignal } catch { }
-
-    try {
-        $requestBody = @{
-            Method      = $method
-            Uri         = $uri
-            Headers     = $script:AuthorizationHeader
-            ContentType = 'application/json; charset=utf-8'
-        }
-
-        $OldProgressPreference = $ProgressPreference
-        $ProgressPreference = 'SilentlyContinue'
-
-        $local:x = @()
-        $local:uri = $null
-
-        do {
-            try { WatchCatchableExitSignal } catch { }
-
-            if ($local:uri) {
-                $requestBody['Uri'] = $local:uri
-            }
-
-            $local:pagedResults = Invoke-RestMethod @requestBody
-            $local:x += $local:pagedResults
-
-            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
-                $local:uri = $null
-            } else {
-                $local:uri = $local:pagedResults.'@odata.nextlink'
-            }
-        } until (!($local:uri))
-
-        $ProgressPreference = $OldProgressPreference
-    } catch {
-        return @{
-            error  = $error[0] | Out-String
-            result = $null
-        }
-    }
-
-    if ($null -ne $local:x) {
-        return @{
-            error  = $false
-            result = $local:x
-        }
-    } else {
-        return @{
-            error  = $error[0] | Out-String
-            result = $null
-        }
-    }
-}
-
-
 function GraphGetToken {
     param(
-        [switch]$EXO
+        [switch]$EXO,
+        [string]$indent = ''
     )
 
     try { WatchCatchableExitSignal } catch { }
 
     if (-not $EXO) {
-        Write-Host '    Graph authentication'
-    }
+        Write-Host "$($indent)Graph authentication"
 
+        if ($GraphClientID -ieq 'beea8249-8c98-4c76-92f6-ce3c468a61e6') {
+            Write-Host "$($indent)  You use the Entra app provided by the developers. It is recommended to create und use your own Entra app." -ForegroundColor Yellow
+            Write-Host "$($indent)    Find a description on how to do this in the file '`.\config\default graph config.ps1`'." -ForegroundColor Yellow
+        }
 
-    try {
-        Invoke-WebRequest $CloudEnvironmentGraphApiEndpoint -UseBasicParsing -TimeoutSec 5
-    } catch {
-        return @{
-            error             = "Endpoint '$($CloudEnvironmentGraphApiEndpoint)' is not accessible: $($_)"
-            AccessToken       = $null
-            authHeader        = $null
-            AccessTokenExo    = $null
-            authHeaderExo     = $null
-            AppAccessToken    = $null
-            AppAuthHeader     = $null
-            AppAccessTokenExo = $null
-            AppAuthHeaderExo  = $null
-        }
-    }
-
-    if (-not $EXO) {
-        try {
-            Invoke-WebRequest $CloudEnvironmentAzureADEndpoint -UseBasicParsing -TimeoutSec 5
-        } catch {
-            return @{
-                error             = "Endpoint '$($CloudEnvironmentAzureADEndpoint)' is not accessible: $($_)"
-                AccessToken       = $null
-                authHeader        = $null
-                AccessTokenExo    = $null
-                authHeaderExo     = $null
-                AppAccessToken    = $null
-                AppAuthHeader     = $null
-                AppAccessTokenExo = $null
-                AppAuthHeaderExo  = $null
-            }
-        }
-    } else {
-        try {
-            Invoke-WebRequest $CloudEnvironmentExchangeOnlineEndpoint -UseBasicParsing -TimeoutSec 5
-        } catch {
-            return @{
-                error             = "Endpoint '$($CloudEnvironmentExchangeOnlineEndpoint)' is not accessible: $($_)"
-                AccessToken       = $null
-                authHeader        = $null
-                AccessTokenExo    = $null
-                authHeaderExo     = $null
-                AppAccessToken    = $null
-                AppAuthHeader     = $null
-                AppAccessTokenExo = $null
-                AppAuthHeaderExo  = $null
-            }
-        }
+        $script:GraphUser = $null
     }
 
     if ($SimulateAndDeployGraphCredentialFile) {
-        Write-Host "        Via SimulateAndDeployGraphCredentialFile '$SimulateAndDeployGraphCredentialFile'"
+        Write-Host "$($indent)  Via SimulateAndDeployGraphCredentialFile '$SimulateAndDeployGraphCredentialFile'"
 
         try {
             try {
@@ -7205,10 +6499,38 @@ function GraphGetToken {
         }
     } else {
         if (-not  $script:MsalModulePath) {
-            Write-Host '      Load MSAL.PS'
+            Write-Host "$($indent)  Load MSAL.PS"
 
-            $script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
-            Copy-Item -Path ((Join-Path -Path '.' -ChildPath 'bin\MSAL.PS')) -Destination (Join-Path -Path $script:MsalModulePath -ChildPath 'MSAL.PS') -Recurse
+            $script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath 'MSAL.PS')
+
+            # Copy each item to the destination
+            foreach ($item in @(Get-ChildItem -Path ((Join-Path -Path '.' -ChildPath 'bin\MSAL.PS')) -Recurse)) {
+                if ($item.BaseName -like '*msalrumtime*') {
+                    if ($IsWindows) {
+                        if ($item.Name -notlike 'msalruntime*.dll') {
+                            continue
+                        }
+                    } elseif ($IsLinux) {
+                        if ($item.Name -notlike 'libmsalruntime.so') {
+                            continue
+                        }
+                    } else {
+                        continue
+                    }
+                }
+
+                $destinationPath = $item.FullName -replace [regex]::escape((Resolve-Path (Join-Path -Path '.' -ChildPath 'bin\MSAL.PS')).ProviderPath), $script:MsalModulePath
+
+                if ($item.PSIsContainer) {
+                    # Create the directory if it doesn't exist
+                    if (-not (Test-Path -Path $destinationPath)) {
+                        $null = New-Item -ItemType Directory -Path $destinationPath -Force
+                    }
+                } else {
+                    # Copy the file
+                    Copy-Item -Path $item.FullName -Destination $destinationPath
+                }
+            }
 
             if (-not $IsLinux) {
                 Get-ChildItem $script:MsalModulePath -Recurse | Unblock-File
@@ -7217,10 +6539,10 @@ function GraphGetToken {
             try { WatchCatchableExitSignal } catch { }
 
             try {
-                Import-Module (Join-Path -Path $script:MsalModulePath -ChildPath 'MSAL.PS') -Force -ErrorAction Stop
+                Import-Module $script:MsalModulePath -Force -ErrorAction Stop
             } catch {
                 Write-Host $error[0]
-                Write-Host '        Problem importing MSAL.PS module. Exit.' -ForegroundColor Red
+                Write-Host "$($indent)    Problem importing MSAL.PS module. Exit." -ForegroundColor Red
                 $script:ExitCode = 30
                 $script:ExitCodeDescription = 'Problem importing MSAL.PS module.';
                 exit
@@ -7245,7 +6567,7 @@ function GraphGetToken {
                             --title=$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }) `
                             --text="$($GraphUnlockKeyringKeychainMessageboxText)"
                     } else {
-                        Write-Host "        Neither kdialog nor zenity found, so no message box could be shown: $($GraphUnlockKeyringKeychainMessageboxText)"
+                        Write-Host "$($indent)  Neither kdialog nor zenity found, so no message box could be shown: $($GraphUnlockKeyringKeychainMessageboxText)"
                     }
                 }
             } elseif ($IsMacOS) {
@@ -7259,114 +6581,113 @@ function GraphGetToken {
 
         try { WatchCatchableExitSignal } catch { }
 
-        try {
-            Write-Host '      Search for login hint in Graph token cache'
-
-            $script:GraphUser = $null
-
-            $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' -AuthenticationBroker | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
-
-            $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
-
-            Write-Host "        Graph token cache: $($script:msalClientApp.cacheInfo)"
-            Write-Host "        Result: '$($script:GraphUser)'"
-        } catch {
-            return @{
-                error             = ($error[0] | Out-String)
-                AccessToken       = $null
-                AuthHeader        = $null
-                AccessTokenExo    = $null
-                AuthHeaderExo     = $null
-                AppAccessToken    = $null
-                AppAuthHeader     = $null
-                AppAccessTokenExo = $null
-                AppAuthHeaderExo  = $null
-            }
-        }
-
-        try { WatchCatchableExitSignal } catch { }
-
         # Graph authentication
-        Write-Host "      Authentication against $(if(-not $EXO) { 'Graph' } else { 'Exchange Online' })"
+        Write-Host "$($indent)  Authentication against $(if(-not $EXO) { 'Graph' } else { 'Exchange Online' })"
 
         try {
-            Write-Host '        Silent via Integrated Windows Authentication without login hint'
+            Write-Host "$($indent)    Silent via Integrated Windows Authentication without login hint"
+
+            if ($EXO) {
+                throw 'Ignoring because login hint is available.'
+            }
 
             $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
             $auth = $script:msalClientApp | Get-MsalToken -IntegratedWindowsAuth -AzureCloudInstance $CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 1)
 
-            Write-Host "          Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+            Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
         } catch {
-            Write-Host "          Failed: $($error[0])"
+            Write-Host "$($indent)      Failed: $($error[0])"
 
             try { WatchCatchableExitSignal } catch { }
 
             try {
-                Write-Host '        Silent via Integrated Windows Authentication with login hint'
+                Write-Host "$($indent)    Silent via Integrated Windows Authentication with login hint"
                 # Required, because IWA without login hint may fail when account enumeration is blocked at OS level
 
-                if (-not ([string]::IsNullOrWhiteSpace($script:GraphUser))) {
-                    $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+                $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
+                if (-not $EXO) {
+                    $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+                }
+
+                Write-Host "$($indent)      Login hint: '$($script:GraphUser)'"
+
+                if (-not ([string]::IsNullOrWhiteSpace($script:GraphUser))) {
                     $auth = $script:msalClientApp | Get-MsalToken -IntegratedWindowsAuth -LoginHint $script:GraphUser -AzureCloudInstance $CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 1)
                 } else {
                     throw 'No login hint found before'
                 }
 
-                Write-Host "          Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
             } catch {
-                Write-Host "          Failed: $($error[0])"
+                Write-Host "$($indent)      Failed: $($error[0])"
 
                 try { WatchCatchableExitSignal } catch { }
 
                 try {
-                    Write-Host '        Silent via Authentication Broker without login hint'
+                    Write-Host "$($indent)    Silent via Authentication Broker without login hint"
+
+                    if ($EXO) {
+                        throw 'Ignoring because login hint is available.'
+                    }
 
                     $script:msalClientApp = New-MsalClientApplication -AuthenticationBroker -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
                     $auth = $script:msalClientApp | Get-MsalToken -Silent -AuthenticationBroker -AzureCloudInstance $CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
 
-                    Write-Host "          Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                    Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
                 } catch {
-                    Write-Host "          Failed: $($error[0])"
+                    Write-Host "$($indent)      Failed: $($error[0])"
 
                     try { WatchCatchableExitSignal } catch { }
 
                     try {
-                        Write-Host '        Silent via Authentication Broker with login hint'
+                        Write-Host "$($indent)    Silent via Authentication Broker with login hint"
+
+                        $script:msalClientApp = New-MsalClientApplication -AuthenticationBroker -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+
+                        if (-not $EXO) {
+                            $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+                        }
+
+                        Write-Host "$($indent)      Login hint: '$($script:GraphUser)'"
 
                         if (-not ([string]::IsNullOrWhiteSpace($script:GraphUser))) {
-                            $script:msalClientApp = New-MsalClientApplication -AuthenticationBroker -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
-
                             $auth = $script:msalClientApp | Get-MsalToken -Silent -AuthenticationBroker -LoginHint $script:GraphUser -AzureCloudInstance $CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
                         } else {
                             throw 'No login hint found before'
                         }
 
-                        Write-Host "          Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                        Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
                     } catch {
-                        Write-Host "          Failed: $($error[0])"
+                        Write-Host "$($indent)      Failed: $($error[0])"
 
                         try {
-                            Write-Host '        Silent via refresh token, with login hint'
+                            Write-Host "$($indent)    Silent via refresh token, with login hint"
+
+                            $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
+
+                            if (-not $EXO) {
+                                $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+                            }
+
+                            Write-Host "$($indent)      Login hint: '$($script:GraphUser)'"
 
                             if (-not ([string]::IsNullOrWhiteSpace($script:GraphUser))) {
-                                $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
-
                                 $auth = $script:msalClientApp | Get-MsalToken -Silent -LoginHint $script:GraphUser -AzureCloudInstance $CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
                             } else {
                                 throw 'No login hint found before'
                             }
 
-                            Write-Host "          Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                            Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
                         } catch {
-                            Write-Host "          Failed: $($error[0])"
+                            Write-Host "$($indent)      Failed: $($error[0])"
 
                             try { WatchCatchableExitSignal } catch { }
 
                             # Interactive authentication methods
-                            Write-Host '        All silent authentication methods failed, switching to interactive authentication methods.'
+                            Write-Host "$($indent)    All silent authentication methods failed, switching to interactive authentication methods."
 
                             if (-not [string]::IsNullOrWhitespace($GraphHtmlMessageboxText)) {
                                 if ($IsWindows -and (-not (Test-Path env:SSH_CLIENT))) {
@@ -7411,7 +6732,7 @@ function GraphGetToken {
                                             --title=$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }) `
                                             --text="$($GraphHtmlMessageboxText)"
                                     } else {
-                                        Write-Host "          Neither kdialog nor zenity found, so no message box could be shown: $($GraphHtmlMessageboxText)"
+                                        Write-Host "$($indent)    Neither kdialog nor zenity found, so no message box could be shown: $($GraphHtmlMessageboxText)"
                                     }
                                 } elseif ($IsMacOS -and ((Test-Path env:DISPLAY))) {
                                     Write-Host $("display alert ""$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })"" message ""$($GraphHtmlMessageboxText)""  buttons { ""OK"" } default button 1" | osascript *>&1; '')
@@ -7441,7 +6762,7 @@ function GraphGetToken {
                             try { WatchCatchableExitSignal } catch { }
 
                             try {
-                                Write-Host '        Interactive via Authentication Broker'
+                                Write-Host "$($indent)    Interactive via Authentication Broker"
 
                                 if (-not $IsWindows) {
                                     throw 'Interactive with Authentication Broker on Linux/macOS only works in the console. Browser is preferred for better user experience.'
@@ -7449,25 +6770,37 @@ function GraphGetToken {
 
                                 $script:msalClientApp = New-MsalClientApplication -AuthenticationBroker -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
-                                Write-Host '          Opening authentication broker window and waiting for you to authenticate. Stopping script execution after five minutes.'
+                                if (-not $EXO) {
+                                    $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+                                }
+
+                                Write-Host "$($indent)      Login hint: '$($script:GraphUser)'"
+
+                                Write-Host "$($indent)      Opening authentication broker window and waiting for you to authenticate. Stopping script execution after five minutes."
                                 $auth = $script:msalClientApp | Get-MsalToken -Interactive -AuthenticationBroker -LoginHint $(if ($script:GraphUser) { $script:GraphUser } else { '' }) -AzureCloudInstance $CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
 
-                                Write-Host "          Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                                Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
                             } catch {
-                                Write-Host "          Failed: $($error[0])"
+                                Write-Host "$($indent)      Failed: $($error[0])"
 
                                 try {
-                                    Write-Host '        Interactive via browser'
+                                    Write-Host "$($indent)    Interactive via browser"
 
                                     $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
-                                    Write-Host '          Opening new browser window and waiting for you to authenticate. Stopping script execution after five minutes.'
+                                    if (-not $EXO) {
+                                        $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+                                    }
+
+                                    Write-Host "$($indent)      Login hint: '$($script:GraphUser)'"
+
+                                    Write-Host "$($indent)      Opening new browser window and waiting for you to authenticate. Stopping script execution after five minutes."
                                     $auth = $script:msalClientApp | Get-MsalToken -Interactive -LoginHint $(if ($script:GraphUser) { $script:GraphUser } else { '' }) -AzureCloudInstance $CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
 
-                                    Write-Host "          Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                                    Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
                                 } catch {
-                                    Write-Host "          Failed: $($error[0])"
-                                    Write-Host '        No authentication possible'
+                                    Write-Host "$($indent)      Failed: $($error[0])"
+                                    Write-Host '$($indent)    No authentication possible'
 
                                     $auth = $null
 
@@ -7534,9 +6867,9 @@ No authentication possible.
                 }
 
                 if (-not $EXO) {
-                    $authExo = GraphGetToken -EXO
+                    $authExo = GraphGetToken -EXO -indent $indent
 
-                    if ($authExo) {
+                    if ($authExo -and ($authExo.error -eq $false)) {
                         return @{
                             error             = $false
                             AccessToken       = $script:AuthorizationToken
@@ -7549,7 +6882,11 @@ No authentication possible.
                             AppAuthHeaderExo  = $null
                         }
                     } else {
-                        throw 'No Exchange Online token'
+                        if ($authExo -and ($authExo.error -ne $false)) {
+                            throw "No Exchange Online token: $($authExo.error)"
+                        } else {
+                            throw 'No Exchange Online token'
+                        }
                     }
                 } else {
                     return @{
@@ -7565,7 +6902,7 @@ No authentication possible.
                     }
                 }
             } catch {
-                Write-Host "          Failed: $($error[0])"
+                Write-Host "$($indent)  Error: $($error[0])"
 
                 return @{
                     error             = ($error[0] | Out-String)
@@ -7579,6 +6916,84 @@ No authentication possible.
                     AppAuthHeaderExo  = $null
                 }
             }
+        }
+    }
+}
+
+
+function GraphGenericQuery {
+    [CmdletBinding()]
+
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$method,
+
+        [Parameter(Mandatory = $true)]
+        [uri]$uri,
+
+        [Parameter(Mandatory = $false)]
+        [AllowEmptyString()] [string]$body = $null,
+
+        [Parameter(Mandatory = $false)]
+        $authHeader = $(if ($SimulateUser -and $SimulateAndDeployGraphCredentialFile) { $script:AppAuthorizationHeader } else { $script:AuthorizationHeader })
+    )
+
+    $error.clear()
+
+    try {
+        $requestBody = @{
+            Method      = $method
+            Uri         = $uri
+            Headers     = $authHeader
+            ContentType = 'application/json; charset=utf-8'
+        }
+
+        if ($body) {
+            $requestBody['Body'] = $body
+        }
+
+        $requestBody['Headers']['x-overridetimestamp'] = 'true'
+
+        $requestBody['Headers']['content-type'] = 'Application/Json; charset=utf-8'
+
+        $OldProgressPreference = $ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
+
+        $local:x = @()
+        $local:uri = $null
+
+        do {
+            if ($local:uri) {
+                $requestBody['Uri'] = $local:uri
+            }
+
+            $local:pagedResults = Invoke-RestMethod @requestBody
+            $local:x += $local:pagedResults
+
+            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
+                $local:uri = $null
+            } else {
+                $local:uri = $local:pagedResults.'@odata.nextlink'
+            }
+        } until (!($local:uri))
+
+        $ProgressPreference = $OldProgressPreference
+    } catch {
+        return @{
+            error  = $error[0] | Out-String
+            result = $null
+        }
+    }
+
+    if ($null -ne $local:x) {
+        return @{
+            error  = $false
+            result = $local:x
+        }
+    } else {
+        return @{
+            error  = $error[0] | Out-String
+            result = $null
         }
     }
 }
@@ -8181,7 +7596,7 @@ function GetIniContent ($filePath, $additionalLines) {
 
     if ($filePath -ne '') {
         try {
-            Write-Verbose '    Original ini content'
+            Write-Verbose '    Original INI content'
 
             foreach ($line in @(@(Get-Content -LiteralPath $FilePath -Encoding UTF8 -ErrorAction Stop) + @($additionalLines -split '\r?\n'))) {
                 Write-Verbose "      $line"
@@ -8285,7 +7700,7 @@ function ConvertPath ([ref]$path) {
             }
             $path.value = ([uri]$path.value).GetLeftPart([System.UriPartial]::Path) -ireplace "$(([uri]$path.value).GetLeftPart([System.UriPartial]::Authority))/:\S:/\S", $(([uri]$path.value).GetLeftPart([System.UriPartial]::Authority))
             $path.value = ([uri]::UnescapeDataString($path.value) -ireplace ('https://', '\\'))
-            $path.value = ([System.URI]$path.value).AbsoluteURI -ireplace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\$2' -ireplace '/', '\'
+            $path.value = ([System.URI]$path.value).AbsoluteURI -ireplace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\${2}' -ireplace '/', '\'
             $path.value = [uri]::UnescapeDataString($path.value)
         } else {
             $path.value = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path.value)
@@ -8671,13 +8086,12 @@ try {
 
     if ($global:SetOutlookSignaturesLastRunGuid) {
         Write-Host '  Set-OutlookSignatures has already been run before in this PowerShell session.' -ForegroundColor Yellow
-        Write-Host '    It is strongly recommended to run Set-OutlookSignatures only once per session, ideally in a fresh one.' -ForegroundColor Yellow
-        Write-Host '    This is the only way to avoid problem caused by .Net caching DLL files in memory.' -ForegroundColor Yellow
-        Write-Host '    Use at your own risk!' -ForegroundColor Yellow
+        Write-Host '    Set-OutlookSignatures is allowed to run only once per session, ideally in a fresh one.' -ForegroundColor Yellow
+        Write-Host '    This is the only way to avoid problems caused by .Net caching DLL files in memory.' -ForegroundColor Yellow
 
-        # $script:ExitCode = 3
-        # $script:ExitCodeDescription = 'Script already run in this PowerShell session, is only supported once.'
-        # exit
+        $script:ExitCode = 3
+        $script:ExitCodeDescription = 'Set-OutlookSignatures has already been run in this PowerShell session, is only supported once.'
+        exit
     } else {
         $global:SetOutlookSignaturesLastRunGuid = (New-Guid).Guid
     }
@@ -8852,6 +8266,10 @@ try {
         Remove-Item $script:tempDir -Recurse -Force -ErrorAction SilentlyContinue
     }
 
+    if ($PSDefaultParameterValuesOriginal) {
+        $PSDefaultParameterValues = $PSDefaultParameterValuesOriginal.Clone()
+    }
+
     if ($TranscriptFullName) {
         Write-Host
         Write-Host 'Log file'
@@ -8861,7 +8279,7 @@ try {
     Write-Host
     Write-Host 'Exit code' -ForegroundColor $(if ($script:ExitCode -eq 0) { (Get-Host).ui.rawui.ForegroundColor } else { 'Yellow' })
     Write-Host "  Code: $($script:ExitCode)" -ForegroundColor $(if ($script:ExitCode -eq 0) { (Get-Host).ui.rawui.ForegroundColor } else { 'Yellow' })
-    Write-Host "  Description: '$($script:ExitCodeDescription)'" -ForegroundColor $(if ($script:ExitCode -eq 0) { (Get-Host).ui.rawui.ForegroundColor } else { 'Yellow' })
+    Write-Host "  Description: $($script:ExitCodeDescription)" -ForegroundColor $(if ($script:ExitCode -eq 0) { (Get-Host).ui.rawui.ForegroundColor } else { 'Yellow' })
 
     if ($script:ExitCode -ne 0) {
         Write-Host '  Check for existing issues at https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=' -ForegroundColor Yellow

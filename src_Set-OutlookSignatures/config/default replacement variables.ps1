@@ -12,7 +12,7 @@
 #
 # See README file for more examples, such as:
 #   Allowed tags
-#   How to work with ini files
+#   How to work with INI files
 #   Variable replacement
 #   Photos from Active Directory
 #   Delete images when attribute is empty, variable content based on group membership
@@ -235,3 +235,10 @@ $ReplaceHash['$CurrentUserSalutation$'] = $ReplaceHash['$CurrentUserGenderPronou
 $ReplaceHash['$CurrentUserManagerSalutation$'] = $ReplaceHash['$CurrentUserManagerGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentUserManager.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentUserManager.extensionattribute3))" })
 $ReplaceHash['$CurrentMailboxSalutation$'] = $ReplaceHash['$CurrentMailboxGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentMailbox.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentMailbox.extensionattribute3))" })
 $ReplaceHash['$CurrentMailboxManagerSalutation$'] = $ReplaceHash['$CurrentMailboxManagerGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentMailboxManager.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentMailboxManager.extensionattribute3))" })
+
+
+$ReplaceHash['$CurrentUserTelephone-prefix-noempty$'] = $(if (-not $ReplaceHash['$CurrentUserTelephone$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Telephone: ' } )
+$ReplaceHash['$CurrentUserMobile-prefix-noempty$'] = $(if (-not $ReplaceHash['$CurrentUserMobile$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Mobile: ' } )
+
+$ReplaceHash['$CurrentUserTelephone-noempty$'] = $(if (-not $ReplaceHash['$CurrentUserTelephone$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Telephone: ' } )
+$ReplaceHash['$CurrentUserMobile-noempty$'] = $(if (-not $ReplaceHash['$CurrentUserMobile$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Mobile: ' } )

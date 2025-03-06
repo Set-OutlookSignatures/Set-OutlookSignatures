@@ -34,7 +34,7 @@
 #       Set "Supported account types" to "Accounts in this organizational directory only (<your tenant> - Single tenant)"
 #       Set Redirect URI to "Mobile and desktop applications" and add
 #         'http://localhost' (http, not https) for browser authentication
-#         'ms-appx-web://microsoft.aad.brokerplugin/<Object ID of your app>' for AuthenticationBroker authentication
+#         'ms-appx-web://microsoft.aad.brokerplugin/<Application ID of your app>' for AuthenticationBroker authentication
 #       The "Application (client) ID" is the value you need to set for $GraphClientID in this file
 #     Client secret
 #       There is no need to define a client secret, as we only work with delegated permissions, and not with application permissions
@@ -46,7 +46,7 @@
 #           Required to log on the current user.
 #         EWS.AccessAsUser.All
 #           Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
-#           Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
+#           Required to connect to Outlook Web and to set Outlook signatures.
 #         Files.Read.All
 #           Allows the app to read all files the signed-in user can access.
 #           Required for access to templates and configuration files hosted on SharePoint Online.
@@ -54,6 +54,9 @@
 #         GroupMember.Read.All
 #           Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
 #           Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+#         Mail.ReadWrite
+#           Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
+#           Required to connect to Outlook Web and to set Outlook signatures.
 #         MailboxSettings.ReadWrite
 #           Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
 #           Required to detect the state of the out-of-office assistant and to set out-of-office replies.
@@ -122,8 +125,8 @@ $GraphHtmlMessageError = "<html><head><title>$(if ($BenefactorCircleLicenseFile)
 [uri] $GraphBrowserRedirectError = ''
 
 
-# User properties to select
-# Custom Graph attributes: 'extension_<AppID owning the extension attribute>_<attribute name>'
+# User properties to retrieve from Microsoft Graph/Entra ID
+# Custom Entra ID attributes use the following naming scheme: 'extension_<App ID w/o dashes of the app owning the extension attribute>_<attribute name>'
 $GraphUserProperties = @(
     'businessPhones',
     'city',
@@ -147,10 +150,11 @@ $GraphUserProperties = @(
 )
 
 
-# Mapping Graph user properties to on-prem Active Directory user properties
+# Mapping Graph/Entra ID user properties to on-prem Active Directory user properties and for use as replacement variables
 # This way, we do not need to differentiate between on-prem, hybrid and cloud in '.\config\default replacement variables.ps1'
-# Active Directory attribute names on the left, Graph attribute names on the right
-# Custom Graph attributes: 'extension_<AppID owning the extension attribute>_<attribute name>'
+# Active Directory attribute name on the left, Entra ID attribute name on the right
+#   If the attribute only exists in Entra ID, just make up a non-existing Active Directory attribute name
+# Custom Entra ID attributes use the following naming scheme: 'extension_<App ID w/o dashes of the app owning the extension attribute>_<attribute name>'
 $GraphUserAttributeMapping = @{
     co                         = 'country'
     company                    = 'companyName'

@@ -214,7 +214,7 @@ Signatures and OOF messages can also be created and deployed centrally, without 
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the software and to inspect the resulting signature files before going live.
 
-**SimulateAndDeploy** allows to deploy signatures to Outlook Web/New Outlook without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
+**SimulateAndDeploy** allows to deploy signatures to Outlook Web/New Outlook (when based on Outlook Web) without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
 
 The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and cloud-only environments**.  
 All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).

@@ -22,6 +22,40 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.0" target="_blank">v4.18.0</a> - 2025-03-06
+
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- Update Outlook add-in dependency @azure/msal-browser to v4.5.1.
+- Update dependency MSAL.Net to v4.69.1.
+- Copy MSAL.Net runtimes only for the current operating system.
+- Reduce the timeout value for autodiscover via Exchange Web Services from 100 to 25 seconds, which matches the Outlook default value.
+### Added
+- Convert more code from Exchange Web Services (EWS) to Graph, as new APIs have been released. To be able to use this, add the '`Mail.ReadWrite`' permission to your Entra ID app as documented in '`.\config\default graph config.psq`', '`.\sample code\Create-EntraApp.ps1`' and '`.\sample code\SimulateAndDeploy.ps1`': Delegated for Set-OutlookSignatures, delegated and application for SimulateAndDeploy. If you do not do this, Set-OutlookSignatures will fall back to using EWS, but this is only considered a workaround from now on. There is no need to change anything for mailboxes hosted on-prem.
+  - Adding '`Mail.ReadWrite`' actually does not add a permission, as they are already included in the existing '`EWS.AccessAsUser.All`' permission, but '`Mail.ReadWrite`' is required when doing things with Graph instead of EWS. Do not remove '`EWS.AccessAsUser.All`', as it is still needed for some tasks that can not be done via Graph.
+  - Also see the new FAQ '`What about Microsoft turning off Exchange Web Services for Exchange Online?`' in '`.\docs\README`' how Set-OutlookSignatures will be affected when Microsoft turns off EWS for Exchange Online.
+- Remove empty CSS properties and resolve multiple assignments in style attributes when creating HTML files. This corrects several errors in Word which affect Outlook (which uses Word as HTML renderer): Using the no longer supported text-autospace CSS property in HTML exports, setting an invalid null value for it, and not interpreting the null value as default 'none' value when rendering.
+- Work around a problem in PowerShell 7 showing wrong number of files in progress bars for copy and delete operations, and not removing these progress bars from screen.
+- Show a warning when Graph authentication is using the Entra app provided by the developers of Set-OutlookSignatures. It is recommended to create and use your own Entra app.
+- Detect when Set-OutlookSignatures has already been run in the current PowerShell session and exit when this is the case. This is the only way to prevent problems caused by .Net caching DLL files in memory.
+- Require a key press to continue when loading the Benefactor Circle license file results in a warning. Set-OutlookSignatures continues automatically after 120 seconds.
+- Add authentication broker support for Linux. No new redirect URI for the Entra app is required.
+- Add new FAQ '`Roaming signatures in Classic Outlook for Windows look different`' to '`.\docs\README`'.
+### Removed
+- Remove comment-based help content from Set-OutlookSignatures.ps1 and refer to '`.\docs\README`' instead.
+- Remove testing the connectivity to endpoints during Graph authentication, as Microsoft's servers suddenly randomly incorrectly interpret the HTTP 'Expect' header, returning HTTP error status code 417 instead of a 2xx success code. Rely on integrated tests in Microsoft's authentication library instead. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/133" target="_blank">#133</a>)
+### Fixed
+- Correct the Entra app configuration requirement for broker authentication in '`.\docs\default graph config`'. Use the application ID, not the Object ID.
+- Fix a race condition when evaluating OOF INI files. OOF INI entries without both the tags '`Internal`' and '`External`' now always correctly default to both, and not sometimes to only '`Internal`'.
+- Write all signature HTML files without a byte order mark (BOM) for consistency between PowerShell 5 and PowerShell 7+.
+- Correctly replace the connected folder path for images in signatures whose name starts with a number. This is a workaround for a problem in PowerShell's implementation of regular expressions.
+- Fix a bug where Active Directory is queried for mailbox properties instead of Graph. This leads to multiple follow-up errors, including the license group membership check in the Benefactor Circle add-on. The error occurs when all of the following conditions are met: The user has a connection to the on-prem Active Directory, GraphOnly is not enabled, and a Graph connection must be enforced as other parameters require it (the conditions are logged in the script output).
+- Fix a bug in the Outlook add-in, which made the script '`run_before_deployment.ps1`' work in PowerShell 7.4 and newer only, but not in Windows PowerShell.
+- Fix the bug that simulation mode did process out-of-office templates but did not include the results in the output.
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.17.0" target="_blank">v4.17.0</a> - 2025-02-14
 
 _**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
@@ -580,16 +614,16 @@ _**Attention, cloud mailbox users:**_
 - _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details, known problems and workarounds._
 ### Added
 - Templates can now be **assigned to or excluded for specific replacement variables of the current user or the current mailbox**. Thanks to [ExplicIT Consulting](https://explicitconsulting.at) for donating this code!  
-See `Template tags and ini files` in `README` for details and examples.  
+See `Template tags and INI files` in `README` for details and examples.  
 Use cases:
   - Assign template to a specific mailbox or user, but only if user or mailbox is member in multiple groups at the same time.
   - Assign template to users or mailboxes which have or have not a value in a replacement variable.
   - Every replacement variable can be used: Current user and current mailbox, their managers, or tailored replacement variables defined in a custom replacement variable config file.
 - Templates can now be **assigned to or excluded for specific email addresses or groups SIDs of the _mailbox of the current user_**. Thanks to [ExplicIT Consulting](https://explicitconsulting.at) for donating this code!  
-See `Template tags and ini files` in `README` for details and examples.  
+See `Template tags and INI files` in `README` for details and examples.  
 Use cases:
   - Assign template to a specific mailbox, but not if the _mailbox of the current user_ has a specific email address or is member of a specific group. It does not matter if this personal mailbox is added in Outlook or not.  
-This is useful for delegate and boss-secretary scenarios - secretaries get specific delegate template for boss's mailbox, but the boss not. **Combine this with the feature that one template can be used multiple times in the ini file, and you basically only need one template file for all delegate combinations in the company!**
+This is useful for delegate and boss-secretary scenarios - secretaries get specific delegate template for boss's mailbox, but the boss not. **Combine this with the feature that one template can be used multiple times in the INI file, and you basically only need one template file for all delegate combinations in the company!**
   - Assign a template to the mailbox of a specific logged-in user or deny a template for the mailbox of a specific user, no matter which mailboxes the user has added in Outlook.
 - The attribute 'GroupsSIDs' is now also available in the `$AdPropsCurrentUser` replacement variable. It contains all the SIDs of the groups the mailbox of the current user is a member of, which allows for replacement variable content based on group membership, as well as assigning or denying templates for specific users. See `Delete images when attribute is empty, variable content based on group membership` in `README` for details and examples.
 - Replacement variables are no longer case sensitive. This eliminates a common error source and makes replacement variables in template files easier to read.
@@ -742,9 +776,9 @@ _Attention cloud mailbox users: Microsoft will make roaming signatures available
 - New FAQ: Why does the text color of my signature change sometimes?
 ### Fixed
 - The permission check no longer takes more time than necessary by showing all allow or deny reasons, only the first match. Denies are only evaluated when an allow match has been found before.
-- Template file categorization time no longer grows exponentially with each template appearing multiple times in an ini file
+- Template file categorization time no longer grows exponentially with each template appearing multiple times in an INI file
 - Handle nested attribute names in graph config file correctly ('onPremisesExtensionAttributes.extensionAttribute1' et al.) (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/41" target="_blank">#41</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
-- Handle ini files with only one section correctly (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/42" target="_blank">#42</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
+- Handle INI files with only one section correctly (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/42" target="_blank">#42</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
 - Include 'state' in list of default replacement variables (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/44" target="_blank">#44</a>) (Thanks <a href="https://github.com/dakolta" target="_blank">@dakolta</a>!)
 - The code detecting Outlook and Word registry version, file version and bitness has been corrected
 
@@ -759,7 +793,7 @@ _Attention cloud mailbox users: Microsoft will make roaming signatures available
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v3.1.0" target="_blank">v3.1.0</a> - 2022-06-26
 _Attention cloud mailbox users: Microsoft will make roaming signatures available in late 2022. See 'What about the roaming signatures feature announced by Microsoft?' in README for details and recommended preparation steps._
 ### Changed
-- Each template reference in an INI file is now considered individually, not just the last entry. See 'How to work with ini files' in README for a use case example.
+- Each template reference in an INI file is now considered individually, not just the last entry. See 'How to work with INI files' in README for a use case example.
 - Additional output is now fully available in the verbose stream, and no longer scattered around the debug and the verbose streams
 - Rewrite FAQ "Why is dynamic group membership not considered on premises?" to reflect recent substantial changes in Microsoft Graph, which make Set-OutlookSignatures automatically support dynamic groups in the cloud. See the FAQ in README for more details and the reason why dynamic groups are not supported on premises.
 - Extend FAQ "How to avoid blank lines when replacement variables return an empty string?" with new examples and sample code that automatically differentiates between DOCX and HTM templates
@@ -781,7 +815,7 @@ If you copied and/or modified the sample files delivered with earlier versions o
   - Final data of replacement variables
 - Update documentation to make clear that 'DNS or NetBIOS name of AD domain' and 'Example' are just examples which need to be replaced with actual AD domain names, but 'EntraID' and 'AzureAD' are not examples
 ### Removed
-- **Breaking:** File name based tags are no longer supported. Use ini files instead.  
+- **Breaking:** File name based tags are no longer supported. Use INI files instead.  
 This change has been announced with the release of v2.5.0 on 2022-01-14.
 - **Breaking:** Parameter AdditionalSignaturePathFolder is no longer supported. Just append the folder to the AdditionalSignaturePath parameter.
 - All sample files with tags based on file names have been removed
@@ -816,7 +850,7 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - Fix Outlook 2013 registry key handling and temporary folder handling in environments without Outlook or Outlook profile (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/27" target="_blank">#27</a>)  (Thanks <a href="https://github.com/Imaginos" target="_blank">@Imaginos</a>!)
 ### Changed
 - Cache group SIDs across all types of templates to reduce network load and increase script speed
-- Deprecate file name based tags. They work as-is, no new features will be added and support for file name based tags will be removed completely in the next months. Please switch to ini files, see README for details.
+- Deprecate file name based tags. They work as-is, no new features will be added and support for file name based tags will be removed completely in the next months. Please switch to INI files, see README for details.
 - Update usage examples in script
 
 
@@ -836,7 +870,7 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - New parameter SimulateAndDeployGraphCredentialFile
 - New FAQ: How to deploy signatures for "Send As", "Send On Behalf" etc.?
 - New FAQ: Can I centrally manage and deploy Outook stationery with this script?
-- Report templates that are mentioned in the ini file but do not exist in the file system, and vice versa
+- Report templates that are mentioned in the INI file but do not exist in the file system, and vice versa
 ### Fixed
 - Do not ignore remote mailboxes when searching mailboxes in Active Directory (Thanks <a href="https://www.linkedin.com/in/lwhdk/" target="_blank">Lars Würtz Hammer</a>!)
 - Correctly handle hybrid scenarios with basic auth disabled in the cloud (Thanks <a href="https://www.linkedin.com/in/lwhdk/" target="_blank">Lars Würtz Hammer</a>!)
@@ -856,7 +890,7 @@ This change has been announced with the release of v2.5.0 on 2022-01-14.
 - Contribution opportunities in '.\docs\CONTRIBUTING.html'
 ### Added
 - Support for mailboxes in Microsoft 365, including hybrid and cloud only scenarios (see '.\docs\README.html' and '.\config\default graph config.ps1' for details)
-- Possibility to use ini files instead of file name tags, including settings for template sort order, sort culture, and custom Outlook signature names (see parameters 'SignatureIniFile' and 'OOFIniFile' for details)
+- Possibility to use INI files instead of file name tags, including settings for template sort order, sort culture, and custom Outlook signature names (see parameters 'SignatureIniFile' and 'OOFIniFile' for details)
 - New default replacement variables `$Current[…]Office$` and `$Current[…]Company$`, including updated templates
 - Enterprise ready workaround for Word security warning when converting documents with linked images
 - FAQ: the software hangs at HTM/RTF export, Word shows a security warning!?

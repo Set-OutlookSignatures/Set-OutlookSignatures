@@ -48,7 +48,7 @@ Signatures and OOF messages can also be created and pushed into mailboxes centra
 
 **Simulation mode** allows content creators and admins to simulate the behavior of the software for a specific user at a specific point in time, and to inspect the resulting signature files before going live.
 
-**SimulateAndDeploy¹** allows to deploy signatures to Outlook Web¹/New Outlook¹ without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
+**SimulateAndDeploy¹** allows to deploy signatures to Outlook Web¹/New Outlook¹ (when based on Outlook Web) without any client deployment or end user interaction, making it ideal for users that only log on to web services but never to a client (users with a Microsoft 365 F-license, for example).
 
 The software is **designed to work in big and complex environments** (Exchange resource forest scenarios, across AD trusts, multi-level AD subdomains, many objects). It works **on premises, in hybrid and in cloud-only environments**.  
 All **national clouds are supported**: Public (AzurePublic), US Government L4 (AzureUSGovernment), US Government L5 (AzureUSGovernment DoD), China (AzureChinaCloud operated by 21Vianet).
@@ -117,14 +117,13 @@ Top level chapters only.
 - [5. Group membership](#5-group-membership)
 - [6. Run Set-OutlookSignatures while Outlook is running](#6-run-set-outlooksignatures-while-outlook-is-running)
 - [7. Signature and OOF template file format](#7-signature-and-oof-template-file-format)
-- [8. Template tags and ini files](#8-template-tags-and-ini-files)
+- [8. Template tags and INI files](#8-template-tags-and-ini-files)
 - [9. Signature and OOF application order](#9-signature-and-oof-application-order)
 - [10. Replacement variables](#10-replacement-variables)
 - [11. Outlook Web](#11-outlook-web)
 - [12. Hybrid and cloud-only support](#12-hybrid-and-cloud-only-support)
 - [13. Simulation mode](#13-simulation-mode)
 - [14. FAQs](#14-faqs)
-  - [14.39 Empty lines contain an underlined space character](#1439-empty-lines-contain-an-underlined-space-character)
   
 # 1. Requirements  
 You need Exchange Online or Exchange on-prem.
@@ -148,7 +147,7 @@ Signature templates can be in DOCX (Windows) or HTML format (Windows, Linux, mac
 
 The software must run in PowerShell Full Language mode. Constrained Language mode is not supported, as some features such as BASE64 conversions are not available in this mode or require very slow workarounds.
 
-If you use AppLocker or a comparable solution, you may need to digitally sign the PowerShell 'Set-OutlokSignatures.ps1'. It is usually not necessary to sign the variable replacement configuration files, e. g. '.\config\default replacement variables.ps1'.  
+If you use AppLocker or a comparable solution (Defender, CrowdStrike, Ivanti, and others), you may need to add the existing digital file signature to your allow list, or define additional settings in your security software.  
 There are locked down environments, where all files matching the patterns `*.ps*1` and `*.dll` need to be digitially signed with a trusted certificate. 
 
 **Thanks to our partnership with [ExplicIT Consulting](https://explicitconsulting.at), Set-OutlookSignatures and its components are digitally signed with an Extended Validation (EV) Code Signing Certificate (which is the highest code signing standard available).  
@@ -196,7 +195,7 @@ Deploy your first signatures in less than an hour!
    - For full Linux and macOS support, the Benefactor Circle add-on (see <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> and is required and the mailboxes need to be hosted in Exchange Online.
 2. Download Set-OutlookSignatures and extract the archive to a local folder
    - On Windows and macOS, unblock the file 'Set-OutlookSignatures.ps1'. You can use the PowerShell cmdlet 'Unblock-File' for this, or right-click the file in File Explorer, select Properties and check 'Unblock'.
-3. If you use AppLocker or a comparable solution, you may need to digitally sign all '`*.ps*1`' and '`*.dll`' files, or add the existing digital signature to your allow list. 
+3. If you use AppLocker or a comparable solution (Defender, CrowdStrike, Ivanti, and others), you may need to add the existing digital file signature to your allow list, or define additional settings in your security software.
 4. Now it is time to run Set-OutlookSignatures for the first time
    - **If _all mailboxes_ are in Exchange _on-prem only_ and the logged-in user has access to the on-prem Active Directory:**<br>Just run 'Set-OutlookSignatures.ps1' in PowerShell.<br>For best results, don't run the software by double clicking it in File Explorer, or via right-click and 'Run'. Instead, run the following command:
       ```
@@ -243,7 +242,7 @@ When everything runs fine with default settings, it is time to start customizing
   - See the following chapters in this document for instructions:
     - Signature and OOF file format
     - Signature template file naming
-    - Template tags and ini files
+    - Template tags and INI files
   - Make sure to pass the parameters '`SignatureTemplatePath`', '`SignatureIniFile`', '`OOFTemplatePath`' and '`OOFIniFile`' to Set-OutlookSignatures.
 - Adapt other parameters you may find useful, or start experimenting with simulation mode.<br>The feature list and the parameter documentation show what's possible.<br><br>
 
@@ -320,7 +319,7 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignatureTemplatePath '.\sample templates\Signatures DOCX'"
 
 ## 3.2. SignatureIniFile<!-- omit in toc -->
-Template tags are placed in an ini file.
+Template tags are placed in an INI file.
 
 The file must be UTF-8 encoded (without BOM).
 
@@ -514,7 +513,7 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\temp
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -OOFTemplatePath '.\templates\Out-of-office DOCX'"
 
 ## 3.13. OOFIniFile<!-- omit in toc -->
-Template tags are placed in an ini file.
+Template tags are placed in an INI file.
 
 The file must be UTF-8 encoded (without BOM).
 
@@ -623,7 +622,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SimulateUser ""202312311859"""
 
 ## 3.19. SimulateAndDeploy<!-- omit in toc -->
-Not only simulate, but deploy signatures while simulating
+Not only simulate, but also deploy signatures to Outlook Web/New Outlook (when based on New Outlook).
 
 Makes only sense in combination with '.\sample code\SimulateAndDeploy.ps1', do not use this parameter for other scenarios
 
@@ -777,11 +776,13 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -SignaturesForAutomappedAndAdditionalMailboxes true"
 
 ## 3.30. DisableRoamingSignatures<!-- omit in toc -->
-Disable signature roaming in Outlook. Only works on Windows. Has no effect on signature roaming via the MirrorCloudSignatures parameter.
+Disable signature roaming in Classic Outlook for Windows. Has no effect on signature roaming via the MirrorCloudSignatures parameter.
 
 A value representing true disables roaming signatures, a value representing false enables roaming signatures, any other value leaves the setting as-is.
 
-Attention: When Outlook v16 and higher is allowed to sync signatures itself, it may overwrite signatures created by this software with their cloud versions. To avoid this, it is recommended to set the parameters DisableRoamingSignatures and MirrorCloudSignatures to true instead.
+Attention:
+- When Outlook v16 and higher is allowed to sync signatures itself, it may overwrite signatures created by this software with their cloud versions. To avoid this, it is recommended to set the parameters DisableRoamingSignatures and MirrorCloudSignatures to true instead.
+- When Classic Outlook for Windows syncs roaming signatures witht its own internal engine, expect problems with character encoding (umlauts, diacritics, emojis, etc.) and more. Until Microsoft provides a sustaining solution, these Outlook-internal problems will come and go depending on the patch level of Outlook. Also see FAQ '`Roaming signatures in Classic Outlook for Windows look different`' in this document.
 
 Only sets HKCU registry key, does not override configuration set by group policy.
 
@@ -833,7 +834,7 @@ What will not work:
 - Download from and upload to shared mailboxes. This is not possible because of Microsoft API restrictions.
 - Uploading signatures other than device specific signatures and such assigned to the mailbox of the current user. Uploading is not implemented, because until now no way could be found that does not massively impact the user experience as soon as the Outlook integrated download process starts (signatures available multiple times, etc.)
 
-Attention: When Outlook v16 and higher is allowed to sync signatures itself, it may overwrite signatures created by this software with their cloud versions. To avoid this, it is recommended to set the parameters DisableRoamingSignatures and MirrorCloudSignatures to true instead.
+Attention: When Outlook v16 and higher is allowed to sync signatures itself, it may overwrite signatures created by this software with their cloud versions. To avoid this, it is recommended to set the parameters DisableRoamingSignatures and MirrorCloudSignatures to true instead. Also see FAQ '`Roaming signatures in Classic Outlook for Windows look different`' in this document.
 
 Consider combining MirrorCloudSignatures with MailboxSpecificSignatureNames.
 
@@ -1160,17 +1161,17 @@ New and changed signatures can be used instantly in Outlook.
 Changing which signature name is to be used as default signature for new emails or for replies and forwards requires restarting Outlook.   
 # 7. Signature and OOF template file format  
 Only Word files with the extension .docx and HTML files with the extension .htm are supported as signature and OOF template files.  
-## 6.1. Relation between template file name and Outlook signature name<!-- omit in toc -->
+## 7.1. Relation between template file name and Outlook signature name<!-- omit in toc -->
 The name of the signature template file without extension is the name of the signature in Outlook.
 Example: The template "Test signature.docx" will create a signature named "Test signature" in Outlook.
 
-This can be overridden in the ini file with the 'OutlookSignatureName' parameter.
-Example: The template "Test signature.htm" with the following ini file configuration will create a signature named "Test signature, do not use".
+This can be overridden in the INI file with the 'OutlookSignatureName' parameter.
+Example: The template "Test signature.htm" with the following INI file configuration will create a signature named "Test signature, do not use".
 ```
 [Test signature.htm]
 OutlookSignatureName = Test signature, do not use
 ```
-## 6.2. Proposed template and signature naming convention<!-- omit in toc -->
+## 7.2. Proposed template and signature naming convention<!-- omit in toc -->
 To make life easier for template maintainers and for users, a consistent template and signature naming convention should be used.
 
 There are multiple approaches, with the following one gaining popularity: `<Company> <internal/external> <Language> <formal/informal> <additional info>`
@@ -1214,7 +1215,7 @@ For the user, the selection process may look complicated at first sight, but is 
   4. "The tone is informal" -> "CompA int EN infrml"
   5. "I send from my own mailbox" -> "CompA int EN infrml"
 
-Don't forget: You can use one and the same template for different signature names. In the example above, the template might not be named `CompA ext EN frml office@.docx`, but `CompA ext EN frml shared@.docx` and be used multiple times in the ini file:
+Don't forget: You can use one and the same template for different signature names. In the example above, the template might not be named `CompA ext EN frml office@.docx`, but `CompA ext EN frml shared@.docx` and be used multiple times in the INI file:
 ```
 # office@example.com
 [CompA ext EN frml shared@.docx]
@@ -1228,7 +1229,7 @@ marketing@example.com
 OutlookSignatureName = CompA ext EN frml marketing@
 DefaultNew
 ```
-# 8. Template tags and ini files
+# 8. Template tags and INI files
 Tags define properties for templates, such as
 - time ranges during which a template shall be applied or not applied
 - groups whose direct or indirect members are allowed or denied application of a template
@@ -1242,7 +1243,7 @@ There are additional tags which are not template specific, but change the behavi
 - specific sort order for templates (ascending, descending, as listed in the file)
 - specific sort culture used for sorting ascendingly or descendingly (de-AT or en-US, for example)
 
-If you want to give template creators control over the ini file, place it in the same folder as the templates.
+If you want to give template creators control over the INI file, place it in the same folder as the templates.
 
 Tags are case insensitive.
 ## 7.1. Allowed tags<!-- omit in toc -->
@@ -1284,7 +1285,7 @@ Tags are case insensitive.
   - Examples: `office@example.com`, `-:test@example.com`
   - The `CURRENTUSER:` and `-CURRENTUSER:` prefixes make this template invalid for the specified email addresses of the current user.  
   Example: Assign template to every mailbox, but not if the personal mailbox of the current user has the email address userX@example.com
-  - Useful for delegate or boss-secretary scenarios: "Assign a template to everyone having the boss mailbox userA@example.com in Outlook, but not for UserA itself" is realized like that in the ini file:
+  - Useful for delegate or boss-secretary scenarios: "Assign a template to everyone having the boss mailbox userA@example.com in Outlook, but not for UserA itself" is realized like that in the INI file:
     ```
     [delegate template name.docx]
     # Assign the template to everyone having userA@example.com in Outlook
@@ -1292,7 +1293,7 @@ Tags are case insensitive.
     # Do not assign the template to the actual user owning the mailbox userA@example.com
     -CURRENTUSER:userA@example.com
     ```
-    You can even only use only one delegate template for your whole company to cover all delegate scenarios. Make sure the template correctly uses `$CurrentUser[…]$` and `$CurrentMailbox[…]$` replacement variables, and then use the template multiple times in the ini file, with different signature names:
+    You can even only use only one delegate template for your whole company to cover all delegate scenarios. Make sure the template correctly uses `$CurrentUser[…]$` and `$CurrentMailbox[…]$` replacement variables, and then use the template multiple times in the INI file, with different signature names:
     ```
     [Company EN external formal delegate.docx]
     # Assign the template to everyone having userA@example.com in Outlook
@@ -1324,7 +1325,7 @@ Tags are case insensitive.
         ```
         @(@('CurrentUser', '$CurrentUser-IsMemberOf-MarketingAndSales$', 'EXAMPLEDOMAIN Marketing', 'EXAMPLEDOMAIN Sales'), @()) | Where-Object { $_ } | Foreach-Object { if ( ((Get-Variable -Name "ADProps$($_[0])" -ValueOnly).GroupsSids -icontains $(ResolveToSid($_[2]))) -and ((Get-Variable -Name "ADProps$($_[0])" -ValueOnly).GroupsSids -icontains $(ResolveToSid($_[3]))) ) { $ReplaceHash[$_[1]] = 'yes' } else { $ReplaceHash[$_[1]] = $null } }
         ```
-      - The template ini configuration then looks like this:
+      - The template INI configuration then looks like this:
         ```
         [template.docx]
         $CurrentUser-IsMemberOf-MarketingAndSales$
@@ -1358,12 +1359,12 @@ Tags are case insensitive.
 
 <br>Tags can be combined: A template may be assigned to several groups, email addresses and time ranges, be denied for several groups, email adresses and time ranges, be used as default signature for new emails and as default signature for replies and forwards - all at the same time. Simple add different tags below a file name, separated by line breaks (each tag needs to be on a separate line).
 
-## 7.2. How to work with ini files<!-- omit in toc -->
+## 7.2. How to work with INI files<!-- omit in toc -->
 1. Comments  
   Comment lines start with '#' or ';'  
 	Whitespace at the beginning and the end of a line is ignored  
   Empty lines are ignored  
-2. Use the ini files in `.\templates\Signatures DOCX with ini` and `.\templates\Out-of-office DOCX with ini` as templates and starting point
+2. Use the INI files in `.\templates\Signatures DOCX with ini` and `.\templates\Out-of-office DOCX with ini` as templates and starting point
 3. Put file names with extensions in square brackets  
   Example: `[Company external English formal.docx]`  
   Putting file names in single or double quotes is possible, but not necessary.  
@@ -1413,7 +1414,7 @@ Tags are case insensitive.
           SharedMailboxC@example.com
           OutlookSignatureName = template SharedMailboxC
           ```
-    You can even only use only one delegate template for your whole company to cover all delegate scenarios. Make sure the template correctly uses `$CurrentUser[…]$` and `$CurrentMailbox[…]$` replacement variables, and then use the template multiple times in the ini file, with different signature names:
+    You can even only use only one delegate template for your whole company to cover all delegate scenarios. Make sure the template correctly uses `$CurrentUser[…]$` and `$CurrentMailbox[…]$` replacement variables, and then use the template multiple times in the INI file, with different signature names:
     ```
     [Company EN external formal delegate.docx]
     # Assign the template to everyone having userA@example.com in Outlook
@@ -1434,18 +1435,18 @@ Tags are case insensitive.
     ```
 4. Add tags in the lines below the filename
   Example: `defaultNew`
-    - Do not enclose tags in square brackets. This is not allowed here, but required when you add tags directly to file names.    - When an ini file is used, tags in file names are not considered as tags, but as part of the file name, so the Outlook signature name will contain them.  
+    - Do not enclose tags in square brackets. This is not allowed here, but required when you add tags directly to file names.    - When an INI file is used, tags in file names are not considered as tags, but as part of the file name, so the Outlook signature name will contain them.  
     - Only one tag per line is allowed.
     Adding not a single tag to file name section is valid. The signature template is then classified as a common template.
     - Putting file names in single or double quotes is possible, but not necessary
     - Tags are case insensitive  
     `defaultNew` is the same as `DefaultNew` and `dEFAULTnEW`
     - You can override the automatic Outlook signature name generation by setting OutlookSignatureName, e. g. `OutlookSignatureName = This is a custom signature name`  
-    With this option, you can have different template file names for the same Outlook signature name. Search for "Marketing external English formal" in the sample ini files for an example. Take care of signature group priorities (common, group, email address, replacement variable) and the SortOrder and SortCulture parameters.
+    With this option, you can have different template file names for the same Outlook signature name. Search for "Marketing external English formal" in the sample INI files for an example. Take care of signature group priorities (common, group, email address, replacement variable) and the SortOrder and SortCulture parameters.
 5. Remove the tags from the file names in the file system  
-Else, the file names in the ini file and the file system do not match, which will result in some templates not being applied.  
+Else, the file names in the INI file and the file system do not match, which will result in some templates not being applied.  
 It is recommended to create a copy of your template folder for tests.
-6. Make the software use the ini file by passing the `SignatureIniFile` and/or `OOFIniFile` parameter
+6. Make the software use the INI file by passing the `SignatureIniFile` and/or `OOFIniFile` parameter
 # 9. Signature and OOF application order  
 Signatures are applied mailbox for mailbox. The mailbox list is sorted as follows (from highest to lowest priority):
 - Mailbox of the currently logged-in user
@@ -1759,8 +1760,9 @@ FAQs in this chapter:
 - [13.36 Why is the out-of-office assistant not activated automatically?](#1436-why-is-the-out-of-office-assistant-not-activated-automatically)
 - [14.37 When should I refer on-prem groups and when Entra ID groups?](#1437-when-should-i-refer-on-prem-groups-and-when-entra-id-groups)
 - [14.38 Why are signatures and out-of-office replies recreated even when their content has not changed?](#1438-why-are-signatures-and-out-of-office-replies-recreated-even-when-their-content-has-not-changed)
-- [14.39 Empty lines contain an underlined space character
-](#1439-empty-lines-contain-an-underlined-space-character)
+- [14.39 Empty lines contain an underlined space character](#1439-empty-lines-contain-an-underlined-space-character)
+- [14.40 What about Microsoft turning off Exchange Web Services for Exchange Online?](#1440-what-about-microsoft-turning-off-exchange-web-services-for-exchange-online)
+- [14.41 Roaming signatures in Classic Outlook for Windows look different](#1441-roaming-signatures-in-classic-outlook-for-windows-look-different)
 
 
 ## 14.1. Where can I find the changelog?<!-- omit in toc -->
@@ -1964,6 +1966,7 @@ The only workaround is to start PowerShell from another program, which does not 
 - NTWind Software's [HStart](https://www.ntwind.com/software/hstart.html)
 - wenshui2008's [RunHiddenConsole](https://github.com/wenshui2008/RunHiddenConsole)
 - stax76's [run-hidden](https://github.com/stax76/run-hidden)
+- Nir Sofer's [NirCmd](https://www.nirsoft.net/utils/nircmd.html)
 - As Microsoft has marked Visual Basic Script (VBS) as deprecated and will remove it completely from future Windows releases, the use of Windows Script Host (WSH) is not recommended. If you want to try it anyway, here is a working example:
   - Create a .vbs (Visual Basic Script) file, paste and adapt the following code into it:
     ```
@@ -1974,6 +1977,10 @@ The only workaround is to start PowerShell from another program, which does not 
     shell.Run command, 0
     ```
   - Then, run the .vbs file directly, without specifying cscript.exe as host (just execute `start.vbs` or `wscript.exe start.vbs`, but not `cscript.exe start.vbs`).
+- If your Windows installation comes with the '`conhost.exe`' console host, you may want to try one of its undocumented parameters:
+  ```
+  conhost.exe --headless powershell.exe -File "\\server\share\directory\Set-OutlookSignatures.ps1" -SignatureTemplatePath "\\server\share\directory\templates\Signatures DOCX" -OOFTemplatePath "\\server\share\directory\templates\Out-of-office DOCX" -ReplacementVariableConfigFile "\\server\share\directory\config\default replacement variables.ps1"
+  ```
 ## 14.13. How to create a shortcut to the software with parameters?<!-- omit in toc -->
 You may want to provide a link on the desktop or in the start menu, so they can start the software on their own.
 
@@ -2496,7 +2503,7 @@ Changes affecting signatures and out-of-office replies may have been made on the
 
 The only reliable way to detect changes in an environment where things can be modified in so many places would be to calculate what the new signatures would look like with current values and then compare these with the existing ones - but if you already have the new signatures and out-of-office replies anyway, overwriting the existing ones is faster than comparing them.
 
-## 14.39 Empty lines contain an underlined space character
+## 14.39 Empty lines contain an underlined space character<!-- omit in toc -->
 Outlook, especially the Web version, sometimes does not show an empty line but a line with a single underlined space character:
 ```
 <a hyperlink>
@@ -2526,3 +2533,45 @@ instead of
 ```
 
 The root cause is unknown, but it seems to be related to the HTML parser of the office.js framework, which is used by Outlook on all platforms to perform specific tasks.
+
+## 14.40 What about Microsoft turning off Exchange Web Services for Exchange Online?<!-- omit in toc -->
+Microsoft will turn of Exchange Web Services (EWS) for Exchange Online. This is announced to happen in October 2026. This only affects Exchange in the cloud, not Exchange hosted on premises.
+
+Set-OutlookSignatures, the Benefactor Circle add-on and the Outlook add-in are prepared for this since the end of 2023, when Microsoft made their first announcement about this.
+
+Unfortunately, the Graph API does not yet offer the same feature set as EWS. This affects the following features for mailboxes hosted in Exchange Online (and only in Exchange Online):
+- Setting the classic Outlook Web signature<br>The classic Outlook Web signature can only be seen when using Outlook Web on a browser in mobile view. This only affects a vanishingly small number of users, the trend is downwards, and it is not yet clear if Microsoft will ever bring this feature to the Graph API.<br>Roaming signatures are not affected. Exchange on-prem is not affected.
+- Getting additional mailboxes from Outlook Web<br>This affects all editions of Outlook which are not the Classic Outlook on Windows - in other words: New Outlook on Windows, any Outlook on macOS, and running Set-OutlookSignatures on Linux.<br>It is very likely that Microsoft will update the Graph API to support this feature. The timeline is unknown.<br>Detecting automapped mailboxes is not affected. Exchange on-prem is not affected.
+
+
+## 14.41 Roaming signatures in Classic Outlook for Windows look different<!-- omit in toc -->
+When letting Classic Outlook for Windows sync roaming signatures itself, you very likely run into multiple problems.
+
+The most disturbing one is that the encoding of characters within the signatures is wrong.
+
+Here is how you can test if the current patch level of Classic Outlook for Windows is affected:
+1. Ensure that the system codepage of your Windows client is not set to UTF-8, but to a local codepage as Windows does per default (such as Windows-1252 in Western Europe). Setting the codepage to UTF-8 is possible, but it is still an optional beta feature. 
+2. Ensure that Classic Outlook for Windows is configured to use roaming signatures.
+3. Create a new signature in Outlook Web (not in any other Outlook) with the following content:
+    ```
+    Test signature with UTF-8 characters
+    ä (a with umlaut)
+    ö (o with umlaut)
+    ü (u with umlaut)
+    𝄞 (musical symbol G clef)
+    😃 (grinning face with big eyes)
+    😞 (disappointed face)
+    🧩 (puzzle piece)
+    ⭐ (star)
+    ```
+4. Wait until Classic Outlook for Windows has downloaded the signature locally.
+5. Add the freshly downloaded signature to a new email in Classic Outlook for Windows or open the downloaded file directly in a browser.
+6. You will notice that the UTF-8 characters are not displayed correctly.
+
+This is because Classic Outlook for Windows performs a wrong codepage conversion. Microsoft knows about this error since roaming signatures have been introduced multiple years ago, but it has not yet been fixed.
+
+Some other problems with the internal roaming signature sync mechanism of classic Outlook for Windows are that you can not reliably trigger the sync and that it can take hours until a changed or new signature is downloaded.
+
+The sync mechanism included in the Benefactor Circle add-on does not have these problems.
+
+This can be a problem, especially when using Set-OutlookSignatures in SimulateAndDeploy mode. If you really can not switch to running Set-OutlookSignatures on the clients of your users, the Outlook add-in that comes with the Benefactor Circle license may be an alternative to the erronous internal roaming signature sync mechanism of Classic Outlook for Windows.

@@ -147,6 +147,14 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                         'type' = 'Scope'
                     },
 
+                    # Delegated permission: Mail.ReadWrite
+                    #   Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
+                    #   Required to connect to Outlook Web and to set Outlook signatures.
+                    @{
+                        'id'   = '024d486e-b451-40bb-833d-3e66d98c5c73'
+                        'type' = 'Scope'
+                    },
+
                     # Delegated permission: MailboxSettings.ReadWrite
                     #   Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
                     #   Required to detect the state of the out-of-office assistant and to set out-of-office replies.
@@ -234,6 +242,14 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                         'type' = 'Scope'
                     },
 
+                    # Delegated permission: Mail.ReadWrite
+                    #   Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
+                    #   Required to connect to Outlook Web and to set Outlook signatures.
+                    @{
+                        'id'   = '024d486e-b451-40bb-833d-3e66d98c5c73'
+                        'type' = 'Scope'
+                    },
+
                     # Delegated permission: MailboxSettings.ReadWrite
                     #   Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
                     #   Required to detect the state of the out-of-office assistant and to set out-of-office replies.
@@ -289,6 +305,14 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                     @{
                         'id'   = '98830695-27a2-44f7-8c18-0c3ebc9698f6'
                         'type' = 'Role'
+                    },
+
+                    # Application permission: Mail.ReadWrite
+                    #   Allows the app to create, read, update, and delete mail in all mailboxes without a signed-in user. Does not include permission to send mail.
+                    #   Required to connect to Outlook Web and to set Outlook signatures.
+                    @{
+                        'id'   = 'e2a3a72e-5f79-4c64-b1b1-878b674786c9'
+                        'type' = 'Scope'
                     },
 
                     # Application permission: MailboxSettings.ReadWrite
