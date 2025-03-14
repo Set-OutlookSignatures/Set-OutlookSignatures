@@ -1757,9 +1757,9 @@ end tell
 
             if ($SignaturesForAutomappedAndAdditionalMailboxes) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignaturesForAutomappedAndAdditionalMailboxes')))) {
-                    Write-Host '    Automapped and additional mailboxes will not be found.' -ForegroundColor Yellow
-                    Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                    Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                    Write-Host '    Automapped and additional mailboxes will not be found.' -ForegroundColor Green
+                    Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                    Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
                     try { WatchCatchableExitSignal } catch { }
 
@@ -1835,9 +1835,9 @@ end tell
 
                 if ($SignaturesForAutomappedAndAdditionalMailboxes) {
                     if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignaturesForAutomappedAndAdditionalMailboxes')))) {
-                        Write-Host '    Automapped and additional mailboxes will not be found.' -ForegroundColor Yellow
-                        Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                        Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                        Write-Host '    Automapped and additional mailboxes will not be found.' -ForegroundColor Green
+                        Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                        Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                     } else {
                         try { WatchCatchableExitSignal } catch { }
 
@@ -2419,9 +2419,9 @@ end tell
         if ($AccountNumberRunning -eq ($MailAddresses.count - 1)) {
             if ($VirtualMailboxConfigFile) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DefineAndAddVirtualMailboxes')))) {
-                    Write-Host '  Virtual mailboxes and dynamic signature INI entries can not be defined and added.' -ForegroundColor Yellow
-                    Write-Host "  The 'VirtualMailboxConfigFile' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                    Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                    Write-Host '  Virtual mailboxes and dynamic signature INI entries can not be defined and added.' -ForegroundColor Green
+                    Write-Host "  The 'VirtualMailboxConfigFile' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                    Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
                     try { WatchCatchableExitSignal } catch { }
 
@@ -2787,9 +2787,9 @@ end tell
             if (($TemplateFilePart -imatch $TemplateFilePartRegexTimeAllow) -or ($TemplateFilePart -imatch $TemplateFilePartRegexTimeDeny)) {
                 Write-Host '      Time based template'
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('TimeBasedTemplate')))) {
-                    Write-Host '        Templates can not be activated or deactivated for specified time ranges.' -ForegroundColor Yellow
-                    Write-Host "        The 'time based template' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                    Write-Host "        Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                    Write-Host '        Templates can not be activated or deactivated for specified time ranges.' -ForegroundColor Green
+                    Write-Host "        The 'time based template' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                    Write-Host "        Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
                     try { WatchCatchableExitSignal } catch { }
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::TimeBasedTemplate()
@@ -3331,9 +3331,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
             if ($MirrorCloudSignatures -eq $true) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesDownload')))) {
-                    Write-Host '    Roaming signatures can not be downloaded from Exchange Online.' -ForegroundColor Yellow
-                    Write-Host "    The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                    Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                    Write-Host '    Roaming signatures can not be downloaded from Exchange Online.' -ForegroundColor Green
+                    Write-Host "    The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                    Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
                     try { WatchCatchableExitSignal } catch { }
 
@@ -3380,9 +3380,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         Write-Host "    Set default classic (not roaming) Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOutlookWebSignature')))) {
-                            Write-Host '      Default classic Outlook Web signature can not be set.' -ForegroundColor Yellow
-                            Write-Host "      The 'SetCurrentUserOutlookWebSignature' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                            Write-Host "      Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                            Write-Host '      Default classic Outlook Web signature can not be set.' -ForegroundColor Green
+                            Write-Host "      The 'SetCurrentUserOutlookWebSignature' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                            Write-Host "      Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                         } else {
                             try { WatchCatchableExitSignal } catch { }
 
@@ -3398,9 +3398,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                         if ($MirrorCloudSignatures -eq $true) {
                             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesSetDefaults')))) {
-                                Write-Host '      Default roaming Outlook Web signature(s) can not be set. This also affects New Outlook on Windows.' -ForegroundColor Yellow
-                                Write-Host "      The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                                Write-Host "      Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                                Write-Host '      Default roaming Outlook Web signature(s) can not be set. This also affects New Outlook on Windows.' -ForegroundColor Green
+                                Write-Host "      The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                                Write-Host "      Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                             } else {
                                 try { WatchCatchableExitSignal } catch { }
 
@@ -3423,9 +3423,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                 if ($SetCurrentUserOOFMessage) {
                     if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOOFMessage')))) {
-                        Write-Host '    The out-of-office replies can not be set.' -ForegroundColor Yellow
-                        Write-Host "    The 'SetCurrentUserOOFMessage' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                        Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                        Write-Host '    The out-of-office replies can not be set.' -ForegroundColor Green
+                        Write-Host "    The 'SetCurrentUserOOFMessage' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                        Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                     } else {
                         try { WatchCatchableExitSignal } catch { }
 
@@ -3468,9 +3468,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($DeleteScriptCreatedSignaturesWithoutTemplate -eq $true) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DeleteScriptCreatedSignaturesWithoutTemplate')))) {
-            Write-Host '  Can not delete old signatures created by Set-OutlookSignatures, which are no longer centrally available.' -ForegroundColor Yellow
-            Write-Host "  The 'DeleteScriptCreatedSignaturesWithoutTemplate' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-            Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+            Write-Host '  Can not delete old signatures created by Set-OutlookSignatures, which are no longer centrally available.' -ForegroundColor Green
+            Write-Host "  The 'DeleteScriptCreatedSignaturesWithoutTemplate' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+            Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
         } else {
             try { WatchCatchableExitSignal } catch { }
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::DeleteScriptCreatedSignaturesWithoutTemplate()
@@ -3494,9 +3494,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($DeleteUserCreatedSignatures -eq $true) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DeleteUserCreatedSignatures')))) {
-            Write-Host '  Can not remove user-created signatures.' -ForegroundColor Yellow
-            Write-Host "  The 'DeleteUserCreatedSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-            Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+            Write-Host '  Can not remove user-created signatures.' -ForegroundColor Green
+            Write-Host "  The 'DeleteUserCreatedSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+            Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
         } else {
             try { WatchCatchableExitSignal } catch { }
 
@@ -3519,9 +3519,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($MirrorCloudSignatures -eq $true) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesUpload')))) {
-            Write-Host '  Signature(s) can not be uploaded to Exchange Online. This affects Outlook Web and New Outlook on Windows.' -ForegroundColor Yellow
-            Write-Host "  The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-            Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+            Write-Host '  Signature(s) can not be uploaded to Exchange Online. This affects Outlook Web and New Outlook on Windows.' -ForegroundColor Green
+            Write-Host "  The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+            Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
         } else {
             try { WatchCatchableExitSignal } catch { }
 
@@ -3557,9 +3557,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($SignatureCollectionInDrafts -eq $true) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignatureCollectionInDrafts')))) {
-            Write-Host '  Can not create email draft containing all signatures.' -ForegroundColor Yellow
-            Write-Host "  The 'SignatureCollectionInDrafts' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-            Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+            Write-Host '  Can not create email draft containing all signatures.' -ForegroundColor Green
+            Write-Host "  The 'SignatureCollectionInDrafts' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+            Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
         } else {
             try { WatchCatchableExitSignal } catch { }
 
@@ -3589,9 +3589,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             Write-Host '    Simulation mode enabled, AdditionalSignaturePath already used as output directory'
         } else {
             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('AdditionalSignaturePath')))) {
-                Write-Host '    Can not copy signatures to additional signature path.' -ForegroundColor Yellow
-                Write-Host "    The 'AdditionalSignaturePath' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                Write-Host '    Can not copy signatures to additional signature path.' -ForegroundColor Green
+                Write-Host "    The 'AdditionalSignaturePath' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
             } else {
                 try { WatchCatchableExitSignal } catch { }
 
@@ -4936,9 +4936,9 @@ function SetSignatures {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DocxHighResImageConversion')))) {
                     $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
-                    Write-Host "$Indent          Can not export high-res images." -ForegroundColor Yellow
-                    Write-Host "$Indent          The 'DocxHighResImageConversion' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                    Write-Host "$Indent          Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                    Write-Host "$Indent          Can not export high-res images." -ForegroundColor Green
+                    Write-Host "$Indent          The 'DocxHighResImageConversion' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                    Write-Host "$Indent          Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
                     try { WatchCatchableExitSignal } catch { }
 
@@ -5287,9 +5287,9 @@ function SetSignatures {
 
             if ($MirrorCloudSignatures -eq $true) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesUpload')))) {
-                    Write-Host "$Indent        Can not upload signature to Exchange Online." -ForegroundColor Yellow
-                    Write-Host "$Indent        The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Yellow
-                    Write-Host "$Indent        Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Yellow
+                    Write-Host "$Indent        Can not upload signature to Exchange Online." -ForegroundColor Green
+                    Write-Host "$Indent        The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
+                    Write-Host "$Indent        Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
                     try { WatchCatchableExitSignal } catch { }
 
@@ -5898,28 +5898,26 @@ $CheckPathScriptblock = {
                         $tempDir = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
                         $null = New-Item $tempDir -ItemType Directory
 
-                        switch (($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).contentType.name) {
-                            'document' {
+                        $docLibDriveItem = $docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }
+
+                        if ($docLibDriveItem) {
+                            if ($docLibDriveItem.driveItem.file) {
                                 Write-Verbose '    Download file to local temp folder'
 
-                                $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath $([uri]::UnEscapeDataString((Split-Path $($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).webUrl -Leaf))))
+                                $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath $([uri]::UnEscapeDataString((Split-Path $docLibDriveItem.webUrl -Leaf))))
 
                                 $(New-Object Net.WebClient).DownloadFile(
-                                    $($docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }).driveItem.'@microsoft.graph.downloadUrl',
+                                    $docLibDriveItem.driveItem.'@microsoft.graph.downloadUrl',
                                     $CheckPathPathNew
                                 )
 
                                 Write-Verbose "      '$($CheckPathRefPath.Value)' -> '$($CheckPathPathNew)'"
                                 $CheckPathPath = $CheckPathRefPath.Value = $CheckPathPathNew
-
-                                break
-                            }
-
-                            'folder' {
+                            } elseif ($docLibDriveItem.driveItem.folder) {
                                 Write-Verbose '    Create temp folders locally'
 
                                 @(
-                                    @($docLibDriveItems | Where-Object { ($_.contentType.name -ieq 'Folder') -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }).webUrl | ForEach-Object {
+                                    @($docLibDriveItems | Where-Object { ($_.driveItem.folder) -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }).webUrl | ForEach-Object {
                                         [uri]::UnescapeDataString(($_ -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'
                                     }
                                 ) | Sort-Object | ForEach-Object {
@@ -5929,7 +5927,7 @@ $CheckPathScriptblock = {
                                 }
 
                                 Write-Verbose '      Create dummy files in local temp folders'
-                                @($docLibDriveItems | Where-Object { ($_.contentType.name -ieq 'Document') -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }) | Sort-Object -Property { $_.webUrl } | ForEach-Object {
+                                @($docLibDriveItems | Where-Object { ($_.driveItem.file) -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }) | Sort-Object -Property { $_.webUrl } | ForEach-Object {
                                     $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath ([uri]::UnescapeDataString(($_.webUrl -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'))
 
                                     if (-not $script:SpoDownloadUrls) {
@@ -5946,16 +5944,12 @@ $CheckPathScriptblock = {
 
                                 Write-Verbose "      '$($CheckPathRefPath.Value)' -> '$($tempDir)'"
                                 $CheckPathPath = $CheckPathRefPath.Value = $tempDir
-
-                                break
                             }
-
-                            default {
-                                Write-Host " '$($CheckPathPath)' does not exist. Exiting." -ForegroundColor Red
-                                $script:ExitCode = 24
-                                $script:ExitCodeDescription = "Path '$($CheckPathPath)' does not exist.";
-                                exit
-                            }
+                        } else {
+                            Write-Host " '$($CheckPathPath)' does not exist. Exiting." -ForegroundColor Red
+                            $script:ExitCode = 24
+                            $script:ExitCodeDescription = "Path '$($CheckPathPath)' does not exist.";
+                            exit
                         }
                     } else {
                         Write-Host '    SharePoint via Graph: No DriveID. Wrong path or missing permission in SharePoint?' -ForegroundColor Yellow

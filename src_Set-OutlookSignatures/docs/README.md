@@ -182,7 +182,7 @@ Not all features are yet available on Linux and macOS. Every parameter contains 
   - Until Classic Outlook supports roaming signatures (which is very likely to never happen), it is treated like Outlook for Windows configured not to use roaming signatures. Consider using the '-MailboxSpecificSignatureNames' parameter.
 - New Outlook for Mac is supported
   - Until New Outlook supports roaming signatures (not yet announced by Microsoft), it is treated like Outlook for Windows configured not to use roaming signatures. Consider using the '-MailboxSpecificSignatureNames' parameter.
-  - If New Outlook is enabled, an alternate method of account detection is used, as scripting is not yet supported by Microsoft (announced on the M365 roadmap for December 2024). This alternate method may detect accounts that are no longer used in Outlook (see software output for details).  
+  - If New Outlook is enabled, an alternate method of account detection is used, as scripting is not yet supported by Microsoft, but already announced on the M365 roadmap. This alternate method may detect accounts that are no longer used in Outlook (see software output for details).  
   - If the alternate method does not find accounts, Outlook Web is used and existing signatures are synchronized with New Outlook for Mac.
     - Support for Outlook Web requires the Benefactor Circle add-on. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.
 - Classic Outlook for Mac and New Outlook for Mac do not allow external software to set default signatures.
@@ -996,8 +996,8 @@ For advanced usage and debug logging, a taskpane is available in all Outlook ver
 ### 4.2.1. Outlook clients<!-- omit in toc -->
 The following Outlook clients are supported:
 - Outlook on Android: Latest release from the app store. Mailboxes hosted in Exchange Online only.
-- Outlook on iOS: Latest release from the app store. Microsoft will add support for iPads in late 2024. Mailboxes hosted in Exchange Online only.
-- Classic Outlook on Windows: Full support in all versions of Office supported by Microsoft.
+- Outlook on iOS: Latest release from the app store. Microsoft will add support for iPads later (see [here](https://learn.microsoft.com/en-us/javascript/api/requirement-sets/common/nested-app-auth-requirement-sets?view=common-js-preview)). Mailboxes hosted in Exchange Online only.
+- Classic Outlook on Windows: Full support in all versions of Office supported by Microsoft. For Exchange Online mailboxes, the version used must support Nested App Authentication (see [here](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/faq-nested-app-auth-outlook-legacy-tokens#when-is-naa-generally-available-for-my-channel)).
 - New Outlook on Windows: Full support in all versions of Office supported by Microsoft
 - Classic Outlook on Mac: Best-effort support only, in all versions of Office supported by Microsoft
 - New Outlook on Mac: Full support in all versions of Office supported by Microsoft
@@ -1092,17 +1092,18 @@ The Integrated Apps feature is the recommended way to deploy Outlook add-ins. It
 
 ## 4.6. Remarks<!-- omit in toc -->
 **General**
-- The add-in has access to the data of the last run of Set-OutlookSignatures v4.14.0 and higher.
+- The add-in has access to the data of the last run of Set-OutlookSignatures v4.14.0 and higher. Always use Set-OutlookSignatures, the Benefactor Circle add-on and the Outlook add-in in the same version.
 - Microsoft is currently actively blocking access to roaming signatures for Outlook add-ins. The add-in will be updated when this block has been removed.
 - The easiest way to test the add-in and its basic functionality is to use the taskpane (see 'Usage' for details). For specific debugging on Android and iOS, you need to use the DEBUG option in '`run_before_deployment.ps1`'.
 - The add-in can run automatically when one of the following events is launched by Outlook: OnNewMessageCompose, OnNewAppointmentOrganizer, OnMessageFromChanged, OnAppointmentFromChanged.
   - Not all these events are supported on all platforms and editions of Outlook, see [this Microsoft article](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/autolaunch#supported-events) for an up-to-date list.
   - While not publicly documented, [Outlook currently does not support add-ins on calendar invite responses](https://github.com/OfficeDev/office-js/issues/4094#issuecomment-1923444325).
+- Microsoft is disabling legacy Exchange Online tokens, but not all Outlook variants in support have enabled nested app authentication yet, leading to a situation where add-ins can not authenticate. This should only affect the Semi Annual Extended Channel or outdated Outlook versions. See [this article](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/turn-exchange-tokens-on-off) for instructions on how to detect this and how to temporarily re-enable legacy Exchange Online tokens.
 
 **Outlook on iOS**
 - Only mailboxes hosted in Exchange Online are supported. This is because the mobile APIs do not allow programmatic access to mailboxes hosted on-prem.
 - Setting the signature on new appointments is not yet supported by Microsoft.
-- Microsoft will add support for iPads in late 2024.
+- Microsoft will add support for iPads later (see [here](https://learn.microsoft.com/en-us/javascript/api/requirement-sets/common/nested-app-auth-requirement-sets?view=common-js-preview)).
 - Add-ins are not allowed to show a taskpane when a new email, reply email or an appointment is created.
 
 **Outlook on Android**
@@ -1119,7 +1120,8 @@ The Integrated Apps feature is the recommended way to deploy Outlook add-ins. It
 - Images are replaced with their alternate description. This will work as soon as Microsoft fixes a bug in their office.js framework. If you are interested in a workaround, please let us know!
 
 **Classic Outlook on Windows**
-- Things work fine for mailboxes in Exchange Online, but the same APIs seem to be unstable for on-prem mailboxes, especially regarding launch events (adding signatures automatically). When in doubt, use the taskpane. 
+- Things work fine for mailboxes in Exchange Online, but the same APIs seem to be unstable for on-prem mailboxes, especially regarding launch events (adding signatures automatically). When in doubt, use the taskpane.
+- For Exchange Online mailboxes, the version used must support Nested App Authentication (see [here](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/faq-nested-app-auth-outlook-legacy-tokens#when-is-naa-generally-available-for-my-channel)).
 
 # 5. Group membership  
 ## 5.1. Group membership in Entra ID<!-- omit in toc -->
@@ -2421,18 +2423,18 @@ Choosing an unsuitable folder structure for script, license, template and config
 
 The following structure is recommended, as it separates customized files from script and license files.
 - **Root share folder**  
-  For example, '\\\\domain\netlogon\signatures'
+  For example, '\\\\server\share\folder'
   - **Config**  
     Contains your custom config files (custom Graph config file, custom replacement variable config file, maybe template INI files)
   - **License**  
-    Contains the Benefactor Circle license/add-on files
-  - **Set-OutlookSignatures**
-    Contains Set-OutlookSignatures files
+    Contains the Benefactor Circle add-on
+  - **Set-OutlookSignatures**  
+    Contains Set-OutlookSignatures
   - **Templates**
     - **OOF**  
-      Contains your custom out-of-office templates, and the corresponding INI file (if not placed in 'Config' folder)
+      Contains out-of-office templates, and the corresponding INI file (if not placed in 'Config' folder)
     - **Signatures**  
-      Contains your custom signature templates, and the corresponding INI file (if not placed in 'Config' folder)
+      Contains signature templates, and the corresponding INI file (if not placed in 'Config' folder)
 
 When you want to upgrade to a new release, you basically just have to delete the content of the 'Set-OutlookSignatures' and 'Set-OutlookSignatures license' folders and copy the new files to them.
 
@@ -2517,9 +2519,9 @@ instead of
 <some text>
 ```
 
-This often happens when the text before the empty line ends with a hyperlink.
+This usually happens when the text before the empty line ends with a hyperlink.
 
-To avoid this, add a non-breaking space character to the empty line in your template:
+To avoid this, add a non-breaking space character to the empty line in your template and to the end of the preceeding line:
 - Word: Insert, Symbol, More Symbols, Special Character, Nonbreaking Space
 - HTML: '`&nbsp;`'
 

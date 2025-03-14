@@ -22,6 +22,21 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.1" target="_blank">v4.18.1</a> - 2025-03-14
+
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- Update Outlook add-in dependency @azure/msal-browser to v4.7.0.
+### Added
+### Removed
+### Fixed
+- Fix handling of existing signature files in Classic Outlook for Windows when they are write protected or hidden.
+- Make the code deciding if a SharePoint Online element is a file or a folder work correctly even when the Graph API erronously returns the contentType in a non-English language.
+- Fix a race condition in the Outlook add-in that may lead to an empty signature list in the taskpane when legacy Exchange Online tokens have been disabled (see [here](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/faq-nested-app-auth-outlook-legacy-tokens) for details).
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.0" target="_blank">v4.18.0</a> - 2025-03-06
 
 _**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  

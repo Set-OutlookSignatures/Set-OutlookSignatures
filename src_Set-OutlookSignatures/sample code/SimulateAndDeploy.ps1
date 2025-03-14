@@ -113,9 +113,9 @@ Limitations
 		- These Outlook-internal problems will come and go depending on the patch level of Outlook.
 		- These Outlook-internal problems can also be observed when Set-OutlookSignatures is not involved at all.
 		- The only workaround currently known is to disable the Classic Outlook for Windows sync engine and let Set-OutlookSignatures do it by running it on the client regularly.
-    - Signatures are directly usable in Outlook Web and New Outlook (when based on Outlook Web). Other Outlook editions may work, but are not supported.
+    - Signatures are directly usable in Outlook Web and New Outlook (when based on Outlook Web). Other Outlook editions may work but are not supported.
 	    - Consider using the Outlook add-in to access signatures created by SimulateAndDeploy on other editions of Outlook in a supported way. See '.\docs\README' for details.
-		- Also see FAQ '`Roaming signatures in Classic Outlook for Windows look different`' in '`.\docs\README`'.
+		- Also see FAQ 'Roaming signatures in Classic Outlook for Windows look different' in '.\docs\README'.
 #>
 
 [CmdletBinding()]
