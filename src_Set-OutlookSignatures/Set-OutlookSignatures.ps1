@@ -6429,7 +6429,7 @@ function GraphGetToken {
         Write-Host "$($indent)Graph authentication"
 
         if ($GraphClientID -ieq 'beea8249-8c98-4c76-92f6-ce3c468a61e6') {
-            Write-Host "$($indent)  You use the Entra app provided by the developers. It is recommended to create und use your own Entra app." -ForegroundColor Yellow
+            Write-Host "$($indent)  You use the Entra ID app provided by the developers. It is recommended to create und use your own Entra ID app." -ForegroundColor Yellow
             Write-Host "$($indent)    Find a description on how to do this in the file '`.\config\default graph config.ps1`'." -ForegroundColor Yellow
         }
 

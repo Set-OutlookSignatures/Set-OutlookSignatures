@@ -38,7 +38,7 @@ Requirements
 		- Create a new app registration in Entra ID
 			- Option A: Create the app automatically by using the script '.\sample code\Create-EntraApp.ps1'
 				The sample code creates the app with all required settings automatically, only providing admin consent is a manual task
-			- Option B: Create the Entra app manually, with the following properties:
+			- Option B: Create the Entra ID app manually, with the following properties:
 				- Application (!) permissions with admin consent
 					- Microsoft Graph
 						- GroupMember.Read.All

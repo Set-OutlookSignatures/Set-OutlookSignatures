@@ -26,7 +26,7 @@
 # It can be replaced with the ID of an app created in your own tenant
 #   Option A: Create the app automatically by using the script '.\sample code\Create-EntraApp.ps1'
 #     The sample code creates the app with all required settings automatically, only providing admin consent is a manual task
-#   Option B: Create the Entra app manually
+#   Option B: Create the Entra ID app manually
 #     Create an app in Entra admin center (https://entra.microsoft.com)
 #       Sign in with an account that has Cloud Application Administrator or Global Admin permissions
 #       Identity > Applications > App registrations > New registration

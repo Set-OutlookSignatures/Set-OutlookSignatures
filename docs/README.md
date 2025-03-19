@@ -966,8 +966,8 @@ Usage example PowerShell: & .\Set-OutlookSignatures.ps1 -VirtualMailboxConfigFil
 Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures.ps1 -VirtualMailboxConfigFile '.\sample code\VirtualMailboxConfigFile.ps1'"
 
 # 4. The Outlook add-in
-With a [Benefactor Circle](Benefactor%20Circle.md) license, you have access to the Set-OutlookSignatures add-in for Outlook. This Outlook add-in can:
-- Automatically add signatures when creating a new email or answering an email (including Outlook on Android and Outlook on iOS), also for alias and secondary email addresses
+With a [Benefactor Circle](Benefactor%20Circle.md) license, you also have access to the Set-OutlookSignatures add-in for Outlook. This Outlook add-in can:
+- Automatically add signatures when creating a new email or answering an email (including Outlook for Android and Outlook for iOS), also for alias and secondary email addresses
 - Automatically add signatures to appointment invites, also for alias and secondary email addresses
 - Allow to select signature in the taskpane of the Outlook add-in. This is like having roaming signatures on-prem.
 
@@ -975,46 +975,45 @@ The Outlook add-in is self-hosted by you. Compared to using a solution hosted by
 - Client specific configuration
 - You have full control over the version that is used
 - Keeps license costs low
-- Is the preferred method from a data protection perspective
+- Is the preferred method from a data protection and privacy perspective
 
-The add-in code is downloaded by the Outlook client and executed locally, in the security context of the mailbox. There are no middleware or proxy servers involved. Data is only transferred between your Outlook client, your authentication systems (Entra ID for Exchange Online) and your mailbox servers.
+The add-in code is downloaded by the Outlook client and executed locally, in the security context of the mailbox. There are no middleware or proxy servers involved. Data is only transferred between your Outlook client, your authentication system (Entra ID for Exchange Online) and your mailbox servers.
 
 ## 4.1. Usage<!-- omit in toc -->
 From an end user perspective, basically nothing needs to be done or configured: When writing a new email, answering an email, or creating a new appointment, the add-in automatically adds the corresponding default signature.
 
-For advanced usage and debug logging, a taskpane is available in all Outlook versions supporting this feature. The taskpane allows to manually choose a signature, trigger setting the signature, and to temporarily override admin-defined settings for debug logging and Outlook host restrictions. The taskpane can be accessed through:
-- Outlook Web, and New Outlook on Windows and Mac:
+For advanced usage and debug logging, a taskpane is available in all Outlook versions supporting this feature. The taskpane allows to manually choose a signature, set the selected signature, and to temporarily override admin-defined settings for debug logging and Outlook host restrictions. The taskpane can be accessed through:
+- Outlook Web (Exchange Online), New Outlook for Windows, New Outlook for Mac:
   - New mail, reply mail: "Message" tab, "Apps" icon
   - New appointment: Ribbon, "…" menu
-- Classic Outlook on Windows and Mac:
+- Outlook Web (on-prem):
+  - New mail, reply mail: Lower right corner of the compose window
+  - New appointment: At the right of the menu bar at the top of the compose window
+- Classic Outlook for Windows, Classic Outlook for Mac:
   - New mail, reply mail: "Message" tab, "All apps" icon
   - New appointment: "Appointment" or "Meeting" tab, "All apps" icon
-- Outlook on iOS, Outlook on Android
+- Outlook for iOS, Outlook for Android
   - These platforms do not support taskpanes for new mails, reply mails and appointments.
 
 ## 4.2. Requirements<!-- omit in toc -->
 ### 4.2.1. Outlook clients<!-- omit in toc -->
-The following Outlook clients are supported:
-- Outlook on Android: Latest release from the app store. Mailboxes hosted in Exchange Online only.
-- Outlook on iOS: Latest release from the app store. Microsoft will add support for iPads later (see [here](https://learn.microsoft.com/en-us/javascript/api/requirement-sets/common/nested-app-auth-requirement-sets?view=common-js-preview)). Mailboxes hosted in Exchange Online only.
-- Classic Outlook on Windows: Full support in all versions of Office supported by Microsoft. For Exchange Online mailboxes, the version used must support Nested App Authentication (see [here](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/faq-nested-app-auth-outlook-legacy-tokens#when-is-naa-generally-available-for-my-channel)).
-- New Outlook on Windows: Full support in all versions of Office supported by Microsoft
-- Classic Outlook on Mac: Best-effort support only, in all versions of Office supported by Microsoft
-- New Outlook on Mac: Full support in all versions of Office supported by Microsoft
-- Outlook on the Web: Full support for mailboxes hosted in Exchange Online and for mailboxes hosted on-prem on Exchange Server 2019.
+The Outlook add-in works for all Outlook clients that are supported by Microsoft. See the '`Remarks`' chapter in this section for possible limitations that may apply due to platform specific Microsoft restrictions.
 
-See the '`Remarks`' chapter in this section for possible restrictions that may apply.
+The add-in always runs in the context of the user that is used by Outlook to access a mailbox. Delegate scenarios are supported. This means the following:
+- User A has the Outlook add-in installed. The Outlook add-in can access all signature information that the Benefactor Circle add-on or the SimulateAndDeploy mode of Set-OutlookSignatures has written to the mailbox of user A. The add-in can be used in the mailbox of user A and in all other mailboxes that user A accesses with his own credentials.
+- When user A has added a mailbox with separate credentials, such as adding shared mailbox B using shared mailbox B's credentials, the add-in installed in user A's mailbox will not work for shared mailbox B. Shared mailbox B needs to have the add-in installed, too, and the add-in only has access to signature information that the Benefactor Circle add-on or the SimulateAndDeploy mode of Set-OutlookSignatures has written to the shared mailbox B. For shared mailbox B, delegate scenarios are supported, too.
+
 ### 4.2.2. Web server and domain<!-- omit in toc -->
 Whatever web server you choose, the requirements are low:
 - Reachable from mobile devices via the public internet
 - Use a dedicated host name ("https://outlookaddin01.example.com"), do not use subdirectories ("https://addins.example.com/outlook01")
-- A valid SSL/TLS certificate. Self-signed certificates can be used for development and testing, as long as the certificate is trusted by the client used for testing.
-- In production, the server hosting the images shouldn't return a Cache-Control header specifying no-cache, no-store, or similar options in the HTTP response. In development, this may make sense.
+- A valid TLS certificate. Self-signed certificates can be used for development and testing, as long as the certificate is trusted by the client used for testing.
+- In production, the server hosting the images shouldn't return a Cache-Control header specifying no-cache, no-store, or similar options in the HTTP response.
 
 [Static website hosting in Azure Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) can be an uncomplicated, cheap and fast alternative.
 
 ### 4.2.3 Set-OutlookSignatures<!-- omit in toc -->
-The Outlook add-in can add existing signatures, but is not able to create them itself on the fly. Set-OutlookSignatures v4.14.0 and higher prepares signature data in a way that it can be used by the Outlook add-in.
+The Outlook add-in can add existing signatures, but is not able to create them itself on the fly. The Benefactor Circle add-on prepares signature data in a way that it can be used by the Outlook add-in.
 
 ## 4.3. Configuration and deployment to the web server<!-- omit in toc -->
 With every new release of Set-OutlookSignatures, [Benefactor Circle](Benefactor%20Circle.md) members not only receive an updated Benefactor Circle license file, but also an updated Outlook add-in.
@@ -1035,7 +1034,7 @@ To configure the add-in and deploy it to your web server:
 - Run '`run_before_deployment.ps1`' in PowerShell.
 - Upload the content of the '`publish`' folder to your web server.
 
-When the '`manifest.xml`' file changes, you also need to update your app deployment in Exchange, so that your clients will pick up the changes automatically. This is required when:
+When the '`manifest.xml`' file changes, you also need to update your app deployment in Exchange, so that your clients download the updated release. This is required when:
 - A new release of the Outlook add-in is published by [ExplicIT Consulting](https://explicitconsulting.at).
 - You change a configuration option in the '`run_before_deployment.ps1`' file which is marked to require an updated deployment.
 - You modify the '`manifest.xml`' file manually.
@@ -1078,8 +1077,8 @@ For mailboxes in Exchange Online:
 Installation of add-ins may have been disabled by your administrators.
 
 Do not use the URLs mentioned above to remove custom add-ins, as this fails most times. Instead, use one of the following options:
-- Open Outlook on the web, draft a new mail, click on the 'Apps' button, right-click the Set-OutlookSignatures add-in and select 'Uninstall'.
-- Remove the custom add-in in Outlook for Android or iOS.
+- Open Outlook for the web, draft a new mail, click on the 'Apps' button, right-click the Set-OutlookSignatures add-in and select 'Uninstall'.
+- Remove the custom add-in in Outlook for Android or Outlook for iOS.
 ### 4.5.2 Microsoft 365 Centralized Deployment or Integrated Apps<!-- omit in toc -->
 Centralized Deployment and deployment via Integrated Apps both provide the following benefits:
 - An admin can deploy and assign an add-in directly to a user, to multiple users via a group, or to everyone in the organization.
@@ -1092,36 +1091,38 @@ The Integrated Apps feature is the recommended way to deploy Outlook add-ins. It
 
 ## 4.6. Remarks<!-- omit in toc -->
 **General**
-- The add-in has access to the data of the last run of Set-OutlookSignatures v4.14.0 and higher. Always use Set-OutlookSignatures, the Benefactor Circle add-on and the Outlook add-in in the same version.
-- Microsoft is currently actively blocking access to roaming signatures for Outlook add-ins. The add-in will be updated when this block has been removed.
+- Microsoft is actively blocking access to roaming signatures for Outlook add-ins. The add-in will be updated when this block has been removed. In the meantime, the add-in has access to the data of the last run of Set-OutlookSignatures v4.14.0 and higher.
+- The Microsoft APIs only allow access to online content. There is no way to access offline mailbox content or the file system. This means that the Outlook add-in only works when Outlook has an online connection to the user's mailbox.
 - The easiest way to test the add-in and its basic functionality is to use the taskpane (see 'Usage' for details). For specific debugging on Android and iOS, you need to use the DEBUG option in '`run_before_deployment.ps1`'.
-- The add-in can run automatically when one of the following events is launched by Outlook: OnNewMessageCompose, OnNewAppointmentOrganizer, OnMessageFromChanged, OnAppointmentFromChanged.
+- The add-in can run automatically when one of the following launch events is triggered by Outlook: OnNewMessageCompose, OnNewAppointmentOrganizer, OnMessageFromChanged, OnAppointmentFromChanged.
   - Not all these events are supported on all platforms and editions of Outlook, see [this Microsoft article](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/autolaunch#supported-events) for an up-to-date list.
   - While not publicly documented, [Outlook currently does not support add-ins on calendar invite responses](https://github.com/OfficeDev/office-js/issues/4094#issuecomment-1923444325).
-- Microsoft is disabling legacy Exchange Online tokens, but not all Outlook variants in support have enabled nested app authentication yet, leading to a situation where add-ins can not authenticate. This should only affect the Semi Annual Extended Channel or outdated Outlook versions. See [this article](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/turn-exchange-tokens-on-off) for instructions on how to detect this and how to temporarily re-enable legacy Exchange Online tokens.
-
-**Outlook on iOS**
-- Only mailboxes hosted in Exchange Online are supported. This is because the mobile APIs do not allow programmatic access to mailboxes hosted on-prem.
+- Microsoft dynamically updates the local copy of the office.js framework, there is no 1:1 relation between the version of Outlook and the version of the framework. This may lead to problems that suddenly appear although neither Outlook nor the add-in have changed. For example, the add-in may suddenly no longer work for shared mailboxes in Classic Outlook for Windows on some devices, while it does on others and in Outlook Web.
+  - Where available, use the taskpane as a workaround. The taskpane is basically the same code with an additional graphical interface.
+  - Use the DEBUG option in '`run_before_deployment.ps1`' to find out if the root cause is in Outlook or in the add-in. When there is no debug output, the launch event it not triggered by Outlook. When there is debug output, it will show where and with which error the add-in fails.
+**Outlook for Android**
+- Only mailboxes hosted in Exchange Online are supported. This is because Microsoft's mobile APIs do not allow programmatic access to mailboxes hosted on-prem.
 - Setting the signature on new appointments is not yet supported by Microsoft.
+- The Microsoft mobile APIs do not allow an add-in to show a taskpane when a new email, reply email or an appointment is created.
+
+**Outlook for iOS**
+- Only mailboxes hosted in Exchange Online are supported. This is because Microsoft's mobile APIs do not allow programmatic access to mailboxes hosted on-prem.
+- Setting the signature on new appointments is not yet supported by Microsoft.
+- The Microsoft mobile APIs do not allow an add-in to show a taskpane when a new email, reply email or an appointment is created.
 - Microsoft will add support for iPads later (see [here](https://learn.microsoft.com/en-us/javascript/api/requirement-sets/common/nested-app-auth-requirement-sets?view=common-js-preview)).
-- Add-ins are not allowed to show a taskpane when a new email, reply email or an appointment is created.
-
-**Outlook on Android**
-- Only mailboxes hosted in Exchange Online are supported. This is because the mobile APIs do not allow programmatic access to mailboxes hosted on-prem.
-- Setting the signature on new appointments is not yet supported by Microsoft.
-- Add-ins are not allowed to show a taskpane when a new email, reply email or an appointment is created.
 
 **Outlook for Mac**
-- Use the New Outlook for Mac whenever possible.
-- While the APIs required for the Set-OutlookSignatures Outlook add-in are available in Classic Outlook for Mac, they are very unstable. Therefore, we only offer best-effort support for the add-in on Classic Outlook for Mac.
+- Use the New Outlook for Mac whenever possible, as Classic Outlook for Mac (a.k.a Legacy Outlook for Mac) is at the end of its lifecycle.
+- While the Microsoft APIs required for the Set-OutlookSignatures Outlook add-in are available in Classic Outlook for Mac, they are very unstable. Therefore, we only offer best-effort support for the add-in on Classic Outlook for Mac.
 
 **Outlook Web on-prem**
-- Launch events are not supported, so only the taskpane works.
-- Images are replaced with their alternate description. This will work as soon as Microsoft fixes a bug in their office.js framework. If you are interested in a workaround, please let us know!
+- Launch events are not supported by Microsoft APIs, so only the taskpane works.
+- Images are replaced with their alternate description. This will work as soon as Microsoft fixes a bug in their office.js API framework. If you are interested in a workaround, please let us know!
 
-**Classic Outlook on Windows**
-- Things work fine for mailboxes in Exchange Online, but the same APIs seem to be unstable for on-prem mailboxes, especially regarding launch events (adding signatures automatically). When in doubt, use the taskpane.
+**Classic Outlook for Windows**
+- Things work fine for mailboxes in Exchange Online, but the same Microsoft APIs seem to be unstable for on-prem mailboxes, especially regarding launch events (adding signatures automatically). When in doubt, use the taskpane.
 - For Exchange Online mailboxes, the version used must support Nested App Authentication (see [here](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/faq-nested-app-auth-outlook-legacy-tokens#when-is-naa-generally-available-for-my-channel)).
+  - Microsoft is disabling legacy Exchange Online tokens, but not all Outlook variants in support have enabled nested app authentication yet, leading to a situation where add-ins can not authenticate. When Outlook is kept up-to-date, this should only affect the Semi Annual Extended Channel or outdated Outlook versions. See [this article](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/turn-exchange-tokens-on-off) for instructions on how to detect this and how to temporarily re-enable legacy Exchange Online tokens.
 
 # 5. Group membership  
 ## 5.1. Group membership in Entra ID<!-- omit in toc -->
@@ -1346,7 +1347,7 @@ Tags are case insensitive.
         -:$CurrentUser-IsMemberOf-MarketingAndSales$
         ```
 - Write protect: `writeProtect`
-    - Write protects the signature files. Works only in Classic Outlook on Windows. Modifying the signature in Outlook's signature editor leads to an error on saving, but the signature can still be changed after it has been added to an email.  
+    - Write protects the signature files. Works only in Classic Outlook for Windows. Modifying the signature in Outlook's signature editor leads to an error on saving, but the signature can still be changed after it has been added to an email.  
 - Set signature as default for new emails: `defaultNew` (signature template files only)  
     - Set signature as default signature for new mails  
 - Set signature as default for replies and forwarded emails: `defaultReplyFwd` (signature template files only)  
@@ -1798,9 +1799,9 @@ Please consider the following caveats regarding the mail attribute:
 For communication with the user's own Active Directory forest, trusted domains, and their sub-domains, the following ports are usually required:
 - 88 TCP/UDP (Kerberos authentication)
 - 389 TCP/UPD (LDAP)
-- 636 TCP (LDAP SSL)
+- 636 TCP (LDAPS)
 - 3268 TCP (Global Catalog)
-- 3269 TCP (Global Catalog SSL)
+- 3269 TCP (Global Catalog TLS)
 - 49152-65535 TCP (high ports)
 
 The client needs the following ports to access a SMB file share on a Windows server (see <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc731402(v=ws.11)" target="_blank">this Microsoft article</a> for details):
@@ -2212,7 +2213,7 @@ As there is no Microsoft official API yet, this feature is to be used at your ow
 
 Storing signatures in the mailbox is a good idea, as this makes signatures available across devices and apps.
 
-As soon as Microsoft makes available a public API, more email clients will get support for this feature - which will close a gap, Set-OutlookSignatures cannot fill because it is not running on exchange servers: Adding signatures to mails sent from apss besides Outlook on Windows, Outlook Web and New Outlook.
+As soon as Microsoft makes available a public API, more email clients will get support for this feature - which will close a gap, Set-OutlookSignatures cannot fill because it is not running on exchange servers: Adding signatures to mails sent from apss besides Outlook for Windows, Outlook Web and New Outlook.
 
 Roaming signatures will very likely never be available for mailboxes on-prem, and it seems that it also will not be available for shared mailboxes in the cloud.
 
@@ -2534,7 +2535,7 @@ instead of
 <a hyperlink> <another hyperlink>
 ```
 
-The root cause is unknown, but it seems to be related to the HTML parser of the office.js framework, which is used by Outlook on all platforms to perform specific tasks.
+The root cause is unknown, but it seems to be related to the HTML parser of the office.js framework, which is used by Outlook for all platforms to perform specific tasks.
 
 ## 14.40 What about Microsoft turning off Exchange Web Services for Exchange Online?<!-- omit in toc -->
 Microsoft will turn of Exchange Web Services (EWS) for Exchange Online. This is announced to happen in October 2026. This only affects Exchange in the cloud, not Exchange hosted on premises.
@@ -2543,7 +2544,7 @@ Set-OutlookSignatures, the Benefactor Circle add-on and the Outlook add-in are p
 
 Unfortunately, the Graph API does not yet offer the same feature set as EWS. This affects the following features for mailboxes hosted in Exchange Online (and only in Exchange Online):
 - Setting the classic Outlook Web signature<br>The classic Outlook Web signature can only be seen when using Outlook Web on a browser in mobile view. This only affects a vanishingly small number of users, the trend is downwards, and it is not yet clear if Microsoft will ever bring this feature to the Graph API.<br>Roaming signatures are not affected. Exchange on-prem is not affected.
-- Getting additional mailboxes from Outlook Web<br>This affects all editions of Outlook which are not the Classic Outlook on Windows - in other words: New Outlook on Windows, any Outlook on macOS, and running Set-OutlookSignatures on Linux.<br>It is very likely that Microsoft will update the Graph API to support this feature. The timeline is unknown.<br>Detecting automapped mailboxes is not affected. Exchange on-prem is not affected.
+- Getting additional mailboxes from Outlook Web<br>This affects all editions of Outlook which are not the Classic Outlook for Windows - in other words: New Outlook for Windows, any Outlook for macOS, and running Set-OutlookSignatures on Linux.<br>It is very likely that Microsoft will update the Graph API to support this feature. The timeline is unknown.<br>Detecting automapped mailboxes is not affected. Exchange on-prem is not affected.
 
 
 ## 14.41 Roaming signatures in Classic Outlook for Windows look different<!-- omit in toc -->

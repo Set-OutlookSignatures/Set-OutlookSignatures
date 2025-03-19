@@ -22,6 +22,20 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.2" target="_blank">v4.18.2</a> - 2025-03-19
+
+_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- Update MSAL.Net to v4.70.0.
+- Simplify the '`The Outlook add-in`' chapter in '`.\docs\README`' and include the latest Microsoft clarifications for their Outlook APIs.
+### Added
+### Removed
+### Fixed
+- Add a workaround to a bug in the Microsoft API for Classic Outlook for Windows (and probably others), not fully garbage collecting variables. This bug results in signatures not updating when the OnMessageFromChanged or OnAppointmentFromChanged launch event is triggered. This bug may also lead to the launch events not being triggered at all, only Microsoft can solve this.
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.1" target="_blank">v4.18.1</a> - 2025-03-14
 
 _**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
@@ -53,16 +67,16 @@ _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explic
   - Also see the new FAQ '`What about Microsoft turning off Exchange Web Services for Exchange Online?`' in '`.\docs\README`' how Set-OutlookSignatures will be affected when Microsoft turns off EWS for Exchange Online.
 - Remove empty CSS properties and resolve multiple assignments in style attributes when creating HTML files. This corrects several errors in Word which affect Outlook (which uses Word as HTML renderer): Using the no longer supported text-autospace CSS property in HTML exports, setting an invalid null value for it, and not interpreting the null value as default 'none' value when rendering.
 - Work around a problem in PowerShell 7 showing wrong number of files in progress bars for copy and delete operations, and not removing these progress bars from screen.
-- Show a warning when Graph authentication is using the Entra app provided by the developers of Set-OutlookSignatures. It is recommended to create and use your own Entra app.
+- Show a warning when Graph authentication is using the Entra ID app provided by the developers of Set-OutlookSignatures. It is recommended to create and use your own Entra ID app.
 - Detect when Set-OutlookSignatures has already been run in the current PowerShell session and exit when this is the case. This is the only way to prevent problems caused by .Net caching DLL files in memory.
 - Require a key press to continue when loading the Benefactor Circle license file results in a warning. Set-OutlookSignatures continues automatically after 120 seconds.
-- Add authentication broker support for Linux. No new redirect URI for the Entra app is required.
+- Add authentication broker support for Linux. No new redirect URI for the Entra ID app is required.
 - Add new FAQ '`Roaming signatures in Classic Outlook for Windows look different`' to '`.\docs\README`'.
 ### Removed
 - Remove comment-based help content from Set-OutlookSignatures.ps1 and refer to '`.\docs\README`' instead.
 - Remove testing the connectivity to endpoints during Graph authentication, as Microsoft's servers suddenly randomly incorrectly interpret the HTTP 'Expect' header, returning HTTP error status code 417 instead of a 2xx success code. Rely on integrated tests in Microsoft's authentication library instead. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/133" target="_blank">#133</a>)
 ### Fixed
-- Correct the Entra app configuration requirement for broker authentication in '`.\docs\default graph config`'. Use the application ID, not the Object ID.
+- Correct the Entra ID app configuration requirement for broker authentication in '`.\docs\default graph config`'. Use the application ID, not the Object ID.
 - Fix a race condition when evaluating OOF INI files. OOF INI entries without both the tags '`Internal`' and '`External`' now always correctly default to both, and not sometimes to only '`Internal`'.
 - Write all signature HTML files without a byte order mark (BOM) for consistency between PowerShell 5 and PowerShell 7+.
 - Correctly replace the connected folder path for images in signatures whose name starts with a number. This is a workaround for a problem in PowerShell's implementation of regular expressions.
@@ -472,7 +486,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 - A message box now informs the user before a new browser tab is opened for authentication, as Microsoft still does not show the Entra ID app name in the authentication prompt. The message text can be customized or disabled with the `$GraphHtmlMessageboxText` parameter in `.\config\default graph config.ps1`. See that file for details.
 - The HTML message after a successful browser authentication can be customized with the `$GraphHtmlMessageSuccess` parameter in `.\config\default graph config.ps1`. See that file for details, and also consider `$GraphBrowserRedirectSuccess` for a redirection alternative.
 - The HTML message after an unsuccessful browser authentication can be customized with the `$GraphHtmlMessageError` parameter in `.\config\default graph config.ps1`. See that file for details, and also consider `$GraphBrowserRedirectError` for a redirection alternative.
-- New sample code `.\sample code\Create-EntraApp.ps1` automates the creation of the Entra app required to access Microsoft Graph.
+- New sample code `.\sample code\Create-EntraApp.ps1` automates the creation of the Entra ID app required to access Microsoft Graph.
 - New FAQ `How do I alternate banners and other images in signatures?`. See `.\docs\README` for details.
 ### Fixed
 - MirrorLocalSignaturesToCloud now correctly detects cloud mailboxes in hybrid environments when a connection to the on-prem Active Directory is used
