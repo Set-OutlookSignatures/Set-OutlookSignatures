@@ -1,13 +1,12 @@
 ﻿<#
 This sample code shows how to achieve two things:
 	- Running simulation mode for multiple users
-  	- How to use simulation mode together with the Benefactor Circle add-on to push signatures and out-of-office replies into mailboxes,
-	  without involving end users or their devices
+  	- How to use simulation mode together with the Benefactor Circle add-on to push signatures and out-of-office replies into mailboxes, without involving end users or their devices
 
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
 
 
 Features
@@ -20,7 +19,7 @@ Features
 
 Requirements
   	Follow the requirements exactly and in full. SimulateAndDeploy will not work correctly when even one requirement is not met.
-	Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
+	Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
 
 	- For mailboxes on-prem
 		- The software needs to be run with an account that
@@ -99,7 +98,7 @@ Requirements
 	- Do not forget to adapt the "Variables" section of this script according to your needs and your configuration
 
 
-Limitations
+Limitations and remarks
 	- Despitze parallelization, the execution time can be too long for a higher number of users. The reason usually is the Word background process.
 		- If you use DOCX templates and/or require signatures in RTF format, Word is needed for document conversion and you can only shorten runtime by adding hardware (scale up or scale out)
 		- If you do need HTML signatures only, you can use the following workaround to avoid starting Word:
@@ -116,6 +115,9 @@ Limitations
     - Signatures are directly usable in Outlook Web and New Outlook (when based on Outlook Web). Other Outlook editions may work but are not supported.
 	    - Consider using the Outlook add-in to access signatures created by SimulateAndDeploy on other editions of Outlook in a supported way. See '.\docs\README' for details.
 		- Also see FAQ 'Roaming signatures in Classic Outlook for Windows look different' in '.\docs\README'.
+	- Consider using the 'VirtualMailboxConfigFile' parameter of Set-OutlookSignatures, ideally together with the output of the Export-RecipientPermissions script.
+	  This allows you to automatically create up-to-date lists of mailboxes based on the permissions granted in Exchange, as well as the according INI file lines.
+	  Visit https://github.com/Export-RecipientPermissions for details about Export-RecipientPermissions.
 #>
 
 [CmdletBinding()]
@@ -123,10 +125,10 @@ Limitations
 # Variables
 param (
 	$ConnectOnpremInsteadOfCloud = $false,
-	[pscredential]$GraphUserCredential = (@(, @('SimulateAndDeployUser@example.com', 'P@ssw0rd!')) | ForEach-Object { New-Object System.Management.Automation.PSCredential ($_[0], $(ConvertTo-SecureString $_[1] -AsPlainText -Force)) }), # Use Get-Credential for interactive mode (MFA is not supported in any case)
+	[pscredential]$GraphUserCredential = (@(, @('SimulateAndDeployUser@example.com', 'P@ssw0rd!')) | ForEach-Object { New-Object System.Management.Automation.PSCredential ($_[0], $(ConvertTo-SecureString $_[1] -AsPlainText -Force)) }), # Use Get-Credential for interactive mode or (Get-Content '.\Config\password.secret') to retrieve info from a separate file (MFA is not supported in any case)
 
 	$GraphClientId = 'The Client ID of the Entra ID application for SimulateAndDeploy', # not the same ID as defined in 'default graph config.ps1' or a custom Graph config file
-	$GraphClientSecret = 'The Client Secret of the Entra ID application for SimulateAndDeploy',
+	$GraphClientSecret = 'The Client Secret of the Entra ID application for SimulateAndDeploy', # to load the secret from a file, use (Get-Content '.\Config\app.secret')
 
 	[ValidateSet('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC', 'AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4', 'AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5', 'China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')]
 	[string]$CloudEnvironment = 'Public',
@@ -137,37 +139,26 @@ param (
 		#
 		# ▼▼▼ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▼▼▼
 		# ▼▼▼ Without the license, signatures can not be read from and written to mailboxes ▼▼▼
-		BenefactorCircleLicenseFile                   = "'\\server\share\folder\license.dll'"
-		BenefactorCircleID                            = '<BenefactorCircleID>'
-		# ▲▲▲ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▲▲▲▲
+		BenefactorCircleLicenseFile   = "'\\server\share\folder\license.dll'"
+		BenefactorCircleID            = '<BenefactorCircleID>'
+		# ▲▲▲ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▲▲▲
 		# ▲▲▲ Without the license, signatures can not be read from and written to mailboxes ▲▲▲
 		#
-		SimulateAndDeploy                             = $false # $false simulates but does not deploy, $true simulates and deploys
-		UseHtmTemplates                               = $false
-		SignatureTemplatePath                         = "'.\sample templates\Signatures DOCX'"
-		SignatureIniFile                              = "'.\sample templates\Signatures DOCX\_Signatures.ini'"
-		OOFTemplatePath                               = "'.\sample templates\Out-of-office DOCX'"
-		OOFIniFile                                    = "'.\sample templates\Out-of-office DOCX\_OOF.ini'"
-		ReplacementVariableConfigFile                 = "'.\config\default replacement variables.ps1'"
-		GraphClientID                                 = $GraphClientId
-		GraphConfigFile                               = "'.\config\default graph config.ps1'"
-		SignaturesForAutomappedAndAdditionalMailboxes = $true
-		DeleteUserCreatedSignatures                   = $false
-		DeleteScriptCreatedSignaturesWithoutTemplate  = $true
-		SetCurrentUserOutlookWebSignature             = $true
-		SetCurrentUserOOFMessage                      = $true
-		MirrorCloudSignatures                         = $true #Set to $false if you do not want to use this feature
-		CreateRtfSignatures                           = $false
-		CreateTxtSignatures                           = $true
-		DocxHighResImageConversion                    = $true
-		MoveCSSInline                                 = $true
-		EmbedImagesInHtml                             = $false
-		EmbedImagesInHtmlAdditionalSignaturePath      = $true
-		GraphOnly                                     = $false
-		TrustsToCheckForGroups                        = @('*')
-		IncludeMailboxForestDomainLocalGroups         = $false
-		WordProcessPriority                           = "'Normal'"
-		Verbose                                       = $($VerbosePreference -ne [System.Management.Automation.ActionPreference]::SilentlyContinue)
+		SimulateAndDeploy             = $false # $false simulates but does not deploy, $true simulates and deploys
+		UseHtmTemplates               = $false
+		SignatureTemplatePath         = "'.\sample templates\Signatures DOCX'"
+		SignatureIniFile              = "'.\sample templates\Signatures DOCX\_Signatures.ini'"
+		OOFTemplatePath               = "'.\sample templates\Out-of-office DOCX'"
+		OOFIniFile                    = "'.\sample templates\Out-of-office DOCX\_OOF.ini'"
+		ReplacementVariableConfigFile = "'.\config\default replacement variables.ps1'"
+		GraphClientID                 = $GraphClientId
+		GraphConfigFile               = "'.\config\default graph config.ps1'"
+		GraphOnly                     = $false
+		# Strings in a hashtable that is later used for splatting (passing parameters to another script) require quotes
+		WordProcessPriority           = "'Normal'"
+		TrustsToCheckForGroups        = @('*')
+		# Use current verbose mode for later execution of Set-OutlookSignatures
+		Verbose                       = $($VerbosePreference -ne [System.Management.Automation.ActionPreference]::SilentlyContinue)
 	},
 
 	$SimulateResultPath = 'c:\test\SimulateAndDeploy',
@@ -184,6 +175,9 @@ param (
 	#     a@example.com;
 	#     b@example.com;b@example.com
 	#     c@example.com;c@example.com,b@example.com
+	#   Consider using the 'VirtualMailboxConfigFile' parameter of Set-OutlookSignatures, ideally together with the output of the Export-RecipientPermissions script.
+	#     This allows you to automatically create up-to-date lists of mailboxes based on the permissions granted in Exchange, as well as the according INI file lines.
+	#     Visit https://github.com/Export-RecipientPermissions for details about Export-RecipientPermissions.
 	$SimulateList = (@'
 SimulateUser;SimulateMailboxes
 alex.alien@example.com;
@@ -242,16 +236,20 @@ function RemoveItemAlternativeRecurse {
 		[switch] $SkipFolder # when $Path is a folder, do not delete $path, only it's content
 	)
 
+	try { WatchCatchableExitSignal } catch { }
+
 	$local:ToDelete = @()
 
 	if (Test-Path -LiteralPath $path) {
 		foreach ($SinglePath in @(Get-Item -LiteralPath $Path)) {
+			try { WatchCatchableExitSignal } catch { }
+
 			if (Test-Path -LiteralPath $SinglePath -PathType Container) {
 				if (-not $SkipFolder) {
-					$local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Property PSIsContainer, @{expression = { $_.FullName.split('\').count }; descending = $true }, fullname)
+					$local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture $TemplateFilesSortCulture -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
 					$local:ToDelete += @(Get-Item -LiteralPath $SinglePath -Force)
 				} else {
-					$local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Property PSIsContainer, @{expression = { $_.FullName.split('\').count }; descending = $true }, fullname)
+					$local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture $TemplateFilesSortCulture -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
 				}
 			} elseif (Test-Path -LiteralPath $SinglePath -PathType Leaf) {
 				$local:ToDelete += (Get-Item -LiteralPath $SinglePath -Force)
@@ -262,6 +260,8 @@ function RemoveItemAlternativeRecurse {
 	}
 
 	foreach ($SingleItemToDelete in $local:ToDelete) {
+		try { WatchCatchableExitSignal } catch { }
+
 		try {
 			if ((Test-Path $SingleItemToDelete.FullName) -eq $true) {
 				Remove-Item $SingleItemToDelete.FullName -Force -Recurse
@@ -271,6 +271,8 @@ function RemoveItemAlternativeRecurse {
 			Write-Verbose $_
 		}
 	}
+
+	try { WatchCatchableExitSignal } catch { }
 }
 
 

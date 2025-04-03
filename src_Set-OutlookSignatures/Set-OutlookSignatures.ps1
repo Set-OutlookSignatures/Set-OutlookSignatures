@@ -8,7 +8,7 @@ See the file '.\docs\README' for details.
 
 .LINK
 Github: https://github.com/Set-OutlookSignatures/Set-OutlookSignatures
-Benefactor Circle add-on and commercial support: https://explicitconsulting.at/Set-OutlookSignatures
+Benefactor Circle add-on and fee-based support: https://explicitconsulting.at/Set-OutlookSignatures
 
 .EXAMPLE
 See the file '.\docs\README' for details.
@@ -3174,7 +3174,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             Add-Type -Path (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
         } catch {
             Write-Host $error[0]
-            Write-Host '  Word not installed or not working correctly. Install or repair Word and the registry information about Word, or consider using HTM templates instead of DOCX tempates. Exit.' -ForegroundColor Red
+            Write-Host '  Word not installed or not working correctly. Install or repair Word and the registry information about Word, or consider using HTM templates instead of DOCX templates. Exit.' -ForegroundColor Red
 
             # Restore original Word AlertIfNotDefault setting
             Set-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value $script:WordAlertIfNotDefaultOriginal -ErrorAction SilentlyContinue | Out-Null
@@ -6499,7 +6499,7 @@ function GraphGetToken {
 
             # Copy each item to the destination
             foreach ($item in @(Get-ChildItem -Path ((Join-Path -Path '.' -ChildPath 'bin\MSAL.PS')) -Recurse)) {
-                if ($item.BaseName -like '*msalrumtime*') {
+                if ($item.BaseName -like '*msalruntime*') {
                     if ($IsWindows) {
                         if ($item.Name -notlike 'msalruntime*.dll') {
                             continue
@@ -6626,6 +6626,20 @@ function GraphGetToken {
                         throw 'Ignoring because login hint is available.'
                     }
 
+                    if ($IsLinux) {
+                        $LinuxAuthBrokerMissingDependencies = @(ldd $(Join-Path -Path $script:MsalModulePath -ChildPath 'netstandard2.0/libmsalruntime.so') | grep 'not found')
+
+                        if ($LinuxAuthBrokerMissingDependencies.Count -gt 0) {
+                            throw 'Missing dependencies for authentication broker: ' + $(
+                                @(
+                                    $LinuxAuthBrokerMissingDependencies | ForEach-Object {
+                                        $(($_ -ireplace '=> not found', '').Trim())
+                                    }
+                                ) -join ', '
+                            )
+                        }
+                    }
+
                     $script:msalClientApp = New-MsalClientApplication -AuthenticationBroker -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
                     $auth = $script:msalClientApp | Get-MsalToken -Silent -AuthenticationBroker -AzureCloudInstance $CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
@@ -6638,6 +6652,20 @@ function GraphGetToken {
 
                     try {
                         Write-Host "$($indent)    Silent via Authentication Broker with login hint"
+
+                        if ($IsLinux) {
+                            $LinuxAuthBrokerMissingDependencies = @(ldd libmsalruntime.so | grep 'not found')
+
+                            if ($LinuxAuthBrokerMissingDependencies.Count -gt 0) {
+                                throw 'Missing dependencies for authentication broker: ' + $(
+                                    @(
+                                        $LinuxAuthBrokerMissingDependencies | ForEach-Object {
+                                            $(($_ -ireplace '=> not found', '').Trim())
+                                        }
+                                    ) -join ', '
+                                )
+                            }
+                        }
 
                         $script:msalClientApp = New-MsalClientApplication -AuthenticationBroker -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
@@ -6758,8 +6786,18 @@ function GraphGetToken {
                             try {
                                 Write-Host "$($indent)    Interactive via Authentication Broker"
 
-                                if (-not $IsWindows) {
-                                    throw 'Interactive with Authentication Broker on Linux/macOS only works in the console. Browser is preferred for better user experience.'
+                                if ($IsLinux) {
+                                    $LinuxAuthBrokerMissingDependencies = @(ldd libmsalruntime.so | grep 'not found')
+
+                                    if ($LinuxAuthBrokerMissingDependencies.Count -gt 0) {
+                                        throw 'Missing dependencies for authentication broker: ' + $(
+                                            @(
+                                                $LinuxAuthBrokerMissingDependencies | ForEach-Object {
+                                                    $(($_ -ireplace '=> not found', '').Trim())
+                                                }
+                                            ) -join ', '
+                                        )
+                                    }
                                 }
 
                                 $script:msalClientApp = New-MsalClientApplication -AuthenticationBroker -ClientId $GraphClientID -AzureCloudInstance $CloudEnvironmentEnvironmentName -TenantId 'organizations' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
@@ -8271,13 +8309,18 @@ try {
     }
 
     Write-Host
-    Write-Host 'Exit code' -ForegroundColor $(if ($script:ExitCode -eq 0) { (Get-Host).ui.rawui.ForegroundColor } else { 'Yellow' })
-    Write-Host "  Code: $($script:ExitCode)" -ForegroundColor $(if ($script:ExitCode -eq 0) { (Get-Host).ui.rawui.ForegroundColor } else { 'Yellow' })
-    Write-Host "  Description: $($script:ExitCodeDescription)" -ForegroundColor $(if ($script:ExitCode -eq 0) { (Get-Host).ui.rawui.ForegroundColor } else { 'Yellow' })
 
-    if ($script:ExitCode -ne 0) {
+    if ($script:ExitCode -eq 0) {
+        Write-Host 'Exit code'
+        Write-Host "  Code: $($script:ExitCode)"
+        Write-Host "  Description: $($script:ExitCodeDescription)"
+    } else {
+        Write-Host 'Exit code' -ForegroundColor Yellow
+        Write-Host "  Code: $($script:ExitCode)" -ForegroundColor Yellow
+        Write-Host "  Description: $($script:ExitCodeDescription)" -ForegroundColor Yellow
+
         Write-Host '  Check for existing issues at https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=' -ForegroundColor Yellow
-        Write-Host '  or request commercial support from ExplicIT Consulting at https://explicitconsulting.at/open-source/set-outlooksignatures.' -ForegroundColor Yellow
+        Write-Host '  or request fee-based support from ExplicIT Consulting at https://explicitconsulting.at/open-source/set-outlooksignatures.' -ForegroundColor Yellow
     }
 
     Write-Host

@@ -3,4 +3,4 @@ Email signatures and out-of-office replies for Exchange and all of Outlook: Clas
 
 To download an official release, visit https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases.
 
-ExplicIT Consulting's Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and commercial support. Visit https://explicitconsulting.at for details.
+ExplicIT Consulting's Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and fee-based support. Visit https://explicitconsulting.at for details.

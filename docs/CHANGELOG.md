@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy.<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black&color=informational" alt="License"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational&labelColor=black" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/commercial%20support-ExplicIT%20Consulting-lawngreen?labelColor=black" alt="get commercial support from ExplicIT Consulting"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy.<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black&color=informational" alt="License"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational&labelColor=black" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/fee--based%20support-ExplicIT%20Consulting-lawngreen?labelColor=black" alt="get fee-based support from ExplicIT Consulting"></a>
 
 # Changelog
 <!--
@@ -22,9 +22,26 @@
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.3" target="_blank">v4.18.3</a> - 2025-04-03
+
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- Update Outlook add-in dependency @azure/msal-browser to v4.9.1.
+- Make sure that signatures are available for the Outlook add-in even while "Prepare data for Outlook add-in" is running. No matter how long this preparation task takes, the switch from old to new signatures now only takes a second for the add-in.
+### Added
+- Add support for the taskpane of the Outlook add-in to be shown in read mode for messages. This makes it easier to check if the add-in is deployed correctly, and if it can access signatures. This is especially useful on mobile devices, in situations where enabling the debug mode is not wanted, and for basic tests when launch events are not triggered by Outlook.
+- Check for missing dependencies before using authentication broker authentication on Linux.
+### Removed
+### Fixed
+- Include line breaks when showing the signature preview for non-HTML signatures in the taskpane of the Outlook add-in.
+- Do not detect the default console color, as this fails on many Linux terminals.
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.2" target="_blank">v4.18.2</a> - 2025-03-19
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -38,7 +55,7 @@ _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explic
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.1" target="_blank">v4.18.1</a> - 2025-03-14
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -53,7 +70,7 @@ _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explic
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.0" target="_blank">v4.18.0</a> - 2025-03-06
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -87,7 +104,7 @@ _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explic
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.17.0" target="_blank">v4.17.0</a> - 2025-02-14
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -127,7 +144,7 @@ _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explic
 _**Attention, Exchange Online admins**_  
 _See '`What about the roaming signatures feature in Exchange Online?`' in '`.\docs\README`' for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see '`MirrorCloudSignatures`' in '`.\docs\README`'._
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Fixed
@@ -139,7 +156,7 @@ _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explic
 _**Attention, Exchange Online admins**_  
 _See '`What about the roaming signatures feature in Exchange Online?`' in '`.\docs\README`' for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see '`MirrorCloudSignatures`' in '`.\docs\README`'._
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explicitonsulting.at`'](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -189,7 +206,7 @@ _See ['`.\docs\Benefactor Circle`'](Benefactor%20Circle.md) or ['`https://explic
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README`._
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -218,7 +235,7 @@ _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicito
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README`._
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -245,7 +262,7 @@ _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicito
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README`._
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Tagline**_  
@@ -258,7 +275,7 @@ _Starting with this release, a tagline is added to each signature deployed for m
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works.<br>Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README`._
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Tagline**_  
@@ -299,7 +316,7 @@ _Starting with this release, a tagline is added to each signature deployed for m
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -320,7 +337,7 @@ _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicito
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Fixed
@@ -331,7 +348,7 @@ _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicito
 _**Attention, Exchange Online admins**_  
 _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\README` for details on how this feature works. Set-OutlookSignatures supports cloud roaming signatures - see `MirrorCloudSignatures` in `.\docs\README` for details._
 
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Changed
@@ -345,7 +362,7 @@ _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicito
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.0" target="_blank">v4.12.0</a> - 2024-05-07
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -368,7 +385,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.11.0" target="_blank">v4.11.0</a> - 2024-03-26
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -390,7 +407,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.10.1" target="_blank">v4.10.1</a> - 2024-02-06
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -414,7 +431,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.10.0" target="_blank">v4.10.0</a> - 2024-01-05
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -438,7 +455,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.9.0" target="_blank">v4.9.0</a> - 2023-12-02
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -461,7 +478,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.1" target="_blank">v4.8.1</a> - 2023-11-24
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -473,7 +490,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.8.0" target="_blank">v4.8.0</a> - 2023-11-20
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -495,7 +512,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.7.0" target="_blank">v4.7.0</a> - 2023-10-29
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -524,7 +541,7 @@ To compare the two permissions, see their description at [Microsoft Graph permis
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.1" target="_blank">v4.6.1</a> - 2023-10-27
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -537,7 +554,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.6.0" target="_blank">v4.6.0</a> - 2023-10-23
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -565,7 +582,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in `.\docs\
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.5.0" target="_blank">v4.5.0</a> - 2023-09-29
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  
@@ -583,7 +600,7 @@ _Set-OutlookSignatures can experimentally handle cloud roaming signatures since 
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.4.0" target="_blank">v4.4.0</a> - 2023-09-20
-_**Add features with the Benefactor Circle add-on and get commercial support from ExplicIT Consulting**_  
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See [`.\docs\Benefactor Circle`](Benefactor%20Circle.md) or [`https://explicitonsulting.at`](https://explicitconsulting.at/open-source/set-outlooksignatures) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 _**Attention, Exchange Online admins**_  

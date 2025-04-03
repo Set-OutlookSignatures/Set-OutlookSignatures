@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy.<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black&color=informational" alt="License"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational&labelColor=black" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/commercial%20support-ExplicIT%20Consulting-lawngreen?labelColor=black" alt="get commercial support from ExplicIT Consulting"></a>
+## **<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="400" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy.<br><br><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black&color=informational" alt="License"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational&labelColor=black" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black" alt="open issues" data-external="1"></a> <a href="./Benefactor%20Circle.md" target="_blank"><img src="https://img.shields.io/badge/add%20features-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://explicitconsulting.at/open-source/set-outlooksignatures/" target="_blank"><img src="https://img.shields.io/badge/fee--based%20support-ExplicIT%20Consulting-lawngreen?labelColor=black" alt="get fee-based support from ExplicIT Consulting"></a>
 
 
 # Welcome!&nbsp;&nbsp;&nbsp;&nbsp;<a href="#feature-comparison"><img src="https://img.shields.io/badge/go%20to-🆚%20Feature%20Comparison%20🆚-lawngreen?labelColor=black" alt="Go to feature comparison"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#2-quick-start-guide"><img src="https://img.shields.io/badge/go%20to-🚀%20Quick%20Start%20Guide%20🚀-lawngreen?labelColor=black" alt="Go to Quick Start Guide"></a><!-- omit in toc -->
@@ -10,6 +10,77 @@ Email signatures and out-of-office replies are an integral part of corporate ide
 Central management and deployment ensures that design guidelines are met, guarantees correct and up-to-date content, helps comply with legal requirements, relieves staff and creates an additional marketing and sales channel.
 
 **You can do all this, and more, with Set-OutlookSignatures and the Benefactor Circle add-on.**
+<details open>
+  <summary>More cost-effective than other products</summary>
+  <ul>
+    <li>Purchase directly from the manufacturer, no graduated prices.</li>
+    <li>Support on demand instead of expensive maintenance contracts.</li>
+    <li>Runs on your own existing (client) infrastructure.</li>
+    <li>Cheaper than independent signature management by your employees.</li>
+  </ul>
+</details>
+
+<details>
+  <summary>Most secure solution on the market</summary>
+  <ul>
+    <li>Does not introduce any new dependencies into your system.</li>
+    <li>The source code of the basic software is freely available.</li>
+    <li>No transfer of data or e-mails to outside parties.</li>
+    <li>Data is only processed on systems that you already trust.</li>
+    <li>Works in all Microsoft 365 clouds (Public, US Government, US Government DoD, China)</li>
+    <li>Processing takes place in the security context of your users, with a subset of existing permissions.</li>
+  </ul>
+</details>
+
+<details>
+  <summary>Simple and intuitive</summary>
+  <ul>
+    <li>Templates in Word or HTML format.</li>
+    <li>No installation and no management app required.</li>
+    <li>Invisible to users: Signatures are simply there and always up-to-date.</li>
+  </ul>
+</details>
+
+<details>
+  <summary>Innovative features</summary>
+  <ul>
+    <li>Signatures for personal mailboxes, shared mailboxes, boss-secretary constellations, delegation scenarios, Send As, Send On Behalf and more.</li>
+    <li>Mix attributes of the current user, the current mailbox, and the managers of both.</li>
+    <li>Any number of signatures that can be assigned flexibly and by date - an additional marketing channel.</li>
+    <li>Signatures that automatically roam with the user - in the cloud and on-prem.</li>
+    <li>Simulation of results for any user.</li>
+    <li>Set out-of-office replies.</li>
+  </ul>
+</details>
+
+<details>
+  <summary>Only one solution for all environments</summary>
+  <ul>
+    <li>On premises, hybrid and cloud only with just one license and one product.</li>
+    <li>For all Outlook versions: Classic and New, Web, Windows, macOS, Android and iOS.</li>
+    <li>Integrated connection to Entra ID and Active Directory. Other data sources can be integrated.</li>
+  </ul>  
+</details>
+
+<details>
+  <summary>Division of tasks according to your wishes</summary>
+  <ul>
+    <li>IT can retain full control or just take care of running the software.</li>
+    <li>Marketing can manage the templates themselves; nothing more than Word is required.</li>
+    <li>Delegated permissions can be assigned down to individual templates.</li>
+    <li>Any number of independent instances can be created.</li>
+  </ul>  
+</details>
+
+<details>
+  <summary>Made in Austria, proven worldwide</summary>
+  <ul>
+    <li>From practice, for practice.</li>
+    <li>Developed specifically so that SMEs can use all functions at the same low price as large companies.</li>
+    <li>Trusted and valued by companies and authorities from a wide range of sectors and sizes worldwide.</li>
+  </ul>  
+</details>
+<br>
 
 To get to know Set-OutlookSignatures, we recommend following the content flow of this README file: [Overview and features](#overview-and-features) > [Demo video](#demo-video) > [Requirements](#1-requirements) > [Quick Start Guide](#2-quick-start-guide) > [Table of Contents](#table-of-contents).
 
@@ -22,6 +93,7 @@ When facing a problem: Before creating a new issue, check the documentation ([RE
 You are welcome to share your experiences with Set-OutlookSignatures, exchange ideas with other users or suggest new features in our [discussions board](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions?discussions_q=).
 
 # Overview and features&nbsp;&nbsp;&nbsp;&nbsp;<a href="#feature-comparison"><img src="https://img.shields.io/badge/go%20to-🆚%20Feature%20Comparison%20🆚-lawngreen?labelColor=black" alt="Go to feature comparison"></a><!-- omit in toc -->
+
 With Set-OutlookSignatures, signatures and out-of-office replies can be:
 - Generated from **templates in DOCX or HTML** file format  
 - Customized with a **broad range of variables**, including **photos**, from Active Directory and other sources
@@ -56,7 +128,7 @@ All **national clouds are supported**: Public (AzurePublic), US Government L4 (A
 It is **multi-client capable** by using different template paths, configuration files and script parameters.
 
 Set-OutlookSignatures requires **no installation on servers or clients**. You only need a standard SMB file share on a central system, and optionally Office on your clients.  
-There is also **no telemetry** or "calling home", emails are **not routed through a 3rd party data center or cloud service**, and there is **no need to change DNS records (MX, SPF) or mail flow**.
+There is also **no telemetry** or "calling home", emails are **not routed through a 3rd party data center or cloud service**, and there is **no need to change DNS records (MX, SPF) or email flow**.
 
 A **documented implementation approach**, based on real life experiences implementing the software in multi-client environments with a five-digit number of mailboxes, contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators.  
 The implementation approach is **suited for service providers as well as for clients**, and covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
@@ -64,7 +136,7 @@ The implementation approach is **suited for service providers as well as for cli
 The software core is **Free and Open-Source Software (FOSS)**. It is published under a license which is approved, among others, by the Free Software Foundation (FSF) and the Open Source Initiative (OSI), and is compatible with the General Public License (GPL) and other popular licenses. Please see `.\LICENSE.txt` for copyright and license details.
 
 Footnote 1 (¹): **Some features are exclusive to the Benefactor Circle add-on.**
-ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and commercial support, ensuring that the core of Set-OutlookSignatures can remain Free and Open-Source Software (FOSS) and continues to evolve. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.
+ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and fee-based support, ensuring that the core of Set-OutlookSignatures can remain Free and Open-Source Software (FOSS) and continues to evolve. See <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> for details.
 
 ## Feature comparison&nbsp;&nbsp;&nbsp;&nbsp;<a href="#2-quick-start-guide"><img src="https://img.shields.io/badge/go%20to-🚀%20Quick%20Start%20Guide%20🚀-lawngreen?labelColor=black" alt="Go to Quick Start Guide"></a><!-- omit in toc -->
 
@@ -130,7 +202,7 @@ You need Exchange Online or Exchange on-prem.
 
 Set-OutlookSignatures can run in two modes:
 - In the security context of the currently logged-in user. This is recommended for most scenarios.
-- On a central system, using a service account to push signatures into users mailboxes. This can be useful for accounts that only log on to the mail service, but not to a client (such as M365 F-licenses). See 'SimulateAndDeploy' in this document for details.
+- On a central system, using a service account to push signatures into users mailboxes. This can be useful for accounts that only log on to the email service, but not to a client (such as M365 F-licenses). See 'SimulateAndDeploy' in this document for details.
 
 A Linux, macOS or Windows system with PowerShell:
 - Windows: Windows PowerShell 5.1 ('powershell.exe', part of Windows) or PowerShell 7+ ('pwsh.exe')
@@ -147,13 +219,12 @@ Signature templates can be in DOCX (Windows) or HTML format (Windows, Linux, mac
 
 The software must run in PowerShell Full Language mode. Constrained Language mode is not supported, as some features such as BASE64 conversions are not available in this mode or require very slow workarounds.
 
-If you use AppLocker or a comparable solution (Defender, CrowdStrike, Ivanti, and others), you may need to add the existing digital file signature to your allow list, or define additional settings in your security software.  
-There are locked down environments, where all files matching the patterns `*.ps*1` and `*.dll` need to be digitially signed with a trusted certificate. 
+On Windows and macOS, unblock the file 'Set-OutlookSignatures.ps1'. You can use the PowerShell cmdlet 'Unblock-File' for this, or right-click the file in File Explorer, select Properties and check 'Unblock'. This removes the "mark of the web", which can prevent script execution when the PowerShell execution policy is set to RemoteSigned.
+
+If you use AppLocker or a comparable solution (Defender, CrowdStrike, Ivanti, and others), you may need to add the existing digital file signature to your allow list, or define additional settings in your security software.
 
 **Thanks to our partnership with [ExplicIT Consulting](https://explicitconsulting.at), Set-OutlookSignatures and its components are digitally signed with an Extended Validation (EV) Code Signing Certificate (which is the highest code signing standard available).  
 This is not only available for Benefactor Circle members, but also the Free and Open Source core version is code signed.**
-
-On Windows and macOS, do not forget to unblock at least 'Set-OutlookSignatures.ps1' after extracting the downloaded ZIP file. You can use the PowerShell cmdlet 'Unblock-File' for this.
 
 The paths to the template and configuration files (SignatureTemplatePath, OOFTemplatePath, GraphConfigFile, etc.) must be accessible by the currently logged-in user. The files must be at least readable for the currently logged-in user.
 
@@ -194,7 +265,7 @@ Deploy your first signatures in less than an hour!
 1. For a first test run, it is recommended to log on with a test user on a Windows system with Word and Outlook installed, and Outlook being configured with at least the test user's mailbox. This way, you get results fast and can experience the biggest set of features.
    - For full Linux and macOS support, the Benefactor Circle add-on (see <a href="./Benefactor%20Circle.md" target="_blank">'.\docs\Benefactor Circle'</a> and is required and the mailboxes need to be hosted in Exchange Online.
 2. Download Set-OutlookSignatures and extract the archive to a local folder
-   - On Windows and macOS, unblock the file 'Set-OutlookSignatures.ps1'. You can use the PowerShell cmdlet 'Unblock-File' for this, or right-click the file in File Explorer, select Properties and check 'Unblock'.
+   - On Windows and macOS, unblock the file 'Set-OutlookSignatures.ps1'. You can use the PowerShell cmdlet 'Unblock-File' for this, or right-click the file in File Explorer, select Properties and check 'Unblock'. This removes the "mark of the web", which can prevent script execution when the PowerShell execution policy is set to RemoteSigned.
 3. If you use AppLocker or a comparable solution (Defender, CrowdStrike, Ivanti, and others), you may need to add the existing digital file signature to your allow list, or define additional settings in your security software.
 4. Now it is time to run Set-OutlookSignatures for the first time
    - **If _all mailboxes_ are in Exchange _on-prem only_ and the logged-in user has access to the on-prem Active Directory:**<br>Just run 'Set-OutlookSignatures.ps1' in PowerShell.<br>For best results, don't run the software by double clicking it in File Explorer, or via right-click and 'Run'. Instead, run the following command:
@@ -210,7 +281,7 @@ Deploy your first signatures in less than an hour!
              - You can safely ignore the error message that the URL '`http://localhost/?admin_consent=True&tenant=[…]`' could not be found or accessed. The reason for this message is that the Entra ID app is configured to only be able to authenticate against http://localhost.
         - Option B: Create and use your own Entra ID app
           - As you create and host your own Entra ID application, this option is considered more secure than using the application provided by the developers.
-          - This is an option for advanced Entra ID administrators. If you do not have this experience yet but still want to use this option, [ExplicIT Consulting](https://explicitconsulting.at) offers commercial support covering this topic.
+          - This is an option for advanced Entra ID administrators. If you do not have this experience yet but still want to use this option, [ExplicIT Consulting](https://explicitconsulting.at) offers fee-based support covering this topic.
           - See the file '`.\config\default graph config.ps1`' for details about the required application permissions, endpoints and authentication methods. This file also links to sample code that automates the creation of the required application in your tenant.
      2. Run Set-OutlookSignatures
         - **If _all mailboxes_ are in Exchange _Online_, or you are in a hybrid environment _without_ synchronizing all required Exchange attributes to on-prem** (mail, legacyExchangeDN, msExchRecipientTypeDetails, msExchMailboxGuid, proxyAddresses):
@@ -256,7 +327,7 @@ The content is based on real life experiences implementing the software in multi
 It contains proven procedures and recommendations for product managers, architects, operations managers, account managers and email and client administrators. It is suited for service providers as well as for clients.  
 It covers several general overview topics, administration, support, training across the whole lifecycle from counselling to tests, pilot operation and rollout up to daily business.
 
-**Set-OutlookSignatures is very well documented, which inevitably brings with it a lot of content.** If you are looking for someone with experience who can quickly train you and assist with evaluation, planning, implementation and ongoing operations: Our partner [ExplicIT Consulting](https://explicitconsulting.at) offers first-class commercial support and also the commercial [Benefactor Circle add-on](https://explicitconsulting.at/open-source/set-outlooksignatures) with enhanced features.
+**Set-OutlookSignatures is very well documented, which inevitably brings with it a lot of content.** If you are looking for someone with experience who can quickly train you and assist with evaluation, planning, implementation and ongoing operations: Our partner [ExplicIT Consulting](https://explicitconsulting.at) offers first-class fee-based support and also the commercial [Benefactor Circle add-on](https://explicitconsulting.at/open-source/set-outlooksignatures) with enhanced features.
 
 # 3. Parameters
 Parameters covered in this chapter:
@@ -588,7 +659,7 @@ Usage example Non-PowerShell: powershell.exe -command "& .\Set-OutlookSignatures
 ## 3.16. SimulateUser<!-- omit in toc -->
 SimulateUser is a mandatory parameter for simulation mode. This value replaces the currently logged-in user.
 
-Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an email-address, but is not necessarily one).
+Use a logon name in the format 'Domain\User' or a Universal Principal Name (UPN, looks like an email address, but is not necessarily one).
 
 Default value: $null
 
@@ -811,7 +882,8 @@ Prerequisites:
 
 Please note:
 - As there is no Microsoft official API yet, this feature is to be used at your own risk.
-- This feature does not work in simulation mode, because the user running the simulation does not have access to the signatures stored in another mailbox
+- This feature does not work in simulation mode, because the user running the simulation does not have access to the signatures stored in another mailbox.
+- For maiboxes in Exchange Online: To delete manually created signatures (signatures that have not been created by Set-OutlookSignatures) you need to to use New Outlook for Windows or Classic Outlook for Windows with its own roaming signature sync mechanism enabled, or you delete the signature both locally and in Outlook Web. Else, manually created signatures will be re-downloaded from the cloud or re-uploaded to the cloud because Set-OutlookSignatures technically can not detect the deletion.
 
 The process is very simple and straight forward. Set-OutlookSignatures goes through the following steps for each mailbox:
 1. Check if all prerequisites are met
@@ -982,18 +1054,26 @@ The add-in code is downloaded by the Outlook client and executed locally, in the
 ## 4.1. Usage<!-- omit in toc -->
 From an end user perspective, basically nothing needs to be done or configured: When writing a new email, answering an email, or creating a new appointment, the add-in automatically adds the corresponding default signature.
 
-For advanced usage and debug logging, a taskpane is available in all Outlook versions supporting this feature. The taskpane allows to manually choose a signature, set the selected signature, and to temporarily override admin-defined settings for debug logging and Outlook host restrictions. The taskpane can be accessed through:
+For advanced usage and debug logging, a taskpane is available in all Outlook versions supporting this feature.
+
+In compose mode, the taskpane allows to manually choose a signature, set the selected signature, and to temporarily override admin-defined settings for debug logging and Outlook host restrictions.
+
+In message read mode, the taskpane can not set signatures, of course. But it is very useful to check if the add-in is deployed correctly, and if it can access signatures. This is especially useful on mobile devices, in situations where enabling the debug mode is not wanted, and for basic tests when launch events are not triggered by Outlook.
+
+The taskpane can be accessed through:
 - Outlook Web (Exchange Online), New Outlook for Windows, New Outlook for Mac:
-  - New mail, reply mail: "Message" tab, "Apps" icon
+  - New mail, reply mail, read mail: "Message" tab, "Apps" icon
   - New appointment: Ribbon, "…" menu
 - Outlook Web (on-prem):
   - New mail, reply mail: Lower right corner of the compose window
   - New appointment: At the right of the menu bar at the top of the compose window
+  - Read mail: Left to the reply button
 - Classic Outlook for Windows, Classic Outlook for Mac:
-  - New mail, reply mail: "Message" tab, "All apps" icon
+  - New mail, reply mail, read mail: "Message" tab, "All apps" icon
   - New appointment: "Appointment" or "Meeting" tab, "All apps" icon
 - Outlook for iOS, Outlook for Android
   - These platforms do not support taskpanes for new mails, reply mails and appointments.
+  - Read mail: Three dots ("…" or "⋮")in the email header
 
 ## 4.2. Requirements<!-- omit in toc -->
 ### 4.2.1. Outlook clients<!-- omit in toc -->
@@ -1005,8 +1085,8 @@ The add-in always runs in the context of the user that is used by Outlook to acc
 
 ### 4.2.2. Web server and domain<!-- omit in toc -->
 Whatever web server you choose, the requirements are low:
-- Reachable from mobile devices via the public internet
-- Use a dedicated host name ("https://outlookaddin01.example.com"), do not use subdirectories ("https://addins.example.com/outlook01")
+- Reachable from mobile devices via the public internet.
+- Use a dedicated host name ("https://outlookaddin01.example.com"), do not use subdirectories ("https://addins.example.com/outlook01").
 - A valid TLS certificate. Self-signed certificates can be used for development and testing, as long as the certificate is trusted by the client used for testing.
 - In production, the server hosting the images shouldn't return a Cache-Control header specifying no-cache, no-store, or similar options in the HTTP response.
 
@@ -1044,7 +1124,7 @@ When mailboxes are hosted in Exchange Online, the Outlook add-in needs an Entra 
 
 You can modify the self-created app you already use for Set-OutlookSignatures, or you can create a separate one for this Outlook add-in.
 
-Creating a separate application for the Outlook add-in is recommended. You can use the instructions in '`.\config\default graph config.ps1`' as guideline, or get commercial support from [ExplicIT Consulting](https://explicitconsulting.at).
+Creating a separate application for the Outlook add-in is recommended. You can use the instructions in '`.\config\default graph config.ps1`' as guideline, or get fee-based support from [ExplicIT Consulting](https://explicitconsulting.at).
 
 The required minimum settings for the Entra ID app are:
 - A name of your choice.
@@ -1678,7 +1758,9 @@ Entra ID is directly asked to silently authenticate the user that was used to ru
 The authentication broker of the operating system opens, asks which account to use and takes care of authentication.
 7. Interactive via browser  
 Authentication via browser. A default browser window with an "Authentication successful" message may open, it can be closed anytime. You can modify the browser message shown, see '.\config\default graph config.ps1' for details.
-  
+
+When all silent authentication methods fail, a dialog informs the user that Set-OutlookSignatures requires interactive authentication. You can change the text displayed in the dialog or disable the dialog using a custom graph configuration file. See '`.\config\default graph config.ps1`' for details and more options related to authentication against the Graph API.
+
 No custom components are used, only the official Microsoft 365 authentication site, the user's default browser and the official Microsoft Authentication Library for .Net (MSAL.Net).
 
 After successful authentication the refresh token is stored for later use by the silent authentication steps described above.
@@ -1829,8 +1911,8 @@ The requirements for .htm files these files are harder to fulfill as it is the c
 - The template must be UTF-8 encoded (without BOM), or at least only contain UTF-8 compatible characters
 - The character set must be set to UTF-8 with a meta tag: '`<meta http-equiv=Content-Type content="text/html; charset=utf-8">`'
 - The template should be a single file, additional files and folders are not recommended (but possible, see below)
-- Images should ideally either reference a public URL or be part of the template as Base64 encoded string
-- When storing images in a subfolder:
+- Images can either reference a public URL, a relative local path (preferred) or be part of the template as Base64 encoded string
+- When storing images in a relative local path:
   - Only one subfolder is allowed
   - The subfolder must be named '\<name of the HTM file without extension>\<suffix>'
     - The suffix must be one from the following list (as defined by Microsoft Office): '.files', '_archivos', '_arquivos', '_bestanden', '_bylos', '_datoteke', '_dosyalar', '_elemei', '_failid', '_fails', '_fajlovi', '_ficheiros', '_fichiers', '_file', '_files', '_fitxategiak', '_fitxers', '_pliki', '_soubory', '_tiedostot', '-Dateien', '-filer'
@@ -2480,7 +2562,7 @@ I draw the line where companies, rather than individuals, benefit one-sidedly. T
 By the way: Companies often make wrong assumptions about free and open source software. Open source software absolutely can contain closed source code. The term "open source" does not automatically imply free usage or even free access to the code. The permission to use software for free does not imply free support.
 
 ### Not sure if Set-OutlookSignatures is the right solution for your company?<!-- omit in toc -->
-The core of Set-OutlookSignatures is available free of charge as open-source software and can be used for as long and for as many mailboxes as your company wants.<br>All documentation is publicly available, and you can get free community support at GitHub or get first-class commercial support, training, workshops and more from [ExplicIT Consulting](https://explicitconsulting.at/open-source/set-outlooksignatures/).
+The core of Set-OutlookSignatures is available free of charge as open-source software and can be used for as long and for as many mailboxes as your company wants.<br>All documentation is publicly available, and you can get free community support at GitHub or get first-class fee-based support, training, workshops and more from [ExplicIT Consulting](https://explicitconsulting.at/open-source/set-outlooksignatures/).
 
 For a small annual fee per mailbox, the [Benefactor Circle add-on](https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/blob/main/docs/Benefactor%20Circle.md) offers a whole bunch of additional features.<br>All documentation is publicly available, and the free 14-day trial version allows companies to test all additional features at no cost.
 

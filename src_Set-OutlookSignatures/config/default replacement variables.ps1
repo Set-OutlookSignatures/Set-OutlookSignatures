@@ -187,7 +187,7 @@ $ReplaceHash['$CurrentMailboxManagerDisplayName$'] = [string]$ADPropsCurrentMail
 #   Dr. John Doe
 #   John Doe, PhD
 #   John Doe
-# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
 $ReplaceHash['$CurrentUserNameWithHonorifics$'] = (((((([string]$ADPropsCurrentUser.honorificPrefix, [string]$ADPropsCurrentUser.givenname, [string]$ADPropsCurrentUser.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUser.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
 $ReplaceHash['$CurrentUserManagerNameWithHonorifics$'] = (((((([string]$ADPropsCurrentUserManager.honorificPrefix, [string]$ADPropsCurrentUserManager.givenname, [string]$ADPropsCurrentUserManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUserManager.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
 $ReplaceHash['$CurrentMailboxNameWithHonorifics$'] = (((((([string]$ADPropsCurrentMailbox.honorificPrefix, [string]$ADPropsCurrentMailbox.givenname, [string]$ADPropsCurrentMailbox.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailbox.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
@@ -196,7 +196,7 @@ $ReplaceHash['$CurrentMailboxManagerNameWithHonorifics$'] = (((((([string]$ADPro
 
 # Sample code: Create MeCard (vCard alternative) QR codes and save the images in the following replacement variables:
 #   $CurrentUserCustomImage1$, $CurrentUserManagerCustomImage1$, $CurrentMailboxCustomImage1$, $CurrentMailboxManagerCustomImage1$
-# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
 @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager') | ForEach-Object {
     $QRCodeContent = @(
         @(
@@ -230,7 +230,7 @@ $ReplaceHash['$CurrentMailboxManagerNameWithHonorifics$'] = (((((([string]$ADPro
 #   If ExtensionAttribute3 is not empty or whitespace, put it in brackets and add a leading space
 #     Examples: " (Mr.)", " (Ms.)", " (she/her)"
 #   Else: '' (emtpy string)
-# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers commercial support for this and other open source code.
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
 $ReplaceHash['$CurrentUserSalutation$'] = $ReplaceHash['$CurrentUserGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentUser.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentUser.extensionattribute3))" })
 $ReplaceHash['$CurrentUserManagerSalutation$'] = $ReplaceHash['$CurrentUserManagerGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentUserManager.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentUserManager.extensionattribute3))" })
 $ReplaceHash['$CurrentMailboxSalutation$'] = $ReplaceHash['$CurrentMailboxGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentMailbox.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentMailbox.extensionattribute3))" })
