@@ -18,8 +18,8 @@ Write-Host 'Set-OutlookSignatures simulation mode helper'
 $params = [ordered]@{
 	SignatureTemplatePath         = '.\sample templates\Signatures DOCX'
 	SignatureIniFile              = '.\sample templates\Signatures DOCX\_Signatures.ini'
-	OOFTemplatePath               = '.\sample templates\Out-of-office DOCX'
-	OOFIniFile                    = '.\sample templates\Out-of-office DOCX\_OOF.ini'
+	OOFTemplatePath               = '.\sample templates\Out-of-Office DOCX'
+	OOFIniFile                    = '.\sample templates\Out-of-Office DOCX\_OOF.ini'
 	ReplacementVariableConfigFile = '.\config\default replacement variables.ps1'
 	GraphConfigFile               = '.\config\default graph config.ps1'
 	GraphOnly                     = $false

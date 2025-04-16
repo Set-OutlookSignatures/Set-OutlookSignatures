@@ -54,6 +54,7 @@ You can commit to the new branch as often as you like, and you don't have to car
 # 5. Commit messages
 Commit messages should follow the <a href="https://www.conventionalcommits.org" target="_blank">Conventional Commits</a> standard.
 ## 5.1. Commit message format
+
 ```
 <type>[optional scope]: <short description>
 <blank line>
@@ -61,6 +62,7 @@ Commit messages should follow the <a href="https://www.conventionalcommits.org" 
 <blank line>
 [optional footer]
 ```
+
 ## 5.2. Type
 - Type is mandatory. 
 - `fix[optional scope]:` A fix. Bumps SemVer patch version.

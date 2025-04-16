@@ -1,7 +1,7 @@
 ﻿<#
 This sample code shows how to achieve two things:
-	- Running simulation mode for multiple users
-  	- How to use simulation mode together with the Benefactor Circle add-on to push signatures and out-of-office replies into mailboxes, without involving end users or their devices
+  - Running simulation mode for multiple users
+   How to use simulation mode together with the Benefactor Circle add-on to push signatures and out-of-office replies into mailboxes, without involving end users or their devices
 
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
@@ -10,114 +10,126 @@ Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offe
 
 
 Features
-	- Automate simulation mode for all given mailboxes
-	- A configurable number of Set-OutlookSignatures instances run in parallel for better performance
-	- Set default signature in Outlook Web, no matter if classic signature or roaming signatures (requires the Benefactor Circle add-on)
-	- Set internal and external out-of-office (OOF) message (requires the Benefactor Circle add-on)
-	- Supports on-prem, hybrid and cloud-only environments
+  - Automate simulation mode for all given mailboxes
+  - A configurable number of Set-OutlookSignatures instances run in parallel for better performance
+  - Set default signature in Outlook Web, no matter if classic signature or roaming signatures (requires the Benefactor Circle add-on)
+  - Set internal and external out-of-office (OOF) message (requires the Benefactor Circle add-on)
+  - Supports on-prem, hybrid and cloud-only environments
 
 
 Requirements
-  	Follow the requirements exactly and in full. SimulateAndDeploy will not work correctly when even one requirement is not met.
-	Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+  Follow the requirements exactly and in full. SimulateAndDeploy will not work correctly when even one requirement is not met.
+  Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
 
-	- For mailboxes on-prem
-		- The software needs to be run with an account that
-			- has a mailbox
-			- and is granted "full access" to all simulated mailboxes
-		- If you do not want to simulate cloud mailboxes, set $ConnectOnpremInsteadOfCloud to $true
-	- For mailboxes in Exchange Online
-		- The software needs to be run with an account that
-			- has a mailbox
-			- and is granted "full access" to all simulated mailboxes
-		- MFA is not yet supported, but script can be adapted accordingly
-			- MFA would require interactivity, breaking the possibility for complete automation
-			- Better configure a Conditional Access Policy that only allows logon from a controlled network and does not require MFA
-		- Service Principals are not supported by the API
-		- Create a new app registration in Entra ID
-			- Option A: Create the app automatically by using the script '.\sample code\Create-EntraApp.ps1'
-				The sample code creates the app with all required settings automatically, only providing admin consent is a manual task
-			- Option B: Create the Entra ID app manually, with the following properties:
-				- Application (!) permissions with admin consent
-					- Microsoft Graph
-						- GroupMember.Read.All
-							Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
-							Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
-						- Mail.ReadWrite
-							Allows the app to create, read, update, and delete mail in all mailboxes without a signed-in user. Does not include permission to send mail.
-							Required to connect to Outlook Web and to set Outlook signatures.
-						- MailboxSettings.ReadWrite
-							Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-							Required to set out-of-office replies for the simulated mailboxes
-						- User.Read.All
-							Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-							Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
-					- Office 365 Exchange Online
-						- full_access_as_app
-							Allows the app to have full access via Exchange Web Services to all mailboxes without a signed-in user.
-							Required for Exchange Web Services access (read Outlook Web configuration, set classic signature and roaming signatures)
-				- Delegated (!) permissions with admin consent
-					These permissions equal those mentioned in '.\config\default graph config.ps1'
-					- Microsoft Graph
-						- email
-							Allows the app to read your users' primary email address.
-							Required to log on the current user.
-						- EWS.AccessAsUser.All
-							Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
-							Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
-						- GroupMember.Read.All
-							Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
-							Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
-						- Mail.ReadWrite
-							Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
-							Required to connect to Outlook Web and to set Outlook signatures.
-						- MailboxSettings.ReadWrite
-							Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-							Required to detect the state of the out-of-office assistant and to set out-of-office replies.
-						- offline_access
-							Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
-							Required to get a refresh token from Graph.
-						- openid
-							Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
-							Required to log on the current user.
-						- profile
-							Allows the app to see your users' basic profile (e.g., name, picture, user name, email address).
-							Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
-						- User.Read.All
-							Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-							Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
-					- Define a client secret (and set a reminder to update it, because it will expire)
-						The code can easily be adapted for certificate authentication at application level (which is not possible for user authentication)
-					- Set supported account types to "Accounts in this organizational directory only" (for security reasons)
-		- You can limit the access of the app to specific mailboxes. This is recommended because of the "MailboxSettings.ReadWrite" and "full_access_as-app" permission required at application level.
-			- Use the New-ApplicationAccessPolicy cmdlet to limit access or to deny access to specific mailboxes or to mailboxes organized in groups.
-			- See https://learn.microsoft.com/en-us/powershell/module/exchange/new-applicationaccesspolicy for details
-	- Microsoft Word (see 'Limitations' for a scenario that does not require Word)
-	- File paths can get very long and be longer than the default OS limit. Make sure you allow long file paths.
-		- https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
-	- Do not forget to adapt the "Variables" section of this script according to your needs and your configuration
+  - For mailboxes on-prem
+      - The software needs to be run with an account that
+          - has a mailbox
+          - and is granted "full access" to all simulated mailboxes
+      - If you do not want to simulate cloud mailboxes, set $ConnectOnpremInsteadOfCloud to $true
+  - For mailboxes in Exchange Online
+      - The software needs to be run with an account that
+          - has a mailbox
+          - and is granted "full access" to all simulated mailboxes
+      - MFA is not supported
+          - MFA would require interactivity, breaking the possibility for complete automation
+          - Better configure a Conditional Access Policy that only allows logon from a controlled network and does not require MFA
+      - Service Principals are not supported by the API
+      - Create a new app registration in Entra ID
+          - Option A: Create the app automatically by using the script '.\sample code\Create-EntraApp.ps1'
+		      - The sample code creates the app with all required settings automatically, only providing admin consent is a manual task
+		  - Option B: Create the Entra ID app manually, with the following properties:
+		      - Application (!) permissions with admin consent
+                  - Microsoft Graph
+				      - Files.Read.All
+					    Allows the app to read all files in all site collections without a signed in user.
+					    Required for access to templates and configuration files hosted on SharePoint Online.
+					    For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
+					  - GroupMember.Read.All
+						Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
+						Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+					  - Mail.ReadWrite
+					    Allows the app to create, read, update, and delete mail in all mailboxes without a signed-in user. Does not include permission to send mail.
+						Required to connect to Outlook Web and to set Outlook signatures.
+					  - MailboxSettings.ReadWrite
+						Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
+						Required to set out-of-office replies for the simulated mailboxes
+					  - User.Read.All
+						Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
+						Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
+				  - Office 365 Exchange Online
+				      - full_access_as_app
+						Allows the app to have full access via Exchange Web Services to all mailboxes without a signed-in user.
+						Required for Exchange Web Services access (read Outlook Web configuration, set classic signature and roaming signatures)
+			  - Delegated (!) permissions with admin consent
+				These permissions equal those mentioned in '.\config\default graph config.ps1'
+			      - Microsoft Graph
+					  - email
+				        Allows the app to read your users' primary email address.
+					    Required to log on the current user.
+					  - EWS.AccessAsUser.All
+						Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
+						Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
+					  - Files.Read.All
+					    Allows the app to read all files the signed-in user can access.
+					    Required for access to templates and configuration files hosted on SharePoint Online.
+					    For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
+					  - GroupMember.Read.All
+						Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
+						Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+					  - Mail.ReadWrite
+						Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
+						Required to connect to Outlook Web and to set Outlook signatures.
+					  - MailboxSettings.ReadWrite
+						Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
+						Required to detect the state of the out-of-office assistant and to set out-of-office replies.
+					  - offline_access
+						Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
+						Required to get a refresh token from Graph.
+					  - openid
+						Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
+						Required to log on the current user.
+					  - profile
+						Allows the app to see your users' basic profile (e.g., name, picture, user name, email address).
+						Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
+					  - User.Read.All
+						Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
+						Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
+			  - Define a client secret (and set a reminder to update it, because it will expire)
+				The code can easily be adapted for certificate authentication at application level (which is not possible for user authentication)
+			  - Set supported account types to "Accounts in this organizational directory only" (for security reasons)
+		  - You can limit the access of the app to specific mailboxes. This is recommended because of the "MailboxSettings.ReadWrite" and "full_access_as-app" permission required at application level.
+		      - Use the New-ApplicationAccessPolicy cmdlet to limit access or to deny access to specific mailboxes or to mailboxes organized in groups.
+			  - See https://learn.microsoft.com/en-us/powershell/module/exchange/new-applicationaccesspolicy for details
+  - Microsoft Word when using DOCX tempates
+  - File paths can get very long and be longer than the default OS limit. Make sure you allow long file paths.
+      - https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+  - Do not forget to adapt the "Variables" section of this script according to your needs and your configuration
 
 
 Limitations and remarks
-	- Despitze parallelization, the execution time can be too long for a higher number of users. The reason usually is the Word background process.
-		- If you use DOCX templates and/or require signatures in RTF format, Word is needed for document conversion and you can only shorten runtime by adding hardware (scale up or scale out)
-		- If you do need HTML signatures only, you can use the following workaround to avoid starting Word:
-			- Use HTM templates instead of DOCX templates (parameter '-UseHtmTemplates true')
-				There are features in DOCX templates that can not be replicated HTM templates, such as applying Word specific image and text filters
-			- Do not create signatures in RTF format (parameter '-CreateRtfSignatures false')
-	- Roaming signatures can currently not be deployed for shared mailboxes, as the API does not support this scenario.
-		- Roaming signatures for shared mailboxes pose a general problem, as only signatures with replacement variables from the $CurrentMailbox[…]$ namespace would make sense anyhow
-	- SimulateAndDeploy can not solve problems around the Classic Outlook for Windows roaming signature sync engine, only Microsoft can do this (but unfortunately does not since years).
-		- Until Microsoft solves this in Classic Outlook for Windows, expect problems with character encoding (umlauts, diacritics, emojis, etc.) and more.
-		- These Outlook-internal problems will come and go depending on the patch level of Outlook.
-		- These Outlook-internal problems can also be observed when Set-OutlookSignatures is not involved at all.
-		- The only workaround currently known is to disable the Classic Outlook for Windows sync engine and let Set-OutlookSignatures do it by running it on the client regularly.
-    - Signatures are directly usable in Outlook Web and New Outlook (when based on Outlook Web). Other Outlook editions may work but are not supported.
-	    - Consider using the Outlook add-in to access signatures created by SimulateAndDeploy on other editions of Outlook in a supported way. See '.\docs\README' for details.
-		- Also see FAQ 'Roaming signatures in Classic Outlook for Windows look different' in '.\docs\README'.
-	- Consider using the 'VirtualMailboxConfigFile' parameter of Set-OutlookSignatures, ideally together with the output of the Export-RecipientPermissions script.
-	  This allows you to automatically create up-to-date lists of mailboxes based on the permissions granted in Exchange, as well as the according INI file lines.
-	  Visit https://github.com/Export-RecipientPermissions for details about Export-RecipientPermissions.
+  - Despitze parallelization, the execution time can be too long for a higher number of users. The reason usually is the Word background process.
+      - If you use DOCX templates and/or require signatures in RTF format, Word is needed for document conversion and you can only shorten runtime by adding hardware (scale up or scale out)
+	  - If you do need HTML signatures only, you can use the following workaround to avoid starting Word:
+	      - Use HTM templates instead of DOCX templates (parameter '-UseHtmTemplates true')
+			There are features in DOCX templates that cannot be replicated HTM templates, such as applying Word specific image and text filters
+		  - Do not create signatures in RTF format (parameter '-CreateRtfSignatures false')
+  - Roaming signatures can currently not be deployed for shared mailboxes, as the API does not support this scenario.
+      - Roaming signatures for shared mailboxes pose a general problem, as only signatures with replacement variables from the $CurrentMailbox[…]$ namespace would make sense anyhow
+  - SimulateAndDeploy cannot solve problems around the Classic Outlook for Windows roaming signature sync engine, only Microsoft can do this (but unfortunately does not since years).
+      - Until Microsoft solves this in Classic Outlook for Windows, expect problems with character encoding (umlauts, diacritics, emojis, etc.) and more.
+	  - These Outlook-internal problems will come and go depending on the patch level of Outlook.
+	  - These Outlook-internal problems can also be observed when Set-OutlookSignatures is not involved at all.
+	  - The only workaround currently known is to disable the Classic Outlook for Windows sync engine and let Set-OutlookSignatures do it by running it on the client regularly.
+  - Signatures are directly usable in Outlook Web and New Outlook (when based on Outlook Web). Other Outlook editions may work but are not supported.
+      - Consider using the Outlook add-in to access signatures created by SimulateAndDeploy on other editions of Outlook in a supported way. See '.\docs\README' for details.
+	  - Also see FAQ 'Roaming signatures in Classic Outlook for Windows look different' in '.\docs\README'.
+  - Consider using the 'VirtualMailboxConfigFile' parameter of Set-OutlookSignatures, ideally together with the output of the Export-RecipientPermissions script.
+      - This allows you to automatically create up-to-date lists of mailboxes based on the permissions granted in Exchange, as well as the according INI file lines.
+	  - Visit https://github.com/Export-RecipientPermissions for details about Export-RecipientPermissions.
+
+
+It is recommended to not modify or copy this sample script, but to call it with parameters.
+  - The "param" section at the beginning of the script defines all parameters that can be used to call this script.
 #>
 
 [CmdletBinding()]
@@ -127,8 +139,8 @@ param (
 	$ConnectOnpremInsteadOfCloud = $false,
 	[pscredential]$GraphUserCredential = (@(, @('SimulateAndDeployUser@example.com', 'P@ssw0rd!')) | ForEach-Object { New-Object System.Management.Automation.PSCredential ($_[0], $(ConvertTo-SecureString $_[1] -AsPlainText -Force)) }), # Use Get-Credential for interactive mode or (Get-Content '.\Config\password.secret') to retrieve info from a separate file (MFA is not supported in any case)
 
-	$GraphClientId = 'The Client ID of the Entra ID application for SimulateAndDeploy', # not the same ID as defined in 'default graph config.ps1' or a custom Graph config file
-	$GraphClientSecret = 'The Client Secret of the Entra ID application for SimulateAndDeploy', # to load the secret from a file, use (Get-Content '.\Config\app.secret')
+	$GraphClientId = 'The Client ID of the Entra ID app for SimulateAndDeploy', # not the same ID as defined in 'default graph config.ps1' or a custom Graph config file
+	$GraphClientSecret = 'The Client Secret of the Entra ID app for SimulateAndDeploy', # to load the secret from a file, use (Get-Content '.\Config\app.secret')
 
 	[ValidateSet('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC', 'AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4', 'AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5', 'China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')]
 	[string]$CloudEnvironment = 'Public',
@@ -138,25 +150,22 @@ param (
 		# Do not use: SimulateUser, SimulateMailboxes, AdditionalSignaturePath, SimulateAndDeployGraphCredentialFile
 		#
 		# ▼▼▼ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▼▼▼
-		# ▼▼▼ Without the license, signatures can not be read from and written to mailboxes ▼▼▼
-		BenefactorCircleLicenseFile   = "'\\server\share\folder\license.dll'"
+		# ▼▼▼ Without the license, signatures cannot be read from and written to mailboxes ▼▼▼
+		BenefactorCircleLicenseFile   = '\\server\share\folder\license.dll'
 		BenefactorCircleID            = '<BenefactorCircleID>'
 		# ▲▲▲ The "Deploy" part of "SimulateAndDeploy" requires a Benefactor Circle license ▲▲▲
-		# ▲▲▲ Without the license, signatures can not be read from and written to mailboxes ▲▲▲
+		# ▲▲▲ Without the license, signatures cannot be read from and written to mailboxes ▲▲▲
 		#
 		SimulateAndDeploy             = $false # $false simulates but does not deploy, $true simulates and deploys
 		UseHtmTemplates               = $false
-		SignatureTemplatePath         = "'.\sample templates\Signatures DOCX'"
-		SignatureIniFile              = "'.\sample templates\Signatures DOCX\_Signatures.ini'"
-		OOFTemplatePath               = "'.\sample templates\Out-of-office DOCX'"
-		OOFIniFile                    = "'.\sample templates\Out-of-office DOCX\_OOF.ini'"
-		ReplacementVariableConfigFile = "'.\config\default replacement variables.ps1'"
+		SignatureTemplatePath         = '.\sample templates\Signatures DOCX'
+		SignatureIniFile              = '.\sample templates\Signatures DOCX\_Signatures.ini'
+		OOFTemplatePath               = '.\sample templates\Out-of-Office DOCX'
+		OOFIniFile                    = '.\sample templates\Out-of-Office DOCX\_OOF.ini'
+		ReplacementVariableConfigFile = '.\config\default replacement variables.ps1'
 		GraphClientID                 = $GraphClientId
-		GraphConfigFile               = "'.\config\default graph config.ps1'"
+		GraphConfigFile               = '.\config\default graph config.ps1'
 		GraphOnly                     = $false
-		# Strings in a hashtable that is later used for splatting (passing parameters to another script) require quotes
-		WordProcessPriority           = "'Normal'"
-		TrustsToCheckForGroups        = @('*')
 		# Use current verbose mode for later execution of Set-OutlookSignatures
 		Verbose                       = $($VerbosePreference -ne [System.Management.Automation.ActionPreference]::SilentlyContinue)
 	},
@@ -246,10 +255,10 @@ function RemoveItemAlternativeRecurse {
 
 			if (Test-Path -LiteralPath $SinglePath -PathType Container) {
 				if (-not $SkipFolder) {
-					$local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture $TemplateFilesSortCulture -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
+					$local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture 127 -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
 					$local:ToDelete += @(Get-Item -LiteralPath $SinglePath -Force)
 				} else {
-					$local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture $TemplateFilesSortCulture -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
+					$local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture 127 -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
 				}
 			} elseif (Test-Path -LiteralPath $SinglePath -PathType Leaf) {
 				$local:ToDelete += (Get-Item -LiteralPath $SinglePath -Force)
@@ -364,7 +373,7 @@ if (-not $ConnectOnpremInsteadOfCloud) {
 	Write-Host '  Microsoft Graph'
 	$SimulateAndDeployGraphCredentialFile = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "$((New-Guid).guid).xml"
 
-	$SetOutlookSignaturesScriptParameters['SimulateAndDeployGraphCredentialFile'] = "'$($SimulateAndDeployGraphCredentialFile)'"
+	$SetOutlookSignaturesScriptParameters['SimulateAndDeployGraphCredentialFile'] = $SimulateAndDeployGraphCredentialFile
 
 	Import-Module $(Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath -Parent) -ChildPath '\bin\MSAL.PS') -Force
 
@@ -417,7 +426,7 @@ foreach ($SimulateEntry in $SimulateList) {
 			Write-Host "  Wrong format for SimulateMailboxes: $($SimulateEntry.SimulateMailboxes)"
 		}
 	} else {
-		$SimulateEntry.SimulateMailboxes = '$null'
+		$SimulateEntry.SimulateMailboxes = $null
 	}
 }
 
@@ -519,8 +528,8 @@ do {
 			Param (
 				$PowershellPath,
 				$SetOutlookSignaturesScriptPath,
-				[string]$SimulateUser,
-				[string]$SimulateMailboxes,
+				$SimulateUser,
+				$SimulateMailboxes,
 				$SimulateResultPath,
 				$LogFilePath,
 				$SetOutlookSignaturesScriptParameters,
@@ -534,13 +543,9 @@ do {
 
 				$SetOutlookSignaturesScriptParameters['SimulateUser'] = $SimulateUser
 				$SetOutlookSignaturesScriptParameters['SimulateMailboxes'] = $SimulateMailboxes
-				$SetOutlookSignaturesScriptParameters['AdditionalSignaturePath'] = "'$(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)'"
+				$SetOutlookSignaturesScriptParameters['AdditionalSignaturePath'] = $(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)
 
-				$InvokeCode = "& '$SetOutlookSignaturesScriptPath' $([string]::Join(' ', ($SetOutlookSignaturesScriptParameters.GetEnumerator() | ForEach-Object { "-$($_.Key):$($_.Value)" })))"
-
-				Write-Host $InvokeCode
-
-				Invoke-Expression $InvokeCode
+				& $SetOutlookSignaturesScriptPath @SetOutlookSignaturesScriptParameters
 
 				if ($?) {
 					Write-Host 'xxxSimulateAndDeployExitCode0xxx'

@@ -293,16 +293,19 @@ The software can be executed via any mechanism, for example
 - by the user himself, e.g. via a shortcut on the desktop  
 - by a tool for client administration
 
-Since Set-OutlookSignatures is mainly a pure PowerShell script, it is called like any other script of this file type:  
+Since Set-OutlookSignatures is mainly a pure PowerShell script, it is called like any other script of this file type:
+
+```batch
+powershell.exe <PowerShell parameter> -file "<path to Set-OutlookSignatures.ps1>" <Script parameter>  
 ```
-powershell.exe <PowerShell parameter> -file <path to Set-OutlookSignatures.ps1> <Script parameter>  
-```
+
 #### 1.7.5.1. Parameters  
 The behaviour of the software can be controlled via parameters. Particularly relevant are SignatureTemplatePath and OOFTemplatePath, which are used to specify the path to the signature and absence templates.
 
 The following is an example where the signature templates are on an SMB file share and the out-of-office provider templates are in a SharePoint document library:  
-```
-powershell.exe -file '\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' -SignatureTemplatePath '\DFS-Share\Common\Templates\Signatures Outlook' -OOFTemplatePath 'https://sharepoint.example.com/CorporateCommunications/Templates/Out-of-office templates'  
+
+```batch
+powershell.exe -file "\netlogon\set-outlooksignatures\set-outlooksignatures.ps1" -SignatureTemplatePath "\DFS-Share\Common\Templates\Signatures Outlook" -OOFTemplatePath "https://sharepoint.example.com/CorporateCommunications/Templates/Out-of-office templates"  
 ```
 
 At the time of writing, other parameters were available. The following is a brief overview of the possibilities, for details please refer to the documentation of the software in the `README` file:  
@@ -662,16 +665,19 @@ Die Software kann über einen beliebigen Mechanismus ausgeführt werden, beispie
 - durch den Benutzer selbst, z. B. über eine Verknüpfung auf dem Desktop  
 - durch ein Werkzeug zur Client-Verwaltung
 
-Da es sich bei Set-OutlookSignatures hauptsächlich um ein PowerShell-Script handelt, erfolgt der Aufruf wie bei jedem anderen Script dieses Dateityps:  
+Da es sich bei Set-OutlookSignatures hauptsächlich um ein PowerShell-Script handelt, erfolgt der Aufruf wie bei jedem anderen Script dieses Dateityps:
+
+```batch
+powershell.exe <PowerShell-Parameter> -file "<Pfad zu Set-OutlookSignatures.ps1>" <Script-Parameter>  
 ```
-powershell.exe <PowerShell-Parameter> -file <Pfad zu Set-OutlookSignatures.ps1> <Script-Parameter>  
-```
+
 #### 2.7.5.1. Parameter  
 Das Verhalten der Software kann über Parameter gesteuert werden. Besonders relevant sind dabei SignatureTemplatePath und OOFTemplatePath, über die der Pfad zu den Signatur- und Abwesenheits-Vorlagen angegeben wird.
 
-Folgend ein Beispiel, bei dem die Signatur-Vorlagen auf einem SMB-File-Share und die Abwesenheits-Vorlagen in einer SharePoint Dokumentbibliothek liegen:  
-```
-powershell.exe -file '\\example.com\netlogon\set-outlooksignatures\set-outlooksignatures.ps1' –SignatureTemplatePath '\\example.com\DFS-Share\Common\Templates\Signatures Outlook' –OOFTemplatePath 'https://sharepoint.example.com/CorporateCommunications/Templates/Out-of-office templates'  
+Folgend ein Beispiel, bei dem die Signatur-Vorlagen auf einem SMB-File-Share und die Abwesenheits-Vorlagen in einer SharePoint Dokumentbibliothek liegen:
+
+```batch
+powershell.exe -file "\\example.com\netlogon\set-outlooksignatures\set-outlooksignatures.ps1" –SignatureTemplatePath "\\example.com\DFS-Share\Common\Templates\Signatures Outlook" –OOFTemplatePath "https://sharepoint.example.com/CorporateCommunications/Templates/Out-of-office templates"  
 ```
 
 Zum Zeitpunkt der Erstellung dieses Dokuments waren noch weitere Parameter verfügbar. Folgend eine kurze Übersicht der Möglichkeit, für Details sei auf die Dokumentation der Software in der `README`-Datei verwiesen:  

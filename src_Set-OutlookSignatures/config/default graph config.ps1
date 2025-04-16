@@ -25,7 +25,7 @@
 #   For security and maintenance reasons, it is recommended to create you own app in your own tenant
 # It can be replaced with the ID of an app created in your own tenant
 #   Option A: Create the app automatically by using the script '.\sample code\Create-EntraApp.ps1'
-#     The sample code creates the app with all required settings automatically, only providing admin consent is a manual task
+#     The sample code creates the app with all required settings
 #   Option B: Create the Entra ID app manually
 #     Create an app in Entra admin center (https://entra.microsoft.com)
 #       Sign in with an account that has Cloud Application Administrator or Global Admin permissions
@@ -35,7 +35,7 @@
 #       Set Redirect URI to "Mobile and desktop applications" and add
 #         'http://localhost' (http, not https) for browser authentication
 #         'ms-appx-web://microsoft.aad.brokerplugin/<Application ID of your app>' for AuthenticationBroker authentication
-#       The "Application (client) ID" is the value you need to set for $GraphClientID in this file
+#       The "Application (client) ID" is the value you need to set for the GraphClientID parameter of Set-OutlookSignatures
 #     Client secret
 #       There is no need to define a client secret, as we only work with delegated permissions, and not with application permissions
 #     Add the following delegated permissions (not application permissions)
@@ -78,6 +78,8 @@
 #       Identity > Applications > App registrations > your application > Manage > Authentication > Advanced settings
 #       Enable "Allow public client flows"
 #       This enables SSO (single sign-on) for domain-joined Windows clients
+#
+# It is strongly recommended to use the GraphClientID parameter of Set-OutlookSignatures instead of defining it here.
 if (-not $GraphClientID) { $GraphClientID = 'beea8249-8c98-4c76-92f6-ce3c468a61e6' }
 
 
@@ -89,7 +91,7 @@ $GraphEndpointVersion = 'v1.0'
 # Leave blank to not show message box at all
 # Defining a text is recommended to inform users why they are asked by the system to unlock their keyring or keychain
 #   Set-OutlookSignatures usually runs in the background, so the system request is a negative surprise for users
-# On Windows, the message box is shown on the very top of the active desktop and can not be sent to the background,
+# On Windows, the message box is shown on the very top of the active desktop and cannot be sent to the background,
 #   but does not steal the focus
 $GraphUnlockKeyringKeychainMessageboxText = "You started Set-OutlookSignatures, or an administrator configured it to run for you to update your Outlook signatures and out-of-office replies.$([System.Environment]::NewLine)$([System.Environment]::NewLine)To look up a required security token for access to Microsoft 365, $(if($IsLinux){ $($PSVersionTable.OS) } elseif ($IsMacOS) { $("$(sw_vers -productName) $(sw_vers -productVersion)") }) will ask you to unlock your personal $( if($IsLinux){ 'keyring' } else { 'keychain' }) with your password.$([System.Environment]::NewLine)$([System.Environment]::NewLine)Should you choose to not unlock you personal $( if($IsLinux){ 'keyring' } else { 'keychain' }), the security token will be saved in an unencrypted file in your user directory."
 
@@ -97,9 +99,9 @@ $GraphUnlockKeyringKeychainMessageboxText = "You started Set-OutlookSignatures, 
 # Message box text to show before browser opens for authentication to Microsoft 365
 # Leave blank to not show message box at all
 # Defining a text is recommended to inform users about the upcoming opening of a new browser tab asking for authentication
-#   Set-OutlookSignatures usually runs in the background and the M365 logon screen can not show a hint to Set-OutlookSignatures,
+#   Set-OutlookSignatures usually runs in the background and the M365 logon screen cannot show a hint to Set-OutlookSignatures,
 #   so the new tab is a negative surprise for users
-# On Windows, the message box is shown on the very top of the active desktop and can not be sent to the background,
+# On Windows, the message box is shown on the very top of the active desktop and cannot be sent to the background,
 #   but does not steal the focus
 $GraphHtmlMessageboxText = "You started Set-OutlookSignatures, or an administrator configured it to run for you to update your Outlook signatures and out-of-office replies.$([System.Environment]::NewLine)$([System.Environment]::NewLine)A required security token for access to Microsoft 365 is not yet available.$([System.Environment]::NewLine)$([System.Environment]::NewLine)The program may run for the first time on this client, a previous security token may have expired or been deleted.$([System.Environment]::NewLine)$([System.Environment]::NewLine)To create this required security token, please login to Microsoft 365 with your account in the new window or browser tab that will open after you click OK in this message."
 

@@ -138,7 +138,7 @@ try {
 
         Write-Output '"Time";"Client";"Target forest/domain";"Target server";"Check";"DNS name or IP address";"Port";"Result";"Time in ms";"Error"'
 
-        foreach ($DC in (@($AllDCs + $AllGCs) | Sort-Object -Unique)) {
+        foreach ($DC in (@($AllDCs + $AllGCs) | Sort-Object -Culture 127 -Unique)) {
             $PowerShell = [powershell]::Create()
             $PowerShell.RunspacePool = $RunspacePool
 

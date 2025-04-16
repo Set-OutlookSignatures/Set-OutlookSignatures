@@ -23,6 +23,7 @@ License : See '.\LICENSE.txt' for details and copyright
 
 # Suppress specific PSScriptAnalyzerRules for specific variables
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'SimulateAndDeployGraphCredentialFile')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'ADPropsCurrentMailboxManager')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentAutodiscoverSecureName')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentAzureADEndpoint')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentEnvironmentName')]
@@ -169,14 +170,14 @@ Param(
     [Parameter(Mandatory = $false, ParameterSetName = 'C: OOF messages')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateNotNullOrEmpty()]
-    [string]$OOFTemplatePath = $(if (($UseHtmTemplates -inotin @(1, 'true', '$true', 'yes')) -or (-not $UseHtmTemplates)) { '.\sample templates\Out-of-office DOCX' } else { '.\sample templates\Out-of-office HTML' }),
+    [string]$OOFTemplatePath = $(if (($UseHtmTemplates -inotin @(1, 'true', '$true', 'yes')) -or (-not $UseHtmTemplates)) { '.\sample templates\Out-of-Office DOCX' } else { '.\sample templates\Out-of-Office HTML' }),
 
     # Path to INI file containing OOF template tags
     [Parameter(Mandatory = $false, ParameterSetName = 'C: OOF messages')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateNotNullOrEmpty()]
     [Alias('OOFIniPath')]
-    [string]$OOFIniFile = $(if (($UseHtmTemplates -inotin @(1, 'true', '$true', 'yes')) -or (-not $UseHtmTemplates)) { '.\sample templates\Out-of-office DOCX\_OOF.ini' } else { '.\sample templates\Out-of-office HTML\_OOF.ini' }),
+    [string]$OOFIniFile = $(if (($UseHtmTemplates -inotin @(1, 'true', '$true', 'yes')) -or (-not $UseHtmTemplates)) { '.\sample templates\Out-of-Office DOCX\_OOF.ini' } else { '.\sample templates\Out-of-Office HTML\_OOF.ini' }),
 
     # Path to a replacement variable config file.
     [Parameter(Mandatory = $false, ParameterSetName = 'D: Replacement variables')]
@@ -284,7 +285,7 @@ Param(
     [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'G: Outlook')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
-    [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
+    [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no', 'CurrentUserOnly')]
     [Alias('MirrorLocalSignaturesToCloud')]
     $MirrorCloudSignatures = $true,
 
@@ -444,7 +445,7 @@ function CheckFilenamePossiblyInvalid ([string] $Filename = '', [bool] $CheckOut
         }
     }
 
-    $InvalidCharacters = @(@($InvalidCharacters | Select-Object -Unique | Where-Object { $_ } | Sort-Object -Culture $TemplateFilesSortCulture) | ForEach-Object { "'$($_)'" })
+    $InvalidCharacters = @(@($InvalidCharacters | Select-Object -Unique | Where-Object { $_ } | Sort-Object -Culture 127) | ForEach-Object { "'$($_)'" })
 
     if ($InvalidCharacters) {
         return $InvalidCharacters -join ', '
@@ -929,7 +930,7 @@ end tell
                     }
 
                     if (-not ($macOSOutlookMailboxes.count -gt 0)) {
-                        Write-Host '    Outlook does not have accounts configured, or accounts can not be scripted. Continuing with Outlook Web only.' -ForegroundColor Yellow
+                        Write-Host '    Outlook does not have accounts configured, or accounts cannot be scripted. Continuing with Outlook Web only.' -ForegroundColor Yellow
                         Write-Host "      Consider using 'sample code/SwitchTo-ClassicOutlookForMac.ps1' to temporarily switch from New Outlook to Classic Outlook." -ForegroundColor Yellow
 
                         $OutlookUseNewOutlook = $true
@@ -937,7 +938,7 @@ end tell
                     }
                 }
             } else {
-                Write-Host '    Outlook for Mac not installed, or signatures can not be scripted. Continuing with Outlook Web only.' -ForegroundColor Yellow
+                Write-Host '    Outlook for Mac not installed, or signatures cannot be scripted. Continuing with Outlook Web only.' -ForegroundColor Yellow
 
                 $OutlookUseNewOutlook = $true
                 $macOSOutlookMailboxes = @()
@@ -1148,7 +1149,7 @@ end tell
 
                 if ($TrustedDomains) {
                     $TrustedDomains = @(
-                        @($TrustedDomains) | Where-Object { $_ -ine $UserForest } | Sort-Object -Culture $TemplateFilesSortCulture -Property @{Expression = {
+                        @($TrustedDomains) | Where-Object { $_ -ine $UserForest } | Sort-Object -Culture 127 -Property @{Expression = {
                                 $TemporaryArray = @($_.properties.name.Split('.'))
                                 [Array]::Reverse($TemporaryArray)
                                 $TemporaryArray
@@ -1195,7 +1196,7 @@ end tell
                                 try { WatchCatchableExitSignal } catch { }
 
                                 $temp = @(
-                                    @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Where-Object { $_ -ine $TrustedDomain.properties.name } | Select-Object -Unique | Sort-Object -Culture $TemplateFilesSortCulture -Property @{Expression = {
+                                    @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Where-Object { $_ -ine $TrustedDomain.properties.name } | Select-Object -Unique | Sort-Object -Culture 127 -Property @{Expression = {
                                             $TemporaryArray = @($_.Split('.'))
                                             [Array]::Reverse($TemporaryArray)
                                             $TemporaryArray
@@ -1278,7 +1279,7 @@ end tell
                                             try { WatchCatchableExitSignal } catch { }
 
                                             $temp = @(
-                                                @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Where-Object { $_ -ine $TrustedDomain.properties.name } | Select-Object -Unique | Sort-Object -Culture $TemplateFilesSortCulture -Property @{Expression = {
+                                                @(@(Resolve-DnsName -Name "_gc._tcp.$($TrustedDomain.properties.name)" -Type srv).nametarget) | ForEach-Object { ($_ -split '\.')[1..999] -join '.' } | Where-Object { $_ -ine $TrustedDomain.properties.name } | Select-Object -Unique | Sort-Object -Culture 127 -Property @{Expression = {
                                                         $TemporaryArray = @($_.Split('.'))
                                                         [Array]::Reverse($TemporaryArray)
                                                         $TemporaryArray
@@ -2272,7 +2273,7 @@ end tell
 
                         try { WatchCatchableExitSignal } catch { }
 
-                        $GroupsSIDs = @($GroupsSIDs | Select-Object -Unique | Sort-Object)
+                        $GroupsSIDs = @($GroupsSIDs | Select-Object -Unique | Sort-Object -Culture 127)
 
                         # Loop through all domains outside the mailbox account's home forest to check if the mailbox account has a group membership there
                         # Across a trust, a user can only be added to a domain local group.
@@ -2419,7 +2420,7 @@ end tell
         if ($AccountNumberRunning -eq ($MailAddresses.count - 1)) {
             if ($VirtualMailboxConfigFile) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DefineAndAddVirtualMailboxes')))) {
-                    Write-Host '  Virtual mailboxes and dynamic signature INI entries can not be defined and added.' -ForegroundColor Green
+                    Write-Host '  Virtual mailboxes and dynamic signature INI entries cannot be defined and added.' -ForegroundColor Green
                     Write-Host "  The 'VirtualMailboxConfigFile' feature requires the Benefactor Circle add-on." -ForegroundColor Green
                     Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
@@ -2628,8 +2629,8 @@ end tell
 
         # Remove trailing null character from file names being enumerated in SharePoint folders. .Net or the WebDAV client sometimes add a null character, which is not allowed in file and path names.
         ## Original code:
-        ## $TemplateFiles = @((Get-ChildItem -LiteralPath $TemplateTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object -Culture $TemplateFilesSortCulture)
-        $TemplateFiles = @(@(@(@(Get-ChildItem -LiteralPath $TemplateTemplatePath -File) | Where-Object { $_.Extension -iin $(if ($UseHtmTemplates) { @('.htm', ".htm$([char]0)") } else { @('*.docx', ".docx$([char]0)") }) }) | Select-Object -Property @{n = 'FullName'; e = { $_.FullName.ToString() -ireplace '\x00$', '' } }, @{n = 'Name'; Expression = { $_.Name.ToString() -ireplace '\x00$', '' } }) | Sort-Object -Property FullName, Name -Culture $TemplateFilesSortCulture)
+        ## $TemplateFiles = @((Get-ChildItem -LiteralPath $TemplateTemplatePath -File -Filter $(if ($UseHtmTemplates) { '*.htm' } else { '*.docx' })) | Sort-Object -Culture 127)
+        $TemplateFiles = @(@(@(@(Get-ChildItem -LiteralPath $TemplateTemplatePath -File) | Where-Object { $_.Extension -iin $(if ($UseHtmTemplates) { @('.htm', ".htm$([char]0)") } else { @('*.docx', ".docx$([char]0)") }) }) | Select-Object -Property @{n = 'FullName'; e = { $_.FullName.ToString() -ireplace '\x00$', '' } }, @{n = 'Name'; Expression = { $_.Name.ToString() -ireplace '\x00$', '' } }) | Sort-Object -Culture 127 -Property FullName, Name)
 
         if ($TemplateIniFile -ne '') {
             Write-Host "  Compare $($SigOrOOF) INI entries and file system"
@@ -2727,7 +2728,7 @@ end tell
             Write-Host ("    '$($TemplateFile.Name)' ($($SigOrOOF) INI index #$($TemplateIniSettingsIndex))")
 
             if ($TemplateIniSettings[$TemplateIniSettingsIndex]['<Set-OutlookSignatures template>'] -ieq $TemplateFile.name) {
-                $TemplateFilePart = (@(@($TemplateIniSettings[$TemplateIniSettingsIndex].GetEnumerator().Name) | Sort-Object -Culture $TemplateFilesSortCulture) -join '] [')
+                $TemplateFilePart = (@(@($TemplateIniSettings[$TemplateIniSettingsIndex].GetEnumerator().Name) | Sort-Object -Culture 127) -join '] [')
                 if ($TemplateFilePart) {
                     $TemplateFilePart = ($TemplateFilePart -split '\] \[' | Where-Object { $_ -inotin ('OutlookSignatureName', '<Set-OutlookSignatures template>') }) -join '] ['
                     $TemplateFilePart = '[' + $TemplateFilePart + ']'
@@ -2787,7 +2788,7 @@ end tell
             if (($TemplateFilePart -imatch $TemplateFilePartRegexTimeAllow) -or ($TemplateFilePart -imatch $TemplateFilePartRegexTimeDeny)) {
                 Write-Host '      Time based template'
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('TimeBasedTemplate')))) {
-                    Write-Host '        Templates can not be activated or deactivated for specified time ranges.' -ForegroundColor Green
+                    Write-Host '        Templates cannot be activated or deactivated for specified time ranges.' -ForegroundColor Green
                     Write-Host "        The 'time based template' feature requires the Benefactor Circle add-on." -ForegroundColor Green
                     Write-Host "        Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
@@ -3133,7 +3134,15 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $script:COMWordDummyPid = [IntPtr]::Zero
                 $null = [Win32Api]::GetWindowThreadProcessId( $script:COMWordDummyHWND, [ref] $script:COMWordDummyPid );
                 $script:COMWordDummy.Caption = $script:COMWordDummyCaption
-                $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$script:COMWordDummyPid""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $WordProcessPriority }
+                try {
+                    $((Get-Process -PID $script:COMWordDummyPid).PriorityClass = $WordProcessPriorityText)
+
+                    if ((Get-Process -PID $script:COMWordDummyPid).PriorityClass.ToString() -ne $WordProcessPriorityText) {
+                        throw "No error, but Word dummy process priority set to '$((Get-Process -PID $script:COMWordDummyPid).PriorityClass.ToString())' ('$((Get-Process -PID $script:COMWordDummyPid).PriorityClass.value__)') instead of '$($WordProcessPriorityText)' ('$($WordProcessPriority)')."
+                    }
+                } catch {
+                    Write-Host "    Error setting Word dummy process priority: $($_)" -ForegroundColor Yellow
+                }
             }
 
             try { WatchCatchableExitSignal } catch { }
@@ -3160,7 +3169,15 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $script:COMWordPid = [IntPtr]::Zero
                 $null = [Win32Api]::GetWindowThreadProcessId( $script:COMWordHWND, [ref] $script:COMWordPid );
                 $script:COMWord.Caption = $script:COMWordCaption
-                $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$script:COMWordPid""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $WordProcessPriority }
+                try {
+                    $((Get-Process -PID $script:COMWordPid).PriorityClass = $WordProcessPriorityText)
+
+                    if ((Get-Process -PID $script:COMWordPid).PriorityClass.ToString() -ne $WordProcessPriorityText) {
+                        throw "No error, but Word process priority set to '$((Get-Process -PID $script:COMWordPid).PriorityClass.ToString())' ('$((Get-Process -PID $script:COMWordPid).PriorityClass.value__)') instead of '$($WordProcessPriorityText)' ('$($WordProcessPriority)')."
+                    }
+                } catch {
+                    Write-Host "    Error setting Word process priority: $($_)" -ForegroundColor Yellow
+                }
             }
 
             if ($script:COMWordDummy) {
@@ -3298,7 +3315,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $PictureVariablesArray += , @($VariableName, $(Get-Variable -Name $($VariableName.Trim('$') + 'Guid') -ValueOnly))
             }
 
-            foreach ($replaceKey in @($replaceHash.Keys | Sort-Object -Culture $TemplateFilesSortCulture)) {
+            foreach ($replaceKey in @($replaceHash.Keys | Sort-Object -Culture 127)) {
                 try { WatchCatchableExitSignal } catch { }
 
                 if ($replaceKey -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' })) {
@@ -3329,9 +3346,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
             Write-Host "  Download roaming signatures from Exchange Online @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
-            if ($MirrorCloudSignatures -eq $true) {
+            if ($MirrorCloudSignatures -ne $false) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesDownload')))) {
-                    Write-Host '    Roaming signatures can not be downloaded from Exchange Online.' -ForegroundColor Green
+                    Write-Host '    Roaming signatures cannot be downloaded from Exchange Online.' -ForegroundColor Green
                     Write-Host "    The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
                     Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
@@ -3380,7 +3397,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         Write-Host "    Set default classic (not roaming) Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOutlookWebSignature')))) {
-                            Write-Host '      Default classic Outlook Web signature can not be set.' -ForegroundColor Green
+                            Write-Host '      Default classic Outlook Web signature cannot be set.' -ForegroundColor Green
                             Write-Host "      The 'SetCurrentUserOutlookWebSignature' feature requires the Benefactor Circle add-on." -ForegroundColor Green
                             Write-Host "      Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                         } else {
@@ -3396,9 +3413,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                         Write-Host "    Set default roaming Outlook Web signature(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
-                        if ($MirrorCloudSignatures -eq $true) {
+                        if ($MirrorCloudSignatures -ne $false) {
                             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesSetDefaults')))) {
-                                Write-Host '      Default roaming Outlook Web signature(s) can not be set. This also affects New Outlook on Windows.' -ForegroundColor Green
+                                Write-Host '      Default roaming Outlook Web signature(s) cannot be set. This also affects New Outlook on Windows.' -ForegroundColor Green
                                 Write-Host "      The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
                                 Write-Host "      Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                             } else {
@@ -3423,7 +3440,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                 if ($SetCurrentUserOOFMessage) {
                     if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOOFMessage')))) {
-                        Write-Host '    The out-of-office replies can not be set.' -ForegroundColor Green
+                        Write-Host '    The out-of-office replies cannot be set.' -ForegroundColor Green
                         Write-Host "    The 'SetCurrentUserOOFMessage' feature requires the Benefactor Circle add-on." -ForegroundColor Green
                         Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                     } else {
@@ -3468,7 +3485,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($DeleteScriptCreatedSignaturesWithoutTemplate -eq $true) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DeleteScriptCreatedSignaturesWithoutTemplate')))) {
-            Write-Host '  Can not delete old signatures created by Set-OutlookSignatures, which are no longer centrally available.' -ForegroundColor Green
+            Write-Host '  Cannot delete old signatures created by Set-OutlookSignatures, which are no longer centrally available.' -ForegroundColor Green
             Write-Host "  The 'DeleteScriptCreatedSignaturesWithoutTemplate' feature requires the Benefactor Circle add-on." -ForegroundColor Green
             Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
         } else {
@@ -3494,7 +3511,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($DeleteUserCreatedSignatures -eq $true) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DeleteUserCreatedSignatures')))) {
-            Write-Host '  Can not remove user-created signatures.' -ForegroundColor Green
+            Write-Host '  Cannot remove user-created signatures.' -ForegroundColor Green
             Write-Host "  The 'DeleteUserCreatedSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
             Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
         } else {
@@ -3517,9 +3534,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
     Write-Host
     Write-Host "Upload local signatures to Exchange Online as roaming signatures for current user @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
-    if ($MirrorCloudSignatures -eq $true) {
+    if ($MirrorCloudSignatures -ne $false) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesUpload')))) {
-            Write-Host '  Signature(s) can not be uploaded to Exchange Online. This affects Outlook Web and New Outlook on Windows.' -ForegroundColor Green
+            Write-Host '  Signature(s) cannot be uploaded to Exchange Online. This affects Outlook Web and New Outlook on Windows.' -ForegroundColor Green
             Write-Host "  The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
             Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
         } else {
@@ -3557,7 +3574,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($SignatureCollectionInDrafts -eq $true) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignatureCollectionInDrafts')))) {
-            Write-Host '  Can not create email draft containing all signatures.' -ForegroundColor Green
+            Write-Host '  Cannot create email draft containing all signatures.' -ForegroundColor Green
             Write-Host "  The 'SignatureCollectionInDrafts' feature requires the Benefactor Circle add-on." -ForegroundColor Green
             Write-Host "  Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
         } else {
@@ -3589,7 +3606,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             Write-Host '    Simulation mode enabled, AdditionalSignaturePath already used as output directory'
         } else {
             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('AdditionalSignaturePath')))) {
-                Write-Host '    Can not copy signatures to additional signature path.' -ForegroundColor Green
+                Write-Host '    Cannot copy signatures to additional signature path.' -ForegroundColor Green
                 Write-Host "    The 'AdditionalSignaturePath' feature requires the Benefactor Circle add-on." -ForegroundColor Green
                 Write-Host "    Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
             } else {
@@ -4053,7 +4070,7 @@ function EvaluateAndSetSignatures {
 
                 $tempAllowCount = 0
 
-                foreach ($replaceKey in @($replaceHash.Keys | Sort-Object -Culture $TemplateFilesSortCulture)) {
+                foreach ($replaceKey in @($replaceHash.Keys | Sort-Object -Culture 127)) {
                     if ((Get-Variable -Name "$($SigOrOOF)FilesReplacementvariableFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[$($replaceKey)``]*") {
                         if ([bool]($ReplaceHash[$replaceKey])) {
                             $TemplateAllowed = $true
@@ -4147,7 +4164,7 @@ function EvaluateAndSetSignatures {
                 # check for replacement variable deny
                 $tempDenyCount = 0
 
-                foreach ($replaceKey in @($replaceHash.Keys | Sort-Object -Culture $TemplateFilesSortCulture)) {
+                foreach ($replaceKey in @($replaceHash.Keys | Sort-Object -Culture 127)) {
                     if ((Get-Variable -Name "$($SigOrOOF)FilesReplacementvariableFilePart" -ValueOnly)[$TemplateIniSettingsIndex] -ilike "*``[-:$($replaceKey)``]*") {
                         if ([bool]($ReplaceHash[$replaceKey])) {
                             $TemplateAllowed = $false
@@ -4437,6 +4454,22 @@ function SetSignatures {
         try { WatchCatchableExitSignal } catch { }
 
         if ($UseHtmTemplates) {
+            # Non-picture variables first, to allow for dynamic code creation
+            # Picture variables are replaced using the DOM later
+
+            Write-Host "$Indent      Replace non-picture variables"
+            $tempFileContent = Get-Content -LiteralPath $path -Encoding UTF8 -Raw
+
+            foreach ($replaceKey in @($replaceHash.Keys | Where-Object { $_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' }) } | Sort-Object -Culture 127)) {
+                $tempFileContent = $tempFileContent -ireplace [Regex]::Escape($replacekey), $replaceHash.$replaceKey
+            }
+
+            try { WatchCatchableExitSignal } catch { }
+
+            [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $tempFileContent)
+
+            try { WatchCatchableExitSignal } catch { }
+
             Write-Host "$Indent      Replace picture variables"
 
             $AngleSharpConfig = [AngleSharp.Configuration]::Default
@@ -4508,7 +4541,7 @@ function SetSignatures {
 
                 # Other images
                 if (($image.attributes['src'].value -ilike '*$*DELETEEMPTY$*') -or ($image.attributes['alt'].value -ilike '*$*DELETEEMPTY$*')) {
-                    foreach ($VariableName in @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$CurrentMailboxManagerPhoto$', '$CurrentUserPhoto$', '$CurrentUserManagerPhoto$') })) {
+                    foreach ($VariableName in @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$CurrentMailboxManagerPhoto$', '$CurrentUserPhoto$', '$CurrentUserManagerPhoto$') } | Sort-Object -Culture 127)) {
                         try { WatchCatchableExitSignal } catch { }
 
                         $tempImageVariableString = $Variablename -ireplace '\$$', 'DELETEEMPTY$'
@@ -4535,21 +4568,61 @@ function SetSignatures {
 
             try { WatchCatchableExitSignal } catch { }
 
-            Write-Host "$Indent      Replace non-picture variables"
-            $tempFileContent = $AngleSharpParsedDocument.documentelement.outerhtml
-
-            foreach ($replaceKey in @($replaceHash.Keys | Where-Object { $_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' }) } | Sort-Object -Culture $TemplateFilesSortCulture)) {
-                $tempFileContent = $tempFileContent -ireplace [Regex]::Escape($replacekey), $replaceHash.$replaceKey
-            }
-
-            try { WatchCatchableExitSignal } catch { }
-
             Write-Host "$Indent      Export to HTM format"
-            [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $tempFileContent)
+            [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $AngleSharpParsedDocument.documentelement.outerhtml)
         } else {
+            $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
+
             try { WatchCatchableExitSignal } catch { }
 
-            $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
+            Write-Host "$Indent      Replace non-picture variables"
+            $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
+
+            try {
+                # Replace in view without field codes
+                if ($script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes -ne $false) {
+                    $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $false
+                }
+
+                $script:COMWord.ActiveDocument.Select()
+                $script:COMWord.Selection.Collapse()
+
+                foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' })) } | Sort-Object -Culture 127 )) {
+                    try { WatchCatchableExitSignal } catch { }
+
+                    $null = $script:COMWord.Selection.Find.Execute($replaceKey, $false, $true, $false, $false, $false, $true, 1, $false, $(($replaceHash.$replaceKey -ireplace "`r`n", '^p') -ireplace "`n", '^l'), 2)
+                }
+
+                # Restore original view
+                if ($script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes -ne $script:COMWordShowFieldCodesOriginal) {
+                    $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
+                }
+
+                try { WatchCatchableExitSignal } catch { }
+
+                # Replace in field codes
+                foreach ($field in $script:COMWord.ActiveDocument.Fields) {
+                    try { WatchCatchableExitSignal } catch { }
+
+                    $tempWordFieldCodeOriginal = $field.Code.Text
+                    $tempWordFieldCodeNew = $tempWordFieldCodeOriginal
+
+                    foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' })) } | Sort-Object -Culture 127 )) {
+                        $tempWordFieldCodeNew = $tempWordFieldCodeNew -ireplace [regex]::escape($replaceKey), $($replaceHash.$replaceKey)
+                    }
+
+                    if ($tempWordFieldCodeOriginal -ne $tempWordFieldCodeNew) {
+                        $field.Code.Text = $tempWordFieldCodeNew
+                    }
+                }
+            } catch {
+                Write-Host $error[0]
+                Write-Host "$Indent        Error replacing non-picture variables in Word. Exit." -ForegroundColor Red
+                Write-Host "$Indent        If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
+                $script:ExitCode = 21
+                $script:ExitCodeDescription = 'Error replacing non-picture variables in Word.'
+                exit
+            }
 
             try { WatchCatchableExitSignal } catch { }
 
@@ -4560,36 +4633,38 @@ function SetSignatures {
             }
 
             try {
-                foreach ($image in @($script:COMWord.ActiveDocument.Shapes + $script:COMWord.ActiveDocument.InlineShapes)) {
+                foreach ($image in @(@($script:COMWord.ActiveDocument.Shapes) + @($script:COMWord.ActiveDocument.InlineShapes))) {
                     try { WatchCatchableExitSignal } catch { }
 
                     # Setting the values in word is very slow, so we use temporay variables
                     $tempImageIsDeleted = $false
-                    $tempImageSourceFullname = $image.linkformat.sourcefullname
-                    $tempImageAlternativeText = $image.alternativetext
-                    $tempImageHyperlinkAddress = $image.hyperlink.Address
-                    $tempImageHyperlinkSubAddress = $image.hyperlink.SubAddress
-                    $tempImageHyperlinkEmailSubject = $image.hyperlink.EmailSubject
-                    $tempImageHyperlinkScreenTip = $image.hyperlink.ScreenTip
+
+                    $tempImageSourceFullName = $image.LinkFormat.SourceFullName
+                    $tempImageAlternativeText = $image.AlternativeText
+                    $tempImageHyperlinkAddress = $image.Hyperlink.Address
+                    $tempImageHyperlinkSubAddress = $image.Hyperlink.SubAddress
+                    $tempImageHyperlinkEmailSubject = $image.Hyperlink.EmailSubject
+                    $tempImageHyperlinkScreenTip = $image.Hyperlink.ScreenTip
+
 
                     # Mailbox photos
-                    if ($tempImageSourceFullname -or $tempImageAlternativeText) {
-                        foreach ($VariableName in $PictureVariablesArray) {
+                    if ($tempImageSourceFullName -or $tempImageAlternativeText) {
+                        foreach ($VariableName in @($PictureVariablesArray)) {
                             try { WatchCatchableExitSignal } catch { }
 
                             if (
-                                $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($Variablename[0])*") }) -or
+                                $(if ($tempImageSourceFullName) { ((Split-Path $tempImageSourceFullName -Leaf) -ilike "*$($Variablename[0])*") }) -or
                                 $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($Variablename[0])*") })
                             ) {
                                 if ($null -ne $($ReplaceHash[$Variablename[0]])) {
-                                    $tempImageSourceFullname = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
+                                    $tempImageSourceFullName = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
                                 }
                             } elseif (
-                                $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')*") }) -or
+                                $(if ($tempImageSourceFullName) { ((Split-Path $tempImageSourceFullName -Leaf) -ilike "*$($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')*") }) -or
                                 $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($Variablename[0] -ireplace '\$$', 'DELETEEMPTY$')*") })
                             ) {
                                 if ($null -ne $($ReplaceHash[$Variablename[0]])) {
-                                    $tempImageSourceFullname = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
+                                    $tempImageSourceFullName = (Join-Path -Path $script:tempDir -ChildPath ($Variablename[0] + $Variablename[1] + '.jpeg'))
                                 } else {
                                     $image.delete()
                                     $tempImageIsDeleted = $true
@@ -4612,16 +4687,14 @@ function SetSignatures {
 
                     # Other images
                     if (
-                        $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike '*$*DELETEEMPTY$*') }) -or
+                        $(if ($tempImageSourceFullName) { ((Split-Path $tempImageSourceFullName -Leaf) -ilike '*$*DELETEEMPTY$*') }) -or
                         $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike '*$*DELETEEMPTY$*') })
                     ) {
-                        foreach ($Variablename in @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$CurrentMailboxManagerPhoto$', '$CurrentUserPhoto$', '$CurrentUserManagerPhoto$') })) {
-                            try { WatchCatchableExitSignal } catch { }
-
+                        foreach ($Variablename in @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$CurrentMailboxManagerPhoto$', '$CurrentUserPhoto$', '$CurrentUserManagerPhoto$') } | Sort-Object -Culture 127)) {
                             $tempImageVariableString = $Variablename -ireplace '\$$', 'DELETEEMPTY$'
 
                             if (
-                                $(if ($tempImageSourceFullname) { ((Split-Path $tempImageSourceFullname -Leaf) -ilike "*$($tempImageVariableString)*") }) -or
+                                $(if ($tempImageSourceFullName) { ((Split-Path $tempImageSourceFullName -Leaf) -ilike "*$($tempImageVariableString)*") }) -or
                                 $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike "*$($tempImageVariableString)*") })
                             ) {
                                 if ($($ReplaceHash[$Variablename])) {
@@ -4637,62 +4710,86 @@ function SetSignatures {
                         }
                     }
 
+                    try { WatchCatchableExitSignal } catch { }
+
                     if ($tempImageIsDeleted) {
                         continue
                     }
 
-                    foreach ($replaceKey in @($replaceHash.Keys | Where-Object { $_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' }) } | Sort-Object -Culture $TemplateFilesSortCulture)) {
-                        try { WatchCatchableExitSignal } catch { }
+                    try { WatchCatchableExitSignal } catch { }
 
+                    foreach ($replaceKey in @($replaceHash.Keys | Where-Object { $_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' }) } | Sort-Object -Culture 127)) {
                         if ($replaceKey) {
-                            if ($null -ne $tempImageAlternativeText) {
+                            if ($tempImageAlternativeText) {
                                 $tempImageAlternativeText = $tempImageAlternativeText -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
                             }
 
-                            if ($null -ne $tempimagehyperlinkAddress) {
-                                $tempimagehyperlinkAddress = $tempimagehyperlinkAddress -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
+                            if ($tempImageHyperlinkAddress) {
+                                $tempImageHyperlinkAddress = $tempImageHyperlinkAddress -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
                             }
 
-                            if ($null -ne $tempimagehyperlinkSubAddress) {
-                                $tempimagehyperlinkSubAddress = $tempimagehyperlinkSubAddress -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
+                            if ($tempImageHyperlinkSubAddress) {
+                                $tempImageHyperlinkSubAddress = $tempImageHyperlinkSubAddress -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
                             }
 
-                            if ($null -ne $tempimagehyperlinkEmailSubject) {
-                                $tempimagehyperlinkEmailSubject = $tempimagehyperlinkEmailSubject -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
+                            if ($tempImageHyperlinkEmailSubject) {
+                                $tempImageHyperlinkEmailSubject = $tempImageHyperlinkEmailSubject -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
                             }
 
-                            if ($null -ne $tempimagehyperlinkScreenTip) {
-                                $tempimagehyperlinkScreenTip = $tempimagehyperlinkScreenTip -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
+                            if ($tempImageHyperlinkScreenTip) {
+                                $tempImageHyperlinkScreenTip = $tempImageHyperlinkScreenTip -ireplace [Regex]::Escape($replaceKey), $replaceHash.$replaceKey
                             }
                         }
                     }
 
+                    try { WatchCatchableExitSignal } catch { }
+
                     if (
-                        $($tempImageSourceFullname) -and
-                        $($image.linkformat.sourcefullname) -and
-                        $($tempImageSourceFullname -ine $image.linkformat.sourcefullname)
+                        $($null -ne $tempImageSourceFullname) -and
+                        $($null -ne $image.linkformat.sourcefullname) -and
+                        ($tempImageSourceFullName -ne $image.LinkFormat.SourceFullName)
                     ) {
-                        $image.linkformat.sourcefullname = $tempImageSourceFullname
+                        $image.LinkFormat.SourceFullName = $tempImageSourceFullName
                     }
 
-                    if ($null -ne $tempImageAlternativeText) {
-                        $image.alternativeText = $tempImageAlternativeText
+                    if (
+                        $($null -ne $tempImageAlternativeText) -and
+                        $($null -ne $image.AlternativeText) -and
+                        ($tempImageAlternativeText -ne $image.AlternativeText)
+                    ) {
+                        $image.AlternativeText = $tempImageAlternativeText
                     }
 
-                    if ($null -ne $tempimagehyperlinkAddress) {
-                        $image.hyperlink.Address = $tempImageHyperlinkAddress
+                    if (
+                        $($null -ne $tempImageHyperlinkAddress) -and
+                        $($null -ne $image.Hyperlink.Address) -and
+                        ($tempImageHyperlinkAddress -ne $image.Hyperlink.Address)
+                    ) {
+                        $image.Hyperlink.Address = $tempImageHyperlinkAddress
                     }
 
-                    if ($null -ne $tempimagehyperlinkSubAddress) {
-                        $image.hyperlink.SubAddress = $tempImageHyperlinkSubAddress
+                    if (
+                        $($null -ne $tempImageHyperlinkSubAddress) -and
+                        $($null -ne $image.Hyperlink.SubAddress) -and
+                        ($tempImageHyperlinkSubAddress -ne $image.Hyperlink.SubAddress)
+                    ) {
+                        $image.Hyperlink.SubAddress = $tempImageHyperlinkSubAddress
                     }
 
-                    if ($null -ne $tempimagehyperlinkEmailSubject) {
-                        $image.hyperlink.EmailSubject = $tempImageHyperlinkEmailSubject
+                    if (
+                        $($null -ne $tempImageHyperlinkEmailSubject) -and
+                        $($null -ne $image.Hyperlink.EmailSubject) -and
+                        ($tempImageHyperlinkEmailSubject -ne $image.Hyperlink.EmailSubject)
+                    ) {
+                        $image.Hyperlink.EmailSubject = $tempImageHyperlinkEmailSubject
                     }
 
-                    if ($null -ne $tempimagehyperlinkScreenTip) {
-                        $image.hyperlink.ScreenTip = $tempImageHyperlinkScreenTip
+                    if (
+                        $($null -ne $tempImageHyperlinkScreenTip) -and
+                        $($null -ne $image.Hyperlink.ScreenTip) -and
+                        ($tempImageHyperlinkScreenTip -ne $image.Hyperlink.ScreenTip)
+                    ) {
+                        $image.Hyperlink.ScreenTip = $tempImageHyperlinkScreenTip
                     }
                 }
             } catch {
@@ -4701,72 +4798,6 @@ function SetSignatures {
                 Write-Host "$Indent        If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
                 $script:ExitCode = 20
                 $script:ExitCodeDescription = 'Error replacing picture variables in Word.'
-                exit
-            }
-
-
-            try { WatchCatchableExitSignal } catch { }
-
-
-            Write-Host "$Indent      Replace non-picture variables"
-            $wdFindContinue = 1
-            $MatchCase = $false
-            $MatchWholeWord = $true
-            $MatchWildcards = $False
-            $MatchSoundsLike = $False
-            $MatchAllWordForms = $False
-            $Forward = $True
-            $Wrap = $wdFindContinue
-            $Format = $False
-            $wdFindContinue = 1
-            $ReplaceAll = 2
-
-            $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
-
-            try {
-                # Replace in view without field codes
-                $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $false
-
-                $script:COMWord.ActiveDocument.Select()
-                $tempWordText = $script:COMWord.Selection.Text
-                $script:COMWord.Selection.Collapse()
-
-                foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' })) -and ($tempWordText -imatch [regex]::escape($_)) } | Sort-Object -Culture $TemplateFilesSortCulture )) {
-                    try { WatchCatchableExitSignal } catch { }
-
-                    $script:COMWord.Selection.Find.Execute($replaceKey, $MatchCase, $MatchWholeWord, `
-                            $MatchWildcards, $MatchSoundsLike, $MatchAllWordForms, $Forward, `
-                            $Wrap, $Format, $(($replaceHash.$replaceKey -ireplace "`r`n", '^p') -ireplace "`n", '^l'), $ReplaceAll) | Out-Null
-                }
-
-                # Restore original view
-                $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $script:COMWordShowFieldCodesOriginal
-
-                $tempWordText = $null
-
-                try { WatchCatchableExitSignal } catch { }
-
-                # Replace in field codes
-                foreach ($field in $script:COMWord.ActiveDocument.Fields) {
-                    try { WatchCatchableExitSignal } catch { }
-
-                    $tempWordFieldCodeOriginal = $field.Code.Text
-                    $tempWordFieldCodeNew = $tempWordFieldCodeOriginal
-
-                    foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' })) } | Sort-Object -Culture $TemplateFilesSortCulture )) {
-                        $tempWordFieldCodeNew = $tempWordFieldCodeNew -ireplace [regex]::escape($replaceKey), $($replaceHash.$replaceKey)
-                    }
-
-                    if ($tempWordFieldCodeOriginal -ne $tempWordFieldCodeNew) {
-                        $field.Code.Text = $tempWordFieldCodeNew
-                    }
-                }
-            } catch {
-                Write-Host $error[0]
-                Write-Host "$Indent        Error replacing non-picture variables in Word. Exit." -ForegroundColor Red
-                Write-Host "$Indent        If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
-                $script:ExitCode = 21
-                $script:ExitCodeDescription = 'Error replacing non-picture variables in Word.'
                 exit
             }
 
@@ -4830,7 +4861,9 @@ function SetSignatures {
 
             # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
             # Close the document to remove in-memory references to already deleted images
-            $script:COMWord.ActiveDocument.Saved = $true
+            if ($script:COMWord.ActiveDocument.Saved -ne $true) {
+                $script:COMWord.ActiveDocument.Saved = $true
+            }
             $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
             try { WatchCatchableExitSignal } catch { }
@@ -4850,17 +4883,39 @@ function SetSignatures {
 
             $script:WordWebOptions = $script:COMWord.ActiveDocument.WebOptions
 
-            $script:COMWord.ActiveDocument.WebOptions.TargetBrowser = 4 # IE6, which is the maximum
-            $script:COMWord.ActiveDocument.WebOptions.BrowserLevel = 2 # IE6, which is the maximum
-            $script:COMWord.ActiveDocument.WebOptions.AllowPNG = $true
-            $script:COMWord.ActiveDocument.WebOptions.OptimizeForBrowser = $false
-            $script:COMWord.ActiveDocument.WebOptions.RelyOnCSS = $true
-            $script:COMWord.ActiveDocument.WebOptions.RelyOnVML = $false
-            $script:COMWord.ActiveDocument.WebOptions.Encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
-            $script:COMWord.ActiveDocument.WebOptions.OrganizeInFolder = $true
-            $script:COMWord.ActiveDocument.WebOptions.PixelsPerInch = 96
-            $script:COMWord.ActiveDocument.WebOptions.ScreenSize = 10 # 1920x1200
-            $script:COMWord.ActiveDocument.WebOptions.UseLongFileNames = $true
+            if ($script:COMWord.ActiveDocument.WebOptions.TargetBrowser -ne 4) {
+                $script:COMWord.ActiveDocument.WebOptions.TargetBrowser = 4 # IE6, which is the maximum
+            }
+            if ($script:COMWord.ActiveDocument.WebOptions.BrowserLevel -ne 2) {
+                $script:COMWord.ActiveDocument.WebOptions.BrowserLevel = 2 # IE6, which is the maximum
+            }
+            if ($script:COMWord.ActiveDocument.WebOptions.AllowPNG -ne $true) {
+                $script:COMWord.ActiveDocument.WebOptions.AllowPNG = $true
+            }
+            if ($script:COMWord.ActiveDocument.WebOptions.OptimizeForBrowser -ne $false) {
+                $script:COMWord.ActiveDocument.WebOptions.OptimizeForBrowser = $false
+            }
+            if ($script:COMWord.ActiveDocument.WebOptions.RelyOnCSS -ne $true) {
+                $script:COMWord.ActiveDocument.WebOptions.RelyOnCSS = $true
+            }
+            if ($script:COMWord.ActiveDocument.WebOptions.RelyOnVML -ne $false) {
+                $script:COMWord.ActiveDocument.WebOptions.RelyOnVML = $false
+            }
+            if ($script:COMWord.ActiveDocument.WebOptions.Encoding -ne 65001) {
+                $script:COMWord.ActiveDocument.WebOptions.Encoding = 65001 # Outlook uses 65001 (UTF8) for .htm, but 1200 (UTF16LE a.k.a Unicode) for .txt
+            }
+            if ($script:COMWord.ActiveDocument.WebOptions.OrganizeInFolder -ne $true) {
+                $script:COMWord.ActiveDocument.WebOptions.OrganizeInFolder = $true
+            }
+            if ($script:COMWord.ActiveDocument.WebOptions.PixelsPerInch -ne 96) {
+                $script:COMWord.ActiveDocument.WebOptions.PixelsPerInch = 96
+            }
+            if ($script:COMWord.ActiveDocument.WebOptions.ScreenSize -ne 10) {
+                $script:COMWord.ActiveDocument.WebOptions.ScreenSize = 10 # 1920x1200
+            }
+            if ($script:COMWord.ActiveDocument.WebOptions.UseLongFileNames -ne $true) {
+                $script:COMWord.ActiveDocument.WebOptions.UseLongFileNames = $true
+            }
 
             $script:COMWord.ActiveDocument.WebOptions.UseDefaultFolderSuffix()
             $pathHtmlFolderSuffix = $script:COMWord.ActiveDocument.WebOptions.FolderSuffix
@@ -4920,7 +4975,9 @@ function SetSignatures {
             try {
                 if ($script:WordWebOptions) {
                     foreach ($property in @('TargetBrowser', 'BrowserLevel', 'AllowPNG', 'OptimizeForBrowser', 'RelyOnCSS', 'RelyOnVML', 'Encoding', 'OrganizeInFolder', 'PixelsPerInch', 'ScreenSize', 'UseLongFileNames')) {
-                        $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
+                        if ($script:COMWord.ActiveDocument.WebOptions.$property -ne $script:WordWebOptions.$property) {
+                            $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
+                        }
                     }
                 }
             } catch {}
@@ -4928,7 +4985,9 @@ function SetSignatures {
             try { WatchCatchableExitSignal } catch { }
 
             # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
-            $script:COMWord.ActiveDocument.Saved = $true
+            if ($script:COMWord.ActiveDocument.Saved -ne $true) {
+                $script:COMWord.ActiveDocument.Saved = $true
+            }
 
             Write-Host "$Indent        Export high-res images"
 
@@ -4936,7 +4995,7 @@ function SetSignatures {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DocxHighResImageConversion')))) {
                     $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
-                    Write-Host "$Indent          Can not export high-res images." -ForegroundColor Green
+                    Write-Host "$Indent          Cannot export high-res images." -ForegroundColor Green
                     Write-Host "$Indent          The 'DocxHighResImageConversion' feature requires the Benefactor Circle add-on." -ForegroundColor Green
                     Write-Host "$Indent          Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
@@ -5222,7 +5281,9 @@ function SetSignatures {
 
                 # Mark document as saved to avoid MS Information Protection asking for setting a sensitivity label when closing the document
                 # Close the document as conversion to .rtf happens from .htm
-                $script:COMWord.ActiveDocument.Saved = $true
+                if ($script:COMWord.ActiveDocument.Saved -ne $true) {
+                    $script:COMWord.ActiveDocument.Saved = $true
+                }
                 $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
                 # Restore original security setting
@@ -5285,9 +5346,9 @@ function SetSignatures {
         if (-not $ProcessOOF) {
             Write-Host "$Indent      Upload signature to Exchange Online as roaming signature"
 
-            if ($MirrorCloudSignatures -eq $true) {
+            if ($MirrorCloudSignatures -ne $false) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesUpload')))) {
-                    Write-Host "$Indent        Can not upload signature to Exchange Online." -ForegroundColor Green
+                    Write-Host "$Indent        Cannot upload signature to Exchange Online." -ForegroundColor Green
                     Write-Host "$Indent        The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
                     Write-Host "$Indent        Find out details in '.\docs\Benefactor Circle'." -ForegroundColor Green
                 } else {
@@ -5920,14 +5981,14 @@ $CheckPathScriptblock = {
                                     @($docLibDriveItems | Where-Object { ($_.driveItem.folder) -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }).webUrl | ForEach-Object {
                                         [uri]::UnescapeDataString(($_ -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'
                                     }
-                                ) | Sort-Object | ForEach-Object {
+                                ) | Sort-Object -Culture 127 | ForEach-Object {
                                     if (-not (Test-Path (Join-Path -Path $tempDir -ChildPath $_) -PathType Container)) {
                                         $null = New-Item -ItemType Directory -Path (Join-Path -Path $tempDir -ChildPath $_)
                                     }
                                 }
 
                                 Write-Verbose '      Create dummy files in local temp folders'
-                                @($docLibDriveItems | Where-Object { ($_.driveItem.file) -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }) | Sort-Object -Property { $_.webUrl } | ForEach-Object {
+                                @($docLibDriveItems | Where-Object { ($_.driveItem.file) -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }) | Sort-Object -Culture 127 -Property { $_.webUrl } | ForEach-Object {
                                     $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath ([uri]::UnescapeDataString(($_.webUrl -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'))
 
                                     if (-not $script:SpoDownloadUrls) {
@@ -7196,7 +7257,7 @@ function GraphGetUserProperties($user, $authHeader = $script:AuthorizationHeader
             } until (!($local:uri))
 
 
-            if (($user.properties.value.userprincipalname -ieq $script:GraphUser) -and ((-not $SimulateUser) -or ($SimulateUser -and $SimulateAndDeployGraphCredentialFile -and ($authHeader -eq $script:AppAuthorizationHeader))) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true) -or ($MirrorCloudSignatures -eq $true))) {
+            if (($user.properties.value.userprincipalname -ieq $script:GraphUser) -and ((-not $SimulateUser) -or ($SimulateUser -and $SimulateAndDeployGraphCredentialFile -and ($authHeader -eq $script:AppAuthorizationHeader))) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true) -or ($MirrorCloudSignatures -ne $false))) {
                 try {
                     $requestBody = @{
                         Method      = 'Get'
@@ -7706,13 +7767,13 @@ function GetIniContent ($filePath, $additionalLines) {
                 }
             )
         ) {
-            $((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortCulture'] = 'de-AT'
+            $((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))['SortCulture'] = '127'
         }
     } else {
         $local:ini["$($local:ini.Count)"] = [ordered]@{
             '<Set-OutlookSignatures template>' = '<Set-OutlookSignatures configuration>'
             'SortOrder'                        = 'AsInThisFile'
-            'SortCulture'                      = 'de-AT'
+            'SortCulture'                      = '127'
         }
     }
 
@@ -7766,10 +7827,10 @@ function RemoveItemAlternativeRecurse {
 
             if (Test-Path -LiteralPath $SinglePath -PathType Container) {
                 if (-not $SkipFolder) {
-                    $local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture $TemplateFilesSortCulture -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
+                    $local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture 127 -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
                     $local:ToDelete += @(Get-Item -LiteralPath $SinglePath -Force)
                 } else {
-                    $local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture $TemplateFilesSortCulture -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
+                    $local:ToDelete += @(Get-ChildItem -LiteralPath $SinglePath -Recurse -Force | Sort-Object -Culture 127 -Property PSIsContainer, @{expression = { $_.FullName.split([IO.Path]::DirectorySeparatorChar).count }; descending = $true }, fullname)
                 }
             } elseif (Test-Path -LiteralPath $SinglePath -PathType Leaf) {
                 $local:ToDelete += (Get-Item -LiteralPath $SinglePath -Force)
@@ -8028,7 +8089,7 @@ function global:WatchCatchableExitSignal {
         $script:ExitCodeDescription = 'Detected catchable exit signal.'
         exit
     } else {
-        if ($WatchCatchableExitSignalNonExitScriptBlock -and ($WatchCatchableExitSignalNonExitScriptBlock -is [ScriptBlock])) {
+        if ($WatchCatchableExitSignalNonExitScriptBlock -is [ScriptBlock]) {
             try {
                 . $WatchCatchableExitSignalNonExitScriptBlock
             } catch {
@@ -8194,17 +8255,20 @@ try {
             try {
                 if ($script:WordWebOptions) {
                     foreach ($property in @('TargetBrowser', 'BrowserLevel', 'AllowPNG', 'OptimizeForBrowser', 'RelyOnCSS', 'RelyOnVML', 'Encoding', 'OrganizeInFolder', 'PixelsPerInch', 'ScreenSize', 'UseLongFileNames')) {
-                        $script:COMWordDummy.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
+                        try {
+                            $script:COMWordDummy.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
+                        } catch {
+                        }
                     }
                 }
             } catch {}
 
             # Restore original TextEncoding
-            try {
-                if ($script:WordTextEncoding) {
+            if ($script:WordTextEncoding) {
+                try {
                     $script:COMWordDummy.ActiveDocument.TextEndocing = $script:WordTextEncoding
+                } catch {
                 }
-            } catch {
             }
         }
 
@@ -8228,17 +8292,19 @@ try {
             try {
                 if ($script:WordWebOptions) {
                     foreach ($property in @('TargetBrowser', 'BrowserLevel', 'AllowPNG', 'OptimizeForBrowser', 'RelyOnCSS', 'RelyOnVML', 'Encoding', 'OrganizeInFolder', 'PixelsPerInch', 'ScreenSize', 'UseLongFileNames')) {
-                        $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
+                        if ($script:COMWord.ActiveDocument.WebOptions.$property -ne $script:WordWebOptions.$property) {
+                            $script:COMWord.ActiveDocument.WebOptions.$property = $script:WordWebOptions.$property
+                        }
                     }
                 }
             } catch {}
 
             # Restore original TextEncoding
-            try {
-                if ($script:WordTextEncoding) {
+            if ($script:WordTextEncoding) {
+                try {
                     $script:COMWord.ActiveDocument.TextEndocing = $script:WordTextEncoding
+                } catch {
                 }
-            } catch {
             }
         }
 
@@ -8286,8 +8352,11 @@ try {
         Remove-Item $script:QRCoderModulePath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
-    if ($script:ScriptProcessPriorityOriginal -and $IsWindows) {
-        $null = Get-CimInstance Win32_process -Filter "ProcessId = ""$PID""" | Invoke-CimMethod -Name SetPriority -Arguments @{Priority = $script:ScriptProcessPriorityOriginal }
+    if ($script:ScriptProcessPriorityOriginal) {
+        try {
+            $((Get-Process -PID $PID).PriorityClass = $script:ScriptProcessPriorityOriginal)
+        } catch {
+        }
     }
 
     if ($script:SystemNetServicePointManagerSecurityProtocolOld) {
@@ -8320,7 +8389,7 @@ try {
         Write-Host "  Description: $($script:ExitCodeDescription)" -ForegroundColor Yellow
 
         Write-Host '  Check for existing issues at https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=' -ForegroundColor Yellow
-        Write-Host '  or request fee-based support from ExplicIT Consulting at https://explicitconsulting.at/open-source/set-outlooksignatures.' -ForegroundColor Yellow
+        Write-Host '  or order fee-based support from ExplicIT Consulting at https://explicitconsulting.at/open-source/set-outlooksignatures.' -ForegroundColor Yellow
     }
 
     Write-Host

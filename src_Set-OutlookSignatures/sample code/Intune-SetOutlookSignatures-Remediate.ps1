@@ -96,13 +96,13 @@ try {
             }
             $ProgressPreference = $OldProgressPreference
 
-            @(@(Get-ChildItem -LiteralPath $SoftwarePath -Recurse -Force) | Select-Object *, @{Name = 'FolderDepth'; Expression = { $_.DirectoryName.Split('\').Count } } | Sort-Object -Descending -Property FolderDepth, FullName) | Remove-Item -Force -Recurse
+            @(@(Get-ChildItem -LiteralPath $SoftwarePath -Recurse -Force) | Select-Object *, @{Name = 'FolderDepth'; Expression = { $_.DirectoryName.Split('\').Count } } | Sort-Object -Culuture 127 -Descending -Property FolderDepth, FullName) | Remove-Item -Force -Recurse
 
             Add-Type -Assembly System.IO.Compression.FileSystem
 
             $zip = [IO.Compression.ZipFile]::OpenRead($tempFile)
 
-            $entries = $zip.Entries | Where-Object { $_.FullName -ilike "Set-OutlookSignatures_$($VersionToUse)/*" } | Sort-Object
+            $entries = $zip.Entries | Where-Object { $_.FullName -ilike "Set-OutlookSignatures_$($VersionToUse)/*" } | Sort-Object -Culture 127
 
             $entries | ForEach-Object {
                 $dest = $(Join-Path -Path $SoftwarePath -ChildPath ($_.FullName -ireplace "^$([regex]::escape("Set-OutlookSignatures_$($VersionToUse)/"))"))

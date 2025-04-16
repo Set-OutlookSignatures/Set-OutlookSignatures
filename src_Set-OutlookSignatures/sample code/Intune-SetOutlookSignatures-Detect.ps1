@@ -32,7 +32,7 @@ $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Obj
 
 Set-Location $PSScriptRoot
 
-$logFile = (Get-ChildItem -Path $(Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs') -ChildPath $('Set-OutlookSignatures_Log_*.txt')) -File -Force -ErrorAction SilentlyContinue | Sort-Object $_.CreationTime | Select-Object -Last 1).FullName
+$logFile = (Get-ChildItem -Path $(Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs') -ChildPath $('Set-OutlookSignatures_Log_*.txt')) -File -Force -ErrorAction SilentlyContinue | Sort-Object -Culture 127 -Property $_.CreationTime | Select-Object -Last 1).FullName
 
 If ((-not $logFile) -or (-not (Test-Path -LiteralPath $logFile))) {
     Write-Host 'Log file not found, Set-OutlookSignatures has not yet run.'

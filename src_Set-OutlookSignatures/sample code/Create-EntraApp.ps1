@@ -18,12 +18,14 @@ param (
     #   'SimulateAndDeploy' for use in the "simulate and deploy" scenario
     #     Uses delegated permissions and application permissions, as described in '.\sample code\SimulateAndDeploy.ps1'
     #   For security reasons, the app type has no default value and needs to be set manually
-    [ValidateSet('Set-OutlookSignatures', 'SimulateAndDeploy')]
+    [ValidateSet('Set-OutlookSignatures', 'SimulateAndDeploy', 'OutlookAddIn')]
     $AppType = $null,
 
     [ValidateNotNullOrEmpty()]
-    $AppName = $null
+    $AppName = $null,
 
+    [ValidateNotNullOrEmpty()]
+    [uri]$OutlookAddInUrl = $null
 )
 
 
@@ -43,33 +45,61 @@ if ($AppName) {
     $AppName = $AppName.trim()
 }
 
-Write-Host 'Create Entra ID app for Set-OutlookSignatures'
-Write-Host "  App type: $($AppType)"
-Write-Host "  App name: $($AppName)"
+Write-Host 'Set-OutlookSignatures Create-EntraApp.ps1'
+
+$ParameterCheckSuccess = $true
 
 if ([string]::IsNullOrWhiteSpace($AppType)) {
-    Write-Host
+    $ParameterCheckSuccess = $false
+
     Write-Host '  App type not defined, exiting.' -ForegroundColor Red
-    Write-Host "  Add parameter '-AppType' with one of the following values: $(($PSCmdlet.MyInvocation.MyCommand.Parameters['AppType'].Attributes |
+    Write-Host "    Add parameter '-AppType' with one of the following values: $(($PSCmdlet.MyInvocation.MyCommand.Parameters['AppType'].Attributes |
     Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }).ValidValues -join ', ') " -ForegroundColor Red
 }
 
 if ([string]::IsNullOrWhiteSpace($AppName)) {
-    Write-Host
+    $ParameterCheckSuccess = $false
+
     Write-Host '  App name not defined, exiting.' -ForegroundColor Red
-    Write-Host "  Add parameter '-AppName' with a name for the Entra ID app to be created." -ForegroundColor Red
+    Write-Host "    Add parameter '-AppName' with a name for the Entra ID app to be created." -ForegroundColor Red
 }
 
-if ([string]::IsNullOrWhiteSpace($AppType) -or [string]::IsNullOrWhiteSpace($AppName)) {
+if ($AppType -ieq 'OutlookAddIn' -and $OutlookAddInUrl -eq $null) {
+    $ParameterCheckSuccess = $false
+
+    Write-Host '  Outlook Add-In URI not defined, exiting.' -ForegroundColor Red
+    Write-Host "    Add parameter '-OutlookAddInUrl' with a URI for the Outlook add-in to be created." -ForegroundColor Red
+}
+
+if (($AppType -iin @('Set-OutlookSignatures', 'SimulateAndDeploy')) -and ($OutlookAddInUrl -ne $null)) {
+    Write-Host "  Outlook Add-In URI not allowed for app type $($AppType), exiting." -ForegroundColor Red
+    Write-Host "    Remove parameter '-OutlookAddInUrl'." -ForegroundColor Red
     exit 1
+}
+
+if (-not $ParameterCheckSuccess) {
+    exit 1
+} else {
+    $AppName = $AppName.trim()
+}
+
+
+Write-Host
+Write-Host 'Create Entra ID app'
+Write-Host "  App type: $($AppType)"
+Write-Host "  App name: $($AppName)"
+if ($AppType -ieq 'OutlookAddIn') {
+    Write-Host "  Outlook Add-In URI: $($OutlookAddInUrl)"
 }
 
 
 Write-Host
 Write-Host 'Install Microsoft.Graph PowerShell modules'
-foreach ($MicrosoftGraphPowerShellModule in @('Microsoft.Graph.Authentication', 'Microsoft.Graph.Applications')) {
+foreach ($MicrosoftGraphPowerShellModule in @('Microsoft.Graph.Authentication', 'Microsoft.Graph.Applications', 'Microsoft.Graph.Identity.SignIns')) {
+    Write-Host "  $($MicrosoftGraphPowerShellModule)"
+
     if (Get-Module -ListAvailable -Name $MicrosoftGraphPowerShellModule) {
-        Update-Module $MicrosoftGraphPowerShellModule -Scope CurrentUser
+        Update-Module $MicrosoftGraphPowerShellModule
     } else {
         Install-Module $MicrosoftGraphPowerShellModule -Scope CurrentUser -Force -AllowClobber
     }
@@ -78,35 +108,42 @@ foreach ($MicrosoftGraphPowerShellModule in @('Microsoft.Graph.Authentication', 
 
 Write-Host
 Write-Host "Connect to your Entra ID with a user being 'Application Adminstrator' or 'Global Administrator'"
+Write-Host '  An authentication window will open, likely in a browser'
+
 # Disconnect first, so that no existing connection is re-used. This forces to choose an account for the following connect.
 $null = Disconnect-MgGraph -ErrorAction SilentlyContinue
-Connect-MgGraph -Scopes 'Application.ReadWrite.All' -NoWelcome
+
+Connect-MgGraph -Scopes 'Application.ReadWrite.All', 'AppRoleAssignment.ReadWrite.All' -NoWelcome
 
 
 Write-Host
 Write-Host 'Create a new app registration'
-Write-Host '  Does not check if an app with the same name already exists'
 Write-Host "  App name: $($AppName)"
+
+$ExistingApp = @(Get-MgApplication | Where-Object { $_.DisplayName.Trim() -ieq $AppName })
+
+if ($ExistingApp.Count -gt 0) {
+    $ExistingApp | ForEach-Object {
+        Write-Host "  App with name '$($AppName)' already exists. ID: $($_.Id)" -ForegroundColor Red
+    }
+
+    Write-Host '  Exiting.' -ForegroundColor Red
+    exit 1
+}
+
 $params = @{
     DisplayName    = $AppName
-    Description    = 'Set-OutlookSignatures, email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, Windows, Web, Mac, Linux, Android, iOS'
-    Notes          = 'Set-OutlookSignatures, email signatures and out-of-office replies for Exchange and all of Outlook: Classic and New, Windows, Web, Mac, Linux, Android, iOS'
+    Description    = "$($AppType) app for Set-OutlookSignatures: Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy."
+    Notes          = "$($AppType) app for Set-OutlookSignatures: Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy."
     SignInAudience = 'AzureADMyOrg'
 }
 
 $app = New-MgApplication @params
 
-if ($AppType -ieq 'Set-OutlookSignatures') {
-    Write-Host "  App Client ID for Set-OutlookSignatures graph config file: $($app.AppId)" -ForegroundColor Green
-} else {
-    Write-Host "  App Client ID for SimulateAndDeploy configuration: $($app.AppId)" -ForegroundColor Green
-}
-
-
 Write-Host
 Write-Host 'Add required permissions to app registration'
 if ($AppType -ieq 'Set-OutlookSignatures') {
-    $params = @{
+    $permissionParams = @{
         RequiredResourceAccess = @(
             @{
                 # Microsoft Graph
@@ -198,8 +235,8 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
             }
         )
     }
-} else {
-    $params = @{
+} elseif ($AppType -ieq 'SimulateAndDeploy') {
+    $permissionParams = @{
         RequiredResourceAccess = @(
             @{
                 # Microsoft Graph
@@ -295,8 +332,8 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                     #   Required for access to templates and configuration files hosted on SharePoint Online.
                     #   For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
                     @{
-                        'id'   = 'df85f4d6-205c-4ac5-a5ea-6bf408dba283'
-                        'type' = 'Scope'
+                        'id'   = '01d4889c-1287-42c6-ac1f-5d1e02578ef6'
+                        'type' = 'Role'
                     },
 
                     # Application permission: GroupMember.Read.All
@@ -312,7 +349,7 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                     #   Required to connect to Outlook Web and to set Outlook signatures.
                     @{
                         'id'   = 'e2a3a72e-5f79-4c64-b1b1-878b674786c9'
-                        'type' = 'Scope'
+                        'type' = 'Role'
                     },
 
                     # Application permission: MailboxSettings.ReadWrite
@@ -347,26 +384,67 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
             }
         )
     }
+} elseif ($AppType -ieq 'OutlookAddin') {
+    $permissionParams = @{
+        RequiredResourceAccess = @(
+            @{
+                # Microsoft Graph
+                'resourceAppId'  = '00000003-0000-0000-c000-000000000000'
+                'resourceAccess' = @(
+                    # Microsoft Graph permissions reference: https://learn.microsoft.com/en-us/graph/permissions-reference
+
+                    # Delegated permission: Mail.Read
+                    #   Allows to read emails in mailbox of the currently logged-on user (and in no other mailboxes).
+                    #    Required because of Microsoft restrictions accessing roaming signatures - this will change in the future, the date is unknown.
+                    @{
+                        'id'   = '570282fd-fa5c-430d-a7fd-fc8dc98a9dca'
+                        'type' = 'Scope'
+                    }
+                )
+            }
+        )
+    }
 }
 
-Update-MgApplication -ApplicationId $app.Id -BodyParameter $params
+Update-MgApplication -ApplicationId $app.Id -BodyParameter $permissionParams
+
+if ($AppType -iin @('Set-OutlookSignatures', 'SimulateAndDeploy')) {
+    Write-Host '  Consider restricting file access by switching from Files.Read.All to Files.SelectedOperations.Selected.'
+    Write-Host '    This enhances security but requires granting specific permissions in SharePoint Online.'
+}
 
 
 Write-Host
 Write-Host 'Add redirect URIs to app registration'
-$params =	@{
-    RedirectUris = @(
-        'http://localhost',
-        "ms-appx-web://microsoft.aad.brokerplugin/$($app.AppId)"
-    )
+if ($AppType -iin @('Set-OutlookSignatures', 'SimulateAndDeploy')) {
+    $params =	@{
+        RedirectUris = @(
+            'http://localhost',
+            "ms-appx-web://microsoft.aad.brokerplugin/$($app.AppId)"
+        )
+    }
+
+    Update-MgApplication -ApplicationId $app.Id -PublicClient $params
+} elseif ($AppType -ieq 'OutlookAddIn') {
+    $params =	@{
+        RedirectUris = @(
+            "brk-multihub://$($OutlookAddInUrl.DnsSafeHost)"
+        )
+    }
+
+    Update-MgApplication -ApplicationId $app.Id -Spa $params
 }
 
-Update-MgApplication -ApplicationId $app.Id -IsFallbackPublicClient -PublicClient $params
+$params.RedirectUris | ForEach-Object {
+    Write-Host "  $($_)"
+}
 
+if ($AppType -iin @('Set-OutlookSignatures', 'SimulateAndDeploy')) {
+    Write-Host
+    Write-Host 'Enable public client flow'
 
-Write-Host
-Write-Host 'Enable public client flow'
-Update-MgApplication -ApplicationId $app.Id -IsFallbackPublicClient
+    Update-MgApplication -ApplicationId $app.Id -IsFallbackPublicClient
+}
 
 
 if ($AppType -ieq 'SimulateAndDeploy') {
@@ -379,34 +457,51 @@ if ($AppType -ieq 'SimulateAndDeploy') {
     }
 
     $secret = Add-MgApplicationPassword -ApplicationId $app.Id -PasswordCredential $params
-
-    Write-Host "  Client secret for SimulateAndDeploy configuration: $($secret.SecretText)" -ForegroundColor Green
-    Write-Host "  Don't forget to renew the client secret before $(Get-Date (Get-Date).AddMonths(24) -Format 'yyyy-MM-dd')" -ForegroundColor Green
 }
 
 
 Write-Host
-Write-Host 'Consider restricting file access'
-Write-Host '  Consider switching from Files.Read.All to Files.SelectedOperations.Selected for added security.'
-Write-Host '    This requires granting specific permissions in SharePoint Online.'
-
-
-Write-Host
 Write-Host 'Grant admin consent'
-Write-Host ('  This creates an enterprise application from the app registration and makes the app accessible to ' + $(
-        if ($AppType -ieq 'Set-OutlookSignatures') {
-            Write-Host 'end users running Set-OutlookSignatures'
-        } else {
-            Write-Host 'the account running Set-OutlookSignatures in SimulateAndDeploy mode'
+Write-Host ' This may take a moment'
+$AppServicePrincipal = New-MgServicePrincipal -AppId $App.AppId
+$delegatedPermissions = @{}
+
+foreach ($resource in $permissionParams.RequiredResourceAccess) {
+    foreach ($resourcePermission in $resource.resourceAccess) {
+        if ($resourcePermission.type -eq 'Role') {
+            # Application permission
+
+            $null = New-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $AppServicePrincipal.Id -PrincipalId $AppServicePrincipal.Id -ResourceId $((Get-MgServicePrincipal -Filter "AppId eq '$($resource.resourceAppId)'").Id) -AppRoleId $resourcePermission.id
+        } elseif ($resourcePermission.type -eq 'Scope') {
+            # Delegated permission
+
+            $delegatedPermissions[$((Get-MgServicePrincipal -Filter "AppId eq '$($resource.resourceAppId)'").Id)] += " $(((Get-MgServicePrincipal -Filter "appId eq '$($resource.resourceAppId)'").Oauth2PermissionScopes | Where-Object { $_.Id -eq $resourcePermission.id }).Value)"
         }
-    )
-)
-Write-Host '  To grant admin consent, navigate to'
-Write-Host "    https://login.microsoftonline.com/$($app.PublisherDomain)/adminconsent?client_id=$($app.AppId)" -ForegroundColor Green
-Write-Host '    with a user being 'Application Adminstrator' or 'Global Administrator' and accept the required permissions on behalf of your tenant.'
-Write-Host "  You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[…]'"
-Write-Host '    could not be found or accessed. The reason for this message is that the Entra ID app is configured to only be able to authenticate against http://localhost.'
+    }
+}
+
+$delegatedPermissions.GetEnumerator() | ForEach-Object {
+    $null = New-MgOauth2PermissionGrant -ClientId $AppServicePrincipal.Id -ConsentType 'AllPrincipals' -ResourceId $_.Key -Scope $_.Value.trim()
+}
 
 
 Write-Host
-Write-Host 'Done'
+Write-Host 'Disconnect from Entra ID'
+$null = Disconnect-MgGraph -ErrorAction SilentlyContinue
+
+
+Write-Host
+Write-Host '▼▼▼ Relevant information for your configuration below ▼▼▼' -ForegroundColor Green
+if ($AppType -ieq 'Set-OutlookSignatures') {
+    Write-Host "  GraphClientId for Set-OutlookSignatures: '$($app.AppId)'"
+} elseif ($AppType -ieq 'SimulateAndDeploy') {
+    Write-Host "  GraphClientId for SimulateAndDeploy: '$($app.AppId)'"
+    Write-Host "  GraphClientSecret for SimulateAndDeploy: '$($secret.SecretText)'"
+    Write-Host "    Do not forget to renew the client secret before $(Get-Date (Get-Date).AddMonths(24) -Format 'yyyy-MM-dd')!"
+} elseif ($AppType -ieq 'OutlookAddIn') {
+    Write-Host "  GRAPH_CLIENT_ID for Outlook Add-In: '$($app.AppId)'"
+}
+Write-Host '▲▲▲ Relevant information for your configuration above ▲▲▲' -ForegroundColor Green
+
+Write-Host
+write-host "Done"
