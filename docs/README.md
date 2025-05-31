@@ -140,41 +140,44 @@ ExplicIT Consulting's commercial Benefactor Circle add-on enhances Set-OutlookSi
 
 ## Feature comparison&nbsp;&nbsp;&nbsp;&nbsp;<a href="#2-quick-start-guide"><img src="https://img.shields.io/badge/go%20to-🚀%20Quick%20Start%20Guide%20🚀-lawngreen?labelColor=black" alt="Go to Quick Start Guide"></a><!-- omit in toc -->
 
-| Feature | Set&#8209;OutlookSignatures<br>with&nbsp;Benefactor&nbsp;Circle | Market Companion&nbsp;A | Market Companion&nbsp;B | Market Companion&nbsp;C |
+| Feature | Set&#8209;OutlookSignatures<br>with&nbsp;Benefactor&nbsp;Circle&nbsp;add-on | Market Companion&nbsp;A | Market Companion&nbsp;B | Market Companion&nbsp;C |
 | :--- | :--- | :--- | :--- | :--- |
 | Free and Open-Source core | 🟢 | 🔴 | 🔴 | 🔴 |
-| Emails stay in your environment (no re-routing to 3rd party datacenters) | 🟢 | 🔴 | 🔴 | 🔴 |
+| Emails stay in your environment (no re-routing to 3rd party datacenters) | 🟢 | 🟡 Optional, causes reduced feature set | 🔴 | 🔴 |
 | Is hosted and runs in environments that you already trust and for which you have established security and management structures | 🟢 | 🔴 | 🔴 | 🔴 |
-| Entra ID and Active Directory permissions | 🟢 <sub>User (a.k.a. delegated) permissions, least privilege principle</sub> | 🔴 <sub>Application permissions, read all directory data (and transfer all emails)</sub> | 🔴 <sub>Application permissions, read all directory data (and transfer all emails)</sub> | 🔴 <sub>Application permissions, read all directory data (and read all emails)</sub> |
+| Entra ID and Active Directory permissions | 🟢 User (a.k.a. delegated) permissions, least privilege principle | 🔴 Application permissions, read all directory data (and transfer all emails) | 🔴 Application permissions, read all directory data (and transfer all emails) | 🔴 Application permissions, read all directory data (and read all emails) |
 | Entra ID and Active Directory data stays in your environment (no transfer to 3rd party datacenters) | 🟢 | 🔴 | 🔴 | 🔴 |
-| Requires an Exchange configuration or adds a dependency to it | 🟢 | 🔴 | 🔴 | 🔴 |
+| Does not require configuring Exchange adding a dependency to it | 🟢 | 🔴 | 🔴 | 🔴 |
 | Multiple independent instances can be run in the same environment | 🟢 | 🔴 | 🔴 | 🔴 |
 | No telemetry or usage data collection, direct or indirect | 🟢 | 🔴 | 🔴 | 🔴 |
 | No auto-renewing subscription | 🟢 | 🔴 | 🔴 | 🔴 |
-| IT can delegate signature management, e.g. to marketing | 🟢 | 🟢 | 🟡 <sub>Not at signature level</sub> | 🟡 <sub>Not at signature level</sub> |
-| Apply signatures to all emails | 🟡 <sub>Outlook clients only</sub> | 🟢 <sub>With email re-routing to a 3rd party datacenter</sub> | 🟢 <sub>With email re-routing to a 3rd party datacenter</sub> | 🟢 <sub>With email re-routing to a 3rd party datacenter</sub> |
+| IT can delegate signature management, e.g. to marketing | 🟢 | 🟢 | 🟡 Not at signature level | 🟡 Not at signature level |
+| Apply signatures to all emails | 🟡 Outlook clients only | 🟢 With email re-routing to a 3rd party datacenter | 🟢 With email re-routing to a 3rd party datacenter | 🟢 With email re-routing to a 3rd party datacenter |
+| Apply signature based on recipients | 🟡 Manually | 🟡 One signature for all recipients, based on first rule match | 🔴 | 🔴 |
 | Additional data sources besides Active Directory and Entra ID | 🟢 | 🟡 | 🔴 | 🔴 |
-| Support for Microsoft national clouds | 🟢 <sub>Global/Public, US Government L4 (GCC, GCC High), US Government L5 (DOD), China operated by 21Vianet</sub> | 🔴 | 🔴 | 🔴 |
+| Supports Microsoft national clouds | 🟢 Global/Public, US Government L4 (GCC, GCC High), US Government L5 (DOD), China operated by 21Vianet | 🔴 | 🔴 | 🔴 |
+| Supports cross-tenant access and multitenant organizations | 🟢 | 🔴 | 🔴 | 🔴 |
 | Support for Microsoft roaming signatures (multiple signatures in Outlook Web and New Outlook) | 🟢 | 🔴 | 🔴 | 🔴 |
-| Number of templates | 🟢 <sub>Unlimited</sub> | 🔴 <sub>1, more charged extra</sub> | 🟢 <sub>Unlimited</sub> | 🟢 <sub>Unlimited</sub> |
-| Targeting and exclusion | 🟢 | 🔴 <sub>Charged extra</sub> | 🟢 | 🟢 |
-| Scheduling | 🟢 | 🔴 <sub>Charged extra</sub> | 🟢 | 🟢 |
-| Banners | 🟢 <sub>Unlimited</sub> | 🔴 <sub>1, more charged extra</sub> | 🟢 <sub>Unlimited</sub> | 🟢 <sub>Unlimited</sub> |
-| QR codes and vCards | 🟢 | 🔴 <sub>Charged extra</sub> | 🔴 <sub>Charged extra</sub> | 🟢 |
+| Number of templates | 🟢 Unlimited | 🔴 1, more charged extra | 🟢 Unlimited | 🟢 Unlimited |
+| Targeting and exclusion | 🟢 | 🔴 Charged extra | 🟢 | 🟢 |
+| Scheduling | 🟢 | 🔴 Charged extra | 🟢 | 🟢 |
+| Banners | 🟢 Unlimited | 🔴 1, more charged extra | 🟢 Unlimited | 🟢 Unlimited |
+| QR codes and vCards | 🟢 | 🔴 Charged extra | 🔴 Charged extra | 🟢 |
 | Signature visible while writing | 🟢 | 🟡 | 🟡  | 🟡 |
-| Signature visible in Sent Items | 🟢 | 🟡 <sub>Cloud mailboxes only</sub> | 🟡 <sub>Cloud mailboxes only</sub> | 🟡 <sub>Cloud mailboxes only</sub> |
-| Out-of-office reply messages | 🟢 | 🔴 <sub>Charged extra</sub> | 🟡 <sub>Same for internal and external senders</sub> | 🔴 <sub>Charged extra</sub> |
+| Signature visible in Sent Items | 🟢 | 🟡 Cloud mailboxes only | 🟡 Cloud mailboxes only | 🟡 Cloud mailboxes only |
+| Out-of-office reply messages | 🟢 | 🔴 Charged extra | 🟡 Same for internal and external senders | 🔴 Charged extra |
 | User-controlled email signatures | 🟢 | 🟡 | 🟡 | 🟡 |
 | Signatures for encrypted messages | 🟢 | 🟡 | 🟡 | 🟡 |
-| Signatures for delegates, shared, additional and automapped mailboxes | 🟢 | 🟡 <sub>No mixing of sender and delegate replacement variables</sub> | 🟡 <sub>No mixing of sender and delegate replacement variables</sub> | 🟡 <sub>No mixing of sender and delegate replacement variables</sub> |
-| Outlook add-in | 🟡 <sub>No on-prem mailboxes on mobile devices</sub> | 🟡 <sub>Not for appointments</sub> | 🟡 <sub>Not for appointments</sub> | 🟢 |
-| Support pricing model | 🟢 <sub>Charged per support hour</sub> | 🔴 <sub>Charged if used or not</sub> | 🔴 <sub>Charged if used or not</sub> | 🔴 <sub>Charged if used or not</sub> |
-| Software escrow | 🟢 <sub>To the free and open-source Set&#8209;OutlookSignatures project</sub> | 🔴 | 🔴 | 🔴 |
-| License cost, 100 mailboxes, 1 year    | 🟢 <sub>appr.   0.3k €</sub> | 🔴 <sub>appr.   1.6k €</sub> | 🟡 <sub>appr.   1.3k €</sub> | 🔴 <sub>appr.   1.6k €</sub> |
-| License cost, 250 mailboxes, 1 year    | 🟢 <sub>appr.   0.6k €</sub> | 🔴 <sub>appr.   4.0k €</sub> | 🟡 <sub>appr.   2.7k €</sub> | 🔴 <sub>appr.   3.6k €</sub> |
-| License cost, 500 mailboxes, 1 year    | 🟢 <sub>appr.   1.3k €</sub> | 🔴 <sub>appr.   8.0k €</sub> | 🟡 <sub>appr.   4.4k €</sub> | 🟡 <sub>appr.   6.2k €</sub> |
-| License cost, 1,000 mailboxes, 1 year  | 🟢 <sub>appr.   2.5k €</sub> | 🔴 <sub>appr.  15.7k €</sub> | 🟡 <sub>appr.   8.7k €</sub> | 🟡 <sub>appr.  10.5k €</sub> |
-| License cost, 10,000 mailboxes, 1 year | 🟢 <sub>appr.  25.0k €</sub> | 🔴 <sub>appr. 110.0k €</sub> | 🟡 <sub>appr.  65.0k €</sub> | 🟡 <sub>appr.  41.0k €</sub> |
+| Signatures for delegates, shared, additional and automapped mailboxes | 🟢 | 🟡 No mixing of sender and delegate replacement variables | 🟡 No mixing of sender and delegate replacement variables | 🟡 No mixing of sender and delegate replacement variables |
+| Outlook add-in | 🟡 No on-prem mailboxes on mobile devices | 🟡 Not for appointments | 🟡 Not for appointments | 🟢 |
+| Support pricing model | 🟢 Charged per support hour | 🔴 Charged if used or not | 🔴 Charged if used or not | 🔴 Charged if used or not |
+| Software escrow | 🟢 To the free and open-source Set&#8209;OutlookSignatures project | 🔴 | 🔴 | 🔴 |
+| License cost for 100 mailboxes, 1 year    | 🟢 300€ | 🔴 ca. 1,600&nbsp;€ | 🟡 ca. 1,300&nbsp;€ | 🔴 ca. 1,600&nbsp;€ |
+| License cost for 250 mailboxes, 1 year    | 🟢 750&nbsp;€ | 🔴 ca. 4,000&nbsp;€ | 🟡 ca. 2,700&nbsp;€ | 🔴 ca. 3,600&nbsp;€ |
+| License cost for 500 mailboxes, 1 year    | 🟢 1,500&nbsp;€ | 🔴 ca. 8,000&nbsp;€ | 🟡 ca. 4,400&nbsp;€ | 🟡 ca. 6,200&nbsp;€ |
+| License cost for 1,000 mailboxes, 1 year  | 🟢 3,000&nbsp;€ | 🔴 ca. 15,700&nbsp;€ | 🟡 ca. 8,700&nbsp;€ | 🟡 ca. 10,500&nbsp;€ |
+| License cost for 10,000 mailboxes, 1 year | 🟢 30,000&nbsp;€ | 🔴 ca. 110,000&nbsp;€ | 🟡 ca. 65,000&nbsp;€ | 🟡 ca. 41,000&nbsp;€ |
+
 
 # Demo video<!-- omit in toc -->
 <a href="https://www.youtube-nocookie.com/embed/K9TrCjTdRUI" target="_blank"><img src="https://img.youtube.com/vi/K9TrCjTdRUI/hqdefault.jpg" height="300" title="Set-OutlookSignatures demo video" alt="Set-OutlookSignatures demo video"></a>
