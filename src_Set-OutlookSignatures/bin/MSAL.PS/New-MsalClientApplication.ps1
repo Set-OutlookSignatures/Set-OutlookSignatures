@@ -11,7 +11,7 @@
     PS C:\>$PublicClientOptions | New-MsalClientApplication -TenantId '00000000-0000-0000-0000-000000000000'
     Pipe in public client options object to get a public client application and target a specific tenant.
 .EXAMPLE
-    PS C:\>$ClientCertificate = Get-Item Cert:\CurrentUser\My\0000000000000000000000000000000000000000
+    PS C:\>$ClientCertificate = Get-Item -LiteralPath Cert:\CurrentUser\My\0000000000000000000000000000000000000000
     PS C:\>$ConfidentialClientOptions = New-Object Microsoft.Identity.Client.ConfidentialClientApplicationOptions -Property @{ ClientId = '00000000-0000-0000-0000-000000000000'; TenantId = '00000000-0000-0000-0000-000000000000' }
     PS C:\>$ConfidentialClientOptions | New-MsalClientApplication -ClientCertificate $ClientCertificate
     Pipe in confidential client options object to get a confidential client application using a client certificate and target a specific tenant.

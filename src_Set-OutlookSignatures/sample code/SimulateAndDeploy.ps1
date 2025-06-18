@@ -121,8 +121,9 @@ Limitations and remarks
 	  - These Outlook-internal problems can also be observed when Set-OutlookSignatures is not involved at all.
 	  - The only workaround currently known is to disable the Classic Outlook for Windows sync engine and let Set-OutlookSignatures do it by running it on the client regularly.
   - Signatures are directly usable in Outlook Web and New Outlook (when based on Outlook Web). Other Outlook editions may work but are not supported.
-      - Consider using the Outlook add-in to access signatures created by SimulateAndDeploy on other editions of Outlook in a supported way. See '.\docs\README' for details.
-	  - Also see FAQ 'Roaming signatures in Classic Outlook for Windows look different' in '.\docs\README'.
+      - Consider using the Outlook add-in to access signatures created by SimulateAndDeploy on other editions of Outlook in a supported way.
+	    See https://set-outlooksignatures.com/outlookaddin for details.
+	  - Also see FAQ 'Roaming signatures in Classic Outlook for Windows look different' at https://set-outlooksignatures.com/faq.
   - Consider using the 'VirtualMailboxConfigFile' parameter of Set-OutlookSignatures, ideally together with the output of the Export-RecipientPermissions script.
       - This allows you to automatically create up-to-date lists of mailboxes based on the permissions granted in Exchange, as well as the according INI file lines.
 	  - Visit https://github.com/Export-RecipientPermissions for details about Export-RecipientPermissions.
@@ -137,13 +138,24 @@ It is recommended to not modify or copy this sample script, but to call it with 
 # Variables
 param (
 	$ConnectOnpremInsteadOfCloud = $false,
-	[pscredential]$GraphUserCredential = (@(, @('SimulateAndDeployUser@example.com', 'P@ssw0rd!')) | ForEach-Object { New-Object System.Management.Automation.PSCredential ($_[0], $(ConvertTo-SecureString $_[1] -AsPlainText -Force)) }), # Use Get-Credential for interactive mode or (Get-Content '.\Config\password.secret') to retrieve info from a separate file (MFA is not supported in any case)
 
-	$GraphClientId = 'The Client ID of the Entra ID app for SimulateAndDeploy', # not the same ID as defined in 'default graph config.ps1' or a custom Graph config file
-	$GraphClientSecret = 'The Client Secret of the Entra ID app for SimulateAndDeploy', # to load the secret from a file, use (Get-Content '.\Config\app.secret')
-
-	[ValidateSet('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC', 'AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4', 'AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5', 'China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')]
+	# $GraphUserCredential, $GraphClientID and $GraphClientSecret are only there for backward compatibility.
+	# In cross-tenant and multitenant scenarios, use $GraphData
+	[pscredential]$GraphUserCredential = (
+		@(, @('SimulateAndDeployUser@example.com', 'P@ssw0rd!')) | ForEach-Object { New-Object System.Management.Automation.PSCredential ($_[0], $(ConvertTo-SecureString $_[1] -AsPlainText -Force)) }
+	), # Use Get-Credential for interactive mode or (Get-Content -LiteralPath '.\Config\password.secret') to retrieve info from a separate file (MFA is not supported in any case)
+	$GraphClientID = 'The Client ID of the Entra ID app for SimulateAndDeploy', # not the same ID as defined in 'default graph config.ps1' or a custom Graph config file
+	$GraphClientSecret = 'The Client Secret of the Entra ID app for SimulateAndDeploy', # to load the secret from a file, use (Get-Content -LiteralPath '.\Config\app.secret')
 	[string]$CloudEnvironment = 'Public',
+
+	#
+	# As soon as $GraphData is not just an empty array, it oversteers $GraphUserCredention, $GraphClientID, and $GraphClientSecret
+	# Format:
+	# $GraphData = @(
+	#     , @('Tenant A ID', 'Tenant A SimulateAndDeployUser', 'Tenant A SimulateAndDeployUserPassword', 'Tenant A GraphClientID', 'Tenant A GraphClientSecret')
+	#     , @('Tenant B ID', 'Tenant B SimulateAndDeployUser', 'Tenant B SimulateAndDeployUserPassword', 'Tenant B GraphClientID', 'Tenant B GraphClientSecret')
+	# )
+	$GraphData = @(),
 
 	$SetOutlookSignaturesScriptPath = '..\Set-OutlookSignatures.ps1',
 	$SetOutlookSignaturesScriptParameters = @{
@@ -163,7 +175,7 @@ param (
 		OOFTemplatePath               = '.\sample templates\Out-of-Office DOCX'
 		OOFIniFile                    = '.\sample templates\Out-of-Office DOCX\_OOF.ini'
 		ReplacementVariableConfigFile = '.\config\default replacement variables.ps1'
-		GraphClientID                 = $GraphClientId
+		GraphClientID                 = @( $($GraphData | ForEach-Object { , @($_[0], $_[3]) }))
 		GraphConfigFile               = '.\config\default graph config.ps1'
 		GraphOnly                     = $false
 		# Use current verbose mode for later execution of Set-OutlookSignatures
@@ -202,37 +214,226 @@ fenix.fish@example.com;fenix.fish@example.com,nat.nuts@example.com
 
 
 # Functions
-function CreateUpdateSimulateAndDeployGraphCredentialFile {
-	# auth with user and app with delegated permissions
-	$GraphClientTenantId = ($GraphUserCredential.username -split '@')[1]
+function ParseJwtToken {
+	# Idea for this code: https://www.michev.info/blog/post/2140/decode-jwt-access-and-id-tokens-via-powershell
 
-	try {
-		# User authentication
-		$auth = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default"
-		$authExo = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -UserCredential $GraphUserCredential -ClientId $GraphClientID -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes "$($CloudEnvironmentExchangeOnlineEndpoint)/.default"
+	[cmdletbinding()]
+	param([Parameter(Mandatory = $true)][string]$token)
 
-		# App authentication
-		$Appauth = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes "$($CloudEnvironmentGraphApiEndpoint)/.default"
-		$AppauthExo = get-msaltoken -AzureCloudInstance $CloudEnvironmentEnvironmentName -ClientId $GraphClientID -ClientSecret ($GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $GraphClientTenantId -RedirectUri 'http://localhost' -Scopes "$($CloudEnvironmentExchangeOnlineEndpoint)/.default"
+	try { WatchCatchableExitSignal } catch { }
 
-		$null = @{
-			'AccessToken'       = $auth.AccessToken
-			'AuthHeader'        = $auth.createauthorizationheader()
-			'AccessTokenExo'    = $authExo.AccessToken
-			'AuthHeaderExo'     = $authExo.createauthorizationheader()
-			'AppAccessToken'    = $Appauth.AccessToken
-			'AppAuthHeader'     = $Appauth.createauthorizationheader()
-			'AppAccessTokenExo' = $AppauthExo.AccessToken
-			'AppAuthHeaderExo'  = $AppauthExo.createauthorizationheader()
-		} | Export-Clixml -Path $SimulateAndDeployGraphCredentialFile
+	# Validate as per https://tools.ietf.org/html/rfc7519
+	# Access and ID tokens are fine, Refresh tokens will not work
+	if (!$token.Contains('.') -or !$token.StartsWith('eyJ')) {
+		return @{
+			error   = 'Invalid token'
+			header  = $null
+			payload = $null
+		}
+	} else {
+		# Header
+		$tokenheader = $token.Split('.')[0].Replace('-', '+').Replace('_', '/')
+
+		# Fix padding as needed, keep adding "=" until string length modulus 4 reaches 0
+		while ($tokenheader.Length % 4) { $tokenheader += '=' }
+
+		# Convert from Base64 encoded string to PSObject all at once
+		$tokenHeader = [System.Text.Encoding]::UTF8.GetString([system.convert]::FromBase64String($tokenheader)) | ConvertFrom-Json
+
+		# Payload
+		$tokenPayload = $token.Split('.')[1].Replace('-', '+').Replace('_', '/')
+
+		# Fix padding as needed, keep adding "=" until string length modulus 4 reaches 0
+		while ($tokenPayload.Length % 4) { $tokenPayload += '=' }
+
+		# Convert to Byte array
+		$tokenByteArray = [System.Convert]::FromBase64String($tokenPayload)
+
+		# Convert to string array
+		$tokenArray = [System.Text.Encoding]::UTF8.GetString($tokenByteArray)
+
+		# Convert from JSON to PSObject
+		$tokenPayload = $tokenArray | ConvertFrom-Json
 
 		return @{
-			'error' = $false
+			error   = $false
+			header  = $tokenHeader
+			payload = $tokenPayload
+		}
+	}
+}
+
+
+function CreateUpdateSimulateAndDeployGraphCredentialFile {
+	$local:GraphTokenDictionary = @{}
+	$returnValuesCollection = @()
+
+	foreach ($GraphDataObject In $GraphData) {
+		$local:GraphTenantId = GraphDomainToTenantID $GraphDataObject[0]
+		$local:GraphUserCredentialUser = $GraphDataObject[1]
+		$local:GraphUserCredentialPassword = $GraphDataObject[2]
+		$local:GraphClientId = $GraphDataObject[3]
+		$local:GraphClientSecret = $GraphDataObject[4]
+
+		$local:GraphUserCredential = (New-Object System.Management.Automation.PSCredential ($local:GraphUserCredentialUser, $(ConvertTo-SecureString $local:GraphUserCredentialPassword -AsPlainText -Force)))
+		$local:GraphCloudEnvironment = $script:GraphDomainToCloudInstanceCache[$local:GraphTenantId]
+
+		try {
+			# User authentication
+			$auth = get-msaltoken -AzureCloudInstance $local:GraphCloudEnvironment -UserCredential $local:GraphUserCredential -ClientId $local:GraphClientId -TenantId $local:GraphTenantId -RedirectUri 'http://localhost' -Scopes "$($script:CloudEnvironmentGraphApiEndpoint)/.default"
+			$authExo = get-msaltoken -AzureCloudInstance $local:GraphCloudEnvironment -UserCredential $local:GraphUserCredential -ClientId $local:GraphClientId -TenantId $local:GraphTenantId -RedirectUri 'http://localhost' -Scopes "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default"
+
+			# App authentication
+			$Appauth = get-msaltoken -AzureCloudInstance $local:GraphCloudEnvironment -ClientId $local:GraphClientId -ClientSecret ($local:GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $local:GraphTenantId -RedirectUri 'http://localhost' -Scopes "$($script:CloudEnvironmentGraphApiEndpoint)/.default"
+			$AppauthExo = get-msaltoken -AzureCloudInstance $local:GraphCloudEnvironment -ClientId $local:GraphClientId -ClientSecret ($local:GraphClientSecret | ConvertTo-SecureString -AsPlainText -Force) -TenantId $local:GraphTenantId -RedirectUri 'http://localhost' -Scopes "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default"
+
+			$returnValues = @{
+				'error'             = $false
+				'AccessToken'       = $auth.AccessToken
+				'AuthHeader'        = $auth.createauthorizationheader()
+				'AccessTokenExo'    = $authExo.AccessToken
+				'AuthHeaderExo'     = $authExo.createauthorizationheader()
+				'AppAccessToken'    = $Appauth.AccessToken
+				'AppAuthHeader'     = $Appauth.createauthorizationheader()
+				'AppAccessTokenExo' = $AppauthExo.AccessToken
+				'AppAuthHeaderExo'  = $AppauthExo.createauthorizationheader()
+			}
+		} catch {
+			$returnValues = @{
+				'error'             = $error[0] | Out-String
+				'AccessToken'       = $null
+				'AuthHeader'        = $null
+				'AccessTokenExo'    = $null
+				'AuthHeaderExo'     = $null
+				'AppAccessToken'    = $null
+				'AppAuthHeader'     = $null
+				'AppAccessTokenExo' = $null
+				'AppAuthHeaderExo'  = $null
+			}
+		}
+
+		$local:GraphTokenDictionary[$local:GraphTenantId] = $returnValues
+
+		$returnValuesCollection += , $returnValues
+	}
+
+	if ($returnValuesCollection.count -eq 1) {
+		$null = $returnValues | Export-Clixml -Path $SimulateAndDeployGraphCredentialFile
+	} else {
+		$null = $(
+			@{
+				GraphDomainToTenantIDCache      = $script:GraphDomainToTenantIDCache
+				GraphDomainToCloudInstanceCache = $script:GraphDomainToCloudInstanceCache
+				GraphTokenDictionary            = $local:GraphTokenDictionary
+			} | Export-Clixml -Path $SimulateAndDeployGraphCredentialFile
+		)
+	}
+
+	return $returnValuesCollection
+}
+
+
+function GraphDomainToTenantID {
+	param (
+		[string]$domain = 'explicitconsulting.at',
+		[uri]$SpecificGraphApiEndpointOnly = $null
+	)
+
+	if (-not $script:GraphDomainToTenantIDCache) {
+		$script:GraphDomainToTenantIDCache = @{}
+	}
+
+	if (-not $script:GraphDomainToCloudInstanceCache) {
+		$script:GraphDomainToCloudInstanceCache = @{}
+	}
+
+	$domain = $domain.Trim().ToLower()
+
+
+	# If $domain is a mail address, extract the domain part
+	try {
+		try { WatchCatchableExitSignal } catch { }
+
+		$tempDomain = [mailaddress]$domain
+
+		if ($tempDomain.Host) {
+			$domain = $tempDomain.Host
+		}
+	} catch {}
+
+	# If $domain is a URL, extract the DNS safe host
+	try {
+		try { WatchCatchableExitSignal } catch { }
+
+		$tempDomain = [uri]$domain
+		if ($tempDomain.DnsSafeHost) {
+			$domain = $tempDomain.DnsSafeHost
 		}
 	} catch {
-		return @{
-			'error' = $error[0] | Out-String
+		# Not a URI, do nothing
+	}
+
+	try { WatchCatchableExitSignal } catch { }
+
+	foreach ($SharePointDomain in @('sharepoint.com', 'sharepoint.us', 'dps.mil', 'sharepoint-mil.us', 'sharepoint.cn')) {
+		if ($domain.EndsWith("-my.$($SharePointDomain)")) {
+			$domain = $domain -ireplace "-my.$($SharePointDomain)", '.onmicrosoft.com'
+
+			break
 		}
+	}
+
+	try { WatchCatchableExitSignal } catch { }
+
+	if ([string]::IsNullOrWhitespace($domain)) {
+		return
+	}
+
+	if ($script:GraphDomainToTenantIDCache.ContainsKey($domain)) {
+		return $script:GraphDomainToTenantIDCache[$domain]
+	}
+
+	try {
+		try { WatchCatchableExitSignal } catch { }
+
+		$local:result = Invoke-RestMethod -UseBasicParsing -Uri "https://odc.officeapps.live.com/odc/v2.1/federationprovider?domain=$($domain)"
+
+		try { WatchCatchableExitSignal } catch { }
+
+		$script:GraphDomainToTenantIDCache[$domain] = $local:result.tenantId
+
+		if ($null -eq $local:result.tenantId) {
+			return
+		}
+
+		if (
+			$(
+				if ([string]::IsNullOrWhitespace($SpecificGraphApiEndpointOnly)) {
+					$true
+				} else {
+					if ([uri]$local:result.graph -ieq [uri]$SpecificGraphApiEndpointOnly) {
+						$true
+					} else {
+						$false
+					}
+				}
+			)
+		) {
+			$script:GraphDomainToCloudInstanceCache[$domain] = $script:GraphDomainToCloudInstanceCache[$local:result.tenantId] = switch ($local:result.authority_host) {
+				'login.microsoftonline.com' { 'AzurePublic'; break }
+				'login.chinacloudapi.cn' { 'AzureChina'; break }
+				'login.microsoftonline.us' { 'AzureUsGovernment'; break }
+				default { 'AzurePublic' }
+			}
+
+			return $local:result.tenantId
+		} else {
+			return
+		}
+	} catch {
+		$script:GraphDomainToTenantIDCache[$domain] = $null
+
+		return
 	}
 }
 
@@ -272,8 +473,8 @@ function RemoveItemAlternativeRecurse {
 		try { WatchCatchableExitSignal } catch { }
 
 		try {
-			if ((Test-Path $SingleItemToDelete.FullName) -eq $true) {
-				Remove-Item $SingleItemToDelete.FullName -Force -Recurse
+			if ((Test-Path -LiteralPath $SingleItemToDelete.FullName) -eq $true) {
+				Remove-Item -LiteralPath $SingleItemToDelete.FullName -Force -Recurse
 			}
 		} catch {
 			Write-Verbose "Could not delete $($SingleItemToDelete.FullName), error: $($_.Exception.Message)"
@@ -298,57 +499,70 @@ if ($psISE) {
 # Folders and objects
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-Set-Location $PSScriptRoot
+if ($PSScriptRoot) {
+	Set-Location -LiteralPath $PSScriptRoot
+} else {
+	Write-Host 'Could not determine the script path, which is essential for this script to work.' -ForegroundColor Red
+	Write-Host 'Make sure to run this script as a file from a PowerShell console, and not just as a text selection in a code editor.' -ForegroundColor Red
+	Write-Host 'Exit.' -ForegroundColor Red
+	exit 1
+}
+
+if (-not $GraphData) {
+	$GraphData = @(
+		, @($(@($GraphUserCredential.username -split '@')[1]), $GraphUserCredential.username, (New-Object PSCredential 0, $GraphUserCredential.Password).GetNetworkCredential().Password; $GraphClientID, $GraphClientSecret)
+	)
+}
 
 # Cloud environment
 ## Endpoints from https://github.com/microsoft/CSS-Exchange/blob/main/Shared/AzureFunctions/Get-CloudServiceEndpoint.ps1
 ## Environment names must match https://learn.microsoft.com/en-us/dotnet/api/microsoft.identity.client.azurecloudinstance?view=msal-dotnet-latest
 switch ($CloudEnvironment) {
 	{ $_ -iin @('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC') } {
-		$CloudEnvironmentEnvironmentName = 'AzurePublic'
-		$CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.com'
-		$CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office.com'
-		$CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.outlook.com'
-		$CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.com'
+		$script:CloudEnvironmentEnvironmentName = 'AzurePublic'
+		$script:CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.com'
+		$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office.com'
+		$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.outlook.com'
+		$script:CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.com'
 		break
 	}
 
 	{ $_ -iin @('AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4') } {
-		$CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
-		$CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.us'
-		$CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office365.us'
-		$CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.office365.us'
-		$CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
+		$script:CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
+		$script:CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.us'
+		$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office365.us'
+		$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.office365.us'
+		$script:CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
 		break
 	}
 
 	{ $_ -iin @('AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5') } {
-		$CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
-		$CloudEnvironmentGraphApiEndpoint = 'https://dod-graph.microsoft.us'
-		$CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook-dod.office365.us'
-		$CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s-dod.office365.us'
-		$CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
+		$script:CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
+		$script:CloudEnvironmentGraphApiEndpoint = 'https://dod-graph.microsoft.us'
+		$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook-dod.office365.us'
+		$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s-dod.office365.us'
+		$script:CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
 		break
 	}
 
 	{ $_ -iin @('China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud') } {
-		$CloudEnvironmentEnvironmentName = 'AzureChina'
-		$CloudEnvironmentGraphApiEndpoint = 'https://microsoftgraph.chinacloudapi.cn'
-		$CloudEnvironmentExchangeOnlineEndpoint = 'https://partner.outlook.cn'
-		$CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.partner.outlook.cn'
-		$CloudEnvironmentAzureADEndpoint = 'https://login.partner.microsoftonline.cn'
+		$script:CloudEnvironmentEnvironmentName = 'AzureChina'
+		$script:CloudEnvironmentGraphApiEndpoint = 'https://microsoftgraph.chinacloudapi.cn'
+		$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://partner.outlook.cn'
+		$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.partner.outlook.cn'
+		$script:CloudEnvironmentAzureADEndpoint = 'https://login.partner.microsoftonline.cn'
 		break
 	}
 }
 
-$SetOutlookSignaturesScriptParameters.CloudEnvironment = $CloudEnvironment # not $CloudEnvironmentEnvironmentName
+$SetOutlookSignaturesScriptParameters.CloudEnvironment = $script:CloudEnvironmentEnvironmentName
 
 
 foreach ($VariableName in ('SimulateResultPath', 'SetOutlookSignaturesScriptPath')) {
 	Set-Variable -Name $VariableName -Value $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath((Get-Variable -Name $VariableName).Value).trimend('\')
 }
 
-if (-not (Test-Path $SimulateResultPath)) {
+if (-not (Test-Path -LiteralPath $SimulateResultPath)) {
 	New-Item -ItemType Directory $SimulateResultPath | Out-Null
 } else {
 	RemoveItemAlternativeRecurse -Path $SimulateResultPath -SkipFolder
@@ -375,16 +589,16 @@ if (-not $ConnectOnpremInsteadOfCloud) {
 
 	$SetOutlookSignaturesScriptParameters['SimulateAndDeployGraphCredentialFile'] = $SimulateAndDeployGraphCredentialFile
 
-	Import-Module $(Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath -Parent) -ChildPath '\bin\MSAL.PS') -Force
+	Import-Module $(Join-Path -Path (Split-Path -LiteralPath $SetOutlookSignaturesScriptPath) -ChildPath '\bin\MSAL.PS') -Force
 
 	$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-	if ($GraphConnectResult.error) {
+	if ($GraphConnectResult.error -icontains $true) {
 		Start-Sleep -Seconds 10
 
 		$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-		if ($GraphConnectResult.error) {
+		if ($GraphConnectResult.error -icontains $true) {
 			Write-Host '    Exiting because of repeated Graph connection error' -ForegroundColor Red
 			Write-Host "    $($GraphConnectResult.error)" -ForegroundColor Red
 			exit 1
@@ -441,9 +655,9 @@ if (-not $SimulateListCheckPositive) {
 # Overcome Word security warning when export contains embedded pictures
 # Set-OutlookSignatures handles this itself very well, but multiple instances running in the same user account may lead to problems
 # As a workaround, we define the setting before running the jobs
-if (($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
+if (($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
 	Write-Host "Export Word security setting and disable it @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-	$script:WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
+	$script:WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty -LiteralPath 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
 	if ($script:WordRegistryVersion.major -gt 16) {
 		Write-Host "    Word version $($script:WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
 		exit 1
@@ -458,16 +672,16 @@ if (($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) -and ($SetOutlookSi
 		exit 1
 	}
 
-	if ($null -eq (Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
-		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+	if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
 	}
 
 	if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-		$script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+		$script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
 	}
 
 	if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path $_) { Get-Item $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
 	}
 }
 
@@ -492,29 +706,63 @@ do {
 	while ((($JobsToStartOpen -gt 0) -and ((Get-Job).count -lt $JobsConcurrent))) {
 		$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$Jobsstarted].SimulateUser)) -ChildPath '_log.txt'
 
-		if ((Test-Path (Split-Path $LogFilePath -Parent)) -eq $false) {
-			New-Item -ItemType Directory -Path (Split-Path $LogFilePath -Parent) | Out-Null
+		if ((Test-Path -LiteralPath (Split-Path -LiteralPath $LogFilePath)) -eq $false) {
+			New-Item -ItemType Directory -Path (Split-Path -LiteralPath $LogFilePath) | Out-Null
 		}
 
 		# Update Graph credential file before starting a job
 		#   this makes sure that the token is still valid when the software runs longer than token lifetime
-		if (-not $ConnectOnpremInsteadOfCloud) {
+		if (
+			$($ConnectOnpremInsteadOfCloud -ne $true) -and
+			$(
+				$(-not $GraphConnectResult) -or
+				$($GraphConnectResult -and ($GraphConnectResult.error -icontains $true)) -or
+				$($GraphConnectResult -and
+					$(
+						@(
+							$(
+								foreach ($SingleGraphConnectResult in $GraphConnectResult) {
+									foreach ($tempTokenType in @('AccessToken', 'AccessTokenExo', 'AppAccessToken', 'AppAccessTokenExo')) {
+										$tempParsedToken = ParseJwtToken -token $($SingleGraphConnectResult.$tempTokenType)
+										$tempCurrentTimeUtcUnixTimestamp = Get-Date -UFormat %s -Millisecond 0 -Date (Get-Date).ToUniversalTime()
+
+										# True if
+										#   Token is expired
+										#   The remaining token lifetime is less than or equals the job timeout
+										#   At least half of the token lifetime has already passed
+										$(
+											$($tempCurrentTimeUtcUnixTimestamp -ge $tempParsedToken.payload.exp) -or
+											$(($tempParsedToken.payload.exp - $tempCurrentTimeUtcUnixTimestamp) -le $JobTimeout.TotalSeconds) -or
+											$($tempCurrentTimeUtcUnixTimestamp -ge ($tempParsedToken.payload.nbf + (($tempParsedToken.payload.exp - $tempParsedToken.payload.nbf) / 2)))
+										)
+									}
+								}
+							)
+						) -icontains $true
+					)
+				)
+			)
+		) {
+			Write-Host '    Renewing Graph token'
+
 			$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-			if ($GraphConnectResult.error) {
-				Start-Sleep -Seconds 10
+			if ($GraphConnectResult.error -icontains $true) {
+				Start-Sleep -Seconds 70
 
 				$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-				if ($GraphConnectResult.error) {
+				if ($GraphConnectResult.error -icontains $true) {
+					Start-Sleep -Seconds 70
+
 					$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-					if ($GraphConnectResult.error) {
-						Start-Sleep -Seconds 30
+					if ($GraphConnectResult.error -icontains $true) {
+						Start-Sleep -Seconds 70
 
 						$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-						if ($GraphConnectResult.error) {
+						if ($GraphConnectResult.error -icontains $true) {
 							Write-Host '    Exiting because of repeated Graph connection error' -ForegroundColor Red
 							Write-Host "    $($GraphConnectResult.error)" -ForegroundColor Red
 							exit 1
@@ -526,14 +774,12 @@ do {
 
 		Start-Job {
 			Param (
-				$PowershellPath,
 				$SetOutlookSignaturesScriptPath,
 				$SimulateUser,
 				$SimulateMailboxes,
 				$SimulateResultPath,
 				$LogFilePath,
-				$SetOutlookSignaturesScriptParameters,
-				$SimulateAndDeployGraphCredentialFile
+				$SetOutlookSignaturesScriptParameters
 			)
 
 			Start-Transcript -LiteralPath $LogFilePath -Force
@@ -558,14 +804,12 @@ do {
 			}
 
 			Stop-Transcript
-		} -Name ("$($Jobsstarted)_Job") -ArgumentList (Get-Process -Id $pid).Path,
-		$SetOutlookSignaturesScriptPath,
+		} -Name ("$($Jobsstarted)_Job") -ArgumentList $SetOutlookSignaturesScriptPath,
 		$($SimulateList[$Jobsstarted].SimulateUser),
 		$($SimulateList[$Jobsstarted].SimulateMailboxes),
 		$SimulateResultPath,
 		$LogFilePath,
-		$SetOutlookSignaturesScriptParameters,
-		$SimulateAndDeployGraphCredentialFile | Out-Null
+		$SetOutlookSignaturesScriptParameters | Out-Null
 
 		"    User $($SimulateList[$Jobsstarted].SimulateUser) started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
 			Write-Host $($_)
@@ -578,7 +822,7 @@ do {
 		Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 	}
 
-	foreach ($x in (Get-Job | Where-Object { $_.State -ieq 'Running' -and (((Get-Date) - $_.PSBeginTime) -gt $JobTimeout) })) {
+	foreach ($x in (Get-Job | Where-Object { (-not $_.PSEndTime) -and (((Get-Date) - $_.PSBeginTime) -gt $JobTimeout) })) {
 		"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) canceled due to timeout @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
 			Write-Host $($_) -ForegroundColor Red
 			Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
@@ -591,10 +835,10 @@ do {
 		Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 	}
 
-	foreach ($x in (Get-Job -State Completed)) {
+	foreach ($x in (Get-Job | Where-Object { $_.PSEndTime })) {
 		$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser)) -ChildPath '_log.txt'
 
-		if ((Get-Content -Path $LogFilePath -Encoding UTF8 -Raw).trim().Contains('xxxSimulateAndDeployExitCode0xxx')) {
+		if ((Get-Content -LiteralPath $LogFilePath -Encoding UTF8 -Raw).trim().Contains('xxxSimulateAndDeployExitCode0xxx')) {
 			"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with no errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
 				Write-Host $($_) -ForegroundColor Green
 				Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt') -Force -Encoding UTF8
@@ -623,17 +867,17 @@ do {
 
 
 # Restore Word security setting for embedded images
-if (($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
+if (($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
 	Write-Host "Restore original Word security setting @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
-	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+	Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 }
 
 Write-Host "Cleanup @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
 if (-not $ConnectOnpremInsteadOfCloud) {
 	Remove-Module MSAL.PS
-	Remove-Item -Force $SimulateAndDeployGraphCredentialFile -ErrorAction SilentlyContinue
+	Remove-Item -LiteralPath $SimulateAndDeployGraphCredentialFile -Force -ErrorAction SilentlyContinue
 }
 
 

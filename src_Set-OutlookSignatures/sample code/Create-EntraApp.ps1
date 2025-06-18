@@ -39,8 +39,6 @@ if ($psISE) {
 
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-Set-Location $PSScriptRoot
-
 if ($AppName) {
     $AppName = $AppName.trim()
 }

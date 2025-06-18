@@ -18,11 +18,11 @@ if ($psISE) {
 
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-Set-Location $PSScriptRoot
 
-$pathSetOutlookSignatures = (Split-Path $PSScriptRoot -Parent)
+$pathSetOutlookSignatures = '\\path\to\Set-OutlookSignatures' # Path to the Set-OutlookSignatures folder
 
-if ($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) {
+
+if ($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) {
     if (-not ([System.Management.Automation.PSTypeName]'SetOutlookSignatures.ShellLink').Type) {
         Add-Type -TypeDefinition @'
 namespace SetOutlookSignatures
@@ -89,7 +89,7 @@ namespace SetOutlookSignatures
             {
                 link.SetArguments(arguments);
             }
-            
+
             if (!string.IsNullOrWhiteSpace(workingDirectory))
             {
                 link.SetWorkingDirectory(workingDirectory);
@@ -143,14 +143,14 @@ Categories=Office;Utility;Email
 Exec=pwsh -File '$(Join-Path -Path $pathSetOutlookSignatures -ChildPath 'Set-OutlookSignatures.ps1')'
 Icon=$(Join-Path -Path $($pathSetOutlookSignatures) -ChildPath 'logo/Set-OutlookSignatures Icon.ico')
 Terminal=true
-"@ | Out-File $tempFile -Encoding UTF8 -Force
+"@ | Out-File -LiteralPath $tempFile -Encoding UTF8 -Force
 
-    xdg-desktop-icon uninstall (Split-Path $tempFile -Leaf)
+    xdg-desktop-icon uninstall (Split-Path -Path $tempFile -Leaf)
     xdg-desktop-icon install --novendor $tempFile
-    gio set $(Join-Path -Path ([System.Environment]::GetFolderPath('Desktop')) -ChildPath (Split-Path $tempFile -Leaf)) metadata::trusted true
-    chmod a+x $(Join-Path -Path ([System.Environment]::GetFolderPath('Desktop')) -ChildPath (Split-Path $tempFile -Leaf))
+    gio set $(Join-Path -Path ([System.Environment]::GetFolderPath('Desktop')) -ChildPath (Split-Path -Path $tempFile -Leaf)) metadata::trusted true
+    chmod a+x $(Join-Path -Path ([System.Environment]::GetFolderPath('Desktop')) -ChildPath (Split-Path -Path $tempFile -Leaf))
 
-    Remove-Item $tempFile -Force
+    Remove-Item -LiteralPath $tempFile -Force
 } elseif ($IsMacOS) {
     $desktopFile = $(Join-Path -Path ([System.Environment]::GetFolderPath('Desktop')) -ChildPath 'Set Outlook signatures')
     $tempFile = $null
@@ -159,7 +159,7 @@ Terminal=true
 #!/usr/bin/env zsh
 
 pwsh -File '$(Join-Path -Path $pathSetOutlookSignatures -ChildPath 'Set-OutlookSignatures.ps1')'
-"@ | Out-File $desktopFile -Encoding UTF8 -Force
+"@ | Out-File -LiteralPath $desktopFile -Encoding UTF8 -Force
 
     chmod a+x $desktopFile
 
@@ -177,10 +177,10 @@ pwsh -File '$(Join-Path -Path $pathSetOutlookSignatures -ChildPath 'Set-OutlookS
 
     if (Get-Command fileicon -ErrorAction SilentlyContinue) {
         fileicon set $desktopFile $(Join-Path -Path $($pathSetOutlookSignatures) -ChildPath 'logo/Set-OutlookSignatures Icon.ico') -f
-    } elseif ($tempFile -and (Test-Path $tempFile)) {
+    } elseif ($tempFile -and (Test-Path -LiteralPath $tempFile)) {
         & $tempfile set $desktopFile $(Join-Path -Path $($pathSetOutlookSignatures) -ChildPath 'logo/Set-OutlookSignatures Icon.ico') -f
 
-        Remove-Item $tempFile -Force
+        Remove-Item -LiteralPath $tempFile -Force
     }
 } else {
     Write-Host 'Unknown Operating System.'

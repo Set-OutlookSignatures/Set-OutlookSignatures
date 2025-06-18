@@ -39,7 +39,14 @@ if ($psISE) {
 
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-Set-Location $PSScriptRoot
+if ($PSScriptRoot) {
+	Set-Location -LiteralPath $PSScriptRoot
+} else {
+	Write-Host 'Could not determine the script path, which is essential for this script to work.' -ForegroundColor Red
+	Write-Host 'Make sure to run this script as a file from a PowerShell console, and not just as a text selection in a code editor.' -ForegroundColor Red
+	Write-Host 'Exit.' -ForegroundColor Red
+	exit 1
+}
 
 ## User part
 
@@ -137,7 +144,7 @@ do {
 	$(
 		try {
 			$tempPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($tempPath)
-			if (Test-Path $tempPath) {
+			if (Test-Path -LiteralPath $tempPath) {
 				Write-Host "      Path: $($tempPath)"
 				$params['AdditionalSignaturePath'] = $tempPath
 				$true
@@ -152,26 +159,6 @@ do {
 )
 
 
-$paramsString = @(
-	$params.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object {
-		if ($_.Value -is [array]) {
-			"-$($_.Name) '$($_.Value -join "', '")'"
-		} elseif ($_.value.tostring().startswith("'") -or $_.value.tostring().startswith('"')) {
-			"-$($_.Name) $($_.Value)"
-		} else {
-			"-$($_.Name) '$($_.Value)'"
-		}
-	}
-) -join ' '
-
-
 Write-Host
-Write-Host 'Resulting commands'
-Write-Host '  For starting Set-OutlookSignatures directly from within this script'
-Write-Host '    & ..\Set-OutlookSignatures.ps1 @params'
-Write-Host '  For the command line'
-Write-Host "    powershell.exe -command `"& ..\Set-OutlookSignatures.ps1 $($paramsString)`""
-
-
-Write-Host
-Write-Host 'Thank you for using Set-OutlookSignatures!'
+Write-Host 'Starting Set-OutlookSignatures in simulation mode'
+& ..\Set-OutlookSignatures.ps1 @params

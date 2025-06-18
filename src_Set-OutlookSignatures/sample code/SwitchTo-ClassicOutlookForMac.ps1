@@ -14,7 +14,7 @@ Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offe
 
 [CmdletBinding()] param ()
 
-if ((-not $IsMacOS) -or (-not (Test-Path '/Applications/Microsoft Outlook.app' -PathType Container))) {
+if ((-not $IsMacOS) -or (-not (Test-Path -LiteralPath '/Applications/Microsoft Outlook.app' -PathType Container))) {
     Write-Host 'This script is only supported on macOS with Outlook. Exit.'
     exit 1
 }

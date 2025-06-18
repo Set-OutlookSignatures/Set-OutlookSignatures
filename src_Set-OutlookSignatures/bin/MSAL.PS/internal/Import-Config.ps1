@@ -22,9 +22,9 @@ function Import-Config {
     #    $Path = Join-Path $AppDataDirectory $Path
     #}
 
-    if (Test-Path $Path) {
+    if (Test-Path -LiteralPath $Path) {
         ## Load from File
-        $ModuleConfigPersistent = Get-Content $Path -Raw | ConvertFrom-Json
+        $ModuleConfigPersistent = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
 
         ## Return Config
         return $ModuleConfigPersistent

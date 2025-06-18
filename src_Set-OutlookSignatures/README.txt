@@ -1,1 +1,3 @@
-See folder '.\docs' for README and other documents related to Set-OutlookSignatures.
+See folder '.\docs' for basic information.
+
+Find the full documentation at https://set-outlooksignatures.com.

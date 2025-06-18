@@ -13,7 +13,7 @@
     PS C:\>Get-MsalToken -ClientId '00000000-0000-0000-0000-000000000000' -ClientSecret (ConvertTo-SecureString 'SuperSecretString' -AsPlainText -Force) -TenantId '00000000-0000-0000-0000-000000000000' -Scope 'https://graph.microsoft.com/.default'
     Get AccessToken (with MS Graph permissions .Default) and IdToken for specific Entra ID tenant using client id and secret from application registration (confidential client).
 .EXAMPLE
-    PS C:\>$ClientCertificate = Get-Item Cert:\CurrentUser\My\0000000000000000000000000000000000000000
+    PS C:\>$ClientCertificate = Get-Item -LiteralPath Cert:\CurrentUser\My\0000000000000000000000000000000000000000
     PS C:\>$MsalClientApplication = Get-MsalClientApplication -ClientId '00000000-0000-0000-0000-000000000000' -ClientCertificate $ClientCertificate -TenantId '00000000-0000-0000-0000-000000000000'
     PS C:\>$MsalClientApplication | Get-MsalToken -Scope 'https://graph.microsoft.com/.default'
     Pipe in confidential client options object to get a confidential client application using a client certificate and target a specific tenant.

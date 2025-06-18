@@ -57,7 +57,7 @@ ${env:msalps.dll.lenientLoading} = $true # Continue Module Import
 #endregion Import Helper Functions
 
 ## Read Module Manifest
-$ModuleManifest = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'MSAL.PS.psd1')
+$ModuleManifest = Import-PowerShellDataFile -LiteralPath (Join-Path $PSScriptRoot 'MSAL.PS.psd1')
 [System.Collections.Generic.List[string]] $RequiredAssemblies = New-Object System.Collections.Generic.List[string]
 
 ## Select the correct assemblies for the PowerShell platform

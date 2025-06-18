@@ -45,16 +45,14 @@ try {
 
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-    
+
     if ($psISE) {
         Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
         Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
         exit 1
     }
-        
-    $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-    Set-Location $PSScriptRoot
+    $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
     Write-Host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.Platform), $($PSVersionTable.OS)) | Where-Object {$_}) -join "', '")'"
 
@@ -69,9 +67,7 @@ try {
         }
     }
 
-    Write-Host "  Script path: '$PSCommandPath'"
-
-    if ($IsWindows -or (-not (Test-Path 'variable:IsWindows'))) {
+    if ($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) {
     } else {
         Write-Host "  Your OS: $($PSVersionTable.OS)" -ForegroundColor Red
         Write-Host '  This script is supported on Windows only. Exit.' -ForegroundColor Red

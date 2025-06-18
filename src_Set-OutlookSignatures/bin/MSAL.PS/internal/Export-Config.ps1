@@ -32,9 +32,9 @@ function Export-Config {
 
     ## Read configuration file
     $ModuleConfigPersistent = $null
-    if (Test-Path $Path) {
+    if (Test-Path -LiteralPath $Path) {
         ## Load from File
-        $ModuleConfigPersistent = Get-Content $Path -Raw | ConvertFrom-Json
+        $ModuleConfigPersistent = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
     }
     if (!$ModuleConfigPersistent) { $ModuleConfigPersistent = [PSCustomObject]@{} }
 
@@ -51,5 +51,5 @@ function Export-Config {
 
     ## Export persistent configuration to file
     Assert-DirectoryExists $AppDataDirectory
-    ConvertTo-Json $ModuleConfigPersistent | Set-Content $Path
+    ConvertTo-Json $ModuleConfigPersistent | Set-Content -LiteralPath $Path
 }

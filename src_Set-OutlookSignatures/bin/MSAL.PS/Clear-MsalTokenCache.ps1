@@ -20,7 +20,7 @@ function Clear-MsalTokenCache {
 
     if ($FromDisk) {
         $TokenCachePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\MSAL.PS\MSAL.PS.msalcache.bin3')
-        if (Test-Path $TokenCachePath) { Remove-Item -LiteralPath $TokenCachePath -Force }
+        if (Test-Path -LiteralPath $TokenCachePath) { Remove-Item -LiteralPath $TokenCachePath -Force }
     } else {
         $script:PublicClientApplications = New-Object 'System.Collections.Generic.List[Microsoft.Identity.Client.IPublicClientApplication]'
         $script:ConfidentialClientApplications = New-Object 'System.Collections.Generic.List[Microsoft.Identity.Client.IConfidentialClientApplication]'

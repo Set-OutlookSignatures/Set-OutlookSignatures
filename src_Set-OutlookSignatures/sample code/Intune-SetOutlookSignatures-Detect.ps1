@@ -1,12 +1,15 @@
 ﻿<#
-This sample code shows how to use Intune detect and remediation scripts to deploy and regularly run Set-OutlookSignatures.
+This sample code shows how to use Intune detect and remediation scripts to deploy
+and regularly run Set-OutlookSignatures.
 
-See FAQ 'How can I deploy and run Set-OutlookSignatures using Microsoft Intune?' in '.\docs\README' for details
+See FAQ 'How can I deploy and run Set-OutlookSignatures using Microsoft Intune?'
+at https://set-outlooksignatures.com/faq for details
 
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting offers fee-based support for this and other open source code:
+https://set-outlooksignatures.com/support
 #>
 
 
@@ -30,9 +33,7 @@ if ($psISE) {
 
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-Set-Location $PSScriptRoot
-
-$logFile = (Get-ChildItem -Path $(Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs') -ChildPath $('Set-OutlookSignatures_Log_*.txt')) -File -Force -ErrorAction SilentlyContinue | Sort-Object -Culture 127 -Property $_.CreationTime | Select-Object -Last 1).FullName
+$logFile = (Get-ChildItem $(Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs') -ChildPath $('Set-OutlookSignatures_Log_*.txt')) -File -Force -ErrorAction SilentlyContinue | Sort-Object -Culture 127 -Property $_.CreationTime | Select-Object -Last 1).FullName
 
 If ((-not $logFile) -or (-not (Test-Path -LiteralPath $logFile))) {
     Write-Host 'Log file not found, Set-OutlookSignatures has not yet run.'

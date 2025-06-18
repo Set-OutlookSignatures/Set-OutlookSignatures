@@ -1,12 +1,15 @@
 ﻿<#
-This sample code shows how to use Intune detect and remediation scripts to deploy and regularly run Set-OutlookSignatures.
+This sample code shows how to use Intune detect and remediation scripts to deploy
+and regularly run Set-OutlookSignatures.
 
-See FAQ 'How can I deploy and run Set-OutlookSignatures using Microsoft Intune?' in '.\docs\README' for details
+See FAQ 'How can I deploy and run Set-OutlookSignatures using Microsoft Intune?'
+at https://set-outlooksignatures.com/faq for details
 
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting offers fee-based support for this and other open source code:
+https://set-outlooksignatures.com/support
 #>
 
 
@@ -53,18 +56,16 @@ if ($psISE) {
 
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-Set-Location $PSScriptRoot
-
 
 try {
     if (-not [string]::IsNullOrWhiteSpace($VersionToUse)) {
         # Get currently installed version
         $currentVersion = $null
 
-        if (-not (Test-Path $SoftwarePath)) {
+        if (-not (Test-Path -LiteralPath $SoftwarePath)) {
             New-Item -Path $SoftwarePath -ItemType Directory
         } else {
-            if ((Test-Path (Join-Path -Path $SoftwarePath -ChildPath 'docs\releases.txt'))) {
+            if ((Test-Path -LiteralPath (Join-Path -Path $SoftwarePath -ChildPath 'docs\releases.txt'))) {
                 try {
                     $currentVersion = @(Get-Content -LiteralPath (Join-Path -Path $SoftwarePath -ChildPath 'docs\releases.txt') | Where-Object { $_ })[-1]
                 } catch {
@@ -88,7 +89,7 @@ try {
                 Invoke-WebRequest -Uri "https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/download/$($VersionToUse)/Set-OutlookSignatures_$($VersionToUse).zip" -UseBasicParsing -OutFile $tempFile
             } catch {
                 Write-Host $error[0]
-    
+
                 Write-Host "Error accessing '$("https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/download/$($VersionToUse)/Set-OutlookSignatures_$($VersionToUse).zip")'."
                 Write-Host "Variable '`$VersionToUse' might not be defined correctly (current value: '$($VersionToUse)')."
 
@@ -108,12 +109,12 @@ try {
                 $dest = $(Join-Path -Path $SoftwarePath -ChildPath ($_.FullName -ireplace "^$([regex]::escape("Set-OutlookSignatures_$($VersionToUse)/"))"))
 
                 if ($_.FullName.EndsWith('/')) {
-                    if (-not (Test-Path $dest)) {
+                    if (-not (Test-Path -LiteralPath $dest)) {
                         $null = New-Item -Path $dest -ItemType Directory -Force
                     }
                 } else {
-                    if (-not (Test-Path (Split-Path $dest -Parent))) {
-                        $null = New-Item -Path (Split-Path $dest -Parent) -ItemType Directory -Force
+                    if (-not (Test-Path -LiteralPath (Split-Path -LiteralPath $dest))) {
+                        $null = New-Item -Path (Split-Path -LiteralPath $dest) -ItemType Directory -Force
                     }
 
                     [IO.Compression.ZipFileExtensions]::ExtractToFile($_, $dest, $true)
@@ -125,7 +126,7 @@ try {
             Remove-Item -LiteralPath $tempFile -Force
 
             if (-not $IsLinux) {
-                Get-ChildItem $SoftwarePath -Recurse | Unblock-File
+                Get-ChildItem -LiteralPath $SoftwarePath -Recurse | Unblock-File
             }
         }
     }
