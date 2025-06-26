@@ -70,7 +70,7 @@ if ($PSVersionTable.PSEdition -eq 'Core') {
         $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
     }
 } elseif ($PSVersionTable.PSEdition -eq 'Desktop') {
-    foreach ($Path in @(@($ModuleManifest.FileList -ilike '*\netstandard2.0\Microsoft.Identity*.dll') | Where-Object { $_ -inotlike '*\netstandard2.0\Microsoft.Identity.Client.Desktop.dll' })) {
+    foreach ($Path in @($ModuleManifest.FileList -ilike '*\netstandard2.0\Microsoft.Identity*.dll')) {
         $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
     }
 }

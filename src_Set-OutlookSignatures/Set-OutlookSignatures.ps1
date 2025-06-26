@@ -2628,7 +2628,7 @@ end tell
                         Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) INI index #$($Enumerator)) found in INI but not in signature template path." -ForegroundColor Yellow
                     }
 
-                    if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotlike "*.$(if($UseHtmTemplates){'htm'}else{'docx'})")) {
+                    if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotlike "*.$(if($UseHtmTemplates){'htm'} else {'docx'})")) {
                         Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) INI index #$($Enumerator)) has the wrong file extension ('-UseHtmTemplates true' allows .htm, else .docx)" -ForegroundColor Yellow
                     }
                 }
@@ -2638,7 +2638,7 @@ end tell
 
             foreach ($TemplateFile in $TemplateFiles) {
                 if ($TemplateFile.name -inotin $x) {
-                    Write-Host "    '$($TemplateFile.name)' found in $($SigOrOOF) template path but not in ini." -ForegroundColor Yellow
+                    Write-Host "    '$($TemplateFile.name)' found in $($SigOrOOF) template path but not in INI file." -ForegroundColor Yellow
                 }
             }
 
@@ -6849,7 +6849,7 @@ $CheckPathScriptblock = {
                 ) | ForEach-Object {
                     Write-Verbose "      Query: '$($_)'"
 
-                    $siteId = (GraphGenericQuery -method 'Get' -uri $_ -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null).result.id
+                    $siteId = (GraphGenericQuery -method GET -uri $_ -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null).result.id
 
                     Write-Verbose "      siteId: $($siteID)"
                 }
@@ -6861,7 +6861,7 @@ $CheckPathScriptblock = {
                     Write-Verbose '    Get DocLib drive ID'
 
                     "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/sites/$($siteId)/drives" | ForEach-Object {
-                        $docLibDriveIdQueryResult = (GraphGenericQuery -method 'Get' -uri $_ -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null).result.value
+                        $docLibDriveIdQueryResult = (GraphGenericQuery -method GET -uri $_ -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null).result.value
                         $docLibDriveId = ($docLibDriveIdQueryResult | Where-Object {
                                 $_.webUrl -ieq $(
                                     if ($CheckPathPathSplitbySlash[2] -iin @('sites', 'teams')) {
@@ -6884,7 +6884,7 @@ $CheckPathScriptblock = {
 
                     if ($docLibDriveId) {
                         Write-Verbose '      Get DocLib drive items'
-                        $docLibDriveItems = (GraphGenericQuery -method 'Get' -uri "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/drives/$($docLibDriveId)/list/items?`$expand=DriveItem" -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null).result.value
+                        $docLibDriveItems = (GraphGenericQuery -method GET -uri "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/drives/$($docLibDriveId)/list/items?`$expand=DriveItem" -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null).result.value
 
                         $tempDir = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
                         $null = New-Item $tempDir -ItemType Directory
@@ -7593,9 +7593,9 @@ function GraphGetToken {
 
             $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -TenantId $script:GraphTenantId | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
-            $auth = $script:msalClientApp | Get-MsalToken -IntegratedWindowsAuth -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 1)
+            $auth = $script:msalClientApp | Get-MsalToken -IntegratedWindowsAuth -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" } else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 1)
 
-            Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+            Write-Host "$($indent)      Success: '$(($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username)'"
         } catch {
             Write-Host "$($indent)      Failed: $($error[0])"
 
@@ -7608,18 +7608,18 @@ function GraphGetToken {
                 $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -TenantId $script:GraphTenantId | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
                 if (-not $EXO) {
-                    $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+                    $script:GraphUser = ($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username
                 }
 
                 Write-Host "$($indent)      Login hint: '$($script:GraphUser)'"
 
                 if (-not ([string]::IsNullOrWhiteSpace($script:GraphUser))) {
-                    $auth = $script:msalClientApp | Get-MsalToken -IntegratedWindowsAuth -LoginHint $script:GraphUser -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 1)
+                    $auth = $script:msalClientApp | Get-MsalToken -IntegratedWindowsAuth -LoginHint $script:GraphUser -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" } else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 1)
                 } else {
                     throw 'No login hint found before'
                 }
 
-                Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                Write-Host "$($indent)      Success: '$(($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username)'"
             } catch {
                 Write-Host "$($indent)      Failed: $($error[0])"
 
@@ -7648,9 +7648,9 @@ function GraphGetToken {
 
                     $script:msalClientApp = New-MsalClientApplication -AuthenticationBroker -ClientId $GraphClientID -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -TenantId $script:GraphTenantId | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
-                    $auth = $script:msalClientApp | Get-MsalToken -Silent -AuthenticationBroker -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
+                    $auth = $script:msalClientApp | Get-MsalToken -Silent -AuthenticationBroker -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" } else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
 
-                    Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                    Write-Host "$($indent)      Success: '$(($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username)'"
                 } catch {
                     Write-Host "$($indent)      Failed: $($error[0])"
 
@@ -7676,18 +7676,18 @@ function GraphGetToken {
                         $script:msalClientApp = New-MsalClientApplication -AuthenticationBroker -ClientId $GraphClientID -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -TenantId $script:GraphTenantId | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
                         if (-not $EXO) {
-                            $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+                            $script:GraphUser = ($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username
                         }
 
                         Write-Host "$($indent)      Login hint: '$($script:GraphUser)'"
 
                         if (-not ([string]::IsNullOrWhiteSpace($script:GraphUser))) {
-                            $auth = $script:msalClientApp | Get-MsalToken -Silent -AuthenticationBroker -LoginHint $script:GraphUser -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
+                            $auth = $script:msalClientApp | Get-MsalToken -Silent -AuthenticationBroker -LoginHint $script:GraphUser -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" } else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
                         } else {
                             throw 'No login hint found before'
                         }
 
-                        Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                        Write-Host "$($indent)      Success: '$(($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username)'"
                     } catch {
                         Write-Host "$($indent)      Failed: $($error[0])"
 
@@ -7697,18 +7697,18 @@ function GraphGetToken {
                             $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -TenantId $script:GraphTenantId -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
                             if (-not $EXO) {
-                                $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+                                $script:GraphUser = ($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username
                             }
 
                             Write-Host "$($indent)      Login hint: '$($script:GraphUser)'"
 
                             if (-not ([string]::IsNullOrWhiteSpace($script:GraphUser))) {
-                                $auth = $script:msalClientApp | Get-MsalToken -Silent -LoginHint $script:GraphUser -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
+                                $auth = $script:msalClientApp | Get-MsalToken -Silent -LoginHint $script:GraphUser -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" } else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -ForceRefresh -Timeout (New-TimeSpan -Minutes 1)
                             } else {
                                 throw 'No login hint found before'
                             }
 
-                            Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                            Write-Host "$($indent)      Success: '$(($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username)'"
                         } catch {
                             Write-Host "$($indent)      Failed: $($error[0])"
 
@@ -7717,7 +7717,7 @@ function GraphGetToken {
                             # Interactive authentication methods
                             Write-Host "$($indent)    All silent authentication methods failed, switching to interactive authentication methods."
 
-                            if (-not [string]::IsNullOrWhitespace($GraphHtmlMessageboxText)) {
+                            if ((-not $EXO) -and (-not [string]::IsNullOrWhitespace($GraphHtmlMessageboxText))) {
                                 if ($IsWindows -and (-not (Test-Path -LiteralPath env:SSH_CLIENT))) {
                                     Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
 
@@ -7809,15 +7809,15 @@ function GraphGetToken {
                                 $script:msalClientApp = New-MsalClientApplication -AuthenticationBroker -ClientId $GraphClientID -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -TenantId $script:GraphTenantId | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
                                 if (-not $EXO) {
-                                    $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+                                    $script:GraphUser = ($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username
                                 }
 
                                 Write-Host "$($indent)      Login hint: '$($script:GraphUser)'"
 
                                 Write-Host "$($indent)      Opening authentication broker window and waiting for you to authenticate. Stopping script execution after five minutes."
-                                $auth = $script:msalClientApp | Get-MsalToken -Interactive -AuthenticationBroker -LoginHint $(if ($script:GraphUser) { $script:GraphUser } else { '' }) -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
+                                $auth = $script:msalClientApp | Get-MsalToken -Interactive -AuthenticationBroker -LoginHint $(if ($script:GraphUser) { $script:GraphUser } else { '' }) -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" } else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
 
-                                Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                                Write-Host "$($indent)      Success: '$(($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username)'"
                             } catch {
                                 Write-Host "$($indent)      Failed: $($error[0])"
 
@@ -7827,15 +7827,15 @@ function GraphGetToken {
                                     $script:msalClientApp = New-MsalClientApplication -ClientId $GraphClientID -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -TenantId $script:GraphTenantId -RedirectUri 'http://localhost' | Enable-MsalTokenCacheOnDisk -PassThru -WarningAction SilentlyContinue
 
                                     if (-not $EXO) {
-                                        $script:GraphUser = ($script:msalClientApp | get-msalaccount | Select-Object -First 1).username
+                                        $script:GraphUser = ($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username
                                     }
 
                                     Write-Host "$($indent)      Login hint: '$($script:GraphUser)'"
 
                                     Write-Host "$($indent)      Opening new browser window and waiting for you to authenticate. Stopping script execution after five minutes."
-                                    $auth = $script:msalClientApp | Get-MsalToken -Interactive -LoginHint $(if ($script:GraphUser) { $script:GraphUser } else { '' }) -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" }else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
+                                    $auth = $script:msalClientApp | Get-MsalToken -Interactive -LoginHint $(if ($script:GraphUser) { $script:GraphUser } else { '' }) -AzureCloudInstance $script:CloudEnvironmentEnvironmentName -Scopes $(if (-not $EXO) { "$($script:CloudEnvironmentGraphApiEndpoint)/.default" } else { "$($script:CloudEnvironmentExchangeOnlineEndpoint)/.default" }) -Timeout (New-TimeSpan -Minutes 5) -Prompt 'NoPrompt' -UseEmbeddedWebView:$false @MsalInteractiveParams
 
-                                    Write-Host "$($indent)      Success: '$(($script:msalClientApp | get-msalaccount | Select-Object -First 1).username)'"
+                                    Write-Host "$($indent)      Success: '$(($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username)'"
                                 } catch {
                                     Write-Host "$($indent)      Failed: $($error[0])"
                                     Write-Host '$($indent)    No authentication possible'
@@ -9442,7 +9442,7 @@ try {
         $TranscriptFullName = Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs') -ChildPath $("Set-OutlookSignatures_Log_$(Get-Date $([DateTime]::UtcNow) -Format FileDateTimeUniversal).txt")
         $TranscriptFullName = (Start-Transcript -LiteralPath $TranscriptFullName -Force).Path
 
-        "This folder contains log files generated by Set-OutlookSignatures.$([Environment]::NewLine)Each file is named according to the pattern ""Set-OutlookSignatures_Log_yyyyMMddTHHmmssffffZ.txt"".$([Environment]::NewLine)Files older than 14 days are automatically deleted with each execution of Set-OutlookSignatures." | Out-File -LiteralPath $(Join-Path -Path (Split-Path -LiteralPath $TranscriptFullName) -ChildPath '_README.txt') -Encoding utf8 -Force
+        "This folder contains log files generated by Set-OutlookSignatures.$([Environment]::NewLine)$([Environment]::NewLine)Each file is named according to the pattern 'Set-OutlookSignatures_Log_yyyyMMddTHHmmssffffZ.txt'.$([Environment]::NewLine)$([Environment]::NewLine)Files older than 14 days are automatically deleted with each execution of Set-OutlookSignatures.$([Environment]::NewLine)$([Environment]::NewLine)Ignore log lines starting with 'PS>TerminatingError' or '>> TerminatingError' unless instructed otherwise." | Out-File -LiteralPath $(Join-Path -Path (Split-Path -LiteralPath $TranscriptFullName) -ChildPath '_README.txt') -Encoding utf8 -Force
     } catch {
         $TranscriptFullName = $null
     }
@@ -9453,6 +9453,7 @@ try {
 
     if ($TranscriptFullName) {
         Write-Host "  Log file: '$TranscriptFullName'"
+        Write-Host "    Ignore log lines starting with 'PS>TerminatingError' or '>> TerminatingError' unless instructed otherwise."
 
         try {
             Get-ChildItem -LiteralPath $(Split-Path -LiteralPath $TranscriptFullName) -File -Force | Where-Object { $_.CreationTime -lt (Get-Date).AddDays(-14) } | ForEach-Object {

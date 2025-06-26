@@ -142,7 +142,6 @@ MSAL.NET (Microsoft.Identity.Client) is an authentication library which enables 
     '.\internal\TokenCacheHelper.cs',
     '.\internal\Write-HostPrompt.ps1',
     '.\netstandard2.0\Microsoft.Identity.Client.Broker.dll',
-    '.\netstandard2.0\Microsoft.Identity.Client.Desktop.dll',
     '.\netstandard2.0\Microsoft.Identity.Client.dll',
     '.\netstandard2.0\Microsoft.Identity.Client.Extensions.Msal.dll',
     '.\netstandard2.0\Microsoft.Identity.Client.NativeInterop.dll',

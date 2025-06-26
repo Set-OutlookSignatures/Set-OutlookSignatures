@@ -21,6 +21,20 @@
   - <Active present tense verb> XXX
 -->
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.1" target="_blank">v4.20.1</a> - 2025-06-26
+
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactorcircle) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- Update dependency MSAL.Net to v4.73.1.
+- Update Outlook add-in dependency @azure-msalbrowser to v4.13.2.
+### Added
+### Removed
+### Fixed
+- Fix a logical error in the code for the '`DeleteScriptCreatedSignaturesWithoutTemplate'` parameter which made the cleanup stop before any work was done. This error only occurred when the parameter was enabled, which it is by default.
+- Fix a logical error in the code for the '`DeleteUserCreatedSignatures`' parameter which deleted all signatures instead of only user-created ones. This error only occurred when the parameters was enabled, which it is not by default.
+
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.0" target="_blank">v4.20.0</a> - 2025-06-18
 

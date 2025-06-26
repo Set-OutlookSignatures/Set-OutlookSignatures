@@ -99,21 +99,19 @@ function New-MsalClientApplication {
             }
 
             if ($PSBoundParameters.ContainsKey('EnableExperimentalFeatures')) { [void] $ClientApplicationBuilder.WithExperimentalFeatures($EnableExperimentalFeatures) }  # Must be called before other experimental features
-            #if ($script:ModuleState.UseWebView2) { [void] [Microsoft.Identity.Client.Desktop.DesktopExtensions]::WithDesktopFeatures($ClientApplicationBuilder) }
             if ($RedirectUri) { [void] $ClientApplicationBuilder.WithRedirectUri($RedirectUri.AbsoluteUri) }
             elseif (!$PublicClientOptions -or !$PublicClientOptions.RedirectUri) {
                 if ($script:ModuleState.UseWebView2) { [void] $ClientApplicationBuilder.WithRedirectUri('https://login.microsoftonline.com/common/oauth2/nativeclient') }
                 else { [void] $ClientApplicationBuilder.WithDefaultRedirectUri() }
             }
             if ($PSBoundParameters.ContainsKey('AuthenticationBroker') -and $AuthenticationBroker) {
-                #if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') { [void] [Microsoft.Identity.Client.Desktop.WamExtension]::WithWindowsBroker($ClientApplicationBuilder, $AuthenticationBroker) }
-                #else { [void] $ClientApplicationBuilder.WithBroker($AuthenticationBroker) }
                 $allOperatingSystems = [enum]::GetValues([Microsoft.Identity.Client.BrokerOptions+OperatingSystems])
                 $combinedOperatingSystems = 0
                 foreach ($os in $allOperatingSystems) {
                     $combinedOperatingSystems = $combinedOperatingSystems -bor $os
                 }
                 $AuthenticationBrokerOptions = [Microsoft.Identity.Client.BrokerOptions]::new($combinedOperatingSystems)
+                $AuthenticationBrokerOptions.Title = "Set-OutlookSignatures broker authentication"
                 [void] [Microsoft.Identity.Client.Broker.BrokerExtension]::WithBroker($ClientApplicationBuilder, $AuthenticationBrokerOptions)
             }
 

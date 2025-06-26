@@ -264,28 +264,98 @@ function Get-MsalToken {
       'PublicClient*' {
         if ($PSBoundParameters.ContainsKey('UserCredential') -and $UserCredential) {
           $AquireTokenParameters = $PublicClientApplication.AcquireTokenByUsernamePassword($Scopes, $UserCredential.UserName, $UserCredential.Password)
-        } elseif ($PSBoundParameters.ContainsKey('DeviceCode') -and $DeviceCode -or ($Interactive -and !$script:ModuleFeatureSupport.WebView1Support -and !$script:ModuleFeatureSupport.WebView2Support -and $PublicClientApplication.AppConfig.RedirectUri -ne 'http://localhost/') -or ($Interactive -and !$script:ModuleFeatureSupport.WebView1Support -and $PublicClientApplication.AppConfig.RedirectUri -eq 'urn:ietf:wg:oauth:2.0:oob')) {
+        } elseif (($PSBoundParameters.ContainsKey('DeviceCode') -and $DeviceCode) -or ($PSBoundParameters.ContainsKey('Interactive') -and $Interactive -and !$script:ModuleFeatureSupport.WebView1Support -and !$script:ModuleFeatureSupport.WebView2Support -and ([uri]$PublicClientApplication.AppConfig.RedirectUri).AbsoluteUri -ine 'http://localhost/') -or ($PSBoundParameters.ContainsKey('Interactive') -and $Interactive -and !$script:ModuleFeatureSupport.WebView1Support -and $PublicClientApplication.AppConfig.RedirectUri -ieq 'urn:ietf:wg:oauth:2.0:oob')) {
           $AquireTokenParameters = $PublicClientApplication.AcquireTokenWithDeviceCode($Scopes, [DeviceCodeHelper]::GetDeviceCodeResultCallback())
         } elseif ($PSBoundParameters.ContainsKey('Interactive') -and $Interactive) {
           $AquireTokenParameters = $PublicClientApplication.AcquireTokenInteractive($Scopes)
-          [IntPtr] $ParentWindow = [System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle
-          if ($ParentWindow -eq [System.IntPtr]::Zero -and [System.Environment]::OSVersion.Platform -eq 'Win32NT') {
-            Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
 
-            $InteractiveAuthTopLevelParentWindow = New-Object System.Windows.Window -Property @{
-              Width                 = 1
-              Height                = 1
-              WindowStartupLocation = [System.Windows.WindowStartupLocation]::CenterScreen
-              ShowActivated         = $false
-              Topmost               = $true
+          if ($IsWindows) {
+            [IntPtr] $ParentWindow = [System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle
+
+            if ($ParentWindow -eq [System.IntPtr]::Zero) {
+              Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
+
+              $InteractiveAuthTopLevelParentWindow = New-Object System.Windows.Window -Property @{
+                Width                 = 1
+                Height                = 1
+                WindowStartupLocation = [System.Windows.WindowStartupLocation]::CenterScreen
+                ShowActivated         = $false
+                Topmost               = $true
+              }
+
+              $InteractiveAuthTopLevelParentWindow.Show()
+              $InteractiveAuthTopLevelParentWindow.Hide()
+
+              [IntPtr] $ParentWindow = [System.Windows.Interop.WindowInteropHelper]::new($InteractiveAuthTopLevelParentWindow).Handle
             }
 
-            $InteractiveAuthTopLevelParentWindow.Show()
-            $InteractiveAuthTopLevelParentWindow.Hide()
+            if ($ParentWindow -ne [System.IntPtr]::Zero) { [void] $AquireTokenParameters.WithParentActivityOrWindow($ParentWindow) }
+          } elseif ($IsMacOS) {
+            $objcCode = @'
+using System;
+using System.Runtime.InteropServices;
 
-            [IntPtr] $ParentWindow = [System.Windows.Interop.WindowInteropHelper]::new($InteractiveAuthTopLevelParentWindow).Handle
+public class MacInterop {
+    [DllImport("/usr/lib/libobjc.A.dylib", EntryPoint = "objc_getClass")]
+    public static extern IntPtr objc_getClass(string className);
+
+    [DllImport("/usr/lib/libobjc.A.dylib", EntryPoint = "sel_registerName")]
+    public static extern IntPtr sel_registerName(string selectorName);
+
+    [DllImport("/usr/lib/libobjc.A.dylib", EntryPoint = "objc_msgSend")]
+    public static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector);
+
+    public static IntPtr GetMainWindowHandle() {
+        IntPtr nsAppClass = objc_getClass("NSApplication");
+        IntPtr sharedAppSel = sel_registerName("sharedApplication");
+        IntPtr mainWindowSel = sel_registerName("mainWindow");
+
+        IntPtr nsApp = objc_msgSend(nsAppClass, sharedAppSel);
+        IntPtr mainWindow = objc_msgSend(nsApp, mainWindowSel);
+
+        return mainWindow;
+    }
+}
+'@
+
+            Add-Type -TypeDefinition $objcCode -Language CSharp
+            [IntPtr] $ParentWindow = [MacInterop]::GetMainWindowHandle()
+
+            if ($ParentWindow -ne [System.IntPtr]::Zero) {
+              [void] $AquireTokenParameters.WithParentActivityOrWindow($ParentWindow)
+            }
+          } elseif ($IsLinux) {
+            $x11Code = @'
+using System;
+using System.Runtime.InteropServices;
+
+public class X11Interop {
+    [DllImport("libX11")]
+    public static extern IntPtr XOpenDisplay(IntPtr display);
+
+    [DllImport("libX11")]
+    public static extern IntPtr XDefaultRootWindow(IntPtr display);
+
+    public static IntPtr GetRootWindow() {
+        IntPtr display = XOpenDisplay(IntPtr.Zero);
+        if (display == IntPtr.Zero) {
+            return IntPtr.Zero;
+        }
+        return XDefaultRootWindow(display);
+    }
+}
+'@
+
+            Add-Type -TypeDefinition $x11Code -Language CSharp
+
+            [IntPtr] $ParentWindow = [X11Interop]::GetRootWindow()
+
+            if ($ParentWindow -ne [System.IntPtr]::Zero) {
+              [void] $AquireTokenParameters.WithParentActivityOrWindow($ParentWindow)
+            }
           }
-          if ($ParentWindow -ne [System.IntPtr]::Zero) { [void] $AquireTokenParameters.WithParentActivityOrWindow($ParentWindow) }
+
+
           #if ($Account) { [void] $AquireTokenParameters.WithAccount($Account) }
           if ($extraScopesToConsent) { [void] $AquireTokenParameters.WithExtraScopesToConsent($extraScopesToConsent) }
           if ($LoginHint) { [void] $AquireTokenParameters.WithLoginHint($LoginHint) }
@@ -323,10 +393,10 @@ function Get-MsalToken {
           $AquireTokenParameters = $PublicClientApplication.AcquireTokenByIntegratedWindowsAuth($Scopes)
           if ($LoginHint) { [void] $AquireTokenParameters.WithUsername($LoginHint) }
         } elseif ($PSBoundParameters.ContainsKey('Silent') -and $Silent) {
-          if ($LoginHint) {
+          if ($PSBoundParameters.ContainsKey('LoginHint') -and $LoginHint) {
             $AquireTokenParameters = $PublicClientApplication.AcquireTokenSilent($Scopes, $LoginHint)
           } else {
-            if ($AuthenticationBroker) {
+            if ($PSBoundParameters.ContainsKey('AuthenticationBroker') -and $AuthenticationBroker) {
               [Microsoft.Identity.Client.IAccount] $Account = [Microsoft.Identity.Client.PublicClientApplication]::OperatingSystemAccount
             } else {
               [Microsoft.Identity.Client.IAccount] $Account = $PublicClientApplication.GetAccountsAsync().GetAwaiter().GetResult() | Select-Object -First 1
