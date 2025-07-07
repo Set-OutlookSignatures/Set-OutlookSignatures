@@ -21,7 +21,7 @@
   - <Active present tense verb> XXX
 -->
 
-## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.2" target="_blank">v4.12.2</a> - 2025-07-07
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.2" target="_blank">v4.20.2</a> - 2025-07-08
 
 _**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactorcircle) for details about these features and how you can benefit from them with a Benefactor Circle license._
