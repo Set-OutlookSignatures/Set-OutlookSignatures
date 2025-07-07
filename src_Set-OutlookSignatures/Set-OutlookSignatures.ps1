@@ -52,7 +52,7 @@ License : See '.\LICENSE.txt' for details and copyright
 [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'Z: All parameters')]
 
 
-Param(
+param(
     # Path to a Benefactor Circle license file
     [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
@@ -438,7 +438,7 @@ function CheckFilenamePossiblyInvalid ([string] $Filename = '', [bool] $CheckOut
 
     # Outlook GUI
     if ($CheckOutlook) {
-        $InvalidCharacters += @(($Filename | Select-String -Pattern "[$([regex]::escape('\/:"*?><,|'))]" -AllMatches).Matches.Value) | Where-Object { $_ }
+        $InvalidCharacters += @(($Filename | Select-String -Pattern "[$([regex]::escape('\/:"*?><,|@'))]" -AllMatches).Matches.Value) | Where-Object { $_ }
     }
 
     # Windows reserved file names and device names (CON, PRN, AUX, COMx, LPTx, …)
@@ -448,7 +448,7 @@ function CheckFilenamePossiblyInvalid ([string] $Filename = '', [bool] $CheckOut
         }
     }
 
-    $InvalidCharacters = @(@($InvalidCharacters | Select-Object -Unique | Where-Object { $_ } | Sort-Object -Culture 127) | ForEach-Object { "'$($_)'" })
+    $InvalidCharacters = @(@($InvalidCharacters | Select-Object -Unique | Where-Object { $_ } | Sort-Object -Culture 127))
 
     if ($InvalidCharacters) {
         return $InvalidCharacters -join ', '
@@ -1721,7 +1721,7 @@ end tell
                 if ($OutlookFileVersion -ge '16.0.0.0') {
                     $MailAddresses += ($RegistryFolder.'Account Name').ToLower()
                 } else {
-                    $MailAddresses += (@(ForEach ($char in @(($RegistryFolder.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '').ToLower()
+                    $MailAddresses += (@(foreach ($char in @(($RegistryFolder.'Account Name' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join '').ToLower()
                 }
 
                 $RegistryPaths += $RegistryFolder.PSPath
@@ -2519,7 +2519,7 @@ end tell
                 try { WatchCatchableExitSignal } catch { }
 
                 try {
-                    @(@(([regex]::Matches((@(ForEach ($char in @(($RegistryFolder.'11020458' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join ''), (@(@($MailAddressesToSearch) | ForEach-Object { [Regex]::Escape($_) }) -join '|'), [System.Text.RegularExpressions.RegexOptions]::IgnoreCase).captures.value).tolower()) | Select-Object -Unique) | ForEach-Object {
+                    @(@(([regex]::Matches((@(foreach ($char in @(($RegistryFolder.'11020458' -join ',').Split(',', [System.StringSplitOptions]::RemoveEmptyEntries) | Where-Object { $_ -gt '0' })) { [char][int]"$($char)" }) -join ''), (@(@($MailAddressesToSearch) | ForEach-Object { [Regex]::Escape($_) }) -join '|'), [System.Text.RegularExpressions.RegexOptions]::IgnoreCase).captures.value).tolower()) | Select-Object -Unique) | ForEach-Object {
                         $CurrentOutlookProfileMailboxSortOrder += $MailAddressesToSearchLookup[$_]
                     }
                 } catch {
@@ -2671,7 +2671,7 @@ end tell
                 $TemplateFiles = @($TemplateFiles[$TemplateFilesSortOrder] | Select-Object -Property fullname, name, TemplateIniSettingsIndex)
 
                 if ($TemplateFiles.count -gt 0) {
-                    foreach ($index In 0..($TemplateFiles.Count - 1)) {
+                    foreach ($index in 0..($TemplateFiles.Count - 1)) {
                         $TemplateFiles[$index].TemplateIniSettingsIndex = $TemplateFilesIniIndex[$index]
                     }
                 }
@@ -2725,21 +2725,46 @@ end tell
                     Write-Host "      Outlook signature name: '$($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'])'"
 
                     if ((CheckFilenamePossiblyInvalid -Filename $TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'])) {
-                        Write-Host "        Ignore INI entry, signature name is invalid: $((CheckFilenamePossiblyInvalid -Filename $TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']))" -ForegroundColor Yellow
+                        # Write-Host "        Ignore INI entry, signature name is invalid: $((CheckFilenamePossiblyInvalid -Filename $TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']))" -ForegroundColor Yellow
+                        # Continue
 
-                        Continue
+                        Write-Host "        Signature name has invalid characters. Replacing: $((CheckFilenamePossiblyInvalid -Filename $TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']))" -ForegroundColor Yellow
+
+                        $tempOutlookSignatureName = $TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']
+
+                        @(
+                            (CheckFilenamePossiblyInvalid -Filename $TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName']) -split [regex]::Escape(', ')
+                        ) | ForEach-Object {
+                            $tempOutlookSignatureName = $tempOutlookSignatureName -ireplace [regex]::Escape($_), $(if ($_ -eq '@') { '_at_' } else { '_' })
+                        }
+
+                        Write-Host "          '$($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'])' -> '$($tempOutlookSignatureName)'" -ForegroundColor Yellow
+
+                        $TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'] = $tempOutlookSignatureName
                     }
 
                     $TemplateFileTargetName = ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
-
                 } else {
                     if ((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name)) {
-                        Write-Host "      Ignore INI entry, signature name is invalid: $((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name))" -ForegroundColor Yellow
+                        # Write-Host "      Ignore INI entry, signature name is invalid: $((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name))" -ForegroundColor Yellow
+                        # continue
 
-                        Continue
+                        Write-Host "        Signature name has invalid characters. Replacing: $((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name))" -ForegroundColor Yellow
+
+                        $tempOutlookSignatureName = $TemplateFile.Name
+
+                        @(
+                            (CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name) -split [regex]::Escape(', ')
+                        ) | ForEach-Object {
+                            $tempOutlookSignatureName = $tempOutlookSignatureName -ireplace [regex]::Escape($_), $(if ($_ -eq '@') { '_at_' } else { '_' })
+                        }
+
+                        Write-Host "          '$($TemplateFile.Name)' -> '$($tempOutlookSignatureName)'" -ForegroundColor Yellow
+
+                        $TemplateFileTargetName = $tempOutlookSignatureName
+                    } else {
+                        $TemplateFileTargetName = $TemplateFile.Name
                     }
-
-                    $TemplateFileTargetName = $TemplateFile.Name
                 }
             } else {
                 $TemplateFilePart = ''
@@ -3739,7 +3764,7 @@ function ResolveToSid($string) {
         $tempFilterOrder += "(displayName eq '$($local:NTName.Split('\')[1])')"
 
         # Search Graph for groups
-        ForEach ($tempFilter in $tempFilterOrder) {
+        foreach ($tempFilter in $tempFilterOrder) {
             try { WatchCatchableExitSignal } catch { }
 
             $tempResults = (GraphFilterGroups $tempFilter -GraphContext $($local:NTName.split('\')[0].split('_')[1]))
@@ -3752,7 +3777,7 @@ function ResolveToSid($string) {
         }
 
         # Search Graph for users
-        ForEach ($tempFilter in $tempFilterOrder) {
+        foreach ($tempFilter in $tempFilterOrder) {
             try { WatchCatchableExitSignal } catch { }
 
             $tempResults = (GraphFilterUsers $tempFilter -GraphContext $($local:NTName.split('\')[0].split('_')[1]))
@@ -3773,7 +3798,7 @@ function ResolveToSid($string) {
 function GetBitness {
     [CmdletBinding()]
 
-    Param
+    param
     (
         [Parameter(Mandatory = $true, ParameterSetName = 'files', HelpMessage = 'Comma separated list of files to process', ValueFromPipelineByPropertyName = $true)]
         [string[]]$fullname ,
@@ -3786,7 +3811,7 @@ function GetBitness {
         [switch]$dotnetOnly
     )
 
-    Begin {
+    begin {
         try { WatchCatchableExitSignal } catch { }
 
         [int]$MACHINE_OFFSET = 4
@@ -3842,35 +3867,35 @@ function GetBitness {
             'Unmanaged32Bit'              = 'Contains pure unmanaged code'
         }
 
-        If ($PSBoundParameters[ 'folders' ]) {
-            $fullname = @(ForEach ($folder in $folders) {
+        if ($PSBoundParameters[ 'folders' ]) {
+            $fullname = @(foreach ($folder in $folders) {
                     Get-ChildItem -LiteralPath $folder -File -Recurse:$recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
                 })
         }
     }
 
-    Process {
-        ForEach ($file in $fullname) {
-            Try {
+    process {
+        foreach ($file in $fullname) {
+            try {
                 try { WatchCatchableExitSignal } catch { }
                 $runtimeAssembly = [System.Reflection.Assembly]::ReflectionOnlyLoadFrom($file)
-            } Catch {
+            } catch {
                 $runtimeAssembly = $null
             }
 
-            Try {
+            try {
                 try { WatchCatchableExitSignal } catch { }
                 $assembly = [System.Reflection.AssemblyName]::GetAssemblyName($file)
-            } Catch {
+            } catch {
                 $assembly = $null
             }
 
             if ((-not $dotnetOnly) -or ($assembly -and $runtimeAssembly)) {
                 $data = New-Object System.Byte[] 4096
 
-                Try {
+                try {
                     $stream = New-Object System.IO.FileStream -ArgumentList $file, Open, Read
-                } Catch {
+                } catch {
                     $stream = $null
 
                     if (-not $quiet) {
@@ -3878,27 +3903,27 @@ function GetBitness {
                     }
                 }
 
-                If ($stream) {
+                if ($stream) {
                     try { WatchCatchableExitSignal } catch { }
 
                     [uint16]$machineUint = 0xffff
                     [int]$read = $stream.Read($data , 0 , $data.Count)
 
-                    If ($read -gt $PE_POINTER_OFFSET) {
-                        If (($data[0] -eq 0x4d) -and ($data[1] -eq 0x5a)) {
+                    if ($read -gt $PE_POINTER_OFFSET) {
+                        if (($data[0] -eq 0x4d) -and ($data[1] -eq 0x5a)) {
                             ## MZ
                             [int]$PE_HEADER_ADDR = [System.BitConverter]::ToInt32($data, $PE_POINTER_OFFSET)
                             [int]$typeOffset = $PE_HEADER_ADDR + $MACHINE_OFFSET
-                            If ($data[$PE_HEADER_ADDR] -eq 0x50 -and $data[$PE_HEADER_ADDR + 1] -eq 0x45) {
+                            if ($data[$PE_HEADER_ADDR] -eq 0x50 -and $data[$PE_HEADER_ADDR + 1] -eq 0x45) {
                                 ## PE
-                                If ($read -gt $typeOffset + [System.Runtime.InteropServices.Marshal]::SizeOf($machineUint)) {
+                                if ($read -gt $typeOffset + [System.Runtime.InteropServices.Marshal]::SizeOf($machineUint)) {
                                     [uint16]$machineUint = [System.BitConverter]::ToUInt16($data, $typeOffset)
                                     $versionInfo = Get-ItemProperty -LiteralPath $file -ErrorAction SilentlyContinue | Select-Object -ExpandProperty VersionInfo
-                                    If ($runtimeAssembly -and ($module = ($runtimeAssembly.GetModules() | Select-Object -First 1))) {
+                                    if ($runtimeAssembly -and ($module = ($runtimeAssembly.GetModules() | Select-Object -First 1))) {
                                         $pekinds = New-Object -TypeName System.Reflection.PortableExecutableKinds
                                         $imageFileMachine = New-Object -TypeName System.Reflection.ImageFileMachine
                                         $module.GetPEKind([ref]$pekinds, [ref]$imageFileMachine)
-                                    } Else {
+                                    } else {
                                         $pekinds = $null
                                         $imageFileMachine = $null
                                     }
@@ -3908,24 +3933,24 @@ function GetBitness {
                                     [pscustomobject][ordered]@{
                                         'File'                = $file
                                         'Architecture'        = $machineTypes[[int]$machineUint]
-                                        'NET Architecture'    = $(If ($assembly) { $processorAchitectures[$assembly.ProcessorArchitecture.ToString()] } else { 'Not .NET' })
-                                        'NET PE Kind'         = $(If ($pekinds) { if ($explain) { ($pekinds.ToString() -split ',\s?' | ForEach-Object { $pekindsExplanations[$_] }) -join ',' } else { $pekinds.ToString() } }  else { 'Not .NET' })
-                                        'NET Platform'        = $(If ($imageFileMachine) { $processorAchitectures[ $imageFileMachine.ToString() ] } else { 'Not .NET' })
-                                        'NET Runtime Version' = $(If ($runtimeAssembly) { $runtimeAssembly.ImageRuntimeVersion } else { 'Not .NET' })
+                                        'NET Architecture'    = $(if ($assembly) { $processorAchitectures[$assembly.ProcessorArchitecture.ToString()] } else { 'Not .NET' })
+                                        'NET PE Kind'         = $(if ($pekinds) { if ($explain) { ($pekinds.ToString() -split ',\s?' | ForEach-Object { $pekindsExplanations[$_] }) -join ',' } else { $pekinds.ToString() } }  else { 'Not .NET' })
+                                        'NET Platform'        = $(if ($imageFileMachine) { $processorAchitectures[ $imageFileMachine.ToString() ] } else { 'Not .NET' })
+                                        'NET Runtime Version' = $(if ($runtimeAssembly) { $runtimeAssembly.ImageRuntimeVersion } else { 'Not .NET' })
                                         'Company'             = $versionInfo | Select-Object -ExpandProperty CompanyName
                                         'File Version'        = $versionInfo | Select-Object -ExpandProperty FileVersionRaw
                                         'Product Name'        = $versionInfo | Select-Object -ExpandProperty ProductName
                                     }
-                                } Else {
+                                } else {
                                     Write-Verbose "Only read $($data.Count) bytes from '$file' so can't read header at offset $typeOffset"
                                 }
-                            } ElseIf (-not $quiet) {
+                            } elseif (-not $quiet) {
                                 Write-Verbose "'$file' does not have a PE header signature"
                             }
-                        } ElseIf (-not $quiet) {
+                        } elseif (-not $quiet) {
                             Write-Verbose "'$file' is not an executable"
                         }
-                    } ElseIf (-not $quiet) {
+                    } elseif (-not $quiet) {
                         Write-Verbose "Only read $read bytes from '$file', not enough to get header at $PE_POINTER_OFFSET"
                     }
                     $stream.Close()
@@ -3938,7 +3963,7 @@ function GetBitness {
 
 
 function EvaluateAndSetSignatures {
-    Param(
+    param(
         [switch]$ProcessOOF = $false
     )
 
@@ -4258,7 +4283,7 @@ function EvaluateAndSetSignatures {
 
 
 function SetSignatures {
-    Param(
+    param(
         [switch]$ProcessOOF = $false
     )
 
@@ -5563,14 +5588,14 @@ end tell
 
         try { WatchCatchableExitSignal } catch { }
 
-        Foreach ($file in @(Get-ChildItem ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
+        foreach ($file in @(Get-ChildItem ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($path) + '*') -Directory).FullName) {
             Remove-Item -LiteralPath $file -Force -Recurse -ErrorAction SilentlyContinue
         }
 
         try { WatchCatchableExitSignal } catch { }
 
         if ($pathHighResHtml) {
-            Foreach ($file in @(Get-ChildItem ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($pathHighResHtml) + '*') -Directory).FullName) {
+            foreach ($file in @(Get-ChildItem ("$($script:tempDir)\*" + [System.IO.Path]::GetFileNameWithoutExtension($pathHighResHtml) + '*') -Directory).FullName) {
                 Remove-Item -LiteralPath $file -Force -Recurse -ErrorAction SilentlyContinue
             }
         }
@@ -5698,7 +5723,7 @@ function CheckADConnectivity {
         $PowerShell.RunspacePool = $RunspacePool
 
         [void]$PowerShell.AddScript({
-                Param (
+                param (
                     [string]$CheckDomain,
                     [string]$CheckProtocolText
                 )
@@ -5818,9 +5843,9 @@ function ConvertEncoding {
     if ($InString) {
         try {
             $InFileBytes = ([System.Text.UTF8Encoding]::new($false)).GetBytes("$($InString -join [Environment]::NewLine)")
-            Write-Verbose 'InString: Converted to bytes using UTF-8 encoding.'
+            Write-Verbose '  InString: Converted to bytes using UTF-8 encoding.'
         } catch {
-            Write-Verbose "InString: Error converting to bytes: $($_)"
+            Write-Verbose "  InString: Error converting to bytes: $($_)"
             return
         }
     } else {
@@ -5832,16 +5857,16 @@ function ConvertEncoding {
 
                 $InFileBytes = [System.IO.File]::ReadAllBytes($InFile)
 
-                Write-Verbose "InFile: '$($InFile)'"
+                Write-Verbose "  InFile: '$($InFile)'"
             } catch {
-                Write-Verbose "InFile: Error reading '$($InFile)': $($_)"
+                Write-Verbose "  InFile: Error reading '$($InFile)': $($_)"
 
                 Write-Verbose 'ConvertEncoding End'
 
                 return
             }
         } catch {
-            Write-Verbose "InFile: '$($InFile)' not found: $($_)"
+            Write-Verbose "  InFile: '$($InFile)' not found: $($_)"
 
             Write-Verbose 'ConvertEncoding End'
 
@@ -5863,15 +5888,15 @@ function ConvertEncoding {
             }
 
             if (-not ($InEncoding -is [System.Text.Encoding])) {
-                Throw "InEncoding: WebName '$($InEncoding)' not found. Exiting."
+                throw "InEncoding: WebName '$($InEncoding)' not found. Exiting."
             }
         }
     }
 
-    Write-Verbose "InEncoding: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
+    Write-Verbose "  InEncoding: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
 
 
-    Write-Verbose "InIsHtml: $($InIsHtml)"
+    Write-Verbose "  InIsHtml: $($InIsHtml)"
 
 
     if ($OutFile) {
@@ -5882,7 +5907,7 @@ function ConvertEncoding {
                 $OutFile = [System.IO.Path]::GetFullPath((Join-Path -Path (Get-Location) -ChildPath $OutFile))
             }
         } catch {
-            Write-Verbose "OutFile: '$($OutFile)' error: $($_)"
+            Write-Verbose "  OutFile: '$($OutFile)' error: $($_)"
 
             Write-Verbose 'ConvertEncoding End'
 
@@ -5890,7 +5915,7 @@ function ConvertEncoding {
         }
     }
 
-    Write-Verbose "OutFile: '$($OutFile)'"
+    Write-Verbose "  OutFile: '$($OutFile)'"
 
 
     if ($OutEncoding) {
@@ -5907,12 +5932,12 @@ function ConvertEncoding {
             }
 
             if (-not ($OutEncoding -is [System.Text.Encoding])) {
-                Throw "OutEncoding: WebName '$($OutEncoding)' not found. Exiting."
+                throw "OutEncoding: WebName '$($OutEncoding)' not found. Exiting."
             }
         }
     }
 
-    Write-Verbose "OutEncoding: WebName '$($OutEncoding.WebName)', WindowsCodePage '$($OutEncoding.WindowsCodePage)', CodePage '$($OutEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $OutEncoding.GetPreamble() } catch { , @() })))'"
+    Write-Verbose "  OutEncoding: WebName '$($OutEncoding.WebName)', WindowsCodePage '$($OutEncoding.WindowsCodePage)', CodePage '$($OutEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $OutEncoding.GetPreamble() } catch { , @() })))'"
 
 
     # $InEncoding has not been defined, so we detect it
@@ -5939,7 +5964,7 @@ function ConvertEncoding {
             }
         }
 
-        Write-Verbose "InEncoding: BOM: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
+        Write-Verbose "  InEncoding: BOM: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
     }
 
     # No BOM detected, so we need to go deeper
@@ -5980,7 +6005,7 @@ function ConvertEncoding {
                     }
                 }
 
-                Write-Verbose "InEncoding: HTML charset '$($charset)': WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
+                Write-Verbose "  InEncoding: HTML charset '$($charset)': WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
 
 
                 # Fallback: Try to find <meta http-equiv="Content-Type" content="...; charset=...">
@@ -6006,7 +6031,7 @@ function ConvertEncoding {
                     }
                 }
 
-                Write-Verbose "InEncoding: HTML http-equiv content '$($charset)': WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
+                Write-Verbose "  InEncoding: HTML http-equiv content '$($charset)': WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
             }
         }
 
@@ -6016,7 +6041,7 @@ function ConvertEncoding {
 
             $InEncoding = [UtfUnknown.CharsetDetector]::DetectFromBytes($InFileBytes).Detected.Encoding
 
-            Write-Verbose "InEncoding: Heuristics: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
+            Write-Verbose "  InEncoding: Heuristics: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
         }
 
         # BOM has already been checked before, so switch to bomless if possible
@@ -6078,7 +6103,7 @@ function ConvertEncoding {
                 }
             }
 
-            Write-Verbose "InEncoding: To BOM-less: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
+            Write-Verbose "  InEncoding: To BOM-less: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
         }
     }
 
@@ -6086,10 +6111,10 @@ function ConvertEncoding {
     if (-not $InEncoding) {
         $InEncoding = [System.Text.UTF8Encoding]::new($false)
 
-        Write-Verbose "InEncoding: Fallback: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
+        Write-Verbose "  InEncoding: Fallback: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
     }
 
-    Write-Verbose "InEncoding: Final: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
+    Write-Verbose "  InEncoding: Final: WebName '$($InEncoding.WebName)', WindowsCodePage '$($InEncoding.WindowsCodePage)', CodePage '$($InEncoding.CodePage)', Preamble/BOM '$([BitConverter]::ToString($(try{ , $InEncoding.GetPreamble() } catch { , @() })))'"
 
 
     try { WatchCatchableExitSignal } catch { }
@@ -6182,9 +6207,9 @@ function ConvertEncoding {
             # As WriteAllText works with .Net Strings only, the input encoding does not need to be (and can not be) defined
             [System.IO.File]::WriteAllText($OutFile, $OutString, $OutEncoding)
 
-            Write-Verbose "OutFile: Success writing '$($OutFile)'"
+            Write-Verbose "  OutFile: Success writing '$($OutFile)'"
         } catch {
-            Write-Verbose "OutFile: Error writing '$($OutFile)': $($_)"
+            Write-Verbose "  OutFile: Error writing '$($OutFile)': $($_)"
 
             Write-Verbose 'ConvertEncoding End'
 
@@ -6236,7 +6261,7 @@ function ConvertHtmlToPlainText {
             }
 
             if (-not ($OutEncoding -is [System.Text.Encoding])) {
-                Throw "OutEncoding WebName '$($OutEncoding)' not found. Exiting."
+                throw "OutEncoding WebName '$($OutEncoding)' not found. Exiting."
             }
         }
     } else {
@@ -6547,7 +6572,7 @@ function MoveCssInline {
     $PowerShell.RunspacePool = $RunspacePool
 
     [void]$PowerShell.AddScript({
-            Param (
+            param (
                 $HtmlCode,
                 $path
             )
@@ -7021,7 +7046,7 @@ $CheckPathScriptblock = {
                                     Write-Host 'WebClient service not running.' -ForegroundColor Red
                                 }
                             } else {
-                                Try {
+                                try {
                                     if (-not [string]::IsNullOrWhitespace($GraphHtmlMessageboxText)) {
                                         if ($IsWindows -and (-not (Test-Path -LiteralPath env:SSH_CLIENT))) {
                                             Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
@@ -7071,7 +7096,7 @@ $CheckPathScriptblock = {
 
                                     while ($i -lt 1) {
                                         $i += @($app.windows() | Where-Object {
-                                            ([uri]::UnescapeDataString([uri]::UnescapeDataString($_.LocationURL)) -ilike $compareurl)
+                                                ([uri]::UnescapeDataString([uri]::UnescapeDataString($_.LocationURL)) -ilike $compareurl)
                                             }).count
 
                                         Start-Sleep -Seconds 1
@@ -7081,7 +7106,7 @@ $CheckPathScriptblock = {
 
                                     # Wait until the corresponding URL is fully loaded, then close the tab
                                     @($app.windows() | Where-Object {
-                                        ([uri]::UnescapeDataString([uri]::UnescapeDataString($_.LocationURL)) -ilike $compareurl)
+                                            ([uri]::UnescapeDataString([uri]::UnescapeDataString($_.LocationURL)) -ilike $compareurl)
                                         }) | ForEach-Object {
 
                                         while ($_.Busy) {
@@ -9049,7 +9074,7 @@ function GetIniContent ($filePath, $additionalLines) {
     if (
         $(
             try {
-        ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))
+                ((@($local:ini[($local:ini.GetEnumerator().name)] | Where-Object { $_['<Set-OutlookSignatures template>'] -ieq '<Set-OutlookSignatures configuration>' }) | Select-Object -Last 1))
             } catch {
                 $false
             }

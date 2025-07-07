@@ -21,6 +21,23 @@
   - <Active present tense verb> XXX
 -->
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.2" target="_blank">v4.12.2</a> - 2025-07-07
+
+_**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
+_See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactorcircle) for details about these features and how you can benefit from them with a Benefactor Circle license._
+
+### Changed
+- Update dependency PreMailer.Net to v2.7.2.
+- Update Outlook add-in dependency @azure-msalbrowser to v4.14.0.
+### Added
+### Removed
+### Fixed
+- Update handling of the '`@`' character in signatures names. Microsoft no longer allows '`@`' in roaming signature names as it is reserved for internal use, and Microsoft Outlook will follow soon.
+  - Add '`@`' to the list of invalid characters for signatures names as documented in sample INI files. The new complete list of invalid characters is '`\/:"*?><,|@`'.
+  - Convert all invalid characters to '`_`', but '`@`' to '`_at_`'.
+  - Only keep the '`@`' character where it is required for Microsoft internal use in roaming signature names.
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.1" target="_blank">v4.20.1</a> - 2025-06-26
 
 _**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
