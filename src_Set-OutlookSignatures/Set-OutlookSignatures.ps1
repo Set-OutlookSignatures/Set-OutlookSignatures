@@ -1551,7 +1551,12 @@ end tell
             }
 
             $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'thumbnailphoto' -Value (GraphGetUserPhoto $script:GraphUser).photo -Force
-            $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $script:GraphUser).properties.userprincipalname -Force
+
+            if ($AADProps.manager) {
+                $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $script:GraphUser).properties.userprincipalname -Force
+            } else {
+                $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null -Force
+            }
         } else {
             Write-Host "      Problem getting data for '$($script:GraphUser)' from Microsoft Graph. Exit." -ForegroundColor Red
             Write-Host $x.error -ForegroundColor Red
@@ -2079,7 +2084,11 @@ end tell
 
                         try { WatchCatchableExitSignal } catch { }
 
-                        $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).properties.userprincipalname -Force
+                        if ($AADProps.manager) {
+                            $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value (GraphGetUserManager $ADPropsMailboxes[$AccountNumberRunning].userprincipalname).properties.userprincipalname -Force
+                        } else {
+                            $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null -Force
+                        }
 
                         try { WatchCatchableExitSignal } catch { }
 
@@ -5850,7 +5859,7 @@ function ConvertEncoding {
         }
     } else {
         try {
-            $InFile = (Resolve-Path -LiteralPath $InFile).ProviderPath
+            $InFile = [System.IO.Path]::GetFullPath($inFile)
 
             try {
                 try { WatchCatchableExitSignal } catch { }
@@ -5904,7 +5913,7 @@ function ConvertEncoding {
             if ([System.IO.Path]::IsPathRooted($OutFile)) {
                 $OutFile = [System.IO.Path]::GetFullPath($OutFile)
             } else {
-                $OutFile = [System.IO.Path]::GetFullPath((Join-Path -Path (Get-Location) -ChildPath $OutFile))
+                $OutFile = [System.IO.Path]::GetFullPath(($(Join-Path -Path (Get-Location).ProviderPath -ChildPath $OutFile)))
             }
         } catch {
             Write-Verbose "  OutFile: '$($OutFile)' error: $($_)"
@@ -6899,7 +6908,7 @@ $CheckPathScriptblock = {
                         ).id
 
                         Write-Verbose "      Query: '$($_)'"
-                        Write-Verbose "      Return value: '$(ConvertTo-Json $docLibDriveIdQueryResult -Compress -Depth 10)'"
+                        Write-Verbose "      Return value: '$($docLibDriveIdQueryResult | ConvertTo-Json -Compress -Depth 10)'"
                         Write-Verbose "      webUrl: '$([uri]::EscapeUriString($(($CheckPathPath -split '/')[0..5] -join '/')))'"
 
                         Write-Verbose "      docLibDriveId: $docLibDriveId"
@@ -7543,8 +7552,8 @@ function GraphGetToken {
                         continue
                     }
                 }
-
-                $destinationPath = $item.FullName -replace [regex]::escape((Resolve-Path -LiteralPath (Join-Path -Path '.' -ChildPath 'bin\MSAL.PS')).ProviderPath), $script:MsalModulePath
+                
+                $destinationPath = $item.FullName -replace [regex]::escape($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath '\bin\MSAL.PS')))), $script:MsalModulePath
 
                 if ($item.PSIsContainer) {
                     # Create the directory if it doesn't exist
@@ -8302,7 +8311,7 @@ function GraphGetTokenWrapper {
                 GraphSwitchContext -TenantID $null
             }
         } else {
-            GraphGetToken -indent "$($indent)  "
+            $script:GraphToken = GraphGetToken -indent "$($indent)  "
         }
     }
 
@@ -8409,7 +8418,7 @@ function GraphGetMe {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Net.WebUtility]::UrlEncode(($GraphUserProperties -join ','))
+            Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Net.WebUtility]::UrlEncode(($GraphUserProperties -join ',')) + '&$expand=manager'
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -8536,7 +8545,11 @@ function GraphGetUserProperties($user, $authHeader) {
     GraphSwitchContext -TenantID $user
 
     if (-not $authHeader) {
-        $authHeader = $script:AuthorizationHeader
+        if ($SimulateUser -and $SimulateAndDeployGraphCredentialFile) {
+            $authHeader = $script:AppAuthorizationHeader
+        } else {
+            $authHeader = $script:AuthorizationHeader
+        }
     }
 
     try { WatchCatchableExitSignal } catch { }
@@ -8547,7 +8560,7 @@ function GraphGetUserProperties($user, $authHeader) {
         try {
             $requestBody = @{
                 Method      = 'Get'
-                Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Net.WebUtility]::UrlEncode($(@($GraphUserProperties | Select-Object -Unique) -join ','))
+                Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Net.WebUtility]::UrlEncode($(@($GraphUserProperties | Select-Object -Unique) -join ',')) + '&$expand=manager'
                 Headers     = $authHeader
                 ContentType = 'Application/Json; charset=utf-8'
             }
@@ -8861,7 +8874,7 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal, $authH
 
             if ($OOFExternal) { $Body.'automaticRepliesSetting'.add('externalReplyMessage', $OOFExternal) }
 
-            $body = ConvertTo-Json -InputObject $body
+            $body = $body | ConvertTo-Json
 
             $requestBody = @{
                 Method      = 'Patch'
@@ -9487,6 +9500,9 @@ try {
         } catch {
         }
     }
+
+    # Remove unnecessary ETS type data associated with arrays in Windows PowerShell
+    Remove-TypeData System.Array -ErrorAction SilentlyContinue
 
     if ($psISE) {
         Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red

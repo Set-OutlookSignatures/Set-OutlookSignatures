@@ -3,25 +3,37 @@
 
 # Changelog
 <!--
-  Sample changelog entry
-  Remove leading spaces after pasting
-  Update .\docs\releases.txt
+Sample changelog entry
+Update .\docs\releases.txt
 
-  ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
-  _Put Notice here_
-  _**Breaking:** <Present tense verb> XXX_  
-  ### Changed
-  - **Breaking:** <Present tense verb> XXX
-  - <Active present tense verb> XXX
-  ### Added
-  - <Active present tense verb> XXX
-  ### Removed
-  - <Active present tense verb> XXX
-  ### Fixed
-  - <Active present tense verb> XXX
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/vX.X.X" target="_blank">vX.X.X</a> - YYYY-MM-DD
+_Put Notice here_
+_**Breaking:** <Present tense verb> XXX_  
+### Changed
+- **Breaking:** <Present tense verb> XXX
+- <Active present tense verb> XXX
+### Added
+- <Active present tense verb> XXX
+### Removed
+- <Active present tense verb> XXX
+### Fixed
+- <Active present tense verb> XXX
 -->
 
-## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.2" target="_blank">v4.20.2</a> - 2025-07-08
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.3" target="_blank">v4.20.3</a> - 2025-07-17
+### Changed
+- Update dependency MSAL.Net to v4.74.0.
+- Update Outlook add-in dependency @azure-msalbrowser to v4.15.0.
+### Added
+### Removed
+### Fixed
+- Add a workaround for PowerShell 5.1 not correctly converting arrays to JSON when passing them via the InputObject parameter. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/136" target="_blank">#136</a>)
+- Fix Set-OutlookSignatures quitting with exit code 14 when using it in SimulateAndDeploy mode for Exchange Online.
+- Add a workaround for PowerShell not reliably resolving SMB paths with relative parts to absolute paths in the MSAL.PS module.
+
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.2" target="_blank">v4.12.2</a> - 2025-07-07
 
 _**Add features with the Benefactor Circle add-on and get fee-based support from ExplicIT Consulting**_  
 _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactorcircle) for details about these features and how you can benefit from them with a Benefactor Circle license._

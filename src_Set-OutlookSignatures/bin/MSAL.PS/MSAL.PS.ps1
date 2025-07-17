@@ -62,16 +62,16 @@ $ModuleManifest = Import-PowerShellDataFile -LiteralPath (Join-Path $PSScriptRoo
 
 ## Select the correct assemblies for the PowerShell platform
 foreach ($Path in @($ModuleManifest.FileList -ilike '*\netstandard2.0\Microsoft.Identity.Client.dll')) {
-    $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
+    $RequiredAssemblies.Add($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath $Path))))
 }
 
 if ($PSVersionTable.PSEdition -eq 'Core') {
     foreach ($Path in @($ModuleManifest.FileList -ilike '*\netstandard2.0\Microsoft.Identity*.dll')) {
-        $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
+        $RequiredAssemblies.Add($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath $Path))))
     }
 } elseif ($PSVersionTable.PSEdition -eq 'Desktop') {
     foreach ($Path in @($ModuleManifest.FileList -ilike '*\netstandard2.0\Microsoft.Identity*.dll')) {
-        $RequiredAssemblies.Add((Join-Path $PSScriptRoot $Path))
+        $RequiredAssemblies.Add($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath $Path))))
     }
 }
 
@@ -88,7 +88,7 @@ foreach ($RequiredAssembly in $RequiredAssemblies) {
 if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') {
     if (-not ('TokenCacheHelper' -as [type])) {
         foreach ($Path in ($ModuleManifest.FileList -like '*\internal\TokenCacheHelper.cs')) {
-            $srcTokenCacheHelper = Join-Path $PSScriptRoot $Path
+            $srcTokenCacheHelper = [System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath $Path))
         }
 
         if ($PSVersionTable.PSVersion -ge [version]'7.0') {
@@ -105,7 +105,7 @@ if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') {
 # Load DeviceCodeHelper
 if (-not ('DeviceCodeHelper' -as [type])) {
     foreach ($Path in ($ModuleManifest.FileList -like '*\internal\DeviceCodeHelper.cs')) {
-        $srcDeviceCodeHelper = Join-Path $PSScriptRoot $Path
+        $srcDeviceCodeHelper = [System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath $Path))
     }
     if ($PSVersionTable.PSVersion -ge [version]'6.0') {
         $RequiredAssemblies.Add('System.Console.dll')

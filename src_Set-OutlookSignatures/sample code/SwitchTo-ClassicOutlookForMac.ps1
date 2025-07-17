@@ -19,6 +19,9 @@ if ((-not $IsMacOS) -or (-not (Test-Path -LiteralPath '/Applications/Microsoft O
     exit 1
 }
 
+# Remove unnecessary ETS type data associated with arrays in Windows PowerShell
+Remove-TypeData System.Array -ErrorAction SilentlyContinue
+
 if ($psISE) {
     Write-Host 'PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
     Write-Host 'Required features are not available in ISE. Exit.' -ForegroundColor Red

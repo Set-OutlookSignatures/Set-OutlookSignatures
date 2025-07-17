@@ -46,6 +46,9 @@ try {
     Write-Host
     Write-Host "Check parameters and script environment @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
+    # Remove unnecessary ETS type data associated with arrays in Windows PowerShell
+    Remove-TypeData System.Array -ErrorAction SilentlyContinue
+
     if ($psISE) {
         Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
         Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
@@ -139,7 +142,7 @@ try {
             $PowerShell.RunspacePool = $RunspacePool
 
             [void]$PowerShell.AddScript( {
-                    Param (
+                    param (
                         $CrossForestTrustRootDomain,
                         $DC,
                         $IsGC,
@@ -358,7 +361,7 @@ try {
     Write-Host $error[0]
     Write-Host
     Write-Host "Unknown error, exiting. @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-    Exit 1
+    exit 1
 
 } finally {
     Write-Host

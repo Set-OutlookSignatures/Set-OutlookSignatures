@@ -37,9 +37,9 @@ body:
   - type: textarea
     id: what-happened
     attributes:
-      label: What happened?
+      label: What happens?
       description: |
-        Tell us what you expected to happen, what really happened and how the problem can be reproduced.
+        Tell us what you expected to happen, what really happens and how the problem can be reproduced.
         Attach the appropriate log file from '`$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs')`'.
         Verbose logs are preferred, see README FAQ "How can I log the software output?" for details.
         You may not get support without a full unmodified log.

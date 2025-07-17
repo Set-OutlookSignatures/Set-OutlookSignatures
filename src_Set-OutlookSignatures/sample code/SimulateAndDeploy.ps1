@@ -140,7 +140,7 @@ param (
 	$ConnectOnpremInsteadOfCloud = $false,
 
 	# $GraphUserCredential, $GraphClientID and $GraphClientSecret are only there for backward compatibility.
-	# In cross-tenant and multitenant scenarios, use $GraphData
+	# It is recommended to use $GraphData instead. In cross-tenant and multitenant scenarios this is a must.
 	[pscredential]$GraphUserCredential = (
 		@(, @('SimulateAndDeployUser@example.com', 'P@ssw0rd!')) | ForEach-Object { New-Object System.Management.Automation.PSCredential ($_[0], $(ConvertTo-SecureString $_[1] -AsPlainText -Force)) }
 	), # Use Get-Credential for interactive mode or (Get-Content -LiteralPath '.\Config\password.secret') to retrieve info from a separate file (MFA is not supported in any case)
@@ -148,8 +148,7 @@ param (
 	$GraphClientSecret = 'The Client Secret of the Entra ID app for SimulateAndDeploy', # to load the secret from a file, use (Get-Content -LiteralPath '.\Config\app.secret')
 	[string]$CloudEnvironment = 'Public',
 
-	#
-	# As soon as $GraphData is not just an empty array, it oversteers $GraphUserCredention, $GraphClientID, and $GraphClientSecret
+	# As soon as $GraphData is not just an empty array, it takes priority over $GraphUserCredential, $GraphClientID, and $GraphClientSecret
 	# Format:
 	# $GraphData = @(
 	#     , @('Tenant A ID', 'Tenant A SimulateAndDeployUser', 'Tenant A SimulateAndDeployUserPassword', 'Tenant A GraphClientID', 'Tenant A GraphClientSecret')
@@ -175,7 +174,6 @@ param (
 		OOFTemplatePath               = '.\sample templates\Out-of-Office DOCX'
 		OOFIniFile                    = '.\sample templates\Out-of-Office DOCX\_OOF.ini'
 		ReplacementVariableConfigFile = '.\config\default replacement variables.ps1'
-		GraphClientID                 = @( $($GraphData | ForEach-Object { , @($_[0], $_[3]) }))
 		GraphConfigFile               = '.\config\default graph config.ps1'
 		GraphOnly                     = $false
 		# Use current verbose mode for later execution of Set-OutlookSignatures
@@ -268,7 +266,7 @@ function CreateUpdateSimulateAndDeployGraphCredentialFile {
 	$local:GraphTokenDictionary = @{}
 	$returnValuesCollection = @()
 
-	foreach ($GraphDataObject In $GraphData) {
+	foreach ($GraphDataObject in $GraphData) {
 		$local:GraphTenantId = GraphDomainToTenantID $GraphDataObject[0]
 		$local:GraphUserCredentialUser = $GraphDataObject[1]
 		$local:GraphUserCredentialPassword = $GraphDataObject[2]
@@ -485,403 +483,446 @@ function RemoveItemAlternativeRecurse {
 	try { WatchCatchableExitSignal } catch { }
 }
 
+try {
+	# Start script
+	Write-Host "Start script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
-# Start script
-Write-Host "Start script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+	# Remove unnecessary ETS type data associated with arrays in Windows PowerShell
+	Remove-TypeData System.Array -ErrorAction SilentlyContinue
 
-if ($psISE) {
-	Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
-	Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
-	exit 1
-}
-
-
-# Folders and objects
-$OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
-
-if ($PSScriptRoot) {
-	Set-Location -LiteralPath $PSScriptRoot
-} else {
-	Write-Host 'Could not determine the script path, which is essential for this script to work.' -ForegroundColor Red
-	Write-Host 'Make sure to run this script as a file from a PowerShell console, and not just as a text selection in a code editor.' -ForegroundColor Red
-	Write-Host 'Exit.' -ForegroundColor Red
-	exit 1
-}
-
-if (-not $GraphData) {
-	$GraphData = @(
-		, @($(@($GraphUserCredential.username -split '@')[1]), $GraphUserCredential.username, (New-Object PSCredential 0, $GraphUserCredential.Password).GetNetworkCredential().Password; $GraphClientID, $GraphClientSecret)
-	)
-}
-
-# Cloud environment
-## Endpoints from https://github.com/microsoft/CSS-Exchange/blob/main/Shared/AzureFunctions/Get-CloudServiceEndpoint.ps1
-## Environment names must match https://learn.microsoft.com/en-us/dotnet/api/microsoft.identity.client.azurecloudinstance?view=msal-dotnet-latest
-switch ($CloudEnvironment) {
-	{ $_ -iin @('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC') } {
-		$script:CloudEnvironmentEnvironmentName = 'AzurePublic'
-		$script:CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.com'
-		$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office.com'
-		$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.outlook.com'
-		$script:CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.com'
-		break
+	if ($psISE) {
+		Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+		Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
+		exit 1
 	}
 
-	{ $_ -iin @('AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4') } {
-		$script:CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
-		$script:CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.us'
-		$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office365.us'
-		$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.office365.us'
-		$script:CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
-		break
+	Write-Host '  Prepare objects'
+
+	$OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+
+	if ($PSScriptRoot) {
+		Set-Location -LiteralPath $PSScriptRoot
+	} else {
+		Write-Host '  Could not determine the script path, which is essential for this script to work.' -ForegroundColor Red
+		Write-Host '  Make sure to run this script as a file from a PowerShell console, and not just as a text selection in a code editor.' -ForegroundColor Red
+		Write-Host '  Exit.' -ForegroundColor Red
+		exit 1
 	}
 
-	{ $_ -iin @('AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5') } {
-		$script:CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
-		$script:CloudEnvironmentGraphApiEndpoint = 'https://dod-graph.microsoft.us'
-		$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook-dod.office365.us'
-		$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s-dod.office365.us'
-		$script:CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
-		break
+	if (-not $GraphData) {
+		$GraphData = @(
+			, @($(@($GraphUserCredential.username -split '@')[1]), $GraphUserCredential.username, (New-Object PSCredential 0, $GraphUserCredential.Password).GetNetworkCredential().Password; $GraphClientID, $GraphClientSecret)
+		)
 	}
 
-	{ $_ -iin @('China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud') } {
-		$script:CloudEnvironmentEnvironmentName = 'AzureChina'
-		$script:CloudEnvironmentGraphApiEndpoint = 'https://microsoftgraph.chinacloudapi.cn'
-		$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://partner.outlook.cn'
-		$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.partner.outlook.cn'
-		$script:CloudEnvironmentAzureADEndpoint = 'https://login.partner.microsoftonline.cn'
-		break
+	$SetOutlookSignaturesScriptParameters.GraphClientID = $GraphData
+
+	# Cloud environment
+	## Endpoints from https://github.com/microsoft/CSS-Exchange/blob/main/Shared/AzureFunctions/Get-CloudServiceEndpoint.ps1
+	## Environment names must match https://learn.microsoft.com/en-us/dotnet/api/microsoft.identity.client.azurecloudinstance?view=msal-dotnet-latest
+	switch ($CloudEnvironment) {
+		{ $_ -iin @('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC') } {
+			$script:CloudEnvironmentEnvironmentName = 'AzurePublic'
+			$script:CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.com'
+			$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office.com'
+			$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.outlook.com'
+			$script:CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.com'
+			break
+		}
+
+		{ $_ -iin @('AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4') } {
+			$script:CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
+			$script:CloudEnvironmentGraphApiEndpoint = 'https://graph.microsoft.us'
+			$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook.office365.us'
+			$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.office365.us'
+			$script:CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
+			break
+		}
+
+		{ $_ -iin @('AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5') } {
+			$script:CloudEnvironmentEnvironmentName = 'AzureUSGovernment'
+			$script:CloudEnvironmentGraphApiEndpoint = 'https://dod-graph.microsoft.us'
+			$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://outlook-dod.office365.us'
+			$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s-dod.office365.us'
+			$script:CloudEnvironmentAzureADEndpoint = 'https://login.microsoftonline.us'
+			break
+		}
+
+		{ $_ -iin @('China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud') } {
+			$script:CloudEnvironmentEnvironmentName = 'AzureChina'
+			$script:CloudEnvironmentGraphApiEndpoint = 'https://microsoftgraph.chinacloudapi.cn'
+			$script:CloudEnvironmentExchangeOnlineEndpoint = 'https://partner.outlook.cn'
+			$script:CloudEnvironmentAutodiscoverSecureName = 'https://autodiscover-s.partner.outlook.cn'
+			$script:CloudEnvironmentAzureADEndpoint = 'https://login.partner.microsoftonline.cn'
+			break
+		}
 	}
-}
 
-$SetOutlookSignaturesScriptParameters.CloudEnvironment = $script:CloudEnvironmentEnvironmentName
+	$SetOutlookSignaturesScriptParameters.CloudEnvironment = $script:CloudEnvironmentEnvironmentName
+
+	Write-Host '  Prepare folders'
+
+	$script:tempDir = (New-Item -Path ([System.IO.Path]::GetTempPath()) -Name (New-Guid).Guid -ItemType Directory).FullName
+
+	foreach ($VariableName in ('SimulateResultPath', 'SetOutlookSignaturesScriptPath')) {
+		Set-Variable -Name $VariableName -Value $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath((Get-Variable -Name $VariableName).Value).trimend('\')
+	}
+
+	if (-not (Test-Path -LiteralPath $SimulateResultPath)) {
+		New-Item -ItemType Directory $SimulateResultPath | Out-Null
+	} else {
+		RemoveItemAlternativeRecurse -Path $SimulateResultPath -SkipFolder
+	}
+
+	@(
+		(Join-Path -Path $SimulateResultPath -ChildPath '_log_started.txt'),
+		(Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt'),
+		(Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt')
+	) | ForEach-Object {
+		New-Item -ItemType File $_ | Out-Null
+	}
+
+	try {
+		$TranscriptFullName = (Join-Path -Path $SimulateResultPath -ChildPath '_log.txt')
+		$TranscriptFullName = (Start-Transcript -LiteralPath $TranscriptFullName -Force).Path
+
+		Write-Host "  Log file: '$TranscriptFullName'"
+		Write-Host "    Ignore log lines starting with 'PS>TerminatingError' or '>> TerminatingError' unless instructed otherwise."
+	} catch {
+		$TranscriptFullName = $null
+	}
 
 
-foreach ($VariableName in ('SimulateResultPath', 'SetOutlookSignaturesScriptPath')) {
-	Set-Variable -Name $VariableName -Value $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath((Get-Variable -Name $VariableName).Value).trimend('\')
-}
+	# Connect to Graph
+	if (-not $ConnectOnpremInsteadOfCloud) {
+		Write-Host
+		Write-Host "Connect to Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
-if (-not (Test-Path -LiteralPath $SimulateResultPath)) {
-	New-Item -ItemType Directory $SimulateResultPath | Out-Null
-} else {
-	RemoveItemAlternativeRecurse -Path $SimulateResultPath -SkipFolder
-}
+		Write-Host '  Microsoft Graph'
+		$SimulateAndDeployGraphCredentialFile = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "$((New-Guid).guid).xml"
 
-@(
-	(Join-Path -Path $SimulateResultPath -ChildPath '_log_started.txt'),
-	(Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt'),
-	(Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt')
-) | ForEach-Object {
-	New-Item -ItemType File $_ | Out-Null
-}
+		$SetOutlookSignaturesScriptParameters['SimulateAndDeployGraphCredentialFile'] = $SimulateAndDeployGraphCredentialFile
 
+		$script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath 'MSAL.PS')
 
-Start-Transcript -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log.txt') -Force
-
-
-# Connect to Graph
-if (-not $ConnectOnpremInsteadOfCloud) {
-	Write-Host "Connect to Graph @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-
-	Write-Host '  Microsoft Graph'
-	$SimulateAndDeployGraphCredentialFile = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "$((New-Guid).guid).xml"
-
-	$SetOutlookSignaturesScriptParameters['SimulateAndDeployGraphCredentialFile'] = $SimulateAndDeployGraphCredentialFile
-
-	Import-Module $(Join-Path -Path (Split-Path -LiteralPath $SetOutlookSignaturesScriptPath) -ChildPath '\bin\MSAL.PS') -Force
-
-	$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
-
-	if ($GraphConnectResult.error -icontains $true) {
-		Start-Sleep -Seconds 10
+		Copy-Item -LiteralPath $([System.Io.Path]::GetFullPath($((Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath) -ChildPath 'bin\MSAL.PS')))) -Destination $script:MsalModulePath -Recurse
+		if (-not $IsLinux) { Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse | Unblock-File }
+		Import-Module $script:MsalModulePath -Force
 
 		$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-		if ($GraphConnectResult.error -icontains $true) {
-			Write-Host '    Exiting because of repeated Graph connection error' -ForegroundColor Red
-			Write-Host "    $($GraphConnectResult.error)" -ForegroundColor Red
-			exit 1
-		}
-	}
-}
-
-
-# Load and check SimulateList
-Write-Host "Load info about mailboxes to simulate @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-Write-Host "  $(($SimulateList | Measure-Object).count) entries found"
-
-$SimulateListCheckPositive = $true
-
-$SimulateListUserDuplicate = @(@(($SimulateList | Group-Object -Property 'SimulateUser' | Where-Object { $_.count -ge 2 }).Group.SimulateUser) | Select-Object -Unique)
-
-if ($SimulateListUserDuplicate) {
-	$SimulateListCheckPositive = $false
-
-	Write-Host '  Duplicate SimulateUser entries:' -ForegroundColor Red
-
-	$SimulateListUserDuplicate | ForEach-Object {
-		Write-Host "   $($_)" -ForegroundColor Red
-	}
-}
-
-foreach ($SimulateEntry in $SimulateList) {
-	if ($SimulateEntry.SimulateUser -inotmatch '^\S+@\S+$|^\S+\\\S+$') {
-		$SimulateListCheckPositive = $false
-		Write-Host "  Wrong format for SimulateUser: $($SimulateEntry.SimulateUser)" -ForegroundColor Red
-	}
-
-	if ($SimulateEntry.SimulateMailboxes) {
-		try {
-			[mailaddress[]] $tempSimulateMailboxes = @(@(($SimulateEntry.SimulateMailboxes -replace '\s+', ',' -replace ';+', ',' -replace ',+', ',') -split ',') | Where-Object { $_ })
-			$SimulateEntry.SimulateMailboxes = "$($tempSimulateMailboxes -join ', ')"
-		} catch {
-			$SimulateListCheckPositive = $false
-			Write-Host "  Wrong format for SimulateMailboxes: $($SimulateEntry.SimulateMailboxes)"
-		}
-	} else {
-		$SimulateEntry.SimulateMailboxes = $null
-	}
-}
-
-if (-not $SimulateListCheckPositive) {
-	Write-Host
-
-	Write-Host 'Errors found, see details above. Exiting.' -ForegroundColor Red
-	exit 1
-}
-
-
-# Overcome Word security warning when export contains embedded pictures
-# Set-OutlookSignatures handles this itself very well, but multiple instances running in the same user account may lead to problems
-# As a workaround, we define the setting before running the jobs
-if (($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
-	Write-Host "Export Word security setting and disable it @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-	$script:WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty -LiteralPath 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
-	if ($script:WordRegistryVersion.major -gt 16) {
-		Write-Host "    Word version $($script:WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
-		exit 1
-	} elseif ($script:WordRegistryVersion.major -eq 16) {
-		$script:WordRegistryVersion = '16.0'
-	} elseif ($script:WordRegistryVersion.major -eq 15) {
-		$script:WordRegistryVersion = '15.0'
-	} elseif ($script:WordRegistryVersion.major -eq 14) {
-		$script:WordRegistryVersion = '14.0'
-	} elseif ($script:WordRegistryVersion.major -lt 14) {
-		Write-Host "    Word version $($script:WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
-		exit 1
-	}
-
-	if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
-		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
-	}
-
-	if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-		$script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
-	}
-
-	if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-		$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
-	}
-}
-
-# Run simulation mode for each user
-Write-Host "Run simulation mode for each user and its mailbox(es) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-
-Write-Host '  Remove old jobs'
-
-Get-Job | Remove-Job -Force
-
-$JobsToStartTotal = ($SimulateList | Measure-Object).count
-$JobsToStartOpen = ($SimulateList | Measure-Object).count
-$JobsStarted = 0
-$JobsCompleted = 0
-
-Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-
-
-$UpdateTime = (Get-Date).Add($UpdateInterval)
-
-do {
-	while ((($JobsToStartOpen -gt 0) -and ((Get-Job).count -lt $JobsConcurrent))) {
-		$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$Jobsstarted].SimulateUser)) -ChildPath '_log.txt'
-
-		if ((Test-Path -LiteralPath (Split-Path -LiteralPath $LogFilePath)) -eq $false) {
-			New-Item -ItemType Directory -Path (Split-Path -LiteralPath $LogFilePath) | Out-Null
-		}
-
-		# Update Graph credential file before starting a job
-		#   this makes sure that the token is still valid when the software runs longer than token lifetime
-		if (
-			$($ConnectOnpremInsteadOfCloud -ne $true) -and
-			$(
-				$(-not $GraphConnectResult) -or
-				$($GraphConnectResult -and ($GraphConnectResult.error -icontains $true)) -or
-				$($GraphConnectResult -and
-					$(
-						@(
-							$(
-								foreach ($SingleGraphConnectResult in $GraphConnectResult) {
-									foreach ($tempTokenType in @('AccessToken', 'AccessTokenExo', 'AppAccessToken', 'AppAccessTokenExo')) {
-										$tempParsedToken = ParseJwtToken -token $($SingleGraphConnectResult.$tempTokenType)
-										$tempCurrentTimeUtcUnixTimestamp = Get-Date -UFormat %s -Millisecond 0 -Date (Get-Date).ToUniversalTime()
-
-										# True if
-										#   Token is expired
-										#   The remaining token lifetime is less than or equals the job timeout
-										#   At least half of the token lifetime has already passed
-										$(
-											$($tempCurrentTimeUtcUnixTimestamp -ge $tempParsedToken.payload.exp) -or
-											$(($tempParsedToken.payload.exp - $tempCurrentTimeUtcUnixTimestamp) -le $JobTimeout.TotalSeconds) -or
-											$($tempCurrentTimeUtcUnixTimestamp -ge ($tempParsedToken.payload.nbf + (($tempParsedToken.payload.exp - $tempParsedToken.payload.nbf) / 2)))
-										)
-									}
-								}
-							)
-						) -icontains $true
-					)
-				)
-			)
-		) {
-			Write-Host '    Renewing Graph token'
+		if (($GraphConnectResult | Where-Object { $_.error -ne $false }).Count -gt 0) {
+			Start-Sleep -Seconds 10
 
 			$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-			if ($GraphConnectResult.error -icontains $true) {
-				Start-Sleep -Seconds 70
+			if (($GraphConnectResult | Where-Object { $_.error -ne $false }).Count -gt 0) {
+				Write-Host '    Exiting because of repeated Graph connection error' -ForegroundColor Red
+				Write-Host "    $($GraphConnectResult.error)" -ForegroundColor Red
+				exit 1
+			}
+		}
+	}
+
+
+	# Load and check SimulateList
+	Write-Host
+	Write-Host "Load and check list of mailboxes to simulate @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+	Write-Host "  $(($SimulateList | Measure-Object).count) entries found"
+
+	$SimulateListCheckPositive = $true
+
+	$SimulateListUserDuplicate = @(@(($SimulateList | Group-Object -Property 'SimulateUser' | Where-Object { $_.count -ge 2 }).Group.SimulateUser) | Select-Object -Unique)
+
+	if ($SimulateListUserDuplicate) {
+		$SimulateListCheckPositive = $false
+
+		Write-Host '  Duplicate SimulateUser entries:' -ForegroundColor Red
+
+		$SimulateListUserDuplicate | ForEach-Object {
+			Write-Host "   $($_)" -ForegroundColor Red
+		}
+	}
+
+	foreach ($SimulateEntry in $SimulateList) {
+		if ($SimulateEntry.SimulateUser -inotmatch '^\S+@\S+$|^\S+\\\S+$') {
+			$SimulateListCheckPositive = $false
+			Write-Host "  Wrong format for SimulateUser: $($SimulateEntry.SimulateUser)" -ForegroundColor Red
+		}
+
+		if ($SimulateEntry.SimulateMailboxes) {
+			try {
+				[mailaddress[]] $tempSimulateMailboxes = @(@(($SimulateEntry.SimulateMailboxes -replace '\s+', ',' -replace ';+', ',' -replace ',+', ',') -split ',') | Where-Object { $_ })
+				$SimulateEntry.SimulateMailboxes = "$($tempSimulateMailboxes -join ', ')"
+			} catch {
+				$SimulateListCheckPositive = $false
+				Write-Host "  Wrong format for SimulateMailboxes: $($SimulateEntry.SimulateMailboxes)"
+			}
+		} else {
+			$SimulateEntry.SimulateMailboxes = $null
+		}
+	}
+
+	if (-not $SimulateListCheckPositive) {
+		Write-Host
+		Write-Host 'Errors found, see details above. Exiting.' -ForegroundColor Red
+		exit 1
+	}
+
+
+	# Overcome Word security warning when export contains embedded pictures
+	# Set-OutlookSignatures handles this itself very well, but multiple instances running in the same user account may lead to problems
+	# As a workaround, we define the setting before running the jobs
+	if (($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
+		Write-Host
+		Write-Host "Memorize Word security setting and disable it @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+		$script:WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty -LiteralPath 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
+		if ($script:WordRegistryVersion.major -gt 16) {
+			Write-Host "  Word version $($script:WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+			exit 1
+		} elseif ($script:WordRegistryVersion.major -eq 16) {
+			$script:WordRegistryVersion = '16.0'
+		} elseif ($script:WordRegistryVersion.major -eq 15) {
+			$script:WordRegistryVersion = '15.0'
+		} elseif ($script:WordRegistryVersion.major -eq 14) {
+			$script:WordRegistryVersion = '14.0'
+		} elseif ($script:WordRegistryVersion.major -lt 14) {
+			Write-Host "    Word version $($script:WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+			exit 1
+		}
+
+		if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+			$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+		}
+
+		if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
+			$script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+		}
+
+		if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
+			$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+		}
+	}
+
+	# Run simulation mode for each user
+	Write-Host
+	Write-Host "Run simulation mode for each user and its mailbox(es) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+	Write-Host '  Remove old jobs'
+
+	Get-Job | Remove-Job -Force
+
+	$JobsToStartTotal = ($SimulateList | Measure-Object).count
+	$JobsToStartOpen = ($SimulateList | Measure-Object).count
+	$JobsStarted = 0
+	$JobsCompleted = 0
+
+	Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+
+	$UpdateTime = (Get-Date).Add($UpdateInterval)
+
+	do {
+		while ((($JobsToStartOpen -gt 0) -and ((Get-Job).count -lt $JobsConcurrent))) {
+			$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$Jobsstarted].SimulateUser)) -ChildPath '_log.txt'
+
+			if ((Test-Path -LiteralPath (Split-Path -LiteralPath $LogFilePath)) -eq $false) {
+				New-Item -ItemType Directory -Path (Split-Path -LiteralPath $LogFilePath) | Out-Null
+			}
+
+			# Update Graph credential file before starting a job
+			#   this makes sure that the token is still valid when the software runs longer than token lifetime
+			if (
+				$($ConnectOnpremInsteadOfCloud -ne $true) -and
+				$(
+					$(-not $GraphConnectResult) -or
+					$($GraphConnectResult -and (($GraphConnectResult | Where-Object { $_.error -ne $false }).Count -gt 0)) -or
+					$($GraphConnectResult -and
+						$(
+							@(
+								$(
+									foreach ($SingleGraphConnectResult in $GraphConnectResult) {
+										foreach ($tempTokenType in @('AccessToken', 'AccessTokenExo', 'AppAccessToken', 'AppAccessTokenExo')) {
+											$tempParsedToken = ParseJwtToken -token $($SingleGraphConnectResult.$tempTokenType)
+											$tempCurrentTimeUtcUnixTimestamp = Get-Date -UFormat %s -Millisecond 0 -Date (Get-Date).ToUniversalTime()
+
+											# True if
+											#   Token is expired
+											#   The remaining token lifetime is less than or equals the job timeout
+											#   At least half of the token lifetime has already passed
+											$(
+												$($tempCurrentTimeUtcUnixTimestamp -ge $tempParsedToken.payload.exp) -or
+												$(($tempParsedToken.payload.exp - $tempCurrentTimeUtcUnixTimestamp) -le $JobTimeout.TotalSeconds) -or
+												$($tempCurrentTimeUtcUnixTimestamp -ge ($tempParsedToken.payload.nbf + (($tempParsedToken.payload.exp - $tempParsedToken.payload.nbf) / 2)))
+											)
+										}
+									}
+								)
+							) -icontains $true
+						)
+					)
+				)
+			) {
+				Write-Host '    Renewing Graph token'
 
 				$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-				if ($GraphConnectResult.error -icontains $true) {
+				if (($GraphConnectResult | Where-Object { $_.error -ne $false }).Count -gt 0) {
 					Start-Sleep -Seconds 70
 
 					$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-					if ($GraphConnectResult.error -icontains $true) {
+					if (($GraphConnectResult | Where-Object { $_.error -ne $false }).Count -gt 0) {
 						Start-Sleep -Seconds 70
 
 						$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
-						if ($GraphConnectResult.error -icontains $true) {
-							Write-Host '    Exiting because of repeated Graph connection error' -ForegroundColor Red
-							Write-Host "    $($GraphConnectResult.error)" -ForegroundColor Red
-							exit 1
+						if (($GraphConnectResult | Where-Object { $_.error -ne $false }).Count -gt 0) {
+							Start-Sleep -Seconds 70
+
+							$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
+
+							if (($GraphConnectResult | Where-Object { $_.error -ne $false }).Count -gt 0) {
+								Write-Host '    Exiting because of repeated Graph connection error' -ForegroundColor Red
+								Write-Host "    $($GraphConnectResult.error)" -ForegroundColor Red
+								exit 1
+							}
 						}
 					}
 				}
 			}
-		}
 
-		Start-Job {
-			Param (
-				$SetOutlookSignaturesScriptPath,
-				$SimulateUser,
-				$SimulateMailboxes,
-				$SimulateResultPath,
-				$LogFilePath,
-				$SetOutlookSignaturesScriptParameters
-			)
+			Start-Job {
+				param (
+					$SetOutlookSignaturesScriptPath,
+					$SimulateUser,
+					$SimulateMailboxes,
+					$SimulateResultPath,
+					$LogFilePath,
+					$SetOutlookSignaturesScriptParameters
+				)
 
-			Start-Transcript -LiteralPath $LogFilePath -Force
+				Start-Transcript -LiteralPath $LogFilePath -Force
 
-			try {
-				Write-Host 'CREATE SIGNATURE FILES BY USING SIMULATON MODE OF SET-OUTLOOKSIGNATURES'
+				try {
+					Write-Host 'CREATE SIGNATURE FILES BY USING SIMULATON MODE OF SET-OUTLOOKSIGNATURES'
 
-				$SetOutlookSignaturesScriptParameters['SimulateUser'] = $SimulateUser
-				$SetOutlookSignaturesScriptParameters['SimulateMailboxes'] = $SimulateMailboxes
-				$SetOutlookSignaturesScriptParameters['AdditionalSignaturePath'] = $(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)
+					$SetOutlookSignaturesScriptParameters['SimulateUser'] = $SimulateUser
+					$SetOutlookSignaturesScriptParameters['SimulateMailboxes'] = $SimulateMailboxes
+					$SetOutlookSignaturesScriptParameters['AdditionalSignaturePath'] = $(Join-Path -Path $SimulateResultPath -ChildPath $SimulateUser)
 
-				& $SetOutlookSignaturesScriptPath @SetOutlookSignaturesScriptParameters
+					& $SetOutlookSignaturesScriptPath @SetOutlookSignaturesScriptParameters
 
-				if ($?) {
-					Write-Host 'xxxSimulateAndDeployExitCode0xxx'
-				} else {
+					if ($?) {
+						Write-Host 'xxxSimulateAndDeployExitCode0xxx'
+					} else {
+						Write-Host 'xxxSimulateAndDeployExitCode999xxx'
+					}
+				} catch {
+					Write-Host $error[0]
 					Write-Host 'xxxSimulateAndDeployExitCode999xxx'
 				}
-			} catch {
-				Write-Host $error[0]
-				Write-Host 'xxxSimulateAndDeployExitCode999xxx'
+
+				Stop-Transcript
+			} -Name ("$($Jobsstarted)_Job") -ArgumentList $SetOutlookSignaturesScriptPath,
+			$($SimulateList[$Jobsstarted].SimulateUser),
+			$($SimulateList[$Jobsstarted].SimulateMailboxes),
+			$SimulateResultPath,
+			$LogFilePath,
+			$SetOutlookSignaturesScriptParameters | Out-Null
+
+			"    User $($SimulateList[$Jobsstarted].SimulateUser) started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
+				Write-Host $($_)
+				Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_started.txt') -Force -Encoding UTF8
 			}
 
-			Stop-Transcript
-		} -Name ("$($Jobsstarted)_Job") -ArgumentList $SetOutlookSignaturesScriptPath,
-		$($SimulateList[$Jobsstarted].SimulateUser),
-		$($SimulateList[$Jobsstarted].SimulateMailboxes),
-		$SimulateResultPath,
-		$LogFilePath,
-		$SetOutlookSignaturesScriptParameters | Out-Null
+			$JobsToStartOpen--
+			$JobsStarted++
 
-		"    User $($SimulateList[$Jobsstarted].SimulateUser) started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
-			Write-Host $($_)
-			Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_started.txt') -Force -Encoding UTF8
+			Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 		}
 
-		$JobsToStartOpen--
-		$JobsStarted++
-
-		Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-	}
-
-	foreach ($x in (Get-Job | Where-Object { (-not $_.PSEndTime) -and (((Get-Date) - $_.PSBeginTime) -gt $JobTimeout) })) {
-		"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) canceled due to timeout @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
-			Write-Host $($_) -ForegroundColor Red
-			Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
-		}
-
-		$x | Remove-Job -Force
-
-		$JobsCompleted++
-
-		Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-	}
-
-	foreach ($x in (Get-Job | Where-Object { $_.PSEndTime })) {
-		$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser)) -ChildPath '_log.txt'
-
-		if ((Get-Content -LiteralPath $LogFilePath -Encoding UTF8 -Raw).trim().Contains('xxxSimulateAndDeployExitCode0xxx')) {
-			"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with no errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
-				Write-Host $($_) -ForegroundColor Green
-				Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt') -Force -Encoding UTF8
-			}
-		} else {
-			"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
+		foreach ($x in (Get-Job | Where-Object { (-not $_.PSEndTime) -and (((Get-Date) - $_.PSBeginTime) -gt $JobTimeout) })) {
+			"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) canceled due to timeout @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
 				Write-Host $($_) -ForegroundColor Red
 				Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
 			}
+
+			$x | Remove-Job -Force
+
+			$JobsCompleted++
+
+			Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 		}
 
-		$x | Remove-Job -Force
+		foreach ($x in (Get-Job | Where-Object { $_.PSEndTime })) {
+			$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser)) -ChildPath '_log.txt'
 
-		$JobsCompleted++
+			if ((Get-Content -LiteralPath $LogFilePath -Encoding UTF8 -Raw).trim().Contains('xxxSimulateAndDeployExitCode0xxx')) {
+				"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with no errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
+					Write-Host $($_) -ForegroundColor Green
+					Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt') -Force -Encoding UTF8
+				}
+			} else {
+				"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
+					Write-Host $($_) -ForegroundColor Red
+					Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
+				}
+			}
 
-		Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+			$x | Remove-Job -Force
+
+			$JobsCompleted++
+
+			Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+		}
+
+		if ((Get-Date) -ge $UpdateTime) {
+			Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+			$UpdateTime = (Get-Date).Add($UpdateInterval)
+		}
+
+		Start-Sleep -Seconds 1
+	} until (($JobsToStartTotal -eq $JobsStarted) -and ($JobsCompleted -eq $JobsToStartTotal))
+} catch {
+	Write-Host
+	Write-Host ($error[0] | Format-List * | Out-String) -ForegroundColor Red
+	Write-Host
+	Write-Host 'Unexpected error. Exit.' -ForegroundColor red
+} finally {
+	Write-Host
+	Write-Host "Clean-up @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+	Get-Job | Remove-Job -Force
+
+	# Restore Word security setting for embedded images
+	if (($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
+		Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 	}
 
-	if ((Get-Date) -ge $UpdateTime) {
-		Write-Host "  $JobstoStartTotal jobs total: $JobsCompleted completed, $($JobsStarted - $JobsCompleted) in progress, $JobsToStartOpen in queue @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-		$UpdateTime = (Get-Date).Add($UpdateInterval)
+	if ($script:MsalModulePath) {
+		Remove-Module -Name MSAL.PS -Force -ErrorAction SilentlyContinue
+		Remove-Item -LiteralPath $script:MsalModulePath -Recurse -Force -ErrorAction SilentlyContinue
 	}
 
-	Start-Sleep -Seconds 1
-} until (($JobsToStartTotal -eq $JobsStarted) -and ($JobsCompleted -eq $JobsToStartTotal))
+	if ($SimulateAndDeployGraphCredentialFile) {
+		Remove-Item -LiteralPath $SimulateAndDeployGraphCredentialFile -Force -ErrorAction SilentlyContinue
+	}
 
+	if ($script:tempDir) {
+		Remove-Item -LiteralPath $script:tempDir -Recurse -Force -ErrorAction SilentlyContinue
+	}
 
-# Restore Word security setting for embedded images
-if (($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
-	Write-Host "Restore original Word security setting @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+	if ($TranscriptFullName) {
+		Write-Host
+		Write-Host 'Log file'
+		Write-Host "  '$TranscriptFullName'"
+	}
 
-	Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+	Write-Host
+	Write-Host "End script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+	if ($TranscriptFullName) {
+		try { Stop-Transcript | Out-Null } catch { }
+	}
 }
-
-Write-Host "Cleanup @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-
-if (-not $ConnectOnpremInsteadOfCloud) {
-	Remove-Module MSAL.PS
-	Remove-Item -LiteralPath $SimulateAndDeployGraphCredentialFile -Force -ErrorAction SilentlyContinue
-}
-
-
-Write-Host "End script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
-
-
-Stop-Transcript
