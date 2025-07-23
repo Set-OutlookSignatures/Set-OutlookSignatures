@@ -64,7 +64,7 @@
 
 <p><a href="https://demo.set-outlooksignatures.com" target="_blank"><img src="https://img.shields.io/badge/Schedule%20your-personal%20demo-gold?labelColor=black" alt="Schedule your personal demo"></a></p>
 
-<p>Our demo video gives you an overview of the most important features:<br>
+<p>If you’d like to start with the basics and appreciate a down-to-earth approach, our demo video offers a compact overview of the key features of Set-OutlookSignatures – based on a real-world example, straightforward, practical, and without much staging.<br>You will see: Our focus is on the functionality and quality of our software, we're neither marketing professionals nor particularly gifted actors.<br>
   <a href="https://www.youtube-nocookie.com/embed/K9TrCjTdRUI" target="_blank"><img src="https://img.youtube.com/vi/K9TrCjTdRUI/hqdefault.jpg" height="300" title="Set-OutlookSignatures demo video" alt="Set-OutlookSignatures demo video"></a>
 </p>
 
