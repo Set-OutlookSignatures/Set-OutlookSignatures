@@ -588,7 +588,7 @@ function main {
 
 
     # Import QRCoder
-    $script:QRCoderModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
+    $script:QRCoderModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
     Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\QRCoder\netstandard2.0')) -Destination $script:QRCoderModulePath -Recurse
     if (-not $IsLinux) { Get-ChildItem -LiteralPath $script:QRCoderModulePath -Recurse | Unblock-File }
@@ -1051,7 +1051,7 @@ end tell
             Pop-Location
         }
     } else {
-        $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname))
+        $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).Guid))).fullname))
 
         if ($Iswindows) {
             Write-Host "  '$($SignaturePaths[-1])' (Outlook Web/New Outlook)"
@@ -1858,7 +1858,7 @@ end tell
         if ($ADPropsCurrentUser.mail) {
             $script:GraphUserDummyMailbox = $true
 
-            $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).guid))).fullname)) + $SignaturePaths
+            $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).Guid))).fullname)) + $SignaturePaths
 
             $MailAddresses = @($ADPropsCurrentUser.mail.tolower()) + $MailAddresses
             $RegistryPaths = @('') + $RegistryPaths
@@ -3149,7 +3149,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                 # Set Word process priority
                 $script:COMWordDummyCaption = $script:COMWordDummy.Caption
-                $script:COMWordDummy.Caption = "Set-OutlookSignatures $([guid]::NewGuid())"
+                $script:COMWordDummy.Caption = "Set-OutlookSignatures $((New-Guid).Guid)"
                 $script:COMWordDummyHWND = [Win32Api]::FindWindow( 'OpusApp', $($script:COMWordDummy.Caption) )
                 $script:COMWordDummyPid = [IntPtr]::Zero
                 $null = [Win32Api]::GetWindowThreadProcessId( $script:COMWordDummyHWND, [ref] $script:COMWordDummyPid );
@@ -3184,7 +3184,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                 # Set Word process priority
                 $script:COMWordCaption = $script:COMWord.Caption
-                $script:COMWord.Caption = "Set-OutlookSignatures $([guid]::NewGuid())"
+                $script:COMWord.Caption = "Set-OutlookSignatures $((New-Guid).Guid)"
                 $script:COMWordHWND = [Win32Api]::FindWindow( 'OpusApp', $($script:COMWord.Caption) )
                 $script:COMWordPid = [IntPtr]::Zero
                 $null = [Win32Api]::GetWindowThreadProcessId( $script:COMWordHWND, [ref] $script:COMWordPid );
@@ -4324,7 +4324,7 @@ function SetSignatures {
     if (($SignatureFileAlreadyDone -eq $false) -or $ProcessOOF) {
         Write-Host "$Indent      Create temporary file copy"
 
-        $pathGUID = (New-Guid).guid
+        $pathGUID = (New-Guid).Guid
         $path = Join-Path -Path $script:tempDir -ChildPath "$($pathGUID).htm"
 
         $pathConnectedFolderNames = @()
@@ -6920,7 +6920,7 @@ $CheckPathScriptblock = {
                         Write-Verbose '      Get DocLib drive items'
                         $docLibDriveItems = (GraphGenericQuery -method GET -uri "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/drives/$($docLibDriveId)/list/items?`$expand=DriveItem" -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null).result.value
 
-                        $tempDir = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid)))
+                        $tempDir = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
                         $null = New-Item $tempDir -ItemType Directory
 
                         $docLibDriveItem = $docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }
@@ -7233,7 +7233,7 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
 
         try { WatchCatchableExitSignal } catch { }
 
-        $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
+        $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid) + '.dll'))
 
         try {
             Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
@@ -7872,7 +7872,7 @@ function GraphGetToken {
                                     Write-Host "$($indent)      Success: '$(($script:msalClientApp | Get-MsalAccount | Select-Object -First 1).username)'"
                                 } catch {
                                     Write-Host "$($indent)      Failed: $($error[0])"
-                                    Write-Host '$($indent)    No authentication possible'
+                                    Write-Host "$($indent)    No authentication possible"
 
                                     $auth = $null
 
@@ -8350,7 +8350,7 @@ function GraphGenericQuery {
         $requestBody = @{
             Method      = $method
             Uri         = $uri
-            Headers     = $authHeader
+            Headers     = $(if ($authHeader) { $authHeader } else { @{} })
             ContentType = 'application/json; charset=utf-8'
         }
 
@@ -8487,7 +8487,7 @@ function GraphGetUpnFromSmtp($user, $authHeader) {
         $requestBody = @{
             Method      = 'Get'
             Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$filter=proxyAddresses/any(x:x eq 'smtp:$($user)')"
-            Headers     = $authHeader
+            Headers     = $(if ($authHeader) { $authHeader } else { @{} })
             ContentType = 'Application/Json; charset=utf-8'
         }
 
@@ -8561,7 +8561,7 @@ function GraphGetUserProperties($user, $authHeader) {
             $requestBody = @{
                 Method      = 'Get'
                 Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Net.WebUtility]::UrlEncode($(@($GraphUserProperties | Select-Object -Unique) -join ',')) + '&$expand=manager'
-                Headers     = $authHeader
+                Headers     = $(if ($authHeader) { $authHeader } else { @{} })
                 ContentType = 'Application/Json; charset=utf-8'
             }
 
@@ -8594,7 +8594,7 @@ function GraphGetUserProperties($user, $authHeader) {
                     $requestBody = @{
                         Method      = 'Get'
                         Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=mailboxsettings"
-                        Headers     = $authHeader
+                        Headers     = $(if ($authHeader) { $authHeader } else { @{} })
                         ContentType = 'Application/Json; charset=utf-8'
                     }
 
@@ -8879,7 +8879,7 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal, $authH
             $requestBody = @{
                 Method      = 'Patch'
                 Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user)/mailboxsettings"
-                Headers     = $authHeader
+                Headers     = $(if ($authHeader) { $authHeader } else { @{} })
                 ContentType = 'Application/Json; charset=utf-8'
                 Body        = $body
             }
@@ -9563,7 +9563,7 @@ try {
     $script:tempDir = (New-Item -Path ([System.IO.Path]::GetTempPath()) -Name (New-Guid).Guid -ItemType Directory).FullName
     $script:ScriptRunGuid = Split-Path -Path $script:tempDir -Leaf
 
-    $script:SetOutlookSignaturesCommonDllFilePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).guid) + '.dll'))
+    $script:SetOutlookSignaturesCommonDllFilePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid) + '.dll'))
     Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\Set-OutlookSignatures\Set-OutlookSignatures.Common.dll')) -Destination $script:SetOutlookSignaturesCommonDllFilePath
     if (-not $IsLinux) {
         Unblock-File -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath

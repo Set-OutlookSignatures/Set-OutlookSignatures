@@ -21,6 +21,19 @@ _**Breaking:** <Present tense verb> XXX_
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.4" target="_blank">v4.20.4</a> - 2025-08-12
+### Changed
+- Update dependency MSAL.Net to v4.74.1.
+- Update dependency HtmlAgilityPack to v1.12.2.
+- Update dependency UTF.Unknown to v2.6.0.
+- Update Outlook add-in dependency @azure-msalbrowser to v4.19.0.
+### Added
+- Add workaround for Microsoft internal problems with roaming signatures API, which would result in the following error when uploading roaming signatures to mailboxes which are not the one of the logged-on user (especially in SimulateAndDeploy mode). The log would contain the error "The response status code for https://localhost:444/owa/service.svc?action=SanitizeHtml action \u0027SanitizeHtml\u0027 is InternalServerError. ReasonPhrase:Internal Server Error".
+- Add hints about probable root causes of empty signatures lists in the log output of the Outlook add-in.
+### Removed
+### Fixed
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.3" target="_blank">v4.20.3</a> - 2025-07-17
 ### Changed
 - Update dependency MSAL.Net to v4.74.0.
