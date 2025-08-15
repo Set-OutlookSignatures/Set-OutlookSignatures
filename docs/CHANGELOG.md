@@ -21,6 +21,29 @@ _**Breaking:** <Present tense verb> XXX_
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.21.0" target="_blank">v4.21.0</a> - 2025-08-15
+### Changed
+- Update dependency MSAL.Net to v4.75.0.
+- Update Outlook add-in dependency @azure-msalbrowser to v4.20.0.
+### Added
+- Add the following new features to the Outlook add-in:
+  - React to launch events OnMessageRecipientsChanged and OnAppointmentAttendeesChanged.
+  - Allow adding custom code to the add-in so you can directly influence which signature it will set.  
+  For example, you can set a specific signature…
+    - …when there are only internal recipients, or another signature when there are external recipients
+    - …depending on the from email address
+    - …when a specific customer is in the To field
+    - …when the current item is a mail or an appointment
+    - …when the current item is a new mail, or another signature when it is a reply or a forward
+    - …depending on the subject
+    - …or any other condition derived from the information available in the customRulesProperties object  
+
+    See '.\sample code\CustomRulesCode.js' in the Outlook add-in folder for details.
+### Removed
+### Fixed
+- Correct a problem reading email addresses from New Outlook for Windows. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/140" target="_blank">#140</a>) (Thanks <a href="https://github.com/psic4t" target="_blank">@psic4t</a>!)
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.4" target="_blank">v4.20.4</a> - 2025-08-12
 ### Changed
 - Update dependency MSAL.Net to v4.74.1.

@@ -1792,8 +1792,8 @@ end tell
 
         if ($IsWindows -and $OutlookUseNewOutlook -eq $true) {
             $x = @(
-                @((ConvertEncoding -InFile $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Microsoft\Olk\UserSettings.json') | ConvertFrom-Json).Identities.IdentityMap.PSObject.Properties | Select-Object -Unique | Where-Object { $_.name -match '(\S+?)@(\S+?)\.(\S+?)' }) | ForEach-Object {
-                    if ((ConvertEncoding -InFile $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath "\Microsoft\OneAuth\accounts\$($_.Value)") | ConvertFrom-Json).association_status -ilike '*"com.microsoft.Olk":"associated"*') {
+                @((ConvertEncoding -InFile $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Microsoft\Olk\UserSettings.json') -InIsHtml $false | ConvertFrom-Json).Identities.IdentityMap.PSObject.Properties | Select-Object -Unique | Where-Object { $_.name -match '(\S+?)@(\S+?)\.(\S+?)' }) | ForEach-Object {
+                    if ((ConvertEncoding -InFile $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath "\Microsoft\OneAuth\accounts\$($_.Value)") -InIsHtml $false | ConvertFrom-Json).association_status -ilike '*"com.microsoft.Olk":"associated"*') {
                         $_.name
                     }
                 }
