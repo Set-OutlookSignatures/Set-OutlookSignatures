@@ -5624,10 +5624,10 @@ end tell
 
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if ($CurrentTemplateIsForAliasSmtp) {
-                        $NewSigExpected."$($CurrentTemplateIsForAliasSmtp.ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                        $script:NewSigExpected."$($CurrentTemplateIsForAliasSmtp.ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                     }
 
-                    $NewSigExpected."$(($MailAddresses[$AccountNumberRunning]).ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                    $script:NewSigExpected."$(($MailAddresses[$AccountNumberRunning]).ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
 
                     if (-not $SimulateUser) {
                         if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
@@ -5669,10 +5669,10 @@ end tell
 
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
                     if ($CurrentTemplateIsForAliasSmtp) {
-                        $ReplySigExpected."$($CurrentTemplateIsForAliasSmtp.ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                        $script:ReplySigExpected."$($CurrentTemplateIsForAliasSmtp.ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                     }
 
-                    $ReplySigExpected."$(($MailAddresses[$AccountNumberRunning]).ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                    $script:ReplySigExpected."$(($MailAddresses[$AccountNumberRunning]).ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
 
                     if (-not $SimulateUser) {
                         if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
@@ -6843,7 +6843,6 @@ $CheckPathScriptblock = {
                 }
 
                 $CheckPathPath = [uri]::UnescapeDataString($CheckPathPath.Trimend('/'))
-                $CheckPathPathSplitBySlash = @($CheckPathPath -split '\/' | Where-Object { $_ })
 
                 try { WatchCatchableExitSignal } catch { }
 
@@ -6872,115 +6871,82 @@ $CheckPathScriptblock = {
 
                 try { WatchCatchableExitSignal } catch { }
 
-                Write-Verbose '    Get SharePoint Online site ID'
+                Write-Verbose '    Resolve URL to driveItem'
 
-                $(
-                    if ($CheckPathPathSplitbySlash[2] -iin @('sites', 'teams')) {
-                        "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/sites/$(([uri]$CheckPathPath).DnsSafeHost):/$($CheckPathPathSplitbySlash[2])/$($CheckPathPathSplitbySlash[3])"
-                    } else {
-                        "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/sites/$(([uri]$CheckPathPath).DnsSafeHost)"
-                    }
-                ) | ForEach-Object {
-                    Write-Verbose "      Query: '$($_)'"
-
-                    $siteId = (GraphGenericQuery -method GET -uri $_ -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null).result.id
-
-                    Write-Verbose "      siteId: $($siteID)"
-                }
-
+                $UrlToDriveItem = (GraphGenericQuery -method GET -uri "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/shares/u!$(([Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([Uri]::EscapeUriString($CheckPathPath)))).TrimEnd('=').Replace('+','-').Replace('/','_'))/driveItem?`$select=id,file,folder,parentreference" -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null)
 
                 try { WatchCatchableExitSignal } catch { }
 
-                if ($siteid) {
-                    Write-Verbose '    Get DocLib drive ID'
+                if ($UrlToDriveItem.error -eq $false) {
+                    if (($UrlToDriveItem.result.parentReference.driveId) -and ($UrlToDriveItem.result.id)) {
+                        $UrlToDriveItemRecursiveContent = (GraphGenericQuery -method GET -uri "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/drives/$($UrlToDriveItem.result.parentReference.driveId)/items/$($UrlToDriveItem.result.id)/delta?`$select=id,file,folder,content.downloadUrl,webDavUrl" -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null)
 
-                    "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/sites/$($siteId)/drives" | ForEach-Object {
-                        $docLibDriveIdQueryResult = (GraphGenericQuery -method GET -uri $_ -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null).result.value
-                        $docLibDriveId = ($docLibDriveIdQueryResult | Where-Object {
-                                $_.webUrl -ieq $(
-                                    if ($CheckPathPathSplitbySlash[2] -iin @('sites', 'teams')) {
-                                        [uri]::EscapeUriString($(($CheckPathPath -split '/')[0..5] -join '/'))
+                        try { WatchCatchableExitSignal } catch { }
+
+                        if ($UrlToDriveItemRecursiveContent.error -eq $false) {
+                            Write-Verbose '    Download'
+
+                            $CheckPathTempDir = (Join-Path -Path $script:tempDir -ChildPath (New-Guid).Guid)
+
+                            $null = New-Item -Path $CheckPathTempDir -ItemType Directory
+
+                            foreach ($docLibDriveItem in @($UrlToDriveItemRecursiveContent.result.value | Sort-Object -Property @{ Expression = { if ($_.folder) { 0 } else { 1 } } },
+                                    @{ Expression = { ($_.webDavUrl | Select-String -Pattern '/' -AllMatches).Matches.Count } },
+                                    @{ Expression = { $_.webDavUrl } }
+                                )
+                            ) {
+                                if ($docLibDriveItem.file) {
+                                    $CheckPathPathNew = $(Join-Path -Path $CheckPathTempDir -ChildPath $([uri]::UnEscapeDataString((Split-Path -Path $docLibDriveItem.webDavUrl -Leaf))))
+
+                                    if ($UrlToDriveItem.result.file) {
+                                        try { WatchCatchableExitSignal } catch { }
+
+                                        Write-Verbose "      Download file: '$($docLibDriveItem.webDavUrl)' -> '$($CheckPathPathNew)'"
+
+                                        $(New-Object Net.WebClient).DownloadFile(
+                                            $docLibDriveItem.'@microsoft.graph.downloadUrl',
+                                            $CheckPathPathNew
+                                        )
+
+                                        $CheckPathPath = $CheckPathRefPath.Value = $CheckPathPathNew
                                     } else {
-                                        [uri]::EscapeUriString($(($CheckPathPath -split '/')[0..3] -join '/'))
+                                        try { WatchCatchableExitSignal } catch { }
+
+                                        Write-Verbose "      Placeholder file: '$($docLibDriveItem.webDavUrl)' -> '$($CheckPathPathNew)'"
+
+                                        if (-not $script:SpoDownloadUrls) {
+                                            $script:SpoDownloadUrls = @{}
+                                        }
+
+                                        $script:SpoDownloadUrls.Add(
+                                            $CheckPathPathNew,
+                                            $docLibDriveItem.'@microsoft.graph.downloadUrl'
+                                        )
+
+                                        $null = New-Item -Path $CheckPathPathNew -ItemType File
+
+                                        $CheckPathPath = $CheckPathRefPath.Value = $CheckPathTempDir
                                     }
-                                )
-                            }
-                        ).id
+                                } elseif ($docLibDriveItem.folder) {
+                                    try { WatchCatchableExitSignal } catch { }
 
-                        Write-Verbose "      Query: '$($_)'"
-                        Write-Verbose "      Return value: '$($docLibDriveIdQueryResult | ConvertTo-Json -Compress -Depth 10)'"
-                        Write-Verbose "      webUrl: '$([uri]::EscapeUriString($(($CheckPathPath -split '/')[0..5] -join '/')))'"
+                                    @([uri]::UnescapeDataString(($docLibDriveItem.webDavUrl -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\') | ForEach-Object {
+                                        Write-Verbose "      Folder: '$($docLibDriveItem.webDavUrl)' -> '$(Join-Path -Path $CheckPathTempDir -ChildPath $_)'"
 
-                        Write-Verbose "      docLibDriveId: $docLibDriveId"
-                    }
-
-                    try { WatchCatchableExitSignal } catch { }
-
-                    if ($docLibDriveId) {
-                        Write-Verbose '      Get DocLib drive items'
-                        $docLibDriveItems = (GraphGenericQuery -method GET -uri "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/drives/$($docLibDriveId)/list/items?`$expand=DriveItem" -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null).result.value
-
-                        $tempDir = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
-                        $null = New-Item $tempDir -ItemType Directory
-
-                        $docLibDriveItem = $docLibDriveItems | Where-Object { ([uri]($_.webUrl)).AbsoluteUri -eq ([uri]($CheckPathPath)).AbsoluteUri }
-
-                        if ($docLibDriveItem) {
-                            if ($docLibDriveItem.driveItem.file) {
-                                Write-Verbose '    Download file to local temp folder'
-
-                                $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath $([uri]::UnEscapeDataString((Split-Path -Path $docLibDriveItem.webUrl -Leaf))))
-
-                                $(New-Object Net.WebClient).DownloadFile(
-                                    $docLibDriveItem.driveItem.'@microsoft.graph.downloadUrl',
-                                    $CheckPathPathNew
-                                )
-
-                                Write-Verbose "      '$($CheckPathRefPath.Value)' -> '$($CheckPathPathNew)'"
-                                $CheckPathPath = $CheckPathRefPath.Value = $CheckPathPathNew
-                            } elseif ($docLibDriveItem.driveItem.folder) {
-                                Write-Verbose '    Create temp folders locally'
-
-                                @(
-                                    @($docLibDriveItems | Where-Object { ($_.driveItem.folder) -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }).webUrl | ForEach-Object {
-                                        [uri]::UnescapeDataString(($_ -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'
+                                        $null = New-Item -ItemType Directory -Path $(Join-Path -Path $CheckPathTempDir -ChildPath $_)
                                     }
-                                ) | Sort-Object -Culture 127 | ForEach-Object {
-                                    if (-not (Test-Path -LiteralPath (Join-Path -Path $tempDir -ChildPath $_) -PathType Container)) {
-                                        $null = New-Item -ItemType Directory -Path (Join-Path -Path $tempDir -ChildPath $_)
-                                    }
+
+                                    $CheckPathPath = $CheckPathRefPath.Value = $CheckPathTempDir
                                 }
-
-                                Write-Verbose '      Create dummy files in local temp folders'
-                                @($docLibDriveItems | Where-Object { ($_.driveItem.file) -and ($_.webUrl -ilike "$([uri]::EscapeUriString($CheckPathPath))/*") }) | Sort-Object -Culture 127 -Property { $_.webUrl } | ForEach-Object {
-                                    $CheckPathPathNew = $(Join-Path -Path $tempDir -ChildPath ([uri]::UnescapeDataString(($_.webUrl -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\'))
-
-                                    if (-not $script:SpoDownloadUrls) {
-                                        $script:SpoDownloadUrls = @{}
-                                    }
-
-                                    $script:SpoDownloadUrls.Add(
-                                        $CheckPathPathNew,
-                                        $_.driveItem.'@microsoft.graph.downloadUrl'
-                                    )
-
-                                    $null = New-Item -Path $CheckPathPathNew -ItemType File
-                                }
-
-                                Write-Verbose "      '$($CheckPathRefPath.Value)' -> '$($tempDir)'"
-                                $CheckPathPath = $CheckPathRefPath.Value = $tempDir
                             }
                         } else {
-                            Write-Host " '$($CheckPathPath)' does not exist. Exiting." -ForegroundColor Red
-                            $script:ExitCode = 24
-                            $script:ExitCodeDescription = "Path '$($CheckPathPath)' does not exist.";
-                            exit
+                            Write-Host "    Error getting driveItem content: $($UrlToDriveItemRecursiveContent.error)" -ForegroundColor Yellow
                         }
                     } else {
-                        Write-Host '    SharePoint via Graph: No DriveID. Wrong path or missing permission in SharePoint?' -ForegroundColor Yellow
+                        Write-Host '    Could resolve URL to driveItem, but its IDs are missing.' -ForegroundColor Yellow
                     }
                 } else {
-                    Write-Host '    SharePoint via Graph: No SiteID. Wrong path or missing permission in Entra ID app?' -ForegroundColor Yellow
+                    Write-Host "    Could not resolve URL to driveItem. Wrong path, missing Entra ID app or SharePoint permission? Error: $($UrlToDriveItem.error)" -ForegroundColor Yellow
                 }
             }
 
@@ -7552,7 +7518,7 @@ function GraphGetToken {
                         continue
                     }
                 }
-                
+
                 $destinationPath = $item.FullName -replace [regex]::escape($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath '\bin\MSAL.PS')))), $script:MsalModulePath
 
                 if ($item.PSIsContainer) {
@@ -8376,10 +8342,10 @@ function GraphGenericQuery {
             $local:pagedResults = Invoke-RestMethod @requestBody
             $local:x += $local:pagedResults
 
-            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
+            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
                 $local:uri = $null
             } else {
-                $local:uri = $local:pagedResults.'@odata.nextlink'
+                $local:uri = $local:pagedResults.'@odata.nextLink'
             }
         } until (!($local:uri))
 
@@ -8418,7 +8384,7 @@ function GraphGetMe {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Net.WebUtility]::UrlEncode(($GraphUserProperties -join ',')) + '&$expand=manager'
+            Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Net.WebUtility]::UrlEncode(($GraphUserProperties -join ',')) + '&$expand=manager($select=id)'
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -8439,10 +8405,10 @@ function GraphGetMe {
             $local:pagedResults = Invoke-RestMethod @requestBody
             $local:x += $local:pagedResults
 
-            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
+            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
                 $local:uri = $null
             } else {
-                $local:uri = $local:pagedResults.'@odata.nextlink'
+                $local:uri = $local:pagedResults.'@odata.nextLink'
             }
         } until (!($local:uri))
 
@@ -8507,10 +8473,10 @@ function GraphGetUpnFromSmtp($user, $authHeader) {
             $local:pagedResults = Invoke-RestMethod @requestBody
             $local:x += $local:pagedResults
 
-            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
+            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
                 $local:uri = $null
             } else {
-                $local:uri = $local:pagedResults.'@odata.nextlink'
+                $local:uri = $local:pagedResults.'@odata.nextLink'
             }
         } until (!($local:uri))
 
@@ -8560,7 +8526,7 @@ function GraphGetUserProperties($user, $authHeader) {
         try {
             $requestBody = @{
                 Method      = 'Get'
-                Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Net.WebUtility]::UrlEncode($(@($GraphUserProperties | Select-Object -Unique) -join ',')) + '&$expand=manager'
+                Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/$($user.properties.value.userprincipalname)?`$select=" + [System.Net.WebUtility]::UrlEncode($(@($GraphUserProperties | Select-Object -Unique) -join ',')) + '&$expand=manager($select=id)'
                 Headers     = $(if ($authHeader) { $authHeader } else { @{} })
                 ContentType = 'Application/Json; charset=utf-8'
             }
@@ -8581,10 +8547,10 @@ function GraphGetUserProperties($user, $authHeader) {
                 $local:pagedResults = Invoke-RestMethod @requestBody
                 $local:x += $local:pagedResults
 
-                if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
+                if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
                     $local:uri = $null
                 } else {
-                    $local:uri = $local:pagedResults.'@odata.nextlink'
+                    $local:uri = $local:pagedResults.'@odata.nextLink'
                 }
             } until (!($local:uri))
 
@@ -8613,10 +8579,10 @@ function GraphGetUserProperties($user, $authHeader) {
                         $local:pagedResults = Invoke-RestMethod @requestBody
                         $local:y += $local:pagedResults
 
-                        if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
+                        if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
                             $local:uri = $null
                         } else {
-                            $local:uri = $local:pagedResults.'@odata.nextlink'
+                            $local:uri = $local:pagedResults.'@odata.nextLink'
                         }
                     } until (!($local:uri))
 
@@ -8706,10 +8672,10 @@ function GraphGetUserManager($user) {
             $local:pagedResults = Invoke-RestMethod @requestBody
             $local:x += $local:pagedResults
 
-            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
+            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
                 $local:uri = $null
             } else {
-                $local:uri = $local:pagedResults.'@odata.nextlink'
+                $local:uri = $local:pagedResults.'@odata.nextLink'
             }
         } until (!($local:uri))
 
@@ -8770,10 +8736,10 @@ function GraphGetUserTransitiveMemberOf($user) {
             $local:pagedResults = Invoke-RestMethod @requestBody
             $local:x += $local:pagedResults
 
-            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
+            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
                 $local:uri = $null
             } else {
-                $local:uri = $local:pagedResults.'@odata.nextlink'
+                $local:uri = $local:pagedResults.'@odata.nextLink'
             }
         } until (!($local:uri))
 
@@ -8937,10 +8903,10 @@ function GraphFilterGroups($filter, $GraphContext = $null) {
             $local:pagedResults = Invoke-RestMethod @requestBody
             $local:x += $local:pagedResults
 
-            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
+            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
                 $local:uri = $null
             } else {
-                $local:uri = $local:pagedResults.'@odata.nextlink'
+                $local:uri = $local:pagedResults.'@odata.nextLink'
             }
         } until (!($local:uri))
 
@@ -9000,10 +8966,10 @@ function GraphFilterUsers($filter, $GraphContext = $null) {
             $local:pagedResults = Invoke-RestMethod @requestBody
             $local:x += $local:pagedResults
 
-            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextlink')) {
+            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
                 $local:uri = $null
             } else {
-                $local:uri = $local:pagedResults.'@odata.nextlink'
+                $local:uri = $local:pagedResults.'@odata.nextLink'
             }
         } until (!($local:uri))
 

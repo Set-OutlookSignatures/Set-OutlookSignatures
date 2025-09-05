@@ -114,7 +114,7 @@ Write-Host '  An authentication window will open, likely in a browser'
 # Disconnect first, so that no existing connection is re-used. This forces to choose an account for the following connect.
 $null = Disconnect-MgGraph -ErrorAction SilentlyContinue
 
-Connect-MgGraph -Scopes 'Application.ReadWrite.All', 'AppRoleAssignment.ReadWrite.All' -NoWelcome
+Connect-MgGraph -ContextScope Process -Scopes 'Application.ReadWrite.All', 'AppRoleAssignment.ReadWrite.All', 'DelegatedPermissionGrant.ReadWrite.All' -NoWelcome
 
 
 Write-Host
@@ -394,11 +394,27 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                 'resourceAccess' = @(
                     # Microsoft Graph permissions reference: https://learn.microsoft.com/en-us/graph/permissions-reference
 
+                    # Delegated permission: GroupMember.Read.All
+                    #   Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
+                    #   Required to find and check license groups.
+                    @{
+                        'id'   = 'bc024368-1153-4739-b217-4326f2e966d0'
+                        'type' = 'Scope'
+                    },
+
                     # Delegated permission: Mail.Read
                     #   Allows to read emails in mailbox of the currently logged-on user (and in no other mailboxes).
-                    #    Required because of Microsoft restrictions accessing roaming signatures - this will change in the future, the date is unknown.
+                    #    Required because of Microsoft restrictions accessing roaming signatures.
                     @{
                         'id'   = '570282fd-fa5c-430d-a7fd-fc8dc98a9dca'
+                        'type' = 'Scope'
+                    },
+
+                    # Delegated permission: User.Read.All
+                    #   Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
+                    #   Required to get the UPN for a given SMTP email address.
+                    @{
+                        'id'   = 'a154be20-db9c-4678-8ab7-66f6cc099a59'
                         'type' = 'Scope'
                     }
                 )
@@ -505,4 +521,4 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
 Write-Host '▲▲▲ Relevant information for your configuration above ▲▲▲' -ForegroundColor Green
 
 Write-Host
-write-host "Done"
+Write-Host 'Done'

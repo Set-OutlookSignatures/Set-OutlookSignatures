@@ -21,13 +21,43 @@ _**Breaking:** <Present tense verb> XXX_
 -->
 
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.22.0" target="_blank">v4.22.0</a> - 2025-09-05
+### Changed
+- Update Outlook add-in dependency @azure-msalbrowser to v4.22.0.
+- Change Outlook add-in variable names for clarity:
+  - Use '`customRulesResultSignatureName`' instead of '`customRulesPropertiesResult`'. The old variable name can still be used but the new one overrides it.
+- Force the Outlook add-in to use the Graph API when the mailbox is hosted in Exchange Online, as Microsoft will be turning off EWS for Exchange Online soon and as the Outlook add-in supports the Graph API since it has been released over a year ago.
+- Optimize the performance accessing SharePoint Online via Graph API by using different endpoints and exactly defining the requested attributes. This greatly enhances performance when the content used for Set-OutlookSignatures is not hosted in a separate document library, but in a document library with many other unrelated items.
+### Added
+- Allow Outlook add-in custom rules code not only to choose from a set of signatures previously deployed using Set-OutlookSignatures, but to set a completely customized signature using the '`customRulesResultSignatureBody`' property. This makes the Outlook add-in the most flexible signature add-in on the market as known of today.
+  - The '`customRulesResultSignatureBody`' proprty is only available for mailboxes hosted in Exchange Online and requires setting two additional permissions in the Entra ID app it uses.
+  - See '`.\sample code\CustomRulesCode.js`' for details about this new feature
+- Add the following additional new features to Outlook add-in custom rules (see '`.\sample code\CustomRulesCode.js`' in the Outlook add-in folder for details):
+  - The '`customRulesProperties.notificationCurrent`' property contains the current text used for the Outlook notification shown after the signature has been set, '`customRulesProperties.notificationOriginal`' contains the value defined originally for the add-in.
+  - Define the text used for the Outlook notification shown after the signature has been set by setting the new '`customRulesResultNotification`' variable.
+  - Add boolean properties '`customRulesProperties.itemIsReply`' and '`customRulesProperties.itemIsForward`'.
+  - Add boolean properties '`customRulesProperties.itemIsHtml`' and '`customRulesProperties.itemIsText`'.
+  - Add string properties '`graphAccessToken`' and '`graphApiEndpoint`', which can be used to query the Graph API for use in custom rules.
+  - Add sample code showing how to query the Graph API (convert sender SMTP email address to UPN, get basic properties of a user, get transitive group membership of a user).
+- Allow to define a custom ID for the Outlook add-in. This allows using multiple independent configurations and versions of the Outlook add-in in the same environment.
+- Add a workaround in the Outlook add-in for the Microsoft problem with Outlook Web and New Outlook for Windows not replacing signatures but adding them in appointments, resulting in multiple signatures.
+- Add comments to clarify mailbox requirements and permissions in the '`manifest.xml`' file of the Outlook add-in.
+- Consider the names of the default signatures defined in Exchange Online when Set-OutlookSignatures runs the Benefactor Circle add-on specific preparations for the Outlook add-in and when the registry does not contain any information about default signatures. This is helpful in scenarios in which Set-OutlookSignatures is used to deploy signatures, but not to define a default signatures.
+- Update '`.\sample code\Create-EntraApp.ps1`' to include the additional Graph scopes needed for the Outlook add-in feature '`customRulesResultSignatureBody`'.
+### Removed
+### Fixed
+- Make sure the Outlook add-in correctly reports '`customRulesProperties.itemIsNew`' and '`customRulesProperties.itemIsReplyForward`' on all platforms and for all item save and sync states when using custom rules code.
+- Make sure the Outlook add-in does not re-use '`customRulesPropertiesResult`' between runs, no matter if triggered manually via the taskpane or automatically via a launch event.
+- Add an additional Graph scope to '`.\sample code\Create-EntraApp.ps1`' to avoid problems with granting admin consent for delegated permissions. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions/143" target="_blank">#143</a>) (Thanks <a href="https://github.com/wwa-jvteeffelen" target="_blank">@wwa-jvteeffelen</a>!)
+
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.21.0" target="_blank">v4.21.0</a> - 2025-08-15
 ### Changed
 - Update dependency MSAL.Net to v4.75.0.
 - Update Outlook add-in dependency @azure-msalbrowser to v4.20.0.
 ### Added
 - Add the following new features to the Outlook add-in:
-  - React to launch events OnMessageRecipientsChanged and OnAppointmentAttendeesChanged.
+  - React to launch events '`OnMessageRecipientsChanged`' and '`OnAppointmentAttendeesChanged`'.
   - Allow adding custom code to the add-in so you can directly influence which signature it will set.  
   For example, you can set a specific signature…
     - …when there are only internal recipients, or another signature when there are external recipients
@@ -38,7 +68,7 @@ _**Breaking:** <Present tense verb> XXX_
     - …depending on the subject
     - …or any other condition derived from the information available in the customRulesProperties object  
 
-    See '.\sample code\CustomRulesCode.js' in the Outlook add-in folder for details.
+    See '`.\sample code\CustomRulesCode.js`' in the Outlook add-in folder for details.
 ### Removed
 ### Fixed
 - Correct a problem reading email addresses from New Outlook for Windows. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/140" target="_blank">#140</a>) (Thanks <a href="https://github.com/psic4t" target="_blank">@psic4t</a>!)
