@@ -100,7 +100,7 @@ try {
             }
             $ProgressPreference = $OldProgressPreference
 
-            @(@(Get-ChildItem -LiteralPath $SoftwarePath -Recurse -Force) | Select-Object *, @{Name = 'FolderDepth'; Expression = { $_.DirectoryName.Split('\').Count } } | Sort-Object -Culuture 127 -Descending -Property FolderDepth, FullName) | Remove-Item -Force -Recurse
+            @(@(Get-ChildItem -LiteralPath $SoftwarePath -Recurse -Force) | Select-Object *, @{Name = 'FolderDepth'; Expression = { $_.DirectoryName.Split('\').Count } } | Sort-Object -Culture 127 -Descending -Property FolderDepth, FullName) | Remove-Item -Force -Recurse
 
             Add-Type -Assembly System.IO.Compression.FileSystem
 
