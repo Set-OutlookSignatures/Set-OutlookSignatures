@@ -8,10 +8,12 @@ at https://set-outlooksignatures.com/faq for details
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting offers fee-based support for this and other open source code:
+Would you like support? ExplicIT Consulting offers professional support for this and other open source code:
 https://set-outlooksignatures.com/support
 #>
 
+
+#Requires -Version 5.1
 
 [CmdletBinding()] param ()
 
@@ -34,17 +36,24 @@ if ($psISE) {
     exit 1
 }
 
+
+if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
+    Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+    Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+    exit 1
+}
+
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
 $logFile = (Get-ChildItem $(Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs') -ChildPath $('Set-OutlookSignatures_Log_*.txt')) -File -Force -ErrorAction SilentlyContinue | Sort-Object -Culture 127 -Property $_.CreationTime | Select-Object -Last 1).FullName
 
-If ((-not $logFile) -or (-not (Test-Path -LiteralPath $logFile))) {
+if ((-not $logFile) -or (-not (Test-Path -LiteralPath $logFile))) {
     Write-Host 'Log file not found, Set-OutlookSignatures has not yet run.'
     Write-Host 'Exit with error code 1 to trigger remediation script.'
 
     exit 1
 } else {
-    If ((Get-Date).AddHours(-$maximumAgeHours) -ge (Get-Item -LiteralPath $logFile).LastWriteTime) {
+    if ((Get-Date).AddHours(-$maximumAgeHours) -ge (Get-Item -LiteralPath $logFile).LastWriteTime) {
         Write-Host "Log file found, it is at least $maximumAgeHours hours old."
         Write-Host 'Exit with error code 1 to trigger remediation script.'
 

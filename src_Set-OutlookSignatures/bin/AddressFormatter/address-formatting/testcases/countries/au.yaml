@@ -1,0 +1,107 @@
+# Australia (AU)
+---
+# -37.8134921, 144.956787658113
+description: Melbourne Magistrates' Court, -37.8134921, 144.956787658113
+components:
+    city: Melbourne
+    country: Australia
+    country_code: AU
+    county: City of Melbourne
+    courthouse: Melbourne Magistrates' Court
+    house_number: 223
+    postcode: 3000
+    road: William Street
+    state: Victoria
+    suburb: Melbourne
+expected:  |
+    Melbourne Magistrates' Court
+    223 William Street
+    Melbourne VIC 3000
+    Australia
+#
+# no city
+#
+---
+description: Road in suburb, -37.7319, 144.9381
+components:
+            country : Australia
+            country_code : au
+            county : City of Moreland
+            postcode : 3039
+            region : Greater Melbourne
+            road : Rainer Street
+            state : Victoria
+            suburb : Pascoe Vale South
+expected:  |
+    Rainer Street
+    Pascoe Vale South VIC 3039
+    Australia
+#
+# suburb should win over town
+#
+---
+description: suburb over town Sans Souci, -34.000,151.124
+components:
+         city: Sydney
+         country: Australia
+         country_code: au
+         county: Georges River Council
+         postcode: 2219
+         pub: St George Motor Boat Club
+         road: Vista Street
+         state: New South Wales
+         state_code: NSW
+         suburb: Sans Souci
+expected:  |
+    St George Motor Boat Club
+    Vista Street
+    Sans Souci NSW 2219
+    Australia
+#
+# suburb should win over town
+#
+---
+description: suburb over town Ashbury, -33.9,151.1229
+components:
+        city: Sydney
+        country: Australia
+        country_code: au
+        county: Canterbury-Bankstown Council
+        postcode: 2193
+        road: Fifth Street
+        state: New South Wales
+        state_code: NSW
+        suburb: Ashbury
+expected:  |
+    Fifth Street
+    Ashbury NSW 2193
+    Australia
+#
+# town and postcode, no street
+#
+---
+description: postcode and town
+components:
+    city: LASCELLES
+    country: Australia
+    country_code: au
+    postcode: 3487
+    state: VICTORIA
+expected:  |
+    LASCELLES VIC 3487
+    Australia
+#
+# city_district and postcode
+#
+---
+description: postcode and city_district
+components:
+    city_district: Lascelles
+    country: Australia
+    country_code: au
+    municipality: Shire of Yarriambiack
+    postcode: 3487
+    state: VICTORIA
+expected:  |
+    Lascelles VIC 3487
+    Australia

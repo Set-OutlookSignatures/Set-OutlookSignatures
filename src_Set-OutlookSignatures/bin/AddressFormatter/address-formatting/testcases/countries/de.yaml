@@ -1,0 +1,310 @@
+---
+description: no repetition
+components:
+    city: Berlin
+    country: Germany
+    country_code: DE
+    state: Berlin
+expected:  |
+    Berlin
+    Germany
+---
+description: Moabit!
+components:
+    city: Berlin
+    city_district: Mitte
+    country: Germany
+    country_code: de
+    state: Berlin
+    suburb: Moabit
+expected:  |
+    Moabit
+    Berlin
+    Germany
+---
+description: Alt-berlin
+components:
+            city: Alt-Berlin
+            city_district: Mitte
+            country: Germany
+            country_code: de
+            house_number: 7
+            neighbourhood: Scheunenviertel
+            pedestrian: Gontardstraße
+            postcode: 10178
+            state: Berlin
+            suburb: Mitte
+expected:  |
+    Gontardstraße 7
+    10178 Berlin
+    Germany
+---
+description: housenumber not house_number
+components:
+            city: Alt-Berlin
+            city_district: Mitte
+            country: Germany
+            country_code: de
+            housenumber: 7
+            neighbourhood: Scheunenviertel
+            pedestrian: Gontardstraße
+            postcode: 10178
+            state: Berlin
+            suburb: Mitte
+expected:  |
+    Gontardstraße 7
+    10178 Berlin
+    Germany
+---
+description: Köln, NRW
+components:
+    country: Germany
+    country_code: de
+    county: Cologne
+    state: North Rhine-Westphalia
+    state_district: Regierungsbezirk Köln
+expected:  |
+    Cologne
+    North Rhine-Westphalia
+    Germany
+---
+description: Köln, hamlet
+components:
+    country: Germany
+    country_code: de
+    county: Bayern
+    hamlet: Köln
+    state: Free State of Bavaria
+    state_district: Upper Bavaria
+expected:  |
+    Köln
+    Bavaria
+    Germany
+---
+description: Bonn formatting
+components:
+    address100: Bonn
+    country: Germany
+    country_code: de
+expected:  |
+    Bonn
+    Germany
+---
+description: Fabisch
+components:
+    city: Berlin
+    city_district: Mitte
+    country: Germany
+    country_code: DE
+    house_number: 1
+    neighbourhood: Scheunenviertel
+    postcode: 10119
+    restaurant: Fabisch
+    road: Rosenthaler Straße
+    state: Berlin
+    suburb: Mitte
+expected:  |
+    Fabisch
+    Rosenthaler Straße 1
+    10119 Berlin
+    Germany
+---
+description: Fabisch no city
+components:
+    city_district: Mitte
+    country: Germany
+    country_code: DE
+    house_number: 1
+    neighbourhood: Scheunenviertel
+    postcode: 10119
+    restaurant: Fabisch
+    road: Rosenthaler Straße
+    state: Berlin
+    suburb: Mitte
+expected:  |
+    Fabisch
+    Rosenthaler Straße 1
+    10119 Berlin
+    Germany
+---
+description: Heyerode
+components:
+    city_district: Heyerode
+    continent: Europa
+    country: Germany
+    country_code: de
+    county: Unstrut-Hainich-Kreis
+    postcode: 99988
+    state: Thüringen
+    village: Heyerode
+expected:  |
+    99988 Heyerode
+    Germany
+---
+description: Berlin state
+components:
+    country: Germany
+    country_code: de
+    state: Berlin
+expected:  |
+    Berlin
+    Germany
+---
+description: no middle comma
+components:
+    city: Landstuhl
+    country: Germany
+    country_code: de
+    county: Landstuhl
+    postcode: 66849
+    road: Bahnstraße
+    state: Rhineland-Palatinate
+    station: Landstuhl
+    suburb: Melkerei
+expected:  |
+    Landstuhl
+    Bahnstraße
+    66849 Landstuhl
+    Germany
+---
+# clean up come components
+description: Maxvorstadt, Munich
+components:
+    city: Munich
+    city_district: Stadtbezirk 03 Maxvorstadt
+    country: Germany
+    country_code: de
+    state: Free State of Bavaria
+    state_district: Upper Bavaria
+expected:  |
+    Maxvorstadt
+    Munich
+    Bavaria
+    Germany
+---
+# clean up postcode
+description: multiple postcodes 49.9886629614539, 9.1545295715332
+components:
+        building: DS Smith Paper Deutschland GmbH
+        country: Germany
+        country_code: de
+        county: Aschaffenburg
+        postcode: '63739,63741,63743'
+        road: Haselmühlweg
+        state: Free State of Bavaria
+        state_district: Lower Franconia
+        suburb: Damm
+        town: Aschaffenburg
+expected:  |
+    DS Smith Paper Deutschland GmbH
+    Haselmühlweg
+    63739 Aschaffenburg
+    Germany
+---
+#
+description: no city, use county (Kreis)
+components:
+        city_district: 'Ortsbeirat 5 : Lütten Klein'
+        country: Germany
+        country_code: de
+        county: Rostock
+        house_number: 30
+        postcode: 18107
+        road: Turkuer Straße
+        state: Mecklenburg-Vorpommern
+        suburb: Lütten Klein
+expected:  |
+    Turkuer Straße 30
+    18107 Rostock
+    Germany
+---
+#
+description: city and town
+components:
+        city: Rhein-Sieg-Kreis
+        country: Germany
+        country_code: de
+        county: Rhein-Sieg-Kreis
+        house_number: 18
+        neighbourhood: Honnef
+        postcode: 53604
+        road: Bahnhofstraße
+        state: North Rhine-Westphalia
+        state_district: Cologne Government Region
+        suburb: Bondorf
+        town: Bad Honnef
+        unknown: Strich nach Punkt
+expected:  |
+    Strich nach Punkt
+    Bahnhofstraße 18
+    53604 Bad Honnef
+    Germany
+---
+#
+description: local_administrative_area and town in Berlin
+components:
+        city: Berlin
+        country: Germany
+        country_code: de
+        house_number: 29A
+        local_administrative_area: Pankow
+        neighbourhood: Kollwitzkiez
+        postcode: 10405
+        road: Jablonskistraße
+        state: Berlin
+        state_code: BE
+        suburb: Prenzlauer Berg
+expected:  |
+    Jablonskistraße 29A
+    10405 Berlin
+    Germany
+---
+#
+description: house in hamlet with no road 48.474124, 10.017457
+components:
+    city: Langenau
+    country: Deutschland
+    country_code: de
+    county: Alb-Donau-Kreis
+    hamlet: Witthau
+    house_number: 3
+    municipality: GVV Langenau
+    postcode: 89129
+    state: Baden-Württemberg
+    state_code: BW
+    town: Langenau
+expected:  |
+    Witthau 3
+    89129 Langenau
+    Deutschland
+---
+#
+description: village and town
+components:
+    country: Germany
+    country_code: de
+    county: Sächsische Schweiz-Osterzgebirge
+    postcode: "01744"
+    state: Saxony
+    state_code: SN
+    town: Dippoldiswalde
+    village: Oberhäslich
+expected:  |
+    01744 Oberhäslich
+    Germany
+---
+#
+description: village and town (fallback)
+components:
+    country: Germany
+    country_code: de
+    county: Landkreis Schwäbisch Hall
+    municipality: Verwaltungsgemeinschaft Schwäbisch Hall
+    state: Baden-Württemberg
+    state_code: BW
+    town: Schwäbisch Hall
+    village: Tüngental
+expected:  |
+    Tüngental
+    Baden-Württemberg
+    Germany

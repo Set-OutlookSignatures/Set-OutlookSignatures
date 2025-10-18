@@ -1,0 +1,35 @@
+---
+description: house in Oslo
+components:
+    city: Oslo
+    city_district: Gamle Oslo
+    country: Norway
+    country_code: "no"
+    county: Oslo
+    house_number: 28
+    neighbourhood: Arctanderbyen
+    postcode: "0650"
+    road: Åkebergveien
+    state: Oslo
+    suburb: Enerhaugen
+expected:  |
+    Åkebergveien 28
+    0650 Oslo
+    Norway
+---
+description: house in village with postal_city
+components:
+    country: Norge
+    country_code: "no"
+    county: Viken
+    house_number: 33
+    neighbourhood: Belset
+    postal_city: Rykkinn
+    postcode: 1349
+    road: Grindstuveien
+    suburb: Angerst
+    village: Ringvoll
+expected:  |
+    Grindstuveien 33
+    1349 Rykkinn
+    Norge

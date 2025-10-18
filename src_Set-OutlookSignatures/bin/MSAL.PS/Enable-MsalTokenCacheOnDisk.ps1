@@ -50,7 +50,7 @@ function Enable-MsalTokenCacheOnDisk {
         $cacheFileName = [System.IO.Path]::GetFileName($cacheFilePath)
         $cacheDir = [System.IO.Path]::GetDirectoryName($cacheFilePath)
 
-        if ($IsWindows) {
+        if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
             $storageProperties = [Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder]::new(
                 $cacheFileName,
                 $cacheDir
@@ -61,7 +61,7 @@ function Enable-MsalTokenCacheOnDisk {
             ).
             CustomizeLockRetry(1000, 3).
             Build()
-        } elseif ( $IsLinux ) {
+        } elseif ( ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) ) {
             $storageProperties = [Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder]::new(
                 $cacheFileName,
                 $cacheDir
@@ -79,7 +79,7 @@ function Enable-MsalTokenCacheOnDisk {
             ).
             CustomizeLockRetry(1000, 3).
             Build()
-        } elseif ($IsMacOS) {
+        } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
             $storageProperties = [Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder]::new(
                 $cacheFileName,
                 $cacheDir
@@ -106,16 +106,16 @@ function Enable-MsalTokenCacheOnDisk {
             $cacheHelper.VerifyPersistence()
 
             $ClientApplication | Add-Member -MemberType NoteProperty -Name 'cacheInfo' -Value $(
-                if ($IsWindows) {
+                if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
                     "Encrypted file '$($cacheFilePath)'"
-                } elseif ($IsLinux) {
+                } elseif ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
                     "Encrypted default keyring entry 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net'"
-                } elseif ($IsMacOS) {
+                } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
                     "Encrypted default keychain entry 'Set-OutlookSignatures Microsoft Graph token via MSAL.Net'"
                 }
             )
         } catch {
-            if ($IsWindows -or $IsMacOS) {
+            if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -or ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS)) {
                 $storageProperties = [Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder]::new(
                     $cacheFileName,
                     $cacheDir
@@ -127,7 +127,7 @@ function Enable-MsalTokenCacheOnDisk {
                 WithUnprotectedFile().
                 CustomizeLockRetry(1000, 3).
                 Build()
-            } elseif ($IsLinux) {
+            } elseif ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
                 $storageProperties = [Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder]::new(
                     $cacheFileName,
                     $cacheDir

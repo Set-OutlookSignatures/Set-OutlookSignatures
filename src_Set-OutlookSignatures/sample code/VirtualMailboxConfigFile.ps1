@@ -4,7 +4,7 @@ This sample code shows how to define the virtual mailboxes and additional signat
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers professional support for this and other open source code.
 
 Virtual mailboxes are mailboxes that are not available in Outlook but are treated by Set-OutlookSignatures as if they were.
 This is an option for scenarios where you want to deploy signatures with not only the $CurrentUser...$ but also

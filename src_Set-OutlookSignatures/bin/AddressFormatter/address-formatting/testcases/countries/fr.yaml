@@ -1,0 +1,298 @@
+---
+description: Toulouse
+components:
+     city: Toulouse
+     country: France
+     country_code: FR
+     county: Toulouse
+     house_number: 17
+     neighbourhood: Lafourguette
+     postcode: 31000
+     road: Rue du Médecin-Colonel Calbairac
+     state: Midi-Pyrénées
+     suburb: Toulouse Ouest
+expected:  |
+    17 Rue du Médecin-Colonel Calbairac
+    31000 Toulouse
+    France
+---
+#
+# dont show postcode ranges that are sometimes in OSM
+#
+description: remove postcode range
+components:
+            city: Mulhouse
+            country: France
+            country_code: fr
+            county: Mulhouse
+            postcode: 68100;68200
+            state: Alsace-Champagne-Ardenne-Lorraine
+expected:  |
+    Mulhouse
+    France
+#
+# French Guyana - part of France, but has its own country code
+#
+---
+description: House in Cayenne, 4.93802,-52.32985
+components:
+            country: France
+            country_code: fr
+            county: Cayenne
+            house_number: 53
+            neighbourhood: Cité Floralies
+            postcode: 97300
+            road: Rue du Lieutenant Becker
+            state: French Guiana
+            town: Cayenne
+expected:  |
+    53 Rue du Lieutenant Becker
+    97300 Cayenne
+    France
+#
+# French Polynesia (PF)
+#
+---
+description: Office in Papeete, -17.53714,-149.56608
+components:
+        building: Mairie (bureaux administratifs)
+        city: Papeete
+        country: Polynésie française, Îles du Vent (eaux territoriales)
+        country_code: fr
+        county: Îles du Vent
+        postcode: 98714
+        road: Rue des Remparts
+        state: French Polynesia
+expected:  |
+    Mairie (bureaux administratifs)
+    Rue des Remparts
+    98714 Papeete
+    Polynésie française
+#
+# Mayotte (YT)
+#
+---
+description: Government building in Mamoudzou, -12.77958,45.23145
+components:
+        building: Conseil Général de Mayotte
+        country: France, Mayotte (eaux territoriales)
+        country_code: fr
+        postcode: 97600
+        road: Rue Houmadi Bacar
+        state: Mayotte
+        town: Mamoudzou
+expected:  |
+    Conseil Général de Mayotte
+    Rue Houmadi Bacar
+    97600 Mamoudzou
+    Mayotte, France
+#
+# Réunion (RE)
+#
+---
+description: Building in Le Port, -20.93750,55.29020
+components:
+        city: Le Port
+        country: France, La Réunion (eaux territoriales)
+        country_code: fr
+        county: Saint-Paul
+        house_number: 17
+        postcode: 97420
+        road: Rue François de Mahy
+        state: Réunion
+expected:  |
+    17 Rue François de Mahy
+    97420 Le Port
+    La Réunion, France
+#
+# Saint Pierre and Miquelon (PM)
+#
+---
+description: Building in Miquelon, 47.10099,-56.37706
+components:
+        building: Société nouvelle des pêches de Miquelon
+        city: Miquelon-Langlade
+        country: France
+        country_code: fr
+        postcode: 97500
+        road: Rue Jacques Vigneau
+        state: Saint Pierre and Miquelon
+expected:  |
+    Société nouvelle des pêches de Miquelon
+    Rue Jacques Vigneau
+    97500 Miquelon-Langlade
+    France
+#
+# New Caledonia (NC), a special collectivity of France
+#
+---
+description: Building in Nouméa, -22.27039,166.44270
+components:
+        building: Immeuble Maréchal Foch
+        city: Nouméa
+        city_district: Secteur Ouest
+        country: France, Nouvelle-Calédonie, Grande Terre et récifs d'Entrecasteaux (eaux territoriales)
+        country_code: fr
+        county: Province Sud
+        postcode: 98800
+        road: Rue Jean Jaurès
+        state: New Caledonia
+        suburb: Centre-Ville
+expected:  |
+    Immeuble Maréchal Foch
+    Rue Jean Jaurès
+    98800 Nouméa
+    Nouvelle-Calédonie, France
+
+#
+# road_reference
+#
+---
+description: road, 48.406168,2.55452
+components:
+            country : France
+            country_code : fr
+            county : Fontainebleau
+            postcode : 77630
+            road : Autoroute du Soleil
+            road_reference : A 6
+            road_reference_intl : E 15
+            state : Ile-de-France
+            village : Arbonne-la-Forêt
+expected:  |
+    Autoroute du Soleil
+    77630 Arbonne-la-Forêt
+    France
+#
+# road_reference
+#
+---
+description: road_reference, 48.406168,2.55452
+components:
+    country : France
+    country_code : fr
+    county : Fontainebleau
+    postcode : 77630
+    road_reference : A 6
+    road_reference_intl : E 15
+    state : Ile-de-France
+    village : Arbonne-la-Forêt
+expected:  |
+    A 6
+    77630 Arbonne-la-Forêt
+    France
+#
+# road_reference
+#
+---
+description: road_reference_intl, 48.406168,2.55452
+components:
+            country : France
+            country_code : fr
+            county : Fontainebleau
+            postcode : 77630
+            road_reference_intl : E 15
+            state : Ile-de-France
+            village : Arbonne-la-Forêt
+expected:  |
+    E 15
+    77630 Arbonne-la-Forêt
+    France
+#
+# town and municpality
+#
+---
+description: 43.42981,6.77514
+components:
+    amenity: A1X4E0
+    country: France
+    country_code: fr
+    county: Var
+    municipality: Draguignan
+    postcode: 83700
+    road: Avenue du XVe Corps
+    state: Provence-Alpes-Côte dAzur
+    suburb: Valescure
+    town: Saint-Raphaël
+expected:  |
+    A1X4E0
+    Avenue du XVe Corps
+    83700 Saint-Raphaël
+    France
+#
+# Paris, remove Arrondissement
+#
+---
+description: 48.8564, 2.2961
+components:
+    city: Paris 7e Arrondissement
+    country: France
+    country_code: fr
+    house_number: 15
+    postcode: 75007
+    state: Île-de-France
+    state_district: Paris
+    street: Avenue Charles Floquet
+expected:  |
+    15 Avenue Charles Floquet
+    75007 Paris
+    France
+#
+# village and municpality
+#
+---
+description: 45.08523,5.73302
+components:
+    country: France
+    country_code: fr
+    county: Isère
+    house_number: 83
+    municipality: Grenoble
+    neighbourhood: Lotissement des cartonneries
+    postcode: 38560
+    road: Avenue Jean Navarre
+    state: Auvergne-Rhône-Alpes
+    state_code: ARA
+    village: Champ-sur-Drac
+expected:  |
+    83 Avenue Jean Navarre
+    38560 Champ-sur-Drac
+    France
+#
+# hamlet and town
+#
+---
+description: 7.06073496297967,6.60534772183623
+components:
+    country: France
+    country_code: fr
+    county: Doubs
+    hamlet: Les Communaux
+    house_number: 20
+    municipality: Pontarlier
+    postcode: 25500
+    road: Rue Antoine de Roche
+    state: Bourgogne-Franche-Comté
+    state_code: BFC
+    town: Morteau
+expected:  |
+    20 Rue Antoine de Roche
+    25500 Morteau
+    France
+---
+description: 48.80868,7.78761
+components:
+    country: France
+    country_code: fr
+    county: Bas-Rhin
+    municipality: Haguenau-Wissembourg
+    postcode: 67500
+    region: Metropolitan France
+    road: Rue des Voituriers
+    state: Grand Est
+    state_code: GES
+    town: Haguenau
+expected: |
+    Rue des Voituriers
+    67500 Haguenau
+    France

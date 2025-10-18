@@ -1,0 +1,37 @@
+country:
+     Central African Republic: CAR
+     Democratic Republic of Congo: DRC
+     New Zealand: NZ
+     United Arab Emirates: UAE
+     United Kingdom: UK
+     United States of America: USA
+     United States Virgin Islands: USVI
+road:
+     Alley: Aly
+     Arcade: Arc
+     Avenue: Ave
+     Boulevard: Blvd
+     Circle: Cl
+     Court: Ct
+     Crescent: Cres
+     Crossroad: XRD
+     Drive: Dr
+     Esplanade: Esp
+     Expressway: EXPY
+     Extension: Ext
+     Freeway: Fwy
+     Grove: Gr
+     Highway: HWY
+     Junior: Jr
+     Lane: Ln
+     Mountain: Mtn
+     Northeast: NE
+     Northwest: NW
+     Place: Pl
+     Road: Rd
+     Southeast: SE
+     Southwest: SW
+     Square: Sq
+     Street: St
+     Terrace: Tce
+     Throughway: TRWY

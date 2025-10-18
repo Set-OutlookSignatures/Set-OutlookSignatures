@@ -1,0 +1,46 @@
+# China
+---
+description: Building in Shanghai, 31.23980,121.49316
+components:
+        building: 万向大厦
+        country: China
+        country_code: cn
+        county: Pudong New District
+        house_number: 99号
+        neighbourhood: Lijuazui
+        postcode: 200120
+        road: West Lujiazui Road
+        state: Shanghai
+expected:  |
+    200120 China
+    Shanghai
+    Pudong New District
+    Lijuazui
+    West Lujiazui Road 99号
+    万向大厦
+---
+description: Macau
+components:
+    country: China
+    country_code: cn
+    region: Macau
+expected:  |
+    Macau
+    China
+---
+description:
+components:
+    city: Nyingchi
+    country: China
+    country_code: cn
+    district: Bayi District
+    postcode: 860000
+    region: Nyingchi Prefecture
+    state: Tibet
+    town: Bayi
+expected:  |
+    860000 China
+    Tibet
+    Nyingchi
+
+

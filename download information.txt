@@ -1,9 +1,10 @@
 Set-OutlookSignatures
-Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy.
+Email signatures and out-of-office replies for Exchange and Outlook.
+Full-featured, cost-effective, unsurpassed data privacy.
 
 
 To download an official release, visit https://set-outlooksignatures.com/download/.
 
 
-ExplicIT Consulting's Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and fee-based support.
+ExplicIT Consulting's Benefactor Circle add-on enhances Set-OutlookSignatures with additional features and first-class professional support.
 Visit https://set-outlooksignatures.com/benefactorcircle for details.

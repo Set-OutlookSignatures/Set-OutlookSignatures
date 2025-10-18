@@ -189,40 +189,12 @@ $ReplaceHash['$CurrentMailboxManagerDisplayName$'] = [string]$ADPropsCurrentMail
 #   Dr. John Doe
 #   John Doe, PhD
 #   John Doe
-# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers professional support for this and other open source code.
 $ReplaceHash['$CurrentUserNameWithHonorifics$'] = (((((([string]$ADPropsCurrentUser.honorificPrefix, [string]$ADPropsCurrentUser.givenname, [string]$ADPropsCurrentUser.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUser.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
 $ReplaceHash['$CurrentUserManagerNameWithHonorifics$'] = (((((([string]$ADPropsCurrentUserManager.honorificPrefix, [string]$ADPropsCurrentUserManager.givenname, [string]$ADPropsCurrentUserManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentUserManager.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
 $ReplaceHash['$CurrentMailboxNameWithHonorifics$'] = (((((([string]$ADPropsCurrentMailbox.honorificPrefix, [string]$ADPropsCurrentMailbox.givenname, [string]$ADPropsCurrentMailbox.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailbox.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
 $ReplaceHash['$CurrentMailboxManagerNameWithHonorifics$'] = (((((([string]$ADPropsCurrentMailboxManager.honorificPrefix, [string]$ADPropsCurrentMailboxManager.givenname, [string]$ADPropsCurrentMailboxManager.sn) | Where-Object { $_ -ne '' }) -join ' '), [string]$ADPropsCurrentMailboxManager.honorificSuffix) | Where-Object { $_ -ne '' }) -join ', ')
 
-
-# Sample code: Create MeCard (vCard alternative) QR codes and save the images in the following replacement variables:
-#   $CurrentUserCustomImage1$, $CurrentUserManagerCustomImage1$, $CurrentMailboxCustomImage1$, $CurrentMailboxManagerCustomImage1$
-# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
-@('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager') | ForEach-Object {
-    $QRCodeContent = @(
-        @(
-            @(
-                'MECARD:'
-                "N:$($ReplaceHash['$' + $_ + 'Surname$']),$($ReplaceHash['$' + $_ + 'GivenName$']);"
-                "NOTE:$($ReplaceHash['$' + $_ + 'Company$'])"
-                "$($ReplaceHash['$' + $_ + 'Title$']);"
-                "EMAIL:$($ReplaceHash['$' + $_ + 'Mail$']);"
-                "TEL:$($ReplaceHash['$' + $_ + 'Mobile$']);"
-                "ADR:$($ReplaceHash['$' + $_ + 'StreetAddress$'])"
-                "$("$($ReplaceHash['$' + $_ + 'Postalcode$']) $($ReplaceHash['$' + $_ + 'Location$'])")"
-                "$($ReplaceHash['$' + $_ + 'State$'])"
-                "$($ReplaceHash['$' + $_ + 'Country$']);"
-                'URL:explicitconsulting.at;'
-                ';'
-            ) | ForEach-Object { $_.trim() }
-        ) | Where-Object { $_ -and (-not $_.EndsWith(':;')) -and (-not $_.EndsWith(':,;')) }
-    ) -join ("`r`n") -replace ':\r\n;', ':;' -replace '\r\n(.*):;', ''
-
-    if ($QRCodeContent -notmatch '\r\nN:.*;\r\n') { $QRCodeContent = 'https://explicitconsulting.at' }
-
-    $ReplaceHash['$' + $_ + 'CustomImage1$'] = ((New-Object -TypeName QRCoder.PngByteQRCode -ArgumentList ((New-Object -TypeName QRCoder.QRCodeGenerator).CreateQrCode($QRCodeContent, 'L', $true))).GetGraphic(20, [byte[]]@(0, 0, 0), [byte[]]@(255, 255, 255), $false))
-}
 
 
 # Sample code: Take salutation or gender pronouns string from Extension Attribute 3
@@ -232,7 +204,7 @@ $ReplaceHash['$CurrentMailboxManagerNameWithHonorifics$'] = (((((([string]$ADPro
 #   If ExtensionAttribute3 is not empty or whitespace, put it in brackets and add a leading space
 #     Examples: " (Mr.)", " (Ms.)", " (she/her)"
 #   Else: '' (emtpy string)
-# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers professional support for this and other open source code.
 $ReplaceHash['$CurrentUserSalutation$'] = $ReplaceHash['$CurrentUserGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentUser.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentUser.extensionattribute3))" })
 $ReplaceHash['$CurrentUserManagerSalutation$'] = $ReplaceHash['$CurrentUserManagerGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentUserManager.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentUserManager.extensionattribute3))" })
 $ReplaceHash['$CurrentMailboxSalutation$'] = $ReplaceHash['$CurrentMailboxGenderPronouns$'] = $(if ([string]::IsNullOrWhiteSpace([string]$ADPropsCurrentMailbox.extensionattribute3)) { $null } else { " ($([string]$ADPropsCurrentMailbox.extensionattribute3))" })
@@ -244,3 +216,183 @@ $ReplaceHash['$CurrentUserMobile-prefix-noempty$'] = $(if (-not $ReplaceHash['$C
 
 $ReplaceHash['$CurrentUserTelephone-noempty$'] = $(if (-not $ReplaceHash['$CurrentUserTelephone$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Telephone: ' } )
 $ReplaceHash['$CurrentUserMobile-noempty$'] = $(if (-not $ReplaceHash['$CurrentUserMobile$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Mobile: ' } )
+
+
+# Create $Current[user|Manager|Mailbox|MailboxManager][Telephone|Fax|Mobile]-[E164|INTERNATIONAL|NATIONAL|RFC3966]$ replacement variables
+# FormatPhoneNumber: Format phone number in different formats
+# Examples
+#   FormatPhoneNumber -Number $ReplaceHash['$CurrentUserTelephone$'] -Country $ReplaceHash['$CurrentUserCountry$'] -Format 'INTERNATIONAL'
+#   FormatPhoneNumber -Number $ReplaceHash['$CurrentUserTelephone$'] -Country $ReplaceHash['$CurrentUserCountry$'] -Format 'RFC3966'
+# Parameters
+#   Number
+#     The phone number to format or parse, as a string. Can include country code or be in local format.
+#       Extensions can only be detected reliably when marked with common indicators such as "ext", "ext.", "x", "x.", ";ext=", ",", or ";".
+#         There is comprehensive public information about country codes and national destination codes, but not on how
+#           carriers actually handle numbers they assign. Service numbers, short numbers, portable numbers make automatic extension detection practically impossible.
+#    Country
+#      Either a two-letter ISO country code (e.g., "AT", "US") or full English country name (e.g., "Austria", "United States").
+#      Required when the phone number does not include a country code such as +43 or +1.
+#        Country codes starting with 00 ('+0043 ...') can only be interpreted correctly if the Country parameter is specified.
+#    Format
+#      Desired phone number format.
+#      Examples are based on two numbers:
+#        '+1 305 418 9136,56', which is '305 418 9136 ext 56' with country set to 'US'.
+#        '+43 50 123456,7890', which is '050 123456 ext 7890' with country set to 'AT'.
+#      Format is one of the following:
+#        E164
+#          International format used for carrier routing. Not intended to be displayed to end users.
+#          Examples (note the missing extension):
+#            +13054189136
+#            +4350123456
+#        INTERNATIONAL
+#          Displaying numbers to users in a global context (e.g., contact lists, websites).
+#          Examples:
+#            +1 305-418-9136 ext. 56
+#            +43 50 123 456 ext. 7890
+#        NATIONAL
+#          Local format as dialed within the country, no country code.
+#          Examples:
+#            (305) 418-9136 ext. 56
+#            050 123 456 ext. 7890
+#        RFC3966
+#          Embedding phone numbers in hyperlinks (tel:+43-1-23456789) or machine-readable formats.
+#          Examples:
+#            tel:+1-305-418-9136;ext=56
+#            tel:+43-50-123-456;ext=7890
+#        CUSTOM
+#          Useful when you need to extract parts of the phone number for custom formatting.
+#          Returns an object with the following properties:
+#            CountryCode (int), NationalDestinationCode (string), SubscriberNumber (string), Extension (string),
+#            ParseResult (a PhoneNumber object), OriginalInput (string), ErrorMessage (string)
+#          Examples:
+#            CountryCode 1, NationDesitionCode 305, SubscriberNumber 4189136, Extension 56
+#            CountryCode 43, NationalDestinationCode 50, SubscriberNumber 123456, Extension 7890
+foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager')) {
+    foreach ($y in @('Telephone', 'Fax', 'Mobile')) {
+        foreach ($z in @('E164', 'INTERNATIONAL', 'NATIONAL', 'RFC3966')) {
+            $ReplaceHash["`$$($x)$($y)-$($z)`$"] = FormatPhoneNumber -Number $ReplaceHash["`$$($x)$($y)`$"] -Country $ReplaceHash["`$$($x)Country`$"] -Format $z
+        }
+    }
+}
+
+# Example: Custom formatting in a (technically wrong) style often seen in German speaking countries
+#   '+1 305 418 9136,56' -> '+1 (0) 305 4189136 DW 56'
+#   '+43 50 123456,7890' -> '+43 (0) 50 123456 DW 7890'
+<#
+foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager')) {
+    foreach ($y in @('Telephone', 'Fax', 'Mobile')) {
+        , (FormatPhoneNumber -Number $ReplaceHash["`$$($x)$($y)`$"] -Country $ReplaceHash["`$$($x)Country`$"] -Format CUSTOM) | ForEach-Object {
+            $ReplaceHash["`$$($x)$($y)-CustomGermanFormat`$"] = $(
+                if ($_.ErrorMessage) {
+                    $_.OriginalInput
+                } else {
+                    @(
+                        @(
+                            "+$($_.CountryCode)"
+                            '(0)'
+                            "$($_.NationalDestinationCode)"
+                            "$($_.SubscriberNumber)"
+                            "$(if ($_.Extension) { "DW $($_.Extension)" } else { '' } )"
+                        ) | Where-Object { $_ }
+                    ) -join ' '
+                }
+            )
+        }
+    }
+}
+#>
+
+
+# Sample code: Create vCard QR codes and save the images in the following replacement variables:
+#   $CurrentUserCustomImage1$, $CurrentUserManagerCustomImage1$, $CurrentMailboxCustomImage1$, $CurrentMailboxManagerCustomImage1$
+# You are not limited to vCard, you can create any QR code content you like.
+# Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers professional support for this and other open source code.
+@('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager') | ForEach-Object {
+    $QRCodeContent = @(
+        @(
+            @(
+                'BEGIN:VCARD'
+                'VERSION:2.1'
+                "N:$($ReplaceHash['$' + $_ + 'Surname$']);$($ReplaceHash['$' + $_ + 'GivenName$']);;$([string](Get-Variable -Name "ADProps$($_)" -ValueOnly).honorificPrefix);$([string](Get-Variable -Name "ADProps$($_)" -ValueOnly).honorificSuffix)"
+                "TITLE:$($ReplaceHash['$' + $_ + 'Title$'])"
+                "ORG:$($ReplaceHash['$' + $_ + 'Company$'])"
+                "EMAIL;WORK;INTERNET:$($ReplaceHash['$' + $_ + 'Mail$'])"
+                "TEL;WORK;VOICE:$($ReplaceHash['$' + $_ + 'Telephone-RFC3966$'] -ireplace 'tel:', '' -ireplace ';ext=', ',')"
+                "TEL;WORK;CELL:$($ReplaceHash['$' + $_ + 'Mobile-RFC3966$'] -ireplace 'tel:', '' -ireplace ';ext=', ',')"
+                "ADR;WORK:;;$($ReplaceHash['$' + $_ + 'StreetAddress$']);$($ReplaceHash['$' + $_ + 'Location$']);$($ReplaceHash['$' + $_ + 'State$']);$($ReplaceHash['$' + $_ + 'Postalcode$']);$($ReplaceHash['$' + $_ + 'Country$'])"
+                'END:VCARD'
+            ) | ForEach-Object { $_.trim() }
+        ) | Where-Object { $_ -and (-not $_.EndsWith(':')) }
+    ) -join ("`r`n")
+
+    if ($QRCodeContent -notmatch '\r\nN:.*\r\n') { $QRCodeContent = 'https://set-outlooksignatures.com' }
+
+    $ReplaceHash['$' + $_ + 'CustomImage1$'] = ((New-Object -TypeName QRCoder.PngByteQRCode -ArgumentList ((New-Object -TypeName QRCoder.QRCodeGenerator).CreateQrCode($QRCodeContent, 'L', $true))).GetGraphic(20, [byte[]]@(0, 0, 0), [byte[]]@(255, 255, 255), $false))
+}
+
+
+# Format an address according to country specific rules
+#   Create $Current[user|Manager|Mailbox|MailboxManager]PostalAddress$ replacement variables
+foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager')) {
+    $FormatPostAddressOptions = @{
+        # Address components as described in https://github.com/OpenCageData/address-formatting/blob/master/conf/components.yaml
+        Components      = @{
+            attention = @(
+                "$($ReplaceHash["`$$($x)GivenName`$"]) $($ReplaceHash["`$$($x)Surname`$"])"
+                "$($ReplaceHash["`$$($x)Department`$"])"
+                "$($ReplaceHash["`$$($x)Company`$"])"
+            ) -join [System.Environment]::NewLine
+            road      = $ReplaceHash["`$$($x)StreetAddress`$"]
+            city      = $ReplaceHash["`$$($x)Location`$"]
+            postcode  = $ReplaceHash["`$$($x)Postalcode`$"]
+            state     = $ReplaceHash["`$$($x)State`$"]
+            country   = $ReplaceHash["`$$($x)Country`$"]
+        }
+
+        # Country as two-letter ISO country code (e.g., "AT", "US") or full English country name (e.g., "Austria", "United States")
+        #   Needed to choose correct address format rules
+        Country         = $(
+            $tempSearchString = $ReplaceHash["`$$($x)Country`$"]
+            ( 
+                @(
+                    foreach ($tempSpecificCulture in [System.Globalization.CultureInfo]::GetCultures('SpecificCultures')) {
+                        $tempRegionInfo = New-Object System.Globalization.RegionInfo($tempSpecificCulture)
+
+                        if (
+                            [System.Globalization.CultureInfo]::InvariantCulture.CompareInfo.IndexOf(
+                                ('|' + $(
+                                    @(
+                                        foreach ($attribute in @('Name', 'EnglishName', 'DisplayName', 'NativeName', 'TwoLetterISORegionName', 'ThreeLetterISORegionName', 'ThreeLetterWindowsRegionName')) {
+                                            (($tempRegionInfo.$attribute).Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower()
+                                        }
+                                    ) -join '|'
+                                ) + '|'),
+                                ('|' + ($tempSearchString.Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower() + '|'),
+                                [System.Globalization.CompareOptions]::IgnoreCase -bor [System.Globalization.CompareOptions]::IgnoreNonSpace -bor [System.Globalization.CompareOptions]::IgnoreKanaType -bor [System.Globalization.CompareOptions]::IgnoreWidth
+                            ) -ge 0
+                        ) {
+                            $tempRegionInfo
+                        }
+                    }
+                ) | Select-Object -First 1
+            ).TwoLetterISORegionName
+        )
+        # Shorten address components ("St." instead of "Street", "Rd." instead of "Road", etc.)
+        Abbreviate      = $false
+
+        # Only return known parts of the address, omit unknown parts
+        #   When disabled, unknown parts are added the the "attention" component
+        OnlyAddress     = $false
+
+        # Use a custom address template instead of the predefined ones
+        #   Predefined templates: https://github.com/OpenCageData/address-formatting/blob/master/conf/countries/worldwide.yaml
+        AddressTemplate = $null
+    }
+
+    $ReplaceHash["`$$($x)PostalAddress`$"] = Format-PostalAddress @FormatPostAddressOptions
+}
+
+
+
+
+

@@ -8,10 +8,12 @@ at https://set-outlooksignatures.com/faq for details
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting offers fee-based support for this and other open source code:
+Would you like support? ExplicIT Consulting offers professional support for this and other open source code:
 https://set-outlooksignatures.com/support
 #>
 
+
+#Requires -Version 5.1
 
 [CmdletBinding()] param ()
 
@@ -57,6 +59,13 @@ if ($psISE) {
     exit 1
 }
 
+
+if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
+    Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+    Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+    exit 1
+}
+
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
 
@@ -91,7 +100,7 @@ try {
             try {
                 Invoke-WebRequest -Uri "https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/download/$($VersionToUse)/Set-OutlookSignatures_$($VersionToUse).zip" -UseBasicParsing -OutFile $tempFile
             } catch {
-                Write-Host $error[0]
+                Write-Host ($error[0] | Format-List * | Out-String)
 
                 Write-Host "Error accessing '$("https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/download/$($VersionToUse)/Set-OutlookSignatures_$($VersionToUse).zip")'."
                 Write-Host "Variable '`$VersionToUse' might not be defined correctly (current value: '$($VersionToUse)')."
@@ -100,7 +109,7 @@ try {
             }
             $ProgressPreference = $OldProgressPreference
 
-            @(@(Get-ChildItem -LiteralPath $SoftwarePath -Recurse -Force) | Select-Object *, @{Name = 'FolderDepth'; Expression = { $_.DirectoryName.Split('\').Count } } | Sort-Object -Culuture 127 -Descending -Property FolderDepth, FullName) | Remove-Item -Force -Recurse
+            @(@(Get-ChildItem -LiteralPath $SoftwarePath -Recurse -Force) | Select-Object *, @{Name = 'FolderDepth'; Expression = { $_.DirectoryName.Split('\').Count } } | Sort-Object -Culture 127 -Descending -Property FolderDepth, FullName) | Remove-Item -Force -Recurse
 
             Add-Type -Assembly System.IO.Compression.FileSystem
 
@@ -128,7 +137,7 @@ try {
 
             Remove-Item -LiteralPath $tempFile -Force
 
-            if (-not $IsLinux) {
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
                 Get-ChildItem -LiteralPath $SoftwarePath -Recurse | Unblock-File
             }
         }

@@ -1,0 +1,138 @@
+---
+# 43.6666,-79.7482
+description: Brampton Centennial Secondary School
+components:
+    city: Brampton
+    country: Canada
+    country_code: ca
+    house_number: 251
+    postcode: L6Y 1Z4
+    road: McMurchy Avenue South
+    school: Brampton Centennial Secondary School
+    state: Ontario
+    suburb: Ridgehill
+expected:  |
+    Brampton Centennial Secondary School
+    251 McMurchy Avenue South
+    Brampton, ON L6Y 1Z4
+    Canada
+#
+#
+#
+---
+description: postcode and suburb
+components:
+    city: Toronto
+    country: Canada
+    country_code: ca
+    postcode: M6K1V2
+    state: Ontario
+    suburb: Parkdale
+expected:  |
+    Parkdale
+    Toronto, ON M6K 1V2
+    Canada
+#
+# London, Ontario
+#
+---
+description: city, state
+components:
+    city: London
+    country: Canada
+    country_code: ca
+    county: Middlesex County
+    state: Ontario
+    state_code: "ON"
+expected:  |
+    London, Ontario
+    Canada
+---
+# London treated as county
+description: London treated as county - 42.95608,-81.23792
+components:
+    country: Canada
+    country_code: ca
+    county: London
+    house_number: 6
+    neighbourhood: Lockwood Park
+    postcode: N6C 2W9
+    road: Cowan Avenue
+    state: Ontario
+    state_code: "ON"
+    state_district: Southwestern Ontario
+expected: |
+    6 Cowan Avenue
+    London, ON N6C 2W9
+    Canada
+---
+# 43.6666,-79.7482
+description: no housenumber
+components:
+    city: Brampton
+    country: Canada
+    country_code: ca
+    postcode: L6Y 1Z4
+    road: McMurchy Avenue South
+    school: Brampton Centennial Secondary School
+    state: Ontario
+    suburb: Ridgehill
+expected:  |
+    Brampton Centennial Secondary School
+    McMurchy Avenue South
+    Brampton, ON L6Y 1Z4
+    Canada
+---
+# 43.6666,-79.7482
+description: just county
+components:
+    country: Canada
+    country_code: ca
+    county: Springfield
+    state: Manitoba
+expected:  |
+    Springfield, Manitoba
+    Canada
+---
+# 43.60242, -79.80113
+description: locality
+components:
+    country: Canada
+    country_code: ca
+    county: Halton Region
+    house_number: 7931
+    locality: Halton Hills
+    municipality: Halton Hills
+    postcode: L5N 8P7
+    road: Tenth Line
+    state: Ontario
+    state_district: Golden Horseshoe
+expected:  |
+    7931 Tenth Line
+    Halton Hills, ON L5N 8P7
+    Canada
+---
+# postformat_replace applied to abbreviated street type
+description: postformat_replace applied to abbreviated street type
+components:
+    country: Canada
+    country_code: ca
+    house_number: 12345
+    locality: St-Hyancinth
+    postcode: J2T 3T5
+    road: Av Demars
+expected:  |
+    12345 Av Demars
+    St-Hyancinth, J2T 3T5
+    Canada
+---
+# region
+components:
+    country: Canada
+    country_code: ca
+    region: Greater Edmonton
+    state: Alberta
+    state_code: AB
+expected:  |
+    Greater Edmonton, Alberta
+    Canada

@@ -1,0 +1,82 @@
+# Philippines
+---
+description: restaurant in Manila
+components:
+    house_number: 1140
+    road: Alhambra
+    city: Ermita
+    postcode: 1000
+    county: Fifth District
+    country: Philippines
+    country_code: PH
+    restaurant: Emerald Garden
+    state: Metro Manila
+    suburb: Ermita
+expected:  |
+    Emerald Garden
+    1140 Alhambra, Ermita
+    1000 Metro Manila
+    Philippines
+---
+description: archipelago
+components:
+    archipelago: Mindanao
+    country: Philippines
+    country_code: ph
+expected:  |
+    Mindanao
+    Philippines
+---
+description: address
+components:
+    house_number: 121
+    road: Epifanio Delos Santos Ave.
+    city: Mandaluyong
+    postcode: 1550
+    suburb: Wack-wack Greenhills
+    county: Fifth District
+    country: Philippines
+    country_code: PH
+    attention: Mr. Juan Maliksi
+    state: Metro Manila
+expected:  |
+    Mr. Juan Maliksi
+    121 Epifanio Delos Santos Ave., Wack-wack Greenhills, Mandaluyong
+    1550 Metro Manila
+    Philippines
+---
+description: address - city_district instead of suburb
+components:
+    house_number: 121
+    road: Epifanio Delos Santos Ave.
+    city: Mandaluyong
+    postcode: 1550
+    city_district: Wack-wack Greenhills
+    county: Fifth District
+    country: Philippines
+    country_code: PH
+    attention: Mr. Juan Maliksi
+    state: Metro Manila
+expected:  |
+    Mr. Juan Maliksi
+    121 Epifanio Delos Santos Ave., Wack-wack Greenhills, Mandaluyong
+    1550 Metro Manila
+    Philippines
+---
+# https://nominatim.openstreetmap.org/ui/details.html?osmtype=N&osmid=11556052391&class=amenity
+description: address - ignore additional region
+components:
+    road: Gerona - Pura Road
+    village: Poblacion 1
+    postcode: 2312
+    municipality: Pura
+    province: Tarlac
+    region: Central Luzon
+    country: Philippines
+    country_code: PH
+    attention: PYS Pharmacy
+expected:  |
+    PYS Pharmacy
+    Gerona - Pura Road, Poblacion 1
+    2312 Pura
+    Philippines

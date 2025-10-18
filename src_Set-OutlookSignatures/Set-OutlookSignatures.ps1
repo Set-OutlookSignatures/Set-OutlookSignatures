@@ -1,7 +1,7 @@
 ﻿<#
 .SYNOPSIS
 Set-OutlookSignatures XXXVersionStringXXX
-Email signatures and out-of-office replies for Exchange and all of Outlook.
+Email signatures and out-of-office replies for Exchange and Outlook.
 Full-featured, cost-effective, unsurpassed data privacy.
 
 .DESCRIPTION
@@ -49,6 +49,8 @@ License : See '.\LICENSE.txt' for details and copyright
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesWriteProtect')]
 
 
+#Requires -Version 5.1
+
 [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'Z: All parameters')]
 
 
@@ -70,7 +72,7 @@ param(
     [Parameter(Mandatory = $false, ParameterSetName = 'C: OOF messages')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
-    $UseHtmTemplates = $(if ($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) { $false } else { $true }),
+    $UseHtmTemplates = $(if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) { $false } else { $true }),
 
     # Path to centrally managed signature templates
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
@@ -199,7 +201,7 @@ param(
     [Parameter(Mandatory = $false, ParameterSetName = 'E: Graph and Active Directory')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
-    $GraphOnly = $(if ($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) { $false } else { $true }),
+    $GraphOnly = $(if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) { $false } else { $true }),
 
     # GraphClientID, later overwritten by $GraphConfigFile
     [Parameter(Mandatory = $false, ParameterSetName = 'E: Graph and Active Directory')]
@@ -508,7 +510,7 @@ function BlockSleep {
         }
     }
 
-    if ($isWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) {
+    if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
         $code = @'
 [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 public static extern void SetThreadExecutionState(uint esFlags);
@@ -529,7 +531,7 @@ public static extern void SetThreadExecutionState(uint esFlags);
         }
 
         $ste::SetThreadExecutionState($flags)
-    } elseif ($isLinux) {
+    } elseif ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
         if (Get-Command systemd-inhibit -ErrorAction SilentlyContinue) {
             if ($script:BlockSleepInhibitPID) {
                 Stop-Process -Id $script:BlockSleepInhibitPID -Force
@@ -542,7 +544,7 @@ public static extern void SetThreadExecutionState(uint esFlags);
         } else {
             Write-Host "  'systemd-inhibit' is not available."
         }
-    } elseif ($isMacOS) {
+    } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
         if (Get-Command caffeinate -ErrorAction SilentlyContinue) {
             if ($script:BlockSleepInhibitPID) {
                 Stop-Process -Id $script:BlockSleepInhibitPID -Force
@@ -587,12 +589,193 @@ function main {
     try { WatchCatchableExitSignal } catch { }
 
 
-    # Import QRCoder
+    Write-Host
+    Write-Host "Loading and initializing dependencies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+    Write-Host '  QRCoder'
     $script:QRCoderModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
     Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\QRCoder\netstandard2.0')) -Destination $script:QRCoderModulePath -Recurse
-    if (-not $IsLinux) { Get-ChildItem -LiteralPath $script:QRCoderModulePath -Recurse | Unblock-File }
+    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:QRCoderModulePath -Recurse | Unblock-File }
     Import-Module (Join-Path -Path $script:QRCoderModulePath -ChildPath 'QRCoder.dll')
+
+
+    try { WatchCatchableExitSignal } catch { }
+
+
+    Write-Host '  libphonenumber-csharp'
+    $script:LibPhoneNumberModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
+
+    Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\libphonenumber\netstandard2.0')) -Destination $script:LibPhoneNumberModulePath -Recurse
+    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:LibPhoneNumberModulePath -Recurse | Unblock-File }
+    Import-Module (Join-Path -Path $script:LibPhoneNumberModulePath -ChildPath 'PhoneNumbers.dll')
+
+    # Sample code: Format phone number in different formats
+    # Examples:
+    #   FormatPhoneNumber -Number $ReplaceHash['$CurrentUserTelephone$'] -Country $ReplaceHash['$CurrentUserCountry$'] -Format 'INTERNATIONAL'
+    #   FormatPhoneNumber -Number $ReplaceHash['$CurrentUserTelephone$'] -Country $ReplaceHash['$CurrentUserCountry$'] -Format 'RFC3966'
+    function FormatPhoneNumber {
+        param (
+            # The phone number to format or parse. Can include country code or be in local format.
+            #   Extensions can only be detected reliably when marked with common indicators such as "ext", "ext.", "x", "x.", ";ext=", ",", or ";".
+            #     There is comprehensive public information about country codes and national destination codes, but not on how
+            #       carriers actually handle numbers they assign. Service numbers, short numbers, portable numbers make automatic extension detection practically impossible.
+            [string]$Number,
+
+            # Either a two-letter ISO country code (e.g., "AT", "US") or full English country name (e.g., "Austria", "United States").
+            # Required when the phone number does not include a country code such as +43 or +1.
+            #   Country codes starting with 00 ('+0043 ...') can only be interpreted correctly if the Country parameter is specified.
+            # As full country names are supported, you can also use one of the default replacement variables:
+            #   $ReplaceHash['$CurrentUserCountry$']
+            #   $ReplaceHash['$CurrentUserManagerCountry$']
+            #   $ReplaceHash['$CurrentMailboxCountry$']
+            #   $ReplaceHash['$CurrentMailboxManagerCountry$']
+            [string]$Country = 'Austria',
+
+            # Desired phone number format.
+            # Examples are based on two numbers:
+            #   '+1 305 418 9136,56', which is '305 418 9136 ext 56' with country set to 'US'.
+            #   '+43 50 123456,7890', which is '050 123456 ext 7890' with country set to 'AT'.
+            # Format is one of the following:
+            #   E164
+            #     International format used for carrier routing. Not intended to be displayed to end users.
+            #     Examples (note the missing extension):
+            #       +13054189136
+            #       +4350123456
+            #   INTERNATIONAL
+            #     Displaying numbers to users in a global context (e.g., contact lists, websites).
+            #     Examples:
+            #       +1 305-418-9136 ext. 56
+            #       +43 50 123 456 ext. 7890
+            #   NATIONAL
+            #     Local format as dialed within the country, no country code.
+            #     Examples:
+            #       (305) 418-9136 ext. 56
+            #       050 123 456 ext. 7890
+            #   RFC3966
+            #     Embedding phone numbers in hyperlinks (tel:+43-1-23456789) or machine-readable formats.
+            #     Examples:
+            #       tel:+1-305-418-9136;ext=56
+            #       tel:+43-50-123-456;ext=7890
+            #   CUSTOM
+            #     Useful when you need to extract parts of the phone number for custom formatting.
+            #     Returns an object with the following properties:
+            #       CountryCode (int), NationalDestinationCode (string), SubscriberNumber (string), Extension (string),
+            #       ParseResult (a PhoneNumber object), OriginalInput (string), ErrorMessage (string)
+            #     Examples:
+            #       CountryCode 1, NationDesitionCode 305, SubscriberNumber 4189136, Extension 56
+            #       CountryCode 43, NationalDestinationCode 50, SubscriberNumber 123456, Extension 7890
+            [ValidateSet('E164', 'INTERNATIONAL', 'NATIONAL', 'RFC3966', 'CUSTOM', IgnoreCase = $true)]
+            [string]$Format = 'International'
+        )
+
+        try {
+            if ($Country.Length -ne 2) {
+                $Country = $(
+                    $tempSearchString = $Country
+                    (
+                        @(
+                            foreach ($tempSpecificCulture in [System.Globalization.CultureInfo]::GetCultures('SpecificCultures')) {
+                                $tempRegionInfo = New-Object System.Globalization.RegionInfo($tempSpecificCulture)
+
+                                if (
+                                    [System.Globalization.CultureInfo]::InvariantCulture.CompareInfo.IndexOf(
+                                        ('|' + $(
+                                            @(
+                                                foreach ($attribute in @('Name', 'EnglishName', 'DisplayName', 'NativeName', 'TwoLetterISORegionName', 'ThreeLetterISORegionName', 'ThreeLetterWindowsRegionName')) {
+                                                    (($tempRegionInfo.$attribute).Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower()
+                                                }
+                                            ) -join '|'
+                                        ) + '|'),
+                                        ('|' + ($tempSearchString.Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower() + '|'),
+                                        [System.Globalization.CompareOptions]::IgnoreCase -bor [System.Globalization.CompareOptions]::IgnoreNonSpace -bor [System.Globalization.CompareOptions]::IgnoreKanaType -bor [System.Globalization.CompareOptions]::IgnoreWidth
+                                    ) -ge 0
+                                ) {
+                                    $tempRegionInfo
+                                }
+                            }
+                        ) | Select-Object -First 1
+                    ).TwoLetterISORegionName
+                )
+            }
+
+            $Country = $Country.ToUpper()
+
+            # Get PhoneNumberUtil instance
+            $phoneUtil = [PhoneNumbers.PhoneNumberUtil]::GetInstance()
+
+            if ($phoneUtil.IsPossibleNumber($Number, $Country)) {
+                $NumberParsed = $phoneUtil.Parse($Number, $Country)
+
+                if ($Format -ieq 'CUSTOM') {
+                    return [PSCustomObject]@{
+                        CountryCode             = $NumberParsed.CountryCode
+                        NationalDestinationCode = $NumberParsed.NationalNumber.ToString().Substring(0, $phoneUtil.GetLengthOfNationalDestinationCode($NumberParsed))
+                        SubscriberNumber        = $NumberParsed.NationalNumber.ToString().Substring($phoneUtil.GetLengthOfNationalDestinationCode($NumberParsed))
+                        Extension               = $NumberParsed.Extension
+                        ParseResult             = $NumberParsed
+                        OriginalInput           = $Number
+                        ErrorMessage            = $null
+                    }
+                } else {
+                    return $phoneUtil.Format($NumberParsed, [PhoneNumbers.PhoneNumberFormat]::$Format).ToString().Trim()
+                }
+            } else {
+                if ($Format -ieq 'CUSTOM') {
+                    return [PSCustomObject]@{
+                        CountryCode             = $null
+                        NationalDestinationCode = $null
+                        SubscriberNumber        = $null
+                        Extension               = $null
+                        ParseResult             = $null
+                        OriginalInput           = $Number
+                        ErrorMessage            = "FormatPhoneNumber: IsPossibleNumber failed for '$($Number)'."
+                    }
+                } else {
+                    Write-Verbose "FormatPhoneNumber: IsPossibleNumber failed for '$($Number)'."
+
+                    return $Number
+                }
+            }
+        } catch {
+            Write-Host "FormatPhoneNumber error: $($_)" -ForegroundColor Red
+
+            if ($Format -ieq 'CUSTOM') {
+                return [PSCustomObject]@{
+                    CountryCode             = $null
+                    NationalDestinationCode = $null
+                    SubscriberNumber        = $null
+                    Extension               = $null
+                    ParseResult             = $null
+                    OriginalInput           = $Number
+                    ErrorMessage            = $_.Exception.Message
+                }
+            }
+
+            return $Number
+        }
+    }
+
+    try { WatchCatchableExitSignal } catch { }
+
+
+    Write-Host '  YamlDotNet'
+    $script:YamlDotNetModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
+
+    Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\YamlDotNet\netstandard2.0')) -Destination $script:YamlDotNetModulePath -Recurse
+    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:YamlDotNetModulePath -Recurse | Unblock-File }
+    Import-Module (Join-Path -Path $script:YamlDotNetModulePath -ChildPath 'YamlDotNet.dll')
+
+
+    try { WatchCatchableExitSignal } catch { }
+
+
+    Write-Host '  AddressFormatter'
+    $script:AddressFormatterModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
+
+    Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\AddressFormatter')) -Destination $script:AddressFormatterModulePath -Recurse
+    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:AddressFormatterModulePath -Recurse | Unblock-File }
+    Import-Module (Join-Path -Path $script:AddressFormatterModulePath -ChildPath 'AddressFormatter.psd1')
 
 
     try { WatchCatchableExitSignal } catch { }
@@ -606,7 +789,7 @@ function main {
     if ($SimulateUser) {
         Write-Host '  Simulation mode enabled, skip Outlook checks'
     } else {
-        if ($IsWindows) {
+        if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
             Write-Host '  Outlook'
 
             if ($(Get-Command -Name 'Get-AppPackage' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue)) {
@@ -800,7 +983,7 @@ function main {
             Write-Host "    Version: $($NewOutlook.Version)"
             Write-Host "    Status: $($NewOutlook.Status)"
             Write-Host "    UseNewOutlook: $OutlookUseNewOutlook"
-        } elseif ($IsMacOS) {
+        } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
             Write-Host '  Outlook'
 
             $macOsIsRunningNewOutlook = ($(defaults read com.microsoft.Outlook IsRunningNewOutlook *>&1).ToString() -eq 1)
@@ -947,7 +1130,7 @@ end tell
 
     try { WatchCatchableExitSignal } catch { }
 
-    if ((($UseHtmTemplates -eq $true) -and (-not $CreateRtfSignatures)) -or (-not $IsWindows)) {
+    if ((($UseHtmTemplates -eq $true) -and (-not $CreateRtfSignatures)) -or (-not ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows))) {
         Write-Host '  UseHtmTemplates set to true or not running on Windows, skip Word checks'
     } else {
         Write-Host '  Word'
@@ -1053,15 +1236,15 @@ end tell
     } else {
         $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).Guid))).fullname))
 
-        if ($Iswindows) {
+        if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
             Write-Host "  '$($SignaturePaths[-1])' (Outlook Web/New Outlook)"
-        } elseif ($IsMacOS) {
+        } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
             if ($macOSSignaturesScriptable) {
                 Write-Host "  '$($SignaturePaths[-1])' (Outlook for Mac with scriptable signatures)"
             } else {
                 Write-Host "  '$($SignaturePaths[-1])' (Outlook Web, because no Outlook, no accounts configured or signatures not scriptable)"
             }
-        } elseif ($IsLinux) {
+        } elseif ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
             Write-Host "  '$($SignaturePaths[-1])' (Outlook Web)"
         }
     }
@@ -1452,7 +1635,7 @@ end tell
 
                 $ADPropsCurrentUser = ConvertToPSCustomObject -item $ADPropsCurrentUser
             } catch {
-                Write-Host $error[0]
+                Write-Host ($error[0] | Format-List * | Out-String)
                 $ADPropsCurrentUser = $null
                 Write-Host '    Problem connecting to Active Directory, or user is a local user. Exit.' -ForegroundColor Red
                 $script:ExitCode = 12
@@ -1712,7 +1895,7 @@ end tell
             $RegistryPaths += ''
             $LegacyExchangeDNs += ''
         }
-    } elseif ($IsWindows -and $OutlookProfiles -and ($OutlookUseNewOutlook -ne $true)) {
+    } elseif (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and $OutlookProfiles -and ($OutlookUseNewOutlook -ne $true)) {
         Write-Host '  Get email addresses from Outlook'
 
         foreach ($OutlookProfile in $OutlookProfiles) {
@@ -1749,9 +1932,7 @@ end tell
 
             if ($SignaturesForAutomappedAndAdditionalMailboxes) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignaturesForAutomappedAndAdditionalMailboxes')))) {
-                    Write-Host '    Automapped and additional mailboxes will not be found.' -ForegroundColor Green
-                    Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                    Write-Host '    Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+                    WriteFeatureInfo -Parameter 'SignaturesForAutomappedAndAdditionalMailboxes' -Indent '  '
                 } else {
                     try { WatchCatchableExitSignal } catch { }
 
@@ -1766,7 +1947,7 @@ end tell
                 Write-Host "    Parameter 'SignaturesForAutomappedAndAdditionalMailboxes' is not enabled, skipping task."
             }
         }
-    } elseif ($IsMacOS -and $macOSSignaturesScriptable -and ($macOSOutlookMailboxes.count -gt 0)) {
+    } elseif (((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) -and $macOSSignaturesScriptable -and ($macOSOutlookMailboxes.count -gt 0)) {
         Write-Host '  Get email addresses from Outlook'
 
         $macOSOutlookMailboxes | ForEach-Object {
@@ -1779,7 +1960,7 @@ end tell
             Write-Verbose "      LegacyExchangeDN: $($LegacyExchangeDNs[-1])"
         }
     } else {
-        if ($IsWindows -and $OutlookUseNewOutlook) {
+        if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and $OutlookUseNewOutlook) {
             Write-Host '  Get email addresses from New Outlook and Outlook Web, as New Outlook is set as default'
         } else {
             Write-Host '  Get email addresses from Outlook Web'
@@ -1790,7 +1971,7 @@ end tell
 
         $script:GraphUserDummyMailbox = $true
 
-        if ($IsWindows -and $OutlookUseNewOutlook -eq $true) {
+        if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and $OutlookUseNewOutlook -eq $true) {
             $x = @(
                 @((ConvertEncoding -InFile $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Microsoft\Olk\UserSettings.json') -InIsHtml $false | ConvertFrom-Json).Identities.IdentityMap.PSObject.Properties | Select-Object -Unique | Where-Object { $_.name -match '(\S+?)@(\S+?)\.(\S+?)' }) | ForEach-Object {
                     if ((ConvertEncoding -InFile $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath "\Microsoft\OneAuth\accounts\$($_.Value)") -InIsHtml $false | ConvertFrom-Json).association_status -ilike '*"com.microsoft.Olk":"associated"*') {
@@ -1827,9 +2008,7 @@ end tell
 
                 if ($SignaturesForAutomappedAndAdditionalMailboxes) {
                     if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignaturesForAutomappedAndAdditionalMailboxes')))) {
-                        Write-Host '    Automapped and additional mailboxes will not be found.' -ForegroundColor Green
-                        Write-Host "    The 'SignaturesForAutomappedAndAdditionalMailboxes' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                        Write-Host '    Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+                        WriteFeatureInfo -Parameter 'SignaturesForAutomappedAndAdditionalMailboxes' -Indent '    '
                     } else {
                         try { WatchCatchableExitSignal } catch { }
 
@@ -2262,7 +2441,7 @@ end tell
                                 }
                             }
                         } catch {
-                            Write-Host $error[0]
+                            Write-Host ($error[0] | Format-List * | Out-String)
                             Write-Host "            Error getting group information from $((($ADPropsMailboxes[$AccountNumberRunning].distinguishedname) -split ',DC=')[1..999] -join '.'), check firewalls, DNS and AD trust" -ForegroundColor Red
                         }
 
@@ -2294,7 +2473,7 @@ end tell
                                     # The sIDHistory of the current mailbox is part of $SIDsToCheckInTrusts and therefore also considered in $LdapFilterSIDs
                                     $LdapFilterSIDs += ('(objectsid=' + $($SidHex -join '') + ')')
                                 } catch {
-                                    Write-Host $error[0]
+                                    Write-Host ($error[0] | Format-List * | Out-String)
                                     Write-Host '        Error creating LDAP filter for search across trusts.' -ForegroundColor Red
                                 }
                             }
@@ -2415,9 +2594,7 @@ end tell
         if ($AccountNumberRunning -eq ($MailAddresses.count - 1)) {
             if ($VirtualMailboxConfigFile) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DefineAndAddVirtualMailboxes')))) {
-                    Write-Host '  Virtual mailboxes and dynamic signature INI entries cannot be defined and added.' -ForegroundColor Green
-                    Write-Host "  The 'VirtualMailboxConfigFile' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                    Write-Host '  Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+                    WriteFeatureInfo -Parameter 'VirtualMailboxConfigFile' -Indent '  '
                 } else {
                     try { WatchCatchableExitSignal } catch { }
 
@@ -2808,9 +2985,7 @@ end tell
             if (($TemplateFilePart -imatch $TemplateFilePartRegexTimeAllow) -or ($TemplateFilePart -imatch $TemplateFilePartRegexTimeDeny)) {
                 Write-Host '      Time based template'
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('TimeBasedTemplate')))) {
-                    Write-Host '        Templates cannot be activated or deactivated for specified time ranges.' -ForegroundColor Green
-                    Write-Host "        The 'time based template' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                    Write-Host '        Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+                    WriteFeatureInfo -Parameter 'TimeBasedTemplate' -Indent '        '
                 } else {
                     try { WatchCatchableExitSignal } catch { }
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::TimeBasedTemplate()
@@ -3215,7 +3390,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
             Add-Type -LiteralPath (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
         } catch {
-            Write-Host $error[0]
+            Write-Host ($error[0] | Format-List * | Out-String)
             Write-Host '  Word not installed or not working correctly. Install or repair Word and the registry information about Word, or consider using HTM templates instead of DOCX templates. Exit.' -ForegroundColor Red
 
             # Restore original Word AlertIfNotDefault setting
@@ -3303,7 +3478,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                     Write-Host "    '$ReplacementVariableConfigFile'"
                     . ([System.Management.Automation.ScriptBlock]::Create((ConvertEncoding -InFile $ReplacementVariableConfigFile -InIsHtml $false)))
                 } catch {
-                    Write-Host $error[0]
+                    Write-Host ($error[0] | Format-List * | Out-String)
                     Write-Host "    Problem executing content of '$ReplacementVariableConfigFile'. Exit." -ForegroundColor Red
                     $script:ExitCode = 18
                     $script:ExitCodeDescription = 'Problem executing content of ReplacementVariableConfigFile.'
@@ -3373,9 +3548,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
             if ($MirrorCloudSignatures -ne $false) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesDownload')))) {
-                    Write-Host '    Roaming signatures cannot be downloaded from Exchange Online.' -ForegroundColor Green
-                    Write-Host "    The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                    Write-Host '    Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+                    WriteFeatureInfo -Parameter 'MirrorCloudSignatures' -Indent '    '
                 } else {
                     try { WatchCatchableExitSignal } catch { }
 
@@ -3422,9 +3595,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         Write-Host "    Set default classic (not roaming) Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOutlookWebSignature')))) {
-                            Write-Host '      Default classic Outlook Web signature cannot be set.' -ForegroundColor Green
-                            Write-Host "      The 'SetCurrentUserOutlookWebSignature' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                            Write-Host '      Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+                            WriteFeatureInfo -Parameter 'SetCurrentUserOutlookWebSignature' -Indent '      '
                         } else {
                             try { WatchCatchableExitSignal } catch { }
 
@@ -3440,9 +3611,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                         if ($MirrorCloudSignatures -ne $false) {
                             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesSetDefaults')))) {
-                                Write-Host '      Default roaming Outlook Web signature(s) cannot be set. This also affects New Outlook on Windows.' -ForegroundColor Green
-                                Write-Host "      The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                                Write-Host '      Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+                                WriteFeatureInfo -Parameter 'MirrorCloudSignatures' -Indent '      '
                             } else {
                                 try { WatchCatchableExitSignal } catch { }
 
@@ -3465,9 +3634,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                 if ($SetCurrentUserOOFMessage) {
                     if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOOFMessage')))) {
-                        Write-Host '    The out-of-office replies cannot be set.' -ForegroundColor Green
-                        Write-Host "    The 'SetCurrentUserOOFMessage' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                        Write-Host '    Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+                        WriteFeatureInfo -Parameter 'SetCurrentUserOOFMessage' -Indent '    '
                     } else {
                         try { WatchCatchableExitSignal } catch { }
 
@@ -3510,9 +3677,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($DeleteScriptCreatedSignaturesWithoutTemplate -eq $true) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DeleteScriptCreatedSignaturesWithoutTemplate')))) {
-            Write-Host '  Cannot delete old signatures created by Set-OutlookSignatures, which are no longer centrally available.' -ForegroundColor Green
-            Write-Host "  The 'DeleteScriptCreatedSignaturesWithoutTemplate' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-            Write-Host '  Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+            WriteFeatureInfo -Parameter 'DeleteScriptCreatedSignaturesWithoutTemplate' -Indent '  '
         } else {
             try { WatchCatchableExitSignal } catch { }
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::DeleteScriptCreatedSignaturesWithoutTemplate()
@@ -3536,9 +3701,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($DeleteUserCreatedSignatures -eq $true) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('DeleteUserCreatedSignatures')))) {
-            Write-Host '  Cannot remove user-created signatures.' -ForegroundColor Green
-            Write-Host "  The 'DeleteUserCreatedSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-            Write-Host '  Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+            WriteFeatureInfo -Parameter 'DeleteUserCreatedSignatures' -Indent '  '
         } else {
             try { WatchCatchableExitSignal } catch { }
 
@@ -3561,9 +3724,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($MirrorCloudSignatures -ne $false) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesUpload')))) {
-            Write-Host '  Signature(s) cannot be uploaded to Exchange Online. This affects Outlook Web and New Outlook on Windows.' -ForegroundColor Green
-            Write-Host "  The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-            Write-Host '  Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+            WriteFeatureInfo -Parameter 'MirrorCloudSignatures' -Indent '  '
         } else {
             try { WatchCatchableExitSignal } catch { }
 
@@ -3599,9 +3760,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     if ($SignatureCollectionInDrafts -eq $true) {
         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SignatureCollectionInDrafts')))) {
-            Write-Host '  Cannot create email draft containing all signatures.' -ForegroundColor Green
-            Write-Host "  The 'SignatureCollectionInDrafts' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-            Write-Host '  Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+            WriteFeatureInfo -Parameter 'SignatureCollectionInDrafts' -Indent '  '
         } else {
             try { WatchCatchableExitSignal } catch { }
 
@@ -3631,9 +3790,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             Write-Host '    Simulation mode enabled, AdditionalSignaturePath already used as output directory'
         } else {
             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('AdditionalSignaturePath')))) {
-                Write-Host '    Cannot copy signatures to additional signature path.' -ForegroundColor Green
-                Write-Host "    The 'AdditionalSignaturePath' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                Write-Host '    Visit https://set-outlooksignatures.com/benefactorcircle for details.' -ForegroundColor Green
+                WriteFeatureInfo -Parameter 'AdditionalSignaturePath' -Indent '    '
             } else {
                 try { WatchCatchableExitSignal } catch { }
 
@@ -4437,7 +4594,7 @@ function SetSignatures {
                 }
             } catch {
                 Write-Host "$Indent        Error copying file. Skip template." -ForegroundColor Red
-                Write-Host $error[0]
+                Write-Host ($error[0] | Format-List * | Out-String)
                 continue
             }
         } else {
@@ -4470,7 +4627,7 @@ function SetSignatures {
             if (-not $_.PSIsContainer) {
                 Set-ItemProperty -LiteralPath $_.FullName -Name IsReadOnly -Value $false
 
-                if (-not $IsLinux) {
+                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
                     Unblock-File -LiteralPath $_.FullName
                 }
             }
@@ -4743,7 +4900,7 @@ function SetSignatures {
                     }
                 }
             } catch {
-                Write-Host $error[0]
+                Write-Host ($error[0] | Format-List * | Out-String)
                 Write-Host "$Indent        Error replacing non-picture variables in Word. Exit." -ForegroundColor Red
                 Write-Host "$Indent        If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
                 $script:ExitCode = 21
@@ -4754,8 +4911,8 @@ function SetSignatures {
             try { WatchCatchableExitSignal } catch { }
 
             Write-Host "$Indent      Replace picture variables"
-            if ($script:COMWord.ActiveDocument.Shapes.Count -gt 0) {
-                Write-Host "$Indent        Warning: Template contains $($script:COMWord.ActiveDocument.Shapes.Count) image(s) configured as non-inline shapes." -ForegroundColor Yellow
+            if (@(@($script:COMWord.ActiveDocument.Shapes) | Where-Object { $_.WrapFormat.Type -ne 7 }).Count -gt 0) {
+                Write-Host "$Indent        Warning: Template contains images or shapes configured as non-inline." -ForegroundColor Yellow
                 Write-Host "$Indent        Set the text wrapping to 'inline with text' to avoid incorrect positioning and other problems." -ForegroundColor Yellow
             }
 
@@ -4880,6 +5037,13 @@ function SetSignatures {
                     }
 
                     if (
+                        $($null -ne $tempImageSourceFullname) -and
+                        $(Test-Path -LiteralPath $tempImageSourceFullname)
+                    ) {
+                        $image.Fill.UserPicture($tempImageSourceFullName)
+                    }
+
+                    if (
                         $($null -ne $tempImageAlternativeText) -and
                         $($null -ne $image.AlternativeText) -and
                         ($tempImageAlternativeText -ne $image.AlternativeText)
@@ -4920,7 +5084,7 @@ function SetSignatures {
                     }
                 }
             } catch {
-                Write-Host $error[0]
+                Write-Host ($error[0] | Format-List * | Out-String)
                 Write-Host "$Indent        Error replacing picture variables in Word. Exit." -ForegroundColor Red
                 Write-Host "$Indent        If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
                 $script:ExitCode = 20
@@ -5128,9 +5292,7 @@ function SetSignatures {
 
                     $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
-                    Write-Host "$Indent          Cannot export high-res images." -ForegroundColor Green
-                    Write-Host "$Indent          The 'DocxHighResImageConversion' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                    Write-Host "$Indent          Visit https://set-outlooksignatures.com/benefactorcircle for details." -ForegroundColor Green
+                    WriteFeatureInfo -Parameter 'DocxHighResImageConversion' -Indent "$Indent          "
                 } else {
                     try { WatchCatchableExitSignal } catch { }
 
@@ -5476,9 +5638,7 @@ function SetSignatures {
 
             if ($MirrorCloudSignatures -ne $false) {
                 if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesUpload')))) {
-                    Write-Host "$Indent        Cannot upload signature to Exchange Online." -ForegroundColor Green
-                    Write-Host "$Indent        The 'MirrorCloudSignatures' feature requires the Benefactor Circle add-on." -ForegroundColor Green
-                    Write-Host "$Indent        Visit https://set-outlooksignatures.com/benefactorcircle for details." -ForegroundColor Green
+                    WriteFeatureInfo -Parameter 'MirrorCloudSignatures' -Indent "$Indent        "
                 } else {
                     try { WatchCatchableExitSignal } catch { }
 
@@ -6796,7 +6956,7 @@ $CheckPathScriptblock = {
         $GraphUserAttributeMapping['onpremisessecurityidentifier'] = 'onPremisesSecurityIdentifier'
         $GraphUserAttributeMapping['userprincipalname'] = 'userPrincipalName'
     } catch {
-        Write-Host $error[0]
+        Write-Host ($error[0] | Format-List * | Out-String)
         Write-Host "        Problem executing content of '$GraphConfigFile'. Exit." -ForegroundColor Red
         $script:ExitCode = 22
         $script:ExitCodeDescription = 'Problem executing content of GraphConfigFile';
@@ -6873,7 +7033,7 @@ $CheckPathScriptblock = {
 
                 Write-Verbose '    Resolve URL to driveItem'
 
-                $UrlToDriveItem = (GraphGenericQuery -method GET -uri "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/shares/u!$(([Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([Uri]::EscapeUriString($CheckPathPath)))).TrimEnd('=').Replace('+','-').Replace('/','_'))/driveItem?`$select=id,file,folder,parentreference" -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null)
+                $UrlToDriveItem = (GraphGenericQuery -method GET -uri "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/shares/u!$(([Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([Uri]::EscapeUriString($CheckPathPath)))).TrimEnd('=').Replace('+','-').Replace('/','_'))/driveItem?`$select=id,file,folder,parentreference,webDavUrl" -GraphContext $(([uri]$CheckPathPath).DnsSafeHost) -body $null)
 
                 try { WatchCatchableExitSignal } catch { }
 
@@ -6896,7 +7056,11 @@ $CheckPathScriptblock = {
                                 )
                             ) {
                                 if ($docLibDriveItem.file) {
-                                    $CheckPathPathNew = $(Join-Path -Path $CheckPathTempDir -ChildPath $([uri]::UnEscapeDataString((Split-Path -Path $docLibDriveItem.webDavUrl -Leaf))))
+                                    if ($docLibDriveItem.webDavUrl -eq $UrlToDriveItem.result.webDavUrl) {
+                                        $CheckPathPathNew = $(Join-Path -Path $CheckPathTempDir -ChildPath $([uri]::UnEscapeDataString($(Split-Path -Path $docLibDriveItem.webDavUrl -Leaf))))
+                                    } else {
+                                        $CheckPathPathNew = $(Join-Path -Path $CheckPathTempDir -ChildPath $([uri]::UnEscapeDataString($($docLibDriveItem.webDavUrl -replace "^$([regex]::Escape($UrlToDriveItem.result.webDavUrl))"))))
+                                    }
 
                                     if ($UrlToDriveItem.result.file) {
                                         try { WatchCatchableExitSignal } catch { }
@@ -6923,17 +7087,17 @@ $CheckPathScriptblock = {
                                             $docLibDriveItem.'@microsoft.graph.downloadUrl'
                                         )
 
-                                        $null = New-Item -Path $CheckPathPathNew -ItemType File
+                                        New-Item -Path $CheckPathPathNew -ItemType File -Force
 
                                         $CheckPathPath = $CheckPathRefPath.Value = $CheckPathTempDir
                                     }
                                 } elseif ($docLibDriveItem.folder) {
                                     try { WatchCatchableExitSignal } catch { }
 
-                                    @([uri]::UnescapeDataString(($docLibDriveItem.webDavUrl -ireplace "^$([uri]::EscapeUriString($CheckPathPath))/", '')) -replace '/', '\') | ForEach-Object {
+                                    @([uri]::UnescapeDataString(($docLibDriveItem.webDavUrl -ireplace "^$([regex]::escape($UrlToDriveItem.result.webDavUrl))", '')) -replace '/', '\') | ForEach-Object {
                                         Write-Verbose "      Folder: '$($docLibDriveItem.webDavUrl)' -> '$(Join-Path -Path $CheckPathTempDir -ChildPath $_)'"
 
-                                        $null = New-Item -ItemType Directory -Path $(Join-Path -Path $CheckPathTempDir -ChildPath $_)
+                                        $null = New-Item -ItemType Directory -Path $(Join-Path -Path $CheckPathTempDir -ChildPath $_) -Force
                                     }
 
                                     $CheckPathPath = $CheckPathRefPath.Value = $CheckPathTempDir
@@ -6958,7 +7122,7 @@ $CheckPathScriptblock = {
                 # SharePoint Online without Graph client ID or SharePoint on-prem
                 # Or normal file path that does not exist
 
-                if ($IsWindows) {
+                if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
                     # Windows. Use old way with "net use", Internet-Explorer-Cookie.
 
                     if (($CheckPathPath.StartsWith('https://', 'CurrentCultureIgnoreCase')) -or ($CheckPathPath -ilike '*@SSL\*')) {
@@ -7023,7 +7187,7 @@ $CheckPathScriptblock = {
                             } else {
                                 try {
                                     if (-not [string]::IsNullOrWhitespace($GraphHtmlMessageboxText)) {
-                                        if ($IsWindows -and (-not (Test-Path -LiteralPath env:SSH_CLIENT))) {
+                                        if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and (-not (Test-Path -LiteralPath env:SSH_CLIENT))) {
                                             Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
 
                                             $window = New-Object System.Windows.Window -Property @{
@@ -7203,7 +7367,7 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
 
         try {
             Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
-            if (-not $IsLinux) {
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
                 Unblock-File -LiteralPath $script:WebServicesDllPath
             }
         } catch {
@@ -7423,7 +7587,7 @@ function GraphGetToken {
 
         if ($GraphClientID -ieq 'beea8249-8c98-4c76-92f6-ce3c468a61e6') {
             Write-Host "$($indent)  You use the Entra ID app provided by the developers. It is recommended to create und use your own Entra ID app." -ForegroundColor Yellow
-            Write-Host "$($indent)    Find a description on how to do this in the file '`.\config\default graph config.ps1`'." -ForegroundColor Yellow
+            Write-Host "$($indent)  Find a description on how to do this in the file '`.\config\default graph config.ps1`'." -ForegroundColor Yellow
         }
 
         $script:GraphUser = $null
@@ -7502,15 +7666,15 @@ function GraphGetToken {
             # Copy each item to the destination
             foreach ($item in @(Get-ChildItem -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\MSAL.PS')) -Recurse)) {
                 if ($item.BaseName -like '*msalruntime*') {
-                    if ($IsWindows) {
+                    if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
                         if ($item.Name -inotlike 'msalruntime*.dll') {
                             continue
                         }
-                    } elseif ($IsLinux) {
+                    } elseif ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
                         if ($item.Name -inotlike 'libmsalruntime.so') {
                             continue
                         }
-                    } elseif ($IsMacOS) {
+                    } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
                         if ($item.Name -inotlike 'msalruntime*.dylib') {
                             continue
                         }
@@ -7532,7 +7696,7 @@ function GraphGetToken {
                 }
             }
 
-            if (-not $IsLinux) {
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
                 Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse | Unblock-File
             }
 
@@ -7541,7 +7705,7 @@ function GraphGetToken {
             try {
                 Import-Module $script:MsalModulePath -Force -ErrorAction Stop
             } catch {
-                Write-Host $error[0]
+                Write-Host ($error[0] | Format-List * | Out-String)
                 Write-Host "$($indent)    Problem importing MSAL.PS module. Exit." -ForegroundColor Red
                 $script:ExitCode = 30
                 $script:ExitCodeDescription = 'Problem importing MSAL.PS module.';
@@ -7553,7 +7717,7 @@ function GraphGetToken {
 
         # On Linux/macOS, unlock keyring/keychain if required
         if (-not [string]::IsNullOrWhitespace($GraphUnlockKeyringKeychainMessageboxText)) {
-            if ($IsLinux) {
+            if ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
                 $keyringPath = (dbus-send --session --dest=org.freedesktop.secrets --type=method_call --print-reply /org/freedesktop/secrets org.freedesktop.Secret.Service.ReadAlias string:'default' | grep -oP '(?<=object path \")/[^"]+')
 
                 if ($((gdbus call -e -d org.freedesktop.secrets -o $keyringPath -m org.freedesktop.DBus.Properties.Get org.freedesktop.Secret.Collection Locked *>&1) -ine '(<false>,)')) {
@@ -7570,7 +7734,7 @@ function GraphGetToken {
                         Write-Host "$($indent)  Neither kdialog nor zenity found, so no message box could be shown: $($GraphUnlockKeyringKeychainMessageboxText)"
                     }
                 }
-            } elseif ($IsMacOS) {
+            } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
                 security unlock-keychain -p 'Set-OutlookSignatures dummy password' *>$null
 
                 if ($LastExitCode -ne 0) {
@@ -7632,7 +7796,7 @@ function GraphGetToken {
                         throw 'Ignoring because login hint is available.'
                     }
 
-                    if ($IsLinux) {
+                    if ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
                         $LinuxAuthBrokerMissingDependencies = @(ldd $(Join-Path -Path $script:MsalModulePath -ChildPath 'netstandard2.0/libmsalruntime.so') | grep 'not found')
 
                         if ($LinuxAuthBrokerMissingDependencies.Count -gt 0) {
@@ -7659,7 +7823,7 @@ function GraphGetToken {
                     try {
                         Write-Host "$($indent)    Silent via Authentication Broker with login hint"
 
-                        if ($IsLinux) {
+                        if ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
                             $LinuxAuthBrokerMissingDependencies = @(ldd $(Join-Path -Path $script:MsalModulePath -ChildPath 'netstandard2.0/libmsalruntime.so') | grep 'not found')
 
                             if ($LinuxAuthBrokerMissingDependencies.Count -gt 0) {
@@ -7718,7 +7882,7 @@ function GraphGetToken {
                             Write-Host "$($indent)    All silent authentication methods failed, switching to interactive authentication methods."
 
                             if ((-not $EXO) -and (-not [string]::IsNullOrWhitespace($GraphHtmlMessageboxText))) {
-                                if ($IsWindows -and (-not (Test-Path -LiteralPath env:SSH_CLIENT))) {
+                                if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and (-not (Test-Path -LiteralPath env:SSH_CLIENT))) {
                                     Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Windows.Forms
 
                                     $window = New-Object System.Windows.Window -Property @{
@@ -7749,7 +7913,7 @@ function GraphGetToken {
                                             AppAuthHeaderExo  = $null
                                         }
                                     }
-                                } elseif ($IsLinux -and ((Test-Path -LiteralPath env:DISPLAY))) {
+                                } elseif (((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) -and ((Test-Path -LiteralPath env:DISPLAY))) {
                                     if ($(Get-Command -Name 'kdialog' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue)) {
                                         $null = kdialog `
                                             --title $(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' }) `
@@ -7762,7 +7926,7 @@ function GraphGetToken {
                                     } else {
                                         Write-Host "$($indent)    Neither kdialog nor zenity found, so no message box could be shown: $($GraphHtmlMessageboxText)"
                                     }
-                                } elseif ($IsMacOS -and ((Test-Path -LiteralPath env:DISPLAY))) {
+                                } elseif (((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) -and ((Test-Path -LiteralPath env:DISPLAY))) {
                                     Write-Host $("display alert ""$(if ($BenefactorCircleLicenseFile) { 'Set-OutlookSignatures Benefactor Circle' } else { 'Set-OutlookSignatures' })"" message ""$($GraphHtmlMessageboxText)""  buttons { ""OK"" } default button 1" | osascript *>&1; '')
                                 }
 
@@ -7792,7 +7956,7 @@ function GraphGetToken {
                             try {
                                 Write-Host "$($indent)    Interactive via Authentication Broker"
 
-                                if ($IsLinux) {
+                                if ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
                                     $LinuxAuthBrokerMissingDependencies = @(ldd $(Join-Path -Path $script:MsalModulePath -ChildPath 'netstandard2.0/libmsalruntime.so') | grep 'not found')
 
                                     if ($LinuxAuthBrokerMissingDependencies.Count -gt 0) {
@@ -8588,7 +8752,7 @@ function GraphGetUserProperties($user, $authHeader) {
 
                     $local:x | Add-Member -MemberType NoteProperty -Name 'mailboxSettings' -Value $local:y.mailboxSettings -Force
                 } catch {
-                    Write-Host $error[0]
+                    Write-Host ($error[0] | Format-List * | Out-String)
                     Write-Host "      Problem getting mailboxSettings for '$($script:GraphUser)' from Microsoft Graph." -ForegroundColor Yellow
                     Write-Host '      This is a Microsoft Graph API problem, which can only be solved by Microsoft itself.' -ForegroundColor Yellow
                     Write-Host '      Disabling SetCurrentUserOutlookWebSignature and SetCurrentUserOOFMessage to be able to continue.' -ForegroundColor Yellow
@@ -9039,7 +9203,7 @@ function GetIniContent ($filePath, $additionalLines) {
                 }
             }
         } catch {
-            Write-Host $error[0]
+            Write-Host ($error[0] | Format-List * | Out-String)
             Write-Host "Error accessing '$FilePath'. Exit." -ForegroundColor red
             $script:ExitCode = 31
             $script:ExitCodeDescription = "Error accessing '$FilePath'."
@@ -9112,7 +9276,7 @@ function ConvertPath ([ref]$path) {
         } else {
             $path.value = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path.value)
 
-            if ($IsWindows) {
+            if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
                 $path.value = ([System.URI]$path.value).absoluteuri -ireplace 'file:///', '' -ireplace 'file://', '\\' -ireplace '/', '\'
                 $path.value = [uri]::UnescapeDataString($path.value)
             }
@@ -9253,7 +9417,7 @@ $WatchCatchableExitSignalRunspace.SessionStateProxy.SetVariable('WatchCatchableE
 $WatchCatchableExitSignalPowershell = [powershell]::Create()
 $WatchCatchableExitSignalPowershell.Runspace = $WatchCatchableExitSignalRunspace
 
-if ($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) {
+if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
     $WatchCatchableExitSignalForm = $null
 
     $WatchCatchableExitSignalRunspace.SessionStateProxy.SetVariable('WatchCatchableExitSignalForm', [ref]$WatchCatchableExitSignalForm)
@@ -9349,7 +9513,7 @@ if ($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) {
             $formRef.Value.ShowDialog()
         }
     )
-} elseif ($IsLinux -or $IsMacOS) {
+} elseif (((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) -or ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS)) {
     $null = $WatchCatchableExitSignalPowershell.AddScript(
         {
             # Use trap instead of try/catch, because trap reacts to catchable POSIX signals
@@ -9479,13 +9643,11 @@ try {
     }
 
     if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-        {
-            Write-Host '' This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode."" -ForegroundColor Red
-            Write-Host '  Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
-            $script:ExitCode = 32
-            $script:ExitCodeDescription = 'Not running in FullLanguage mode.'
-            exit
-        }
+        Write-Host "  This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+        Write-Host '  Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+        $script:ExitCode = 32
+        $script:ExitCodeDescription = 'Not running in FullLanguage mode.'
+        exit
     }
 
     if ($global:SetOutlookSignaturesLastRunGuid) {
@@ -9494,16 +9656,10 @@ try {
         Write-Host '    This is the only way to avoid problems caused by .Net caching DLL files in memory.' -ForegroundColor Yellow
 
         $script:ExitCode = 3
-        $script:ExitCodeDescription = 'Set-OutlookSignatures has already been run in this PowerShell session, is only supported once.'
+        $script:ExitCodeDescription = 'Set-OutlookSignatures has already been run in this PowerShell session but is only supported once.'
         exit
     } else {
         $global:SetOutlookSignaturesLastRunGuid = (New-Guid).Guid
-    }
-
-    if (-not (Test-Path -LiteralPath 'variable:IsWindows')) {
-        $script:IsWindows = $true
-        $script:IsLinux = $false
-        $script:IsMacOS = $false
     }
 
     BlockSleep
@@ -9531,14 +9687,14 @@ try {
 
     $script:SetOutlookSignaturesCommonDllFilePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid) + '.dll'))
     Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\Set-OutlookSignatures\Set-OutlookSignatures.Common.dll')) -Destination $script:SetOutlookSignaturesCommonDllFilePath
-    if (-not $IsLinux) {
+    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
         Unblock-File -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath
     }
 
     try {
         Import-Module -Name $script:SetOutlookSignaturesCommonDllFilePath -Force -ErrorAction Stop
     } catch {
-        Write-Host $error[0]
+        Write-Host ($error[0] | Format-List * | Out-String)
         Write-Host '    Problem importing Set-OutlookSignatures.Common.dll. Exit.' -ForegroundColor Red
         $script:ExitCode = 4
         $script:ExitCodeDescription = 'Problem importing Set-OutlookSignatures.Common.dll.'
@@ -9689,6 +9845,21 @@ try {
         Remove-Item -LiteralPath $script:QRCoderModulePath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
+    if ($script:LibPhoneNumberModulePath) {
+        Remove-Module -Name PhoneNumber -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $script:LibPhoneNumberModulePath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    if ($script:YamlDotNetModulePath) {
+        Remove-Module -Name YamlDotNet -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $script:YamlDotNetModulePath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    if ($script:AddressFormatterModulePath) {
+        Remove-Module -Name AddressFormatter -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $script:AddressFormatterModulePath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
     if ($script:ScriptProcessPriorityOriginal) {
         try {
             $((Get-Process -PID $PID).PriorityClass = $script:ScriptProcessPriorityOriginal)
@@ -9726,7 +9897,7 @@ try {
         Write-Host "  Description: $($script:ExitCodeDescription)" -ForegroundColor Yellow
 
         Write-Host '  Check for existing issues at https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=' -ForegroundColor Yellow
-        Write-Host '  or get fee-based support from ExplicIT Consulting at https://set-outlooksignatures.com/support.' -ForegroundColor Yellow
+        Write-Host '  or get professional support from ExplicIT Consulting at https://set-outlooksignatures.com/support.' -ForegroundColor Yellow
     }
 
     Write-Host

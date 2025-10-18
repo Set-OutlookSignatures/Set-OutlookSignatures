@@ -1,0 +1,151 @@
+---
+# 53.27195, -9.05405
+description: Galway
+components:
+    city: Galway City
+    country: Ireland
+    country_code: ie
+    county: Galway City
+    house_number: 8-9
+    road: Mainguard Street
+    state_district: Connacht
+    suburb: Claddagh
+expected:  |
+    8-9 Mainguard Street
+    Claddagh
+    Galway
+    Ireland
+
+---
+# 52.65417, -7.25222
+description: Kilkenny
+components:
+    country: Ireland
+    country_code: ie
+    county: Kilkenny
+    state: Leinster
+    town: Kilkenny
+expected:  |
+    Kilkenny
+    Ireland
+---
+# Friar's Hill - 52.54593995, -6.95706874120767
+description: Friar's Hill, Graiguenamanagh
+components:
+    country: Ireland
+    country_code: ie
+    county: County Kilkenny
+    residential: Friar's Hill
+    state_district: Leinster
+    town: Graiguenamanagh
+expected:  |
+    Friar's Hill
+    Graiguenamanagh
+    County Kilkenny
+    Ireland
+---
+# 53.3388,-6.2691
+description: condense "Dublin, County Dublin"
+components:
+    city: Dublin
+    city_district: Wood Quay A ED
+    continent: Europe
+    country: Ireland
+    country_code: ie
+    county: County Dublin
+    county_code: D
+    library: The National Archives
+    postcode: D02 TD99
+    road: Bishop Street
+    state: Leinster
+    state_code: L
+expected:  |
+    The National Archives
+    Bishop Street
+    Wood Quay A ED
+    Dublin
+    D02 TD99
+    Ireland
+---
+# 52.6726,-8.6407
+description: remove "The Metropolitan District of"
+components:
+    city: The Metropolitan District of Limerick City
+    city_district: Farranshone
+    country: Ireland
+    country_code: ie
+    county: County Limerick
+    county_code: LK
+    locality: Farranshone Beg
+    road: Shelbourne Road
+    road_reference: R464
+    state: Munster
+expected:  |
+    Shelbourne Road
+    Farranshone
+    Limerick
+    Ireland
+---
+# 53.49137,-10.02117
+description: no "Electoral Division"
+components:
+    city_district: Clifden Electoral Division
+    continent: Europe
+    country: Ireland
+    country_code: ie
+    county: County Galway
+    county_code: G
+    guest_house: Connemara Country Lodge
+    region: Conamara Municipal District
+    road: N59
+    state: Connacht
+    state_code: C
+    town: Clifden
+expected:  |
+    Connemara Country Lodge
+    N59
+    Clifden
+    County Galway
+    Ireland
+---
+# 53.3653974, -6.5853397
+description: format Eircode correctly (no spaces)
+components:
+    building: G
+    city_district: Maynooth ED
+    continent: Europe
+    country: Ireland
+    country_code: ie
+    county: County Kildare
+    county_code: KE
+    postcode: W23P466
+    region: The Municipal District of Clane — Maynooth
+    road: Ballygoran Road
+expected:  |
+    G
+    Ballygoran Road
+    Maynooth ED
+    County Kildare
+    W23 P466
+    Ireland
+---
+# 53.3653974, -6.5853397
+description: format Eircode correctly (dash)
+components:
+    building: G
+    city_district: Maynooth ED
+    continent: Europe
+    country: Ireland
+    country_code: ie
+    county: County Kildare
+    county_code: KE
+    postcode: W23-P466
+    region: The Municipal District of Clane — Maynooth
+    road: Ballygoran Road
+expected:  |
+    G
+    Ballygoran Road
+    Maynooth ED
+    County Kildare
+    W23 P466
+    Ireland

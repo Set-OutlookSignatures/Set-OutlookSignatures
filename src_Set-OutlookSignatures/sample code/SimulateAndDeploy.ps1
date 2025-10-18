@@ -6,7 +6,7 @@ This sample code shows how to achieve two things:
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers professional support for this and other open source code.
 
 
 Features
@@ -19,7 +19,7 @@ Features
 
 Requirements
   Follow the requirements exactly and in full. SimulateAndDeploy will not work correctly when even one requirement is not met.
-  Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+  Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers professional support for this and other open source code.
 
   - For mailboxes on-prem
       - The software needs to be run with an account that
@@ -127,11 +127,16 @@ Limitations and remarks
   - Consider using the 'VirtualMailboxConfigFile' parameter of Set-OutlookSignatures, ideally together with the output of the Export-RecipientPermissions script.
       - This allows you to automatically create up-to-date lists of mailboxes based on the permissions granted in Exchange, as well as the according INI file lines.
 	  - Visit https://github.com/Export-RecipientPermissions for details about Export-RecipientPermissions.
+  - In newer releases, Word throws error messages when run in a non-interactive mode (such as using a scheduled task configured with "Run whether user is logged on or not").
+      - The only known workarounds are to run SimulateAndDeploy in interactive mode, or to use HTM templates instead of DOCX templates.
 
 
 It is recommended to not modify or copy this sample script, but to call it with parameters.
   - The "param" section at the beginning of the script defines all parameters that can be used to call this script.
 #>
+
+
+#Requires -Version 5.1
 
 [CmdletBinding()]
 
@@ -496,6 +501,12 @@ try {
 		exit 1
 	}
 
+	if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
+		Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+		Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+		exit 1
+	}
+
 	Write-Host '  Prepare objects'
 
 	$OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
@@ -606,7 +617,7 @@ try {
 		$script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath 'MSAL.PS')
 
 		Copy-Item -LiteralPath $([System.Io.Path]::GetFullPath($((Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath) -ChildPath 'bin\MSAL.PS')))) -Destination $script:MsalModulePath -Recurse
-		if (-not $IsLinux) { Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse | Unblock-File }
+		if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse | Unblock-File }
 		Import-Module $script:MsalModulePath -Force
 
 		$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
@@ -673,7 +684,7 @@ try {
 	# Overcome Word security warning when export contains embedded pictures
 	# Set-OutlookSignatures handles this itself very well, but multiple instances running in the same user account may lead to problems
 	# As a workaround, we define the setting before running the jobs
-	if (($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
+	if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
 		Write-Host
 		Write-Host "Memorize Word security setting and disable it @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 		$script:WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty -LiteralPath 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
@@ -819,7 +830,7 @@ try {
 						Write-Host 'xxxSimulateAndDeployExitCode999xxx'
 					}
 				} catch {
-					Write-Host $error[0]
+					Write-Host ($error[0] | Format-List * | Out-String)
 					Write-Host 'xxxSimulateAndDeployExitCode999xxx'
 				}
 
@@ -896,7 +907,7 @@ try {
 	Get-Job | Remove-Job -Force
 
 	# Restore Word security setting for embedded images
-	if (($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
+	if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
 		Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 	}
 

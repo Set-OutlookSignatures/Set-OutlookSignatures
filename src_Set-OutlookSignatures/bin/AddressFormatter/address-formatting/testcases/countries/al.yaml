@@ -1,0 +1,35 @@
+# Albania
+---
+description: Bank in Tiranë, 41.32036,19.82343
+components:
+            bank: Raiffeisen Bank
+            city: Tiranë
+            country: Albania
+            country_code: al
+            county: Tiranë
+            postcode: 1001
+            road: Papa Gjon Pali II
+expected:  |
+    Raiffeisen Bank
+    Papa Gjon Pali II
+    1001
+    Tiranë
+    Albania
+---
+description: Kindergarten in Tiranë, 41.32462,19.83047
+components:
+     city_district: Tiranë
+     country: Albania
+     country_code: al
+     county: Tirana County
+     kindergarten: Kopështi nr. 18
+     municipality: Tirana Municipality
+     road: Rruga Dalip Zavalani
+     state: Central Albania
+     suburb: Njësia Bashkiake Nr. 2
+expected:  |
+    Kopështi nr. 18
+    Rruga Dalip Zavalani
+    Tiranë
+    Albania
+

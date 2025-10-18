@@ -269,7 +269,7 @@ function Get-MsalToken {
         } elseif ($PSBoundParameters.ContainsKey('Interactive') -and $Interactive) {
           $AquireTokenParameters = $PublicClientApplication.AcquireTokenInteractive($Scopes)
 
-          if ($IsWindows) {
+          if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
             [IntPtr] $ParentWindow = [System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle
 
             if ($ParentWindow -eq [System.IntPtr]::Zero) {
@@ -290,7 +290,7 @@ function Get-MsalToken {
             }
 
             if ($ParentWindow -ne [System.IntPtr]::Zero) { [void] $AquireTokenParameters.WithParentActivityOrWindow($ParentWindow) }
-          } elseif ($IsMacOS) {
+          } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
             $objcCode = @'
 using System;
 using System.Runtime.InteropServices;
@@ -324,8 +324,9 @@ public class MacInterop {
             if ($ParentWindow -ne [System.IntPtr]::Zero) {
               [void] $AquireTokenParameters.WithParentActivityOrWindow($ParentWindow)
             }
-          } elseif ($IsLinux) {
-            $x11Code = @'
+          } elseif ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
+            try {
+              $x11Code = @'
 using System;
 using System.Runtime.InteropServices;
 
@@ -346,12 +347,15 @@ public class X11Interop {
 }
 '@
 
-            Add-Type -TypeDefinition $x11Code -Language CSharp
+              Add-Type -TypeDefinition $x11Code -Language CSharp
 
-            [IntPtr] $ParentWindow = [X11Interop]::GetRootWindow()
+              [IntPtr] $ParentWindow = [X11Interop]::GetRootWindow()
 
-            if ($ParentWindow -ne [System.IntPtr]::Zero) {
-              [void] $AquireTokenParameters.WithParentActivityOrWindow($ParentWindow)
+              if ($ParentWindow -ne [System.IntPtr]::Zero) {
+                [void] $AquireTokenParameters.WithParentActivityOrWindow($ParentWindow)
+              }
+            } catch {
+              # Do nothing
             }
           }
 

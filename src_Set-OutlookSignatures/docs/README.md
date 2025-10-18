@@ -1,6 +1,14 @@
 <!-- omit in toc -->
-## **<a href="https://set-outlooksignatures.com" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="250px" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy.<br><br><a href="https://set-outlooksignatures.com" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black&color=informational" alt="License"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=latest%20release&color=informational&labelColor=black" alt="latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?labelColor=black" alt="open issues" data-external="1"></a> <a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank"><img src="https://img.shields.io/badge/add%20features-Benefactor%20Circle%20add--on-gold?labelColor=black" alt="add features with Benefactor Circle"></a> <a href="https://set-outlooksignatures.com/support" target="_blank"><img src="https://img.shields.io/badge/fee--based%20support-ExplicIT%20Consulting-lawngreen?labelColor=black" alt="get fee-based support from ExplicIT Consulting"></a>
+## **<a href="https://set-outlooksignatures.com" target="_blank"><img src="/src_Set-OutlookSignatures/logo/Set-OutlookSignatures%20Logo.png" width="250px" title="Set-OutlookSignatures" alt="Set-OutlookSignatures"></a>**<br>Email signatures and out-of-office replies for Exchange and Outlook.<br>Full-featured, cost-effective, unsurpassed data privacy.<br><br><a href="https://set-outlooksignatures.com" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?label=License&labelColor=black&color=informational" alt="License: EUPL 1.2"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=Latest%20release&color=informational&labelColor=black" alt="Latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?label=Issues&labelColor=black" alt="Issues" data-external="1"></a> <a href="https://set-outlooksignatures.com/faq/#44-what-can-i-learn-from-the-code-of-set-outlooksignatures" target="_blank"><img src="https://img.shields.io/badge/Behind%20the%20scenes-Learn%20from%20the%20code-lawngreen?labelColor=black" alt="Behind the scenes: Learn from the code"></a>
 
+<p>
+  <a
+    href="https://set-outlooksignatures.com/quickstart" target="_blank"><img src="https://img.shields.io/badge/Click%20for-Quick%20Start%20Guide:%20Deploy%20signatures%20in%20minutes-lawngreen?labelColor=black" alt="Quick Start Guide: Deploy signatures within minutes">
+  </a>
+  <a
+    href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Click%20for-Features%20and%20Feature%20Comparison-lawngreen?labelColor=black" alt="Features and Feature Comparison">
+  </a>
+</p>
 
 <h2>Manage your Outlook signatures centrally and fully automated</h2>
 <p>Set-OutlookSignatures takes the hassle out of manually maintaining Outlook signatures and out-of-office replies.</p>
@@ -44,7 +52,7 @@
 
 
 <h2>Functionality meets expertise</h2>
-<p>The optional Benefactor Circle Add-On extends the free and open-source Set-OutlookSignatures with powerful enterprise features, prioritized support, and direct access to new capabilities.<p>
+<p>The optional Benefactor Circle Add-On extends Set-OutlookSignatures with powerful enterprise features, prioritized support, and direct access to new capabilities.<p>
 
 <p>If desired, we’ll set up our solution together with you: Simple, tailored to your needs, and with sustainable knowledge transfer.<p>
 
@@ -69,7 +77,7 @@
 </p>
 
 
-<h2>First signatures in less than an hour</h2>
+<h2>Deploy signatures within minutes</h2>
 <p>Follow the easy 3-step-process to deploy your first signatures, get a glimpse of what Set-OutlookSignatures can do, and create a robust starting point for your own customizations.<p>
 
 <p><a href="https://set-outlooksignatures.com/quickstart" target="_blank"><img src="https://img.shields.io/badge/Click%20for-Quick%20Start%20Guide-lawngreen?labelColor=black" alt="Click for Quick Start Guide"></a></p>
@@ -84,5 +92,5 @@
   <li>The detailed feature set and a comparison with market companions</li>
   <li>Requirements and configuration options</li>
   <li>Best practices and FAQ</li>
-  <li>How to get first-class support</li>
+  <li>How to get first-class professional support</li>
 </ul>

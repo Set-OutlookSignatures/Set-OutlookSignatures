@@ -6,8 +6,11 @@ Both types of apps are supported: The one for end users, and the one for Simulat
 You can adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers professional support for this and other open source code.
 #>
+
+
+#Requires -Version 5.1
 
 [CmdletBinding()]
 
@@ -37,6 +40,12 @@ Remove-TypeData System.Array -ErrorAction SilentlyContinue
 if ($psISE) {
     Write-Host 'PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
     Write-Host 'Required features are not available in ISE. Exit.' -ForegroundColor Red
+    exit 1
+}
+
+if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
+    Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+    Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
     exit 1
 }
 
@@ -134,8 +143,8 @@ if ($ExistingApp.Count -gt 0) {
 
 $params = @{
     DisplayName    = $AppName
-    Description    = "$($AppType) app for Set-OutlookSignatures: Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy."
-    Notes          = "$($AppType) app for Set-OutlookSignatures: Email signatures and out-of-office replies for Exchange and all of Outlook. Full-featured, cost-effective, unsurpassed data privacy."
+    Description    = "$($AppType) app for Set-OutlookSignatures: Email signatures and out-of-office replies for Exchange and Outlook. Full-featured, cost-effective, unsurpassed data privacy."
+    Notes          = "$($AppType) app for Set-OutlookSignatures: Email signatures and out-of-office replies for Exchange and Outlook. Full-featured, cost-effective, unsurpassed data privacy."
     SignInAudience = 'AzureADMyOrg'
 }
 

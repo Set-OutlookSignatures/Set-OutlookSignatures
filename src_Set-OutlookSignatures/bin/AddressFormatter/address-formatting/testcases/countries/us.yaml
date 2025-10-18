@@ -1,0 +1,268 @@
+---
+description: house number in California
+components:
+    house_number: 301
+    road: Hamilton Avenue
+    neighbourhood: Crescent Park
+    city: Palo Alto
+    postcode: 94303
+    county: Santa Clara County
+    state: California
+    country: United States of America
+    country_code: US
+expected:  |
+    301 Hamilton Avenue
+    Palo Alto, CA 94303
+    United States of America
+
+---
+description: correct "USA"
+components:
+    house_number: 301
+    road: Hamilton Avenue
+    neighbourhood: Crescent Park
+    city: Palo Alto
+    postcode: 94303
+    county: Santa Clara County
+    state: California
+    country: USA
+    country_code: US
+expected:  |
+    301 Hamilton Avenue
+    Palo Alto, CA 94303
+    United States of America
+
+---
+description: correct "United States"
+components:
+    house_number: 301
+    road: Hamilton Avenue
+    neighbourhood: Crescent Park
+    city: Palo Alto
+    postcode: 94303
+    county: Santa Clara County
+    state: California
+    country: United States
+    country_code: US
+expected:  |
+    301 Hamilton Avenue
+    Palo Alto, CA 94303
+    United States of America
+
+---
+description: correct "US"
+components:
+    house_number: 301
+    road: Hamilton Avenue
+    neighbourhood: Crescent Park
+    city: Palo Alto
+    postcode: 94303
+    county: Santa Clara County
+    state: California
+    country: US
+    country_code: US
+expected:  |
+    301 Hamilton Avenue
+    Palo Alto, CA 94303
+    United States of America
+
+---
+description: town in CA
+components:
+    city: Palo Alto
+    country: United States of America
+    country_code: US
+    county: Santa Clara County
+    state: California
+expected:  |
+    Palo Alto, California
+    United States of America
+---
+description: NY, NY
+components:
+    city: New York
+    country: United States of America
+    country_code: US
+    state: New York
+expected:  |
+    New York, New York
+    United States of America
+---
+description: house number in New York, no city
+components:
+    house_number: 175
+    road: Varick Street
+    neighbourhood: Greenwich Village
+    postcode: 10014
+    county: New York County
+    state_district: New York City
+    state: New York
+    country: United States of America
+    country_code: US
+expected:  |
+    175 Varick Street
+    New York City, NY 10014
+    United States of America
+---
+description: state code for Washington, D.C.
+components:
+    country: United States of America
+    country_code: us
+    postcode: 20500
+    state: Washington, D.C.
+expected:  |
+    Washington, DC 20500
+    United States of America
+---
+description: state code for Washington DC
+components:
+    country: United States of America
+    country_code: us
+    postcode: 20500
+    state: Washington DC
+expected:  |
+    Washington, DC 20500
+    United States of America
+---
+description: use suburb if no city
+components:
+    country: USA
+    country_code: us
+    county: Volusia County
+    house_number: 928
+    postcode: 32132
+    road: Flagler Avenue
+    state: Florida
+    state_code: FL
+    suburb: Edgewater
+expected:  |
+    928 Flagler Avenue
+    Edgewater, FL 32132
+    United States of America
+---
+description: clean up "Town of " 40.7805,-73.4875
+components:
+    country: United States
+    country_code: us
+    county: Nassau County
+    house_number: 4
+    municipality: Town of Oyster Bay
+    postcode: 11803
+    road: Lakeville Lane
+    state: New York
+    state_code: NY
+expected:  |
+    4 Lakeville Lane
+    Oyster Bay, NY 11803
+    United States of America
+---
+description: use county if no city
+components:
+    country: USA
+    country_code: us
+    county: Volusia County
+    house_number: 928
+    postcode: 32132
+    road: Flagler Avenue
+    state: Florida
+    state_code: FL
+expected:  |
+    928 Flagler Avenue
+    Volusia County, FL 32132
+    United States of America
+---
+description: state code for Washington DC
+components:
+    city: Washington
+    country: United States of America
+    country_code: us
+    postcode: 20500
+    state: District of Columbia
+expected:  |
+    Washington, DC 20500
+    United States of America
+#
+# United States Virgin Islands
+---
+description: Library in Charlotte Amalie, 18.34119,-64.93546
+components:
+   country: United States of America
+   country_code: us
+   county: St. Thomas Island
+   library: Enid M Baa Library and Archives
+   postcode: "00803"
+   road: Dronningens Gade
+   state: United States Virgin Islands
+   town: Charlotte Amalie
+expected:  |
+    Enid M Baa Library and Archives
+    Dronningens Gade
+    Charlotte Amalie, VI 00803
+    United States of America
+#
+# state_district
+---
+description: state_district
+components:
+   country: United States of America
+   country_code: us
+   state: New York
+   state_district: New York
+expected:  |
+    New York, New York
+    United States of America
+---
+description: just state
+components:
+   country: United States of America
+   country_code: us
+   state: New York
+expected:  |
+    New York
+    United States of America
+#
+# municipality
+---
+description: municipality
+components:
+    country: United States of America
+    country_code: us
+    county: Saginaw County
+    municipality: Taymouth Township
+    state: Michigan
+    village: Burt
+expected:  |
+    Burt
+    Taymouth Township, Michigan
+    United States of America
+#
+# village
+---
+description: village
+components:
+    country: United States of America
+    country_code:  us
+    county: Costilla County
+    postcode: "08113"
+    state: Colorado
+    village:  Fort Garland
+expected:  |
+    Fort Garland
+    Costilla County, CO 08113
+    United States of America
+#
+# hamlet
+---
+description: hamlet
+components:
+    city: Homestead
+    country: United States of America
+    country_code:  us
+    county: Miami-Dade County
+    hamlet: Homestead Trailer Park
+    postcode: 33030
+    state: Florida
+expected:  |
+    Homestead Trailer Park
+    Homestead, FL 33030
+    United States of America

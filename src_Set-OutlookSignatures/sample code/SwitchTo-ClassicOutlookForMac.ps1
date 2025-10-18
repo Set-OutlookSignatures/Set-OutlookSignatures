@@ -9,12 +9,15 @@ This sample code does the following:
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers professional support for this and other open source code.
 #>
+
+
+#Requires -Version 5.1
 
 [CmdletBinding()] param ()
 
-if ((-not $IsMacOS) -or (-not (Test-Path -LiteralPath '/Applications/Microsoft Outlook.app' -PathType Container))) {
+if ((-not ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS)) -or (-not (Test-Path -LiteralPath '/Applications/Microsoft Outlook.app' -PathType Container))) {
     Write-Host 'This script is only supported on macOS with Outlook. Exit.'
     exit 1
 }
@@ -25,6 +28,12 @@ Remove-TypeData System.Array -ErrorAction SilentlyContinue
 if ($psISE) {
     Write-Host 'PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
     Write-Host 'Required features are not available in ISE. Exit.' -ForegroundColor Red
+    exit 1
+}
+
+if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
+    Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+    Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
     exit 1
 }
 
@@ -48,13 +57,13 @@ end tell
 $DefaultIsRunningNewOutlook = ($(defaults read com.microsoft.Outlook IsRunningNewOutlook *>&1).ToString() -eq 1)
 
 $DefaultEnableNewOutlook = $(defaults read com.microsoft.Outlook EnableNewOutlook *>&1).ToString()
-If ($DefaultEnableNewOutlook -inotin @(0, 1, 2, 3)) { $DefaultEnableNewOutlook = 2 } else { $DefaultEnableNewOutlook = [int]$DefaultEnableNewOutlook }
+if ($DefaultEnableNewOutlook -inotin @(0, 1, 2, 3)) { $DefaultEnableNewOutlook = 2 } else { $DefaultEnableNewOutlook = [int]$DefaultEnableNewOutlook }
 
 $OutlookWasRunning = $false
 
 # If New Outlook is enabled and running, ask the user to close New Outlook
 # and then automatically temporarily disable New Outlook
-If ((-not $macOSSignaturesScriptable) -and $DefaultIsRunningNewOutlook) {
+if ((-not $macOSSignaturesScriptable) -and $DefaultIsRunningNewOutlook) {
     if ((Get-Process | Where-Object { $_.path -ilike '/Applications/Microsoft Outlook.app/*' }).count -gt 0) {
         $OutlookWasRunning = $true
 
@@ -75,7 +84,7 @@ If ((-not $macOSSignaturesScriptable) -and $DefaultIsRunningNewOutlook) {
 
 
 # Restore New Outlook setting and inform user
-If ((-not $macOSSignaturesScriptable) -and $DefaultIsRunningNewOutlook) {
+if ((-not $macOSSignaturesScriptable) -and $DefaultIsRunningNewOutlook) {
     # Restore original setting
     defaults write com.microsoft.Outlook EnableNewOutlook -integer $DefaultEnableNewOutlook
     defaults write com.microsoft.Outlook IsRunningNewOutlook -integer 1

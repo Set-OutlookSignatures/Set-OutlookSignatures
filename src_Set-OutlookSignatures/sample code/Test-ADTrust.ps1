@@ -11,8 +11,11 @@ This script assumes that the trust to check is either a cross-forest trust, or t
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers professional support for this and other open source code.
 #>
+
+
+#Requires -Version 5.1
 
 [CmdletBinding()]
 
@@ -55,6 +58,12 @@ try {
         exit 1
     }
 
+    if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
+        Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+        Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+        exit 1
+    }
+
     $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
     Write-Host "  PowerShell: '$((($($PSVersionTable.PSVersion), $($PSVersionTable.PSEdition), $($PSVersionTable.Platform), $($PSVersionTable.OS)) | Where-Object {$_}) -join "', '")'"
@@ -70,7 +79,7 @@ try {
         }
     }
 
-    if ($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) {
+    if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
     } else {
         Write-Host "  Your OS: $($PSVersionTable.OS)" -ForegroundColor Red
         Write-Host '  This script is supported on Windows only. Exit.' -ForegroundColor Red
@@ -358,7 +367,7 @@ try {
         }
     }
 } catch {
-    Write-Host $error[0]
+    Write-Host ($error[0] | Format-List * | Out-String)
     Write-Host
     Write-Host "Unknown error, exiting. @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
     exit 1

@@ -1,0 +1,45 @@
+# India
+---
+description: Restaurant in Hyderabad
+components:
+    road: uppuguda
+    city: Hyderabad
+    neighbourhood: Patthergatti
+    country: India
+    country_code: IN
+    postcode: 500064
+    restaurant: Anand Bhavan (vegetarian)
+    state: Telangana
+    suburb: Charminar
+expected:  |
+    Anand Bhavan (vegetarian)
+    uppuguda
+    Charminar
+    Hyderabad - 500064
+    Telangana
+    India
+---
+description: Indian postcode
+components:
+    state: Mahārāshtra
+    postcode: 400096
+    country: India
+    country_code: in
+expected:  |
+    400096
+    Mahārāshtra
+    India
+---
+description: without postcode
+components:
+    city: Pune
+    country: India
+    country_code: in
+    road: Baner
+    state: Maharashtra
+expected:  |
+    Baner
+    Pune
+    Maharashtra
+    India
+

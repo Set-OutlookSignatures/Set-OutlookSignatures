@@ -1,0 +1,288 @@
+---
+description: Lokku office
+components:
+    city: London
+    city_district: London Borough of Islington
+    country: United Kingdom
+    country_code: GB
+    house: Lokku Ltd
+    house_number: 82
+    postcode: EC1M 5RF
+    road: Clerkenwell Road
+    state: England
+    state_district: Greater London
+    suburb: Clerkenwell
+expected:  |
+    Lokku Ltd
+    82 Clerkenwell Road
+    London
+    EC1M 5RF
+    United Kingdom
+---
+description: Lokku office
+components:
+    country: United Kingdom
+    country_code: GB
+    county: Greater London
+    local_administrative_area: City of London
+    state: England
+    suburb: Barbican
+expected:  |
+    Barbican
+    City of London
+    London
+    United Kingdom
+---
+description: London
+components:
+    city: London
+    country: United Kingdom
+    country_code: GB
+    county: London
+    state: England
+    state_district: Greater London
+expected:  |
+    London
+    United Kingdom
+
+---
+description: Manchester
+components:
+    city: Manchester
+    country: United Kingdom
+    country_code: GB
+    county: Manchester
+    state: England
+expected:  |
+    Manchester
+    England
+    United Kingdom
+
+
+---
+description: just a suburb
+components:
+    city: London
+    city_district: London Borough of Islington
+    country: United Kingdom
+    country_code: gb
+    county: London
+    state: England
+    state_district: Greater London
+    suburb: Clerkenwell
+expected:  |
+    Clerkenwell
+    London
+    United Kingdom
+
+---
+description: City of Westminster, 51.52089885, -0.14007993
+components:
+    city: City of Westminster
+    country: United Kingdom
+    country_code: gb
+    county: London
+    house_number: 115
+    postcode: W1T 5DU
+    road: New Cavendish Street
+    state: England
+    state_district: Greater London
+    suburb: Fitzrovia
+    university: University of Westminster
+expected:  |
+    University of Westminster
+    115 New Cavendish Street
+    London
+    W1T 5DU
+    United Kingdom
+---
+description: village in Cambridgeshire, 52.281523,-0.115179
+components:
+    country: United Kingdom
+    country_code: gb
+    county: Cambridgeshire
+    postcode: PE28 9QA
+    region: East of England
+    state: England
+    suburb: Fenstanton
+    town: Huntingdonshire
+    village: Hilton
+expected:  |
+    Hilton
+    PE28 9QA
+    United Kingdom
+---
+description: Willoughby House, Barbican
+components:
+    building: Willoughby House
+    city: London
+    country: United Kingdom
+    country_code: gb
+    county: City of London
+    postcode: EC2Y 9DP
+    quarter: Barbican
+    road: Moor Lane
+    state: England
+    state_district: Greater London
+expected:  |
+    Willoughby House
+    Moor Lane
+    Barbican
+    London
+    EC2Y 9DP
+    United Kingdom
+---
+description: City of Nottingham
+components:
+    city: City of Nottingham
+    country: United Kingdom
+    country_code: gb
+    house_number: 121
+    neighbourhood: Lace Market
+    postcode: NG3 1NB
+    road: Abbotsford Drive
+    state: England
+    state_district: East Midlands
+    suburb: St Ann's
+expected:  |
+    121 Abbotsford Drive
+    Nottingham
+    NG3 1NB
+    United Kingdom
+---
+description: London Borough of Waltham Forest
+components:
+    city: London
+    country: United Kingdom
+    country_code: gb
+    county: London Borough of Waltham Forest
+    house_number: 64
+    neighbourhood: Walthamstow Village
+    postcode: E10
+    road: Melbourne Road
+    state: England
+    state_district: Greater London
+    suburb: Leyton
+expected:  |
+    64 Melbourne Road
+    London
+    E10
+    United Kingdom
+---
+description: London Borough of Waltham Forest - partial_postcode
+components:
+    city: London
+    country: United Kingdom
+    country_code: gb
+    county: London Borough of Waltham Forest
+    house_number: 64
+    neighbourhood: Walthamstow Village
+    partial_postcode: E10
+    road: Melbourne Road
+    state: England
+    state_district: Greater London
+    suburb: Leyton
+expected:  |
+    64 Melbourne Road
+    London
+    E10
+    United Kingdom
+---
+description: Prefer town over city (Ossett vs Wakefield)
+components:
+    building: Orchard House
+    city: Wakefield
+    country: United Kingdom
+    country_code: gb
+    county: West Yorkshire
+    postcode: WF5 8PG
+    road: West Wells Road
+    state: England
+    state_code: ENG
+    state_district: Yorkshire and the Humber
+    town: Ossett
+expected:  |
+    Orchard House
+    West Wells Road
+    Ossett
+    WF5 8PG
+    United Kingdom
+---
+description: Farmland
+components:
+    country: United Kingdom
+    country_code: gb
+    county: York
+    farmland: Fair Field
+    hamlet: Kexby
+    state: England
+    state_district: Yorkshire and the Humber
+expected:  |
+    Fair Field
+    Kexby
+    York
+    England
+    United Kingdom
+---
+description: suburb before city_district
+components:
+    city: London
+    city_district: London Borough of Hackney
+    country: United Kingdom
+    country_code: gb
+    state: England
+    state_code: ENG
+    state_district: Greater London
+    suburb: Hoxton
+expected:  |
+    Hoxton
+    London
+    United Kingdom
+---
+description: village and city
+components:
+        city: Stratford-on-Avon
+        country: United Kingdom
+        country_code: gb
+        county: Warwickshire
+        state: England
+        village: Welford on Avon CP
+expected:  |
+    Welford on Avon
+    Stratford-on-Avon
+    Warwickshire
+    England
+    United Kingdom
+---
+description: town and city
+components:
+        city: East Hertfordshire
+        country: United Kingdom
+        country_code: gb
+        county: Hertfordshire
+        county_code: HRT
+        state: England
+        state_code: ENG
+        town: Bishop's Stortford
+expected:  |
+    Bishop's Stortford
+    Hertfordshire
+    England
+    United Kingdom
+---
+description: place name with & in name
+components:
+        city: London
+        country: United Kingdom
+        country_code: gb
+        house: St. Judes & St. Pauls C of E (Va) Primary School
+        house_number: 10
+        postcode: N1 4AZ
+        road: Kingsbury Road
+expected:  |
+    St. Judes & St. Pauls C of E (Va) Primary School
+    10 Kingsbury Road
+    London
+    N1 4AZ
+    United Kingdom
+

@@ -4,9 +4,11 @@ This sample code shows how to create a desktop icon in Windows, allowing the use
 You have to adapt it to fit your environment.
 The sample code is written in a generic way, which allows for easy adaption.
 
-Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers fee-based support for this and other open source code.
+Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offers professional support for this and other open source code.
 #>
 
+
+#Requires -Version 5.1
 
 [CmdletBinding()] param ()
 
@@ -19,13 +21,19 @@ if ($psISE) {
     exit 1
 }
 
+if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
+    Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+    Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+    exit 1
+}
+
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
 
 $pathSetOutlookSignatures = '\\path\to\Set-OutlookSignatures' # Path to the Set-OutlookSignatures folder
 
 
-if ($IsWindows -or (-not (Test-Path -LiteralPath 'variable:IsWindows'))) {
+if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
     if (-not ([System.Management.Automation.PSTypeName]'SetOutlookSignatures.ShellLink').Type) {
         Add-Type -TypeDefinition @'
 namespace SetOutlookSignatures
@@ -131,7 +139,7 @@ namespace SetOutlookSignatures
         0, # iconIndex: Index of the icon within the icon file
         1 # showCmd: Window mode: 1 = Normal, 3 = Maximized, 7 = Minimized
     )
-} elseif ($IsLinux) {
+} elseif ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
     $tempFile = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath 'Set Outlook signatures.desktop'
 
     @"
@@ -154,7 +162,7 @@ Terminal=true
     chmod a+x $(Join-Path -Path ([System.Environment]::GetFolderPath('Desktop')) -ChildPath (Split-Path -Path $tempFile -Leaf))
 
     Remove-Item -LiteralPath $tempFile -Force
-} elseif ($IsMacOS) {
+} elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
     $desktopFile = $(Join-Path -Path ([System.Environment]::GetFolderPath('Desktop')) -ChildPath 'Set Outlook signatures')
     $tempFile = $null
 
