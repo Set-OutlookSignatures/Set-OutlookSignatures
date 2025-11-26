@@ -17,7 +17,15 @@ function Get-DeviceRegistrationStatus {
 
     if (([System.Environment]::OSVersion.Platform -eq 'Win32NT') -and ([System.Environment]::OSVersion.Version -ge '10.0') -and ([System.Environment]::OSVersion.Version.Build -ge 17134)) {
         try {
-            dsregcmd /status | ForEach-Object { if ($_ -match '\s*(.+) : (.+)') { $Dsreg.Add($Matches[1], $Matches[2]) } }
+            dsregcmd /status | ForEach-Object {
+                if ($_ -match '\s*(.+) : (.+)') {
+                    if ($Dsreg.ContainsKey($Matches[1])) {
+                        # Do nothing, keep the first value
+                    } else {
+                        $Dsreg.Add($Matches[1], $Matches[2])
+                    }
+                }
+            }
         } catch {
         }
     }

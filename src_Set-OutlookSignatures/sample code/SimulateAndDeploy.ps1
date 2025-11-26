@@ -127,8 +127,9 @@ Limitations and remarks
   - Consider using the 'VirtualMailboxConfigFile' parameter of Set-OutlookSignatures, ideally together with the output of the Export-RecipientPermissions script.
       - This allows you to automatically create up-to-date lists of mailboxes based on the permissions granted in Exchange, as well as the according INI file lines.
 	  - Visit https://github.com/Export-RecipientPermissions for details about Export-RecipientPermissions.
-  - In newer releases, Word throws error messages when run in a non-interactive mode (such as using a scheduled task configured with "Run whether user is logged on or not").
+  - Some Word builds throw an error message when run in a non-interactive mode (such as using a scheduled task configured with "Run whether user is logged on or not").
       - The only known workarounds are to run SimulateAndDeploy in interactive mode, or to use HTM templates instead of DOCX templates.
+	    ExplicIT Consulting can help you create code converting DOCX templates to HTM templates automatically.
 
 
 It is recommended to not modify or copy this sample script, but to call it with parameters.
@@ -702,16 +703,18 @@ try {
 			exit 1
 		}
 
-		if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
-			$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+		if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+			$null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
 		}
 
 		if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-			$script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+			if (Test-Path -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security") {
+				$script:WordDisableWarningOnIncludeFieldsUpdate = (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security").'DisableWarningOnIncludeFieldsUpdate'
+			}
 		}
 
 		if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-			$null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+			$null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
 		}
 	}
 
@@ -908,7 +911,7 @@ try {
 
 	# Restore Word security setting for embedded images
 	if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and ($SetOutlookSignaturesScriptParameters.UseHtmTemplates -inotin (1, '1', 'true', '$true', 'yes'))) {
-		Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+		Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 	}
 
 	if ($script:MsalModulePath) {

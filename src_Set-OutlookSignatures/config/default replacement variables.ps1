@@ -270,7 +270,11 @@ $ReplaceHash['$CurrentUserMobile-noempty$'] = $(if (-not $ReplaceHash['$CurrentU
 foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager')) {
     foreach ($y in @('Telephone', 'Fax', 'Mobile')) {
         foreach ($z in @('E164', 'INTERNATIONAL', 'NATIONAL', 'RFC3966')) {
-            $ReplaceHash["`$$($x)$($y)-$($z)`$"] = FormatPhoneNumber -Number $ReplaceHash["`$$($x)$($y)`$"] -Country $ReplaceHash["`$$($x)Country`$"] -Format $z
+            if ($ReplaceHash["`$$($x)$($y)`$"]) {
+                $ReplaceHash["`$$($x)$($y)-$($z)`$"] = FormatPhoneNumber -Number $ReplaceHash["`$$($x)$($y)`$"] -Country $ReplaceHash["`$$($x)Country`$"] -Format $z
+            } else {
+                $ReplaceHash["`$$($x)$($y)-$($z)`$"] = $ReplaceHash["`$$($x)$($y)`$"]
+            }
         }
     }
 }
@@ -338,9 +342,13 @@ foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'Current
         # Address components as described in https://github.com/OpenCageData/address-formatting/blob/master/conf/components.yaml
         Components      = @{
             attention = @(
-                "$($ReplaceHash["`$$($x)GivenName`$"]) $($ReplaceHash["`$$($x)Surname`$"])"
-                "$($ReplaceHash["`$$($x)Department`$"])"
-                "$($ReplaceHash["`$$($x)Company`$"])"
+                @(
+                    @(
+                        "$($ReplaceHash["`$$($x)GivenName`$"]) $($ReplaceHash["`$$($x)Surname`$"])"
+                        "$($ReplaceHash["`$$($x)Department`$"])"
+                        "$($ReplaceHash["`$$($x)Company`$"])"
+                    ) | ForEach-Object { $_.trim() }
+                ) | Where-Object { $_ }
             ) -join [System.Environment]::NewLine
             road      = $ReplaceHash["`$$($x)StreetAddress`$"]
             city      = $ReplaceHash["`$$($x)Location`$"]
@@ -352,30 +360,37 @@ foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'Current
         # Country as two-letter ISO country code (e.g., "AT", "US") or full English country name (e.g., "Austria", "United States")
         #   Needed to choose correct address format rules
         Country         = $(
-            $tempSearchString = $ReplaceHash["`$$($x)Country`$"]
-            ( 
-                @(
-                    foreach ($tempSpecificCulture in [System.Globalization.CultureInfo]::GetCultures('SpecificCultures')) {
-                        $tempRegionInfo = New-Object System.Globalization.RegionInfo($tempSpecificCulture)
+            $tempSearchString = "$($ReplaceHash["`$$($x)Country`$"])".Trim()
 
-                        if (
-                            [System.Globalization.CultureInfo]::InvariantCulture.CompareInfo.IndexOf(
-                                ('|' + $(
-                                    @(
-                                        foreach ($attribute in @('Name', 'EnglishName', 'DisplayName', 'NativeName', 'TwoLetterISORegionName', 'ThreeLetterISORegionName', 'ThreeLetterWindowsRegionName')) {
-                                            (($tempRegionInfo.$attribute).Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower()
-                                        }
-                                    ) -join '|'
-                                ) + '|'),
-                                ('|' + ($tempSearchString.Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower() + '|'),
-                                [System.Globalization.CompareOptions]::IgnoreCase -bor [System.Globalization.CompareOptions]::IgnoreNonSpace -bor [System.Globalization.CompareOptions]::IgnoreKanaType -bor [System.Globalization.CompareOptions]::IgnoreWidth
-                            ) -ge 0
-                        ) {
-                            $tempRegionInfo
+            if ([string]::IsNullOrWhiteSpace($tempSearchString)) {
+                $null
+            } else {
+                (
+                    @(
+                        foreach ($tempSpecificCulture in [System.Globalization.CultureInfo]::GetCultures('SpecificCultures')) {
+                            $tempRegionInfo = New-Object System.Globalization.RegionInfo($tempSpecificCulture)
+
+                            if (
+                                [System.Globalization.CultureInfo]::InvariantCulture.CompareInfo.IndexOf(
+                                    ('|' + $(
+                                        @(
+                                            foreach ($attribute in @('Name', 'EnglishName', 'DisplayName', 'NativeName', 'TwoLetterISORegionName', 'ThreeLetterISORegionName', 'ThreeLetterWindowsRegionName')) {
+                                                if (-not [string]::IsNullOrWhiteSpace($tempRegionInfo.$attribute)) {
+                                                    (($tempRegionInfo.$attribute).Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower()
+                                                }
+                                            }
+                                        ) -join '|'
+                                    ) + '|'),
+                                    ('|' + ($tempSearchString.Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower() + '|'),
+                                    [System.Globalization.CompareOptions]::IgnoreCase -bor [System.Globalization.CompareOptions]::IgnoreNonSpace -bor [System.Globalization.CompareOptions]::IgnoreKanaType -bor [System.Globalization.CompareOptions]::IgnoreWidth
+                                ) -ge 0
+                            ) {
+                                $tempRegionInfo
+                            }
                         }
-                    }
-                ) | Select-Object -First 1
-            ).TwoLetterISORegionName
+                    ) | Select-Object -First 1
+                ).TwoLetterISORegionName
+            }
         )
         # Shorten address components ("St." instead of "Street", "Rd." instead of "Road", etc.)
         Abbreviate      = $false
@@ -391,8 +406,3 @@ foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'Current
 
     $ReplaceHash["`$$($x)PostalAddress`$"] = Format-PostalAddress @FormatPostAddressOptions
 }
-
-
-
-
-

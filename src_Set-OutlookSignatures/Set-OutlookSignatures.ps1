@@ -672,30 +672,37 @@ function main {
         try {
             if ($Country.Length -ne 2) {
                 $Country = $(
-                    $tempSearchString = $Country
-                    (
-                        @(
-                            foreach ($tempSpecificCulture in [System.Globalization.CultureInfo]::GetCultures('SpecificCultures')) {
-                                $tempRegionInfo = New-Object System.Globalization.RegionInfo($tempSpecificCulture)
+                    $tempSearchString = "$($Country)".Trim()
 
-                                if (
-                                    [System.Globalization.CultureInfo]::InvariantCulture.CompareInfo.IndexOf(
-                                        ('|' + $(
-                                            @(
-                                                foreach ($attribute in @('Name', 'EnglishName', 'DisplayName', 'NativeName', 'TwoLetterISORegionName', 'ThreeLetterISORegionName', 'ThreeLetterWindowsRegionName')) {
-                                                    (($tempRegionInfo.$attribute).Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower()
-                                                }
-                                            ) -join '|'
-                                        ) + '|'),
-                                        ('|' + ($tempSearchString.Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower() + '|'),
-                                        [System.Globalization.CompareOptions]::IgnoreCase -bor [System.Globalization.CompareOptions]::IgnoreNonSpace -bor [System.Globalization.CompareOptions]::IgnoreKanaType -bor [System.Globalization.CompareOptions]::IgnoreWidth
-                                    ) -ge 0
-                                ) {
-                                    $tempRegionInfo
+                    if ([string]::IsNullOrWhiteSpace($tempSearchString)) {
+                        $null
+                    } else {
+                        (
+                            @(
+                                foreach ($tempSpecificCulture in [System.Globalization.CultureInfo]::GetCultures('SpecificCultures')) {
+                                    $tempRegionInfo = New-Object System.Globalization.RegionInfo($tempSpecificCulture)
+
+                                    if (
+                                        [System.Globalization.CultureInfo]::InvariantCulture.CompareInfo.IndexOf(
+                                            ('|' + $(
+                                                @(
+                                                    foreach ($attribute in @('Name', 'EnglishName', 'DisplayName', 'NativeName', 'TwoLetterISORegionName', 'ThreeLetterISORegionName', 'ThreeLetterWindowsRegionName')) {
+                                                        if (-not [string]::IsNullOrWhiteSpace($tempRegionInfo.$attribute)) {
+                                                            (($tempRegionInfo.$attribute).Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower()
+                                                        }
+                                                    }
+                                                ) -join '|'
+                                            ) + '|'),
+                                            ('|' + ($tempSearchString.Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower() + '|'),
+                                            [System.Globalization.CompareOptions]::IgnoreCase -bor [System.Globalization.CompareOptions]::IgnoreNonSpace -bor [System.Globalization.CompareOptions]::IgnoreKanaType -bor [System.Globalization.CompareOptions]::IgnoreWidth
+                                        ) -ge 0
+                                    ) {
+                                        $tempRegionInfo
+                                    }
                                 }
-                            }
-                        ) | Select-Object -First 1
-                    ).TwoLetterISORegionName
+                            ) | Select-Object -First 1
+                        ).TwoLetterISORegionName
+                    }
                 )
             }
 
@@ -886,9 +893,9 @@ function main {
 
             if ($null -ne $OutlookRegistryVersion) {
                 try {
-                    $OutlookDefaultProfile = (Get-ItemProperty -LiteralPath "hkcu:\software\microsoft\office\$($OutlookRegistryVersion)\Outlook" -ErrorAction Stop -WarningAction SilentlyContinue).DefaultProfile
+                    $OutlookDefaultProfile = (Get-ItemProperty -LiteralPath "HKCU:\Software\microsoft\office\$($OutlookRegistryVersion)\Outlook" -ErrorAction Stop -WarningAction SilentlyContinue).DefaultProfile
 
-                    $OutlookProfiles = @(@((Get-ChildItem -LiteralPath "hkcu:\SOFTWARE\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles" -ErrorAction Stop -WarningAction SilentlyContinue).PSChildName) | Where-Object { $_ })
+                    $OutlookProfiles = @(@((Get-ChildItem -LiteralPath "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles" -ErrorAction Stop -WarningAction SilentlyContinue).PSChildName) | Where-Object { $_ })
 
                     if ($OutlookDefaultProfile -and ($OutlookDefaultProfile -iin $OutlookProfiles)) {
                         $OutlookProfiles = @(@($OutlookDefaultProfile) + @($OutlookProfiles | Where-Object { $_ -ine $OutlookDefaultProfile }))
@@ -1214,7 +1221,7 @@ end tell
             $SignaturePaths += $AdditionalSignaturePath
         }
     } elseif ($OutlookProfiles -and ($OutlookUseNewOutlook -ne $true)) {
-        $x = (Get-ItemProperty -LiteralPath "hkcu:\software\microsoft\office\$($OutlookRegistryVersion)\common\general" -ErrorAction SilentlyContinue).'Signatures'
+        $x = (Get-ItemProperty -LiteralPath "HKCU:\Software\microsoft\office\$($OutlookRegistryVersion)\common\general" -ErrorAction SilentlyContinue).'Signatures'
 
         if ($x) {
             Push-Location -LiteralPath ((Join-Path -Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ApplicationData)) -ChildPath 'Microsoft'))
@@ -1254,7 +1261,7 @@ end tell
     # If Outlook is installed, synch profile folders anyway
     # Also makes sure that signatures are already there when starting Outlook for the first time
     if ((-not $SimulateUser) -and $OutlookFileVersion) {
-        $x = (Get-ItemProperty -LiteralPath "hkcu:\software\microsoft\office\$($OutlookRegistryVersion)\common\general" -ErrorAction SilentlyContinue).'Signatures'
+        $x = (Get-ItemProperty -LiteralPath "HKCU:\Software\microsoft\office\$($OutlookRegistryVersion)\common\general" -ErrorAction SilentlyContinue).'Signatures'
 
         if ($x) {
             Push-Location -LiteralPath ((Join-Path -Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ApplicationData)) -ChildPath 'Microsoft'))
@@ -1903,7 +1910,7 @@ end tell
 
             Write-Host "    Profile '$($OutlookProfile)'"
 
-            foreach ($RegistryFolder in @(Get-ChildItem -LiteralPath "hkcu:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookProfile\9375CFF0413111d3B88A00104B2A6676" -ErrorAction SilentlyContinue | Get-ItemProperty | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } })) {
+            foreach ($RegistryFolder in @(Get-ChildItem -LiteralPath "HKCU:\Software\Microsoft\Office\$OutlookRegistryVersion\Outlook\Profiles\$OutlookProfile\9375CFF0413111d3B88A00104B2A6676" -ErrorAction SilentlyContinue | Get-ItemProperty | Where-Object { if ($OutlookFileVersion -ge '16.0.0.0') { ($_.'Account Name' -like '*@*.*') } else { (($_.'Account Name' -join ',') -like '*,64,*,46,*') } })) {
                 try { WatchCatchableExitSignal } catch { }
 
                 if ($OutlookFileVersion -ge '16.0.0.0') {
@@ -2170,10 +2177,22 @@ end tell
                                 $UserDomain = $TrustsToCheckForGroups[$DomainNumber]
                                 $ADPropsMailboxesUserDomain[$AccountNumberRunning] = $TrustsToCheckForGroups[$DomainNumber]
                                 $LegacyExchangeDNs[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].legacyexchangedn
-                                $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
+
+                                if ($ADPropsMailboxes[$AccountNumberRunning].mail) {
+                                    $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
+                                } else {
+                                    $MailAddresses[$AccountNumberRunning] = $null
+                                }
+
                                 Write-Host "      DistinguishedName: $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
                                 Write-Host "      UserPrincipalName: $($ADPropsMailboxes[$AccountNumberRunning].userprincipalname)"
                                 Write-Host "      Mail: $($ADPropsMailboxes[$AccountNumberRunning].mail)"
+                                if (-not $ADPropsMailboxes[$AccountNumberRunning].mail) {
+                                    Write-Host '        The mail attribute is not set, this will lead to errors in Set-OutlookSignatures and other applications.' -ForegroundColor Yellow
+                                }
+                                if ($ADPropsMailboxes[$AccountNumberRunning].mail -ine (@($ADPropsMailboxes[$AccountNumberRunning].proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')) {
+                                    Write-Host "        The mail attribute does not match the primary SMTP address ('$(@($ADPropsMailboxes[$AccountNumberRunning].proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')'), this will lead to errors in Set-OutlookSignatures and other applications." -ForegroundColor Yellow
+                                }
                                 Write-Host "      Manager: $($ADPropsMailboxes[$AccountNumberRunning].manager)"
                             }
                         }
@@ -2275,11 +2294,21 @@ end tell
                             $LegacyExchangeDNs[$AccountNumberRunning] = 'dummy'
                         }
 
-                        $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
+                        if ($ADPropsMailboxes[$AccountNumberRunning].mail) {
+                            $MailAddresses[$AccountNumberRunning] = $ADPropsMailboxes[$AccountNumberRunning].mail.tolower()
+                        } else {
+                            $MailAddresses[$AccountNumberRunning] = $null
+                        }
 
                         Write-Host "      DistinguishedName: $($ADPropsMailboxes[$AccountNumberRunning].distinguishedname)"
                         Write-Host "      UserPrincipalName: $($ADPropsMailboxes[$AccountNumberRunning].userprincipalname)"
                         Write-Host "      Mail: $($ADPropsMailboxes[$AccountNumberRunning].mail)"
+                        if (-not $ADPropsMailboxes[$AccountNumberRunning].mail) {
+                            Write-Host '        The mail attribute is not set, this will lead to errors in Set-OutlookSignatures and other applications.' -ForegroundColor Yellow
+                        }
+                        if ($ADPropsMailboxes[$AccountNumberRunning].mail -ine (@($ADPropsMailboxes[$AccountNumberRunning].proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')) {
+                            Write-Host "        The mail attribute does not match the primary SMTP address ('$(@($ADPropsMailboxes[$AccountNumberRunning].proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')'), this will lead to errors in Set-OutlookSignatures and other applications." -ForegroundColor Yellow
+                        }
                         Write-Host "      Manager: $($ADPropsMailboxes[$AccountNumberRunning].manager)"
 
                         if ($ADPropsMailboxes[$AccountNumberRunning].manager) {
@@ -2701,7 +2730,7 @@ end tell
 
             $CurrentOutlookProfileMailboxSortOrder = @()
 
-            foreach ($RegistryFolder in @(Get-ItemProperty -LiteralPath "hkcu:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\0a0d020000000000c000000000000046" -ErrorAction SilentlyContinue | Where-Object { ($_.'11020458') })) {
+            foreach ($RegistryFolder in @(Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Profiles\$($OutlookProfile)\0a0d020000000000c000000000000046" -ErrorAction SilentlyContinue | Where-Object { ($_.'11020458') })) {
                 try { WatchCatchableExitSignal } catch { }
 
                 try {
@@ -4868,13 +4897,29 @@ function SetSignatures {
                     $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $false
                 }
 
-                $script:COMWord.ActiveDocument.Select()
-                $script:COMWord.Selection.Collapse()
-
                 foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' })) } | Sort-Object -Culture 127 )) {
                     try { WatchCatchableExitSignal } catch { }
 
-                    $null = $script:COMWord.Selection.Find.Execute($replaceKey, $false, $true, $false, $false, $false, $true, 1, $false, $(($replaceHash.$replaceKey -ireplace "`r`n", '^p') -ireplace "`n", '^l'), 2)
+                    $t = $replaceHash.$replaceKey -ireplace "`r`n", '^p' -ireplace "`n", '^l'
+
+                    if ($t.Length -le 255) {
+                        $script:COMWord.ActiveDocument.Select()
+                        $script:COMWord.Selection.Collapse()
+
+                        $null = $script:COMWord.Selection.Find.Execute($replaceKey, $false, $true, $false, $false, $false, $true, 1, $false, $t, 2)
+                    } else {
+                        Write-Verbose "$Indent        '$replaceKey' exceeds 255 characters, using slower replacement method."
+                        Write-Verbose "$Indent        '$replaceKey': '$($t)'"
+
+                        $r = $script:COMWord.ActiveDocument.Content
+
+                        while ($r.Find.Execute($replaceKey, $false, $true, $false, $false, $false, $true, 1, $false)) {
+                            $match = $r.Duplicate
+                            $match.Text = $replaceHash.$replaceKey # Do not use $t here, as $match.Text allows multi-line strings
+                            $r.Start = $match.End
+                            $r.End = $script:COMWord.ActiveDocument.Content.End
+                        }
+                    }
                 }
 
                 # Restore original view
@@ -4913,7 +4958,7 @@ function SetSignatures {
             Write-Host "$Indent      Replace picture variables"
             if (@(@($script:COMWord.ActiveDocument.Shapes) | Where-Object { $_.WrapFormat.Type -ne 7 }).Count -gt 0) {
                 Write-Host "$Indent        Warning: Template contains images or shapes configured as non-inline." -ForegroundColor Yellow
-                Write-Host "$Indent        Set the text wrapping to 'inline with text' to avoid incorrect positioning and other problems." -ForegroundColor Yellow
+                Write-Host "$Indent        Set the text wrapping to 'inline with text' to avoid HTML incompatibilities such as incorrect positioning." -ForegroundColor Yellow
             }
 
             try {
@@ -5101,16 +5146,18 @@ function SetSignatures {
 
             try {
                 # Overcome Word security warning when export contains embedded pictures
-                if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                    $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                 }
 
                 if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                    if (Test-Path -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security") {
+                        $script:WordDisableWarningOnIncludeFieldsUpdate = (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security").'DisableWarningOnIncludeFieldsUpdate'
+                    }
                 }
 
                 if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                    $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                 }
 
                 try { WatchCatchableExitSignal } catch { }
@@ -5119,24 +5166,26 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
-                Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             } catch {
                 # Restore original security setting after error
-                Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 
                 Start-Sleep -Seconds 2
 
                 # Overcome Word security warning when export contains embedded pictures
-                if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                    $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                 }
 
                 if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                    if (Test-Path -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security") {
+                        $script:WordDisableWarningOnIncludeFieldsUpdate = (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security").'DisableWarningOnIncludeFieldsUpdate'
+                    }
                 }
 
                 if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                    $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                 }
 
                 try { WatchCatchableExitSignal } catch { }
@@ -5145,7 +5194,7 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
-                Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             }
 
             try { WatchCatchableExitSignal } catch { }
@@ -5217,16 +5266,18 @@ function SetSignatures {
 
             try {
                 # Overcome Word security warning when export contains embedded pictures
-                if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                    $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                 }
 
                 if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                    if (Test-Path -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security") {
+                        $script:WordDisableWarningOnIncludeFieldsUpdate = (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security").'DisableWarningOnIncludeFieldsUpdate'
+                    }
                 }
 
                 if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                    $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                 }
 
                 try { WatchCatchableExitSignal } catch { }
@@ -5235,24 +5286,26 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
-                Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             } catch {
                 # Restore original security setting after error
-                Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 
                 Start-Sleep -Seconds 2
 
                 # Overcome Word security warning when export contains embedded pictures
-                if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                    $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                 }
 
                 if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                    $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                    if (Test-Path -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security") {
+                        $script:WordDisableWarningOnIncludeFieldsUpdate = (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security").'DisableWarningOnIncludeFieldsUpdate'
+                    }
                 }
 
                 if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                    $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                    $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                 }
 
                 try { WatchCatchableExitSignal } catch { }
@@ -5261,7 +5314,7 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                 # Restore original security setting
-                Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
             }
 
             try { WatchCatchableExitSignal } catch { }
@@ -5549,16 +5602,18 @@ function SetSignatures {
 
                 try {
                     # Overcome Word security warning when export contains embedded pictures
-                    if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                    if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                        $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                     }
 
                     if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                        $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                        if (Test-Path -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security") {
+                            $script:WordDisableWarningOnIncludeFieldsUpdate = (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security").'DisableWarningOnIncludeFieldsUpdate'
+                        }
                     }
 
                     if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                        $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                     }
 
                     try { WatchCatchableExitSignal } catch { }
@@ -5567,24 +5622,26 @@ function SetSignatures {
                     $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                     # Restore original security setting
-                    Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                    Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
                 } catch {
                     # Restore original security setting after error
-                    Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                    Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 
                     Start-Sleep -Seconds 2
 
                     # Overcome Word security warning when export contains embedded pictures
-                    if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
+                    if ($null -eq (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -ErrorAction SilentlyContinue).DisableWarningOnIncludeFieldsUpdate) {
+                        $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 0 -Force
                     }
 
                     if ($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) {
-                        $script:WordDisableWarningOnIncludeFieldsUpdate = Get-ItemPropertyValue -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore
+                        if (Test-Path -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security") {
+                            $script:WordDisableWarningOnIncludeFieldsUpdate = (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security").'DisableWarningOnIncludeFieldsUpdate'
+                        }
                     }
 
                     if (($null -eq $script:WordDisableWarningOnIncludeFieldsUpdate) -or ($script:WordDisableWarningOnIncludeFieldsUpdate -ne 1)) {
-                        $null = "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
+                        $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableWarningOnIncludeFieldsUpdate' -Type DWORD -Value 1 -Force
                     }
 
                     try { WatchCatchableExitSignal } catch { }
@@ -5593,7 +5650,7 @@ function SetSignatures {
                     $script:COMWord.ActiveDocument.SaveAs2($path, $saveFormat, [Type]::Missing, [Type]::Missing, $false)
 
                     # Restore original security setting
-                    Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                    Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
                 }
 
                 try { WatchCatchableExitSignal } catch { }
@@ -5609,7 +5666,7 @@ function SetSignatures {
                 $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
 
                 # Restore original security setting
-                Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
+                Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name DisableWarningOnIncludeFieldsUpdate -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction Ignore | Out-Null
 
                 try { WatchCatchableExitSignal } catch { }
 
@@ -6313,6 +6370,8 @@ function ConvertEncoding {
 
     # Modify HTML to reflect the new encoding
     if ($InIsHtml -eq $true) {
+        $htmlDoc = New-Object HtmlAgilityPack.HtmlDocument
+
         $htmlDoc.LoadHtml($OutString)
 
         # Desired encoding
@@ -7587,7 +7646,7 @@ function GraphGetToken {
 
         if ($GraphClientID -ieq 'beea8249-8c98-4c76-92f6-ce3c468a61e6') {
             Write-Host "$($indent)  You use the Entra ID app provided by the developers. It is recommended to create und use your own Entra ID app." -ForegroundColor Yellow
-            Write-Host "$($indent)  Find a description on how to do this in the file '`.\config\default graph config.ps1`'." -ForegroundColor Yellow
+            Write-Host "$($indent)  The file '`.\config\default graph config.ps1`' describes how to do this." -ForegroundColor Yellow
         }
 
         $script:GraphUser = $null
@@ -8011,27 +8070,27 @@ function GraphGetToken {
 No authentication possible.
 1. Did you follow the Quick Start Guide and configure the Entra ID app correctly?
    https://set-outlooksignatures.com/quickstart
-2. Run Set-OutlookSignatures with the "-Verbose" parameter and check for authentication messages
+2. Run Set-OutlookSignatures with the "-Verbose" parameter and check for authentication messages.
 3. If the "Interactive" message is displayed:
    - When using an Authentication Broker (which is preferred on supported platforms):
      - Does the account picker window show up?
-     - Check if authentication happens within five minutes
+     - Make sure that an account is chosen within five minutes.
      - Check if your firewall or anti-malware software blocks Set-OutlookSignatures from creating a temporary listener port for localhost.
-     - Check if the correct user account is selected/entered and if the authentication is successful
+     - Check if the correct user account is selected/entered and if the authentication is successful.
    - When not using an Authentication Broker (on a system without support for it, or when broker auth failed):
      - Does a browser (the system default browser, if configured) open and ask for authentication?
       - Yes:
-       - Check if authentication happens within five minutes
+       - Make sure that the user authenticates with within five minutes.
        - Ensure that your browser does not block access to 'http://localhost', errors such as 'connection refused' point to this problem. ('https://localhost' is currently not technically feasible, see 'https://learn.microsoft.com/en-us/entra/msal/dotnet/acquiring-tokens/using-web-browsers' and 'https://learn.microsoft.com/en-us/entra/msal/dotnet/acquiring-tokens/using-web-browsers' for details)
          This is typically due to enforced redirection to HTTPS being applied to localhost. If not configured via policies: edge://net-internals/#hsts or chrome://net-internals/#hsts, delete domain security policies for localhost.
        - Check if your firewall or anti-malware software blocks Set-OutlookSignatures from creating a temporary listener port for localhost.
-       - Check if the correct user account is selected/entered and if the authentication is successful
+       - Check if the correct user account is selected/entered and if the authentication is successful.
      - No:
-       - Check if a default browser is set and if the PowerShell command 'start https://set-outlooksignatures.com' opens it
-       - Make sure that Set-OutlookSignatures is executed in the security context of the currently logged-in user
-       - Run Set-OutlookSignatures in a new PowerShell session
-       - Check your anti-malware configuration (errors such as 'error sending the request' or 'connection refused' point at a problem there)
-       - Make sure that the current PowerShell session allows TLS 1.2+ (see https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85 for details)
+       - Check if a default browser is set and if the PowerShell command 'start https://set-outlooksignatures.com' opens it.
+       - Make sure that Set-OutlookSignatures is executed in the security context of the currently logged-in user.
+       - Run Set-OutlookSignatures in a new PowerShell session.
+       - Check your anti-malware configuration (errors such as 'error sending the request' or 'connection refused' point at a problem there).
+       - Make sure that the current PowerShell session allows TLS 1.2+ (see https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85 for details).
 4. Delete the Graph token cache: $($script:msalClientApp.cacheInfo).
 "@)
                                         AccessToken       = $null
@@ -8521,16 +8580,9 @@ function GraphGenericQuery {
         }
     }
 
-    if ($null -ne $local:x) {
-        return @{
-            error  = $false
-            result = $local:x
-        }
-    } else {
-        return @{
-            error  = $error[0] | Out-String
-            result = $null
-        }
+    return @{
+        error  = $false
+        result = $local:x
     }
 }
 
@@ -8584,16 +8636,9 @@ function GraphGetMe {
         }
     }
 
-    if ($null -ne $local:x) {
-        return @{
-            error = $false
-            me    = $local:x
-        }
-    } else {
-        return @{
-            error = $error[0] | Out-String
-            me    = $null
-        }
+    return @{
+        error = $false
+        me    = $local:x
     }
 }
 
@@ -8652,16 +8697,9 @@ function GraphGetUpnFromSmtp($user, $authHeader) {
         }
     }
 
-    if ($null -ne $local:x) {
-        return @{
-            error      = $false
-            properties = $local:x
-        }
-    } else {
-        return @{
-            error      = $error[0] | Out-String
-            properties = $null
-        }
+    return @{
+        error      = $false
+        properties = $local:x
     }
 }
 
@@ -8781,16 +8819,9 @@ function GraphGetUserProperties($user, $authHeader) {
             }
         }
 
-        if ($null -ne $local:x) {
-            return @{
-                error      = $false
-                properties = $local:x
-            }
-        } else {
-            return @{
-                error      = $error[0] | Out-String
-                properties = $null
-            }
+        return @{
+            error      = $false
+            properties = $local:x
         }
     } else {
         return @{
@@ -8851,18 +8882,10 @@ function GraphGetUserManager($user) {
         }
     }
 
-    if ($null -ne $local:x) {
-        return @{
-            error      = $false
-            properties = $local:x
-        }
-    } else {
-        return @{
-            error      = $error[0] | Out-String
-            properties = $null
-        }
+    return @{
+        error      = $false
+        properties = $local:x
     }
-
 }
 
 
@@ -8915,16 +8938,9 @@ function GraphGetUserTransitiveMemberOf($user) {
         }
     }
 
-    if ($null -ne $local:x) {
-        return @{
-            error    = $false
-            memberof = $local:x
-        }
-    } else {
-        return @{
-            error    = $error[0] | Out-String
-            memberof = $null
-        }
+    return @{
+        error    = $false
+        memberof = $local:x
     }
 }
 
@@ -8967,16 +8983,9 @@ function GraphGetUserPhoto($user) {
         }
     }
 
-    if ($null -ne $local:x) {
-        return @{
-            error = $false
-            photo = $local:x
-        }
-    } else {
-        return @{
-            error = $error[0] | Out-String
-            photo = $null
-        }
+    return @{
+        error = $false
+        photo = $local:x
     }
 }
 
@@ -9082,16 +9091,9 @@ function GraphFilterGroups($filter, $GraphContext = $null) {
         }
     }
 
-    if ($null -ne $local:x) {
-        return @{
-            error  = $false
-            groups = $local:x
-        }
-    } else {
-        return @{
-            error  = $error[0] | Out-String
-            groups = $null
-        }
+    return @{
+        error  = $false
+        groups = $local:x
     }
 }
 
@@ -9145,16 +9147,9 @@ function GraphFilterUsers($filter, $GraphContext = $null) {
         }
     }
 
-    if ($null -ne $local:x) {
-        return @{
-            error = $false
-            users = $local:x
-        }
-    } else {
-        return @{
-            error = $error[0] | Out-String
-            users = $null
-        }
+    return @{
+        error = $false
+        users = $local:x
     }
 }
 
@@ -9656,7 +9651,7 @@ try {
         Write-Host '    This is the only way to avoid problems caused by .Net caching DLL files in memory.' -ForegroundColor Yellow
 
         $script:ExitCode = 3
-        $script:ExitCodeDescription = 'Set-OutlookSignatures has already been run in this PowerShell session but is only supported once.'
+        $script:ExitCodeDescription = 'Set-OutlookSignatures has already been run in this PowerShell session but is only supported once to avoid problems caused by .Net caching DLL files in memory.'
         exit
     } else {
         $global:SetOutlookSignaturesLastRunGuid = (New-Guid).Guid
@@ -9719,7 +9714,7 @@ try {
     Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value $script:WordAlertIfNotDefaultOriginal -ErrorAction SilentlyContinue | Out-Null
 
     # Restore original Word security setting
-    Set-ItemProperty -LiteralPath "HKCU:\SOFTWARE\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
+    Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" -Name 'DisableWarningOnIncludeFieldsUpdate' -Value $script:WordDisableWarningOnIncludeFieldsUpdate -ErrorAction SilentlyContinue | Out-Null
 
     if ($script:COMWordDummy) {
         if ($script:COMWordDummy.ActiveDocument) {
