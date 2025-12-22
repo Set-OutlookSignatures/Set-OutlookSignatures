@@ -32,6 +32,17 @@
 # 3. After importing the default configuration file, existing replacement variables can be altered with custom definitions and new replacement variables can be added.
 # 4. Instead of altering existing replacement variables, it is recommended to create new replacement variables with modified content.
 # 5. Start Set-OutlookSignatures with the parameter 'ReplacementVariableConfigFile' pointing to the new custom configuration file.
+#
+#
+# To simplify signature design in limited space, shorter versions of replacement variables are made available automatically:
+# - CurrentUser -> U
+#   Example: '$CurrentUserVariableX$' is also available as '$UVariableX$'
+# - CurrentUserManager -> UM
+#   Example: '$CurrentUserManagerVariableX$' is also available as '$UMVariableX$'
+# - CurrentMailbox -> M
+#   Example: '$CurrentMailboxVariableX$' is also available as '$MVariableX$'
+# - CurrentMailboxManager -> MM
+#   Example: '$CurrentMailboxManagerVariableX$' is also available as '$MMVariableX$'
 
 
 # Currently logged in user
@@ -218,7 +229,7 @@ $ReplaceHash['$CurrentUserTelephone-noempty$'] = $(if (-not $ReplaceHash['$Curre
 $ReplaceHash['$CurrentUserMobile-noempty$'] = $(if (-not $ReplaceHash['$CurrentUserMobile$']) { '' } else { $(if ($UseHtmTemplates) { '<br>' } else { "`n" }) + 'Mobile: ' } )
 
 
-# Create $Current[user|Manager|Mailbox|MailboxManager][Telephone|Fax|Mobile]-[E164|INTERNATIONAL|NATIONAL|RFC3966]$ replacement variables
+# Create $Current[User|Manager|Mailbox|MailboxManager][Telephone|Fax|Mobile]-[E164|INTERNATIONAL|NATIONAL|RFC3966]$ replacement variables
 # FormatPhoneNumber: Format phone number in different formats
 # Examples
 #   FormatPhoneNumber -Number $ReplaceHash['$CurrentUserTelephone$'] -Country $ReplaceHash['$CurrentUserCountry$'] -Format 'INTERNATIONAL'
@@ -336,7 +347,7 @@ foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'Current
 
 
 # Format an address according to country specific rules
-#   Create $Current[user|Manager|Mailbox|MailboxManager]PostalAddress$ replacement variables
+#   Create $Current[User|Manager|Mailbox|MailboxManager]PostalAddress$ replacement variables
 foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager')) {
     $FormatPostAddressOptions = @{
         # Address components as described in https://github.com/OpenCageData/address-formatting/blob/master/conf/components.yaml
@@ -404,5 +415,10 @@ foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'Current
         AddressTemplate = $null
     }
 
-    $ReplaceHash["`$$($x)PostalAddress`$"] = Format-PostalAddress @FormatPostAddressOptions
+    if ($UseHtmTemplates) {
+        $ReplaceHash["`$$($x)PostalAddress`$"] = 
+        (([System.Net.WebUtility]::HtmlEncode((Format-PostalAddress @FormatPostAddressOptions)) -replace "`r`n", '<p>') -replace "`n", '<br>')
+    } else {
+        $ReplaceHash["`$$($x)PostalAddress`$"] = (Format-PostalAddress @FormatPostAddressOptions)
+    }
 }

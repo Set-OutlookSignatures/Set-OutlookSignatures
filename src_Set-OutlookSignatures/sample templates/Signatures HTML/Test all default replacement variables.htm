@@ -153,17 +153,11 @@ ul
 
 <div class=WordSection1>
 
-<p class=MsoTitle>Sample signature template file</p>
-
-<h1>Remarks</h1>
+<p class=MsoTitle>Welcome!</p>
 
 <p class=MsoNormal><span style='font-size:12.0pt;line-height:106%;font-family:
 "Aptos",sans-serif'>This sample signature template file contains all default
-replacement variables defined in '.\config\default replacement variables.ps1'.<br>
-As this signature template file is not generated automatically, it may not be
-up to date. Should you find an error, please create a new issue at </span><span lang=DE-AT><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" title="Link to the issues page of Set-OutlookSignatures on GitHub"><span lang=EN-US style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues</span></a></span><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>.<br>
-If you have created custom replacement variables, these variables are not
-automatically included here.</span></p>
+replacement variables defined in '.\config\default replacement variables.ps1'.</span></p>
 
 <p class=MsoNoSpacing><span style='font-size:12.0pt;font-family:"Aptos",sans-serif'>This
 file also contains examples for more advanced features of
@@ -200,6 +194,15 @@ images in sample templates in the sample templates are accessible barrier-free.<
 at </span><span lang=DE-AT><a href="https://set-outlooksignatures.com/" title="Visit Set-OutlookSignatures on the internet"><span lang=EN-US style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>https://set-outlooksignatures.com</span></a></span><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>.
 Please read the documentation carefully before opening a new issue at GitHub.</span></p>
 
+<p class=MsoNormal><span style='font-size:12.0pt;line-height:106%;font-family:
+"Aptos",sans-serif'>As this signature template file is not generated
+automatically, it may not be up to date. Should you find an error, please
+create a new issue at </span><span lang=DE-AT><a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" title="Link to the issues page of Set-OutlookSignatures on GitHub"><span lang=EN-US style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues</span></a></span><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>.</span></p>
+
+<p class=MsoNormal><span style='font-size:12.0pt;line-height:106%;font-family:
+"Aptos",sans-serif'>If you have created custom replacement variables, these
+variables are not automatically included here.</span></p>
+
 <h1>Default replacement variables</h1>
 
 <p class=MsoNormal><span style='font-size:12.0pt;line-height:106%;font-family:
@@ -210,12 +213,14 @@ user, the current mailbox, and their managers.</span></p>
 "Aptos",sans-serif'>The following table shows you the default replacement
 variables you can use in your templates. The columns define the namespace, the
 rows the attribute, and the crossing of both shows the actual value of the
-variable.<br>
-Let’s take the the upper left value: The namespace is &quot;$CurrentUser&quot;,
-the variable is &quot;GivenName$&quot;, which gives the replacement variable
-name &quot;CurrentUserGivenName&quot; – you just have to add a starting and a
-trailing $ character in your template. See '.\docs\sample templates' for
-examples.</span></p>
+variable.</span></p>
+
+<p class=MsoNormal><span style='font-size:12.0pt;line-height:106%;font-family:
+"Aptos",sans-serif'>Let’s take the the upper left value: The namespace is
+&quot;$CurrentUser&quot;, the variable is &quot;GivenName$&quot;, which gives
+the replacement variable name &quot;CurrentUserGivenName&quot; – you just have
+to add a starting and a trailing $ character in your template. See
+'.\docs\sample templates' for examples.</span></p>
 
 <table class=MsoTable15Grid5DarkAccent6 border=1 cellspacing=0 cellpadding=0 width=1500 style='width:1124.65pt;border-collapse:collapse;border:none'>
  <tr>
@@ -1456,7 +1461,30 @@ examples.</span></p>
  </tr>
 </table>
 
-<h1><a name="_Hlk125034287">User photos</a></h1>
+<p class=MsoNoSpacing><a name="_Hlk125034287"><span style='font-size:12.0pt;
+font-family:"Aptos",sans-serif'>&nbsp;</span></a></p>
+
+<p class=MsoNoSpacing><span style='font-size:12.0pt;font-family:"Aptos",sans-serif'>To
+simplify signature design with limited space, shorter versions of replacement
+variables are available:</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='text-indent:-18.0pt'><span style='font-size:12.0pt;line-height:106%;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>CurrentUser
+-&gt; U<br>
+Example: '$CurrentUserVariableX$' is also available as '$UVariableX$'</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-18.0pt'><span style='font-size:12.0pt;line-height:106%;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>CurrentUserManager
+-&gt; UM<br>
+Example: '$CurrentUserManagerVariableX$' is also available as '$UMVariableX$'</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-18.0pt'><span style='font-size:12.0pt;line-height:106%;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>CurrentMailbox
+-&gt; M<br>
+Example: '$CurrentMailboxVariableX$' is also available as '$MVariableX$'</span></p>
+
+<p class=MsoListParagraphCxSpLast style='text-indent:-18.0pt'><span style='font-size:12.0pt;line-height:106%;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>CurrentMailboxManager
+-&gt; MM<br>
+Example: '$CurrentMailboxManagerVariableX$' is also available as '$MMVariableX$'</span></p>
+
+<h1>User photos</h1>
 
 <p class=MsoNormal><span lang=EN-GB style='font-size:12.0pt;line-height:106%;
 font-family:"Aptos",sans-serif'>User photos from Active Directory/Entra ID are
@@ -1555,7 +1583,7 @@ automatically available via replacement variables.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentUserPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=134 height=202 id="Picture 14" src="Test%20all%20default%20replacement%20variables_files/image003.png" alt="This is a placeholder image for the photo of the current user, with some fancy formatting that can only be used with DOCX templates. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=135 height=135 id="Picture 14" src="Test%20all%20default%20replacement%20variables_files/image003.png" alt="This is a placeholder image for the photo of the current user, with some fancy formatting that can only be used with DOCX templates. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"></span></p>
   </td>
  </tr>
  <tr>
@@ -1635,16 +1663,17 @@ automatically available via replacement variables.</span></p>
  </tr>
 </table>
 
-<p class=MsoNormal><span lang=DE-AT>&nbsp;</span></p>
+<p class=MsoNormal><span lang=DE-AT style='font-family:"Aptos",sans-serif'>&nbsp;</span></p>
 
-<p class=MsoNormal>When using DOCX templates, it also works fine with inline
-(!) shapes. In this case, no linking and embedding is required, just add the
-replacement variable to the alternate text. Set-OutlookSignatures will then
-fill the inline shape with the account picture. Just don’t forget to format the
-shape as “inline with text”.</p>
+<p class=MsoNormal><span style='font-family:"Aptos",sans-serif'>When using DOCX
+templates, it also works fine with inline (!) shapes. In this case, no linking
+and embedding is required, just add the replacement variable to the alternate
+text. Set-OutlookSignatures will then fill the inline shape with the account
+picture. Just don’t forget to format the shape as “inline with text”.</span></p>
 
-<p class=MsoNormal>As you have seen the principle before, the following table
-only shows the account picture of the currently logged-on user.</p>
+<p class=MsoNormal><span style='font-family:"Aptos",sans-serif'>As you have
+seen the principle before, the following table only shows the account picture
+of the currently logged-on user.</span></p>
 
 <table class=MsoTable15Grid4Accent6 border=1 cellspacing=0 cellpadding=0 style='border-collapse:collapse;border:none'>
  <tr>
@@ -1739,7 +1768,7 @@ only shows the account picture of the currently logged-on user.</p>
  </tr>
 </table>
 
-<p class=MsoNormal><span lang=DE-AT>&nbsp;</span></p>
+<p class=MsoNormal><span lang=DE-AT style='font-family:"Aptos",sans-serif'>&nbsp;</span></p>
 
 <h1>Custom images</h1>
 
@@ -1864,7 +1893,7 @@ empty, but CustomImage1 is a QR code containing a vCard.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentMailboxCustomImage1DeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=114 height=114 src="Test%20all%20default%20replacement%20variables_files/image021.png" alt="This is a placeholder image for CustomImage1 of the current mailbox. If the current mailbox has no CustomImage1, this placeholder is deleted.&#10;$CurrentMailboxCustomImage1DeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=114 height=114 src="Test%20all%20default%20replacement%20variables_files/image022.png" alt="This is a placeholder image for CustomImage1 of the current mailbox. If the current mailbox has no CustomImage1, this placeholder is deleted.&#10;$CurrentMailboxCustomImage1DeleteEmpty$"></span></p>
   </td>
  </tr>
  <tr>
@@ -1877,13 +1906,13 @@ empty, but CustomImage1 is a QR code containing a vCard.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentMailboxManagerCustomImage1$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=114 height=114 src="Test%20all%20default%20replacement%20variables_files/image022.png" alt="This is a placeholder image for CustomImage1 of the current mailbox manager. If the current mailbox manager has no CustomImage1, this placeholder is still shown.&#10;$CurrentMailboxManagerCustomImage1$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=114 height=114 src="Test%20all%20default%20replacement%20variables_files/image021.png" alt="This is a placeholder image for CustomImage1 of the current mailbox manager. If the current mailbox manager has no CustomImage1, this placeholder is still shown.&#10;$CurrentMailboxManagerCustomImage1$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentMailboxManagerCustomImage1DeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=114 height=114 src="Test%20all%20default%20replacement%20variables_files/image022.png" alt="This is a placeholder image for CustomImage1 of the current mailbox manager. If the current mailbox manager has no CustomImage1, this placeholder is deleted.&#10;$CurrentMailboxManagerCustomImage1DeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=114 height=114 src="Test%20all%20default%20replacement%20variables_files/image021.png" alt="This is a placeholder image for CustomImage1 of the current mailbox manager. If the current mailbox manager has no CustomImage1, this placeholder is deleted.&#10;$CurrentMailboxManagerCustomImage1DeleteEmpty$"></span></p>
   </td>
  </tr>
 </table>

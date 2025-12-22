@@ -88,6 +88,8 @@ if (($AppType -iin @('Set-OutlookSignatures', 'SimulateAndDeploy')) -and ($Outlo
 }
 
 if (-not $ParameterCheckSuccess) {
+    Write-Host '  All apps require the AppType and AppName parameters, app type OutlookAddIn additionally the OutlookAddInUrl parameter.' -ForegroundColor Red
+
     exit 1
 } else {
     $AppName = $AppName.trim()
@@ -95,7 +97,7 @@ if (-not $ParameterCheckSuccess) {
 
 
 Write-Host
-Write-Host 'Create Entra ID app'
+Write-Host 'Entra ID app to create'
 Write-Host "  App type: $($AppType)"
 Write-Host "  App name: $($AppName)"
 if ($AppType -ieq 'OutlookAddIn') {
@@ -104,15 +106,47 @@ if ($AppType -ieq 'OutlookAddIn') {
 
 
 Write-Host
-Write-Host 'Install Microsoft.Graph PowerShell modules'
-foreach ($MicrosoftGraphPowerShellModule in @('Microsoft.Graph.Authentication', 'Microsoft.Graph.Applications', 'Microsoft.Graph.Identity.SignIns')) {
-    Write-Host "  $($MicrosoftGraphPowerShellModule)"
-
-    if (Get-Module -ListAvailable -Name $MicrosoftGraphPowerShellModule) {
-        Update-Module $MicrosoftGraphPowerShellModule
-    } else {
-        Install-Module $MicrosoftGraphPowerShellModule -Scope CurrentUser -Force -AllowClobber
+Write-Host 'Install required PowerShell modules'
+[enum]::GetNames([System.Net.SecurityProtocolType]) | ForEach-Object {
+    try {
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol, $_
+    } catch {
     }
+}
+
+try {
+    if (-not (Get-PSRepository | Where-Object { $_.Name -ieq 'PSGallery' })) {
+        Register-PSRepository -Name 'PSGallery' -SourceLocation 'https://www.powershellgallery.com/api/v2' -WarningAction SilentlyContinue -ErrorAction Stop
+    }
+
+    if ($PSVersionTable.PSEdition -ine 'Core') {
+        @('PackageManagement', 'PowerShellGet') | ForEach-Object {
+            Write-Host "  $($_)"
+
+            if (Get-Module -ListAvailable -Name $_) {
+                Find-Module -Name $_ -Repository PSGallery | Update-Module -Scope CurrentUser -Force -WarningAction SilentlyContinue -ErrorAction Stop | Import-Module -Force -WarningAction SilentlyContinue -ErrorAction Stop
+            } else {
+                Find-Module -Name $_ -Repository PSGallery | Install-Module -Scope CurrentUser -Force -AllowClobber -WarningAction SilentlyContinue -ErrorAction Stop | Import-Module -Force -WarningAction SilentlyContinue -ErrorAction Stop
+            }
+        }
+    }
+
+    @('Microsoft.Graph.Authentication', 'Microsoft.Graph.Applications', 'Microsoft.Graph.Identity.SignIns') | ForEach-Object {
+        Write-Host "  $($_)"
+
+        if (Get-Module -ListAvailable -Name $_) {
+            Find-Module -Name $_ -Repository PSGallery | Update-Module -Scope CurrentUser -Force -WarningAction SilentlyContinue -ErrorAction Stop | Import-Module -Force -WarningAction SilentlyContinue -ErrorAction Stop
+        } else {
+            Find-Module -Name $_ -Repository PSGallery | Install-Module -Scope CurrentUser -Force -AllowClobber -WarningAction SilentlyContinue -ErrorAction Stop | Import-Module -Force -WarningAction SilentlyContinue -ErrorAction Stop
+        }
+    }
+} catch {
+    Write-Host "Error installing Microsoft.Graph PowerShell modules: $($_)" -ForegroundColor Red
+    Write-Host
+    Write-Host 'This is a severe error. It is not related to this script, but to the basic PowerShell setup on this system.' -ForegroundColor Red
+    Write-Host 'Please fix these issues with PowerShell package management and package providers first.' -ForegroundColor Red
+
+    exit 1
 }
 
 
@@ -123,8 +157,27 @@ Write-Host '  An authentication window will open, likely in a browser'
 # Disconnect first, so that no existing connection is re-used. This forces to choose an account for the following connect.
 $null = Disconnect-MgGraph -ErrorAction SilentlyContinue
 
-Connect-MgGraph -ContextScope Process -Scopes 'Application.ReadWrite.All', 'AppRoleAssignment.ReadWrite.All', 'DelegatedPermissionGrant.ReadWrite.All' -NoWelcome
+try {
+    $scopes = @('Application.ReadWrite.All', 'AppRoleAssignment.ReadWrite.All', 'DelegatedPermissionGrant.ReadWrite.All')
 
+    Connect-MgGraph -ContextScope Process -Scopes $scopes -NoWelcome -ErrorAction Stop
+
+    if (-not (Get-MgContext)) {
+        throw 'No connection established.'
+    } else {
+        $scopes | ForEach-Object {
+            if (-not (Get-MgContext).Scopes -icontains ($_)) {
+                throw "Required scope '$_' not granted."
+            }
+        }
+    }
+} catch {
+    Write-Host "Error connecting to Microsoft Graph: $($_)" -ForegroundColor Red
+    Write-Host
+    Write-Host 'Please ensure that you can connect to Microsoft Graph and that your user has sufficient permissions.' -ForegroundColor Red
+
+    exit 1
+}
 
 Write-Host
 Write-Host 'Create a new app registration'
@@ -171,7 +224,7 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
 
                     # Delegated permission: EWS.AccessAsUser.All
                     #   Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
-                    #   Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
+                    #   Required to connect to Outlook on the web and to set Outlook on the web signature (classic and roaming).
                     @{
                         'id'   = '9769c687-087d-48ac-9cb3-c37dde652038'
                         'type' = 'Scope'
@@ -196,7 +249,7 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
 
                     # Delegated permission: Mail.ReadWrite
                     #   Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
-                    #   Required to connect to Outlook Web and to set Outlook signatures.
+                    #   Required to connect to Outlook on the web and to set Outlook signatures.
                     @{
                         'id'   = '024d486e-b451-40bb-833d-3e66d98c5c73'
                         'type' = 'Scope'
@@ -266,7 +319,7 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
 
                     # Delegated permission: EWS.AccessAsUser.All
                     #   Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
-                    #   Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
+                    #   Required to connect to Outlook on the web and to set Outlook on the web signature (classic and roaming).
                     @{
                         'id'   = '9769c687-087d-48ac-9cb3-c37dde652038'
                         'type' = 'Scope'
@@ -291,7 +344,7 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
 
                     # Delegated permission: Mail.ReadWrite
                     #   Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
-                    #   Required to connect to Outlook Web and to set Outlook signatures.
+                    #   Required to connect to Outlook on the web and to set Outlook signatures.
                     @{
                         'id'   = '024d486e-b451-40bb-833d-3e66d98c5c73'
                         'type' = 'Scope'
@@ -356,7 +409,7 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
 
                     # Application permission: Mail.ReadWrite
                     #   Allows the app to create, read, update, and delete mail in all mailboxes without a signed-in user. Does not include permission to send mail.
-                    #   Required to connect to Outlook Web and to set Outlook signatures.
+                    #   Required to connect to Outlook on the web and to set Outlook signatures.
                     @{
                         'id'   = 'e2a3a72e-5f79-4c64-b1b1-878b674786c9'
                         'type' = 'Role'
@@ -386,7 +439,7 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                     @{
                         # Application permission: full_access_as_app
                         #   Allows the app to have full access via Exchange Web Services to all mailboxes without a signed-in user.
-                        #   Required for Exchange Web Services access (read Outlook Web configuration, set classic signature and roaming signatures)
+                        #   Required for Exchange Web Services access (read Outlook on the web configuration, set classic signature and roaming signatures)
                         'id'   = 'dc890d15-9560-4a4c-9b7f-a736ec74ec40'
                         'type' = 'Role'
                     }

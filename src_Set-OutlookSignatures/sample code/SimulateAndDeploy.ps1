@@ -11,8 +11,9 @@ Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offe
 
 Features
   - Automate simulation mode for all given mailboxes
+    - SimulateAndDeploy considers additional mailboxes when the user added them in Outlook on the web, when they are passed via the 'SimulateMailboxes' parameter, or when being added dynamically via the 'VirtualMailboxConfigFile' parameter
   - A configurable number of Set-OutlookSignatures instances run in parallel for better performance
-  - Set default signature in Outlook Web, no matter if classic signature or roaming signatures (requires the Benefactor Circle add-on)
+  - Set default signature in Outlook on the web, no matter if classic signature or roaming signatures (requires the Benefactor Circle add-on)
   - Set internal and external out-of-office (OOF) message (requires the Benefactor Circle add-on)
   - Supports on-prem, hybrid and cloud-only environments
 
@@ -49,7 +50,7 @@ Requirements
 						Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
 					  - Mail.ReadWrite
 					    Allows the app to create, read, update, and delete mail in all mailboxes without a signed-in user. Does not include permission to send mail.
-						Required to connect to Outlook Web and to set Outlook signatures.
+						Required to connect to Outlook on the web and to set Outlook signatures.
 					  - MailboxSettings.ReadWrite
 						Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
 						Required to set out-of-office replies for the simulated mailboxes
@@ -59,7 +60,7 @@ Requirements
 				  - Office 365 Exchange Online
 				      - full_access_as_app
 						Allows the app to have full access via Exchange Web Services to all mailboxes without a signed-in user.
-						Required for Exchange Web Services access (read Outlook Web configuration, set classic signature and roaming signatures)
+						Required for Exchange Web Services access (read Outlook on the web configuration, set classic signature and roaming signatures)
 			  - Delegated (!) permissions with admin consent
 				These permissions equal those mentioned in '.\config\default graph config.ps1'
 			      - Microsoft Graph
@@ -68,7 +69,7 @@ Requirements
 					    Required to log on the current user.
 					  - EWS.AccessAsUser.All
 						Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
-						Required to connect to Outlook Web and to set Outlook Web signature (classic and roaming).
+						Required to connect to Outlook on the web and to set Outlook on the web signature (classic and roaming).
 					  - Files.Read.All
 					    Allows the app to read all files the signed-in user can access.
 					    Required for access to templates and configuration files hosted on SharePoint Online.
@@ -78,7 +79,7 @@ Requirements
 						Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
 					  - Mail.ReadWrite
 						Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
-						Required to connect to Outlook Web and to set Outlook signatures.
+						Required to connect to Outlook on the web and to set Outlook signatures.
 					  - MailboxSettings.ReadWrite
 						Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
 						Required to detect the state of the out-of-office assistant and to set out-of-office replies.
@@ -115,15 +116,15 @@ Limitations and remarks
 		  - Do not create signatures in RTF format (parameter '-CreateRtfSignatures false')
   - Roaming signatures can currently not be deployed for shared mailboxes, as the API does not support this scenario.
       - Roaming signatures for shared mailboxes pose a general problem, as only signatures with replacement variables from the $CurrentMailbox[…]$ namespace would make sense anyhow
-  - SimulateAndDeploy cannot solve problems around the Classic Outlook for Windows roaming signature sync engine, only Microsoft can do this (but unfortunately does not since years).
-      - Until Microsoft solves this in Classic Outlook for Windows, expect problems with character encoding (umlauts, diacritics, emojis, etc.) and more.
+  - SimulateAndDeploy cannot solve problems around the Classic Outlook on Windows roaming signature sync engine, only Microsoft can do this (but unfortunately does not since years).
+      - Until Microsoft solves this in Classic Outlook on Windows, expect problems with character encoding (umlauts, diacritics, emojis, etc.) and more.
 	  - These Outlook-internal problems will come and go depending on the patch level of Outlook.
 	  - These Outlook-internal problems can also be observed when Set-OutlookSignatures is not involved at all.
-	  - The only workaround currently known is to disable the Classic Outlook for Windows sync engine and let Set-OutlookSignatures do it by running it on the client regularly.
-  - Signatures are directly usable in Outlook Web and New Outlook (when based on Outlook Web). Other Outlook editions may work but are not supported.
+	  - The only workaround currently known is to disable the Classic Outlook on Windows sync engine and let Set-OutlookSignatures do it by running it on the client regularly.
+  - Signatures are directly usable in Outlook on the web and New Outlook (when based on Outlook on the web). Other Outlook editions may work but are not supported.
       - Consider using the Outlook add-in to access signatures created by SimulateAndDeploy on other editions of Outlook in a supported way.
 	    See https://set-outlooksignatures.com/outlookaddin for details.
-	  - Also see FAQ 'Roaming signatures in Classic Outlook for Windows look different' at https://set-outlooksignatures.com/faq.
+	  - Also see FAQ 'Roaming signatures in Classic Outlook on Windows look different' at https://set-outlooksignatures.com/faq.
   - Consider using the 'VirtualMailboxConfigFile' parameter of Set-OutlookSignatures, ideally together with the output of the Export-RecipientPermissions script.
       - This allows you to automatically create up-to-date lists of mailboxes based on the permissions granted in Exchange, as well as the according INI file lines.
 	  - Visit https://github.com/Export-RecipientPermissions for details about Export-RecipientPermissions.
@@ -194,7 +195,7 @@ param (
 
 	# List of users and mailboxes to simulate
 	#   SimulateUser: Logon name in UPN or pre-Windows 2000 format
-	#   SimulateMailboxes: Separate multiple mailboxes by spaces or commas. Leave empty to get mailboxes from Outlook Web (recommended).
+	#   SimulateMailboxes: Separate multiple mailboxes by spaces or commas. Leave empty to get mailboxes from Outlook on the web (recommended).
 	#   Examples:
 	#     ExampleDomain\ExampleUser;
 	#     a@example.com;
@@ -400,7 +401,17 @@ function GraphDomainToTenantID {
 	try {
 		try { WatchCatchableExitSignal } catch { }
 
-		$local:result = Invoke-RestMethod -UseBasicParsing -Uri "https://odc.officeapps.live.com/odc/v2.1/federationprovider?domain=$($domain)"
+		try {
+			$local:result = Invoke-RestMethod -UseBasicParsing -Uri "https://odc.officeapps.live.com/odc/v2.1/federationprovider?domain=$($domain)"
+		} catch {
+			if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+				Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+				Start-Sleep -Seconds 5
+				$local:result = Invoke-RestMethod -UseBasicParsing -Uri "https://odc.officeapps.live.com/odc/v2.1/federationprovider?domain=$($domain)"
+			} else {
+				throw $_
+			}
+		}
 
 		try { WatchCatchableExitSignal } catch { }
 
@@ -847,7 +858,7 @@ try {
 
 			"    User $($SimulateList[$Jobsstarted].SimulateUser) started @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
 				Write-Host $($_)
-				Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_started.txt') -Force -Encoding UTF8
+				Add-Content -Value $($_.TrimStart()) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_started.txt') -Force -Encoding UTF8
 			}
 
 			$JobsToStartOpen--
@@ -859,7 +870,7 @@ try {
 		foreach ($x in (Get-Job | Where-Object { (-not $_.PSEndTime) -and (((Get-Date) - $_.PSBeginTime) -gt $JobTimeout) })) {
 			"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) canceled due to timeout @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
 				Write-Host $($_) -ForegroundColor Red
-				Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
+				Add-Content -Value $($_.TrimStart()) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
 			}
 
 			$x | Remove-Job -Force
@@ -875,12 +886,12 @@ try {
 			if ((Get-Content -LiteralPath $LogFilePath -Encoding UTF8 -Raw).trim().Contains('xxxSimulateAndDeployExitCode0xxx')) {
 				"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with no errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
 					Write-Host $($_) -ForegroundColor Green
-					Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt') -Force -Encoding UTF8
+					Add-Content -Value $($_.TrimStart()) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt') -Force -Encoding UTF8
 				}
 			} else {
 				"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
 					Write-Host $($_) -ForegroundColor Red
-					Add-Content -Value $($_) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
+					Add-Content -Value $($_.TrimStart()) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
 				}
 			}
 

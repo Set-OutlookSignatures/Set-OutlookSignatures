@@ -108,7 +108,7 @@ param(
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no')]
     $DeleteScriptCreatedSignaturesWithoutTemplate = $true,
 
-    # Shall the software set the Outlook Web signature of the currently logged-in user?
+    # Shall the software set the Outlook on the web signature of the currently logged-in user?
     [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
@@ -883,12 +883,71 @@ function main {
             if ($null -ne $OutlookRegistryVersion) {
                 Write-Host "    Set 'Send Pictures With Document' registry value to '1'"
                 $null = "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Options\Mail" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'Send Pictures With Document' -Type DWORD -Value 1 -Force
+
+                @(
+                    foreach ($key in @(
+                            "HKCU:\Software\Policies\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Options\Mail"
+                            "HKLM:\Software\Policies\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Options\Mail" # Only very old Outlook versions supporting roaming signatures respect HKLM
+                        )
+                    ) {
+                        if (Test-Path -LiteralPath $key) {
+                            foreach ($value in @(
+                                    'Send Pictures With Document'
+                                )
+                            ) {
+                                try {
+                                    @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
+                                        if (1 -ne $_) {
+                                            "'$($key)': '$($value)' = '$($_)'"
+                                        }
+                                    }
+                                } catch {
+                                    $null # Value not set
+                                }
+                            }
+                        } else {
+                            $null # GPO key not found
+                        }
+                    }
+                ) | Where-Object { $_ } | ForEach-Object {
+                    Write-Host "      Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
+                }
             }
 
             if (($DisableRoamingSignatures -in @($true, $false)) -and $OutlookRegistryVersion -and ($OutlookFileVersion -ge '16.0.0.0')) {
                 Write-Host "    Set 'DisableRoamingSignatures' registry value to '$([int]$DisableRoamingSignatures)'"
                 $null = "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableRoamingSignaturesTemporaryToggle' -Type DWORD -Value $([int]$DisableRoamingSignatures) -Force
                 $null = "HKCU:\Software\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DisableRoamingSignatures' -Type DWORD -Value $([int]$DisableRoamingSignatures) -Force
+
+                @(
+                    foreach ($key in @(
+                            "HKCU:\Software\Policies\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup"
+                            "HKLM:\Software\Policies\Microsoft\Office\$($OutlookRegistryVersion)\Outlook\Setup" # Only very old Outlook versions supporting roaming signatures respect HKLM
+                        )
+                    ) {
+                        if (Test-Path -LiteralPath $key) {
+                            foreach ($value in @(
+                                    'DisableRoamingSignatures'
+                                    'DisableRoamingSignaturesTemporaryToggle'
+                                )
+                            ) {
+                                try {
+                                    @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
+                                        if ($([int]$DisableRoamingSignatures) -ne $_) {
+                                            "'$($key)': '$($value)' = '$($_)'"
+                                        }
+                                    }
+                                } catch {
+                                    $null # Value not set
+                                }
+                            }
+                        } else {
+                            $null # GPO key not found
+                        }
+                    }
+                ) | Where-Object { $_ } | ForEach-Object {
+                    Write-Host "      Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
+                }
             }
 
             if ($null -ne $OutlookRegistryVersion) {
@@ -1084,7 +1143,7 @@ end tell
             $WordFilePath = $null
 
             if ($macOSSignaturesScriptable) {
-                Write-Host '    Outlook for Mac with scriptable signatures detected.'
+                Write-Host '    Outlook on Mac with scriptable signatures detected.'
 
                 $EmbedImagesInHtml = $true
 
@@ -1109,7 +1168,7 @@ end tell
                     }
 
                     if (-not ($macOSOutlookMailboxes.count -gt 0)) {
-                        Write-Host '    Outlook does not have accounts configured, or accounts cannot be scripted. Continuing with Outlook Web only.' -ForegroundColor Yellow
+                        Write-Host '    Outlook does not have accounts configured, or accounts cannot be scripted. Continuing with Outlook on the web only.' -ForegroundColor Yellow
                         Write-Host "      Consider using 'sample code/SwitchTo-ClassicOutlookForMac.ps1' to temporarily switch from New Outlook to Classic Outlook." -ForegroundColor Yellow
 
                         $OutlookUseNewOutlook = $true
@@ -1117,7 +1176,7 @@ end tell
                     }
                 }
             } else {
-                Write-Host '    Outlook for Mac not installed, or signatures cannot be scripted. Continuing with Outlook Web only.' -ForegroundColor Yellow
+                Write-Host '    Outlook on Mac not installed, or signatures cannot be scripted. Continuing with Outlook on the web only.' -ForegroundColor Yellow
 
                 $OutlookUseNewOutlook = $true
                 $macOSOutlookMailboxes = @()
@@ -1144,9 +1203,8 @@ end tell
 
         $script:WordRegistryVersion = $null
 
-        $script:WordAlertIfNotDefaultOriginal = (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -ErrorAction SilentlyContinue).AlertIfNotDefault
-
         $script:WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty -LiteralPath 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
+
         if ($script:WordRegistryVersion.major -gt 16) {
             Write-Host "    Word version $($script:WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
             $script:ExitCode = 9
@@ -1190,6 +1248,35 @@ end tell
             Write-Host "    Set 'DontUseScreenDpiOnOpen' registry value to '1'"
             $null = "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" | ForEach-Object { if (Test-Path -LiteralPath $_) { Get-Item -LiteralPath $_ } else { New-Item $_ -Force } } | New-ItemProperty -Name 'DontUseScreenDpiOnOpen' -Type DWORD -Value 1 -Force
 
+            @(
+                foreach ($key in @(
+                        "HKCU:\Software\Policies\Microsoft\Office\$($WordRegistryVersion)\Word\Options"
+                        "HKLM:\Software\Policies\Microsoft\Office\$($WordRegistryVersion)\Word\Options" # Only very old Outlook versions supporting roaming signatures respect HKLM
+                    )
+                ) {
+                    if (Test-Path -LiteralPath $key) {
+                        foreach ($value in @(
+                                'DontUseScreenDpiOnOpen'
+                            )
+                        ) {
+                            try {
+                                @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
+                                    if (1 -ne $_) {
+                                        "'$($key)': '$($value)' = '$($_)'"
+                                    }
+                                }
+                            } catch {
+                                $null # Value not set
+                            }
+                        }
+                    } else {
+                        $null # GPO key not found
+                    }
+                }
+            ) | Where-Object { $_ } | ForEach-Object {
+                Write-Host "    Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
+            }
+
             try {
                 $WordBitnessInfo = GetBitness -fullname $WordFilePath
                 $WordFileVersion = [System.Version]::Parse((((($WordBitnessInfo.'File Version'.ToString() + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
@@ -1204,9 +1291,69 @@ end tell
             $WordFileVersion = $null
         }
 
+        $script:WordAlertIfNotDefaultOriginal = (Get-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -ErrorAction SilentlyContinue).AlertIfNotDefault
+
         Write-Host "    Registry version: $script:WordRegistryVersion"
         Write-Host "    File version: $WordFileVersion"
         Write-Host "    Bitness: $WordBitness"
+
+        @(
+            foreach ($key in @(
+                    "HKCU:\Software\Policies\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options"
+                    "HKLM:\Software\Policies\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" # Only very old Outlook versions supporting roaming signatures respect HKLM
+                )
+            ) {
+                if (Test-Path -LiteralPath $key) {
+                    foreach ($value in @(
+                            'AlertIfNotDefault'
+                        )
+                    ) {
+                        try {
+                            @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
+                                if (0 -ne $_) {
+                                    "'$($key)': '$($value)' = '$($_)'"
+                                }
+                            }
+                        } catch {
+                            $null # Value not set
+                        }
+                    }
+                } else {
+                    $null # GPO key not found
+                }
+            }
+        ) | Where-Object { $_ } | ForEach-Object {
+            Write-Host "    Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
+        }
+
+        @(
+            foreach ($key in @(
+                    "HKCU:\Software\Policies\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security"
+                    "HKLM:\Software\Policies\Microsoft\Office\$($script:WordRegistryVersion)\Word\Security" # Only very old Outlook versions supporting roaming signatures respect HKLM
+                )
+            ) {
+                if (Test-Path -LiteralPath $key) {
+                    foreach ($value in @(
+                            'DisableWarningOnIncludeFieldsUpdate'
+                        )
+                    ) {
+                        try {
+                            @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
+                                if (1 -ne $_) {
+                                    "'$($key)': '$($value)' = '$($_)'"
+                                }
+                            }
+                        } catch {
+                            $null # Value not set
+                        }
+                    }
+                } else {
+                    $null # GPO key not found
+                }
+            }
+        ) | Where-Object { $_ } | ForEach-Object {
+            Write-Host "    Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
+        }
     }
 
     try { WatchCatchableExitSignal } catch { }
@@ -1244,22 +1391,22 @@ end tell
         $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).Guid))).fullname))
 
         if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
-            Write-Host "  '$($SignaturePaths[-1])' (Outlook Web/New Outlook)"
+            Write-Host "  '$($SignaturePaths[-1])' (Outlook on the web/New Outlook)"
         } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
             if ($macOSSignaturesScriptable) {
-                Write-Host "  '$($SignaturePaths[-1])' (Outlook for Mac with scriptable signatures)"
+                Write-Host "  '$($SignaturePaths[-1])' (Outlook on Mac with scriptable signatures)"
             } else {
-                Write-Host "  '$($SignaturePaths[-1])' (Outlook Web, because no Outlook, no accounts configured or signatures not scriptable)"
+                Write-Host "  '$($SignaturePaths[-1])' (Outlook on the web, because no Outlook, no accounts configured or signatures not scriptable)"
             }
         } elseif ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
-            Write-Host "  '$($SignaturePaths[-1])' (Outlook Web)"
+            Write-Host "  '$($SignaturePaths[-1])' (Outlook on the web)"
         }
     }
 
     try { WatchCatchableExitSignal } catch { }
 
     # If Outlook is installed, synch profile folders anyway
-    # Also makes sure that signatures are already there when starting Outlook for the first time
+    # Also makes sure that signatures are already there when starting Outlook on the first time
     if ((-not $SimulateUser) -and $OutlookFileVersion) {
         $x = (Get-ItemProperty -LiteralPath "HKCU:\Software\microsoft\office\$($OutlookRegistryVersion)\common\general" -ErrorAction SilentlyContinue).'Signatures'
 
@@ -1968,9 +2115,9 @@ end tell
         }
     } else {
         if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and $OutlookUseNewOutlook) {
-            Write-Host '  Get email addresses from New Outlook and Outlook Web, as New Outlook is set as default'
+            Write-Host '  Get email addresses from New Outlook and Outlook on the web, as New Outlook is set as default'
         } else {
-            Write-Host '  Get email addresses from Outlook Web'
+            Write-Host '  Get email addresses from Outlook on the web'
         }
 
         $OutlookProfiles = @()
@@ -2036,10 +2183,10 @@ end tell
     try { WatchCatchableExitSignal } catch { }
 
     if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -inotcontains $ADPropsCurrentUser.mail)) {
-        # OOF and/or Outlook web signature must be set, but user does not seem to have a mailbox in Outlook
-        # Maybe this is a pure Outlook Web user, so we will add a helper entry
+        # OOF and/or Outlook on the web signature must be set, but user does not seem to have a mailbox in Outlook
+        # Maybe this is a pure Outlook on the web user, so we will add a helper entry
         # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
-        Write-Host "  User's mailbox not found in email address list, but Outlook Web signature and/or OOF message should be set. Adding dummy mailbox entry." -ForegroundColor Yellow
+        Write-Host "  User's mailbox not found in email address list, but Outlook on the web signature and/or OOF message should be set. Adding dummy mailbox entry." -ForegroundColor Yellow
 
         if ($ADPropsCurrentUser.mail) {
             $script:GraphUserDummyMailbox = $true
@@ -2801,6 +2948,27 @@ end tell
 
     try { WatchCatchableExitSignal } catch { }
 
+
+    if (
+        $(
+            $(-not $SimulateUser) -or
+            $($SimulateUser -and $SimulateAndDeploy)
+        ) -and
+        $(-not $(
+                $((($null -ne $ADPropsCurrentUser.msexchrecipienttypedetails) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648)) -or ($null -ne $ADPropsCurrentUser.mailboxsettings)) -and
+                $($script:GraphToken -and ($script:GraphToken.error -eq $false) -and (@((ParseJwtToken $script:GraphToken.AccessToken).payload.scp -split ' ') -icontains 'Mail.ReadWrite'))
+            )
+        )
+    ) {
+        Write-Host
+        Write-Host "Initially establish EWS connection to user's mailbox @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+
+        ConnectEWS -MailAddress $PrimaryMailboxAddress -Indent '  '
+
+        try { WatchCatchableExitSignal } catch { }
+    }
+
+
     $TemplateFilesGroupSIDsOverall = @{}
 
     foreach ($SigOrOOF in ('signature', 'OOF')) {
@@ -3264,7 +3432,7 @@ end tell
 
     if ($macOSSignaturesScriptable) {
         Write-Host
-        Write-Host "Create copies of Outlook for Mac signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+        Write-Host "Create copies of Outlook on Mac signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
         $SignaturePaths | ForEach-Object {
             try { WatchCatchableExitSignal } catch { }
@@ -3522,6 +3690,20 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
             try { WatchCatchableExitSignal } catch { }
 
+            foreach ($replaceKey in @($replaceHash.Keys | Sort-Object -Culture 127)) {
+                foreach ($alternateNamePair in @(
+                        @('$CurrentUserManager', '$UM'), @('$CurrentMailboxManager', '$MM'), @('$CurrentUser', '$U'), @('$CurrentMailbox', '$M'))
+                ) {
+                    if ($replaceKey -imatch "^$([regex]::Escape($alternateNamePair[0]))") {
+                        $replaceHash[$($replaceKey -ireplace "^$([regex]::Escape($alternateNamePair[0]))", $alternateNamePair[1])] = $replaceHash[$replaceKey]
+
+                        break
+                    }
+                }
+            }
+
+            try { WatchCatchableExitSignal } catch { }
+
             $PictureVariablesArray = @()
 
             foreach ($VariableName in @(foreach ($VariableName in @(
@@ -3542,7 +3724,24 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 New-Variable -Name $($($VariableName).Trim('$') + 'Guid') -Value (New-Guid).Guid -Force
 
                 $PictureVariablesArray += , @($VariableName, $(Get-Variable -Name $($VariableName.Trim('$') + 'Guid') -ValueOnly))
+
+                foreach ($alternateNamePair in @(
+                        @('$CurrentUserManager', '$UM'), @('$CurrentMailboxManager', '$MM'), @('$CurrentUser', '$U'), @('$CurrentMailbox', '$M'))
+                ) {
+                    if ($VariableName -imatch "^$([regex]::Escape($alternateNamePair[0]))") {
+                        $PictureVariablesArray += , @(
+                            $($VariableName -ireplace "^$([regex]::Escape($alternateNamePair[0]))", $alternateNamePair[1]),
+                            $(Get-Variable -Name $($VariableName.Trim('$') + 'Guid') -ValueOnly)
+                        )
+
+                        break
+                    }
+                }
             }
+
+            $PictureVariablesArray = $PictureVariablesArray | Sort-Object -Property { $_[0] }
+
+            try { WatchCatchableExitSignal } catch { }
 
             foreach ($replaceKey in @($replaceHash.Keys | Sort-Object -Culture 127)) {
                 try { WatchCatchableExitSignal } catch { }
@@ -3610,18 +3809,18 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             }
 
 
-            # Set OOF message and Outlook Web signature
+            # Set OOF message and Outlook on the web signature
             if (
                 ((($SetCurrentUserOutlookWebSignature -eq $true)) -or ($SetCurrentUserOOFMessage -eq $true)) -and
                 ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
             ) {
-                Write-Host "  Set default signature(s) in Outlook Web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                Write-Host "  Set default signature(s) in Outlook on the web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                 if ($SetCurrentUserOutlookWebSignature) {
                     if ($SimulateUser -and (-not $SimulateAndDeploy)) {
                         Write-Host '      Simulation mode enabled, skipping task.' -ForegroundColor Yellow
                     } else {
-                        Write-Host "    Set default classic (not roaming) Outlook Web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                        Write-Host "    Set default classic (not roaming) Outlook on the web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOutlookWebSignature')))) {
                             WriteFeatureInfo -Parameter 'SetCurrentUserOutlookWebSignature' -Indent '      '
@@ -3631,12 +3830,12 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SetCurrentUserOutlookWebSignature()
 
                             if ($FeatureResult -ne 'true') {
-                                Write-Host '      Error setting current user Outlook web signature.' -ForegroundColor Yellow
+                                Write-Host '      Error setting current user Outlook on the web signature.' -ForegroundColor Yellow
                                 Write-Host "      $FeatureResult" -ForegroundColor Yellow
                             }
                         }
 
-                        Write-Host "    Set default roaming Outlook Web signature(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                        Write-Host "    Set default roaming Outlook on the web signature(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                         if ($MirrorCloudSignatures -ne $false) {
                             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesSetDefaults')))) {
@@ -4668,15 +4867,14 @@ function SetSignatures {
 
         $Signature.value = $([System.IO.Path]::ChangeExtension($($Signature.value), '.htm'))
 
-        if ($MailboxSpecificSignatureNames -and ($ProcessOOF -eq $false)) {
-            if ($OutlookDisableRoamingSignatures -eq 0) {
+        if ($ProcessOOF -eq $false) {
+            if ($MailboxSpecificSignatureNames) {
                 $Signature.value = ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
-            } else {
-                $Signature.value = ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
+            } elseif ($DisableRoamingSignatures) {
+                # Mark for later deleteion as this filename can only be a leftover from roaming signatures having been enabled earlier
+                $script:SignatureFilesDone += ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
             }
-        }
 
-        if (-not $ProcessOOF) {
             $script:SignatureFilesDone += $Signature.Value
         }
 
@@ -4886,8 +5084,17 @@ function SetSignatures {
             $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
             $script:COMWord.ActiveDocument.ActiveWindow.View.Type = [Microsoft.Office.Interop.Word.WdViewType]::wdWebView
 
+            $script:ComWordScreenUpdatingOriginal = $script:COMWord.ScreenUpdating
+            $script:ComWordOptionsCheckSpellingAsYouTypeOriginal = $script:COMWord.Options.CheckSpellingAsYouType
+            $script:ComWordOptionsCheckGrammarAsYouTypeOriginal = $script:COMWord.Options.CheckGrammarAsYouType
+
+            $script:COMWord.ScreenUpdating = $false
+            $script:COMWord.Options.CheckSpellingAsYouType = $false
+            $script:COMWord.Options.CheckGrammarAsYouType = $false
+
             try { WatchCatchableExitSignal } catch { }
 
+            <#
             Write-Host "$Indent      Replace non-picture variables"
             $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
 
@@ -4897,16 +5104,23 @@ function SetSignatures {
                     $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes = $false
                 }
 
+                $COMWordActiveDocumentContentText = $script:COMWord.ActiveDocument.Content.Text
+
+                if ($COMWordActiveDocumentContentText.Length -ge 1000) {
+                    Write-Host "$Indent        The signature contains much text, replacement may be slow."
+                }
+
                 foreach ($replaceKey in @($replaceHash.Keys | Where-Object { ($_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' })) } | Sort-Object -Culture 127 )) {
+                    if ($COMWordActiveDocumentContentText -inotmatch [regex]::Escape($replaceKey)) {
+                        continue
+                    }
+
                     try { WatchCatchableExitSignal } catch { }
 
                     $t = $replaceHash.$replaceKey -ireplace "`r`n", '^p' -ireplace "`n", '^l'
 
                     if ($t.Length -le 255) {
-                        $script:COMWord.ActiveDocument.Select()
-                        $script:COMWord.Selection.Collapse()
-
-                        $null = $script:COMWord.Selection.Find.Execute($replaceKey, $false, $true, $false, $false, $false, $true, 1, $false, $t, 2)
+                        $null = $script:COMWord.ActiveDocument.Content.Find.Execute($replaceKey, $false, $true, $false, $false, $false, $true, 1, $false, $t, 2)
                     } else {
                         Write-Verbose "$Indent        '$replaceKey' exceeds 255 characters, using slower replacement method."
                         Write-Verbose "$Indent        '$replaceKey': '$($t)'"
@@ -4920,6 +5134,8 @@ function SetSignatures {
                             $r.End = $script:COMWord.ActiveDocument.Content.End
                         }
                     }
+
+                    $COMWordActiveDocumentContentText = $script:COMWord.ActiveDocument.Content.Text
                 }
 
                 # Restore original view
@@ -4954,11 +5170,12 @@ function SetSignatures {
             }
 
             try { WatchCatchableExitSignal } catch { }
+            #>
 
             Write-Host "$Indent      Replace picture variables"
             if (@(@($script:COMWord.ActiveDocument.Shapes) | Where-Object { $_.WrapFormat.Type -ne 7 }).Count -gt 0) {
                 Write-Host "$Indent        Warning: Template contains images or shapes configured as non-inline." -ForegroundColor Yellow
-                Write-Host "$Indent        Set the text wrapping to 'inline with text' to avoid HTML incompatibilities such as incorrect positioning." -ForegroundColor Yellow
+                Write-Host "$Indent        Set the text wrapping to 'inline with text' to avoid email incompatibilities, such as incorrect positioning." -ForegroundColor Yellow
             }
 
             try {
@@ -5369,9 +5586,31 @@ function SetSignatures {
 
                 $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
             }
+
+            $script:COMWord.ScreenUpdating = $script:ComWordScreenUpdatingOriginal
+            $script:COMWord.Options.CheckSpellingAsYouType = $script:ComWordOptionsCheckSpellingAsYouTypeOriginal
+            $script:COMWord.Options.CheckGrammarAsYouType = $script:ComWordOptionsCheckGrammarAsYouTypeOriginal
         }
 
         try { WatchCatchableExitSignal } catch { }
+
+        if (-not $UseHtmTemplates) {
+            Write-Host "$Indent        Replace non-picture variables"
+
+            $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+
+            $tempFileContent = (ConvertEncoding -InFile $path)
+
+            foreach ($replaceKey in @($replaceHash.Keys | Where-Object { $_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' }) } | Sort-Object -Culture 127)) {
+                $tempFileContent = $tempFileContent -ireplace [Regex]::Escape($replacekey), (([System.Net.WebUtility]::HtmlEncode($replaceHash.$replaceKey) -replace "`r`n", '<p>') -replace "`n", '<br>')
+            }
+
+            try { WatchCatchableExitSignal } catch { }
+
+            [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $tempFileContent)
+
+            try { WatchCatchableExitSignal } catch { }
+        }
 
         Write-Host "$Indent        Copy HTM image width and height attributes to style attribute"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
@@ -5523,47 +5762,129 @@ function SetSignatures {
         }
 
         # Check for the meta tag
-        $metaExists = $headNode.SelectSingleNode("meta[@name='data-SignatureFileInfo' and @content='Set-OutlookSignatures']")
+        $metaExists = $(
+            # Correct way to search the entire document
+            $htmlDoc.DocumentNode.SelectSingleNode("//meta[@name='data-SignatureFileInfo' and @content='Set-OutlookSignatures']") -or
+            $htmlDoc.DocumentNode.SelectSingleNode("//span[@*[contains(., 'SetOutlookSignaturesSignatureFileInfo')]]")
+        )
 
-        if (-not $metaExists) {
-            $meta = $htmlDoc.CreateElement('meta')
-            $null = $meta.SetAttributeValue('name', 'data-SignatureFileInfo')
-            $null = $meta.SetAttributeValue('content', 'Set-OutlookSignatures')
-            $null = $headNode.AppendChild($meta)
+        # Delete all existing tags
+        if ($metaExists) {
+            $metaTags = $htmlDoc.DocumentNode.SelectNodes("//meta[@name='data-SignatureFileInfo' and @content='Set-OutlookSignatures']")
+            if ($null -ne $metaTags) {
+                foreach ($node in $metaTags) { $node.Remove() }
+            }
+
+            $sigDivs = $htmlDoc.DocumentNode.SelectNodes("//span[@*[contains(., 'SetOutlookSignaturesSignatureFileInfo')]]")
+            if ($null -ne $sigDivs) {
+                foreach ($node in $sigDivs) { $node.Remove() }
+            }
         }
+
+        # Ensure there's a <body> element; if not, find <html> and add one
+        $bodyNode = $htmlDoc.DocumentNode.SelectSingleNode('//body')
+
+        if (-not $bodyNode) {
+            $htmlNode = $htmlDoc.DocumentNode.SelectSingleNode('//html')
+            if (-not $htmlNode) {
+                $htmlNode = $htmlDoc.CreateElement('html')
+                $null = $htmlDoc.DocumentNode.AppendChild($htmlNode)
+            }
+            $bodyNode = $htmlDoc.CreateElement('body')
+            $null = $htmlNode.AppendChild($bodyNode)
+        }
+
+        # Create the new marker divs
+        $newSpanMarker = 'SetOutlookSignaturesSignatureFileInfo'
+        $newSpan = $htmlDoc.CreateElement('span')
+        $null = $newSpan.SetAttributeValue('class', "$($newSpanMarker)$((New-Guid).ToString('N'))")
+        $null = $newSpan.SetAttributeValue('id', "$($newSpanMarker)$((New-Guid).ToString('N'))")
+        $null = $newSpan.SetAttributeValue('title', "$($newSpanMarker)$((New-Guid).ToString('N'))")
+        $null = $newSpan.SetAttributeValue('alt', "$($newSpanMarker)$((New-Guid).ToString('N'))")
+        $null = $newSpan.SetAttributeValue('data-SignatureFileInfo', "$($newSpanMarker)$((New-Guid).ToString('N'))")
+        $null = $newSpan.SetAttributeValue('style', "font-family:""$($newSpanMarker)$((New-Guid).ToString('N'))"",""Calibri"",sans-serif !important; font-size:0pt !important;")
+        $null = $newSpan.SetAttributeValue('hidden', 'hidden')
+        $null = $newSpan.SetAttributeValue('aria-hidden', 'true')
+        $null = $newSpan.InnerHtml = '&nbsp;'
+
+        $targetNode = $bodyNode.SelectNodes('./*') | Select-Object -Last 1
+
+        while ($targetNode.HasChildNodes) {
+            $lastChild = $targetNode.ChildNodes | Where-Object { $_.NodeType -eq 'Element' } | Select-Object -Last 1
+
+            if ($null -eq $lastChild) { break }
+
+            $targetNode = $lastChild
+        }
+
+        if ($null -ne $targetNode) {
+            $null = $targetNode.AppendChild($newSpan)
+        } else {
+            $null = $bodyNode.AppendChild($newSpan)
+        }
+
+
+        $meta = $htmlDoc.CreateElement('meta')
+        $null = $meta.SetAttributeValue('name', 'data-SignatureFileInfo')
+        $null = $meta.SetAttributeValue('content', 'Set-OutlookSignatures')
+        $null = $headNode.AppendChild($meta)
 
         try { WatchCatchableExitSignal } catch { }
 
         Write-Host "$Indent        Modify connected folder name"
 
-        foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
-            try { WatchCatchableExitSignal } catch { }
+        # Update src attributes in <img> tags
+        $htmlDocSelectNodeResult = $htmlDoc.DocumentNode.SelectNodes('//img[@src]')
 
-            $newFolderName = "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files"
+        if ($htmlDocSelectNodeResult) {
+            foreach ($img in $htmlDocSelectNodeResult) {
+                $src = $img.GetAttributeValue('src', '')
 
-            # Update src attributes in <img> tags
-            $htmlDocSelectNodeResult = $htmlDoc.DocumentNode.SelectNodes('//img[@src]')
+                if ($null -eq $src) {
+                    continue
+                } else {
+                    $src = $src.Trim()
+                }
 
-            if ($htmlDocSelectNodeResult) {
-                foreach ($img in $htmlDocSelectNodeResult) {
-                    $src = $img.GetAttributeValue('src', '')
-
-                    if ($null -ne $src) {
-                        $src = $src.Trim()
-                    } else {
-                        continue
-                    }
-
-                    if ($src -like "$($pathConnectedFolderName)/*") {
-                        $null = $img.SetAttributeValue('src', "$($newFolderName)/$($src.Substring($pathConnectedFolderName.Length + 1))")
-                    }
+                if (
+                    $(
+                        if ($src -ilike 'data:image/*;*') {
+                            @(@($src -split ';')[0] -split '\/')[-1]
+                        } elseif ($src -inotlike 'data:*') {
+                            $(@($src -split '\.'))[-1]
+                        }
+                    ) -inotin @('jpeg', 'jpg', 'png', 'gif')
+                ) {
+                    Write-Host "$Indent          '$($src)' is not a typical image format for emails (JPG, JPEG, PNG, GIF). Expect problems on most clients." -ForegroundColor Yellow
                 }
             }
 
-            # Rename the folder
-            $oldFolderPath = Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath $pathConnectedFolderName
+            try { WatchCatchableExitSignal } catch { }
 
-            Rename-Item -LiteralPath $oldFolderPath -NewName $newFolderName -ErrorAction SilentlyContinue
+            foreach ($pathConnectedFolderName in $pathConnectedFolderNames) {
+                $newFolderName = "$([System.IO.Path]::GetFileNameWithoutExtension($Signature.value)).files"
+
+                foreach ($img in $htmlDocSelectNodeResult) {
+                    try { WatchCatchableExitSignal } catch { }
+
+                    $src = $img.GetAttributeValue('src', '')
+
+                    if ($null -eq $src) {
+                        continue
+                    } else {
+                        $src = $src -replace '\\', '/' -replace '^\s*\.\/', ''
+                    }
+
+                    if ($src -ilike "$($pathConnectedFolderName)/*") {
+                        $null = $img.SetAttributeValue('src', "$($newFolderName)/$($src.Substring($pathConnectedFolderName.Length + 1))")
+                    }
+                }
+
+                # Rename the folder
+                $oldFolderPath = Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath $pathConnectedFolderName
+
+                Rename-Item -LiteralPath $oldFolderPath -NewName $newFolderName -ErrorAction SilentlyContinue
+            }
         }
 
         try { WatchCatchableExitSignal } catch { }
@@ -5766,7 +6087,7 @@ function SetSignatures {
                 try { WatchCatchableExitSignal } catch { }
 
                 if ($macOSSignaturesScriptable) {
-                    Write-Host "$Indent      Create Outlook for Mac signature"
+                    Write-Host "$Indent      Create Outlook on Mac signature"
 
                     @($(@"
 tell application "Microsoft Outlook"
@@ -6571,7 +6892,7 @@ function ConvertHtmlToPlainText {
     function ConvertHtmlToPlainTextProcessNodes([ref]$builder, [ref]$state, $nodes) {
         foreach ($node in $nodes) {
             if ($node -is [HtmlAgilityPack.HtmlTextNode]) {
-                $text = [HtmlAgilityPack.HtmlEntity]::DeEntitize($node.Text)
+                $text = [HtmlAgilityPack.HtmlEntity]::DeEntitize($node.Text) -replace '\u200B', ''
 
                 ConvertHtmlToPlainTextProcessText -builder $builder -state $state -chars $text.ToCharArray()
             } else {
@@ -6831,6 +7152,7 @@ function MoveCssInline {
 
                     try {
                         $dllPath = Join-Path -Path $path -ChildPath "$($assemblyName).dll"
+
                         if (Test-Path -LiteralPath $dllPath) {
                             return [System.Reflection.Assembly]::LoadFrom($dllPath)
                         }
@@ -6923,11 +7245,13 @@ function MoveCssInline {
             if ($null -ne $job.StartTime) {
                 if ((($job.handle.IsCompleted -eq $true) -and ($job.Done -eq $false)) -or (($job.Done -eq $false) -and ((New-TimeSpan -Start $job.StartTime -End (Get-Date)).TotalSeconds -ge 5))) {
                     $data = $job.Object[0..$(($job.object).count - 1)]
-                    #if ($job.Powershell.Streams.Debug[1].Message.StartsWith('Failed: ')) {
-                    #    $returnvalue = $HtmlCode
-                    #} else {
-                    $returnvalue = $job.Powershell.Streams.Debug[1].Message
-                    #}
+                    if ($job.Powershell.Streams.Debug[1].Message.StartsWith('Failed: ')) {
+                        $returnvalue = $HtmlCode
+
+                        Write-Verbose "MoveCssInline failed: $(@($job.Powershell.Streams.Debug).Message -join [System.Environment]::NewLine)"
+                    } else {
+                        $returnvalue = $job.Powershell.Streams.Debug[1].Message
+                    }
                     $job.Done = $true
                 }
             }
@@ -7412,13 +7736,17 @@ $CheckPathScriptblock = {
 }
 
 
-function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = '') {
-    Write-Host "$($Indent)Connect to Outlook Web"
+function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = '', [switch]$silent) {
+    if (-not $silent) {
+        Write-Host "$($Indent)Connect to Outlook on the web"
+    }
 
     GraphSwitchContext -TenantID $MailAddress
 
     if (-not $script:WebServicesDllPath) {
-        Write-Host "$Indent  Set up environment for connection to Outlook Web"
+        if (-not $silent) {
+            Write-Host "$Indent  Set up environment for connection to Outlook on the web"
+        }
 
         try { WatchCatchableExitSignal } catch { }
 
@@ -7430,7 +7758,9 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
                 Unblock-File -LiteralPath $script:WebServicesDllPath
             }
         } catch {
-            Write-Verbose "$Indent    $($_)"
+            if (-not $silent) {
+                Write-Verbose "$Indent    $($_)"
+            }
         }
     }
 
@@ -7442,21 +7772,29 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
                 $($script:exchService.SetOutlookSignaturesMailaddress -ieq $MailAddress) -and
                 $(([Microsoft.Exchange.WebServices.Data.Folder]::Bind($script:exchService, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Inbox)).DisplayName)
             ) {
-                Write-Host "$($Indent)  Existing connection matches required parameters and is working"
+                if (-not $silent) {
+                    Write-Host "$($Indent)  Existing connection matches required parameters and is working"
+                }
 
                 $local:exchServiceAvailable = $true
             } else {
-                Write-Host "$($Indent)  Existing connecting does not match required parameters or does not work"
+                if (-not $silent) {
+                    Write-Host "$($Indent)  Existing connecting does not match required parameters or does not work"
+                }
             }
         } catch {
-            Write-Host "$($Indent)  Existing connecting does not match required parameters or does not work"
+            if (-not $silent) {
+                Write-Host "$($Indent)  Existing connecting does not match required parameters or does not work"
+            }
         }
     }
 
     try { WatchCatchableExitSignal } catch { }
 
     if ($local:exchServiceAvailable -eq $false) {
-        Write-Host "$($Indent)  Creating new connection"
+        if (-not $silent) {
+            Write-Host "$($Indent)  Creating new connection"
+        }
 
         $script:exchService = $null
 
@@ -7517,30 +7855,38 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
             try { WatchCatchableExitSignal } catch { }
 
             try {
-                Write-Host "$($Indent)    Try Autodiscover with Integrated Windows Authentication"
+                if (-not $silent) {
+                    Write-Host "$($Indent)    Try Autodiscover with Integrated Windows Authentication"
+                }
 
                 $script:exchService.UseDefaultCredentials = $true
                 $script:exchService.ImpersonatedUserId = $null
                 $script:exchService.AutodiscoverUrl($MailAddress, { $true }) | Out-Null
 
-                Write-Host "$($Indent)      Success"
+                if (-not $silent) {
+                    Write-Host "$($Indent)      Success"
+                }
             } catch {
-                Write-Host "$($Indent)      Failed. See verbose output for details."
-                Write-Verbose "$($Indent)        $($_)"
-                Write-Verbose "$($Indent)      This is OK when:"
-                Write-Verbose "$($Indent)        - Not connected to internal network"
-                Write-Verbose "$($Indent)        - Connected to internal network with no Exchange on prem."
-                Write-Verbose "$($Indent)        - Connected to internal network with Exchange on prem, but your mailbox is in Exchange Online."
-                Write-Verbose "$($Indent)        - Connected to internal network but not logged-on with Active Directory credentials."
-                Write-Verbose "$($Indent)      Else, you should check your internal and/or external Autodiscover configuration:"
-                Write-Verbose "$($Indent)        - External: https://testconnectivity.microsoft.com"
-                Write-Verbose "$($Indent)        - Internal: https://learn.microsoft.com/en-us/exchange/architecture/client-access/autodiscover"
-                Write-Verbose "$($Indent)        - Check your loadbalancer configuration."
+                if (-not $silent) {
+                    Write-Host "$($Indent)      Failed. See verbose output for details."
+                    Write-Verbose "$($Indent)        $($_)"
+                    Write-Verbose "$($Indent)      This is OK when:"
+                    Write-Verbose "$($Indent)        - Not connected to internal network"
+                    Write-Verbose "$($Indent)        - Connected to internal network with no Exchange on prem."
+                    Write-Verbose "$($Indent)        - Connected to internal network with Exchange on prem, but your mailbox is in Exchange Online."
+                    Write-Verbose "$($Indent)        - Connected to internal network but not logged-on with Active Directory credentials."
+                    Write-Verbose "$($Indent)      Else, you should check your internal and/or external Autodiscover configuration:"
+                    Write-Verbose "$($Indent)        - External: https://testconnectivity.microsoft.com"
+                    Write-Verbose "$($Indent)        - Internal: https://learn.microsoft.com/en-us/exchange/architecture/client-access/autodiscover"
+                    Write-Verbose "$($Indent)        - Check your loadbalancer configuration."
+                }
 
                 if ([System.Uri]::IsWellFormedUriString($tempEwsRedirectUrl, [System.UriKind]::Absolute)) {
-                    Write-Verbose "$($Indent)      Anyhow:"
-                    Write-Verbose "$($Indent)        - Redirect URL '$($tempEwsRedirectUrl)' was returned."
-                    Write-Verbose "$($Indent)        - No need to try Autodiscver with OAuth, skipping to OAuth with fixed URL."
+                    if (-not $silent) {
+                        Write-Verbose "$($Indent)      Anyhow:"
+                        Write-Verbose "$($Indent)        - Redirect URL '$($tempEwsRedirectUrl)' was returned."
+                        Write-Verbose "$($Indent)        - No need to try Autodiscver with OAuth, skipping to OAuth with fixed URL."
+                    }
                 } else {
                     $tempEwsRedirectUrl = $null
                 }
@@ -7555,7 +7901,9 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
                 try { WatchCatchableExitSignal } catch { }
 
                 try {
-                    Write-Host "$($Indent)    Try Autodiscover with OAuth"
+                    if (-not $silent) {
+                        Write-Host "$($Indent)    Try Autodiscover with OAuth"
+                    }
 
                     if ([System.Uri]::IsWellFormedUriString($tempEwsRedirectUrl, [System.UriKind]::Absolute)) {
                         throw 'Autodiscover with IWA failed before, but returned a redirect URL. We will use this fixed URL without Autodiscover.'
@@ -7575,25 +7923,33 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
 
                     $script:exchService.AutodiscoverUrl($MailAddress, { $true }) | Out-Null
 
-                    Write-Host "$($Indent)      Success"
+                    if (-not $silent) {
+                        Write-Host "$($Indent)      Success"
+                    }
                 } catch {
                     if ([System.Uri]::IsWellFormedUriString($tempEwsRedirectUrl, [System.UriKind]::Absolute)) {
-                        Write-Host "$($Indent)      Skipping Autodiscover with OAuth because"
-                        Write-Host "$($Indent)        $($_)"
+                        if (-not $silent) {
+                            Write-Host "$($Indent)      Skipping Autodiscover with OAuth because"
+                            Write-Host "$($Indent)        $($_)"
+                        }
                     } else {
-                        Write-Host "$($Indent)      Failed.  See verbose output for details."
-                        Write-Verbose "$($Indent)        $($_)"
-                        Write-Verbose "$($Indent)      This is OK when"
-                        Write-Verbose "$($indent)        - Connected to internal network with Exchange on prem without Hybrid Modern Authentication"
-                        Write-Verbose "$($Indent)      Else, you should check your internal and/or external Autodiscover configuration:"
-                        Write-Verbose "$($Indent)        - External: https://testconnectivity.microsoft.com"
-                        Write-Verbose "$($Indent)        - Internal: https://learn.microsoft.com/en-us/exchange/architecture/client-access/autodiscover"
-                        Write-Verbose "$($Indent)        - Check your loadbalancer configuration."
+                        if (-not $silent) {
+                            Write-Host "$($Indent)      Failed.  See verbose output for details."
+                            Write-Verbose "$($Indent)        $($_)"
+                            Write-Verbose "$($Indent)      This is OK when"
+                            Write-Verbose "$($indent)        - Connected to internal network with Exchange on prem without Hybrid Modern Authentication"
+                            Write-Verbose "$($Indent)      Else, you should check your internal and/or external Autodiscover configuration:"
+                            Write-Verbose "$($Indent)        - External: https://testconnectivity.microsoft.com"
+                            Write-Verbose "$($Indent)        - Internal: https://learn.microsoft.com/en-us/exchange/architecture/client-access/autodiscover"
+                            Write-Verbose "$($Indent)        - Check your loadbalancer configuration."
+                        }
                     }
 
                     try { WatchCatchableExitSignal } catch { }
 
-                    Write-Host "$($Indent)    Try OAuth with fixed URL"
+                    if (-not $silent) {
+                        Write-Host "$($Indent)    Try OAuth with fixed URL"
+                    }
 
                     $script:exchService.UseDefaultCredentials = $false
 
@@ -7611,19 +7967,23 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
                         $script:exchService.Url = "$($script:CloudEnvironmentExchangeOnlineEndpoint)/EWS/Exchange.asmx"
                     }
 
-                    Write-Host "$($Indent)      Success"
-                    Write-Host "$($Indent)      Fixed URL: '$($script:exchService.Url)'"
+                    if (-not $silent) {
+                        Write-Host "$($Indent)      Success"
+                        Write-Host "$($Indent)      Fixed URL: '$($script:exchService.Url)'"
+                    }
                 }
             }
 
             if (([Microsoft.Exchange.WebServices.Data.Folder]::Bind($script:exchService, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Inbox)).DisplayName) {
                 Add-Member -InputObject $script:exchService -MemberType NoteProperty -Name 'SetOutlookSignaturesMailaddress' -Value $MailAddress -Force
             } else {
-                throw 'Could not connect to Outlook Web, although the EWS DLL threw no error.'
+                throw 'Could not connect to Outlook on the web, although the EWS DLL threw no error.'
             }
         } catch {
-            Write-Host "$($Indent)    Error connecting to Outlook Web: $($_)" -ForegroundColor Red
-            Write-Host "$($Indent)    Check verbose output for details and solution hints." -ForegroundColor Red
+            if (-not $silent) {
+                Write-Host "$($Indent)    Error connecting to Outlook on the web: $($_)" -ForegroundColor Red
+                Write-Host "$($Indent)    Check verbose output for details and solution hints." -ForegroundColor Red
+            }
 
             $script:exchService = $null
         }
@@ -7646,7 +8006,7 @@ function GraphGetToken {
 
         if ($GraphClientID -ieq 'beea8249-8c98-4c76-92f6-ce3c468a61e6') {
             Write-Host "$($indent)  You use the Entra ID app provided by the developers. It is recommended to create und use your own Entra ID app." -ForegroundColor Yellow
-            Write-Host "$($indent)  The file '`.\config\default graph config.ps1`' describes how to do this." -ForegroundColor Yellow
+            Write-Host "$($indent)  The Quick Start Guide shows how to do this: https://set-outlooksignatures.com/quickstart" -ForegroundColor Yellow
         }
 
         $script:GraphUser = $null
@@ -8246,7 +8606,17 @@ function GraphDomainToTenantID {
     try {
         try { WatchCatchableExitSignal } catch { }
 
-        $local:result = Invoke-RestMethod -UseBasicParsing -Uri "https://odc.officeapps.live.com/odc/v2.1/federationprovider?domain=$($domain)"
+        try {
+            $local:result = Invoke-RestMethod -UseBasicParsing -Uri "https://odc.officeapps.live.com/odc/v2.1/federationprovider?domain=$($domain)"
+        } catch {
+            if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                Start-Sleep -Seconds 5
+                $local:result = Invoke-RestMethod -UseBasicParsing -Uri "https://odc.officeapps.live.com/odc/v2.1/federationprovider?domain=$($domain)"
+            } else {
+                throw $_
+            }
+        }
 
         try { WatchCatchableExitSignal } catch { }
 
@@ -8562,7 +8932,18 @@ function GraphGenericQuery {
                 $requestBody['Uri'] = $local:uri
             }
 
-            $local:pagedResults = Invoke-RestMethod @requestBody
+            try {
+                $local:pagedResults = Invoke-RestMethod @requestBody
+            } catch {
+                if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                    Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                    Start-Sleep -Seconds 5
+                    $local:pagedResults = Invoke-RestMethod @requestBody
+                } else {
+                    throw $_
+                }
+            }
+
             $local:x += $local:pagedResults
 
             if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
@@ -8618,7 +8999,18 @@ function GraphGetMe {
                 $requestBody['Uri'] = $local:uri
             }
 
-            $local:pagedResults = Invoke-RestMethod @requestBody
+            try {
+                $local:pagedResults = Invoke-RestMethod @requestBody
+            } catch {
+                if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                    Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                    Start-Sleep -Seconds 5
+                    $local:pagedResults = Invoke-RestMethod @requestBody
+                } else {
+                    throw $_
+                }
+            }
+
             $local:x += $local:pagedResults
 
             if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
@@ -8679,7 +9071,18 @@ function GraphGetUpnFromSmtp($user, $authHeader) {
                 $requestBody['Uri'] = $local:uri
             }
 
-            $local:pagedResults = Invoke-RestMethod @requestBody
+            try {
+                $local:pagedResults = Invoke-RestMethod @requestBody
+            } catch {
+                if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                    Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                    Start-Sleep -Seconds 5
+                    $local:pagedResults = Invoke-RestMethod @requestBody
+                } else {
+                    throw $_
+                }
+            }
+
             $local:x += $local:pagedResults
 
             if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
@@ -8746,7 +9149,18 @@ function GraphGetUserProperties($user, $authHeader) {
                     $requestBody['Uri'] = $local:uri
                 }
 
-                $local:pagedResults = Invoke-RestMethod @requestBody
+                try {
+                    $local:pagedResults = Invoke-RestMethod @requestBody
+                } catch {
+                    if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                        Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                        Start-Sleep -Seconds 5
+                        $local:pagedResults = Invoke-RestMethod @requestBody
+                    } else {
+                        throw $_
+                    }
+                }
+
                 $local:x += $local:pagedResults
 
                 if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
@@ -8778,7 +9192,18 @@ function GraphGetUserProperties($user, $authHeader) {
                             $requestBody['Uri'] = $local:uri
                         }
 
-                        $local:pagedResults = Invoke-RestMethod @requestBody
+                        try {
+                            $local:pagedResults = Invoke-RestMethod @requestBody
+                        } catch {
+                            if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                                Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                                Start-Sleep -Seconds 5
+                                $local:pagedResults = Invoke-RestMethod @requestBody
+                            } else {
+                                throw $_
+                            }
+                        }
+
                         $local:y += $local:pagedResults
 
                         if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
@@ -8864,7 +9289,18 @@ function GraphGetUserManager($user) {
                 $requestBody['Uri'] = $local:uri
             }
 
-            $local:pagedResults = Invoke-RestMethod @requestBody
+            try {
+                $local:pagedResults = Invoke-RestMethod @requestBody
+            } catch {
+                if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                    Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                    Start-Sleep -Seconds 5
+                    $local:pagedResults = Invoke-RestMethod @requestBody
+                } else {
+                    throw $_
+                }
+            }
+
             $local:x += $local:pagedResults
 
             if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
@@ -8920,7 +9356,18 @@ function GraphGetUserTransitiveMemberOf($user) {
                 $requestBody['Uri'] = $local:uri
             }
 
-            $local:pagedResults = Invoke-RestMethod @requestBody
+            try {
+                $local:pagedResults = Invoke-RestMethod @requestBody
+            } catch {
+                if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                    Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                    Start-Sleep -Seconds 5
+                    $local:pagedResults = Invoke-RestMethod @requestBody
+                } else {
+                    throw $_
+                }
+            }
+
             $local:x += $local:pagedResults
 
             if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
@@ -8967,7 +9414,17 @@ function GraphGetUserPhoto($user) {
         $OldProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
 
-        $null = Invoke-RestMethod @requestBody -OutFile $local:tempFile
+        try {
+            $null = Invoke-RestMethod @requestBody -OutFile $local:tempFile
+        } catch {
+            if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                Start-Sleep -Seconds 5
+                $null = Invoke-RestMethod @requestBody -OutFile $local:tempFile
+            } else {
+                throw $_
+            }
+        }
 
         $ProgressPreference = $OldProgressPreference
 
@@ -9026,7 +9483,17 @@ function GraphPatchUserMailboxsettings($user, $OOFInternal, $OOFExternal, $authH
             $OldProgressPreference = $ProgressPreference
             $ProgressPreference = 'SilentlyContinue'
 
-            $null = Invoke-RestMethod @requestBody
+            try {
+                $null = Invoke-RestMethod @requestBody
+            } catch {
+                if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                    Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                    Start-Sleep -Seconds 5
+                    $null = Invoke-RestMethod @requestBody
+                } else {
+                    throw $_
+                }
+            }
 
             $ProgressPreference = $OldProgressPreference
         }
@@ -9073,7 +9540,18 @@ function GraphFilterGroups($filter, $GraphContext = $null) {
                 $requestBody['Uri'] = $local:uri
             }
 
-            $local:pagedResults = Invoke-RestMethod @requestBody
+            try {
+                $local:pagedResults = Invoke-RestMethod @requestBody
+            } catch {
+                if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                    Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                    Start-Sleep -Seconds 5
+                    $local:pagedResults = Invoke-RestMethod @requestBody
+                } else {
+                    throw $_
+                }
+            }
+
             $local:x += $local:pagedResults
 
             if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
@@ -9129,7 +9607,18 @@ function GraphFilterUsers($filter, $GraphContext = $null) {
                 $requestBody['Uri'] = $local:uri
             }
 
-            $local:pagedResults = Invoke-RestMethod @requestBody
+            try {
+                $local:pagedResults = Invoke-RestMethod @requestBody
+            } catch {
+                if (($null -ne $_.Exception.Response) -and ([int]$_.Exception.Response.StatusCode -in (@(304) + (400..599)))) {
+                    Write-Verbose "Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting 5s."
+                    Start-Sleep -Seconds 5
+                    $local:pagedResults = Invoke-RestMethod @requestBody
+                } else {
+                    throw $_
+                }
+            }
+
             $local:x += $local:pagedResults
 
             if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
@@ -9547,8 +10036,8 @@ function global:WatchCatchableExitSignal {
 
         $global:WatchCatchableExitSignalStatus[0] = 'Clean-up done'
     } elseif (
-        $($global:WatchCatchableExitSignalStatus[0].StartsWith('Detected ''')) -and
-        $($global:WatchCatchableExitSignalStatus[0].EndsWith(''', initiate clean-up and exit'))
+        $global:WatchCatchableExitSignalStatus[0].StartsWith('Detected ''') -and
+        $global:WatchCatchableExitSignalStatus[0].EndsWith(''', initiate clean-up and exit')
     ) {
         Write-Host
         Write-Host "WatchCatchableExitSignal: $($global:WatchCatchableExitSignalStatus[0])" -ForegroundColor Yellow
@@ -9791,6 +10280,18 @@ try {
                 }
             }
         }
+
+        try {
+            $script:COMWord.ScreenUpdating = $script:ComWordScreenUpdatingOriginal
+        } catch {}
+
+        try {
+            $script:COMWord.Options.CheckSpellingAsYouType = $script:ComWordOptionsCheckSpellingAsYouTypeOriginal
+        } catch {}
+
+        try {
+            $script:COMWord.Options.CheckGrammarAsYouType = $script:ComWordOptionsCheckGrammarAsYouTypeOriginal
+        } catch {}
 
         try {
             $script:COMWord.Quit([ref]$false)

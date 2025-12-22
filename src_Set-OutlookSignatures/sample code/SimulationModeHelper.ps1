@@ -87,7 +87,7 @@ do {
 Write-Host
 Write-Host '  Please enter the email addresses of the mailboxes to simulate'
 Write-Host '    Separate multiple mailboxes by spaces, commas or semicolons'
-Write-Host '    Leave empty to get mailboxes from Outlook Web'
+Write-Host '    Leave empty to get mailboxes from Outlook on the web'
 Write-Host '      Example: user.x@domain.com, user.a@domain.com, sharedmailbox.y@domain.com'
 
 do {

@@ -46,7 +46,7 @@
 #           Required to log on the current user.
 #         EWS.AccessAsUser.All
 #           Allows the app to have the same access to mailboxes as the signed-in user via Exchange Web Services.
-#           Required to connect to Outlook Web and to set Outlook signatures.
+#           Required to connect to Outlook on the web and to set Outlook signatures.
 #         Files.Read.All
 #           Allows the app to read all files the signed-in user can access.
 #           Required for access to templates and configuration files hosted on SharePoint Online.
@@ -56,7 +56,7 @@
 #           Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
 #         Mail.ReadWrite
 #           Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
-#           Required to connect to Outlook Web and to set Outlook signatures.
+#           Required to connect to Outlook on the web and to set Outlook signatures.
 #         MailboxSettings.ReadWrite
 #           Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
 #           Required to detect the state of the out-of-office assistant and to set out-of-office replies.
