@@ -43,14 +43,9 @@ _**Breaking:** <Present tense verb> XXX_
 
 _**Benefactor Circle add-on users with mailboxes in Exchange Online should update to this version as soon as possible.**_ Microsoft will begin changing roaming signature HTML processing shortly. Update as soon as possible to avoid potential negative impact on the parameters '`DeleteScriptCreatedSignaturesWithoutTemplate`' and '`DeleteUserCreatedSignatures`'.
 
-_**Variable replacement in Word is now much faster, but you must test your DOCX templates first.**_ You must make sure that every character of a replacement variable in the template is formatted identically, or the replacement will fail. An example is given in the detailed changelog entry below.
-
 ### Changed
 #### Set-OutlookSignatures
 - Switch to a new way of marking signatures created by Set-OutlookSignatures, while keeping compatibility with the existing one. This makes sure that the parameters '`DeleteScriptCreatedSignaturesWithoutTemplate`' and '`DeleteUserCreatedSignatures`', as well as similar features keep working when Microsoft changes roaming signature HTML processing.
-- Speed up replacing non-picture variables in DOCX (Word) templates by no longer replacing the variables in Word, but in the exported HTM file.
-  - You must make sure that every character of a replacement variable in the template is formatted identically, or the replacement will fail.
-  An example: When not all characters of '\$CurrentUserGivenName\$' are formatted identically, the string cannot be found in the final HTML signature created from the DOCX tempate file, which makes it impossible to replace the placeholder with the actual given name of the currently logged-on user. The slower Word variant used in earlier versions allowed for this, but always used the formatting of the first letter for the replaced text.
 - Update '`MoveCSSInline`' to fall back to non-inlined HTML in case of errors.
 - Update libphonenumber-csharp to v9.0.21.
 - Update address-formatting datbase to 8444a0cc989042ebb21e6420f82bc4ded05a7fec.

@@ -5094,7 +5094,7 @@ function SetSignatures {
 
             try { WatchCatchableExitSignal } catch { }
 
-            <#
+
             Write-Host "$Indent      Replace non-picture variables"
             $script:COMWordShowFieldCodesOriginal = $script:COMWord.ActiveDocument.ActiveWindow.View.ShowFieldCodes
 
@@ -5170,7 +5170,7 @@ function SetSignatures {
             }
 
             try { WatchCatchableExitSignal } catch { }
-            #>
+
 
             Write-Host "$Indent      Replace picture variables"
             if (@(@($script:COMWord.ActiveDocument.Shapes) | Where-Object { $_.WrapFormat.Type -ne 7 }).Count -gt 0) {
@@ -5593,24 +5593,6 @@ function SetSignatures {
         }
 
         try { WatchCatchableExitSignal } catch { }
-
-        if (-not $UseHtmTemplates) {
-            Write-Host "$Indent        Replace non-picture variables"
-
-            $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-
-            $tempFileContent = (ConvertEncoding -InFile $path)
-
-            foreach ($replaceKey in @($replaceHash.Keys | Where-Object { $_ -inotin @($PictureVariablesArray | ForEach-Object { $_[0]; $_[0] -replace '\$$', 'DeleteEmpty$' }) } | Sort-Object -Culture 127)) {
-                $tempFileContent = $tempFileContent -ireplace [Regex]::Escape($replacekey), (([System.Net.WebUtility]::HtmlEncode($replaceHash.$replaceKey) -replace "`r`n", '<p>') -replace "`n", '<br>')
-            }
-
-            try { WatchCatchableExitSignal } catch { }
-
-            [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $tempFileContent)
-
-            try { WatchCatchableExitSignal } catch { }
-        }
 
         Write-Host "$Indent        Copy HTM image width and height attributes to style attribute"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))

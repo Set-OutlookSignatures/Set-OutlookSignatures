@@ -28,7 +28,10 @@ param (
     $AppName = $null,
 
     [ValidateNotNullOrEmpty()]
-    [uri]$OutlookAddInUrl = $null
+    [uri]$OutlookAddInUrl = $null,
+
+    [ValidateSet('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC', 'AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4', 'AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5', 'China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud')]
+    [string]$CloudEnvironment = 'Public'
 )
 
 
@@ -95,6 +98,33 @@ if (-not $ParameterCheckSuccess) {
     $AppName = $AppName.trim()
 }
 
+switch ($CloudEnvironment) {
+    { $_ -iin @('Public', 'Global', 'AzurePublic', 'AzureGlobal', 'AzureCloud', 'AzureUSGovernmentGCC', 'USGovernmentGCC') } {
+        $MgGraphEnvironment = 'Global'
+        break
+    }
+
+    { $_ -iin @('AzureUSGovernment', 'AzureUSGovernmentGCCHigh', 'AzureUSGovernmentL4', 'USGovernmentGCCHigh', 'USGovernmentL4') } {
+        $MgGraphEnvironment = 'USGov'
+        break
+    }
+
+    { $_ -iin @('AzureUSGovernmentDOD', 'AzureUSGovernmentL5', 'USGovernmentDOD', 'USGovernmentL5') } {
+        $MgGraphEnvironment = 'USGovDoD'
+        break
+    }
+
+    { $_ -iin @('China', 'AzureChina', 'ChinaCloud', 'AzureChinaCloud') } {
+        $MgGraphEnvironment = 'China'
+        break
+    }
+
+    default {
+        $MgGraphEnvironment = 'Global'
+        break
+    }
+}
+
 
 Write-Host
 Write-Host 'Entra ID app to create'
@@ -119,29 +149,19 @@ try {
         Register-PSRepository -Name 'PSGallery' -SourceLocation 'https://www.powershellgallery.com/api/v2' -WarningAction SilentlyContinue -ErrorAction Stop
     }
 
-    if ($PSVersionTable.PSEdition -ine 'Core') {
-        @('PackageManagement', 'PowerShellGet') | ForEach-Object {
-            Write-Host "  $($_)"
-
-            if (Get-Module -ListAvailable -Name $_) {
-                Find-Module -Name $_ -Repository PSGallery | Update-Module -Scope CurrentUser -Force -WarningAction SilentlyContinue -ErrorAction Stop | Import-Module -Force -WarningAction SilentlyContinue -ErrorAction Stop
-            } else {
-                Find-Module -Name $_ -Repository PSGallery | Install-Module -Scope CurrentUser -Force -AllowClobber -WarningAction SilentlyContinue -ErrorAction Stop | Import-Module -Force -WarningAction SilentlyContinue -ErrorAction Stop
-            }
-        }
-    }
-
     @('Microsoft.Graph.Authentication', 'Microsoft.Graph.Applications', 'Microsoft.Graph.Identity.SignIns') | ForEach-Object {
         Write-Host "  $($_)"
 
         if (Get-Module -ListAvailable -Name $_) {
-            Find-Module -Name $_ -Repository PSGallery | Update-Module -Scope CurrentUser -Force -WarningAction SilentlyContinue -ErrorAction Stop | Import-Module -Force -WarningAction SilentlyContinue -ErrorAction Stop
+            Find-Module -Name $_ -Repository PSGallery | Update-Module -Force -WarningAction SilentlyContinue -ErrorAction Stop
         } else {
-            Find-Module -Name $_ -Repository PSGallery | Install-Module -Scope CurrentUser -Force -AllowClobber -WarningAction SilentlyContinue -ErrorAction Stop | Import-Module -Force -WarningAction SilentlyContinue -ErrorAction Stop
+            Find-Module -Name $_ -Repository PSGallery | Install-Module -Scope CurrentUser -Force -AllowClobber -WarningAction SilentlyContinue -ErrorAction Stop
         }
+
+        Import-Module -Name $_ -Force -WarningAction SilentlyContinue -ErrorAction Stop
     }
 } catch {
-    Write-Host "Error installing Microsoft.Graph PowerShell modules: $($_)" -ForegroundColor Red
+    Write-Host "Error installing PowerShell modules: $($_)" -ForegroundColor Red
     Write-Host
     Write-Host 'This is a severe error. It is not related to this script, but to the basic PowerShell setup on this system.' -ForegroundColor Red
     Write-Host 'Please fix these issues with PowerShell package management and package providers first.' -ForegroundColor Red
@@ -151,7 +171,9 @@ try {
 
 
 Write-Host
-Write-Host "Connect to your Entra ID with a user being 'Application Adminstrator' or 'Global Administrator'"
+Write-Host "Connect to your Entra ID with a user being 'Application Administrator' or 'Global Administrator'"
+Write-Host "  Connecting to Graph environment '$($MgGraphEnvironment)'"
+Write-Host "    To connect to another environment, cancel authentication and add the '-CloudEnvironment' parameter."
 Write-Host '  An authentication window will open, likely in a browser'
 
 # Disconnect first, so that no existing connection is re-used. This forces to choose an account for the following connect.
@@ -160,7 +182,7 @@ $null = Disconnect-MgGraph -ErrorAction SilentlyContinue
 try {
     $scopes = @('Application.ReadWrite.All', 'AppRoleAssignment.ReadWrite.All', 'DelegatedPermissionGrant.ReadWrite.All')
 
-    Connect-MgGraph -ContextScope Process -Scopes $scopes -NoWelcome -ErrorAction Stop
+    Connect-MgGraph -Environment $MgGraphEnvironment -ContextScope Process -Scopes $scopes -NoWelcome -ErrorAction Stop
 
     if (-not (Get-MgContext)) {
         throw 'No connection established.'
@@ -183,7 +205,7 @@ Write-Host
 Write-Host 'Create a new app registration'
 Write-Host "  App name: $($AppName)"
 
-$ExistingApp = @(Get-MgApplication | Where-Object { $_.DisplayName.Trim() -ieq $AppName })
+$ExistingApp = @(Get-MgApplication -Filter "DisplayName eq '$($AppName)'" -ErrorAction Stop)
 
 if ($ExistingApp.Count -gt 0) {
     $ExistingApp | ForEach-Object {
@@ -447,7 +469,7 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
             }
         )
     }
-} elseif ($AppType -ieq 'OutlookAddin') {
+} elseif ($AppType -ieq 'OutlookAddIn') {
     $permissionParams = @{
         RequiredResourceAccess = @(
             @{
@@ -541,7 +563,7 @@ if ($AppType -ieq 'SimulateAndDeploy') {
 
 Write-Host
 Write-Host 'Grant admin consent'
-Write-Host ' This may take a moment'
+Write-Host '  This may take a moment'
 $AppServicePrincipal = New-MgServicePrincipal -AppId $App.AppId
 $delegatedPermissions = @{}
 
