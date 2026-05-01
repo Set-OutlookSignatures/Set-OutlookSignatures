@@ -1,7 +1,6 @@
 ﻿<#
 .SYNOPSIS
 Set-OutlookSignatures XXXVersionStringXXX
-Data Sovereign Email Signatures and Out-of-Office Replies
 
 .DESCRIPTION
 Find the full documentation at https://set-outlooksignatures.com.
@@ -25,6 +24,7 @@ License : See '.\LICENSE.txt' for details and copyright
 # Suppress specific PSScriptAnalyzerRules for specific variables
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'SimulateAndDeployGraphCredentialFile')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'ADPropsCurrentMailboxManager')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironment')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentAutodiscoverSecureName')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentAzureADEndpoint')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironmentGraphApiEndpoint')]
@@ -105,7 +105,7 @@ param(
     [ValidateSet(1, 'true', '$true', 'yes', 0, 'false', '$false', 'no', IgnoreCase = $true)]
     $DeleteScriptCreatedSignaturesWithoutTemplate = $true,
 
-    # Shall the software set the Outlook on the web signature of the currently logged-in user?
+    # Shall the software set the Outlook for the web signature of the currently logged-in user?
     [Parameter(Mandatory = $false, ParameterSetName = 'A: Benefactor Circle')]
     [Parameter(Mandatory = $false, ParameterSetName = 'B: Signatures')]
     [Parameter(Mandatory = $false, ParameterSetName = 'Z: All parameters')]
@@ -588,6 +588,83 @@ function main {
     try { global:WatchCatchableExitSignal } catch {}
 
 
+    if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows)) {
+        try {
+            # Check if the type already exists to avoid the "type name already exists" error
+            if (-not ([System.Management.Automation.PSTypeName]'Win32.PowerManager').Type) {
+                Add-Type -MemberDefinition @'
+[DllImport("powrprof.dll")]
+public static extern uint PowerGetEffectiveOverlayScheme(out Guid EffectiveOverlaySchemeGuid);
+
+[DllImport("kernel32.dll")]
+public static extern bool GetSystemPowerStatus(out SystemPowerStatus systemPowerStatus);
+
+public struct SystemPowerStatus {
+    public byte ACLineStatus;    // 0 = Battery, 1 = AC, 255 = Unknown
+    public byte BatteryFlag;     // 128 = No battery, 255 = Unknown
+    public byte BatteryLifePercent;
+    public byte Reserved1;
+    public uint BatteryLifeTime;
+    public uint BatteryFullLifeTime;
+}
+'@ -Name 'PowerManager' -Namespace 'Win32'
+            }
+
+            # 1. Check Power Source and Battery Presence
+            $powerStatus = New-Object Win32.PowerManager+SystemPowerStatus
+            $isOnBattery = $false
+            $hasBattery = $false
+
+            if ([Win32.PowerManager]::GetSystemPowerStatus([ref]$powerStatus)) {
+                # ACLineStatus: 0 = Offline (Battery)
+                if ($powerStatus.ACLineStatus -eq 0) { $isOnBattery = $true }
+
+                # BatteryFlag: 128 = No System Battery.
+                # Values like 1 (High), 2 (Low), 4 (Critical), or 8 (Charging) indicate a battery exists.
+                if ($powerStatus.BatteryFlag -ne 128 -and $powerStatus.BatteryFlag -ne 255) {
+                    $hasBattery = $true
+                }
+            }
+
+            # 2. Define Power Overlay GUIDs
+            $OverlayMap = @{
+                [Guid]'ded574b5-45a0-4f42-8737-46345c09c238' = 'Best Performance'
+                [Guid]'00000000-0000-0000-0000-000000000000' = 'Balanced'
+                [Guid]'961cc777-2547-4f9d-8174-7d86181b8a7a' = 'Best Power Efficiency'
+            }
+
+            $currentOverlayGuid = [Guid]::Empty
+            $null = [Win32.PowerManager]::PowerGetEffectiveOverlayScheme([ref]$currentOverlayGuid)
+
+            $isBestPerformance = $currentOverlayGuid -eq [Guid]'ded574b5-45a0-4f42-8737-46345c09c238'
+            $isBestEfficiency = $currentOverlayGuid -eq [Guid]'961cc777-2547-4f9d-8174-7d86181b8a7a'
+
+            # 3. Logic: Determine if a performance warning is appropriate
+            $shouldWarn = $false
+
+            if (
+                $isOnBattery -or
+                ($hasBattery -and (-not $isBestPerformance)) -or
+                $isBestEfficiency
+            ) {
+                $shouldWarn = $true
+            }
+
+            if ($shouldWarn) {
+                $modeName = if ($OverlayMap.ContainsKey($currentOverlayGuid)) { $OverlayMap[$currentOverlayGuid] } else { "Unknown ($($currentOverlayGuid.ToString()))" }
+
+                Write-Host
+                Write-Host 'The system is not running at maximum performance'
+                Write-Host "  Effective power mode: $($modeName)"
+                Write-Host "  Power source: System has $(if ($hasBattery) {'a battery'} else {'no battery'}), running on $(if ($isOnBattery) {'battery'} else {'AC'}) power"
+                Write-Host '  Consider this when measuring performance. Details: https://set-outlooksignatures.com/faq#windows-power-mode'
+            }
+        } catch {
+            # Silent fail for environments where P/Invoke or API is unavailable
+        }
+    }
+
+
     Write-Host
     Write-Host "Loading and initializing dependencies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
@@ -595,7 +672,7 @@ function main {
         Write-Host '  QRCoder'
         $script:QRCoderModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
-        Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\QRCoder\netstandard2.0')) -Destination $script:QRCoderModulePath -Recurse
+        Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\QRCoder\netstandard2.0')) -Destination $script:QRCoderModulePath -Recurse
         if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:QRCoderModulePath -Recurse | Unblock-File }
         Import-Module (Join-Path -Path $script:QRCoderModulePath -ChildPath 'QRCoder.dll') -ErrorAction Stop
 
@@ -606,7 +683,7 @@ function main {
         Write-Host '  libphonenumber-csharp'
         $script:LibPhoneNumberModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
-        Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\libphonenumber\netstandard2.0')) -Destination $script:LibPhoneNumberModulePath -Recurse
+        Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\libphonenumber\netstandard2.0')) -Destination $script:LibPhoneNumberModulePath -Recurse
         if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:LibPhoneNumberModulePath -Recurse | Unblock-File }
         Import-Module (Join-Path -Path $script:LibPhoneNumberModulePath -ChildPath 'PhoneNumbers.dll') -ErrorAction Stop
 
@@ -765,22 +842,40 @@ function main {
 
         try { global:WatchCatchableExitSignal } catch {}
 
-
-        Write-Host '  YamlDotNet'
-        $script:YamlDotNetModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
-
-        Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\YamlDotNet\netstandard2.0')) -Destination $script:YamlDotNetModulePath -Recurse
-        if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:YamlDotNetModulePath -Recurse | Unblock-File }
-        Import-Module (Join-Path -Path $script:YamlDotNetModulePath -ChildPath 'YamlDotNet.dll') -ErrorAction Stop
-
-
-        try { global:WatchCatchableExitSignal } catch {}
-
-
         Write-Host '  AddressFormatter'
         $script:AddressFormatterModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
-        Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\AddressFormatter')) -Destination $script:AddressFormatterModulePath -Recurse
+        Push-Location ((Join-Path -Path $PSScriptRoot -ChildPath 'deps\AddressFormatter'))
+
+        # Copy each item to the destination
+        foreach ($item in @(Get-ChildItem -LiteralPath ((Join-Path -Path $PSScriptRoot -ChildPath 'deps\AddressFormatter')) -Recurse)) {
+            $tempRelativePath = Resolve-Path -LiteralPath $item.FullName -Relative
+
+            if (
+                ($tempRelativePath -ilike (@('.', 'subModules', 'OpenCageData', 'address-formatting', '*') -join [IO.Path]::DirectorySeparatorChar)) -and
+                -not (
+                    ($tempRelativePath -ilike (@('.', 'subModules', 'OpenCageData', 'address-formatting', 'conf', '*') -join [IO.Path]::DirectorySeparatorChar)) -or
+                    ($tempRelativePath -ieq (@('.', 'subModules', 'OpenCageData', 'address-formatting', 'conf') -join [IO.Path]::DirectorySeparatorChar))
+                )
+            ) {
+                continue
+            }
+
+            $destinationPath = $item.FullName -replace [regex]::escape($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath '\deps\AddressFormatter')))), $script:AddressFormatterModulePath
+
+            if ($item.PSIsContainer) {
+                # Create the directory if it doesn't exist
+                if (-not (Test-Path -LiteralPath $destinationPath)) {
+                    $null = New-Item -ItemType Directory -Path $destinationPath -Force
+                }
+            } else {
+                # Copy the file
+                Copy-Item -LiteralPath $item.FullName -Destination $destinationPath
+            }
+        }
+
+        Pop-Location
+
         if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:AddressFormatterModulePath -Recurse | Unblock-File }
         Import-Module (Join-Path -Path $script:AddressFormatterModulePath -ChildPath 'AddressFormatter.psd1') -ErrorAction Stop
     } catch {
@@ -1150,7 +1245,7 @@ end tell
             $WordFilePath = $null
 
             if ($macOSSignaturesScriptable) {
-                Write-Host '    Outlook on Mac with scriptable signatures detected.'
+                Write-Host '    Outlook for Mac with scriptable signatures detected.'
 
                 $EmbedImagesInHtml = $true
 
@@ -1175,7 +1270,7 @@ end tell
                     }
 
                     if (-not ($macOSOutlookMailboxes.count -gt 0)) {
-                        Write-Host '    Outlook does not have accounts configured, or accounts cannot be scripted. Continuing with Outlook on the web only.' -ForegroundColor Yellow
+                        Write-Host '    Outlook does not have accounts configured, or accounts cannot be scripted. Continuing with Outlook for the web only.' -ForegroundColor Yellow
                         Write-Host "      Consider using 'sample code/SwitchTo-ClassicOutlookForMac.ps1' to temporarily switch from New Outlook to Classic Outlook." -ForegroundColor Yellow
 
                         $OutlookUseNewOutlook = $true
@@ -1183,7 +1278,7 @@ end tell
                     }
                 }
             } else {
-                Write-Host '    Outlook on Mac not installed, or signatures cannot be scripted. Continuing with Outlook on the web only.' -ForegroundColor Yellow
+                Write-Host '    Outlook for Mac not installed, or signatures cannot be scripted. Continuing with Outlook for the web only.' -ForegroundColor Yellow
 
                 $OutlookUseNewOutlook = $true
                 $macOSOutlookMailboxes = @()
@@ -1398,15 +1493,15 @@ end tell
         $SignaturePaths = @(((New-Item -ItemType Directory (Join-Path -Path $script:tempDir -ChildPath ((New-Guid).Guid))).fullname))
 
         if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
-            Write-Host "  '$($SignaturePaths[-1])' (Outlook on the web/New Outlook)"
+            Write-Host "  '$($SignaturePaths[-1])' (Outlook for the web/New Outlook)"
         } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
             if ($macOSSignaturesScriptable) {
-                Write-Host "  '$($SignaturePaths[-1])' (Outlook on Mac with scriptable signatures)"
+                Write-Host "  '$($SignaturePaths[-1])' (Outlook for Mac with scriptable signatures)"
             } else {
-                Write-Host "  '$($SignaturePaths[-1])' (Outlook on the web, because no Outlook, no accounts configured or signatures not scriptable)"
+                Write-Host "  '$($SignaturePaths[-1])' (Outlook for the web, because no Outlook, no accounts configured or signatures not scriptable)"
             }
         } elseif ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
-            Write-Host "  '$($SignaturePaths[-1])' (Outlook on the web)"
+            Write-Host "  '$($SignaturePaths[-1])' (Outlook for the web)"
         }
     }
 
@@ -1414,7 +1509,7 @@ end tell
 
     # If Outlook is installed, synch profile folders anyway
     # But only is roaming signatures are disabled (if enabled, Outlook does that itself)
-    # Also makes sure that signatures are already there when starting Outlook on the first time
+    # Also makes sure that signatures are already there when starting Outlook for the first time
     if ((-not $SimulateUser) -and $OutlookFileVersion -and ($OutlookDisableRoamingSignatures -eq 1)) {
         $x = (Get-ItemProperty -LiteralPath "HKCU:\Software\microsoft\office\$($OutlookRegistryVersion)\common\general" -ErrorAction SilentlyContinue).'Signatures'
 
@@ -2123,9 +2218,9 @@ end tell
         }
     } else {
         if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and $OutlookUseNewOutlook) {
-            Write-Host '  Get email addresses from New Outlook and Outlook on the web, as New Outlook is set as default'
+            Write-Host '  Get email addresses from New Outlook and Outlook for the web, as New Outlook is set as default'
         } else {
-            Write-Host '  Get email addresses from Outlook on the web'
+            Write-Host '  Get email addresses from Outlook for the web'
         }
 
         $OutlookProfiles = @()
@@ -2191,10 +2286,10 @@ end tell
     try { global:WatchCatchableExitSignal } catch {}
 
     if ((($SetCurrentUserOutlookWebSignature -eq $true) -or ($SetCurrentUserOOFMessage -eq $true)) -and ($MailAddresses -inotcontains $ADPropsCurrentUser.mail)) {
-        # OOF and/or Outlook on the web signature must be set, but user does not seem to have a mailbox in Outlook
-        # Maybe this is a pure Outlook on the web user, so we will add a helper entry
+        # OOF and/or Outlook for the web signature must be set, but user does not seem to have a mailbox in Outlook
+        # Maybe this is a pure Outlook for the web user, so we will add a helper entry
         # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
-        Write-Host "  User's mailbox not found in email address list, but Outlook on the web signature and/or OOF message should be set. Adding dummy mailbox entry." -ForegroundColor Yellow
+        Write-Host "  User's mailbox not found in email address list, but Outlook for the web signature and/or OOF message should be set. Adding dummy mailbox entry." -ForegroundColor Yellow
 
         if ($ADPropsCurrentUser.mail) {
             $script:GraphUserDummyMailbox = $true
@@ -3421,7 +3516,7 @@ end tell
 
     if ($macOSSignaturesScriptable) {
         Write-Host
-        Write-Host "Create copies of Outlook on Mac signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+        Write-Host "Create copies of Outlook for Mac signatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
         $SignaturePaths | ForEach-Object {
             try { global:WatchCatchableExitSignal } catch {}
@@ -3623,6 +3718,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('CLCGM')))) {
                 Write-Host '  Mailbox is member of license group: False (no valid Benefactor Circle license file found)'
+                Write-Host "    The subtle `"Free and open-source Set-OutlookSignatures`" tagline will be appended after some time of use."
             } else {
                 try { global:WatchCatchableExitSignal } catch {}
 
@@ -3630,6 +3726,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                 if ($FeatureResult -ine 'true') {
                     Write-Host "  Mailbox is member of license group: False ($($FeatureResult))"
+                    Write-Host "    The subtle `"Free and open-source Set-OutlookSignatures`" tagline will be appended after some time of use."
                 } else {
                     Write-Host '  Mailbox is member of license group: True'
                 }
@@ -3798,18 +3895,18 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             }
 
 
-            # Set OOF message and Outlook on the web signature
+            # Set OOF message and Outlook for the web signature
             if (
                 ((($SetCurrentUserOutlookWebSignature -eq $true)) -or ($SetCurrentUserOOFMessage -eq $true)) -and
                 ($MailAddresses[$AccountNumberRunning] -ieq $PrimaryMailboxAddress)
             ) {
-                Write-Host "  Set default signature(s) in Outlook on the web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                Write-Host "  Set default signature(s) in Outlook for the web @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                 if ($SetCurrentUserOutlookWebSignature) {
                     if ($SimulateUser -and (-not $SimulateAndDeploy)) {
                         Write-Host '      Simulation mode enabled, skipping task.' -ForegroundColor Yellow
                     } else {
-                        Write-Host "    Set default classic (not roaming) Outlook on the web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                        Write-Host "    Set default classic (not roaming) Outlook for the web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                         if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('SetCurrentUserOutlookWebSignature')))) {
                             WriteFeatureInfo -Parameter 'SetCurrentUserOutlookWebSignature' -Indent '      '
@@ -3819,12 +3916,12 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SetCurrentUserOutlookWebSignature()
 
                             if ($FeatureResult -ne 'true') {
-                                Write-Host '      Error setting current user Outlook on the web signature.' -ForegroundColor Yellow
+                                Write-Host '      Error setting current user Outlook for the web signature.' -ForegroundColor Yellow
                                 Write-Host "      $FeatureResult" -ForegroundColor Yellow
                             }
                         }
 
-                        Write-Host "    Set default roaming Outlook on the web signature(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
+                        Write-Host "    Set default roaming Outlook for the web signature(s) @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
                         if ($MirrorCloudSignatures -ne $false) {
                             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('RoamingSignaturesSetDefaults')))) {
@@ -5632,24 +5729,19 @@ function SetSignatures {
 
                 $newStyleParts = @()
 
-                $widthAttribute = $image.Attributes['width']
+                foreach ($dim in @('width', 'height')) {
+                    $attr = $image.Attributes[$dim]
+                    if ($null -ne $attr) {
+                        # Clean up the value: trim whitespace and trailing dots
+                        $val = $attr.Value.Trim().TrimEnd('.')
 
-                if ($null -ne $widthAttribute) {
-                    $width = $widthAttribute.Value
-
-                    if (-not [string]::IsNullOrWhiteSpace($width) -and $currentStyle -notmatch 'width:') {
-                        $newStyleParts += "width:$($width)"
-                    }
-                }
-
-
-                $heightAttribute = $image.Attributes['height']
-
-                if ($null -ne $heightAttribute) {
-                    $height = $heightAttribute.Value
-
-                    if (-not [string]::IsNullOrWhiteSpace($height) -and $currentStyle -notmatch 'height:') {
-                        $newStyleParts += "height:$($height)"
+                        if (-not [string]::IsNullOrWhiteSpace($val) -and $currentStyle -inotmatch "$($dim)\s*:") {
+                            if ($val -match '\d$') {
+                                $newStyleParts += "$($dim):$($val)px"
+                            } else {
+                                $newStyleParts += "$($dim):$($val)"
+                            }
+                        }
                     }
                 }
 
@@ -5657,7 +5749,7 @@ function SetSignatures {
                     $combinedStyle = $newStyleParts -join ';'
 
                     if (-not [string]::IsNullOrWhiteSpace($currentStyle)) {
-                        $null = $image.SetAttributeValue('style', "$currentStyle;$combinedStyle")
+                        $null = $image.SetAttributeValue('style', "$($currentStyle.Trim().TrimEnd(';'));$($combinedStyle)")
                     } else {
                         $null = $image.SetAttributeValue('style', $combinedStyle)
                     }
@@ -6093,7 +6185,7 @@ function SetSignatures {
                 try { global:WatchCatchableExitSignal } catch {}
 
                 if ($macOSSignaturesScriptable) {
-                    Write-Host "$Indent      Create Outlook on Mac signature"
+                    Write-Host "$Indent      Create Outlook for Mac signature"
 
                     @($(@"
 tell application "Microsoft Outlook"
@@ -7082,12 +7174,12 @@ function ParseHtmlStyleAttribute {
 
 function GetHtmlBody {
     param (
-        [string]$htmlContent = ''
+        [string]$HtmlContent = ''
     )
 
+    if ("$([string]::IsNullOrWhiteSpace($HtmlContent))") { return "$($HtmlContent)" }
 
     try { global:WatchCatchableExitSignal } catch {}
-
 
     $htmlDoc = [HtmlAgilityPack.HtmlDocument]::new()
     $htmlDoc.DisableImplicitEnd = $true
@@ -7096,23 +7188,32 @@ function GetHtmlBody {
     $htmlDoc.OptionEmptyCollection = $true
     $htmlDoc.OptionFixNestedTags = $true
 
-    $htmlDoc.LoadHtml($htmlContent)
+    $htmlDoc.LoadHtml($HtmlContent)
 
     $bodyNode = $htmlDoc.DocumentNode.SelectSingleNode('//body')
 
-    if ($bodyNode) {
-        $bodyHtml = $bodyNode.InnerHtml
-    } else {
-        $bodyChildren = $htmlDoc.DocumentNode.ChildNodes | Where-Object {
-            $($_.Name -ine 'head') -and
-            $($_.Name -ine 'html') -and
-            $($_.NodeType -ieq 'Element')
-        }
-
-        $bodyHtml = ($bodyChildren | ForEach-Object { $_.OuterHtml }) -join "`n"
+    if ($null -ne $bodyNode) {
+        return $bodyNode.InnerHtml.Trim()
     }
 
-    return $bodyHtml
+    $searchRoot = $htmlDoc.DocumentNode.SelectSingleNode('//html')
+
+    if ($null -eq $searchRoot) {
+        $searchRoot = $htmlDoc.DocumentNode
+    }
+
+    $validNodes = $searchRoot.ChildNodes | Where-Object {
+        ($_.NodeType -eq 'Text' -and -not [string]::IsNullOrWhiteSpace($_.InnerText)) -or
+        ($_.NodeType -eq 'Element' -and $_.Name -inotin @('script', 'style', 'head', 'title', 'meta', 'link', 'xml', 'html', 'header', 'footer', 'title'))
+    }
+
+    $container = $htmlDoc.CreateElement('div')
+
+    foreach ($node in $validNodes) {
+        $null = $container.AppendChild($node)
+    }
+
+    return $container.InnerHtml.Trim()
 }
 
 
@@ -7753,7 +7854,7 @@ $CheckPathScriptblock = {
 function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = '', [switch]$silent, [switch]$OnlyLoadDLL) {
     if (-not $script:WebServicesDllPath) {
         if (-not $silent) {
-            Write-Host "$Indent  Set up environment for connection to Outlook on the web"
+            Write-Host "$Indent  Set up environment for connection to Outlook for the web"
         }
 
         try { global:WatchCatchableExitSignal } catch {}
@@ -7761,7 +7862,7 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
         $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid) + '.dll'))
 
         try {
-            Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+            Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
             if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
                 Unblock-File -LiteralPath $script:WebServicesDllPath
             }
@@ -7790,7 +7891,7 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
     }
 
     if (-not $silent) {
-        Write-Host "$($Indent)Connect to Outlook on the web"
+        Write-Host "$($Indent)Connect to Outlook for the web"
     }
 
     GraphSwitchContext -TenantID $MailAddress
@@ -7810,12 +7911,12 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
                 $local:exchServiceAvailable = $true
             } else {
                 if (-not $silent) {
-                    Write-Host "$($Indent)  Existing connecting does not match required parameters or does not work"
+                    Write-Host "$($Indent)  Existing connection does not match required parameters or does not work"
                 }
             }
         } catch {
             if (-not $silent) {
-                Write-Host "$($Indent)  Existing connecting does not match required parameters or does not work"
+                Write-Host "$($Indent)  Existing connection does not match required parameters or does not work"
             }
         }
     }
@@ -8043,11 +8144,11 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
             if (([Microsoft.Exchange.WebServices.Data.Folder]::Bind($script:exchService, [Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::Inbox)).DisplayName) {
                 Add-Member -InputObject $script:exchService -MemberType NoteProperty -Name 'SetOutlookSignaturesMailaddress' -Value $MailAddress -Force
             } else {
-                throw 'Could not connect to Outlook on the web, although the EWS DLL threw no error.'
+                throw 'Could not connect to Outlook for the web, although the EWS DLL threw no error.'
             }
         } catch {
             if (-not $silent) {
-                Write-Host "$($Indent)    Error connecting to Outlook on the web: $($_)" -ForegroundColor Red
+                Write-Host "$($Indent)    Error connecting to Outlook for the web: $($_)" -ForegroundColor Red
                 Write-Host "$($Indent)    Check verbose output for details and solution hints." -ForegroundColor Red
             }
 
@@ -8069,11 +8170,14 @@ function GraphGetToken {
 
     if (-not $EXO) {
         Write-Host "$($indent)Graph authentication"
-        Write-Host "$($indent)  Application (client) ID of the Entra ID app: $($GraphClientID)"
 
-        if ($GraphClientID -ieq 'beea8249-8c98-4c76-92f6-ce3c468a61e6') {
-            Write-Host "$($indent)  You use the Entra ID app provided by the developers. It is recommended to create und use your own Entra ID app." -ForegroundColor Yellow
-            Write-Host "$($indent)  The Quickstart Guide shows how to do this: https://set-outlooksignatures.com/quickstart" -ForegroundColor Yellow
+        if (-not $SimulateAndDeployGraphCredentialFile) {
+            Write-Host "$($indent)  Application (client) ID of the Entra ID app: $($GraphClientID)"
+
+            if ($GraphClientID -ieq 'beea8249-8c98-4c76-92f6-ce3c468a61e6') {
+                Write-Host "$($indent)    You use the Entra ID app provided by the developers. Add security by using your own Entra ID app." -ForegroundColor Yellow
+                Write-Host "$($indent)    The Quickstart Guide shows how to do this: https://set-outlooksignatures.com/quickstart" -ForegroundColor Yellow
+            }
         }
 
         $script:GraphUser = $null
@@ -8119,6 +8223,13 @@ function GraphGetToken {
                 GraphSwitchContext $null
             }
 
+            Write-Host "$($indent)  Application (client) ID of the Entra ID app: $((ParseJwtToken $script:AuthorizationToken).payload.appid)"
+
+            if ((ParseJwtToken $script:AuthorizationToken).payload.appid -ieq 'beea8249-8c98-4c76-92f6-ce3c468a61e6') {
+                Write-Host "$($indent)    You use the Entra ID app provided by the developers. Add security by using your own Entra ID app." -ForegroundColor Yellow
+                Write-Host "$($indent)    The Quickstart Guide shows how to do this: https://set-outlooksignatures.com/quickstart" -ForegroundColor Yellow
+            }
+
             return @{
                 error             = $false
                 AccessToken       = $script:AuthorizationToken
@@ -8150,7 +8261,7 @@ function GraphGetToken {
             $script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath 'MSAL.PS')
 
             # Copy each item to the destination
-            foreach ($item in @(Get-ChildItem -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\MSAL.PS')) -Recurse)) {
+            foreach ($item in @(Get-ChildItem -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\MSAL.PS')) -Recurse)) {
                 if ($item.BaseName -like '*msalruntime*') {
                     if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
                         if ($item.Name -inotlike 'msalruntime*.dll') {
@@ -8169,7 +8280,7 @@ function GraphGetToken {
                     }
                 }
 
-                $destinationPath = $item.FullName -replace [regex]::escape($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath '\bin\MSAL.PS')))), $script:MsalModulePath
+                $destinationPath = $item.FullName -replace [regex]::escape($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath '\deps\MSAL.PS')))), $script:MsalModulePath
 
                 if ($item.PSIsContainer) {
                     # Create the directory if it doesn't exist
@@ -9030,101 +9141,240 @@ function GraphGetTokenWrapper {
 
 
     function local:GraphCheckTokenPermissions {
-        if ($script:GraphToken -and $script:GraphToken.AccessToken) {
-            $local:tempGraphAccessTokenPermissionsResult = @()
+        $local:delegatedDefinition = @(
+            @{ Required = 'email'; RequiredMsg = 'Required for: Authenticate the signed-in user.' }
+            @{ Required = 'GroupMember.Read.All'; RequiredMsg = 'Required for: 	Find groups by name, get their security identifier (SID) and transitive members.' }
+            @{ Required = 'Mail.ReadWrite'; RequiredMsg = 'Required for: Create signature collection in drafts, provide signatures for Outlook add-in.' }
+            @{ Required = 'MailboxSettings.ReadWrite'; RequiredMsg = 'Required for: Detect mailbox environment, get and set out-of-office data.' }
+            @{ Required = 'offline_access'; RequiredMsg = 'Required for: Get a refresh token from Graph.' }
+            @{ Required = 'openid'; RequiredMsg = 'Required for: Authenticate the signed-in user.' }
+            @{ Required = 'profile'; RequiredMsg = 'Required for: Authenticate the signed-in user, get basic properties.' }
+            @{ Required = 'User.Read.All'; RequiredMsg = 'Required for: Data for replacement variables, SMTP to UPN, group membership.' }
+            @{
+                RequiredAnyOf = @('MailboxConfigItem.ReadWrite', 'EWS.AccessAsUser.All')
+                RequiredMsg   = 'Required for: Read data from Outlook Web, set Outlook web signatures.'
+                Preferred     = 'MailboxConfigItem.ReadWrite'
+                PreferredMsg  = 'Microsoft starts disabling EWS in Exchange Online in October 2026.'
+            }
+            @{
+                OptionalAnyOf = @('Files.SelectedOperations.Selected', 'Files.Read.All')
+                OptionalMsg   = 'Optional, required for: Read template and configuration files hosted on SharePoint Online.'
+                Preferred     = 'Files.SelectedOperations.Selected'
+                PreferredMsg  = 'Files.SelectedOperations.Selected is harder to implement but more secure.'
+            }
+        )
 
-            @(
-                'email'
-                'GroupMember.Read.All'
-                'Mail.ReadWrite'
-                'MailboxSettings.ReadWrite'
-                'openid'
-                'profile'
-                'User.Read.All'
-                , @('Files.Read.All', 'Files.SelectedOperations', 'Optional, SharePoint Online access will not work')
-                , @('MailboxConfigItem.ReadWrite', 'EWS.AccessAsUser.All', 'Required but missing, only MailboxConfigItem.ReadWrite will work when Microsoft disables EWS in Exchange Online in October 2026.')
-                , @('MailboxConfigItem.ReadWrite', 'MailboxConfigItem.ReadWrite', 'Optional but highly recommended as Microsoft disables EWS in Exchange Online in October 2026.')
-                # 'test0_delegated'
-                # , @('test1_delegated', 'test2_delegated', 'Optional, some text')
-                # , @('test3_delegated', 'test4_delegated', 'Required, some text')
-            ) | ForEach-Object {
-                if ($_ -is [array]) {
-                    if (
-                        $($_[0] -inotin @((ParseJwtToken $script:GraphToken.AccessToken).payload.scp -split ' ')) -and
-                        $($_[1] -inotin @((ParseJwtToken $script:GraphToken.AccessToken).payload.scp -split ' '))
-                    ) {
-                        $local:tempGraphAccessTokenPermissionsResult += "Delegated permission $($_[0]) or $($_[1]): $($_[2])"
-                    }
+        if ($SimulateUser -and $SimulateAndDeploy -and $SimulateAndDeployGraphCredentialFile) {
+            # SimulateAndDeploy
+            $local:appDefinition = @(
+                @{ Required = 'GroupMember.Read.All'; RequiredMsg = 'Required for: 	Find groups by name, get their security identifier (SID) and transitive members.' }
+                @{ Required = 'Mail.ReadWrite'; RequiredMsg = 'Required for: Create signature collection in drafts, provide signatures for Outlook add-in.' }
+                @{ Required = 'MailboxSettings.ReadWrite'; RequiredMsg = 'Required for: Detect mailbox environment, get and set out-of-office data.' }
+                @{ Required = 'User.Read.All'; RequiredMsg = 'Required for: Data for replacement variables, SMTP to UPN, group membership.' }
+                @{
+                    RequiredAnyOf = @('MailboxConfigItem.ReadWrite', 'EWS.AccessAsUser.All')
+                    RequiredMsg   = 'Required for: Read data from Outlook Web, set Outlook web signatures.'
+                    Preferred     = 'MailboxConfigItem.ReadWrite'
+                    PreferredMsg  = 'Microsoft starts disabling EWS in Exchange Online in October 2026.'
+                }
+                @{
+                    OptionalAnyOf = @('Files.SelectedOperations.Selected', 'Files.Read.All')
+                    OptionalMsg   = 'Optional, required for: Read template and configuration files hosted on SharePoint Online.'
+                    Preferred     = 'Files.SelectedOperations.Selected'
+                    PreferredMsg  = 'Files.SelectedOperations.Selected is harder to implement but more secure.'
+                }
+            )
+        } else {
+            $local:appDefinition = @()
+        }
+
+        $local:results = @()
+
+        foreach ($local:PermissionType in @('delegated', 'application').ToLower()) {
+            if ($local:PermissionType -ieq 'delegated') {
+                $local:definition = $local:delegatedDefinition
+
+                if ($script:GraphToken -and $script:GraphToken.AccessToken) {
+                    $local:parsedToken = ParseJwtToken $script:GraphToken.AccessToken
                 } else {
-                    if ($_ -inotin @((ParseJwtToken $script:GraphToken.AccessToken).payload.scp -split ' ')) {
-                        $local:tempGraphAccessTokenPermissionsResult += "Delegated permission $($_): Required but missing"
+                    $local:parsedToken = $null
+                }
+
+                $local:tokenPermissions = $(
+                    if ($local:parsedToken -and $local:parsedToken.payload -and $local:parsedToken.payload.scp -and ($local:parsedToken.payload.scp -is [string])) {
+                        @(@($local:parsedToken.payload.scp -split ' ') | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+                    } else {
+                        @()
+                    }
+                )
+            } else {
+                $local:definition = $local:appDefinition
+
+                if ($script:GraphToken -and $script:GraphToken.AppAccessToken) {
+                    $local:parsedToken = ParseJwtToken $script:GraphToken.AppAccessToken
+                } else {
+                    $local:parsedToken = $null
+                }
+
+                $local:tokenPermissions = $(
+                    if ($local:parsedToken -and $local:parsedToken.payload -and $local:parsedToken.payload.roles -and ($local:parsedToken.payload.roles -is [array])) {
+                        @(@($local:parsedToken.payload.roles) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+                    } else {
+                        @()
+                    }
+                )
+            }
+
+            $local:checkedPermissions = @()
+
+            foreach ($local:definitionGroup in $local:definition) {
+                if ($local:definitionGroup.ContainsKey('Required') -and ($local:definitionGroup.Required -is [string])) {
+                    $local:checkedPermissions += $local:definitionGroup.Required
+
+                    if (
+                        $(
+                            if ($local:definitionGroup.Required -ieq 'offline_access') {
+                                try { if (-not $local:parsedToken.payload.rh) { $true } else { $false } } catch { $true }
+                            } elseif ($local:definitionGroup.Required -inotin $local:tokenPermissions) {
+                                $true
+                            } else {
+                                $false
+                            }
+                        )
+                    ) {
+                        $local:results += @(
+                            @(
+                                "Error: Required $($local:PermissionType) permission $($local:definitionGroup.Required) not found."
+                                "  $($local:definitionGroup.RequiredMsg)"
+                            ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+                        ) -join [System.Environment]::NewLine
+                    }
+                } elseif ($local:definitionGroup.ContainsKey('RequiredAnyOf') -and ($local:definitionGroup.RequiredAnyOf -is [array])) {
+                    $local:hasAny = $false
+
+                    if ($local:definitionGroup.ContainsKey('Preferred') -and ($local:definitionGroup.RequiredAnyOf -icontains $local:definitionGroup.Preferred) -and ($local:tokenPermissions -icontains $local:definitionGroup.Preferred)) {
+                        $local:hasAny = $true
+                        $local:checkedPermissions += $local:definitionGroup.Preferred
+                    } else {
+                        foreach ($local:perm in $local:definitionGroup.RequiredAnyOf) {
+                            if ($local:perm -iin $local:tokenPermissions) {
+                                $local:hasAny = $true
+                                $local:checkedPermissions += $local:perm
+                                break
+                            }
+                        }
+                    }
+
+                    if (-not $local:hasAny) {
+                        $local:results += @(
+                            @(
+                                "Error: No $($local:PermissionType) permission found from the required set '$($local:definitionGroup.RequiredAnyOf -join ' OR ')'."
+                                "  $($local:definitionGroup.RequiredMsg)"
+                                if ($local:definitionGroup.ContainsKey('Preferred')) { "  Preferred permission is $($local:definitionGroup.Preferred)." }
+                                if ($local:definitionGroup.ContainsKey('PreferredMsg')) { "  $($local:definitionGroup.PreferredMsg)" }
+                            ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+                        ) -join [System.Environment]::NewLine
+                    } elseif ($local:definitionGroup.ContainsKey('Preferred')) {
+                        if ($local:definitionGroup.Preferred -inotin $local:tokenPermissions) {
+                            $local:results += @(
+                                @(
+                                    "Warning: App does not use the preferred $($local:PermissionType) permission $($local:definitionGroup.Preferred) from the required set '$($local:definitionGroup.RequiredAnyOf -join ' OR ')'."
+                                    "  $($local:definitionGroup.PreferredMsg)"
+                                ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+                            ) -join [System.Environment]::NewLine
+                        }
+                    }
+                } elseif ($local:definitionGroup.ContainsKey('Optional') -and ($local:definitionGroup.Optional -is [string])) {
+                    $local:checkedPermissions += $local:definitionGroup.Optional
+
+                    if ($local:definitionGroup.Optional -inotin $local:tokenPermissions) {
+                        $local:results += @(
+                            @(
+                                "Info: Optional $($local:PermissionType) permission $($local:definitionGroup.Optional) not found."
+                                "  $($local:definitionGroup.OptionalMsg)"
+                            ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+                        ) -join [System.Environment]::NewLine
+                    }
+                } elseif ($local:definitionGroup.ContainsKey('OptionalAnyOf') -and ($local:definitionGroup.OptionalAnyOf -is [array])) {
+                    $local:hasAny = $false
+
+                    if ($local:definitionGroup.ContainsKey('Preferred') -and ($local:definitionGroup.OptionalAnyOf -icontains $local:definitionGroup.Preferred) -and ($local:tokenPermissions -icontains $local:definitionGroup.Preferred)) {
+                        $local:hasAny = $true
+                        $local:checkedPermissions += $local:definitionGroup.Preferred
+                    } else {
+                        foreach ($local:perm in $local:definitionGroup.OptionalAnyOf) {
+                            if ($local:perm -iin $local:tokenPermissions) {
+                                $local:hasAny = $true
+                                $local:checkedPermissions += $local:perm
+                                break
+                            }
+                        }
+                    }
+
+                    if (-not $local:hasAny) {
+                        $local:results += @(
+                            @(
+                                "Info: No $($local:PermissionType) permission found from the optional set '$($local:definitionGroup.OptionalAnyOf -join ' OR ')'."
+                                "  $($local:definitionGroup.OptionalMsg)"
+                                if ($local:definitionGroup.ContainsKey('Preferred')) { "  Preferred permission is $($local:definitionGroup.Preferred)." }
+                                if ($local:definitionGroup.ContainsKey('PreferredMsg')) { "  $($local:definitionGroup.PreferredMsg)" }
+                            ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+                        ) -join [System.Environment]::NewLine
+                    } elseif ($local:definitionGroup.ContainsKey('Preferred')) {
+                        if ($local:definitionGroup.Preferred -inotin $local:tokenPermissions) {
+                            $local:results += @(
+                                @(
+                                    "Info: App does not use the preferred $($local:PermissionType) permission $($local:definitionGroup.Preferred) from the optional set '$($local:definitionGroup.OptionalAnyOf -join ' OR ')'."
+                                    "  $($local:definitionGroup.PreferredMsg)"
+                                ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+                            ) -join [System.Environment]::NewLine
+                        }
                     }
                 }
             }
 
-            if ($local:tempGraphAccessTokenPermissionsResult.Count -gt 0) {
-                Write-Host "$($indent)  The Entra ID app misses delegated permissions. See '.\config\default graph config.ps1' for details." -ForegroundColor $(if ($local:tempGraphAccessTokenPermissionsResult -ilike '*: Required*') { 'Red' } else { 'Yellow' })
-
-                $local:tempGraphAccessTokenPermissionsResult | ForEach-Object {
-                    Write-Host "$($indent)    $($_)" -ForegroundColor $(if ($_ -ilike '*: Required*') { 'Red' } else { 'Yellow' })
-
+            $local:tokenPermissions | ForEach-Object {
+                # User.Read is included per default when authenticating against /<tenant id>, but not when against /organizations
+                # As User.Read.All is required anyhow, we ignore it.
+                if ($_ -inotin @('User.Read')) {
+                    if ($_ -inotin $local:checkedPermissions) {
+                        $local:results += @(
+                            @(
+                                "Info: $((Get-Culture).TextInfo.ToTitleCase($local:PermissionType)) permission $($_) is present but neither required nor optional."
+                                '  Consider removing it for security reasons.'
+                            ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+                        ) -join [System.Environment]::NewLine
+                    }
                 }
             }
         }
 
+        if ($local:results.Count -gt 0) {
+            Write-Host "$($indent)  The permissions of the Entra ID app are not configured ideally." -ForegroundColor $(if ($local:results -ilike 'Error:*') { 'Red' } elseif ($local:results -ilike 'Warning:*') { 'Yellow' } else { $Host.UI.RawUI.ForegroundColor })
+            Write-Host "$($indent)    Details: https://set-outlooksignatures.com/details#security-considerations" -ForegroundColor $(if ($local:results -ilike 'Error:*') { 'Red' } elseif ($local:results -ilike 'Warning:*') { 'Yellow' } else { $Host.UI.RawUI.ForegroundColor })
 
-        if ($script:GraphToken -and $script:GraphToken.AppAccessToken) {
-            $local:tempGraphAppAccessTokenPermissionsResult = @()
-
-            @(
-                'GroupMember.Read.All'
-                'Mail.ReadWrite'
-                'MailboxSettings.ReadWrite'
-                'User.Read.All'
-                , @('Files.Read.All', 'Files.SelectedOperations', 'Optional, SharePoint Online access will not work')
-                , @('MailboxConfigItem.ReadWrite', 'EWS.AccessAsUser.All', 'Required but missing, only MailboxConfigItem.ReadWrite will work when Microsoft disables EWS in Exchange Online in October 2026.')
-                , @('MailboxConfigItem.ReadWrite', 'MailboxConfigItem.ReadWrite', 'Optional but highly recommended as Microsoft disables EWS in Exchange Online in October 2026.')
-                # 'test0_application'
-                # , @('test1_application', 'test2_delegated', 'Optional, some text')
-                # , @('test3_application', 'test4_application', 'Required, some text')
-            ) | ForEach-Object {
-                if ($_ -is [array]) {
-                    if (
-                        $($_[0] -inotin @((ParseJwtToken $script:GraphToken.AppAccessToken).payload.roles -split ' ')) -and
-                        $($_[1] -inotin @((ParseJwtToken $script:GraphToken.AppAccessToken).payload.roles -split ' '))
-                    ) {
-                        $local:tempGraphAppAccessTokenPermissionsResult += "Application permission $($_[0]) or $($_[1]): $($_[2])"
-                    }
-                } else {
-                    if ($_ -inotin @((ParseJwtToken $script:GraphToken.AppAccessToken).payload.roles -split ' ')) {
-                        $local:tempGraphAppAccessTokenPermissionsResult += "Application permission $($_): Required but missing"
-                    }
+            $local:results | ForEach-Object {
+                foreach ($line in @($_ -split '\r?\n')) {
+                    Write-Host "$($indent)    $($line)" -ForegroundColor $(if ($_ -ilike 'Error:*') { 'Red' } elseif ($_ -ilike 'Warning:*') { 'Yellow' } else { $Host.UI.RawUI.ForegroundColor })
                 }
             }
 
-            if ($local:tempGraphAppAccessTokenPermissionsResult.Count -gt 0) {
-                Write-Host "$($indent)  The Entra ID app misses application permissions. See '.\sample code\SimulateAndDeploy.ps1' for details." -ForegroundColor $(if ($local:tempGraphAppAccessTokenPermissionsResult -ilike '*: Required*') { 'Red' } else { 'Yellow' })
+            if ($local:results -ilike 'Error:*') {
+                Write-Host 'The Entra ID app misses required permissions:' -ForegroundColor Red
 
-                $local:tempGraphAppAccessTokenPermissionsResult | ForEach-Object {
-                    Write-Host "$($indent)    $($_)" -ForegroundColor $(if ($_ -ilike '*: Required*') { 'Red' } else { 'Yellow' })
+                @($local:results | Where-Object { $_ -ilike 'Error:*' }) | ForEach-Object {
+                    foreach ($line in @($_ -split '\r?\n')) {
+                        Write-Host "  $($line)" -ForegroundColor Red
+                    }
                 }
+
+                $script:ExitCode = 44
+                $script:ExitCodeDescription = 'Entra ID app misses required permissions.'
+                exit
             }
-        }
-
-        if (
-            @(@(@($tempGraphAccessTokenPermissionsResult) + @($tempGraphAppAccessTokenPermissionsResult)) -ilike '*: Required*').Count -gt 0
-        ) {
-            Write-Host 'The Entra ID app misses required permissions:' -ForegroundColor Red
-
-            @(@($tempGraphAccessTokenPermissionsResult) + @($tempGraphAppAccessTokenPermissionsResult)) | ForEach-Object {
-                Write-Host "  $($_)" -ForegroundColor $(if ($_ -ilike '*: Required*') { 'Red' } else { 'Yellow' })
-            }
-
-            $script:ExitCode = 44
-            $script:ExitCodeDescription = 'Entra ID app misses required permissions.'
-            exit
         }
     }
+
 
     if (-not ($GraphClientIDOriginal -is [string])) {
         $tempGraphClientIDOriginal = @()
@@ -9212,7 +9462,6 @@ function GraphGetTokenWrapper {
 
 function GraphGenericQuery {
     [CmdletBinding()]
-
     param (
         [Parameter(Mandatory = $true)]
         [string]$method,
@@ -9229,109 +9478,79 @@ function GraphGenericQuery {
         $GraphContext = $null
     )
 
-    GraphSwitchContext -TenantID $GraphContext
-
-    if (-not $authHeader) {
-        $authHeader = $(if ($SimulateUser -and $SimulateAndDeployGraphCredentialFile) { $script:AppAuthorizationHeader } else { $script:AuthorizationHeader })
-    }
-
-    $error.clear()
-
     try {
+        if ($null -ne $GraphContext) {
+            GraphSwitchContext -TenantID $GraphContext
+        }
+
+        if (-not $authHeader) {
+            $authHeader = if ($SimulateUser -and $SimulateAndDeployGraphCredentialFile) {
+                $script:AppAuthorizationHeader
+            } else {
+                $script:AuthorizationHeader
+            }
+        }
+
         $requestBody = @{
             Method      = $method
             Uri         = $uri
-            Headers     = $(if ($authHeader) { $authHeader } else { @{} })
+            Headers     = if ($authHeader) { $authHeader } else { @{} }
             ContentType = 'application/json; charset=utf-8'
         }
 
-        if ($body) {
-            $requestBody['Body'] = $body
-        }
-
+        if ($body) { $requestBody['Body'] = $body }
         $requestBody['Headers']['x-overridetimestamp'] = 'true'
-
         $requestBody['Headers']['content-type'] = 'Application/Json; charset=utf-8'
 
-        $OldProgressPreference = $ProgressPreference
-        $ProgressPreference = 'SilentlyContinue'
-
-        $local:x = @()
-        $local:uri = $null
+        $local:resultsList = @()
+        $local:currentUri = $uri
 
         do {
-            if ($local:uri) {
-                $requestBody['Uri'] = $local:uri
-            }
-
             $local:QueryRetryMaxRetries = 3
-            $local:QueryRetryRetryCount = 0
+            $local:QueryRetryCount = 0
             $local:QueryRetryDone = $false
 
             do {
                 try {
-                    $local:pagedResults = Invoke-RestMethod @requestBody -ErrorAction Stop
+                    if ($local:currentUri) { $requestBody['Uri'] = $local:currentUri }
+
+                    $local:pagedResults = Invoke-RestMethod @requestBody
                     $local:QueryRetryDone = $true
                 } catch {
-                    $local:QueryRetryWaitTime = 0
-
                     $local:QueryRetryResponse = $_.Exception.Response
+                    $local:StatusCode = if ($null -ne $local:QueryRetryResponse) { [int]$local:QueryRetryResponse.StatusCode } else { 0 }
 
-                    if ($null -ne $local:QueryRetryResponse) {
-                        $local:QueryRetryRetryAfterHeader = $local:QueryRetryResponse.Headers['Retry-After']
-
-                        $local:QueryRetryStatusCode = [int]$local:QueryRetryResponse.StatusCode
-
-                        if ($null -ne $local:QueryRetryRetryAfterHeader) {
-                            if ($local:QueryRetryRetryAfterHeader -match '^\d+$') {
-                                $local:QueryRetryWaitTime = [Math]::Max([int]$local:QueryRetryRetryAfterHeader + 1, 3 * [Math]::Pow(($local:QueryRetryRetryCount + 1), 2))
-                            } else {
-                                try {
-                                    $retryDate = [DateTime]::Parse($local:QueryRetryRetryAfterHeader).ToUniversalTime()
-                                    $local:QueryRetryWaitTime = [Math]::Max([int]($retryDate - (Get-Date).ToUniversalTime()).TotalSeconds + 1, 3 * [Math]::Pow(($local:QueryRetryRetryCount + 1), 2))
-                                } catch {
-                                    $local:QueryRetryWaitTime = 3 * [Math]::Pow(($local:QueryRetryRetryCount + 1), 2)
-                                }
-                            }
-                        } elseif ($local:QueryRetryStatusCode -in @(408, 429, 500, 502, 503, 504)) {
-                            $local:QueryRetryWaitTime = 3 * [Math]::Pow(($local:QueryRetryRetryCount + 1), 2)
+                    if ($local:StatusCode -in @(408, 429, 500, 502, 503, 504) -and $local:QueryRetryCount -lt $local:QueryRetryMaxRetries) {
+                        $local:QueryRetryCount++
+                        $wait = [Math]::Pow(2, $local:QueryRetryCount) # Simple exponential backoff
+                        Write-Verbose "Retry $local:QueryRetryCount for $local:StatusCode. Waiting $($wait)s..."
+                        Start-Sleep -Seconds $wait
+                    } else {
+                        return @{
+                            error  = "Graph API Request Failed ($local:StatusCode): $($_.Exception.Message)"
+                            result = $null
                         }
-                    } else {
-                        $local:QueryRetryWaitTime = 3 * [Math]::Pow(($local:QueryRetryRetryCount + 1), 2)
-                    }
-
-                    if ($local:QueryRetryWaitTime -gt 0 -and $local:QueryRetryRetryCount -lt $local:QueryRetryMaxRetries) {
-                        $local:QueryRetryRetryCount++
-
-                        Write-Verbose "Retry attempt $local:QueryRetryRetryCount. Retryable error ($($_.Exception.Response.StatusCode.value__)). Waiting $($local:QueryRetryWaitTime)s."
-
-                        Start-Sleep -Seconds $local:QueryRetryWaitTime
-                    } else {
-                        throw $_
                     }
                 }
             } while (-not $local:QueryRetryDone)
 
-            $local:x += $local:pagedResults
-
-            if ([string]::IsNullOrWhiteSpace($local:pagedResults.'@odata.nextLink')) {
-                $local:uri = $null
-            } else {
-                $local:uri = $local:pagedResults.'@odata.nextLink'
+            if ($null -ne $local:pagedResults) {
+                $local:resultsList += $local:pagedResults
             }
-        } until (!($local:uri))
 
-        $ProgressPreference = $OldProgressPreference
+            $local:currentUri = if ($null -ne $local:pagedResults.'@odata.nextLink') { $local:pagedResults.'@odata.nextLink' } else { $null }
+
+        } until ($null -eq $local:currentUri)
+
+        return @{
+            error  = $false
+            result = $local:resultsList
+        }
     } catch {
         return @{
-            error  = $error[0] | Out-String
+            error  = "Unexpected Function Error: $($_.Exception.Message)"
             result = $null
         }
-    }
-
-    return @{
-        error  = $false
-        result = $local:x
     }
 }
 
@@ -10798,7 +11017,7 @@ try {
     $script:ScriptRunGuid = Split-Path -Path $script:tempDir -Leaf
 
     $script:SetOutlookSignaturesCommonDllFilePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid) + '.dll'))
-    Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'bin\Set-OutlookSignatures\Set-OutlookSignatures.Common.dll')) -Destination $script:SetOutlookSignaturesCommonDllFilePath
+    Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\Set-OutlookSignatures.Common\Set-OutlookSignatures.Common.dll')) -Destination $script:SetOutlookSignaturesCommonDllFilePath
     if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
         Unblock-File -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath
     }
@@ -10970,11 +11189,6 @@ try {
     if ($script:LibPhoneNumberModulePath) {
         Remove-Module -Name PhoneNumber -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $script:LibPhoneNumberModulePath -Recurse -Force -ErrorAction SilentlyContinue
-    }
-
-    if ($script:YamlDotNetModulePath) {
-        Remove-Module -Name YamlDotNet -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath $script:YamlDotNetModulePath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     if ($script:AddressFormatterModulePath) {

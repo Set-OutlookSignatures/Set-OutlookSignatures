@@ -1,0 +1,3479 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Set-OutlookSignatures INI file editor</title>
+  <meta name="description"
+    content="A professional editor for Set-OutlookSignatures .ini configuration files. Parse, classify, sort, edit, and export signature INI files in your browser." />
+
+  <!-- Favicon (the small icon shown in the browser tab). Linked from the
+       official Set-OutlookSignatures site — we keep no local copy. If the
+       user is offline the browser simply shows no tab icon (no placeholder). -->
+  <link rel="icon" type="image/x-icon"
+    href="https://set-outlooksignatures.com/assets/images/set-outlooksignatures%20icon.ico" />
+
+  <!--
+    ===========================================================================
+    Set-OutlookSignatures INI file editor — single-file web app
+    ===========================================================================
+
+    WHAT THIS FILE IS
+    -----------------
+    This is the entire editor. Everything (HTML markup, CSS styles, and the
+    JavaScript that makes it interactive) lives in this one file so that the
+    editor can be opened directly from disk or dropped into any web server
+    without a build step.
+
+    Images (the favicon and the small icon shown next to the title) are
+    LINKED from the official Set-OutlookSignatures website rather than
+    bundled. If the user is offline the images simply do not appear — no
+    "broken image" placeholder is shown — so the editor stays usable.
+
+    DONATION / CREDITS
+    ------------------
+    This editor was donated to the Set-OutlookSignatures project
+    (https://set-outlooksignatures.com/) by:
+
+        ExplicIT Consulting — https://explicitconsulting.at/
+        the providers of the Benefactor Circle add-on
+
+    Please keep this credit intact when redistributing or modifying the file.
+
+    HOW TO READ THIS FILE
+    ---------------------
+    The file is split into clearly-labelled sections. Use your editor's
+    "Find" feature (Ctrl+F) to jump to a section by its heading.
+
+      <head>     STYLES         — colours, layout, typography (CSS)
+      <body>     MARKUP         — the page structure (HTML)
+      <script>   1. CONFIGURATION CONSTANTS    8. WRAP-HEIGHT MEASUREMENT
+                 2. STATE & PREFERENCES        9. RENDERING
+                 3. PARSER                    10. MAIN REFRESH
+                 4. TAG CLASSIFIER            11. CURSOR / SCROLL SYNC
+                 5. VALIDATION                12. EDITOR EVENTS / MUTATIONS
+                 6. SORTER                    13. DRAGGABLE DIVIDER
+                 7. UNDO / REDO HISTORY       14. BOOT
+
+    The most common change — re-skinning colours — only needs the ":root"
+    block at the very top of the <style> section just below.
+    ===========================================================================
+  -->
+
+  <!--
+    ===========================================================================
+    STYLES
+    ===========================================================================
+    Everything below is the visual layout of the page. To change colours, find
+    the ":root" block right at the top — every named colour is defined there.
+    To change how things are arranged on the page, look for the section
+    headings (e.g. "TOP BAR", "MAIN LAYOUT", "ANALYSIS GRID").
+  -->
+  <style>
+    /* -------- Colour palette (change here to re-skin the editor) -------- */
+    /* All text colours below have been chosen so they reach at least WCAG AA
+       contrast (4.5:1) against the white background, including the muted /
+       "faint" greys used for line numbers and the index column. The (allow)
+       green and (deny) red are likewise both ≥ 5:1 on white and on their
+       tinted issue backgrounds, so colour-vision differences shouldn't
+       prevent users from reading the editor. The actual meaning of each
+       colour is also encoded in the visible TYPE label text — colour is
+       always paired with words, never used alone to convey information. */
+    :root {
+      --bg: #ffffff;
+      /* page background */
+      --panel: #ffffff;
+      --border: #c7cdd7;
+      /* normal hairline borders (≥ 3:1 vs --bg) */
+      --border-strong: #8a93a0;
+      /* button borders (clear without being heavy) */
+      --text: black;
+      /* #1a2230; */
+      /* body text — ~14:1 on white */
+      --text-muted: black;
+      /* #545b67; */
+      /* secondary text — ~7.5:1 on white (AAA) */
+      --text-faint: #6e7686;
+      /* line numbers, index col — ~5:1 on white (AA) */
+      --accent: #1f5d99;
+      /* selected line / primary button — ~6:1 on white */
+      --accent-strong: #143f6b;
+      /* hover / focus — even higher contrast */
+      --row-hover: #eef1f5;
+      --focus-ring: #1f5d99;
+      /* matches --accent; used in 2px outlines */
+
+      /* Section tints — every parsed section is tinted with one of these. */
+      --sec-tint-a: #f5f7fb;
+      /* odd  sections (very subtle) */
+      --sec-tint-b: #f0f3ee;
+      /* even sections (very subtle) */
+      --sec-tint-cfg: #fff5e6;
+      /* the special configuration section */
+
+      --warn: #8a3a07;
+      /* ≥ 6:1 on white */
+      --err: #9c1c14;
+      /* ≥ 6:1 on white */
+      --allow: #186a40;
+      /* ≥ 5.5:1 on white */
+      --warn-tint: #fff8eb;
+      --err-tint: #fdeeee;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      /* System font stack — no Google fonts, no external dependencies. */
+      font-family: sans-serif;
+      /* Bumped from 13px to 14px so secondary text (mini buttons, legends,
+         the index column) stays comfortably above WCAG's recommended
+         minimum readable size while still feeling like a developer tool. */
+      font-size: 14px;
+      line-height: 1.45;
+      height: 100%;
+    }
+
+    /* Honour the user's "reduce motion" OS setting — disables the divider
+       hover transition (the only animation in the editor). */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      html {
+        color-scheme: dark;
+        background: #1a1a1a;
+        filter: invert(1) hue-rotate(180deg);
+      }
+
+      img {
+        filter: invert(1) hue-rotate(180deg);
+      }
+    }
+
+    #app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* -------- TOP BAR -------- */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: #fbfbfc;
+      flex-wrap: wrap;
+      row-gap: 6px;
+      /* When a row in the top bar overflows, the wrapped items should end up
+         on the right side of the new line, not the left. justify-content
+         only distributes leftover space, so flex-grow on .spacer still
+         keeps the first-row left-side items (title block) pinned to the
+         left edge as long as everything fits. */
+      justify-content: flex-end;
+    }
+
+    /* Small app icon shown to the LEFT of the title in the top bar.
+       The image source is the same favicon.ico the browser uses for the tab. */
+    .topbar .app-icon {
+      width: 2.5em;
+      height: 2.5em;
+      flex: 0 0 auto;
+      display: block;
+    }
+
+    /* Title block: a 2-column grid so the two icons stack in the LEFT
+       column (app icon above, donor logo below) and the two text labels
+       stack in the RIGHT column (title above, donor credit below). The
+       credit link uses `display: contents` so its <img> and text children
+       participate directly in this grid, keeping the link clickable as a
+       single unit while still occupying the correct grid cells. */
+    .title-block {
+      display: grid;
+      grid-template-columns: 22px auto;
+      column-gap: 6px;
+      row-gap: 2px;
+      align-items: center;
+      justify-items: start;
+    }
+
+    .title-block>.app-icon {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: center;
+    }
+
+    .title-block>h1 {
+      grid-column: 2;
+      grid-row: 1;
+      padding-left: 0.5em;
+    }
+
+    .credit-inline {
+      display: contents;
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .credit-inline>.credit-logo {
+      grid-column: 1;
+      grid-row: 2;
+      justify-self: center;
+      width: 14px;
+      height: 14px;
+      display: block;
+      border-radius: 2px;
+    }
+
+    .credit-inline>.credit-text {
+      grid-column: 2;
+      grid-row: 2;
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .credit-inline:hover>.credit-text {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .credit-inline:focus-visible>.credit-text {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      /* font-size: 14px; */
+      font-weight: bold;
+    }
+
+    /* (No separate status bar — the live "N lines · N sections · N warnings"
+       summary is rendered to the right of the INPUT column header, see the
+       `.left-legend .col-input .stats` rule above. This saves a row of
+       vertical space.) */
+    .topbar .spacer {
+      flex: 1;
+    }
+
+    .topbar .sep {
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+      margin: 0 2px;
+    }
+
+    .topbar button {
+      font: inherit;
+      font-size: 13px;
+      padding: 5px 11px;
+      border: 1px solid var(--border-strong);
+      background: #fff;
+      color: var(--text);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .topbar button:hover:not(:disabled) {
+      background: var(--row-hover);
+    }
+
+    .topbar button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    /* a touch more legible than 0.4 */
+    .topbar button.mini {
+      font-size: 12px;
+      padding: 4px 8px;
+      color: var(--text-muted);
+    }
+
+    .topbar button.mini:hover:not(:disabled) {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .topbar button.primary {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .topbar button.primary:hover {
+      background: #eef4fb;
+    }
+
+    /* A clear, high-contrast keyboard focus indicator on every interactive
+       control. Required for WCAG 2.4.7 (Focus Visible). */
+    .topbar button:focus-visible,
+    .topbar select:focus-visible,
+    .topbar a:focus-visible,
+    .topbar input:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+      border-radius: 3px;
+    }
+
+    .topbar select {
+      font: inherit;
+      font-size: 13px;
+      padding: 4px 7px;
+      border: 1px solid var(--border-strong);
+      border-radius: 3px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .topbar select.insert-select {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .topbar select:hover {
+      border-color: var(--accent);
+    }
+
+    .topbar .config-field {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /*
+     .topbar .config-field span {
+      text-transform: uppercase;
+    }
+    */
+
+    .topbar input[type="file"] {
+      display: none;
+    }
+
+    /* -------- MAIN LAYOUT (left pane | right pane) -------- */
+    /* The right pane is separated from the editor by a draggable divider.
+       The editor pane (`1fr`) flexes to fill the remaining space on the left,
+       while the right pane takes the remaining area. The divider gives users
+       direct control over the split width. */
+    /* Single-scrollbar layout: the OUTER grid container scrolls, not each
+       pane individually. Both panes always move together (their content is
+       row-by-row aligned), so two independent scrollbars were redundant and
+       fragile (sub-pixel rounding + JS sync). With one scrollbar:
+        - the user gets a single, native, accessible scroll surface;
+        - touch-pad / wheel / keyboard PageDown all behave uniformly across
+          the whole editor regardless of which pane the cursor is over;
+        - alignment is automatic — there is nothing to "sync".
+       The two sticky headers (`.left-legend`, `.legend`) attach to this
+       same scroll container so they both stay pinned at the top while the
+       user scrolls. */
+    .layout {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 6px minmax(360px, 1fr);
+      overflow: auto;
+    }
+
+    .pane {
+      background: #fff;
+      min-width: 0;
+      /* No `overflow` here — the outer .layout is the sole scroll
+         container. Sticky descendants resolve to .layout, so both pane
+         legends pin to the same top edge. */
+    }
+
+    .divider {
+      width: 6px;
+      background: #e4e7ed;
+      cursor: col-resize;
+      transition: background 120ms ease;
+    }
+
+    .divider:hover,
+    .divider.dragging {
+      background: #c7cdd7;
+    }
+
+    .pane.right {
+      border-left: none;
+      /* The right pane is separated from the editor by the draggable divider
+         on desktop. A top border is preserved for mobile in the media query.
+         Allow the pane to shrink to fit and wrap TYPE content when needed. */
+      min-width: 0;
+      max-width: none;
+    }
+
+    /* -------- LEFT PANE: line numbers + editable text area -------- */
+    /* Sticky header strip — exists purely so the editor's first line is at the
+       SAME vertical position as the analysis pane's first row (the right pane
+       has its own sticky "LINE INDEX TYPE" header below).
+       The grid columns MUST match `.left-content` exactly (50px gutter + 1fr
+       editor) and the inner padding MUST match the gutter cell's right padding
+       and the textarea's left padding so the labels sit directly above the
+       numbers and the text. */
+    .left-legend {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      position: sticky;
+      top: 0;
+      background: #fbfbfc;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    .left-legend .col-line {
+      text-align: right;
+      padding: 6px 8px 6px 0;
+    }
+
+    /* matches gutter cell */
+    /* The INPUT column header doubles as the live status strip — the
+       "INPUT" label sits on the left, and the "N lines · N sections · N
+       warnings · N errors" summary is right-aligned on the same row. This
+       saves a whole row of vertical space versus a separate status bar. */
+    .left-legend .col-input {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      text-align: left;
+      padding: 6px 12px;
+      /* matches textarea padding-left */
+      min-width: 0;
+    }
+
+    .left-legend .col-input .stats {
+      /* Live counters — keep them lower-case (the rest of the legend is
+         uppercase via text-transform on the parent) and slightly de-emphasised
+         so they read as data, not a heading. The white-space:nowrap stops the
+         counts from wrapping when the pane is narrow; ellipsis hides the
+         tail in extreme cases instead of pushing the LINE/INPUT row taller. */
+      text-transform: none;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .left-content {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      /* gutter | editor */
+      /* No min-height:100% — both panes share the SINGLE outer scroll
+         container (#layout) now, so each pane only needs to be as tall as
+         its own content. Stretching either pane to fill the viewport would
+         create empty pixels at the bottom that the user could pointlessly
+         scroll into. */
+    }
+
+    .gutter {
+      display: flex;
+      flex-direction: column;
+      padding-top: 10px;
+      /* match editor's top padding */
+      padding-bottom: 10px;
+      background: #fbfbfc;
+      border-right: 1px solid var(--border);
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .gutter-cell {
+      font-family: monospace;
+      /* Must match #editor's font-size + line-height so the gutter numbers
+         stay vertically aligned with the editor lines they label.
+         CRITICAL: the line-height MUST be an INTEGER number of pixels,
+         not a multiplier like 1.5 (which would be 19.5px and round to 20px
+         in offsetHeight, accumulating ~0.5px of drift per line). */
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--text-faint);
+      text-align: right;
+      padding-right: 8px;
+      flex: 0 0 auto;
+      /* Each cell's HEIGHT is set by the script to match the wrapped line. */
+    }
+
+    .input-wrap {
+      position: relative;
+      /* lets us stack the colour overlay behind the textarea */
+      min-width: 0;
+    }
+
+    /* Coloured stripes painted behind the textarea, one stripe per logical line. */
+    .bg-overlay {
+      position: absolute;
+      inset: 0;
+      padding-top: 10px;
+      /* match editor's top padding */
+      padding-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-cell {
+      flex: 0 0 auto;
+      pointer-events: auto;
+    }
+
+    /* Section colours — applied to gutter cells, bg overlay cells AND analysis rows. */
+    .tint-a {
+      background: var(--sec-tint-a);
+    }
+
+    .tint-b {
+      background: var(--sec-tint-b);
+    }
+
+    .tint-cfg {
+      background: var(--sec-tint-cfg);
+    }
+
+    #editor {
+      position: relative;
+      z-index: 1;
+      /* sits on top of the colour overlay */
+      width: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      overflow: hidden;
+      /* the surrounding pane scrolls, not the textarea */
+      background: transparent;
+      /* lets the section tints show through */
+      color: var(--text);
+      font-family: monospace;
+      /* font-size + line-height MUST EXACTLY MATCH .gutter-cell and the
+         analysis-row line-height. Use an INTEGER pixel line-height — a
+         fractional 1.5 multiplier (= 19.5px at 13px) rounds to 20px in the
+         mirror's offsetHeight measurement and causes the right pane to
+         drift below the editor by ~0.5px per line over hundreds of lines. */
+      font-size: 12px;
+      line-height: 20px;
+      padding: 10px 12px;
+      tab-size: 4;
+      white-space: pre-wrap;
+      /* word wrap: long lines wrap inside the textarea */
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      /* Height is set by the script to the total measured content height. */
+    }
+
+    /* Strong focus ring on the textarea itself — without `outline: none` the
+       browser default would be hidden by the surrounding chrome, so we add
+       a visible one via box-shadow on the wrapper instead. */
+    #editor:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: -2px;
+    }
+
+    /* Hidden element used to measure how tall each wrapped INPUT line will be.
+
+       CRITICAL: this MUST be a <textarea>, not a <div>. A <textarea> wraps
+       text slightly differently from a <div> — the browser reserves a few
+       pixels on the right edge for the caret, so a string that fits on
+       ONE row inside a <div> can wrap to TWO rows inside a <textarea>.
+       Measuring with a <div> therefore *under-measures* lines that wrap in
+       the real editor: the gutter cell stays short, the analysis row stays
+       short, the textarea actually grows taller — and from that line down
+       every line number drifts below the text it is supposed to label.
+       Using a <textarea> for the mirror guarantees identical wrapping. */
+    #mirror {
+      position: absolute;
+      top: -10000px;
+      left: -10000px;
+      visibility: hidden;
+      pointer-events: none;
+      /* Strip everything that would offset the measurement so the
+         mirror's scrollHeight reports ONLY the wrapped text height. */
+      border: 0;
+      margin: 0;
+      padding: 0;
+      resize: none;
+      overflow: hidden;
+      min-height: 0;
+      /* Match the visible editor's wrapping behaviour exactly. */
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      box-sizing: content-box;
+    }
+
+    /* -------- RIGHT PANE: analysis grid (line | index | type) -------- */
+    /* Right-pane analysis grid — only INDEX + TYPE; the LINE column was
+       removed (the matching gutter on the left already shows line numbers,
+       so duplicating them here just wasted horizontal space). */
+    .legend {
+      display: flex;
+      grid-template-columns: 50px minmax(0, 1fr);
+      gap: 12px;
+      padding: 6px 12px;
+      position: sticky;
+      top: 0;
+      background: #fbfbfc;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    .legend>div {
+      text-align: left;
+    }
+
+    .legend .col-index {
+      text-align: right;
+    }
+
+    .analysis-row {
+      display: grid;
+      grid-template-columns: 50px minmax(0, 1fr);
+      /* gap: 12px; */
+      padding: 0 12px;
+      align-items: start;
+      /* top-align: line/index/type sit at the top of the row,
+                                       matching the editor where wrapped lines start at the top */
+      font-family: monospace;
+      /* MUST be an INTEGER pixel line-height that matches #editor and
+         .gutter-cell exactly — see the explanatory comment on #editor. */
+      font-size: 12px;
+      line-height: 20px;
+      cursor: pointer;
+      flex: 0 0 auto;
+      outline: none;
+      /* Each row's MIN-HEIGHT is set by the script to match the wrapped editor line.
+         Using min-height (not height) lets a long wrapping `type` label grow the row
+         instead of being clipped. */
+    }
+
+    .analysis-row:hover,
+    .bg-cell:hover,
+    .gutter-cell:hover,
+    .analysis-row.hover-sync,
+    .bg-cell.hover-sync,
+    .gutter-cell.hover-sync {
+      background-color: var(--row-hover) !important;
+      filter: brightness(0.97);
+      cursor: pointer;
+    }
+
+    /* Strong, high-contrast keyboard focus indicator (WCAG 2.4.7). The
+       2px inset ring is visible against every section tint. */
+    .analysis-row:focus-visible {
+      box-shadow: inset 0 0 0 2px var(--focus-ring);
+    }
+
+    .analysis-row.active {
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    .analysis-row .col-index {
+      color: var(--text-faint);
+      padding: 0 12px;
+      text-align: right;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .analysis-row .col-type {
+      color: var(--text-muted);
+      /* Use the proper-noun labels exactly as written ("Comment", "Section",
+         "Use template for mailboxes with this email address", …) — NO text-transform, so capitalisation is
+         preserved for screen-reader pronunciation and visual scanning. */
+      font-size: 12px;
+      font-family: sans-serif;
+      /* CRITICAL: line-height MUST be a fixed INTEGER pixel value that equals
+         the editor's line height (now 20px). Otherwise (a) the system
+         sans-serif font's slightly taller inline box would push the row a
+         pixel or two taller than the matching editor line, and (b) any
+         fractional value would round in offsetHeight and accumulate drift. */
+      line-height: 20px;
+      /* CRITICAL: the TYPE label MUST stay on a SINGLE row.
+         A textarea has no per-line height — every wrap row inside it is the
+         same fixed height. So if we let the TYPE label wrap to two visual
+         rows, the analysis row on the right grows by 20px but the matching
+         editor line on the left cannot grow with it, and from that line down
+         the gutter, the coloured background overlay and every later analysis
+         row drift below the editor lines they were supposed to label.
+         We therefore clip overflow with an ellipsis; the FULL label is always
+         available in the row's `title` tooltip (set in `renderRows`), and the
+         appended issue text is shown in the same tooltip when present. */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      max-width: 100%;
+      /* allow the flex/grid cell to actually shrink */
+      padding: 0;
+      /* no vertical padding — would offset alignment */
+    }
+
+    .analysis-row.t-section .col-type {
+      color: var(--text);
+      font-weight: bold;
+    }
+
+    .analysis-row.t-name .col-type {
+      color: var(--text);
+    }
+
+    /* Allow / deny colours are paired with the visible "(allow)" / "(deny…)"
+       text inside the label, so colour-blind users always have a textual
+       cue in addition to the colour. Both variants meet AA contrast. */
+    .analysis-row .col-type.allow {
+      color: var(--allow);
+    }
+
+    .analysis-row .col-type.deny {
+      color: var(--err);
+    }
+
+    .analysis-row .col-type .issue {
+      margin-left: 8px;
+      font-style: italic;
+      font-family: sans-serif;
+      text-transform: none;
+    }
+
+    .analysis-row .col-type .issue.warn {
+      color: var(--warn);
+      font-weight: bold;
+    }
+
+    .analysis-row .col-type .issue.error {
+      color: var(--err);
+      font-weight: bold;
+    }
+
+    /* Issue row accent (a thin coloured strip on the LEFT). */
+    .analysis-row.issue-warn {
+      box-shadow: inset 3px 0 0 var(--warn);
+    }
+
+    .analysis-row.issue-error {
+      box-shadow: inset 3px 0 0 var(--err);
+    }
+
+    .analysis-row.active.issue-warn,
+    .analysis-row.active.issue-error {
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    /* Stack panes vertically on very narrow screens — editor on top, the
+       analysis pane below it. The right pane drops its `auto` width and
+       `max-width: 50%` constraint here so it can use the full screen width.
+       Mobile uses PER-PANE scrolling (each pane has its own ~50vh scroll
+       area) instead of the desktop's single-outer-scrollbar model: with
+       both panes stacked vertically, a single tall scroll would force the
+       user to scroll past the entire editor before seeing any analysis,
+       which is awful on a phone. Two independent scroll areas let the user
+       view editor and analysis at the same time. Mobile browsers hide
+       scrollbar gutters by default, so this is not visually noisy. The two
+       sticky headers each pin inside their own pane on mobile, so they
+       never visually collide. */
+    @media (max-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: 50vh 1fr;
+        overflow: hidden;
+        /* the panes scroll on mobile, not the layout */
+      }
+
+      .pane {
+        overflow: auto;
+      }
+
+      /* restore per-pane scroll on mobile */
+      .pane.right {
+        max-width: none;
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+
+      .layout .divider {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!--
+    ===========================================================================
+    PAGE LAYOUT (HTML)
+    ===========================================================================
+    The whole UI is built by the script below — these are just the empty
+    containers it fills in.
+  -->
+  <div id="app">
+    <header class="topbar" id="topbar"></header>
+    <div class="layout" id="layout">
+      <div class="pane left" id="left-pane">
+        <!-- The INPUT column header doubles as the live status strip — the
+             "N lines · N sections · N warnings · N errors" summary sits to
+             the right of the "INPUT" label. The <span#stats> is targeted by
+             id from refreshAll() in section 10. -->
+        <div class="left-legend">
+          <div class="col-line">line #</div>
+          <div class="col-input">
+            <span>INI content editor</span>
+            <span class="stats" id="stats"></span>
+          </div>
+        </div>
+        <div class="left-content" id="left-content">
+          <div class="gutter" id="gutter"></div>
+          <div class="input-wrap" id="input-wrap">
+            <div class="bg-overlay" id="bg-overlay"></div>
+            <textarea id="editor" spellcheck="false" placeholder="# Paste or type INI content here…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="divider" id="divider" role="separator" aria-orientation="vertical" aria-valuemin="200"
+        aria-valuemax="1000" aria-valuenow="0" tabindex="0"></div>
+      <div class="pane right" id="right-pane">
+        <div class="right-content" id="right-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden element used to measure how tall each wrapped editor line will be.
+       MUST be a <textarea>, not a <div> — see the long comment on `#mirror`
+       in the <style> block above. A <div> mirror under-measures by one wrap
+       row at the edge, which throws the line numbers and the TYPE column
+       out of vertical alignment with the editor. -->
+  <textarea id="mirror" readonly tabindex="-1" aria-hidden="true" wrap="soft"></textarea>
+
+  <!--
+    ===========================================================================
+    SCRIPT — all editor logic
+    ===========================================================================
+    The script is split into clearly named sections so you can find what you
+    need quickly. To add or rename a tag, change colours, or tweak the
+    validation messages, look at the matching section below.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/jschardet@3/dist/jschardet.min.js"></script>
+
+  <script>
+    "use strict";
+
+    /* ============================================================
+     1. CONFIGURATION CONSTANTS
+     Edit these to add new tags, change validation rules, or
+     change the snippets shown in the Insert dropdown.
+     ============================================================ */
+
+    // The special section that holds editor settings (sort order etc).
+    var CONFIG_SECTION_NAME = "<Set-OutlookSignatures configuration>";
+
+    // System tags valid only for SIGNATURE INI files.
+    var SIGNATURE_SYSTEM_TAGS = new Set([
+      "defaultnew",
+      "defaultreplyfwd",
+      "writeprotect",
+    ]);
+
+    // System tags valid only for OUT-OF-OFFICE INI files.
+    var OOF_SYSTEM_TAGS = new Set(["internal", "external"]);
+
+    // Combined set used by the parser/classifier.
+    var SYSTEM_TAGS = new Set([
+      "defaultnew",
+      "defaultreplyfwd",
+      "writeprotect", // signature
+      "internal",
+      "external", // OOF
+    ]);
+
+    // Characters not allowed in OutlookSignatureName values.
+    var SIG_NAME_INVALID_CHARS_RE = /[\\\/:"*?><,|@]/;
+
+    // Allowed values for the SortOrder configuration key (case-insensitive).
+    var VALID_SORT_ORDERS = new Set([
+      "asinthisfile",
+      "aslisted",
+      "ascending",
+      "descending",
+      "asc",
+      "desc",
+      "up",
+      "down",
+    ]);
+
+    // Allowed configuration keys inside the [<Set-OutlookSignatures configuration>] section.
+    var VALID_CONFIG_KEYS = new Set(["sortculture", "sortorder"]);
+
+    // The order in which buckets are written when sorting a section.
+    var BUCKET_ORDER = [
+      "name",          // OutlookSignatureName
+      "kv",            // any other key=value
+      "time-allow",    // time ranges (allow)
+      "group-allow",   // groups (allow)
+      "email-allow",   // mailboxes (allow)
+      "variable-allow",// replacement variables (allow)
+      "time-deny",     // time ranges (deny)
+      "group-deny",    // groups (deny)
+      "email-deny",    // mailboxes (deny)
+      "variable-deny", // replacement variables (deny)
+      "defaultNew",    // defaultNew / internal
+      "defaultReply",  // defaultReplyFwd / external
+      "writeProtect",
+      "other",
+    ];
+
+    // The sample INI loaded by "Load sample" or by visiting the page with ?demo=1.
+    var SAMPLE_INI =
+      "# Sample Set-OutlookSignatures INI\n" +
+      "\n" +
+      "[<Set-OutlookSignatures configuration>]\n" +
+      "SortOrder = AsInThisFile\n" +
+      "SortCulture = 127\n" +
+      "\n" +
+      "# Informal signatures\n" +
+      "[Informal.docx]\n" +
+      "defaultReplyFwd\n" +
+      "\n" +
+      "[Informal Delegate.docx]\n" +
+      "alex.alien@galactic.experiences\n" +
+      "-CURRENTUSER:alex.alien@galactic.experiences\n" +
+      "OutlookSignatureName = Informal Delegate alex.alien\n" +
+      "defaultReplyFwd\n" +
+      "\n" +
+      "# Formal signatures\n" +
+      "[Formal.docx]\n" +
+      "defaultNew\n" +
+      "\n" +
+      "[Formal HR Christmas.docx]\n" +
+      "202412100000-202501062359\n" +
+      "202512100000-202601062359\n" +
+      "OutlookSignatureName = Formal\n" +
+      "defaultNew\n" +
+      "EntraID Name-of-HR-Group@galactic.experiences\n" +
+      "\n" +
+      "[Test all default replacement variables.docx]\n" +
+      "-:alex.alien@galactic.experiences\n";
+
+    // Snippets shown in the topbar's "Insert…" dropdown. The Section snippet is
+    // built dynamically so it follows the currently-selected template type.
+    function buildInsertSnippets() {
+      var ext = state.templateType === "htm" ? "htm" : "docx";
+      var iniType = state.iniType === "oof" ? "oof" : "signature";
+
+      var groups = [
+        {
+          group: "Comment",
+          items: [{ label: "Comment", text: "# " }],
+        },
+        {
+          group: "Template section",
+          items: [
+            {
+              label: "Add template section [NameOfTemplateFile." + ext + "]",
+              text: "[NameOfTemplateFile." + ext + "]",
+            },
+          ],
+        },
+        {
+          group: "Signature naming",
+          items: [
+            {
+              label: "Name signature different than template",
+              text: "OutlookSignatureName = NameOfSignatureAsItAppearsInOutlook",
+            },
+          ],
+        },
+        {
+          group: "Time-based restrictions",
+          items: [
+            {
+              label: "Mark template valid during a time range",
+              text: "202512311359-202601312359",
+            },
+            {
+              label: "Mark template invalid during a time range",
+              text: "-:202512311359-202601312359",
+            },
+          ],
+        },
+        {
+          group: "Group-based restrictions",
+          items: [
+            {
+              label:
+                "Mark template valid for mailboxes belonging to a specific Entra ID group",
+              text: "EntraID ExampleGroupName@ExampleDomain.com",
+            },
+            {
+              label:
+                "Mark template valid for mailboxes belonging to a specific Active Directory group",
+              text: "ExampleActiveDirectoryNetbiosName ExampleGroupSamAccountName",
+            },
+            {
+              label:
+                "Mark template invalid for mailboxes belonging to a specific Entra ID group",
+              text: "-:EntraID ExampleGroupName@ExampleDomain.com",
+            },
+            {
+              label:
+                "Mark template invalid for mailboxes belonging to a specific Active Directory group",
+              text: "-:ExampleActiveDirectoryNetbiosName ExampleGroupSamAccountName",
+            },
+            {
+              label:
+                "Mark template invalid if the logged-on user belongs to a specific Entra ID group",
+              text: "-CURRENTUSER:EntraID ExampleGroupName@ExampleDomain.com",
+            },
+            {
+              label:
+                "Mark template invalid if the logged-on user belongs to a specific Active Directory group",
+              text: "-CURRENTUSER:ExampleActiveDirectoryNetbiosName ExampleGroupSamAccountName",
+            },
+          ],
+        },
+        {
+          group: "Email-address-based restrictions",
+          items: [
+            {
+              label:
+                "Mark template valid for mailboxes with a specific email address",
+              text: "ExampleUser@ExampleDomain.com",
+            },
+            {
+              label:
+                "Mark template invalid for mailboxes with a specific email address",
+              text: "-:ExampleUser@ExampleDomain.com",
+            },
+            {
+              label:
+                "Mark template invalid if the logged-on user has a specific email address",
+              text: "-CURRENTUSER:ExampleUser@ExampleDomain.com",
+            },
+          ],
+        },
+        {
+          group: "Replacement-variable-based restrictions",
+          items: [
+            {
+              label:
+                "Mark template valid for mailboxes with a specific replacement variable",
+              text: "$ExampleReplacementVariable$",
+            },
+            {
+              label:
+                "Mark template invalid for mailboxes with a specific replacement variable",
+              text: "-:$ExampleReplacementVariable$",
+            },
+          ],
+        },
+        {
+          group: "Default signatures",
+          items: [
+            {
+              label: "Mark as default signature for new emails",
+              text: "defaultNew",
+            },
+            {
+              label: "Mark as default signature for replies and forwards",
+              text: "defaultReplyFwd",
+            },
+          ],
+        },
+        {
+          group: "Write protect",
+          items: [
+            {
+              label: "Write protect the signature where possible",
+              text: "writeProtect",
+            },
+          ],
+        },
+        {
+          group: "Default out-of-office replies",
+          items: [
+            {
+              label: "Mark as out-of-office reply for internal recipients",
+              text: "internal",
+            },
+            {
+              label: "Mark as out-of-office reply for external recipients",
+              text: "external",
+            },
+          ],
+        },
+      ];
+
+      return groups.filter(function (item) {
+        // 1. Only return Signature groups if type is signature
+        if (
+          item.group === "Default signatures" ||
+          item.group === "Write protect"
+        ) {
+          return iniType === "signature";
+        }
+
+        // 2. Only return OOF group if type is oof
+        if (item.group === "Default out-of-office replies") {
+          return iniType === "oof";
+        }
+
+        // 3. Return all other groups (Comment, Restrictions, etc.)
+        return true;
+      });
+    }
+
+    /* ============================================================
+     2. STATE & PREFERENCES
+     ============================================================ */
+
+    var state = {
+      text: "",
+      fileName: "",
+      iniType: "signature",
+      templateType: "docx",
+      activeLine: 1,
+      leftWidth: undefined,
+    };
+
+    /* ============================================================
+     3. PARSER
+     Turns raw INI text into typed line objects and identifies
+     section blocks (with their preamble comments).
+     ============================================================ */
+
+    var SECTION_RE = /^\s*\[(.+)\]\s*$/;
+    var KV_RE = /^\s*([A-Za-z_][A-Za-z0-9_\-.]*)\s*=\s*(.*?)\s*$/;
+
+    function isCommentLine(trimmed) {
+      if (!trimmed) return false;
+      return (
+        trimmed.charAt(0) === "#" ||
+        trimmed.charAt(0) === ";" ||
+        trimmed.indexOf("//") === 0
+      );
+    }
+
+    function stripWrappingQuotes(s) {
+      if (s.length >= 2) {
+        var f = s.charAt(0),
+          l = s.charAt(s.length - 1);
+        if ((f === '"' && l === '"') || (f === "'" && l === "'"))
+          return s.slice(1, -1);
+      }
+      return s;
+    }
+
+    function tokenize(raw) {
+      var trimmed = raw.trim();
+      if (trimmed === "") return { kind: "blank", raw: raw };
+      if (isCommentLine(trimmed)) return { kind: "comment", raw: raw };
+      var sm = raw.match(SECTION_RE);
+      if (sm)
+        return {
+          kind: "section",
+          raw: raw,
+          name: stripWrappingQuotes(sm[1].trim()).trim(),
+        };
+      var km = raw.match(KV_RE);
+      if (km)
+        return {
+          kind: "kv",
+          raw: raw,
+          key: stripWrappingQuotes(km[1].trim()).trim(),
+          value: stripWrappingQuotes(km[2].trim()).trim(),
+        };
+      return {
+        kind: "tag",
+        raw: raw,
+        value: stripWrappingQuotes(trimmed).trim(),
+      };
+    }
+
+    // Walks the file; identifies section blocks (header + content + preamble comments).
+    function analyze(text) {
+      var rawLines = text.split(/\r?\n/);
+      var lines = rawLines.map(tokenize);
+
+      // Find every section header line.
+      var headerIndices = [];
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].kind === "section") headerIndices.push(i);
+      }
+
+      // Walk backward from each header to attach its comment preamble.
+      var blockStart = headerIndices.map(function (hi) {
+        var s = hi,
+          j = hi - 1;
+        while (j >= 0 && lines[j].kind === "comment") {
+          s = j;
+          j--;
+        }
+        return s;
+      });
+
+      // End of each block = just before next block, with trailing blanks stripped.
+      var blockEnd = headerIndices.map(function (_, idx) {
+        var nextStart =
+          idx + 1 < blockStart.length ? blockStart[idx + 1] : lines.length;
+        var e = nextStart - 1;
+        while (e >= blockStart[idx] && lines[e].kind === "blank") e--;
+        return e;
+      });
+
+      // For every line, which section block does it belong to (or null = preface/separator).
+      var blockOf = new Array(lines.length).fill(null);
+      for (var b = 0; b < headerIndices.length; b++) {
+        for (var k = blockStart[b]; k <= blockEnd[b]; k++) blockOf[k] = b;
+      }
+
+      var prefaceEnd =
+        headerIndices.length > 0 ? blockStart[0] - 1 : lines.length - 1;
+
+      // Build section objects (used for sorting / serialisation).
+      var sections = headerIndices.map(function (hi, idx) {
+        var s = blockStart[idx],
+          e = blockEnd[idx];
+        return {
+          idx: idx,
+          headerLine: hi,
+          start: s,
+          end: e,
+          name: lines[hi].name,
+          isConfig: lines[hi].name === CONFIG_SECTION_NAME,
+          lines: lines.slice(s, e + 1),
+        };
+      });
+
+      // Build display rows used by the analysis pane.
+      var rows = lines.map(function (l, i) {
+        var sectionIdx = blockOf[i];
+        var inConfig =
+          sectionIdx != null &&
+          sections[sectionIdx] &&
+          sections[sectionIdx].isConfig;
+        var label, kind;
+
+        // ----- Choose the human-readable TYPE label and the CSS hook (kind). -----
+        // The labels here are exactly what appears in the right-hand TYPE column.
+        // (Blank rows show NO text in the TYPE column on purpose — the empty
+        // row still exists so click/keyboard navigation lines up with the editor.)
+        if (l.kind === "blank") {
+          kind = "blank";
+          label = "";
+        } else if (l.kind === "comment") {
+          kind = "comment";
+          label = "Comment";
+        } else if (l.kind === "section") {
+          kind = "section";
+          // The configuration section header is shown spelled out in full so
+          // it's obvious it is the special globals block (not a template).
+          if (l.name === CONFIG_SECTION_NAME) {
+            label = "Set-OutlookSignatures configuration section";
+          } else {
+            // Qualify "Template section" with the audience the template
+            // applies to, derived from its tags (var-* > email-* > group-*).
+            var grp =
+              sectionIdx != null && sections[sectionIdx]
+                ? templateGroupOf(sections[sectionIdx])
+                : "common";
+            var qualifier =
+              grp === "variable"
+                ? "hierarchy level 4: replacement variable specific template"
+                : grp === "email"
+                  ? "hierarchy level 3: email address specific template"
+                  : grp === "group"
+                    ? "hierarchy level 2: group specific template"
+                    : "hierarchy level 1: common template";
+            label = "Template '" + l.name + "' (" + qualifier + ")";
+          }
+        } else if (l.kind === "kv") {
+          var keyL = (l.key || "").toLowerCase();
+          // Inside the [<Set-OutlookSignatures configuration>] section the only
+          // legal keys are SortOrder / SortCulture — show them in PascalCase
+          // exactly as they appear in the official spec.
+          if (inConfig && keyL === "sortorder") {
+            kind = "config-key";
+            label =
+              "SortOrder for template sections (AsInThisFile, ascending, descending)";
+          } else if (inConfig && keyL === "sortculture") {
+            kind = "config-key";
+            label =
+              "SortCulture for template sections (127, de-AT, en-US, …)";
+          }
+          // OutlookSignatureName is the ONLY valid key=value entry outside the
+          // configuration section. We highlight it as such; "different from
+          // template name" is included so non-experts don't confuse it with the
+          // template filename written in the section header.
+          else if (keyL === "outlooksignaturename") {
+            kind = "name";
+            label = "Name signature '" + l.value + "' instead of '" + (sectionIdx != null && sections[sectionIdx] ? sections[sectionIdx].name.replace(/\.[^/.]+$/, "") : "") + "'";
+          }
+          // Any other key=value line is malformed — system tags should appear
+          // on their own line without "= value" (see the validator for the
+          // accompanying error/warning), so we lump it into "Unknown tag".
+          else {
+            kind = "kv";
+            label = "Unknown tag";
+          }
+        } else {
+          var cls = classifyTag(l.value);
+          kind = cls.kind;
+          label = cls.label;
+        }
+
+        return {
+          lineNo: i + 1,
+          sectionIdx: sectionIdx,
+          kind: kind,
+          label: label,
+          isConfig: inConfig,
+          isConfigHeader:
+            l.kind === "section" && l.name === CONFIG_SECTION_NAME,
+          lineKind: l.kind,
+          isPreface: i <= prefaceEnd && sectionIdx === null,
+        };
+      });
+
+      return {
+        lines: lines,
+        rows: rows,
+        sections: sections,
+        prefaceEnd: prefaceEnd,
+        headerIndices: headerIndices,
+      };
+    }
+
+    /* ============================================================
+     4. TAG CLASSIFIER
+     Identifies what kind of thing a free-form tag value is
+     (email, group, time range, variable, system tag, …).
+     ============================================================ */
+
+    // Returns the kind (used for grouping and CSS hooks) and the human-readable
+    // label that appears in the right-hand TYPE column.
+    //
+    // The "deny" prefix is split into TWO variants so that the editor can show
+    // (and sort) them distinctly:
+    //   "-:value"            → applies to ALL users (kind ends in "-deny")
+    //   "-CURRENTUSER:value" → applies only to the currently logged-on user
+    //                          (kind ends in "-deny-current")
+    function classifyTag(rawValue) {
+      var v = (rawValue || "").trim();
+
+      if (
+        v.length >= 2 &&
+        v.charAt(0) === "[" &&
+        v.charAt(v.length - 1) === "]"
+      ) {
+        v = v.slice(1, -1).trim();
+      }
+
+      if (!v) return {
+        kind: "unknown",
+        label: "Unknown tag"
+      };
+
+
+      var formatTime = function (ts) {
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var clean = ts.replace(/Z$/i, "");
+
+        var year = clean.substring(0, 4);
+        var monthIdx = parseInt(clean.substring(4, 6), 10) - 1;
+        var month = months[monthIdx];
+        var day = clean.substring(6, 8);
+        var hour = clean.substring(8, 10);
+        var min = clean.substring(10, 12);
+
+        // Format: 12-Jan-2026 14:00
+        var formatted = day + "-" + month + "-" + year + " " + hour + ":" + min;
+
+        // Using GMT instead of UTC for better user recognition
+        var tz = /Z$/i.test(ts) ? " GMT/UTC time" : " local time";
+        return formatted + tz;
+      };
+
+
+      if (/^(?!-:)\d{12}Z?-\d{12}Z?$/i.test(v)) {
+        var parts = v.split("-");
+        return {
+          kind: "time-allow",
+          label: "Use this template only from " + formatTime(parts[0]) + " to " + formatTime(parts[1]),
+        };
+      }
+
+      if (/^-:\d{12}Z?-\d{12}Z?$/i.test(v)) {
+        var timePart = v.replace(/^-:/i, "");
+        var parts = timePart.split("-");
+        return {
+          kind: "time-deny",
+          label: "Do not use this template from " + formatTime(parts[0]) + " to " + formatTime(parts[1]),
+        };
+      }
+
+
+      if (/^(?!-:|-CURRENTUSER:)\S+?\s.+?$/i.test(v)) {
+        var spaceIndex = v.indexOf(" ");
+        var prefix = v.substring(0, spaceIndex);
+        var groupName = v.substring(spaceIndex + 1);
+        var isEntra = /^(?:EntraID|AzureAD)(?:_\S+)?$/i.test(prefix);
+
+        return {
+          kind: "group-allow",
+          label: isEntra
+            ? "Use template for mailboxes belonging to the Entra ID group '" + groupName + "'"
+            : "Use template for mailboxes belonging to the Active Directory group '" + groupName + "' from domain '" + prefix + "'",
+        };
+      }
+
+      if (/^-:\S+?\s.+?$/i.test(v)) {
+        var spaceIndex = v.indexOf(" ");
+        var fullPrefix = v.substring(0, spaceIndex);
+        var groupName = v.substring(spaceIndex + 1);
+        var provider = fullPrefix.replace(/^-:/i, "");
+        var isEntra = /^(?:EntraID|AzureAD)(?:_\S+)?$/i.test(provider);
+
+        return {
+          kind: "group-deny",
+          label: isEntra
+            ? "Do not use this template for mailboxes belonging to the Entra ID group '" + groupName + "'"
+            : "Do not use this template for mailboxes belonging to the Active Directory group '" + groupName + "' from domain '" + provider + "'",
+        };
+      }
+
+      if (/^-CURRENTUSER:\S+?\s.+?$/i.test(v)) {
+        var spaceIndex = v.indexOf(" ");
+        var fullPrefix = v.substring(0, spaceIndex);
+        var groupName = v.substring(spaceIndex + 1);
+        var provider = fullPrefix.replace(/^-CURRENTUSER:/i, "");
+        var isEntra = /^(?:EntraID|AzureAD)(?:_\S+)?$/i.test(provider);
+
+        return {
+          kind: "group-deny-current",
+          label: isEntra
+            ? "Do not use this template when the logged-on user belongs to the Entra ID group '" + groupName + "'"
+            : "Do not use this template when the logged-on user belongs to the Active Directory group '" + groupName + "' from domain '" + provider + "'",
+        };
+      }
+
+
+      if (/^(?!-:|-CURRENTUSER:)\S+?@\S+?\.\S+?$/i.test(v)) {
+        var email = v;
+        return {
+          kind: "email-allow",
+          label: "Use this template for mailboxes with the email address '" + email + "'",
+        };
+      }
+
+      if (/^-:\S+?@\S+?\.\S+?$/i.test(v)) {
+        var email = v.replace(/^-:/i, "");
+        return {
+          kind: "email-deny",
+          label: "Do not use this template for mailboxes with the email address '" + email + "'",
+        };
+      }
+
+      if (/^-CURRENTUSER:\S+?@\S+?\.\S+?$/i.test(v)) {
+        var email = v.replace(/^-CURRENTUSER:/i, "");
+        return {
+          kind: "email-deny-current",
+          label: "Do not use this template when the logged-on user has the email address '" + email + "'",
+        };
+      }
+
+
+      if (/^(?!-:)\$.*\$$/i.test(v))
+        return {
+          kind: "var-allow",
+          label: "Use this template for mailboxes with a value in the replacement variable '" + v + "'",
+        };
+
+      if (/^-:\$.*\$$/i.test(v))
+        return {
+          kind: "var-deny",
+          label: "Do not use this template for mailboxes wit a value in the replacement variable '" + v + "'",
+        };
+
+
+      if (v.toLowerCase() === "defaultnew")
+        return {
+          kind: "system",
+          label: "Set this signature as default for new emails",
+        };
+
+      if (v.toLowerCase() === "defaultreplyfwd")
+        return {
+          kind: "system",
+          label: "Set this signature as default for replies and forwards",
+        };
+
+
+      if (v.toLowerCase() === "writeprotect")
+        return {
+          kind: "system",
+          label: "Write protect this signature where possible"
+        };
+
+
+      if (v.toLowerCase() === "internal")
+        return {
+          kind: "system",
+          label: "Set this template as OOF reply for internal recipients",
+        };
+
+      if (v.toLowerCase() === "external")
+        return {
+          kind: "system",
+          label: "Set this template as OOF reply for external recipients",
+        };
+
+
+      if (SYSTEM_TAGS.has(v.toLowerCase()))
+        return {
+          kind: "system",
+          label: "System tag"
+        };
+
+
+      return {
+        kind: "unknown",
+        label: "Unknown tag"
+      };
+    }
+
+
+    /* ============================================================
+     5. VALIDATION
+     Returns a Map of lineNo (1-based) -> { severity, message }.
+     ============================================================ */
+
+    // Strict: only accept "invariant", a KNOWN LCID number from the table below,
+    // or a locale tag that JavaScript's Intl can actually understand. We never
+    // fall back silently to the host default when the value is unrecognised.
+    function isValidSortCulture(v) {
+      if (v == null) return false;
+      var s = String(v).trim();
+      if (s === "") return false;
+      if (s.toLowerCase() === "invariant") return true;
+      if (/^\d+$/i.test(s)) {
+        return Object.prototype.hasOwnProperty.call(LCID_TO_LOCALE, s);
+      }
+      if (/^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/i.test(s)) {
+        try {
+          new Intl.Collator(s);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    }
+
+    function checkSystemTagForType(tag, iniType) {
+      var t = tag.toLowerCase();
+      if (iniType === "signature" && OOF_SYSTEM_TAGS.has(t))
+        return {
+          severity: "warn",
+          message: '"' + tag + '" is OOF-only — change INI type or remove',
+        };
+      if (iniType === "oof" && SIGNATURE_SYSTEM_TAGS.has(t))
+        return {
+          severity: "warn",
+          message:
+            '"' + tag + '" is signature-only — change INI type or remove',
+        };
+      return null;
+    }
+
+    function validate(result, opts) {
+      var iniType = opts.iniType,
+        templateType = opts.templateType;
+      var ext = templateType === "docx" ? ".docx" : ".htm";
+      var issues = new Map();
+
+      function set(lineNo, severity, message) {
+        var prev = issues.get(lineNo);
+        if (!prev || (prev.severity === "warn" && severity === "error")) {
+          issues.set(lineNo, { severity: severity, message: message });
+        }
+      }
+
+      // ---- Per-line checks ----
+      for (var i = 0; i < result.rows.length; i++) {
+        var r = result.rows[i];
+        var ln = result.lines[r.lineNo - 1];
+
+        if (ln.kind === "section") {
+          if (
+            ln.name !== CONFIG_SECTION_NAME &&
+            !ln.name.toLowerCase().endsWith(ext)
+          ) {
+            set(
+              r.lineNo,
+              "warn",
+              'Expected "' +
+              ext +
+              '" filename for ' +
+              templateType.toUpperCase() +
+              " template format",
+            );
+          }
+          continue;
+        }
+
+        // Tags / KVs that appear before any section are errors.
+        if (r.sectionIdx == null && (ln.kind === "kv" || ln.kind === "tag")) {
+          set(r.lineNo, "error", "Tag or key=value before any section header");
+          continue;
+        }
+
+        if (ln.kind === "kv") {
+          var k = (ln.key || "").toLowerCase();
+          if (r.isConfig) {
+            if (k === "sortorder") {
+              if (!VALID_SORT_ORDERS.has((ln.value || "").toLowerCase())) {
+                set(
+                  r.lineNo,
+                  "error",
+                  'Invalid SortOrder "' +
+                  ln.value +
+                  '" — expected AsInThisFile, AsListed, Ascending or Descending',
+                );
+              }
+            } else if (k === "sortculture") {
+              if (!isValidSortCulture(ln.value)) {
+                set(
+                  r.lineNo,
+                  "error",
+                  'Invalid SortCulture "' +
+                  ln.value +
+                  '" — expected an LCID number (e.g. 127, 1033) or BCP-47 tag (e.g. en-US)',
+                );
+              }
+            } else {
+              set(
+                r.lineNo,
+                "warn",
+                'Unknown configuration key "' +
+                ln.key +
+                '" — expected SortOrder or SortCulture',
+              );
+            }
+          } else if (SYSTEM_TAGS.has(k)) {
+            // System tags must appear on their OWN line (no "= value"). When
+            // someone writes e.g. `defaultNew = true`, that's a syntax mistake.
+            set(
+              r.lineNo,
+              "error",
+              '"' +
+              ln.key +
+              '" is a system tag — write it on its own line, without "= ' +
+              ln.value +
+              '"',
+            );
+          } else if (k === "sortorder" || k === "sortculture") {
+            set(
+              r.lineNo,
+              "warn",
+              ln.key +
+              " only takes effect inside the [" +
+              CONFIG_SECTION_NAME +
+              "] section",
+            );
+          } else if (k === "outlooksignaturename") {
+            if (iniType === "oof") {
+              set(
+                r.lineNo,
+                "warn",
+                "OutlookSignatureName has no effect in an OOF INI",
+              );
+            }
+            if (SIG_NAME_INVALID_CHARS_RE.test(ln.value)) {
+              set(
+                r.lineNo,
+                "error",
+                'OutlookSignatureName contains invalid characters: \\ / : " * ? > < , | @',
+              );
+            }
+          } else {
+            // Any other "key = value" line outside the configuration section is
+            // not a recognised entry. Flag it so the user knows it will be
+            // ignored (or, more likely, was meant to be a tag without "=").
+            set(
+              r.lineNo,
+              "warn",
+              'Unknown key "' +
+              ln.key +
+              '" — only OutlookSignatureName is a valid key=value entry here',
+            );
+          }
+        } else if (ln.kind === "tag") {
+          var cls = classifyTag(ln.value);
+          if (cls.kind === "unknown") {
+            var v = (ln.value || "").replace(/^(?:-:|-CURRENTUSER:)/i, "");
+            if (/^\d/i.test(v) && /\d.*-.*\d/i.test(v)) {
+              set(
+                r.lineNo,
+                "error",
+                "Malformed time range (expected YYYYMMDDHHMM[Z]-YYYYMMDDHHMM[Z])",
+              );
+            } else if (/^[\$].*[^$]$|^[^$].*[\$]$/i.test(v)) {
+              set(r.lineNo, "error", "Malformed variable (expected $name$)");
+            } else if (/@/i.test(v)) {
+              set(
+                r.lineNo,
+                "error",
+                "Malformed email (expected user@host.tld)",
+              );
+            } else {
+              set(r.lineNo, "warn", "Unrecognized tag");
+            }
+          } else if (cls.kind === "system") {
+            var stripped = (ln.value || "")
+              .toLowerCase()
+              .replace(/^(?:-:|-currentuser:)/, "");
+            var issue2 = checkSystemTagForType(stripped, iniType);
+            if (issue2) set(r.lineNo, issue2.severity, issue2.message);
+          }
+        }
+      }
+
+      // ---- Duplicate values within a section ----
+      // Set-OutlookSignatures simply de-duplicates repeated entries inside a
+      // section (an email or tag listed twice is treated as if listed once),
+      // so a literal duplicate is harmless. We do NOT flag it — false-positive
+      // warnings are more disruptive than the harmless redundancy itself.
+
+      // ---- OOF templates must declare audience ----
+      // In OOF mode every template section needs at least one "internal" or
+      // "external" tag — without it the engine has no way to know which OOF
+      // message slot the template should fill, so the section is effectively
+      // dead weight. Warn on the section header line.
+      if (iniType === "oof") {
+        for (var os = 0; os < result.sections.length; os++) {
+          var osec = result.sections[os];
+          if (osec.isConfig) continue;
+          var hasAudience = false;
+          for (var oj = 0; oj < osec.lines.length; oj++) {
+            var oln = osec.lines[oj];
+            if (oln.kind !== "tag") continue;
+            var ov = (oln.value || "")
+              .toLowerCase()
+              .replace(/^(?:-:|-currentuser:)/, "");
+            if (ov === "internal" || ov === "external") {
+              hasAudience = true;
+              break;
+            }
+          }
+          if (!hasAudience) {
+            set(
+              osec.headerLine + 1,
+              "warn",
+              'OOF template has no "internal" or "external" tag — template will not be used',
+            );
+          }
+        }
+      }
+
+      // ---- Duplicate configuration section ----
+      // Set-OutlookSignatures permits the same template / mailbox to appear in
+      // several sections — the engine merges them — so we no longer flag
+      // duplicate ordinary section names. The ONE exception is the special
+      // [<Set-OutlookSignatures configuration>] block: only one is meaningful,
+      // and a second one silently shadows the first, so we still warn there.
+      var seenConfigLine = null;
+      for (var ss = 0; ss < result.sections.length; ss++) {
+        var sn = result.sections[ss];
+        if (!sn.isConfig) continue;
+        if (seenConfigLine == null) {
+          seenConfigLine = sn.headerLine + 1;
+        } else {
+          set(
+            sn.headerLine + 1,
+            "warn",
+            "duplicate [" +
+            CONFIG_SECTION_NAME +
+            "] — only one configuration section is honoured (first one is at line " +
+            seenConfigLine +
+            ")",
+          );
+        }
+      }
+
+      return issues;
+    }
+
+    /* ============================================================
+     6. SORTER
+     Reorders sections and the contents of each section using the
+     SortOrder / SortCulture values found in the configuration block.
+     ============================================================ */
+
+    // Locale Code IDs (LCID) used by Set-OutlookSignatures, mapped to BCP-47 tags
+    // that JavaScript's Intl.Collator understands. (Direct copy from the spec.)
+    var LCID_TO_LOCALE = {
+      127: undefined,
+      1: "ar",
+      10: "es",
+      100: "fil",
+      101: "dv",
+      102: "bin",
+      10241: "ar-SY",
+      10249: "en-BZ",
+      1025: "ar-SA",
+      10250: "es-PE",
+      10252: "fr-SN",
+      1026: "bg-BG",
+      10266: "sr-Cyrl-RS",
+      1027: "ca-ES",
+      1029: "cs-CZ",
+      103: "ff",
+      1030: "da-DK",
+      1031: "de-DE",
+      1032: "el-GR",
+      1033: "en-US",
+      1035: "fi-FI",
+      1036: "fr-FR",
+      1037: "he-IL",
+      1038: "hu-HU",
+      1039: "is-IS",
+      104: "ha",
+      1040: "it-IT",
+      1041: "ja-JP",
+      1042: "ko-KR",
+      1043: "nl-NL",
+      1044: "nb-NO",
+      1045: "pl-PL",
+      1046: "pt-BR",
+      1047: "rm-CH",
+      1048: "ro-RO",
+      1049: "ru-RU",
+      105: "ibb",
+      1050: "hr-HR",
+      1051: "sk-SK",
+      1052: "sq-AL",
+      1053: "sv-SE",
+      1054: "th-TH",
+      1055: "tr-TR",
+      1056: "ur-PK",
+      1057: "id-ID",
+      1058: "uk-UA",
+      1059: "be-BY",
+      106: "yo",
+      1060: "sl-SI",
+      1061: "et-EE",
+      1062: "lv-LV",
+      1063: "lt-LT",
+      1065: "fa-IR",
+      1066: "vi-VN",
+      1067: "hy-AM",
+      1068: "az-Latn-AZ",
+      1069: "eu-ES",
+      1070: "hsb-DE",
+      1071: "mk-MK",
+      1072: "st-ZA",
+      1073: "ts-ZA",
+      1074: "tn-ZA",
+      1075: "ve-ZA",
+      1076: "xh-ZA",
+      1077: "zu-ZA",
+      1078: "af-ZA",
+      1079: "ka-GE",
+      108: "nso",
+      1080: "fo-FO",
+      1081: "hi-IN",
+      1082: "mt-MT",
+      1083: "se-NO",
+      1085: "yi-001",
+      1086: "ms-MY",
+      1087: "kk-KZ",
+      1088: "ky-KG",
+      1089: "sw-KE",
+      109: "ba",
+      1090: "tk-TM",
+      1091: "uz-Latn-UZ",
+      1092: "tt-RU",
+      1093: "bn-IN",
+      1095: "gu-IN",
+      1096: "or-IN",
+      1097: "ta-IN",
+      1098: "te-IN",
+      1099: "kn-IN",
+      11: "fi",
+      110: "lb",
+      1100: "ml-IN",
+      1101: "as-IN",
+      1102: "mr-IN",
+      1103: "sa-IN",
+      1104: "mn-MN",
+      1105: "bo-CN",
+      1106: "cy-GB",
+      1107: "km-KH",
+      1108: "lo-LA",
+      1109: "my-MM",
+      111: "kl",
+      1110: "gl-ES",
+      1111: "kok-IN",
+      1113: "sd-Deva-IN",
+      1114: "syr-SY",
+      1115: "si-LK",
+      1118: "am-ET",
+      1119: "tzm-Arab-MA",
+      112: "ig",
+      1120: "ks-Arab",
+      1121: "ne-NP",
+      1122: "fy-NL",
+      1123: "ps-AF",
+      1124: "fil-PH",
+      1125: "dv-MV",
+      1126: "bin-NG",
+      11265: "ar-JO",
+      11273: "en-TT",
+      11274: "es-AR",
+      11276: "fr-CM",
+      1129: "ibb-NG",
+      11290: "sr-Latn-ME",
+      113: "kr",
+      1130: "yo-NG",
+      1132: "nso-ZA",
+      1133: "ba-RU",
+      1134: "lb-LU",
+      1135: "kl-GL",
+      1136: "ig-NG",
+      1138: "om-ET",
+      1139: "ti-ET",
+      114: "om",
+      1140: "gn-PY",
+      1141: "haw-US",
+      1143: "so-SO",
+      1144: "ii-CN",
+      1145: "pap-029",
+      1146: "arn-CL",
+      1148: "moh-CA",
+      115: "ti",
+      1150: "br-FR",
+      1152: "ug-CN",
+      1153: "mi-NZ",
+      1154: "oc-FR",
+      1155: "co-FR",
+      1156: "gsw-FR",
+      1157: "sah-RU",
+      1159: "rw-RW",
+      116: "gn",
+      1160: "wo-SN",
+      1169: "gd-GB",
+      117: "haw",
+      118: "la",
+      119: "so",
+      12: "fr",
+      120: "ii",
+      121: "pap",
+      122: "arn",
+      12289: "ar-LB",
+      12297: "en-ZW",
+      12298: "es-EC",
+      12300: "fr-CI",
+      12314: "sr-Cyrl-ME",
+      124: "moh",
+      126: "br",
+      128: "ug",
+      129: "mi",
+      13: "he",
+      130: "oc",
+      131: "co",
+      132: "gsw",
+      133: "sah",
+      13313: "ar-KW",
+      13321: "en-PH",
+      13322: "es-CL",
+      13324: "fr-ML",
+      134: "quc",
+      135: "rw",
+      136: "wo",
+      14: "hu",
+      14337: "ar-AE",
+      14345: "en-ID",
+      14346: "es-UY",
+      14348: "fr-MA",
+      145: "gd",
+      15: "is",
+      15361: "ar-BH",
+      15369: "en-HK",
+      15370: "es-PY",
+      15372: "fr-HT",
+      16: "it",
+      16385: "ar-QA",
+      16393: "en-IN",
+      16394: "es-BO",
+      17: "ja",
+      17417: "en-MY",
+      17418: "es-SV",
+      18: "ko",
+      18441: "en-SG",
+      18442: "es-HN",
+      19: "nl",
+      19466: "es-NI",
+      2: "bg",
+      20: "no",
+      2049: "ar-IQ",
+      20490: "es-PR",
+      2055: "de-CH",
+      2057: "en-GB",
+      2058: "es-MX",
+      2060: "fr-BE",
+      2064: "it-CH",
+      2067: "nl-BE",
+      2068: "nn-NO",
+      2070: "pt-PT",
+      2072: "ro-MD",
+      2073: "ru-MD",
+      2077: "sv-FI",
+      2080: "ur-IN",
+      2092: "az-Cyrl-AZ",
+      2094: "dsb-DE",
+      2098: "tn-BW",
+      21: "pl",
+      2107: "se-SE",
+      2108: "ga-IE",
+      2110: "ms-BN",
+      2115: "uz-Cyrl-UZ",
+      2117: "bn-BD",
+      2118: "pa-Arab-PK",
+      2121: "ta-LK",
+      2128: "mn-Mong-CN",
+      2137: "sd-Arab-PK",
+      2141: "iu-Latn-CA",
+      2144: "ks-Deva-IN",
+      2145: "ne-IN",
+      2151: "ff-Latn-SN",
+      21514: "es-US",
+      2163: "ti-ER",
+      22: "pt",
+      22538: "es-419",
+      23: "rm",
+      23562: "es-CU",
+      24: "ro",
+      25: "ru",
+      25626: "bs-Cyrl",
+      26: "hr",
+      26650: "bs-Latn",
+      27: "sk",
+      27674: "sr-Cyrl",
+      28: "sq",
+      28698: "sr-Latn",
+      28731: "smn",
+      29: "sv",
+      29740: "az-Cyrl",
+      29755: "sms",
+      3: "ca",
+      30: "th",
+      30724: "zh",
+      3073: "ar-EG",
+      30740: "nn",
+      30746: "bs",
+      30764: "az-Latn",
+      30779: "sma",
+      30787: "uz-Cyrl",
+      3079: "de-AT",
+      3081: "en-AU",
+      30815: "tzm-Tfng",
+      3082: "es-ES",
+      3084: "fr-CA",
+      31: "tr",
+      3131: "se-FI",
+      3152: "mn-Mong-MN",
+      3153: "dz-BT",
+      31748: "zh-Hant",
+      31764: "nb",
+      31770: "sr",
+      31790: "dsb",
+      31803: "smj",
+      31811: "uz-Latn",
+      31814: "pa-Arab",
+      31824: "mn-Mong",
+      31833: "sd-Arab",
+      31837: "iu-Latn",
+      31847: "ff-Latn",
+      32: "ur",
+      33: "id",
+      34: "uk",
+      35: "be",
+      36: "sl",
+      37: "et",
+      38: "lv",
+      39: "lt",
+      4: "zh-Hans",
+      40: "tg",
+      4097: "ar-LY",
+      41: "fa",
+      4103: "de-LU",
+      4105: "en-CA",
+      4106: "es-GT",
+      4108: "fr-CH",
+      4122: "hr-BA",
+      4155: "smj-NO",
+      4191: "tzm-Tfng-MA",
+      42: "vi",
+      43: "hy",
+      44: "az",
+      45: "eu",
+      46: "hsb",
+      47: "mk",
+      48: "st",
+      49: "ts",
+      5: "cs",
+      50: "tn",
+      51: "ve",
+      5121: "ar-DZ",
+      5127: "de-LI",
+      5129: "en-NZ",
+      5130: "es-CR",
+      5132: "fr-LU",
+      5146: "bs-Latn-BA",
+      5179: "smj-SE",
+      52: "xh",
+      53: "zu",
+      54: "af",
+      55: "ka",
+      56: "fo",
+      57: "hi",
+      58: "mt",
+      59: "se",
+      6: "da",
+      60: "ga",
+      61: "yi",
+      6145: "ar-MA",
+      6153: "en-IE",
+      6154: "es-PA",
+      6156: "fr-MC",
+      6170: "sr-Latn-BA",
+      62: "ms",
+      6203: "sma-NO",
+      63: "kk",
+      64: "ky",
+      65: "sw",
+      66: "tk",
+      67: "uz",
+      68: "tt",
+      69: "bn",
+      7: "de",
+      70: "pa",
+      71: "gu",
+      7169: "ar-TN",
+      7177: "en-ZA",
+      7178: "es-DO",
+      7180: "fr-029",
+      7194: "sr-Cyrl-BA",
+      72: "or",
+      7227: "sma-SE",
+      73: "ta",
+      74: "te",
+      75: "kn",
+      76: "ml",
+      77: "as",
+      78: "mr",
+      79: "sa",
+      8: "el",
+      80: "mn",
+      81: "bo",
+      8193: "ar-OM",
+      82: "cy",
+      8201: "en-JM",
+      8202: "es-VE",
+      8204: "fr-RE",
+      8218: "bs-Cyrl-BA",
+      8251: "sms-FI",
+      83: "km",
+      84: "lo",
+      85: "my",
+      86: "gl",
+      87: "kok",
+      88: "mni",
+      89: "sd",
+      9: "en",
+      90: "syr",
+      91: "si",
+      92: "chr",
+      9217: "ar-YE",
+      9225: "en-029",
+      9226: "es-CO",
+      9228: "fr-CD",
+      9242: "sr-Latn-RS",
+      9275: "smn-FI",
+      93: "iu",
+      94: "am",
+      95: "tzm",
+      96: "ks",
+      97: "ne",
+      98: "fy",
+      99: "ps",
+    };
+
+    function makeComparator(culture) {
+      var code = String(culture || "127").trim();
+      if (
+        code === "127" ||
+        code === "" ||
+        code.toLowerCase() === "invariant"
+      ) {
+        return function (a, b) {
+          var A = a.toLowerCase(),
+            B = b.toLowerCase();
+          return A < B ? -1 : A > B ? 1 : 0;
+        };
+      }
+      var locale;
+      if (/^\d+$/i.test(code)) locale = LCID_TO_LOCALE[code];
+      else locale = code;
+      try {
+        var c = new Intl.Collator(locale, {
+          sensitivity: "base",
+          numeric: true,
+        });
+        return function (a, b) {
+          return c.compare(a, b);
+        };
+      } catch (e) {
+        return function (a, b) {
+          return a < b ? -1 : a > b ? 1 : 0;
+        };
+      }
+    }
+
+    function bucketOf(ln) {
+      if (ln.kind === "kv") {
+        var k = (ln.key || "").toLowerCase();
+        if (k === "outlooksignaturename") return "name";
+        if (k === "defaultnew" || k === "internal") return "defaultNew";
+        if (k === "defaultreplyfwd" || k === "external")
+          return "defaultReply";
+        if (k === "writeprotect") return "writeProtect";
+        return "kv";
+      }
+      if (ln.kind === "tag") {
+        var cls = classifyTag(ln.value);
+
+        // Map specific classified kinds to our new bucket names
+        if (cls.kind === "time-allow") return "time-allow";
+        if (cls.kind === "time-deny") return "time-deny";
+        if (cls.kind === "group-allow") return "group-allow";
+        if (cls.kind === "group-deny" || cls.kind === "group-deny-current") return "group-deny";
+        if (cls.kind === "email-allow") return "email-allow";
+        if (cls.kind === "email-deny" || cls.kind === "email-deny-current") return "email-deny";
+        if (cls.kind === "var-allow") return "variable-allow";
+        if (cls.kind === "var-deny") return "variable-deny";
+
+        if (cls.kind === "system") {
+          var v = (ln.value || "").toLowerCase().trim();
+          if (v.charAt(0) === "[" && v.charAt(v.length - 1) === "]")
+            v = v.slice(1, -1).trim();
+          var stripped = v.replace(/^(-:|-currentuser:)/, "");
+          if (stripped === "defaultnew" || stripped === "internal")
+            return "defaultNew";
+          if (stripped === "defaultreplyfwd" || stripped === "external")
+            return "defaultReply";
+          if (stripped === "writeprotect") return "writeProtect";
+          return "other";
+        }
+        return "other";
+      }
+      return "other";
+    }
+
+    function lineSortKey(ln) {
+      if (ln.kind === "comment")
+        return (ln.raw || "").replace(/^\s*(?:#+|;+|\/\/+)\s*/, "");
+      if (ln.kind === "kv") return ln.key || "";
+      if (ln.kind === "tag") {
+        // Tag values may carry an "allow/deny" prefix:
+        //   ""             → allow      (priority 0)
+        //   "-:"           → deny ALL   (priority 1)
+        //   "-CURRENTUSER:"→ deny CURRENT user (priority 2)
+        //
+        // For a meaningful sort we want all three variants of the same identity
+        // (e.g. alex@x, -:alex@x, -CURRENTUSER:alex@x) to cluster together,
+        // ordered allow → deny-all → deny-current within the cluster.
+        // We achieve that by stripping the prefix for the primary sort key and
+        // appending the priority as a trailing digit. The "\u001f" Unit
+        // Separator is a control character that locale-aware collators sort by
+        // raw codepoint, so the priority digit always wins ties cleanly.
+        var v = ln.value || "";
+        var pri = "0";
+        var rest = v;
+        if (/^-CURRENTUSER:/i.test(v)) {
+          pri = "2";
+          rest = v.replace(/^-CURRENTUSER:/i, "");
+        } else if (/^-:/i.test(v)) {
+          pri = "1";
+          rest = v.replace(/^-:/, "");
+        }
+        return rest + "\u001f" + pri;
+      }
+      return "";
+    }
+
+    function renderLine(ln) {
+      if (ln.kind === "comment") return ln.raw || "";
+      if (ln.kind === "kv") return ln.key + " = " + ln.value;
+      if (ln.kind === "tag") return ln.value || "";
+      return "";
+    }
+
+    function sortAndSerializeBlock(block, cmp) {
+      var buckets = {
+        comments: [],
+        name: [],
+        kv: [],
+        "time-allow": [],
+        "group-allow": [],
+        "email-allow": [],
+        "variable-allow": [],
+        "time-deny": [],
+        "group-deny": [],
+        "email-deny": [],
+        "variable-deny": [],
+        defaultNew: [],
+        defaultReply: [],
+        writeProtect: [],
+        other: [],
+      };
+      var header = null;
+
+      for (var i = 0; i < block.lines.length; i++) {
+        var ln = block.lines[i];
+        if (ln.kind === "section") {
+          header = ln;
+          continue;
+        }
+        if (ln.kind === "blank") continue;
+        if (ln.kind === "comment") {
+          buckets.comments.push(ln);
+          continue;
+        }
+        buckets[bucketOf(ln)].push(ln);
+      }
+
+      Object.keys(buckets).forEach(function (k) {
+        buckets[k].sort(function (a, b) {
+          return cmp(lineSortKey(a), lineSortKey(b));
+        });
+      });
+
+      var out = [];
+      for (var c = 0; c < buckets.comments.length; c++)
+        out.push(renderLine(buckets.comments[c]));
+      if (header) out.push("[" + header.name + "]");
+      for (var bi = 0; bi < BUCKET_ORDER.length; bi++) {
+        var bn = BUCKET_ORDER[bi];
+        for (var li = 0; li < buckets[bn].length; li++)
+          out.push(renderLine(buckets[bn][li]));
+      }
+      return out.join("\n");
+    }
+
+    function getConfigValue(sections, key) {
+      var sec = null;
+      for (var i = 0; i < sections.length; i++)
+        if (sections[i].name === CONFIG_SECTION_NAME) {
+          sec = sections[i];
+          break;
+        }
+      if (!sec) return null;
+      var k = key.toLowerCase();
+      for (var j = 0; j < sec.lines.length; j++) {
+        var ln = sec.lines[j];
+        if (ln.kind === "kv" && ln.key && ln.key.toLowerCase() === k)
+          return ln.value;
+      }
+      return null;
+    }
+
+    // Decide which template-section group a parsed section belongs to.
+    // Rules are evaluated in this priority (first match wins):
+    //   "var-*"   → "variable"  (replacement-variable based)
+    //   "email-*" → "email"     (email-address based)
+    //   "group-*" → "group"     (Entra ID / Active Directory group based)
+    //   default   → "common"
+    function templateGroupOf(section) {
+      var hasVar = false,
+        hasEmail = false,
+        hasGroup = false;
+      for (var i = 0; i < section.lines.length; i++) {
+        var ln = section.lines[i];
+        if (ln.kind !== "tag") continue;
+        var k = (classifyTag(ln.value).kind || "").toLowerCase();
+        if (k.indexOf("var-allow") === 0) hasVar = true;
+        else if (k.indexOf("email-allow") === 0) hasEmail = true;
+        else if (k.indexOf("group-allow") === 0) hasGroup = true;
+      }
+      if (hasVar) return "variable";
+      if (hasEmail) return "email";
+      if (hasGroup) return "group";
+      return "common";
+    }
+
+    function buildSortedText(result) {
+      var lines = result.lines,
+        sections = result.sections,
+        prefaceEnd = result.prefaceEnd;
+
+      // Preface text (before first section).
+      var prefaceLines = [];
+      if (sections.length === 0) {
+        for (var p = 0; p < lines.length; p++)
+          prefaceLines.push(lines[p].raw == null ? "" : lines[p].raw);
+      } else {
+        for (var pp = 0; pp <= prefaceEnd; pp++)
+          prefaceLines.push(lines[pp].raw == null ? "" : lines[pp].raw);
+      }
+      while (
+        prefaceLines.length &&
+        prefaceLines[prefaceLines.length - 1].trim() === ""
+      )
+        prefaceLines.pop();
+
+      // Always pin the configuration section at the top.
+      var configBlock = null,
+        others = [];
+      for (var s = 0; s < sections.length; s++) {
+        if (sections[s].isConfig) configBlock = sections[s];
+        else others.push(sections[s]);
+      }
+      if (!configBlock) {
+        configBlock = {
+          name: CONFIG_SECTION_NAME,
+          isConfig: true,
+          lines: [
+            {
+              kind: "section",
+              raw: "[" + CONFIG_SECTION_NAME + "]",
+              name: CONFIG_SECTION_NAME,
+            },
+            {
+              kind: "kv",
+              raw: "SortCulture = 127",
+              key: "SortCulture",
+              value: "127",
+            },
+            {
+              kind: "kv",
+              raw: "SortOrder = AsInThisFile",
+              key: "SortOrder",
+              value: "AsInThisFile",
+            },
+          ],
+        };
+      }
+
+      var order = (
+        getConfigValue(sections, "SortOrder") || "AsInThisFile"
+      ).toLowerCase();
+      var culture = getConfigValue(sections, "SortCulture") || "127";
+      var baseCmp = makeComparator(culture);
+      var noSort = order === "asinthisfile" || order === "aslisted";
+      var desc =
+        order === "desc" || order === "down" || order === "descending";
+
+      if (!noSort) {
+        others.sort(function (a, b) {
+          var r = baseCmp(a.name, b.name);
+          return desc ? -r : r;
+        });
+      }
+      var intraCmp = noSort
+        ? function () {
+          return 0;
+        }
+        : function (a, b) {
+          return desc ? -baseCmp(a, b) : baseCmp(a, b);
+        };
+
+      // Group template sections by the kind of tags they contain.
+      // Hierarchical, first match wins:
+      //   1. any "var-*"   tag → "variable" group
+      //   2. any "email-*" tag → "email"    group
+      //   3. any "group-*" tag → "group"    group
+      //   4. otherwise         → "common"   group
+      // Final order on disk: Common → Group → Email → Variable.
+      var groups = { common: [], group: [], email: [], variable: [] };
+      for (var oi = 0; oi < others.length; oi++) {
+        groups[templateGroupOf(others[oi])].push(others[oi]);
+      }
+      var orderedOthers = []
+        .concat(groups.common)
+        .concat(groups.group)
+        .concat(groups.email)
+        .concat(groups.variable);
+
+      var ordered = [configBlock].concat(orderedOthers);
+      var blockTexts = [];
+      for (var bi = 0; bi < ordered.length; bi++) {
+        var t = sortAndSerializeBlock(ordered[bi], intraCmp);
+        if (t.length > 0) blockTexts.push(t);
+      }
+
+      var parts = [];
+      if (prefaceLines.length) parts.push(prefaceLines.join("\n"));
+      parts.push.apply(parts, blockTexts);
+      return parts.join("\n\n") + "\n";
+    }
+
+    /* ============================================================
+     7. UNDO / REDO HISTORY
+     A small ring buffer of text snapshots. Captures a snapshot
+     500ms after the last keystroke (so each pause = one undo step)
+     or immediately for explicit actions like Insert / Sort.
+     ============================================================ */
+
+    var HISTORY_LIMIT = 100; // generous
+    var editHistory = [""]; // snapshots of state.text
+    var historyIndex = 0; // index of the snapshot currently shown
+    var captureTimer = null;
+    var applyingHistory = false; // suppress capture while restoring
+
+    function captureNow() {
+      captureTimer = null;
+      if (applyingHistory) return;
+      if (editHistory[historyIndex] === state.text) return;
+      editHistory = editHistory.slice(0, historyIndex + 1); // drop redo branch
+      editHistory.push(state.text);
+      if (editHistory.length > HISTORY_LIMIT) editHistory.shift();
+      historyIndex = editHistory.length - 1;
+      updateUndoRedoButtons();
+    }
+
+    function captureDebounced() {
+      if (captureTimer) clearTimeout(captureTimer);
+      captureTimer = setTimeout(captureNow, 500);
+    }
+
+    function flushCapture() {
+      if (captureTimer) {
+        clearTimeout(captureTimer);
+        captureNow();
+      }
+    }
+
+    function undo() {
+      flushCapture();
+      if (historyIndex <= 0) return;
+      historyIndex--;
+      applyHistorySnapshot();
+    }
+    function redo() {
+      flushCapture();
+      if (historyIndex >= editHistory.length - 1) return;
+      historyIndex++;
+      applyHistorySnapshot();
+    }
+    function applyHistorySnapshot() {
+      applyingHistory = true;
+      state.text = editHistory[historyIndex];
+      var ed = document.getElementById("editor");
+      if (ed) ed.value = state.text;
+      refreshAll();
+      updateUndoRedoButtons();
+      applyingHistory = false;
+    }
+    function updateUndoRedoButtons() {
+      var u = document.getElementById("btn-undo");
+      var r = document.getElementById("btn-redo");
+      if (u) u.disabled = historyIndex <= 0;
+      if (r) r.disabled = historyIndex >= editHistory.length - 1;
+    }
+
+    /* ============================================================
+     8. WRAP-HEIGHT MEASUREMENT
+     For each logical line, compute the height it occupies in the
+     textarea after word wrapping. Used to align the gutter, the
+     coloured background overlay, and the analysis rows.
+     ============================================================ */
+
+    function measureLineHeights(text) {
+      var mirror = document.getElementById("mirror");
+      var ta = document.getElementById("editor");
+      var cs = getComputedStyle(ta);
+
+      var pl = parseFloat(cs.paddingLeft) || 0;
+      var pr = parseFloat(cs.paddingRight) || 0;
+      // The visible textarea's content area = clientWidth - horizontal
+      // padding. The mirror is also a <textarea>, so giving it the SAME
+      // content width and the SAME font produces the SAME wrap points the
+      // user actually sees — no off-by-one row drift at the edge.
+      var contentWidth = ta.clientWidth - pl - pr;
+      if (contentWidth < 50) contentWidth = 50;
+
+      mirror.style.font = cs.font;
+      mirror.style.fontFamily = cs.fontFamily;
+      mirror.style.fontSize = cs.fontSize;
+      mirror.style.fontWeight = cs.fontWeight;
+      mirror.style.lineHeight = cs.lineHeight;
+      mirror.style.letterSpacing = cs.letterSpacing;
+      mirror.style.tabSize = cs.tabSize;
+      // Mirror has padding:0 (see #mirror CSS) and box-sizing:content-box,
+      // so its width IS its content width — matching the editor's content
+      // area exactly.
+      mirror.style.width = contentWidth + "px";
+      // Single-row tall to start; we read scrollHeight which reports the
+      // *content* height regardless of the box's visible height.
+      mirror.rows = 1;
+
+      var lines = text.split("\n");
+      var heights = new Array(lines.length);
+      for (var i = 0; i < lines.length; i++) {
+        var s = lines[i];
+        // Empty lines still occupy one line of height. A space gives us that.
+        mirror.value = s === "" ? " " : s;
+        // Force the browser to recompute scroll metrics for the new value.
+        // (Some engines cache scrollHeight from the previous value otherwise.)
+        // eslint-disable-next-line no-unused-vars
+        var _force = mirror.scrollTop;
+        heights[i] = mirror.scrollHeight;
+      }
+      return heights;
+    }
+
+    /* ============================================================
+     9. RENDERING
+     ============================================================ */
+
+    function el(tag, attrs, children) {
+      var node = document.createElement(tag);
+      if (attrs) {
+        for (var k in attrs) {
+          if (!Object.prototype.hasOwnProperty.call(attrs, k)) continue;
+          var v = attrs[k];
+          if (v == null || v === false) continue;
+          if (k === "class") node.className = v;
+          else if (k === "text") node.textContent = v;
+          else if (k === "html") node.innerHTML = v;
+          else if (k.indexOf("on") === 0 && typeof v === "function") {
+            node.addEventListener(k.slice(2).toLowerCase(), v);
+          } else node.setAttribute(k, v);
+        }
+      }
+      if (children) {
+        var arr = [].concat(children);
+        for (var i = 0; i < arr.length; i++) {
+          var c = arr[i];
+          if (c == null || c === false) continue;
+          node.appendChild(
+            typeof c === "string" ? document.createTextNode(c) : c,
+          );
+        }
+      }
+      return node;
+    }
+
+    // -------- TOP BAR --------
+
+    function renderTopbar() {
+      var bar = document.getElementById("topbar");
+      bar.innerHTML = "";
+
+      // --- ROW 1: BRANDING & GLOBAL SETUP ---
+      var appIcon = el("img", {
+        class: "app-icon",
+        src: "https://set-outlooksignatures.com/assets/images/set-outlooksignatures%20icon.ico",
+        alt: "",
+        "aria-hidden": "true",
+      });
+      appIcon.addEventListener("error", function () {
+        if (appIcon.parentNode) appIcon.parentNode.removeChild(appIcon);
+      });
+      var titleBlock = el("div", { class: "title-block" });
+      titleBlock.appendChild(appIcon);
+      titleBlock.appendChild(
+        el("h1", null, ["Set-OutlookSignatures INI file editor"]),
+      );
+      var creditLink = el(
+        "a",
+        {
+          class: "credit-inline",
+          href: "https://explicitconsulting.at/",
+          target: "_blank",
+          rel: "noopener noreferrer",
+          title:
+            "Donated to Set-OutlookSignatures by ExplicIT Consulting — providers of the Benefactor Circle add-on",
+        },
+        [],
+      );
+      var creditLogo = el("img", {
+        class: "credit-logo",
+        src: "https://explicitconsulting.at/assets/images/explicit%20consulting,%20color%20on%20black,%20favicon.png",
+        alt: "",
+        "aria-hidden": "true",
+      });
+      creditLogo.addEventListener("error", function () {
+        if (creditLogo.parentNode)
+          creditLogo.parentNode.removeChild(creditLogo);
+      });
+      /*
+              creditLink.appendChild(creditLogo);
+              creditLink.appendChild(
+                el("span", { class: "credit-text" }, ["Donated by ExplicIT Consulting"]),
+              );
+              titleBlock.appendChild(creditLink);
+              */
+      bar.appendChild(titleBlock);
+
+      // Push setup and file opening to the right
+      bar.appendChild(el("span", { class: "spacer" }));
+
+      // INI type selector
+      var iniSel = el("select", { id: "ini-type" });
+      [
+        ["signature", "Signature"],
+        ["oof", "Out-of-Office"],
+      ].forEach(function (p) {
+        var opt = el("option", { value: p[0], text: p[1] });
+        if (state.iniType === p[0]) opt.selected = true;
+        iniSel.appendChild(opt);
+      });
+      iniSel.addEventListener("change", function (e) {
+        state.iniType = e.target.value;
+        renderTopbar();
+        refreshAll();
+      });
+
+      // Template format selector
+      var tplSel = el("select", { id: "tpl-type" });
+      [
+        ["docx", "DOCX"],
+        ["htm", "HTM"],
+      ].forEach(function (p) {
+        var opt = el("option", { value: p[0], text: p[1] });
+        if (state.templateType === p[0]) opt.selected = true;
+        tplSel.appendChild(opt);
+      });
+      tplSel.addEventListener("change", function (e) {
+        state.templateType = e.target.value;
+        renderTopbar();
+        refreshAll();
+      });
+
+      // File Input (Hidden)
+      var fileInput = el("input", { type: "file", accept: ".ini" });
+      fileInput.addEventListener("change", function (e) {
+        var f = e.target.files[0];
+        if (!f) return;
+        state.fileName = f.name;
+        var rd = new FileReader();
+        rd.onload = function (event) {
+          var content = event.target.result;
+          var detection = jschardet.detect(content);
+          var encoding = detection.encoding || "utf-8";
+          var textReader = new FileReader();
+          textReader.onload = function (textEvent) {
+            flushCapture();
+            state.text = String(textEvent.target.result || "").replace(
+              /\r?\n/g,
+              "\n",
+            );
+            document.getElementById("editor").value = state.text;
+            captureNow();
+            refreshAll();
+          };
+          textReader.readAsText(f, encoding);
+        };
+        rd.readAsBinaryString(f);
+      });
+
+      bar.appendChild(el("button", { onclick: loadSample }, ["Load sample"]));
+      bar.appendChild(
+        el(
+          "button",
+          {
+            onclick: function () {
+              fileInput.click();
+            },
+          },
+          ["Open file…"],
+        ),
+      );
+
+      bar.appendChild(el("span", { class: "sep" }));
+
+      bar.appendChild(
+        el("label", { class: "config-field" }, [
+          el("span", { text: "INI type:" }),
+          iniSel,
+        ]),
+      );
+      bar.appendChild(
+        el("label", { class: "config-field" }, [
+          el("span", { text: "Template format:" }),
+          tplSel,
+        ]),
+      );
+
+      bar.appendChild(el("span", { class: "sep" }));
+
+      // Undo / Redo
+      bar.appendChild(
+        el(
+          "button",
+          { class: "mini", id: "btn-undo", title: "Undo", onclick: undo },
+          ["Undo"],
+        ),
+      );
+      bar.appendChild(
+        el(
+          "button",
+          { class: "mini", id: "btn-redo", title: "Redo", onclick: redo },
+          ["Redo"],
+        ),
+      );
+
+
+      // --- ROW 2: EDITING & EXPORTING ---
+      bar.appendChild(el("div", { style: "flex-basis: 100%; height: 0;" }));
+      bar.appendChild(el("span", { class: "spacer" }));
+
+      // Insert Dropdown
+      var insertSel = el("select", { class: "insert-select" });
+
+      function refreshInsertOptions() {
+        if (insertSel._refreshing) return;
+        insertSel._refreshing = true;
+        insertSel.innerHTML = "";
+        insertSel.appendChild(
+          el("option", {
+            value: "",
+            text: "Insert…",
+            disabled: "disabled",
+            hidden: "hidden",
+            selected: "selected",
+          }),
+        );
+        var snippets = buildInsertSnippets();
+        for (var g = 0; g < snippets.length; g++) {
+          var og = el("optgroup", { label: snippets[g].group });
+          for (var k = 0; k < snippets[g].items.length; k++) {
+            var it = snippets[g].items[k];
+            og.appendChild(el("option", { value: it.text, text: it.label }));
+          }
+          insertSel.appendChild(og);
+        }
+        setTimeout(function () {
+          insertSel._refreshing = false;
+        }, 100);
+      }
+
+      insertSel.addEventListener("change", function (e) {
+        var v = e.target.value;
+        if (!v) return;
+        insertAtCursor(v);
+        e.target.value = "";
+      });
+      refreshInsertOptions();
+
+      bar.appendChild(insertSel);
+
+      bar.appendChild(el("span", { class: "sep" }));
+
+      // Organization & Save
+      bar.appendChild(
+        el(
+          "button",
+          {
+            onclick: sortAndUpdate,
+            title:
+              "Sort sections: configuration first, then template sections grouped as Common → Group → Email → Variable. Within each group the existing SortCulture/SortOrder rules apply.",
+          },
+          ["Sort sections"],
+        ),
+      );
+      bar.appendChild(
+        el("button", { onclick: downloadIni }, ["Download .ini"]),
+      );
+
+      updateUndoRedoButtons();
+    }
+
+    function statsText(result, errCount, warnCount) {
+      var n = result.sections.length,
+        l = result.lines.length;
+      var parts = [
+        l + " line" + (l === 1 ? "" : "s"),
+        n + " section" + (n === 1 ? "" : "s"),
+      ];
+      if (warnCount)
+        parts.push(warnCount + " warning" + (warnCount === 1 ? "" : "s"));
+      if (errCount)
+        parts.push(errCount + " error" + (errCount === 1 ? "" : "s"));
+      return parts.join(" · ");
+    }
+
+    // Decide which CSS tint class belongs to each parsed section.
+    function tintsFor(sections) {
+      var tints = new Array(sections.length);
+      var nonCfg = 0;
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].isConfig) tints[i] = "tint-cfg";
+        else tints[i] = nonCfg % 2 === 0 ? "tint-a" : "tint-b";
+        if (!sections[i].isConfig) nonCfg++;
+      }
+      return tints;
+    }
+
+    // -------- LEFT (gutter + bg overlay) and RIGHT (analysis rows) --------
+
+    function renderRows(result, issues, heights) {
+      var gutter = document.getElementById("gutter");
+      var bgOver = document.getElementById("bg-overlay");
+      var rightCt = document.getElementById("right-content");
+      gutter.innerHTML = "";
+      bgOver.innerHTML = "";
+      rightCt.innerHTML = "";
+
+      var tints = tintsFor(result.sections);
+
+      // Sticky column header in the analysis pane.
+      rightCt.appendChild(
+        el("div", { class: "legend" }, [
+          el("div", { class: "col-index", text: "index" }),
+          el("div", { class: "col-type", text: "explanation" }),
+        ]),
+      );
+
+      // Top spacer: matches the editor's 10-px top padding so analysis row #1
+      // sits at the SAME y-position as line #1 in the textarea. Both panes
+      // share a single outer scroll container now (#layout), so this is purely
+      // about visual row-by-row alignment with the editor on the left.
+      rightCt.appendChild(el("div", { style: "height:10px;flex:0 0 auto" }));
+
+      // Build a map of lineNo -> row for quick lookup during the main loop.
+      var rowsByLineNo = {};
+      for (var j = 0; j < result.rows.length; j++) {
+        rowsByLineNo[result.rows[j].lineNo] = result.rows[j];
+      }
+
+      // Iterate through ALL lines (including blank ones). Create gutter, bg, and
+      // analysis row elements for every line to maintain perfect 1-to-1 alignment.
+      for (var lineNo = 1; lineNo <= heights.length; lineNo++) {
+        var h = heights[lineNo - 1] || 21;
+        var r = rowsByLineNo[lineNo]; // might be undefined for blank lines
+
+        // --- Gutter cell (for EVERY line) ---
+        var gutterCell = el("div", {
+          class:
+            "gutter-cell " +
+            (r && r.sectionIdx != null ? tints[r.sectionIdx] : ""),
+          style: "height:" + h + "px",
+          "data-line": String(lineNo),
+          text: String(lineNo),
+        });
+        gutter.appendChild(gutterCell);
+
+        // --- Background overlay cell (for EVERY line) ---
+        var bgCell = el("div", {
+          class:
+            "bg-cell " +
+            (r && r.sectionIdx != null ? tints[r.sectionIdx] : ""),
+          style: "height:" + h + "px",
+          "data-line": String(lineNo),
+        });
+
+        bgOver.appendChild(bgCell);
+
+        // --- Analysis row (for EVERY line) ---
+        var row;
+        if (r) {
+          // Parsed content — render the full analysis row with label and type
+          var issue = issues.get(r.lineNo);
+          var classes = ["analysis-row", "t-" + r.kind];
+          if (r.sectionIdx != null) classes.push(tints[r.sectionIdx]);
+          if (issue)
+            classes.push(
+              issue.severity === "error" ? "issue-error" : "issue-warn",
+            );
+
+          // Colour the TYPE label green for "(allow)" entries and red for any
+          // "(deny…)" entry. We match an opening "(deny" rather than the literal
+          // "(deny)" so the longer "(deny currently logged-on user)" is caught too.
+          var typeClass = "col-type";
+          if (r.label.toLowerCase().indexOf("allow") !== -1)
+            typeClass += " allow";
+          else if (/deny\b/i.test(r.label.toLowerCase()))
+            typeClass += " deny";
+
+          // The col-type cell can wrap to multiple lines, so build a tooltip
+          // containing the full label + any issue message — hovering the cell
+          // always reveals the complete text.
+          var typeTooltip = r.label + (issue ? "  —  " + issue.message : "");
+
+          var typeChildren = [r.label];
+          if (issue) {
+            var icon = issue.severity === "error" ? "!" : "⚠";
+            typeChildren.push(
+              el("span", {
+                class: "issue " + issue.severity,
+                text: icon + " " + issue.message,
+                title: issue.message,
+              }),
+            );
+          }
+
+          var lineNoCaptured = r.lineNo;
+          var activate = (function (ln) {
+            return function () {
+              focusLine(ln);
+            };
+          })(lineNoCaptured);
+          row = el(
+            "div",
+            {
+              class: classes.join(" "),
+              "data-line": String(r.lineNo),
+              // Make every analysis row reachable by keyboard (Tab) and activatable
+              // with Enter or Space, so the editor is usable without a mouse.
+              tabindex: "0",
+              role: "button",
+              "aria-label": "Jump to line " + r.lineNo + ", " + r.label,
+              // Hover tooltip — reveals the full label and any issue message.
+              title: typeTooltip,
+              style: "min-height:" + h + "px",
+              onclick: activate,
+              onkeydown: (function (act) {
+                return function (ev) {
+                  if (ev.key === "Enter" || ev.key === " ") {
+                    ev.preventDefault();
+                    act();
+                  }
+                };
+              })(activate),
+            },
+            [
+              el("div", {
+                class: "col-index",
+                text: r.sectionIdx != null ? String(r.sectionIdx) : "",
+              }),
+              el("div", { class: typeClass }, typeChildren),
+            ],
+          );
+        } else {
+          // Blank line — render an empty row with the same height to maintain alignment
+          row = el(
+            "div",
+            {
+              class: "analysis-row",
+              style: "min-height:" + h + "px",
+            },
+            [
+              el("div", { class: "col-index" }),
+              el("div", { class: "col-type" }),
+            ],
+          );
+        }
+        rightCt.appendChild(row);
+
+        // Alignment rule: gutter cell, background overlay cell and analysis
+        // row are ALL pinned to the same `h` that the editor's wrapped INPUT
+        // line uses. The TYPE label is locked to a single row by CSS
+        // (`white-space: nowrap; text-overflow: ellipsis`) — see the comment
+        // on `.analysis-row .col-type` — so the analysis row can never exceed
+        // `h`, and there is no need to grow anything to match.
+        // Do NOT take Math.max with rowHeight here: a textarea has no
+        // per-line height, so any growth on the right would silently desync
+        // the gutter from the editor lines below it.
+      }
+
+      // Bottom spacer — symmetric with the 10-px top spacer above so the very
+      // last analysis row has breathing room at the bottom of the scroll
+      // container, matching the editor's bottom padding on the left side.
+      rightCt.appendChild(el("div", { style: "height:10px;flex:0 0 auto" }));
+    }
+
+    function setupHoverSync() {
+      const app = document.getElementById("app");
+
+      const updateSync = (line, isAdd) => {
+        if (!line) return;
+        // Find all elements (gutter, bg, analysis-row) sharing this line number
+        const elements = document.querySelectorAll(`[data-line="${line}"]`);
+        elements.forEach((el) => {
+          el.classList.toggle("hover-sync", isAdd);
+        });
+      };
+
+      app.addEventListener("mouseover", (e) => {
+        const target = e.target.closest("[data-line]");
+        if (target) updateSync(target.getAttribute("data-line"), true);
+      });
+
+      app.addEventListener("mouseout", (e) => {
+        const target = e.target.closest("[data-line]");
+        if (target) updateSync(target.getAttribute("data-line"), false);
+      });
+    }
+
+    /* ============================================================
+     10. MAIN REFRESH
+     Called whenever text, INI type, template type, or width changes.
+     ============================================================ */
+
+    function refreshAll() {
+      var result = analyze(state.text);
+      var issues = validate(result, {
+        iniType: state.iniType,
+        templateType: state.templateType,
+      });
+
+      // Stats text in the top bar.
+      var errCount = 0;
+      issues.forEach(function (v) {
+        if (v.severity === "error") errCount++;
+      });
+      var warnCount = issues.size - errCount;
+      var statsEl = document.getElementById("stats");
+      if (statsEl)
+        statsEl.textContent = statsText(result, errCount, warnCount);
+
+      // Set the editor's height to fit all wrapped lines (so the pane scrolls,
+      // not the textarea itself).
+      var heights = measureLineHeights(state.text);
+      var total = 0;
+      for (var i = 0; i < heights.length; i++) total += heights[i];
+
+      var ed = document.getElementById("editor");
+      // Top + bottom padding (10px each from the CSS).
+      ed.style.height = total + 20 + "px";
+
+      renderRows(result, issues, heights);
+
+      // Restore highlight on the line where the cursor sits.
+      syncCursorHighlight();
+    }
+
+    /* ============================================================
+     11. CURSOR / SCROLL SYNC
+     ============================================================ */
+
+    function getCurrentLineNo() {
+      var ta = document.getElementById("editor");
+      if (!ta) return 1;
+      var pos = ta.selectionStart,
+        text = ta.value;
+      var line = 1;
+      for (var i = 0; i < pos && i < text.length; i++) {
+        if (text.charCodeAt(i) === 10) line++;
+      }
+      return line;
+    }
+
+    function highlightAnalysisRow(lineNo) {
+      var ct = document.getElementById("right-content");
+      if (!ct) return;
+      var prev = ct.querySelector(".analysis-row.active");
+      if (prev) prev.classList.remove("active");
+      var t = ct.querySelector('.analysis-row[data-line="' + lineNo + '"]');
+      if (t) t.classList.add("active");
+    }
+
+    function syncCursorHighlight() {
+      state.activeLine = getCurrentLineNo();
+      highlightAnalysisRow(state.activeLine);
+    }
+
+    function focusLine(lineNo) {
+      var ta = document.getElementById("editor");
+      if (!ta) return;
+      var lines = ta.value.split("\n");
+      var start = 0;
+      for (var i = 0; i < lineNo - 1 && i < lines.length; i++)
+        start += lines[i].length + 1;
+      var end = start + (lines[lineNo - 1] || "").length;
+      ta.focus();
+      ta.setSelectionRange(start, end);
+      syncCursorHighlight();
+      scrollLineIntoView(lineNo);
+    }
+
+    function scrollLineIntoView(lineNo) {
+      // The active scroll container depends on the layout:
+      //   - desktop (>720px): the outer #layout grid scrolls (single scrollbar)
+      //   - mobile  (<=720px): each .pane scrolls independently — scrolling
+      //     #layout would do nothing because we set overflow:hidden on it
+      //     in the mobile media query.
+      // Pick the right element by checking which one actually has scrollable
+      // content (clientHeight < scrollHeight); if neither does, fall back to
+      // the left pane.
+      var gutter = document.getElementById("gutter");
+      var leftPane = document.getElementById("left-pane");
+      var layout = document.getElementById("layout");
+      if (!gutter || !leftPane || !layout) return;
+      if (lineNo < 1 || lineNo > gutter.children.length) return;
+      var scroller =
+        layout.scrollHeight > layout.clientHeight + 1
+          ? layout
+          : leftPane.scrollHeight > leftPane.clientHeight + 1
+            ? leftPane
+            : layout; // nothing to scroll — pick layout, no-op below
+
+      // The sticky header strip (.left-legend) sits at the top of the
+      // scroller and would visually cover any line scrolled "to the top" —
+      // measure it and offset the target so the focused line is never
+      // hidden behind the header.
+      var legend = document.getElementsByClassName("left-legend")[0];
+      var headerH = legend ? legend.offsetHeight : 0;
+
+      // Position of this gutter cell INSIDE the scroller. We use viewport
+      // rects + the scroller's current scrollTop because `offsetTop` is
+      // unreliable here: it walks up to the nearest *positioned* ancestor,
+      // and none of #app / #layout / .pane / .left-content set position,
+      // so offsetTop would resolve all the way up to <body> and silently
+      // include the toolbar height — which is NOT in the scroller's
+      // coordinate system. The rect-diff form is bullet-proof regardless of
+      // which element ends up being the scroller.
+      var cell = gutter.children[lineNo - 1];
+      var cellRect = cell.getBoundingClientRect();
+      var scrollRect = scroller.getBoundingClientRect();
+      var top = cellRect.top - scrollRect.top + scroller.scrollTop;
+      var bottom = cellRect.bottom - scrollRect.top + scroller.scrollTop;
+
+      var visibleTop = scroller.scrollTop + headerH;
+      var visibleBottom = scroller.scrollTop + scroller.clientHeight;
+      if (top < visibleTop) scroller.scrollTop = top - headerH - 20;
+      if (bottom > visibleBottom)
+        scroller.scrollTop = bottom - scroller.clientHeight + 20;
+    }
+
+    // Scroll sync between panes is no longer needed — both panes are inside
+    // a single outer scroll container (#layout, see the CSS comment on
+    // `.layout`), so they automatically move together. The function is kept
+    // as a no-op so any stray future caller (or the boot wiring below) does
+    // not crash.
+    function setupScrollSync() {
+      /* intentionally empty — single scrollbar */
+    }
+
+    /* ============================================================
+     12. EDITOR EVENTS / MUTATIONS
+     ============================================================ */
+
+    function setupEditor() {
+      var ed = document.getElementById("editor");
+      ed.value = state.text;
+      ed.addEventListener("input", function (e) {
+        state.text = e.target.value;
+        captureDebounced();
+        refreshAll();
+      });
+      ed.addEventListener("click", syncCursorHighlight);
+      ed.addEventListener("keyup", syncCursorHighlight);
+    }
+
+    // Document-level keyboard shortcuts so Undo/Redo work no matter where focus
+    // is (the textarea, an analysis row, the divider, etc). We deliberately do
+    // NOT handle the shortcuts inside other text inputs (e.g. file inputs) to
+    // let the browser handle native field-level undo there.
+    function setupGlobalShortcuts() {
+      document.addEventListener("keydown", function (e) {
+        var meta = e.ctrlKey || e.metaKey;
+        if (!meta) return;
+        var k = (e.key || "").toLowerCase();
+        if (k !== "z" && k !== "y") return;
+        var t = e.target;
+        var tag = t && t.tagName ? t.tagName.toLowerCase() : "";
+        // Allow native undo/redo inside other inputs (we only own the editor).
+        if ((tag === "input" || tag === "select") && t.id !== "editor")
+          return;
+        if (k === "z" && !e.shiftKey) {
+          e.preventDefault();
+          undo();
+        } else if (k === "y" || (k === "z" && e.shiftKey)) {
+          e.preventDefault();
+          redo();
+        }
+      });
+    }
+
+    function insertAtCursor(snippet) {
+      flushCapture();
+      var ta = document.getElementById("editor");
+      if (!ta) {
+        state.text =
+          (state.text ? state.text.replace(/\r?\n*$/, "\n") : "") +
+          snippet +
+          "\n";
+        captureNow();
+        refreshAll();
+        return;
+      }
+      var start = ta.selectionStart,
+        end = ta.selectionEnd;
+      var before = ta.value.slice(0, start),
+        after = ta.value.slice(end);
+      var prefix = "",
+        suffix = "";
+      if (before && !/\n$/i.test(before)) prefix = "\n";
+      if (after && !/^\n/i.test(after)) suffix = "\n";
+      if (/^\[.+\]$/i.test(snippet) && before && !/\n\n$/i.test(before)) {
+        prefix = /\n$/i.test(before) ? "\n" : "\n\n";
+      }
+      var newText = before + prefix + snippet + suffix + after;
+      ta.value = newText;
+      state.text = newText;
+      var newCursor = (before + prefix + snippet).length;
+      ta.focus();
+      ta.setSelectionRange(newCursor, newCursor);
+      captureNow();
+      refreshAll();
+    }
+
+    function sortAndUpdate() {
+      var result = analyze(state.text);
+      if (!result.sections.length) return;
+      flushCapture();
+      state.text = buildSortedText(result);
+      document.getElementById("editor").value = state.text;
+      captureNow();
+      refreshAll();
+    }
+
+    function downloadIni() {
+      var blob = new Blob([state.text], { type: "text/plain;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = state.fileName || (state.iniType === "oof" ? "oof.ini" : "signatures.ini");
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () {
+        URL.revokeObjectURL(url);
+        a.remove();
+      }, 200);
+    }
+
+    function loadSample() {
+      flushCapture();
+      state.text = SAMPLE_INI;
+      // state.fileName = "Signatures-sample.ini";
+      state.iniType = "signature";
+      state.templateType = "docx";
+      document.getElementById("editor").value = state.text;
+      captureNow();
+      renderTopbar();
+      refreshAll();
+    }
+
+    /* ============================================================
+     13. PANE-WIDTH RECOMPUTATION ON WINDOW RESIZE
+     The two panes are split by a draggable divider. The left pane width
+     is persisted and the right pane takes the remaining space. On window
+     resize we recompute wrapped line heights and refresh the layout.
+     ============================================================ */
+
+    function setupDivider() {
+      var div = document.getElementById("divider");
+      var layout = document.getElementById("layout");
+
+      function applyLayout(leftW) {
+        var w = layout.clientWidth;
+        var minLeft = 200,
+          minRight = 250;
+        if (leftW < minLeft) leftW = minLeft;
+        if (leftW > w - minRight) leftW = w - minRight;
+        layout.style.gridTemplateColumns = leftW + "px 6px 1fr";
+        state.leftWidth = leftW;
+        div.setAttribute("aria-valuenow", leftW);
+        div.setAttribute("aria-valuemax", Math.max(w - minRight, minLeft));
+        refreshAll();
+      }
+
+      var initial = state.leftWidth;
+      if (!initial || initial < 200)
+        initial = Math.round(layout.clientWidth * 0.5);
+      applyLayout(initial);
+
+      div.addEventListener("mousedown", function (e) {
+        e.preventDefault();
+        div.classList.add("dragging");
+        var startX = e.clientX;
+        var startW = document.getElementById("left-pane").offsetWidth;
+        function onMove(ev) {
+          applyLayout(startW + (ev.clientX - startX));
+        }
+        function onUp() {
+          document.removeEventListener("mousemove", onMove);
+          document.removeEventListener("mouseup", onUp);
+          div.classList.remove("dragging");
+        }
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+      });
+
+      div.addEventListener(
+        "touchstart",
+        function (e) {
+          if (!e.touches[0]) return;
+          var startX = e.touches[0].clientX;
+          var startW = document.getElementById("left-pane").offsetWidth;
+          function onMove(ev) {
+            if (ev.touches[0])
+              applyLayout(startW + (ev.touches[0].clientX - startX));
+          }
+          function onEnd() {
+            document.removeEventListener("touchmove", onMove);
+            document.removeEventListener("touchend", onEnd);
+          }
+          document.addEventListener("touchmove", onMove, { passive: true });
+          document.addEventListener("touchend", onEnd);
+        },
+        { passive: true },
+      );
+
+      window.addEventListener("resize", function () {
+        refreshAll();
+      });
+    }
+
+    /* ============================================================
+     14. BOOT
+     ============================================================ */
+
+    document.addEventListener("DOMContentLoaded", function () {
+      var params = new URLSearchParams(location.search);
+      if (params.get("demo") === "1") state.text = SAMPLE_INI;
+
+      editHistory = [state.text];
+      historyIndex = 0;
+
+      renderTopbar();
+      setupEditor();
+      setupHoverSync();
+      setupGlobalShortcuts();
+      setupDivider();
+      setupScrollSync();
+      refreshAll();
+      document.getElementById("editor").focus();
+    });
+  </script>
+</body>
+
+</html>

@@ -1,6 +1,6 @@
 <!-- omit in toc -->
 # Data Sovereign Email Signatures and Out-of-Office Replies<br><sub>Unified Outlook branding everywhere – with zero external data exposure</sub>
-<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/blob/main/license.txt" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?label=License&labelColor=black&color=informational" alt="License: EUPL 1.2"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=Latest%20release&color=informational&labelColor=black" alt="Latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/set-outlooksignatures/set-outlooksignatures/total?label=Downloads&labelColor=black" alt="Downloads" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?label=Issues&labelColor=black" alt="Issues" data-external="1"></a> <a href="https://set-outlooksignatures.com/faq#what-can-i-learn-from-the-code-of-set-outlooksignatures" target="_blank"><img src="https://img.shields.io/badge/Behind%20the%20scenes-Learn%20from%20the%20code-lawngreen?labelColor=black" alt="Behind the scenes: Learn from the code"></a>
+<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/blob/main/LICENSE.txt" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?label=License&labelColor=black&color=informational" alt="License: EUPL 1.2"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=Latest%20release&color=informational&labelColor=black" alt="Latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/set-outlooksignatures/set-outlooksignatures/total?label=Downloads&labelColor=black" alt="Downloads" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?label=Issues&labelColor=black" alt="Issues" data-external="1"></a> <a href="https://set-outlooksignatures.com/faq#what-can-i-learn-from-the-code-of-set-outlooksignatures" target="_blank"><img src="https://img.shields.io/badge/Behind%20the%20scenes-Learn%20from%20the%20code-lawngreen?labelColor=black" alt="Behind the scenes: Learn from the code"></a>
 
 # Changelog
 <!--
@@ -11,71 +11,112 @@ _Put Notice here_
 _**Breaking:** <Present tense verb> XXX_
 
 ### Set-OutlookSignatures
-#### Changed
-#### Added
-#### Removed
-#### Fixed
+#### Security
+#### Additions
+#### Changes
+#### Deprecations
+#### Removals
+#### Fixes
 
 ### Benefactor Circle add-on
-#### Changed
-#### Added
-#### Removed
-#### Fixed
+#### Security
+#### Additions
+#### Changes
+#### Deprecations
+#### Removals
+#### Fixes
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
-#### Added
-#### Removed
-#### Fixed
+#### Security
+#### Additions
+#### Changes
+#### Deprecations
+#### Removals
+#### Fixes
 -->
 
 
-## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.26.1" target="_blank">v4.26.1</a> - 2026-03-17
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.27.0" target="_blank">v4.27.0</a> - 2026-05-01
 
-_Put Notice here_
+_**[Microsoft starts turning off EWS for Exchange Online in October 2026](https://techcommunity.microsoft.com/blog/exchange/exchange-online-ews-your-time-is-almost-up/4492361).** Make sure to use Set-OutlookSignatures v4.26.0 or newer, and to modify the Entra ID app permissions as described in the 'Set-OutlookSignatures' and 'Benefactor Circle add-on' sections of [release v4.26.0](#v4260---2026-03-09)._
 
 _**Breaking:** <Present tense verb> XXX_
 
 ### Set-OutlookSignatures
-#### Changed
+#### Additions
+- Add a graphical INI file editor. A powerful, web-based tool for managing Set-OutlookSignatures configuration files. It simplifies complex tasks for IT and Marketing teams by providing a visual interface for `.ini` manipulation-
+  - A single HTML file that runs locally, from a file share, or hosted on a web server.
+  - Create or modify signature and out-of-office (OOF) configuration files with ease.
+  - Integrated documentation provides a clear explanation for every line and setting in the INI file.
+  - Detects errors based on technical syntax and years of real-world support experience from the support teams of Set-OutlookSignatures and the Benefactor Circle add-on.
+  - Visualizes the exact processing order the engine will use for templates.
+  - Includes undo/redo history, dark/light mode, mobile/touch support, and automatic input file encoding detection.
+
+  Check out `.\sample code\IniEditor.html` for a local copy or use it online at [set-outlooksignatures.com/inieditor](https://set-outlooksignatures.com/inieditor).
+
+  Thanks to [ExplicIT Consulting](https://explicitconsulting.at), the providers of the [Benefactor Circle add-on](https://set-outlooksignatures.com/benefactorcircle), for donating this tool!
+- Report not only missing but also superflous Entra ID permissions, as well as more secure alternatives to existing permissions.
+- Log when the system power mode is not set to best performance or when the system is running on battery, as these can have a huge impact on script runtime. See https://set-outlooksignatures.com/faq#windows-power-mode for details.
+#### Changes
+- Update address-formatter to commit 4ca0771.
+- Update address-formatting database to commit 9192954.
+- Update libphonenumber-csharp to v9.0.29.
+- Update MSAL.Net to v4.83.3.
+- Update QRCoder to v1.8.0.
+- Rename `bin` subdirectory to `deps` to improve compatibility with pre-configured .gitignore files and to clearly distinguish external dependencies from the core Set-OutlookSignatures source code.
+  - Add explicit licensing documentation within the deps directory to define the boundaries of the EUPL v1.2 jurisdiction.
+  - Include a specific license.txt for Set-OutlookSignatures.Common.dll to clarify its status as a third-party proprietary component gifted by ExplicIT Consulting GmbH, ensuring compliance through software aggregation.
+#### Fixes
+- Update copying width and height attributes to style attribute: When no unit is specified, use `px`.
+
+### Benefactor Circle add-on
+#### Additions
+- Add a workaround in preparing data for the Outlook add-in for inconsistent roaming signature information given back from Microsoft Graph API. This inconsistence can lead to missing default signatures for additional and automapped Exchange Online mailboxes.
+
+### Outlook add-in (part of the Benefactor Circle add-on)
+#### Security
+- Remove custom crypto shim as @azure/msal-browser includes this feature natively again since v5.6.2.
+#### Additions
+- Report missing Entra ID app permissions as error, and superfluous Entra ID app permissions as warning.
+- Make Exchange Online hosting detection more robust by not only using a curated list of autodiscover URLs but by dynamically adding entries from Microsoft's API services. This extends support beyond known public, national and sovereign clouds.
+- Add workaround for inconsistent paragraph heights in HTML signatures.
+#### Changes
+- Update @azure/msal-browser to v5.9.0.
+- Throw an error when the license check fails, instead of just warning about it. This warning is also shown as Outlook notification message.
+#### Fixes
+- Fix the problem that `run_before_deployment.ps1` on Linux and macOS adds .js files from the `sample code` folder of the Outlook add-in to the `.well-known/microsoft-officeaddins-allowed.json` file due to non cross-platform compatible path comparison code.
+- Do not write log messages to taskpane elements before they exist.
+- Decode UTF8 characters correcty when logging Graph token metadata.
+
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.26.1" target="_blank">v4.26.1</a> - 2026-03-17
+
+_**[Microsoft starts turning off EWS for Exchange Online in October 2026](https://techcommunity.microsoft.com/blog/exchange/exchange-online-ews-your-time-is-almost-up/4492361).** Make sure to use Set-OutlookSignatures v4.26.0 or newer, and to modify the Entra ID app permissions as described in the 'Set-OutlookSignatures' and 'Benefactor Circle add-on' sections of [release v4.26.0](#v4260---2026-03-09)._
+
+### Set-OutlookSignatures
+#### Changes
 - Update MSAL.Net to v4.83.1.
 - Update libphonenumber-csharp to v9.0.26.
-#### Added
+#### Additions
 - Warn when the Entra ID app used is missing optional permissions, exit when it is missing required permissions.
-#### Removed
-#### Fixed
+#### Fixes
 - Fix WatchCatchableExitSignal not ending the script. Set-OutlookSignatures finishes all its signature and log file related tasks but then hangs infinitely. This does not happen in all environments but depends on combinations of calling process, console host, and .Net version.
 
 ### Benefactor Circle add-on
-#### Changed
-#### Added
-#### Removed
-#### Fixed
-- Do not reset Outlook Web and New Outlook on Windows user configuration options - such as time zone, dark mode, and reading pane position - when configuring signatures in Outlook Web. The problem only happens in v4.26.0 when the new Graph API code path is used. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions/152" target="_blank">#152</a>) (Thanks <a href="https://github.com/wwa-jvteeffelen" target="_blank">@wwa-jvteeffelen</a>!)
+#### Fixes
+- Do not reset Outlook Web and New Outlook for Windows user configuration options - such as time zone, dark mode, and reading pane position - when configuring signatures in Outlook Web. The problem only happens in v4.26.0 when the new Graph API code path is used. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions/152" target="_blank">#152</a>) (Thanks <a href="https://github.com/wwa-jvteeffelen" target="_blank">@wwa-jvteeffelen</a>!)
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure/msal-browser to v5.5.0.
-#### Added
-#### Removed
-#### Fixed
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.26.0" target="_blank">v4.26.0</a> - 2026-03-09
 
-_**Pay attention if you have mailboxes in Exchange Online:** Microsoft begins removing access to Exchange Web Service (EWS) from Exchange Online. Set-OutlookSignatures v4.26.0 uses newly published Graph APIs in favor of EWS.<br>**Make sure to modify the permissions assigned to your Entra ID apps as mentioned below in the sections 'Set-OutlookSignatures' and 'Benefactor Circle add-on'.**<br>A fallback to EWS is integrated, but it will stop working as soon as Microsoft [begins to disable EWS in Exchange Online in the next months](https://techcommunity.microsoft.com/blog/exchange/exchange-online-ews-your-time-is-almost-up/4492361)._
+_**[Microsoft starts turning off EWS for Exchange Online in October 2026](https://techcommunity.microsoft.com/blog/exchange/exchange-online-ews-your-time-is-almost-up/4492361).** Make sure to use Set-OutlookSignatures v4.26.0 or newer, and to modify the Entra ID app permissions as described in the 'Set-OutlookSignatures' and 'Benefactor Circle add-on' sections below._
 
 ### Set-OutlookSignatures
-#### Changed
-- Use Graph API for mailboxes hosted in Exchange Online instead of EWS (Exchange Web Services) for the last remaining features. This has not been possible before as the Graph API lacked these features.
-  - **Make sure to REMOVE the 'EWS.AccessAsUser.All' delegated permission from the Entra ID app you use for Set-OutlookSignatures and ADD the delegated Graph API permission 'MailboxConfigItem.ReadWrite'.**<br>Alternatively, you can delete the existing Entra ID app, create a new one using '`.\sample code\Create-EntraApp.ps1`', and then update your configuration ('`GraphClientId`') with the new application ID.<br>A fallback to EWS is integrated, but will stop working as soon as Microsoft [begins to disable EWS in Exchange Online in the next months](https://techcommunity.microsoft.com/blog/exchange/exchange-online-ews-your-time-is-almost-up/4492361).
-- Always consider mailbox display sort order of Classic Outlook for Windows when prioritizing mailboxes, even when the display sort order does not match the number of mailboxes found. This overcomes an Outlook issue where Outlook does not always update the display sort order when a new mailbox is added.
-- Update address-formatting database to 064d82b.
-- Update libphonenumber-csharp to v9.0.25.
-- Update MSAL.Net to v4.82.1.
-- Make the CHANGELOG easier to read by making the change categories (Changed, Added, Removed, Fixed) sub-categories of the products (Set-OutlookSignatures, Benefactor Circle add-on, Outlook add-in). The change has been applied to all CHANGELOG entries starting with v4.20.0.
-- Add content to FAQ '[Why is no admin or user GUI available?](https://set-outlooksignatures.com/faq#why-is-no-admin-or-user-gui-available)'.
-#### Added
+#### Additions
 - Add support for sovereign clouds: Bleu (France), Delos (Germany), and GovSG (Singapore).
 - Add support for all future cloud environments via the '`$CustomCloudEnvironments`' variable in a custom Graph configuration file. This makes Set-OutlookSignatures usable in any M365 cloud, even when the endpoints have not been published, which is not unusual when the environment is still in its soft-launch phase, for example. See the file '.\config\default graph config.ps1' for an example.
 - Add the '[Architecture considerations](https://set-outlooksignatures.com/details#architecture-considerations)' chapter to the 'Technical details, requirements and usage' document.
@@ -93,28 +134,46 @@ _**Pay attention if you have mailboxes in Exchange Online:** Microsoft begins re
   - [Signature management in the cloud: The underestimated compliance risk](https://set-outlooksignatures.com/blog/2026/02/17/privacy)
   - [Seasonal, time-based, and campaign-driven email signatures](https://set-outlooksignatures.com/blog/2026/02/25/seasonal-signatures)
   - [Best image formats for email signatures: Compatibility guide](https://set-outlooksignatures.com/blog/2026/03/05/image-formats)
-#### Fixed
+- Always consider mailbox display sort order of Classic Outlook for Windows when prioritizing mailboxes, even when the display sort order does not match the number of mailboxes found. This overcomes an Outlook issue where Outlook does not always update the display sort order when a new mailbox is added.
+#### Changes
+- Update address-formatting database to 064d82b.
+- Update libphonenumber-csharp to v9.0.25.
+- Update MSAL.Net to v4.82.1.
+- Make the CHANGELOG easier to read by making the change categories (Changed, Added, Removed, Fixed) sub-categories of the products (Set-OutlookSignatures, Benefactor Circle add-on, Outlook add-in). The change has been applied to all CHANGELOG entries starting with v4.20.0.
+- Add content to FAQ '[Why is no admin or user GUI available?](https://set-outlooksignatures.com/faq#why-is-no-admin-or-user-gui-available)'.
+#### Deprecations
+- Deprecate EWS (Exchange Web Services) for Exchange Online in favor of Microsoft Graph API. **Action required, as [Microsoft starts turning off EWS for Exchange Online in October 2026](https://techcommunity.microsoft.com/blog/exchange/exchange-online-ews-your-time-is-almost-up/4492361):**
+  - Remove these permissions from the Entra ID app you use for Set-OutlookSignatures:
+    - Graph API, delegated: EWS.AccessAsUser.All
+  - Add this permission:
+    - Graph API, delegated: MailboxConfigItem.ReadWrite
+#### Fixes
 - Make sure signature marking works for downloaded roaming signatures even when they are only an HTML fragment and not a full HTML document. This issue results from Microsoft changing roaming signature HTML processing.
 - Make sure the ConvertEnconding function adds the '\<head\>' tag to HTML files correctly when the HTML code is just an HTML fragment and not a full document.
 - Make sure '`MoveCSSInline`' does not crash Set-OutlookSignatures when the resulting HTML code is a null string (which can be the result of an empty signature or a problem within the component). (Thanks <a href="https://bearclawtechnology.com/" target="_blank">Jeff Feldstein</a>!)
 
 ### Benefactor Circle add-on
-#### Changed
-- Use Graph API for mailboxes hosted in Exchange Online instead of EWS (Exchange Web Services) for the last remaining features. This has not been possible before as the Graph API lacked these features.
-  - If you use **'SimulateAndDeploy'** mode, you likely have a separate Entra ID app for it. **Make sure to REMOVE the 'EWS.AccessAsUser.All' delegated permission and the Office 365 Exchange Online application permission 'full_access_as_app', then ADD the Graph API permission 'MailboxConfigItem.ReadWrite' as delegated permission and as application permission**.<br>Alternatively, you can delete the existing Entra ID app, create a new one using '`.\sample code\Create-EntraApp.ps1`', and then update your configuration with the new application ID and secret.<br>A fallback to EWS is integrated, but will stop working as soon as Microsoft [begins to disable EWS in Exchange Online in the next months](https://techcommunity.microsoft.com/blog/exchange/exchange-online-ews-your-time-is-almost-up/4492361).
-#### Added
+#### Additions
 - Add support for sovereign clouds: Bleu (France), Delos (Germany), and GovSG (Singapore).
 - Add support for all future cloud environments via the '`$CustomCloudEnvironments`' variable in a custom Graph configuration file. This makes Set-OutlookSignatures usable in any M365 cloud, even when the endpoints have not been published, which is not unusual when the environment is still in its soft-launch phase, for example. See the file '.\config\default graph config.ps1' for an example.
-#### Fixed
+#### Deprecations
+- Deprecate EWS (Exchange Web Services) for Exchange Online in favor of Microsoft Graph API. **Action required for SimulateAndDeploy mode, as [Microsoft starts turning off EWS for Exchange Online in October 2026](https://techcommunity.microsoft.com/blog/exchange/exchange-online-ews-your-time-is-almost-up/4492361):**
+  - Remove these permissions from the Entra ID app you use for SimulateAndDeploy:
+    - Graph API, delegated: EWS.AccessAsUser.All
+    - Office 365 Exchange Online, application: full_access_as_app
+  - Add these permissions:
+    - Graph API, delegated: MailboxConfigItem.ReadWrite
+    - Graph API, application: MailboxConfigItem.ReadWrite
+#### Fixes
 - Make sure signature marking works for downloaded roaming signatures from mailboxes other than the one of the current user. This issue results from Microsoft changing roaming signature HTML processing.
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
-- Update @azure/msal-browser to v5.4.0.
-#### Added
+#### Additions
 - Add support for sovereign clouds: Bleu (France), Delos (Germany), and GovSG (Singapore).
 - Add support for all future cloud environments via the '`$CustomCloudEnvironments`' parameters. This makes the Outlook add-in usable in any M365 cloud, even when the endpoints have not been published, which is not unusual when the environment is still in its soft-launch phase, for example. See the file '.\run_before_deployment.ps1' for an example.
 - Add the 'HTML as plain text' option to the signature 'Copy' button in the taskpane.
+#### Changes
+- Update @azure/msal-browser to v5.4.0.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.25.0" target="_blank">v4.25.0</a> - 2025-12-22
@@ -122,14 +181,14 @@ _**Pay attention if you have mailboxes in Exchange Online:** Microsoft begins re
 _**Benefactor Circle add-on users with mailboxes in Exchange Online should update to this version as soon as possible.**_ Microsoft will begin changing roaming signature HTML processing shortly. Update as soon as possible to avoid potential negative impact on the parameters '`DeleteScriptCreatedSignaturesWithoutTemplate`' and '`DeleteUserCreatedSignatures`'.
 
 ### Set-OutlookSignatures
-#### Changed
+#### Changes
 - Switch to a new way of marking signatures created by Set-OutlookSignatures, while keeping compatibility with the existing one. This makes sure that the parameters '`DeleteScriptCreatedSignaturesWithoutTemplate`' and '`DeleteUserCreatedSignatures`', as well as similar features keep working when Microsoft changes roaming signature HTML processing.
 - Update '`MoveCSSInline`' to fall back to non-inlined HTML in case of errors.
 - Update libphonenumber-csharp to v9.0.21.
 - Update address-formatting datbase to 8444a0cc989042ebb21e6420f82bc4ded05a7fec.
 - Rephrase the welcome screen.
 - Make Graph API queries more resilient by retrying them five seconds after catching an error. This compensates for brief "hiccups" in the internal environment, on the Internet, and in Microsoft's data centers.
-#### Added
+#### Additions
 - Add shorter replacement variable names. To simplify signature design in limited space, shorter versions of replacement variables are automatically added. The original long names remain the default; short names are just an extra option. This applies to both default and custom variables.<br>Implementation logic and usage examples:
   1. CurrentUserManager -> UM<br>Example: '\$CurrentUserManagerVariableX\$' is also available as '\$UMVariableX\$'
   2. CurrentMailboxManager -> MM<br>Example: '\$CurrentMailboxManagerVariableX\$' is also available as '\$MMVariableX\$'
@@ -143,19 +202,19 @@ _**Benefactor Circle add-on users with mailboxes in Exchange Online should updat
 - Make the parameter '`DeleteScriptCreatedSignaturesWithoutTemplate`' remove old signatures which can only be leftovers of switching from '`DisableRoamingSignatures false`' to '`DisableRoamingSignatures true`', even when these leftovers have not been created by Set-OutlookSignatures.
 - Show a warning when a signature has more than 30,000 characters (excluding images) and will therefore probably not work in Outlook add-in launch events and the taskpane.
 - Add additional code to '`.\sample code\Create-EntraApp.ps1`' ensuring that default configuration parameters, package providers, and package repositories are available. Force the use of PowerShell Gallery when searching for required packages.
-#### Fixed
+#### Fixes
 - Make sure the '`$Current[User|Manager|Mailbox|MailboxManager]PostalAddress$`' not only contains line breaks when using DOCX templates, but also when using HTM templates.
 
 ### Benefactor Circle add-on
-#### Changed
-- Embed images when setting Outlook on the web signatures (classic and roaming), independent from the value of the '`EmbedImagesInHtml`' parameter. This makes sure that images are also considered for default signatures that have not been created by Set-OutlookSignatures.
-#### Fixed
-- Fix warning message '`Signature file '.htm' not found. Outlook on the web HTML signature will be blank.`', which leads to not setting the signature in classic Outlook on the web. This is only relevant for mailboxes hosted in Exchange on-prem when being accessed via Outlook on the web and when not using the Outlook add-in.
+#### Changes
+- Embed images when setting Outlook for the web signatures (classic and roaming), independent from the value of the '`EmbedImagesInHtml`' parameter. This makes sure that images are also considered for default signatures that have not been created by Set-OutlookSignatures.
+#### Fixes
+- Fix warning message '`Signature file '.htm' not found. Outlook for the web HTML signature will be blank.`', which leads to not setting the signature in classic Outlook for the web. This is only relevant for mailboxes hosted in Exchange on-prem when being accessed via Outlook for the web and when not using the Outlook add-in.
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure/msal-browser to v4.27.0.
-#### Added
+#### Additions
 - Show a warning in the taskpane of the Outlook add-in when the signature shown in the preview has more than 30,000 characters (excluding images) and will therefore probably not work in Outlook add-in launch events and the taskpane.
 - Add to the taskpane a "Copy to clipboard" button for the currently previewed signature. This makes it easy to copy a signature to another email client and to overcome the 30,000 character limit.
 - Add to the taskpane a "Copy to clipboard" button for the log output.
@@ -166,51 +225,51 @@ _**Benefactor Circle add-on users with mailboxes in Exchange Online should updat
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.24.0" target="_blank">v4.24.0</a> - 2025-11-26
 
 ### Set-OutlookSignatures
-#### Changed
+#### Changes
 - Update libphonenumber-csharp to v9.0.19.
 - Update MSAL.Net to v4.79.2.
-#### Added
+#### Additions
 - Make it much easier and more flexible to add account pictures to DOCX templates: Simply add a shape, position it "inline with text" and add the name of the picture replacement variable ('`$CurrentUserPhoto$`', for example) to the alternative text. The shape is then automatically filled with the picuture you selected, giving you new graphical possibilities. The old way via "link and embed" is still possible, so you do not need to change your templates.
 - Update the function '`ConvertEncoding`' to handle and try to automatically correct HTM template files which are not following the required format (UTF-8 without BOM, meta charset definition).
 - Add new FAQ: '[How to deploy a signature only once](https://set-outlooksignatures.com/faq#how-to-deploy-a-signature-only-once)'
 - Show a warning when a mailbox does not have the '`mail`' attribute set, if the mail attribute does not match the primary SMTP address, or if multiple primary SMTP addresses are defined. Each of these misconfigurations will lead to errors in Set-OutlookSignatures and other applications, including Microsoft software.
 - Show a warning when DOCX templates are used and a non-picture replacement variable has more than 255 characters. Use a slower replacement method for these cases.
 - Add a workaround for Microsoft Graph sending malformed IDs for mailbox elements, which in turn can not be used with the Graph API as they are malformed (an error with the code '`ErrorInvalidIdMalformed`' can be found in the log file).
-#### Fixed
+#### Fixes
 - Update Graph authentication module to handle a change in the Windows 'dsregcmd /status' output, which can include keys like 'NgcSet' multiple times when additional work accounts have been added to Windows. This could make 'Integrated Windows Authentation without login hint' impossible (silent authentication would still work with the authentication broker method tried later, as all Windows versions in support which allow work accounts also support the broker method).
 - Update country detection for '`FormatPhoneNumber`' and '`Format-PostalAddress`' to correctly handle null values and whitespace strings.
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure/msal-browser to v4.26.2.
-#### Added
+#### Additions
 - Show '`CUSTOM_RULES_CODE`' in the log output of the Outlook add-in.
 - Add a new configuration parameter: '`LAUNCHEVENTS_HOSTS_AND_PLATFORMS`' allows for additional fine-grained control by defining which launch events are enabled on which hosts and platforms (and not just for mobile and non-mobile as Microsoft allows). See '`run_before_deployment.ps1`' for details.
-- Add a workaround for New Outlook (and in some cases Outlook on the web) behavior: In events, an existing signature is not replaced but added as additional text below the existing one. This can lead to many signatures shown, as the Outlook add-in is triggered by each added or removed recipient.
+- Add a workaround for New Outlook (and in some cases Outlook for the web) behavior: In events, an existing signature is not replaced but added as additional text below the existing one. This can lead to many signatures shown, as the Outlook add-in is triggered by each added or removed recipient.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.23.0" target="_blank">v4.23.0</a> - 2025-10-18
 
 ### Set-OutlookSignatures
-#### Changed
+#### Changes
 - Update HtmlAgilityPack to v1.12.4.
 - Update MSAL.Net to v4.77.1.
 - Update QRCoder to v1.7.0.
 - Change included sample QR code from MeCard to the more frequently used vCard format.
 - Update sample templates to reflect QR code and phone number changes as described in the '`Added`' section.
-#### Added
+#### Additions
 - Add check for PowerShell Full Language Mode to all admin scripts, including sample code.
 - Add a phone number formatter based on Googles libphonenumber library.<br>The code '`FormatPhoneNumber`' in '`.\config\default replacement variables.ps1`' is used to create the new additional default replacement variables '`$Current[User|Manager|Mailbox|MailboxManager][Telephone|Fax|Mobile]-[E164|INTERNATIONAL|NATIONAL|RFC3966]$`'. The sample code takes a phone number and optionally a country, and converts them to standardized predefined formats for easy human readability or for use in '`tel:`' links. A custom formatting option is also available.
 - Add an address formatter.<br>The AddressFormatter module is based on the great work OpenCage GmbH shares on <a href="https://github.com/opencagedata/address-formatting">their GitHub repo</a>.<br>The code in '`.\config\default replacement variables.ps1`' used to create the new '`$Current[User|Manager|Mailbox|MailboxManager]PostalAddress$`' replacement variables can easily be adapted to create other postal addresses matching the formatting rules of the defined for a user or mailbox.
 - Add FAQ '[What can I learn from the code of Set-OutlookSignatures?](https://set-outlooksignatures.com/faq#what-can-i-learn-from-the-code-of-set-outlooksignatures)'. It gives an overview which scripting techniques you can learn from Set-OutlookSignatures.
 - Add '`.\sample code\Start-IfADAvailable.ps1`', showing how to run Set-OutlookSignatures (and other software) only when a working connection to Active Directory is available.
 - Add a workaround for Windows PowerShell 5.1 sometimes not being able to access variables with a 'script' scope and a name of 'IsWindows', 'IsLinux', or 'IsMacOS'.
-#### Fixed
+#### Fixes
 - Fix the Sort-Object parameter to use -Culture in the Intune remediation sample script, restoring culture-aware sorting. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/pull/145" target="_blank">#145</a>) (Thanks <a href="https://github.com/rene-schwabe" target="_blank">@rene-schwabe</a>!)
 - Include relative path information when downloading files from SharePoint Online. This makes sure that images in subfolders are correctly downloaded when using HTM templates.
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure/msal-browser to v4.25.1.
 - Reduce output of Outlook add-in taskpane when not being viewed in Outlook.
 
@@ -218,24 +277,24 @@ _**Benefactor Circle add-on users with mailboxes in Exchange Online should updat
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.22.0" target="_blank">v4.22.0</a> - 2025-09-05
 
 ### Set-OutlookSignatures
-#### Changed
+#### Changes
 - Optimize the performance accessing SharePoint Online via Graph API by using different endpoints and exactly defining the requested attributes. This greatly enhances performance when the content used for Set-OutlookSignatures is not hosted in a separate document library, but in a document library with many other unrelated items.
-#### Added
+#### Additions
 - Update '`.\sample code\Create-EntraApp.ps1`' to include the additional Graph scopes needed for the Outlook add-in feature '`customRulesResultSignatureBody`'.
-#### Fixed
+#### Fixes
 - Add an additional Graph scope to '`.\sample code\Create-EntraApp.ps1`' to avoid problems with granting admin consent for delegated permissions. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions/143" target="_blank">#143</a>) (Thanks <a href="https://github.com/wwa-jvteeffelen" target="_blank">@wwa-jvteeffelen</a>!)
 
 ### Benefactor Circle add-on
-#### Added
+#### Additions
 - Consider the names of the default signatures defined in Exchange Online when Set-OutlookSignatures runs the Benefactor Circle add-on specific preparations for the Outlook add-in and when the registry does not contain any information about default signatures. This is helpful in scenarios in which Set-OutlookSignatures is used to deploy signatures, but not to define a default signatures.
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure-msalbrowser to v4.22.1.
 - Change Outlook add-in variable names for clarity:
   - Use '`customRulesResultSignatureName`' instead of '`customRulesPropertiesResult`'. The old variable name can still be used but the new one overrides it.
 - Force the Outlook add-in to use the Graph API when the mailbox is hosted in Exchange Online, as Microsoft will be turning off EWS for Exchange Online soon and as the Outlook add-in supports the Graph API since it has been released over a year ago.
-#### Added
+#### Additions
 - Allow Outlook add-in custom rules code not only to choose from a set of signatures previously deployed using Set-OutlookSignatures, but to set a completely customized signature using the '`customRulesResultSignatureBody`' property. This makes the Outlook add-in the most flexible signature add-in on the market as known of today.
   - The '`customRulesResultSignatureBody`' proprty is only available for mailboxes hosted in Exchange Online and requires setting two additional permissions in the Entra ID app it uses.
   - See '`.\sample code\CustomRulesCode.js`' for details about this new feature
@@ -247,10 +306,10 @@ _**Benefactor Circle add-on users with mailboxes in Exchange Online should updat
   - Add string properties '`graphAccessToken`' and '`graphApiEndpoint`', which can be used to query the Graph API for use in custom rules.
   - Add sample code showing how to query the Graph API (convert sender SMTP email address to UPN, get basic properties of a user, get transitive group membership of a user).
 - Allow to define a custom ID for the Outlook add-in. This allows using multiple independent configurations and versions of the Outlook add-in in the same environment.
-- Add a workaround in the Outlook add-in for the Microsoft problem with Outlook on the web and New Outlook on Windows not replacing signatures but adding them in appointments, resulting in multiple signatures.
+- Add a workaround in the Outlook add-in for the Microsoft problem with Outlook for the web and New Outlook for Windows not replacing signatures but adding them in appointments, resulting in multiple signatures.
 - Add comments to clarify mailbox requirements and permissions in the '`manifest.xml`' file of the Outlook add-in.
 - Add additional error handling to the Outlook add-in file '`run_before_deployment.ps1`'.
-#### Fixed
+#### Fixes
 - Make sure the Outlook add-in correctly reports '`customRulesProperties.itemIsNew`' and '`customRulesProperties.itemIsReplyForward`' on all platforms and for all item save and sync states when using custom rules code.
 - Make sure the Outlook add-in does not re-use '`customRulesPropertiesResult`' between runs, no matter if triggered manually via the taskpane or automatically via a launch event.
 
@@ -258,15 +317,15 @@ _**Benefactor Circle add-on users with mailboxes in Exchange Online should updat
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.21.0" target="_blank">v4.21.0</a> - 2025-08-15
 
 ### Set-OutlookSignatures
-#### Changed
+#### Changes
 - Update MSAL.Net to v4.75.0.
-#### Fixed
-- Correct a problem reading email addresses from New Outlook on Windows. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/140" target="_blank">#140</a>) (Thanks <a href="https://github.com/psic4t" target="_blank">@psic4t</a>!)
+#### Fixes
+- Correct a problem reading email addresses from New Outlook for Windows. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/140" target="_blank">#140</a>) (Thanks <a href="https://github.com/psic4t" target="_blank">@psic4t</a>!)
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure-msalbrowser to v4.20.0.
-#### Added
+#### Additions
 - React to launch events '`OnMessageRecipientsChanged`' and '`OnAppointmentAttendeesChanged`'.
 - Allow adding custom code to the add-in so you can directly influence which signature it will set.<br>For example, you can set a specific signature…
   - …when there are only internal recipients, or another signature when there are external recipients
@@ -283,35 +342,35 @@ _**Benefactor Circle add-on users with mailboxes in Exchange Online should updat
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.4" target="_blank">v4.20.4</a> - 2025-08-12
 
 ### Set-OutlookSignatures
-#### Changed
+#### Changes
 - Update MSAL.Net to v4.74.1.
 - Update HtmlAgilityPack to v1.12.2.
 - Update UTF.Unknown to v2.6.0.
 
 ### Benefactor Circle add-on
-#### Added
+#### Additions
 - Add workaround for Microsoft internal problems with roaming signatures API, which would result in the following error when uploading roaming signatures to mailboxes which are not the one of the logged-on user (especially in SimulateAndDeploy mode). The log would contain the error "The response status code for https://localhost:444/owa/service.svc?action=SanitizeHtml action \u0027SanitizeHtml\u0027 is InternalServerError. ReasonPhrase:Internal Server Error".
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure-msalbrowser to v4.19.0.
-#### Added
+#### Additions
 - Add hints about probable root causes of empty signatures lists in the log output of the Outlook add-in.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.20.3" target="_blank">v4.20.3</a> - 2025-07-17
 
 ### Set-OutlookSignatures
-#### Changed
+#### Changes
 - Update MSAL.Net to v4.74.0.
-#### Fixed
+#### Fixes
 - Fix Set-OutlookSignatures quitting with exit code 14 when using it in SimulateAndDeploy mode for Exchange Online.
 - Add a workaround for PowerShell not reliably resolving SMB paths with relative parts to absolute paths in the MSAL.PS module.
 #### Outlook add-in (part of the Benefactor Circle add-on)
 - Add a workaround for PowerShell 5.1 not correctly converting arrays to JSON when passing them via the InputObject parameter. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/136" target="_blank">#136</a>)
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure-msalbrowser to v4.15.0.
 
 
@@ -321,16 +380,16 @@ _**Add features with the Benefactor Circle add-on and get professional support f
 _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactorcircle) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Set-OutlookSignatures
-#### Changed
+#### Changes
 - Update PreMailer.Net to v2.7.2.
-#### Fixed
+#### Fixes
 - Update handling of the '`@`' character in signatures names. Microsoft no longer allows '`@`' in roaming signature names as it is reserved for internal use, and Microsoft Outlook will follow soon.
   - Add '`@`' to the list of invalid characters for signatures names as documented in sample INI files. The new complete list of invalid characters is '`\/:"*?><,|@`'.
   - Convert all invalid characters to '`_`', but '`@`' to '`_at_`'.
   - Only keep the '`@`' character where it is required for Microsoft internal use in roaming signature names.
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure-msalbrowser to v4.14.0.
 
 
@@ -340,14 +399,14 @@ _**Add features with the Benefactor Circle add-on and get professional support f
 _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactorcircle) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Set-OutlookSignatures
-#### Changed
+#### Changes
 - UpdateMSAL.Net to v4.73.1.
-#### Fixed
+#### Fixes
 - Fix a logical error in the code for the '`DeleteScriptCreatedSignaturesWithoutTemplate'` parameter which made the cleanup stop before any work was done. This error only occurred when the parameter was enabled, which it is by default.
 - Fix a logical error in the code for the '`DeleteUserCreatedSignatures`' parameter which deleted all signatures instead of only user-created ones. This error only occurred when the parameters was enabled, which it is not by default.
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure-msalbrowser to v4.13.2.
 
 
@@ -357,7 +416,7 @@ _**Add features with the Benefactor Circle add-on and get professional support f
 _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactorcircle) for details about these features and how you can benefit from them with a Benefactor Circle license._
 
 ### Set-OutlookSignatures
-#### Changed
+#### Changes
 - Update MSAL.Net to v4.73.0.
 - Update PreMailer.Net to v2.7.0.
 - Update QRCoder to v1.6.0.
@@ -366,37 +425,37 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 - Show all replacement variables in verbose output, not just the ones that have values. This helps detect null or empty values.
 - Rewrite and radically simplify the [Quickstart Guide](https://set-outlooksignatures.com/quickstart).
 - Reduce repository and release size by deleting unused image files and by outsourcing the detailed documentation to [set-outlooksignatures.com](https://set-outlooksignatures.com).
-#### Added
+#### Additions
 - Support for cross-tenant access and Multitenant Organizations. This allows to deploy signatures for mailboxes that are not hosted in the users home tenant, with all the properties, replacement variables and Benefactor Circle features being fully available. See the description of the parameter '`GraphClientID`' in the [parameter documentation](https://set-outlooksignatures.com/parameters) for details.
 - Detect the encoding of HTML template files automatically, using the same logic as browsers do. See the FAQ '`Should I use .docx or .htm as file format for templates?`' for details.
 - Check if the automatic variable '`$PSScriptRoot`' is available when scripts require to know from which path they are run from. This avoids follow-up problems when scripts are not run as file, but as selection of text in code editors.
 - Add '`Does it support cross-tenant access and Multitenant Organizations?`' to the [FAQ section](https://set-outlooksignatures.com/faq).
-#### Fixed
+#### Fixes
 - Switch from '`Set-Location $PSScriptRoot`' to '`Set-Location -LiteralPath $PSScriptRoot`' in scripts that do require to know from which path they are run from. This allows the use of paths containing characters with a specific meaning in PowerShell (square brackets, for example).
 - Fix a typo in source code of FAQ '`How can I start the software only when there is a connection to the Active Directory on-prem?`' in the [FAQ section](https://set-outlooksignatures.com/faq), and add checks for the forest root domain and it's child domains.
 - Make sure that DOCX template files are not opened in "Read" view in Microsoft Word, as search and replace is not available in this view.
 - Make sure that temporary copies of template files are not write protected and do not have the "mark of the web", as both may lead to problems with search and replace or file type conversion in Microsoft Word.
-- Add support for Outlook profile names with special characters, which Classic Outlook on Windows saves in the registry using a completely unknown and not publicly documented encoding. Set-OutlookSignatures can not display the special characters correctly due to the unknown encoding, but can now read the contents without errors.
+- Add support for Outlook profile names with special characters, which Classic Outlook for Windows saves in the registry using a completely unknown and not publicly documented encoding. Set-OutlookSignatures can not display the special characters correctly due to the unknown encoding, but can now read the contents without errors.
 - Correctly handle HTML template files referencing the same image file multiple times but with different image replacement variables such as '`$CurrentUserPhoto$`': Do not overwrite image files which are referenced multiple times, create a new GUID named file instead.
 
 ### Benefactor Circle add-on
-#### Changed
+#### Changes
 - Reduce Entra ID throttling probability in '`.\sample code\SimulateAndDeploy.ps1`' by applying the following changes:
   - Do not refresh the Graph token every time a new job is started, but only when:
     - Token is expired.
     - The remaining token lifetime is less than or equal the job timeout.
     - At least half of the token lifetime has already passed.
   - In case of an error, wait 70 seconds between the three retries.
-#### Added
+#### Additions
 - Convert HTML files to UTF8 when uploading or downloading roaming signatures, with the same logic browsers use. This is another fix for the problems of Outlook's own signature sync mechanism, and also solves issues with signatures that have been created manually in Non-UTF-8 encoding.
 - Delete local copies of roaming signatures when cleaning up if they have previously been downloaded from other mailboxes (not the mailbox of the current user) and if these mailboxes are no longer available in Outlook.
-#### Fixed
+#### Fixes
 - Make sure that leading whitespace in signature lines is correctly represented in the email draft containing all signatures (parameter '`SignatureCollectionInDrafts`' and signature preview in the taskpane of the Outlook add-in).
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
-#### Changed
+#### Changes
 - Update @azure-msalbrowser to v4.13.1.
-#### Added
+#### Additions
 - Allow defining the text of the notification banner that is shown after a signature has been added to an email or an appointment by the Outlook add-in. The parameter is called '`NOTIFICATION_TEXT`' and can be passed to '`run_before_deployment.ps1`'.
 
 
@@ -455,7 +514,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 ### Added
 ### Removed
 ### Fixed
-- Add a workaround to a bug in the Microsoft API for Classic Outlook on Windows (and probably others), not fully garbage collecting variables. This bug results in signatures not updating when the OnMessageFromChanged or OnAppointmentFromChanged launch event is triggered. This bug may also lead to the launch events not being triggered at all, only Microsoft can solve this.
+- Add a workaround to a bug in the Microsoft API for Classic Outlook for Windows (and probably others), not fully garbage collecting variables. This bug results in signatures not updating when the OnMessageFromChanged or OnAppointmentFromChanged launch event is triggered. This bug may also lead to the launch events not being triggered at all, only Microsoft can solve this.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.1" target="_blank">v4.18.1</a> - 2025-03-14
@@ -468,7 +527,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 ### Added
 ### Removed
 ### Fixed
-- Fix handling of existing signature files in Classic Outlook on Windows when they are write protected or hidden.
+- Fix handling of existing signature files in Classic Outlook for Windows when they are write protected or hidden.
 - Make the code deciding if a SharePoint Online element is a file or a folder work correctly even when the Graph API erronously returns the contentType in a non-English language.
 - Fix a race condition in the Outlook add-in that may lead to an empty signature list in the taskpane when legacy Exchange Online tokens have been disabled (see [here](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/faq-nested-app-auth-outlook-legacy-tokens) for details).
 
@@ -493,7 +552,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 - Detect when Set-OutlookSignatures has already been run in the current PowerShell session and exit when this is the case. This is the only way to prevent problems caused by .Net caching DLL files in memory.
 - Require a key press to continue when loading the Benefactor Circle license file results in a warning. Set-OutlookSignatures continues automatically after 120 seconds.
 - Add authentication broker support for Linux. No new redirect URI for the Entra ID app is required.
-- Add new FAQ '`Roaming signatures in Classic Outlook on Windows look different`' to the [FAQ section](https://set-outlooksignatures.com/faq).
+- Add new FAQ '`Roaming signatures in Classic Outlook for Windows look different`' to the [FAQ section](https://set-outlooksignatures.com/faq).
 ### Removed
 - Remove comment-based help content from Set-OutlookSignatures.ps1 and refer to [the online help](https://set-outlooksignatures.com/help) instead.
 - Remove testing the connectivity to endpoints during Graph authentication, as Microsoft's servers suddenly randomly incorrectly interpret the HTTP 'Expect' header, returning HTTP error status code 417 instead of a 2xx success code. Rely on integrated tests in Microsoft's authentication library instead. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/133" target="_blank">#133</a>)
@@ -604,7 +663,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 - Fix a problem where roaming signatures downloaded from additional and automapped mailboxes overwrite identically signatures which were created by Set-OutlookSignatures for a mailbox with higher priority.
 - Correctly handle paths to outlook.exe and winword.exe stored in the registry in enclosing quotes.
 - Update login hint detection logic for Graph authentication to handle cases where the UPN used to log on does not match the UPN in Entra ID.
-- Add more code to work around limitations for Outlook add-ins on Outlook on the web on premises. Microsoft has silently removed on-prem support for several features in office.js in the last few weeks - if this goes on, on-prem signature add-ins will soon not be realizable any more.
+- Add more code to work around limitations for Outlook add-ins on Outlook for the web on premises. Microsoft has silently removed on-prem support for several features in office.js in the last few weeks - if this goes on, on-prem signature add-ins will soon not be realizable any more.
 - Fix the workaround to not show Word security warning when converting documents with linked images when using '`-CreateRTFSignatures true`'.
 
 
@@ -623,8 +682,8 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 - Update Outlook add-in dependency @azure/msal-browser to v3.24.0.
 ### Added
 - Allow to select signature in the taskpane of the Outlook add-in. This is like having roaming signatures on-prem.
-- Make data preparation for Outlook add-in compatible with on-prem mailboxes. This does not (yet) remove the limitation that the add-in only works with cloud mailboxes on Outlook on Android and Outlook on iOS.
-- Add Outlook add-in support for images in signatures in Outlook on the web on premises (will start working as soon as Microsoft fixes a bug in their office.js framework) 
+- Make data preparation for Outlook add-in compatible with on-prem mailboxes. This does not (yet) remove the limitation that the add-in only works with cloud mailboxes on Outlook for Android and Outlook for iOS.
+- Add Outlook add-in support for images in signatures in Outlook for the web on premises (will start working as soon as Microsoft fixes a bug in their office.js framework) 
 - Connect to Graph if only one Benefactor Circle license group is defined and this license group is an Entra ID group, and show a warning when the Benefactor Circle license group for a mailbox is an Entra ID group but there is no connection to Graph.
 - Add support for the new way of Exchange Online modifying the HTML code of roaming signatures to '`DeleteScriptCreatedSignaturesWithoutTemplate`' and '`DeleteuserCreatedSignatures`'.
 - Add support for the `OnAppointmentFromChanged event` in the `Outlook add-in`, as Microsoft has updated the office.js library accordingly.
@@ -634,7 +693,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 ### Removed
 ### Fixed
 - Fix the problem in the Outlook add-in that led to images not being shown in the signature on the first run of the add-in for a new appointment.
-- Add more code to work around limitations for Outlook add-ins on Outlook on the web on premises.
+- Add more code to work around limitations for Outlook add-ins on Outlook for the web on premises.
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.14.2" target="_blank">v4.14.2</a> - 2024-09-07
@@ -695,7 +754,7 @@ _Starting with this release, a tagline is added to each signature deployed for m
 - Update dependency MSAL.Net to v4.64.0.
 ### Added
 - Add an Outlook add-in that can:  
-  - Automatically add signatures to new emails and reply emails (including Outlook on iOS and Outlook on Android)
+  - Automatically add signatures to new emails and reply emails (including Outlook for iOS and Outlook for Android)
   - Automatically add signatures to new appointment invites
 
   See the [Outlook add-in documentation](https://set-outlooksignatures.com/outlookaddin) for details about features, usage, configuration, deployment and remarks.  
@@ -707,7 +766,7 @@ _Starting with this release, a tagline is added to each signature deployed for m
 - Show local and UTC time for SimulateTime parameter when in simulation mode.
 - Add a tagline to each signature deployed for mailboxes without a [Benefactor Circle](https://set-outlooksignatures.com/benefactorcircle) license. See FAQ `How to disable the tagline in signatures?` in the [FAQ section](https://set-outlooksignatures.com/faq) for details.
 - Remove trailing null character from file names being enumerated in SharePoint folders. .Net and the WebDAV client sometimes add a null character, which is not allowed in file and path names.
-- Detect corrupted Outlook on Windows installations by comparing the major part of the Outlook version information from the registry and from outlook.exe.
+- Detect corrupted Outlook for Windows installations by comparing the major part of the Outlook version information from the registry and from outlook.exe.
 - Add `Which group naming format should I choose?` recommendation to the [FAQ section](https://set-outlooksignatures.com/faq) and INI files.
 - Add FAQ `Why is the out-of-office assistant not activated automatically?` to the [FAQ section](https://set-outlooksignatures.com/faq).
 ### Fixed
@@ -736,7 +795,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 ### Removed
 - Remove dependency to System.Web.dll for URL encode and decode operations.
 ### Fixed
-- Truncate text signature for SignatureTextOnMobile when setting Outlook on the web signature if it is longer than 512 characters, and show a warning message. SignatureTextOnMobile is only used when browsing Outlook on the web on a mobile device. (Thanks <a href="https://github.com/bmartins-EMCDDA" target="_blank">@bmartins-EMCDDA</a>!)
+- Truncate text signature for SignatureTextOnMobile when setting Outlook for the web signature if it is longer than 512 characters, and show a warning message. SignatureTextOnMobile is only used when browsing Outlook for the web on a mobile device. (Thanks <a href="https://github.com/bmartins-EMCDDA" target="_blank">@bmartins-EMCDDA</a>!)
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.12.2" target="_blank">v4.12.2</a> - 2024-05-27
@@ -784,7 +843,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in the [FAQ
 - Custom image replacement variables that you can fill yourself with a byte array: `$CurrentUserCustomImage[1..10]$`, `$CurrentUserManagerCustomImage[1..10]$`, `$CurrentMailboxCustomImage[1..10]$`, `$CurrentMailboxManagerCustomImage[1..10]$`. Use cases: Account pictures from a share, QR code vCard/URL/text/Twitter/X/Facebook/App stores/geo location/email, etc.
   - QR code vCard (MeCard) in custom image replacement variable `$Current[..]CustomImage1$`. See file `.\config\default replacement variables.ps1` for the easily customizable code used to create it. See the [technical details documentation](https://set-outlooksignatures.com/details) for details.
 - Support for maximum barrier-free accessibility with screen readers and comparable tools. Use Word ScreenTips and HTML titles for hyperlinks, and alt text for images, replacement variables are supported. All sample templates have been updated accordingly. Just hover your mouse pointer over a hyperlink or image to see additional information.
-- Show a warning when authentication to Outlook on the web (no matter if on-prem or in the cloud) is not possible via Autodiscover, as this means that Autodiscover is not configured correctly.
+- Show a warning when authentication to Outlook for the web (no matter if on-prem or in the cloud) is not possible via Autodiscover, as this means that Autodiscover is not configured correctly.
 - The `MirrorLocalSignaturesToCloud` parameter is now also available under the name `MirrorCloudSignatures`. The old name may be removed with the next major release (v5.0.0).
 ### Fixed
 - When using HTM templates, image paths were not correctly modified when containing one of the reserved characters defined in RFC3986 (`:/?#[]@!$&'()*+,;=`, Uri.EscapeUriString vs. Uri.EscapeDataString).
@@ -822,7 +881,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in the [FAQ
 - Graph connectivity: Update dependency MSAL.Net to v4.59.0
 - Updated FAQ `How can I deploy and run Set-OutlookSignatures using Microsoft Intune?` in the [FAQ section](https://set-outlooksignatures.com/faq), and moved sample code from FAQ to `.\sample code` directory
 - Active Directory attribute names are no longer case sensitive, making it easier creating own replacement variables and adding custom schema extensions
-- Only use Integrated Windows Authentication for connection to Outlook on the web when no cloud token is available
+- Only use Integrated Windows Authentication for connection to Outlook for the web when no cloud token is available
 - If the variable replacement in Word fails, an additional note is displayed about the possible mandatory use of Microsoft Purview Information Protection.
 - Updated sample templates
 ### Added
@@ -832,7 +891,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in the [FAQ
 - More workarounds for timing problems with file operations in folders used by OneDrive
 - Verbose output no longer logs Graph tokens, only their properties (header and payload data only, no digital signature)
 - When an existing signature is overwritten by a new signature and the two signature names only differ in upper and lower case ("signature a" and "Signature A", for example), always use the casing of the new signature
-- Correctly detect automapped mailboxes in Outlook on the web when New Outlook is not used
+- Correctly detect automapped mailboxes in Outlook for the web when New Outlook is not used
 - Add scope 'Application.ReadWrite.All' to sample script `.\sample code\Create-EntraApp.ps1`
 
 
@@ -871,7 +930,7 @@ _See `What about the roaming signatures feature in Exchange Online?` in the [FAQ
 - `MoveCssInline`: Update dependency PreMailer.Net to v2.5.0
 - Graph connectivity: Update dependency MSAL.Net to v4.58.0
 ### Added
-- Check for valid Windows/Outlook/Outlook on the web signature names when using the `MirrorLocalSignaturesToCloud` parameter or the `OutlookSignatureName` INI parameter
+- Check for valid Windows/Outlook/Outlook for the web signature names when using the `MirrorLocalSignaturesToCloud` parameter or the `OutlookSignatureName` INI parameter
 - `MirrorLocalSignaturesToCloud`: Only download a roaming signature from Exchange Online when its local version is older or does not exist
 - Sample code `SimulateAndDeploy.ps1`
   - Display info when a specific job ends, in addition to when there is an error
@@ -934,7 +993,7 @@ To compare the two permissions, see their description at [Microsoft Graph permis
     - If you want to use GroupMember.Read.All instead of Group.Read.All, you have to use at least v4.6.0 of Set-OutlookSignatures, and renew your admin consent for the new reduced permissions:
       1. Open a browser, preferably in a private window
       2. Open the URL 'https://login.microsoftonline.com/organizations/adminconsent?client_id=beea8249-8c98-4c76-92f6-ce3c468a61e6'
-      3. Log on with a user that has Global Admin or Client Application Administrator rights in your tenant
+      3. Log on with a user that has Global Administrator or Application Administrator rights in your tenant
       4. Accept the required permissions on behalf of your tenant. You can safely ignore the error message that the URL 'http://localhost/?admin_consent=True&tenant=[…]' could not be found or accessed.
     - If you want to use a version older than v4.6.0, you need to create your own app in your own Entra ID tenant as detailed in `.\config\default graph config.ps1`.
     - For security and maintenance reasons, it is recommended to create you own app in your own tenant.
@@ -1017,7 +1076,7 @@ _Set-OutlookSignatures can experimentally handle cloud roaming signatures since 
   1. Simulation mode is enabled: Mailboxes defined in SimulateMailboxes
   2. Outlook is installed and has profiles, and New Outlook is not set as default: Mailboxes from Outlook profiles
   3. New Outlook is installed: Mailboxes from New Outlook (including manually added and automapped mailboxes for the currently logged-in user)
-  4. If none of the above matches: Mailboxes from Outlook on the web (including manually added mailboxes, automapped mailboxes follow when Microsoft updates Outlook on the web to match the New Outlook experience)
+  4. If none of the above matches: Mailboxes from Outlook for the web (including manually added mailboxes, automapped mailboxes follow when Microsoft updates Outlook for the web to match the New Outlook experience)
 ### Fixed
 - Correctly handly write protected files when copying to AdditionalSignaturePath
 
@@ -1030,7 +1089,7 @@ _**Attention, cloud mailbox users:**_
 - _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in the [FAQ section](https://set-outlooksignatures.com/faq) for details, known problems and workarounds._  
 - _Set-OutlookSignatures can experimentally handle roaming signatures since v4.0.0. See `MirrorLocalSignaturesToCloud` in the [parameters documentation](https://set-outlooksignatures.com/parameters) for details._
 ### Added
-- When no mailboxes are configured in Outlook, additional mailboxes configured in Outlook on the web are used. Thanks to our partner [ExplicIT Consulting](https://explicitconsulting.at) for donating this code, enabling another world-first feature and bringing us even closer to supporting the "new Outlook" client (codename "Monarch") in the future!
+- When no mailboxes are configured in Outlook, additional mailboxes configured in Outlook for the web are used. Thanks to our partner [ExplicIT Consulting](https://explicitconsulting.at) for donating this code, enabling another world-first feature and bringing us even closer to supporting the "new Outlook" client (codename "Monarch") in the future!
 - Add hint to TLS 1.2 when Entra ID/Graph authentication is not successful (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues/85" target="_blank">#85</a>) (Thanks <a href="https://github.com/halatovic" target="_blank">@halatovic</a>!)
 - Update '`Quickstart Guide`' in '`README`' file with clearer instructions on how to register the Entra ID app required for hybrid and cloud-only environments
 
@@ -1053,7 +1112,7 @@ _**Attention, cloud mailbox users:**_
 - _**Set-OutlookSignatures can now experimentally handle roaming signatures!** See `MirrorLocalSignaturesToCloud` in the [parameters documentation](https://set-outlooksignatures.com/parameters) for details._
 - _Microsoft actively enables roaming signatures in Exchange Online. See `What about the roaming signatures feature in Exchange Online?` in the [FAQ section](https://set-outlooksignatures.com/faq) for details, known problems and workarounds._
 ### Added
-- New parameter `MoveCSSInline` to move CSS to inline style attributes, for maximum email client compatibility. This parameter is enabled per default, as a workaround to Microsoft's problem with formatting in Outlook on the web (M365 roaming signatures and font sizes, especially).
+- New parameter `MoveCSSInline` to move CSS to inline style attributes, for maximum email client compatibility. This parameter is enabled per default, as a workaround to Microsoft's problem with formatting in Outlook for the web (M365 roaming signatures and font sizes, especially).
 ### Fixed
 - Set Word WebOptions in correct order, so that they do not overwrite each other
 
@@ -1100,7 +1159,7 @@ _**Attention, cloud mailbox users:**_
   - Script features
     - Time-based campaigns by assigning time range constraints to templates
     - Signatures for automapped and additional mailboxes
-    - Set current user Outlook on the web signature (classic Outlook on the web signature and roaming signature)
+    - Set current user Outlook for the web signature (classic Outlook for the web signature and roaming signature)
     - Download and upload roaming signatures
     - Set current user out-of-office replies
     - Delete signatures created by the software, for which the templates no longer exist or apply
@@ -1124,7 +1183,7 @@ This is not only available for Benefactor Circle members, but also the Free and 
 - The new script parameter `SimulateTime` allows to use a specific time when running simulation mode, which is handy for testing time-based templates.
 - New parameter `DisableRoamingSignatures`. See `README` for details.
 - New FAQ `Start Set-OutlookSignatures in hidden/invisible mode`. See `README` for details.
-- Show a warning message when setting the Outlook on the web signature is not possible because Outlook on the web has not been initialized yet, making it impossible to set signature options in Outlook on the web without breaking the first log in experience for this mailbox (getting asked for language, timezone, etc.)
+- Show a warning message when setting the Outlook for the web signature is not possible because Outlook for the web has not been initialized yet, making it impossible to set signature options in Outlook for the web without breaking the first log in experience for this mailbox (getting asked for language, timezone, etc.)
 - Copy HTM image width and height attributes to style attribute
 - Show a warning when a template contains images formatted as non-inline shapes, as these image formatting options may not be supported by Outlook (e.g., behind the text)
 - Support for mailboxes in the user's Entra ID tenant with different UPN/user ID and primary SMTP address
@@ -1182,7 +1241,7 @@ _Attention cloud mailbox users: Microsoft actively enables roaming signatures in
 - Mailbox priority list: Don't add automapped or additional mailboxes to the end of the mailbox priority list, but to the end of each Outlook profile in the mailbox priority list
 - Mailbox priority list: When duplicates exist, only show the mail address with the highest priority. Verbose output contains additional information for each occurrence (Outlook profile name, registry path, legacyExchangeDN)
 - Setting default signature: Show Outlook profile name, so that mailboxes that exist in multiple Outlook profiles can be distinguished
-- When the logged in user's personal mailbox exists in multiple profiles, set the Outlook on the web signature and OOF message for this mailbox only once
+- When the logged in user's personal mailbox exists in multiple profiles, set the Outlook for the web signature and OOF message for this mailbox only once
 - When a mailbox exists in multiple Outlook profiles, only query AD/Graph at the first occurrence and use cached data on remaining occurrences
 
 
@@ -1450,7 +1509,7 @@ _Do not use this release. It was withdrawn due to a severe problem._
 - Add parameter UseHtmlTemplates to switch from DOCX to HTML template handling
 - Consider images in .docx templates with different text wrapping setting (Shapes for "inline with text" and InlineShapes for all other text wrapping settings)
 ### Fixed
-- Check existence of signature file before trying to set Outlook on the web signature
+- Check existence of signature file before trying to set Outlook for the web signature
 
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.5.4" target="_blank">v1.5.4</a> - 2021-06-24
@@ -1468,7 +1527,7 @@ _Do not use this release. It was withdrawn due to a severe problem._
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v1.5.2" target="_blank">v1.5.2</a> - 2021-06-21
 ### Fixed
-- Fix handling of Outlook on the web connection error.
+- Fix handling of Outlook for the web connection error.
 - Fix readme: OOF templates are not applied when currently active or scheduled.
 
 
@@ -1526,7 +1585,7 @@ _Do not use this release. It was withdrawn due to a severe problem._
 - Add a logo
 - Adapt script to include script information (version and others) in code and output
 ### Fixed
-- Modify license.txt to that GitHub recognizes the license type
+- Modify LICENSE.txt to that GitHub recognizes the license type
 - Add '.gitattributes' file to ignore '.git*' folders and README in relase
 - Add 'readme.txt', a plain text version of README, which can be read on all systems with on-board tools.
 

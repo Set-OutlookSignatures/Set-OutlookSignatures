@@ -28,7 +28,7 @@
 #     The sample code creates the app with all required settings
 #   Option B: Create the Entra ID app manually
 #     Create an app in Entra admin center (https://entra.microsoft.com)
-#       Sign in with an account that has Cloud Application Administrator or Global Admin permissions
+#       Sign in with an account that has Application Administrator or Global Administrator permissions in your tenant
 #       Identity > Applications > App registrations > New registration
 #       Enter at least a display name for your application
 #       Set "Supported account types" to "Accounts in this organizational directory only (<your tenant> - Single tenant)"
@@ -42,37 +42,36 @@
 #       "Delegated" means that all these permissions run in the security context of the user
 #         Set-OutlookSignatures only gain access to a clearly defined subset of what any of your users can do anyhow.
 #       Identity > Applications > App registrations > your application > Manage > API permissions > Add a permission
-#       Microsoft Graph, delegated permissions
+#       Microsoft Graph API delegated permissions
 #         email
-#           Allows the app to read your users' primary email address.
+#           https://learn.microsoft.com/en-us/graph/permissions-reference#email
 #           Required to log on the current user.
 #         MailboxConfigItem.ReadWrite
-#           Allows the app to create, read, update and delete user's UserConfiguration objects, on behalf of the signed-in user.
-#           Required to connect to Outlook on the web and to set Outlook signatures.
+#           https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxconfigitemreadwrite
+#           Read data from Outlook Web, set Outlook web signatures.
 #         Files.Read.All
-#           Allows the app to read all files the signed-in user can access.
-#           Required for access to templates and configuration files hosted on SharePoint Online.
-#           For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
+#           https://learn.microsoft.com/en-us/graph/permissions-reference#filesreadall
+#           Read template and configuration files hosted on SharePoint Online. Alternative: Files.SelectedOperations.Selected.
 #         GroupMember.Read.All
-#           Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
-#           Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+#           https://learn.microsoft.com/en-us/graph/permissions-reference#groupmemberreadall
+#           Find groups by name, get their security identifier (SID) and transitive members.
 #         Mail.ReadWrite
-#           Allows the app to create, read, update, and delete email in user mailboxes, on behalf of the signed-in user. Does not include permission to send mail.
-#           Required to connect to Outlook on the web and to set Outlook signatures.
+#           https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadwrite
+#           Required to connect to Outlook for the web and to set Outlook signatures.
 #         MailboxSettings.ReadWrite
-#           Allows the app to create, read, update, and delete user's mailbox settings, on behalf of the signed-in user. Does not include permission to send mail.
-#           Required to detect the state of the out-of-office assistant and to set out-of-office replies.
+#           https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsreadwrite
+#           Detect mailbox environment, get and set out-of-office data.
 #         offline_access
-#           Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
+#           https://learn.microsoft.com/en-us/graph/permissions-reference#offline_access
 #           Required to get a refresh token from Graph.
 #         openid
-#           Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
-#           Required to log on the current user.
+#           https://learn.microsoft.com/en-us/graph/permissions-reference#openid
+#           Authenticate the signed-in user.
 #         profile
-#           Allows the app to see your users' basic profile (e.g., name, picture, user name, email address).
-#           Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
+#           https://learn.microsoft.com/en-us/graph/permissions-reference#profile
+#           Authenticate the signed-in user, get basic properties.
 #         User.Read.All
-#           Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
+#           https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall
 #           Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
 #       Provide admin consent
 #         Click the "Grant admin consent for <your tenant>" button
@@ -90,14 +89,14 @@ $GraphEndpointVersion = 'v1.0'
 
 # Define custom cloud environments, such as for not yet publicly documented sovereign clouds
 $CustomCloudEnvironments = @(
-    @{
-        Aliases                 = @('AzureExample', 'Example', 'ExampleCloud', 'AzureExampleCloud') # Mandatory. Each value must be unique across all environments.
-        AzureADEndpoint         = 'https://login.sovcloud-identity.example' # Mandatory.
-        GraphApiEndpoint        = 'https://graph.svc.sovcloud.example' # Mandatory.
-        ExchangeOnlineEndpoint  = 'https://outlook.sovcloud.example' # Mandatory.
-        AutodiscoverSecureName  = 'https://autodiscover-s.outlook.sovcloud.example' # Mandatory.
-        SharePointOnlineDomains = @('sharepoint.example') # Mandatory for accessing SharePoint via Graph.
-    }
+    # @{
+    #     Aliases                 = @('AzureExample', 'Example', 'ExampleCloud', 'AzureExampleCloud') # Mandatory. Each value must be unique across all environments.
+    #     AzureADEndpoint         = 'https://login.sovcloud-identity.example' # Mandatory.
+    #     GraphApiEndpoint        = 'https://graph.svc.sovcloud.example' # Mandatory.
+    #     ExchangeOnlineEndpoint  = 'https://outlook.sovcloud.example' # Mandatory.
+    #     AutodiscoverSecureName  = 'https://autodiscover-s.outlook.sovcloud.example' # Mandatory.
+    #     SharePointOnlineDomains = @('sharepoint.example') # Mandatory for accessing SharePoint via Graph.
+    # }
 
     # @{
     #   ...

@@ -11,9 +11,9 @@ Would you like support? ExplicIT Consulting (https://explicitconsulting.at) offe
 
 Features
   - Automate simulation mode for all given mailboxes
-    - SimulateAndDeploy considers additional mailboxes when the user added them in Outlook on the web, when they are passed via the 'SimulateMailboxes' parameter, or when being added dynamically via the 'VirtualMailboxConfigFile' parameter
+    - SimulateAndDeploy considers additional mailboxes when the user added them in Outlook for the web, when they are passed via the 'SimulateMailboxes' parameter, or when being added dynamically via the 'VirtualMailboxConfigFile' parameter
   - A configurable number of Set-OutlookSignatures instances run in parallel for better performance
-  - Set default signature in Outlook on the web, no matter if classic signature or roaming signatures (requires the Benefactor Circle add-on)
+  - Set default signature in Outlook for the web, no matter if classic signature or roaming signatures (requires the Benefactor Circle add-on)
   - Set internal and external out-of-office (OOF) message (requires the Benefactor Circle add-on)
   - Supports on-prem, hybrid and cloud-only environments
 
@@ -42,58 +42,56 @@ Requirements
 		      - Application (!) permissions with admin consent
                   - Microsoft Graph
 				      - Files.Read.All
-					    Allows the app to read all files in all site collections without a signed in user.
-					    Required for access to templates and configuration files hosted on SharePoint Online.
-					    For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
+					    https://learn.microsoft.com/en-us/graph/permissions-reference#filesreadall
+					    Read template and configuration files hosted on SharePoint Online. Alternative: Files.SelectedOperations.Selected.
 					  - GroupMember.Read.All
-						Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
+						https://learn.microsoft.com/en-us/graph/permissions-reference#groupmemberreadall
 						Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
 					  - Mail.ReadWrite
-					    Allows the app to create, read, update, and delete mail in all mailboxes without a signed-in user. Does not include permission to send mail.
-						Required to connect to Outlook on the web and to set Outlook signatures.
+					    https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadwrite
+						Create signature collection in drafts, provide signatures for Outlook add-in.
 					  - MailboxSettings.ReadWrite
-						Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-						Required to set out-of-office replies for the simulated mailboxes
+						https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsreadwrite
+						Detect mailbox environment, get and set out-of-office data.
 					  - User.Read.All
-						Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-						Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
+						https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall
+						Data for replacement variables, SMTP to UPN, group membership.
 					  - MailboxConfigItem.ReadWrite
-					    Allows the app to create, read, update and delete all users' UserConfiguration objects.
-						Required to connect to Outlook on the web and to set Outlook on the web signature (classic and roaming).
+					    https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxconfigitemreadwrite
+						Read data from Outlook Web, set Outlook web signatures.
 			  - Delegated (!) permissions with admin consent
 				These permissions equal those mentioned in '.\config\default graph config.ps1'
 			      - Microsoft Graph
 					  - email
-				        Allows the app to read your users' primary email address.
-					    Required to log on the current user.
+				        https://learn.microsoft.com/en-us/graph/permissions-reference#email
+					    Authenticate the signed-in user.
 					  - MailboxConfigItem.ReadWrite
-						Allows the app to create, read, update and delete user's UserConfiguration objects, on behalf of the signed-in user.
-						Required to connect to Outlook on the web and to set Outlook on the web signature (classic and roaming).
+						https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxconfigitemreadwrite
+						Read data from Outlook Web, set Outlook web signatures.
 					  - Files.Read.All
-					    Allows the app to read all files the signed-in user can access.
-					    Required for access to templates and configuration files hosted on SharePoint Online.
-					    For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
+					    https://learn.microsoft.com/en-us/graph/permissions-reference#filesreadall
+					    Read template and configuration files hosted on SharePoint Online. Alternative: Files.SelectedOperations.Selected.
 					  - GroupMember.Read.All
-						Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
+						https://learn.microsoft.com/en-us/graph/permissions-reference#groupmemberreadall
 						Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
 					  - Mail.ReadWrite
-						Allows the app to create, read, update, and delete email in user mailboxes. Does not include permission to send mail.
-						Required to connect to Outlook on the web and to set Outlook signatures.
+						https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadwrite
+						Create signature collection in drafts, provide signatures for Outlook add-in.
 					  - MailboxSettings.ReadWrite
-						Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-						Required to detect the state of the out-of-office assistant and to set out-of-office replies.
+						https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsreadwrite
+						Detect mailbox environment, get and set out-of-office data.
 					  - offline_access
-						Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
+						https://learn.microsoft.com/en-us/graph/permissions-reference#offline_access
 						Required to get a refresh token from Graph.
 					  - openid
-						Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
-						Required to log on the current user.
+						https://learn.microsoft.com/en-us/graph/permissions-reference#openid
+						Authenticate the signed-in user.
 					  - profile
-						Allows the app to see your users' basic profile (e.g., name, picture, user name, email address).
-						Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
+						https://learn.microsoft.com/en-us/graph/permissions-reference#profile
+						Authenticate the signed-in user, get basic properties.
 					  - User.Read.All
-						Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-						Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
+						https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall
+						Data for replacement variables, SMTP to UPN, group membership.
 			  - Define a client secret (and set a reminder to update it, because it will expire)
 				The code can easily be adapted for certificate authentication at application level (which is not possible for user authentication)
 			  - Set supported account types to "Accounts in this organizational directory only" (for security reasons)
@@ -115,15 +113,15 @@ Limitations and remarks
 		  - Do not create signatures in RTF format (parameter '-CreateRtfSignatures false')
   - Roaming signatures can currently not be deployed for shared mailboxes, as the API does not support this scenario.
       - Roaming signatures for shared mailboxes pose a general problem, as only signatures with replacement variables from the $CurrentMailbox[…]$ namespace would make sense anyhow
-  - SimulateAndDeploy cannot solve problems around the Classic Outlook on Windows roaming signature sync engine, only Microsoft can do this (but unfortunately does not since years).
-      - Until Microsoft solves this in Classic Outlook on Windows, expect problems with character encoding (umlauts, diacritics, emojis, etc.) and more.
+  - SimulateAndDeploy cannot solve problems around the Classic Outlook for Windows roaming signature sync engine, only Microsoft can do this (but unfortunately does not since years).
+      - Until Microsoft solves this in Classic Outlook for Windows, expect problems with character encoding (umlauts, diacritics, emojis, etc.) and more.
 	  - These Outlook-internal problems will come and go depending on the patch level of Outlook.
 	  - These Outlook-internal problems can also be observed when Set-OutlookSignatures is not involved at all.
-	  - The only workaround currently known is to disable the Classic Outlook on Windows sync engine and let Set-OutlookSignatures do it by running it on the client regularly.
-  - Signatures are directly usable in Outlook on the web and New Outlook (when based on Outlook on the web). Other Outlook editions may work but are not supported.
+	  - The only workaround currently known is to disable the Classic Outlook for Windows sync engine and let Set-OutlookSignatures do it by running it on the client regularly.
+  - Signatures are directly usable in Outlook for the web and New Outlook (when based on Outlook for the web). Other Outlook editions may work but are not supported.
       - Consider using the Outlook add-in to access signatures created by SimulateAndDeploy on other editions of Outlook in a supported way.
 	    See https://set-outlooksignatures.com/outlookaddin for details.
-	  - Also see FAQ 'Roaming signatures in Classic Outlook on Windows look different' at https://set-outlooksignatures.com/faq.
+	  - Also see FAQ 'Roaming signatures in Classic Outlook for Windows look different' at https://set-outlooksignatures.com/faq.
   - Consider using the 'VirtualMailboxConfigFile' parameter of Set-OutlookSignatures, ideally together with the output of the Export-RecipientPermissions script.
       - This allows you to automatically create up-to-date lists of mailboxes based on the permissions granted in Exchange, as well as the according INI file lines.
 	  - Visit https://github.com/Export-RecipientPermissions for details about Export-RecipientPermissions.
@@ -137,7 +135,12 @@ It is recommended to not modify or copy this sample script, but to call it with 
 #>
 
 
+# Suppress specific PSScriptAnalyzerRules for specific variables
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'CloudEnvironment')]
+
+
 #Requires -Version 5.1
+
 
 [CmdletBinding()]
 
@@ -157,14 +160,14 @@ param (
 
 	# Define custom cloud environments, such as for not yet publicly documented sovereign clouds
 	$CustomCloudEnvironments = @(
-		@{
-			Aliases                 = @('AzureExample', 'Example', 'ExampleCloud', 'AzureExampleCloud') # Mandatory. Each value must be unique across all environments.
-			AzureADEndpoint         = 'https://login.sovcloud-identity.example' # Mandatory.
-			GraphApiEndpoint        = 'https://graph.svc.sovcloud.example' # Mandatory.
-			ExchangeOnlineEndpoint  = 'https://outlook.sovcloud.example' # Mandatory.
-			AutodiscoverSecureName  = 'https://autodiscover-s.outlook.sovcloud.example' # Mandatory.
-			SharePointOnlineDomains = @('sharepoint.example') # Mandatory for accessing SharePoint via Graph.
-		}
+		# @{
+		# 	Aliases                 = @('AzureExample', 'Example', 'ExampleCloud', 'AzureExampleCloud') # Mandatory. Each value must be unique across all environments.
+		# 	AzureADEndpoint         = 'https://login.sovcloud-identity.example' # Mandatory.
+		# 	GraphApiEndpoint        = 'https://graph.svc.sovcloud.example' # Mandatory.
+		# 	ExchangeOnlineEndpoint  = 'https://outlook.sovcloud.example' # Mandatory.
+		# 	AutodiscoverSecureName  = 'https://autodiscover-s.outlook.sovcloud.example' # Mandatory.
+		# 	SharePointOnlineDomains = @('sharepoint.example') # Mandatory for accessing SharePoint via Graph.
+		# }
 
 		# @{
 		#   ...
@@ -211,7 +214,7 @@ param (
 
 	# List of users and mailboxes to simulate
 	#   SimulateUser: Logon name in UPN or pre-Windows 2000 format
-	#   SimulateMailboxes: Separate multiple mailboxes by spaces or commas. Leave empty to get mailboxes from Outlook on the web (recommended).
+	#   SimulateMailboxes: Separate multiple mailboxes by spaces or commas. Leave empty to get mailboxes from Outlook for the web (recommended).
 	#   Examples:
 	#     ExampleDomain\ExampleUser;
 	#     a@example.com;
@@ -896,7 +899,7 @@ try {
 
 		$script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath 'MSAL.PS')
 
-		Copy-Item -LiteralPath $([System.Io.Path]::GetFullPath($((Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath) -ChildPath 'bin\MSAL.PS')))) -Destination $script:MsalModulePath -Recurse
+		Copy-Item -LiteralPath $([System.Io.Path]::GetFullPath($((Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath) -ChildPath 'deps\MSAL.PS')))) -Destination $script:MsalModulePath -Recurse
 		if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse | Unblock-File }
 		Import-Module $script:MsalModulePath -Force
 

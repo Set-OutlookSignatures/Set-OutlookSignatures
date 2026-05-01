@@ -289,56 +289,55 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                     # Microsoft Graph permissions reference: https://learn.microsoft.com/en-us/graph/permissions-reference
 
                     # Delegated permission: email
-                    #   Allows the app to read your users' primary email address.
-                    #   Required to log on the current user.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#email
+                    #   Authenticate the signed-in user.
                     @{
                         'id'   = '64a6cdd6-aab1-4aaf-94b8-3cc8405e90d0'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: MailboxConfigItem.ReadWrite
-                    #   Allows the app to create, read, update and delete user's UserConfiguration objects, on behalf of the signed-in user.
-                    #   Required to connect to Outlook on the web and to set Outlook on the web signature (classic and roaming).
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxconfigitemreadwrite
+                    #   Read data from Outlook Web, set Outlook web signatures.
                     @{
                         'id'   = '7d461784-7715-4b09-9f90-91a6d8722652'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: Files.Read.All
-                    #   Allows the app to read all files the signed-in user can access.
-                    #   Required for access to templates and configuration files hosted on SharePoint Online.
-                    #   For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#filesreadall
+                    #   Read template and configuration files hosted on SharePoint Online. Alternative: Files.SelectedOperations.Selected.
                     @{
                         'id'   = 'df85f4d6-205c-4ac5-a5ea-6bf408dba283'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: GroupMember.Read.All
-                    #   Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
-                    #   Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#groupmemberreadall
+                    #   Find groups by name, get their security identifier (SID) and transitive members.
                     @{
                         'id'   = 'bc024368-1153-4739-b217-4326f2e966d0'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: Mail.ReadWrite
-                    #   Allows the app to create, read, update, and delete email in user mailboxes, on behalf of the signed-in user. Does not include permission to send mail.
-                    #   Required to connect to Outlook on the web and to set Outlook signatures.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadwrite
+                    #   Create signature collection in drafts, provide signatures for Outlook add-in.
                     @{
                         'id'   = '024d486e-b451-40bb-833d-3e66d98c5c73'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: MailboxSettings.ReadWrite
-                    #   Allows the app to create, read, update, and delete user's mailbox settings, on behalf of the signed-in user. Does not include permission to send mail.
-                    #   Required to detect the state of the out-of-office assistant and to set out-of-office replies.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsreadwrite
+                    #   Detect mailbox environment, get and set out-of-office data.
                     @{
                         'id'   = '818c620a-27a9-40bd-a6a5-d96f7d610b4b'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: offline_access
-                    #   Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#offline_access
                     #   Required to get a refresh token from Graph.
                     @{
                         'id'   = '7427e0e9-2fba-42fe-b0c0-848c9e6a8182'
@@ -346,24 +345,24 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                     },
 
                     # Delegated permission: openid
-                    #   Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
-                    #   Required to log on the current user.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#openid
+                    #   Authenticate the signed-in user.
                     @{
                         'id'   = '37f7f235-527c-4136-accd-4a02d197296e'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: profile
-                    #   Allows the app to see your users' basic profile (e.g., name, picture, user name, email address).
-                    #   Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#profile
+                    #   Authenticate the signed-in user, get basic properties.
                     @{
                         'id'   = '14dad69e-099b-42c9-810b-d002981feec1'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: User.Read.All
-                    #   Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-                    #   Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall
+                    #   Data for replacement variables, SMTP to UPN, group membership.
                     @{
                         'id'   = 'a154be20-db9c-4678-8ab7-66f6cc099a59'
                         'type' = 'Scope'
@@ -381,59 +380,56 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                 'resourceAccess' = @(
                     # Microsoft Graph permissions reference: https://learn.microsoft.com/en-us/graph/permissions-reference
 
-                    # Microsoft Graph permissions reference: https://learn.microsoft.com/en-us/graph/permissions-reference
-
                     # Delegated permission: email
-                    #   Allows the app to read your users' primary email address.
-                    #   Required to log on the current user.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#email
+                    #   Authenticate the signed-in user.
                     @{
                         'id'   = '64a6cdd6-aab1-4aaf-94b8-3cc8405e90d0'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: MailboxConfigItem.ReadWrite
-                    #   Allows the app to create, read, update and delete user's UserConfiguration objects, on behalf of the signed-in user.
-                    #   Required to connect to Outlook on the web and to set Outlook on the web signature (classic and roaming).
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxconfigitemreadwrite
+                    #   Read data from Outlook Web, set Outlook web signatures.
                     @{
                         'id'   = '7d461784-7715-4b09-9f90-91a6d8722652'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: Files.Read.All
-                    #   Allows the app to read all files the signed-in user can access.
-                    #   Required for access to SharePoint Online on Linux, macOS, and on Windows without WebDAV.
-                    #   You can use Files.SelectedOperations.Selected as alternative, requiring granting specific permission in SharePoint Online.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#filesreadall
+                    #   Read template and configuration files hosted on SharePoint Online. Alternative: Files.SelectedOperations.Selected.
                     @{
                         'id'   = 'df85f4d6-205c-4ac5-a5ea-6bf408dba283'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: GroupMember.Read.All
-                    #   Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
-                    #   Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#groupmemberreadall
+                    #   Find groups by name, get their security identifier (SID) and transitive members.
                     @{
                         'id'   = 'bc024368-1153-4739-b217-4326f2e966d0'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: Mail.ReadWrite
-                    #   Allows the app to create, read, update, and delete email in user mailboxes, on behalf of the signed-in user. Does not include permission to send mail.
-                    #   Required to connect to Outlook on the web and to set Outlook signatures.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadwrite
+                    #   Create signature collection in drafts, provide signatures for Outlook add-in.
                     @{
                         'id'   = '024d486e-b451-40bb-833d-3e66d98c5c73'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: MailboxSettings.ReadWrite
-                    #   Allows the app to create, read, update, and delete user's mailbox settings, on behalf of the signed-in user. Does not include permission to send mail.
-                    #   Required to detect the state of the out-of-office assistant and to set out-of-office replies.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsreadwrite
+                    #   Detect mailbox environment, get and set out-of-office data.
                     @{
                         'id'   = '818c620a-27a9-40bd-a6a5-d96f7d610b4b'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: offline_access
-                    #   Allows the app to see and update the data you gave it access to, even when users are not currently using the app. This does not give the app any additional permissions.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#offline_access
                     #   Required to get a refresh token from Graph.
                     @{
                         'id'   = '7427e0e9-2fba-42fe-b0c0-848c9e6a8182'
@@ -441,73 +437,72 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                     },
 
                     # Delegated permission: openid
-                    #   Allows users to sign in to the app with their work or school accounts and allows the app to see basic user profile information.
-                    #   Required to log on the current user.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#openid
+                    #   Authenticate the signed-in user.
                     @{
                         'id'   = '37f7f235-527c-4136-accd-4a02d197296e'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: profile
-                    #   Allows the app to see your users' basic profile (e.g., name, picture, user name, email address).
-                    #   Required to log on the current user, to access the '/me' Graph API, to get basic properties of the current user.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#profile
+                    #   Authenticate the signed-in user, get basic properties.
                     @{
                         'id'   = '14dad69e-099b-42c9-810b-d002981feec1'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: User.Read.All
-                    #   Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-                    #   Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall
+                    #   Data for replacement variables, SMTP to UPN, group membership.
                     @{
                         'id'   = 'a154be20-db9c-4678-8ab7-66f6cc099a59'
                         'type' = 'Scope'
                     },
 
                     # Application permission: Files.Read.All
-                    #   Allows the app to read all files in all site collections without a signed in user.
-                    #   Required for access to templates and configuration files hosted on SharePoint Online.
-                    #   For added security, use Files.SelectedOperations.Selected as alternative, requiring granting specific permissions in SharePoint Online.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#filesreadall
+                    #   Read template and configuration files hosted on SharePoint Online. Alternative: Files.SelectedOperations.Selected.
                     @{
                         'id'   = '01d4889c-1287-42c6-ac1f-5d1e02578ef6'
                         'type' = 'Role'
                     },
 
                     # Application permission: GroupMember.Read.All
-                    #   Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
-                    #   Required to find groups by name and to get their security identifier (SID) and the number of transitive members.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#groupmemberreadall
+                    #   Find groups by name, get their security identifier (SID) and transitive members.
                     @{
                         'id'   = '98830695-27a2-44f7-8c18-0c3ebc9698f6'
                         'type' = 'Role'
                     },
 
                     # Application permission: Mail.ReadWrite
-                    #   Allows the app to create, read, update, and delete mail in all mailboxes without a signed-in user. Does not include permission to send mail.
-                    #   Required to connect to Outlook on the web and to set Outlook signatures.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadwrite
+                    #   Create signature collection in drafts, provide signatures for Outlook add-in.
                     @{
                         'id'   = 'e2a3a72e-5f79-4c64-b1b1-878b674786c9'
                         'type' = 'Role'
                     },
 
                     # Application permission: MailboxSettings.ReadWrite
-                    #   Allows the app to create, read, update, and delete user's mailbox settings. Does not include permission to send mail.
-                    #   Required to detect the state of the out-of-office assistant and to set out-of-office replies.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsreadwrite
+                    #   Detect mailbox environment, get and set out-of-office data.
                     @{
                         'id'   = '6931bccd-447a-43d1-b442-00a195474933'
                         'type' = 'Role'
                     },
 
                     # Application permission: User.Read.All
-                    #   Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-                    #   Required for $CurrentUser[…]$ and $CurrentMailbox[…]$ replacement variables, and for simulation mode.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall
+                    #   Data for replacement variables, SMTP to UPN, group membership.
                     @{
                         'id'   = 'df021288-bdef-4463-88db-98f22de89214'
                         'type' = 'Role'
                     },
 
                     # Application permission: MailboxConfigItem.ReadWrite
-                    #   Allows the app to create, read, update and delete all users' UserConfiguration objects.
-                    #   Required to connect to Outlook on the web and to set Outlook on the web signature (classic and roaming).
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxconfigitemreadwrite
+                    #   Read data from Outlook Web, set Outlook web signatures.
                     @{
                         'id'   = 'aa6d92d4-b25a-4640-aefe-3e3231e5e736'
                         'type' = 'Role'
@@ -526,24 +521,24 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
                     # Microsoft Graph permissions reference: https://learn.microsoft.com/en-us/graph/permissions-reference
 
                     # Delegated permission: GroupMember.Read.All
-                    #   Allows the app to list groups, read basic group properties and read membership of all groups the signed-in user has access to.
-                    #   Required to find and check license groups.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#groupmemberreadall
+                    #   Find groups by name, get their security identifier (SID) and transitive members.
                     @{
                         'id'   = 'bc024368-1153-4739-b217-4326f2e966d0'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: Mail.Read
-                    #   Allows to read emails in mailbox of the currently logged-on user (and in no other mailboxes).
-                    #    Required because of Microsoft restrictions accessing roaming signatures.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#mailread
+                    #   Required because of Microsoft restrictions accessing roaming signatures.
                     @{
                         'id'   = '570282fd-fa5c-430d-a7fd-fc8dc98a9dca'
                         'type' = 'Scope'
                     },
 
                     # Delegated permission: User.Read.All
-                    #   Allows the app to read the full set of profile properties, reports, and managers of other users in your organization, on behalf of the signed-in user.
-                    #   Required to get the UPN for a given SMTP email address.
+                    #   https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall
+                    #   Data for replacement variables, SMTP to UPN, group membership.
                     @{
                         'id'   = 'a154be20-db9c-4678-8ab7-66f6cc099a59'
                         'type' = 'Scope'

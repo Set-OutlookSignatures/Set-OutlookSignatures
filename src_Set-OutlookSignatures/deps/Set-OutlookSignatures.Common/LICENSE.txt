@@ -1,0 +1,24 @@
+-----------------------------------------------------------------
+Set-OutlookSignatures.Common.dll
+-----------------------------------------------------------------
+Copyright (c) 2023--present ExplicIT Consulting GmbH. All rights reserved.
+
+Commercial License Notice:
+This software is proprietary and confidential.
+Use, unauthorized copying, modification, distribution, or reverse engineering of this software via any medium is strictly prohibited.
+This license is non-transferable. You may not sublicense, rent, or lease this software to third parties.
+This license and the right to use the software terminate automatically if you fail to comply with any of its terms.
+This license is governed by the laws of the Republic of Austria, without regard to conflict of law principles.
+Use is subject to the Terms of Service and the General Terms and Conditions found at https://explicitconsulting.at/legal.
+
+Authorized Use:
+Permission to use this software is granted exclusively to users of the free and open-source Set-OutlookSignatures software.
+Redistribution of this software or its components is permitted only when bundled as an integral part of the Set-OutlookSignatures distribution.
+
+Software Escrow:
+The source code for this proprietary component is held in a professional software escrow.
+This ensures continued availability for the Set-OutlookSignatures open-source project community should the developer cease operations.
+
+Disclaimer:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE.

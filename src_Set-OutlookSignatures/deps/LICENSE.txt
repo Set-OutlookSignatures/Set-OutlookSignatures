@@ -1,0 +1,1 @@
+This distribution includes certain proprietary third-party components in the /deps directory. These components are not covered by the EUPL v1.2 license. Please refer to the license.txt within each dependency folder for specific terms of use.
