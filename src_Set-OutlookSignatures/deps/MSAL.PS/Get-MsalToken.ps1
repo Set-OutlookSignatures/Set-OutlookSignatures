@@ -468,8 +468,10 @@ public class X11Interop {
         try {
           #$AuthenticationResult = $AquireTokenParameters.ExecuteAsync().GetAwaiter().GetResult()
           $taskAuthenticationResult = $AquireTokenParameters.ExecuteAsync($tokenSource.Token)
+
           try {
             $endTime = [datetime]::Now.Add($Timeout)
+
             while (!$taskAuthenticationResult.IsCompleted) {
               if ($Timeout -eq [timespan]::Zero -or [datetime]::Now -lt $endTime) {
                 try { global:WatchCatchableExitSignal } catch {}
@@ -477,9 +479,14 @@ public class X11Interop {
                 Start-Sleep -Seconds 1
               } else {
                 $tokenSource.Cancel()
-                try { $taskAuthenticationResult.Wait() }
-                catch {}
-                Write-Error -Exception (New-Object System.TimeoutException) -Category ([System.Management.Automation.ErrorCategory]::OperationTimeout) -CategoryActivity $MyInvocation.MyCommand -ErrorId 'GetMsalTokenFailureOperationTimeout' -TargetObject $AquireTokenParameters -ErrorAction Stop
+
+                try {
+                  $taskAuthenticationResult.Wait()
+                } catch {
+                }
+
+                # Write-Error -Exception (New-Object System.TimeoutException) -Category ([System.Management.Automation.ErrorCategory]::OperationTimeout) -CategoryActivity $MyInvocation.MyCommand -ErrorId 'GetMsalTokenFailureOperationTimeout' -TargetObject $AquireTokenParameters -ErrorAction Stop
+                throw (New-Object System.Management.Automation.ErrorRecord (New-Object System.TimeoutException), 'GetMsalTokenFailureOperationTimeout', 'OperationTimeout', $AquireTokenParameters)
               }
             }
           } finally {
@@ -501,16 +508,19 @@ public class X11Interop {
 
           ## Parse task results
           if ($taskAuthenticationResult.IsFaulted) {
-            Write-Error -Exception $taskAuthenticationResult.Exception -Category ([System.Management.Automation.ErrorCategory]::AuthenticationError) -CategoryActivity $MyInvocation.MyCommand -ErrorId 'GetMsalTokenFailureAuthenticationError' -TargetObject $AquireTokenParameters -ErrorAction Stop
-          }
-          if ($taskAuthenticationResult.IsCanceled) {
-            Write-Error -Exception (New-Object System.Threading.Tasks.TaskCanceledException $taskAuthenticationResult) -Category ([System.Management.Automation.ErrorCategory]::OperationStopped) -CategoryActivity $MyInvocation.MyCommand -ErrorId 'GetMsalTokenFailureOperationStopped' -TargetObject $AquireTokenParameters -ErrorAction Stop
+            # Write-Error -Exception $taskAuthenticationResult.Exception -Category ([System.Management.Automation.ErrorCategory]::AuthenticationError) -CategoryActivity $MyInvocation.MyCommand -ErrorId 'GetMsalTokenFailureAuthenticationError' -TargetObject $AquireTokenParameters -ErrorAction Stop
+            throw (New-Object System.Management.Automation.ErrorRecord $taskAuthenticationResult.Exception, 'GetMsalTokenFailureAuthenticationError', 'AuthenticationError', $AquireTokenParameters)
+          } elseif ($taskAuthenticationResult.IsCanceled) {
+            # Write-Error -Exception (New-Object System.Threading.Tasks.TaskCanceledException $taskAuthenticationResult) -Category ([System.Management.Automation.ErrorCategory]::OperationStopped) -CategoryActivity $MyInvocation.MyCommand -ErrorId 'GetMsalTokenFailureOperationStopped' -TargetObject $AquireTokenParameters -ErrorAction Stop
+            throw (New-Object System.Management.Automation.ErrorRecord (New-Object System.Threading.Tasks.TaskCanceledException $taskAuthenticationResult), 'GetMsalTokenFailureOperationStopped', 'OperationStopped', $AquireTokenParameters)
           } else {
             $AuthenticationResult = $taskAuthenticationResult.Result
           }
         } catch {
-          Write-Error -Exception (Coalesce $_.Exception.InnerException, $_.Exception) -Category ([System.Management.Automation.ErrorCategory]::AuthenticationError) -CategoryActivity $MyInvocation.MyCommand -ErrorId 'GetMsalTokenFailureAuthenticationError' -TargetObject $AquireTokenParameters -ErrorAction Stop
+          # Write-Error -Exception (Coalesce $_.Exception.InnerException, $_.Exception) -Category ([System.Management.Automation.ErrorCategory]::AuthenticationError) -CategoryActivity $MyInvocation.MyCommand -ErrorId 'GetMsalTokenFailureAuthenticationError' -TargetObject $AquireTokenParameters -ErrorAction Stop
+          throw (New-Object System.Management.Automation.ErrorRecord (Coalesce $_.Exception.InnerException, $_.Exception), 'GetMsalTokenFailureAuthenticationError', 'AuthenticationError', $AquireTokenParameters)
         }
+
         break
       }
     }

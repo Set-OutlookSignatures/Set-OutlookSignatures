@@ -573,8 +573,12 @@ function main {
         [SetOutlookSignatures.Common]::Init()
 
         if (-not $SetOutlookSignaturesCommonInitDone) {
+            if ($script:ExitCode -ne 255) {
+                $script:ExitCodeDescription = 'Common initialization routine failed.'
+            } else {
+                $script:ExitCodeDescription = "Common initialization routine failed. Root cause is error $($script:ExitCode): $($script:ExitCodeDescription)"
+            }
             $script:ExitCode = 5
-            $script:ExitCodeDescription = 'Common initialization routine failed.'
             exit
         }
     } else {
@@ -2229,13 +2233,21 @@ end tell
         $script:GraphUserDummyMailbox = $true
 
         if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and $OutlookUseNewOutlook -eq $true) {
+            $NewOutlookUserSettingsFilePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Microsoft\Olk\UserSettings.json')
+
+            $NewOutlookUserSettingsFileContent = ConvertEncoding -InFile $NewOutlookUserSettingsFilePath -InIsHtml $false
+
+            if ($PSVersionTable.PSEdition -ieq 'Desktop') {
+                Add-Type -AssemblyName 'System.Web.Extensions'
+
+                $xx = ((New-Object -TypeName System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($NewOutlookUserSettingsFileContent, [hashtable]))
+            } else {
+                $xx = $NewOutlookUserSettingsFileContent | ConvertFrom-Json -AsHashtable
+            }
+
             $x = @(
-                @((ConvertEncoding -InFile $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Microsoft\Olk\UserSettings.json') -InIsHtml $false | ConvertFrom-Json).Identities.IdentityMap.PSObject.Properties | Select-Object -Unique | Where-Object { $_.name -match '(\S+?)@(\S+?)\.(\S+?)' }) | ForEach-Object {
-                    if ((ConvertEncoding -InFile $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath "\Microsoft\OneAuth\accounts\$($_.Value)") -InIsHtml $false | ConvertFrom-Json).association_status -ilike '*"com.microsoft.Olk":"associated"*') {
-                        $_.name
-                    }
-                }
-            )
+                ('' + $xx.AccountLocalBackup.Json | ConvertFrom-Json).accounts.emailAddress
+            ) | Select-Object -Unique
         } else {
             $x = @()
         }
@@ -5771,12 +5783,26 @@ function SetSignatures {
 
             # Use a separate runspace for PreMailer.Net, as there are DLL conflicts in PowerShell 5.x with Invoke-RestMethod
             # Do not use jobs, as they fall back to Constrained Language Mode in secured environments, which makes Import-Module fail
-            $MoveCSSInlineResult = MoveCssInline $tempFileContent
+            try {
+                $PreMailer = [PreMailer.Net.PreMailer]::New(
+                    $tempFileContent, # string html
+                    $null # uri baseUri
+                )
 
-            if ($MoveCSSInlineResult.StartsWith('Failed: ')) {
-                Write-Host "$Indent          $MoveCSSInlineResult" -ForegroundColor Yellow
-            } else {
+                $MoveCSSInlineResult = $PreMailer.MoveCssInline(
+                    $true, # bool removeStyleElements = False
+                    $null, # string ignoreElements = null
+                    $null, # string css = null
+                    $true, # bool stripIdAndClassAttributes = False
+                    $false, # bool removeComments = False
+                    $null, # AngleSharp.IMarkupFormatter customFormatter = null
+                    $false, # bool preserveMediaQueries = False
+                    $false # bool useEmailFormatter = False # Messes up Outlook formatting!
+                ).html
+
                 [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $MoveCSSInlineResult)
+            } catch {
+                Write-Host "$Indent          $MoveCSSInlineResult" -ForegroundColor Yellow
             }
         }
 
@@ -7214,172 +7240,6 @@ function GetHtmlBody {
     }
 
     return $container.InnerHtml.Trim()
-}
-
-
-function MoveCssInline {
-    param (
-        $HtmlCode
-    )
-
-    try { global:WatchCatchableExitSignal } catch {}
-
-    [void][runspacefactory]::CreateRunspacePool()
-    $RunspacePool = [runspacefactory]::CreateRunspacePool(1, 1)
-    $RunspacePool.Open()
-
-    $PowerShell = [powershell]::Create()
-    $PowerShell.RunspacePool = $RunspacePool
-
-    [void]$PowerShell.AddScript({
-            param (
-                $HtmlCode,
-                $path
-            )
-
-            $assemblyResolveHandler = $null
-            $currentlyResolving = @{}
-
-            function EnableAssemblyResolver {
-                if ($null -ne $assemblyResolveHandler) {
-                    return
-                }
-
-                $assemblyResolveHandler = {
-                    param($senderDetails, $arguments)
-
-                    $assemblyName = [System.Reflection.AssemblyName]::new($arguments.Name).Name
-
-                    if ($assemblyName -like '*.resources') {
-                        return $null
-                    }
-
-
-                    if ($currentlyResolving.ContainsKey($assemblyName)) {
-                        return $null
-                    }
-
-                    $currentlyResolving[$assemblyName] = $true
-
-                    try {
-                        $dllPath = Join-Path -Path $path -ChildPath "$($assemblyName).dll"
-
-                        if (Test-Path -LiteralPath $dllPath) {
-                            return [System.Reflection.Assembly]::LoadFrom($dllPath)
-                        }
-                    } catch {
-                        Write-Debug "Failed: Load '$($assemblyName)' from '$($dllPath)'."
-                    } finally {
-                        $currentlyResolving.Remove($assemblyName) | Out-Null
-                    }
-
-                    try {
-                        return [System.Reflection.Assembly]::Load($assemblyName)
-                    } catch {
-                        Write-Debug "Failed: Default load for '$($assemblyName)'."
-                    }
-
-                    return $null
-                }
-
-
-                [System.AppDomain]::CurrentDomain.add_AssemblyResolve($assemblyResolveHandler)
-            }
-
-            function DisableAssemblyResolver {
-                if ($null -eq $assemblyResolveHandler) {
-                    return
-                }
-
-                [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($assemblyResolveHandler)
-
-                $assemblyResolveHandler = $null
-            }
-
-            if ($($PSVersionTable.PSEdition) -ine 'Core') {
-                EnableAssemblyResolver
-            }
-
-            $DebugPreference = 'Continue'
-            Write-Debug "Start(Ticks) = $((Get-Date).Ticks)"
-
-            try {
-                Import-Module (Join-Path -Path $path -ChildPath 'PreMailer.Net.dll') -Force -ErrorAction Stop
-
-                $PreMailer = [PreMailer.Net.PreMailer]::New(
-                    $HtmlCode, # string html
-                    $null # uri baseUri
-                )
-
-                Write-Debug $(
-                    $PreMailer.MoveCssInline(
-                        $true, # bool removeStyleElements = False
-                        $null, # string ignoreElements = null
-                        $null, # string css = null
-                        $true, # bool stripIdAndClassAttributes = False
-                        $false, # bool removeComments = False
-                        $null, # AngleSharp.IMarkupFormatter customFormatter = null
-                        $false, # bool preserveMediaQueries = False
-                        $false # bool useEmailFormatter = False # Messes up Outlook formatting!
-                    ).html
-                )
-            } catch {
-                Write-Debug "Failed: $($_ | Format-List * | Out-String)"
-            }
-
-            if ($($PSVersionTable.PSEdition) -ine 'Core') {
-                DisableAssemblyResolver
-            }
-        }).AddArgument($HtmlCode).AddArgument($script:PreMailerNetModulePath)
-
-    $Object = New-Object 'System.Management.Automation.PSDataCollection[psobject]'
-    $Handle = $PowerShell.BeginInvoke($Object, $Object)
-    $temp = '' | Select-Object PowerShell, Handle, Object, StartTime, Done
-    $temp.PowerShell = $PowerShell
-    $temp.Handle = $Handle
-    $temp.Object = $Object
-    $temp.StartTime = $null
-    $temp.Done = $false
-    [void]$script:jobs.Add($Temp)
-
-    while (($script:jobs.Done | Where-Object { $_ -eq $false }).count -ne 0) {
-        try { global:WatchCatchableExitSignal } catch {}
-
-        foreach ($job in $script:jobs) {
-            try { global:WatchCatchableExitSignal } catch {}
-
-            if (($null -eq $job.StartTime) -and ($job.Powershell.Streams.Debug[0].Message -imatch 'Start')) {
-                $StartTicks = $job.powershell.Streams.Debug[0].Message -ireplace '[^0-9]'
-                $job.StartTime = [Datetime]::MinValue + [TimeSpan]::FromTicks($StartTicks)
-            }
-
-            if ($null -ne $job.StartTime) {
-                if ((($job.handle.IsCompleted -eq $true) -and ($job.Done -eq $false)) -or (($job.Done -eq $false) -and ((New-TimeSpan -Start $job.StartTime -End (Get-Date)).TotalSeconds -ge 5))) {
-                    if ($job.Powershell.Streams.Debug.Count -ge 2) {
-                        if ([string]::IsNullOrWhiteSpace($job.Powershell.Streams.Debug[1].Message) -eq $false) {
-                            $returnvalue = $job.Powershell.Streams.Debug[1].Message
-                        } else {
-                            $returnvalue = 'Failed: Output from PreMailer.Net is null or whitespace. See verbose output for details.'
-
-                            Write-Verbose (@($job.Powershell.Streams.Debug.Message) -join [System.Environment]::NewLine)
-                        }
-                    } else {
-                        $returnvalue = 'Failed: No output from PreMailer.Net. See verbose output for details.'
-
-                        Write-Verbose (@($job.Powershell.Streams.Debug.Message) -join [System.Environment]::NewLine)
-                    }
-
-                    $job.Done = $true
-                }
-            }
-        }
-
-        Start-Sleep -Seconds 1
-    }
-
-    try { global:WatchCatchableExitSignal } catch {}
-
-    return $returnvalue
 }
 
 
@@ -9350,12 +9210,27 @@ function GraphGetTokenWrapper {
         }
 
         if ($local:results.Count -gt 0) {
-            Write-Host "$($indent)  The permissions of the Entra ID app are not configured ideally." -ForegroundColor $(if ($local:results -ilike 'Error:*') { 'Red' } elseif ($local:results -ilike 'Warning:*') { 'Yellow' } else { $Host.UI.RawUI.ForegroundColor })
-            Write-Host "$($indent)    Details: https://set-outlooksignatures.com/details#security-considerations" -ForegroundColor $(if ($local:results -ilike 'Error:*') { 'Red' } elseif ($local:results -ilike 'Warning:*') { 'Yellow' } else { $Host.UI.RawUI.ForegroundColor })
+            if ($local:results -ilike 'Error:*') {
+                Write-Host "$($indent)  The permissions of the Entra ID app are not configured ideally." -ForegroundColor Red
+                Write-Host "$($indent)    Details: https://set-outlooksignatures.com/details#security-considerations" -ForegroundColor Red
+            } elseif ($local:results -ilike 'Warning:*') {
+                Write-Host "$($indent)  The permissions of the Entra ID app are not configured ideally." -ForegroundColor Yellow
+                Write-Host "$($indent)    Details: https://set-outlooksignatures.com/details#security-considerations" -ForegroundColor Yellow
+
+            } else {
+                Write-Host "$($indent)  The permissions of the Entra ID app are not configured ideally."
+                Write-Host "$($indent)    Details: https://set-outlooksignatures.com/details#security-considerations"
+            }
 
             $local:results | ForEach-Object {
                 foreach ($line in @($_ -split '\r?\n')) {
-                    Write-Host "$($indent)    $($line)" -ForegroundColor $(if ($_ -ilike 'Error:*') { 'Red' } elseif ($_ -ilike 'Warning:*') { 'Yellow' } else { $Host.UI.RawUI.ForegroundColor })
+                    if ($_ -ilike 'Error:*') {
+                        Write-Host "$($indent)    $($line)" -ForegroundColor Red
+                    } elseif ($_ -ilike 'Warning:*') {
+                        Write-Host "$($indent)    $($line)" -ForegroundColor Yellow
+                    } else {
+                        Write-Host "$($indent)    $($line)"
+                    }
                 }
             }
 
@@ -11016,6 +10891,106 @@ try {
     $script:tempDir = (New-Item -Path ([System.IO.Path]::GetTempPath()) -Name (New-Guid).Guid -ItemType Directory).FullName
     $script:ScriptRunGuid = Split-Path -Path $script:tempDir -Leaf
 
+
+    $BridgeCode = @'
+using System;
+using System.Reflection;
+using System.IO;
+using System.Diagnostics;
+using System.Collections.Generic;
+
+namespace SetOutlookSignatures.AssemblyResolver {
+    public static class SmartBridge {
+        private static string _rootPath;
+        private static bool _isEnabled = false;
+        private static readonly ResolveEventHandler _handler = new ResolveEventHandler(HandleResolve);
+
+        // Cache to store already resolved assemblies for this session
+        private static readonly Dictionary<string, Assembly> _cache = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
+
+        public static void Initialize(string rootPath) {
+            _rootPath = rootPath;
+            AppDomain.CurrentDomain.AssemblyResolve -= _handler;
+            AppDomain.CurrentDomain.AssemblyResolve += _handler;
+        }
+
+        public static void Enable() { _isEnabled = true; }
+        public static void Disable() { _isEnabled = false; }
+
+        private static Assembly HandleResolve(object sender, ResolveEventArgs args) {
+            if (!_isEnabled || string.IsNullOrEmpty(args.Name) || !Directory.Exists(_rootPath)) return null;
+
+            string requestedName = new AssemblyName(args.Name).Name;
+
+            lock (_cache) {
+                if (_cache.ContainsKey(requestedName)) {
+                    return _cache[requestedName];
+                }
+            }
+
+            string bestPath = null;
+            Version bestVersion = new Version(0, 0, 0, 0);
+
+            string[] files = Directory.GetFiles(_rootPath, "*.dll", SearchOption.AllDirectories);
+
+            foreach (string file in files) {
+                // Uncomment if you want to restrict to netstandard2.0
+                // if (file.IndexOf("netstandard2.0", StringComparison.OrdinalIgnoreCase) == -1) continue;
+
+                if (Path.GetFileNameWithoutExtension(file).Equals(requestedName, StringComparison.OrdinalIgnoreCase)) {
+                    try {
+                        FileVersionInfo info = FileVersionInfo.GetVersionInfo(file);
+                        Version currentVersion = new Version(info.FileVersion ?? "0.0.0.0");
+
+                        if (currentVersion > bestVersion) {
+                            bestVersion = currentVersion;
+                            bestPath = file;
+                        }
+                    } catch { }
+                }
+            }
+
+            if (bestPath != null) {
+                try {
+                    Assembly loadedAssembly = Assembly.LoadFrom(bestPath);
+                    lock (_cache) {
+                        _cache[requestedName] = loadedAssembly;
+                    }
+                    return loadedAssembly;
+                } catch { }
+            }
+
+            return null;
+        }
+    }
+}
+'@
+
+    # Compile
+    if (-not ([System.Type]::GetType('SetOutlookSignatures.AssemblyResolver.SmartBridge'))) {
+        Add-Type -TypeDefinition $BridgeCode
+    }
+
+    # Initialize
+    [SetOutlookSignatures.AssemblyResolver.SmartBridge]::Initialize($script:tempdir)
+
+    # Toggle on
+    [SetOutlookSignatures.AssemblyResolver.SmartBridge]::Enable()
+
+    # Disable assembly resolver C# bridge
+    # [SetOutlookSignatures.AssemblyResolver.SmartBridge]::Disable()
+
+
+    $script:CommonDepsPath = (Join-Path -Path $script:tempDir -ChildPath 'commonDeps')
+    Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\_common')) -Destination $script:CommonDepsPath -Recurse
+    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
+        Unblock-File -LiteralPath $script:CommonDepsPath
+    }
+
+
+    try { global:WatchCatchableExitSignal } catch {}
+
+
     $script:SetOutlookSignaturesCommonDllFilePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid) + '.dll'))
     Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\Set-OutlookSignatures.Common\Set-OutlookSignatures.Common.dll')) -Destination $script:SetOutlookSignaturesCommonDllFilePath
     if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
@@ -11235,6 +11210,9 @@ try {
         Write-Host '  Check for existing issues at https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues?q=' -ForegroundColor Red
         Write-Host '  or get professional support from ExplicIT Consulting at https://set-outlooksignatures.com/support.' -ForegroundColor Red
     }
+
+    # Disable assembly resolver C# bridge
+    [SetOutlookSignatures.AssemblyResolver.SmartBridge]::Disable()
 
     Write-Host
     Write-Host "End Set-OutlookSignatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"

@@ -1,5 +1,5 @@
-<!-- omit in toc -->
 # Data Sovereign Email Signatures and Out-of-Office Replies<br><sub>Unified Outlook branding everywhere – with zero external data exposure</sub>
+
 <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/blob/main/LICENSE.txt" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?label=License&labelColor=black&color=informational" alt="License: EUPL 1.2"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=Latest%20release&color=informational&labelColor=black" alt="Latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/set-outlooksignatures/set-outlooksignatures/total?label=Downloads&labelColor=black" alt="Downloads" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?label=Issues&labelColor=black" alt="Issues" data-external="1"></a> <a href="https://set-outlooksignatures.com/faq#what-can-i-learn-from-the-code-of-set-outlooksignatures" target="_blank"><img src="https://img.shields.io/badge/Behind%20the%20scenes-Learn%20from%20the%20code-lawngreen?labelColor=black" alt="Behind the scenes: Learn from the code"></a>
 
 <p>
@@ -14,7 +14,6 @@
   </a>
 </p>
 
-
 <p align="center">
   <code>Peer-Reviewable Core</code> &nbsp; <code>Agentless Sync</code> &nbsp; <code>No Mail Rerouting</code> &nbsp; <code>Sovereign Cloud Ready</code>
 </p>
@@ -22,7 +21,6 @@
 **Trusted worldwide and proven in high-security environments:** The free and open-source Set-OutlookSignatures and the [**Benefactor Circle add-on**](https://set-outlooksignatures.com/benefactorcircle) turn email signatures and out-of-office replies into a centrally managed business asset — without external data transfer.
 
 By leveraging **Microsoft Roaming Signatures** and our own direct-to-mailbox technology, we provide the world’s only sovereign, native-sync experience that works across all Outlook editions and platforms — including **Exchange Online, Hybrid, and On-Premises** — silently in the background.
-
 
 <table>
   <tr>
@@ -45,7 +43,6 @@ By leveraging **Microsoft Roaming Signatures** and our own direct-to-mailbox tec
   Used by security‑conscious and brand-aware organizations worldwide. See how we <a href="https://set-outlooksignatures.com/features#feature-comparison">compare to alternatives</a> and review our <a href="https://set-outlooksignatures.com/benefactorcircle#price">transparent, non-renewing pricing</a>.
 </p>
 
-
 ## Experience it **in action**
 
 Organizations use our ecosystem to enforce 📣 dynamic branding, 🏛️ administrative governance, and 🧭 cross-platform data sovereignty — all without changing how users work.
@@ -66,7 +63,6 @@ Organizations use our ecosystem to enforce 📣 dynamic branding, 🏛️ admini
     </td>
   </tr>
 </table>
-
 
 ## The **power** of the ecosystem
 

@@ -1,3 +1,53 @@
+$BridgeCode = @'
+using System;
+using System.Reflection;
+using System.IO;
+
+namespace MSALPS.Loader {
+    public static class DependencyResolver {
+        private static string _basePath;
+        private static ResolveEventHandler _handler;
+
+        public static void Initialize(string path) {
+            _basePath = path;
+            _handler = new ResolveEventHandler(Handler);
+            AppDomain.CurrentDomain.AssemblyResolve += _handler;
+        }
+
+        public static void Uninitialize() {
+            if (_handler != null) {
+                AppDomain.CurrentDomain.AssemblyResolve -= _handler;
+                _handler = null;
+            }
+        }
+
+        private static Assembly Handler(object sender, ResolveEventArgs args) {
+            AssemblyName name = new AssemblyName(args.Name);
+
+            if (name.Name == "System.Memory") {
+                string dll = Path.Combine(_basePath, "System.Memory.dll");
+                return File.Exists(dll) ? Assembly.LoadFrom(dll) : null;
+            }
+
+            string pathCheck = Path.Combine(_basePath, name.Name + ".dll");
+            if (File.Exists(pathCheck)) {
+                return Assembly.LoadFrom(pathCheck);
+            }
+            return null;
+        }
+    }
+}
+'@
+
+if ($PSVersionTable.PSVersion.Major -le 5) {
+    if (-not ([System.Type]::GetType('MSALPS.Loader.DependencyResolver'))) {
+        Add-Type -TypeDefinition $BridgeCode
+    }
+
+    [MSALPS.Loader.DependencyResolver]::Initialize((Join-Path -Path $PSScriptRoot -ChildPath 'netstandard2.0'))
+}
+
+
 #region Import Helper Functions
 function Catch-AssemblyLoadError {
     [CmdletBinding()]
@@ -60,6 +110,7 @@ ${env:msalps.dll.lenientLoading} = $true # Continue Module Import
 $ModuleManifest = Import-PowerShellDataFile -LiteralPath (Join-Path $PSScriptRoot 'MSAL.PS.psd1')
 [System.Collections.Generic.List[string]] $RequiredAssemblies = New-Object System.Collections.Generic.List[string]
 
+
 ## Select the correct assemblies for the PowerShell platform
 foreach ($Path in @($ModuleManifest.FileList -ilike '*\netstandard2.0\Microsoft.Identity.Client.dll')) {
     $RequiredAssemblies.Add($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath $Path))))
@@ -118,3 +169,12 @@ if (-not ('DeviceCodeHelper' -as [type])) {
         Write-Warning 'There was an error loading some dependencies. DeviceCode parameter will not function.'
     }
 }
+
+
+<#
+if ($PSVersionTable.PSVersion.Major -le 5) {
+    # This removes the event handler from the AppDomain to prevent
+    # memory leaks or conflicts with other modules later in the session.
+    [MSALPS.Loader.DependencyResolver]::Uninitialize()
+}
+#>
