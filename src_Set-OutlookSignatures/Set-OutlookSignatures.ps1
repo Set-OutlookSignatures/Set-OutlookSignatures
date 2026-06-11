@@ -677,8 +677,11 @@ public struct SystemPowerStatus {
         $script:QRCoderModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
         Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\QRCoder\netstandard2.0')) -Destination $script:QRCoderModulePath -Recurse
-        if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:QRCoderModulePath -Recurse | Unblock-File }
-        Import-Module (Join-Path -Path $script:QRCoderModulePath -ChildPath 'QRCoder.dll') -ErrorAction Stop
+        Get-ChildItem -LiteralPath $script:QRCoderModulePath -Recurse -Force | ForEach-Object {
+            $_.Attributes = 'Normal'
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+        }
+        Add-Type -LiteralPath (Join-Path -Path $script:QRCoderModulePath -ChildPath 'QRCoder.dll') -ErrorAction Stop
 
 
         try { global:WatchCatchableExitSignal } catch {}
@@ -688,8 +691,11 @@ public struct SystemPowerStatus {
         $script:LibPhoneNumberModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
         Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\libphonenumber\netstandard2.0')) -Destination $script:LibPhoneNumberModulePath -Recurse
-        if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:LibPhoneNumberModulePath -Recurse | Unblock-File }
-        Import-Module (Join-Path -Path $script:LibPhoneNumberModulePath -ChildPath 'PhoneNumbers.dll') -ErrorAction Stop
+        Get-ChildItem -LiteralPath $script:LibPhoneNumberModulePath -Recurse -Force | ForEach-Object {
+            $_.Attributes = 'Normal'
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+        }
+        Add-Type -LiteralPath (Join-Path -Path $script:LibPhoneNumberModulePath -ChildPath 'PhoneNumbers.dll') -ErrorAction Stop
 
         # Sample code: Format phone number in different formats
         # Examples:
@@ -880,7 +886,10 @@ public struct SystemPowerStatus {
 
         Pop-Location
 
-        if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:AddressFormatterModulePath -Recurse | Unblock-File }
+        Get-ChildItem -LiteralPath $script:AddressFormatterModulePath -Recurse -Force | ForEach-Object {
+            $_.Attributes = 'Normal'
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+        }
         Import-Module (Join-Path -Path $script:AddressFormatterModulePath -ChildPath 'AddressFormatter.psd1') -ErrorAction Stop
     } catch {
         Write-Host ($error[0] | Format-List * | Out-String) -ForegroundColor Red
@@ -1001,14 +1010,18 @@ public struct SystemPowerStatus {
                                     'Send Pictures With Document'
                                 )
                             ) {
-                                try {
-                                    @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
-                                        if (1 -ne $_) {
-                                            "'$($key)': '$($value)' = '$($_)'"
+                                if (Test-Path (Join-Path -Path $key -ChildPath $value)) {
+                                    try {
+                                        @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
+                                            if (1 -ne $_) {
+                                                "'$($key)': '$($value)' = '$($_)'"
+                                            }
                                         }
+                                    } catch {
+                                        $null # Value not set
                                     }
-                                } catch {
-                                    $null # Value not set
+                                } else {
+                                    $null # Value does not exist
                                 }
                             }
                         } else {
@@ -1037,14 +1050,18 @@ public struct SystemPowerStatus {
                                     'DisableRoamingSignaturesTemporaryToggle'
                                 )
                             ) {
-                                try {
-                                    @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
-                                        if ($([int]$DisableRoamingSignatures) -ne $_) {
-                                            "'$($key)': '$($value)' = '$($_)'"
+                                if (Test-Path (Join-Path -Path $key -ChildPath $value)) {
+                                    try {
+                                        @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
+                                            if ($([int]$DisableRoamingSignatures) -ne $_) {
+                                                "'$($key)': '$($value)' = '$($_)'"
+                                            }
                                         }
+                                    } catch {
+                                        $null # Value not set
                                     }
-                                } catch {
-                                    $null # Value not set
+                                } else {
+                                    $null # Value does not exist
                                 }
                             }
                         } else {
@@ -1365,14 +1382,18 @@ end tell
                                 'DontUseScreenDpiOnOpen'
                             )
                         ) {
-                            try {
-                                @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
-                                    if (1 -ne $_) {
-                                        "'$($key)': '$($value)' = '$($_)'"
+                            if (Test-Path (Join-Path -Path $key -ChildPath $value)) {
+                                try {
+                                    @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
+                                        if (1 -ne $_) {
+                                            "'$($key)': '$($value)' = '$($_)'"
+                                        }
                                     }
+                                } catch {
+                                    $null # Value not set
                                 }
-                            } catch {
-                                $null # Value not set
+                            } else {
+                                $null # Value does not exist
                             }
                         }
                     } else {
@@ -1414,14 +1435,18 @@ end tell
                             'AlertIfNotDefault'
                         )
                     ) {
-                        try {
-                            @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
-                                if (0 -ne $_) {
-                                    "'$($key)': '$($value)' = '$($_)'"
+                        if (Test-Path (Join-Path -Path $key -ChildPath $value)) {
+                            try {
+                                @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
+                                    if (0 -ne $_) {
+                                        "'$($key)': '$($value)' = '$($_)'"
+                                    }
                                 }
+                            } catch {
+                                $null # Value not set
                             }
-                        } catch {
-                            $null # Value not set
+                        } else {
+                            $null # Value does not exist
                         }
                     }
                 } else {
@@ -1443,14 +1468,18 @@ end tell
                             'DisableWarningOnIncludeFieldsUpdate'
                         )
                     ) {
-                        try {
-                            @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
-                                if (1 -ne $_) {
-                                    "'$($key)': '$($value)' = '$($_)'"
+                        if (Test-Path (Join-Path -Path $key -ChildPath $value)) {
+                            try {
+                                @((Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value) | ForEach-Object {
+                                    if (1 -ne $_) {
+                                        "'$($key)': '$($value)' = '$($_)'"
+                                    }
                                 }
+                            } catch {
+                                $null # Value not set
                             }
-                        } catch {
-                            $null # Value not set
+                        } else {
+                            $null # Value does not exist
                         }
                     }
                 } else {
@@ -3580,9 +3609,17 @@ end tell
     if (($UseHtmTemplates -eq $true) -and (($CreateRtfSignatures -eq $false))) {
         Write-Host '  Not required: UseHtmTemplates = $true, CreateRtfSignatures = $false'
     } else {
-        Write-Verbose "  WordProcessPriority: '$($WordProcessPriorityText)' ('$($WordProcessPriority)')"
+        # Load Word interop, Start Word dummy object, set process priority, start real Word object, set process priority, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the software
+        try {
+            try { global:WatchCatchableExitSignal } catch {}
 
-        Add-Type -TypeDefinition @'
+            if (
+                -not [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.Office.Interop.Word')
+            ) {
+                Write-Host '  Word Interop assembly could not be found or loaded. Word automation may not work properly.' -ForegroundColor Yellow
+            }
+
+            Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
 
@@ -3596,8 +3633,6 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 }
 '@
 
-        # Start Word dummy object, set process priority, start real Word object, set process priority, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the software
-        try {
             try { global:WatchCatchableExitSignal } catch {}
 
             Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value 0 -ErrorAction SilentlyContinue
@@ -3616,6 +3651,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 try { global:WatchCatchableExitSignal } catch {}
 
                 # Set Word process priority
+                Write-Verbose "  WordProcessPriority: '$($WordProcessPriorityText)' ('$($WordProcessPriority)')"
+
                 $script:COMWordDummyCaption = $script:COMWordDummy.Caption
                 $script:COMWordDummy.Caption = "Set-OutlookSignatures $((New-Guid).Guid)"
                 $script:COMWordDummyHWND = [Win32Api]::FindWindow( 'OpusApp', $($script:COMWordDummy.Caption) )
@@ -3678,13 +3715,11 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 [System.Runtime.Interopservices.Marshal]::ReleaseComObject($script:COMWordDummy) | Out-Null
                 Remove-Variable COMWordDummy -Scope 'script'
             }
-
-            try { global:WatchCatchableExitSignal } catch {}
-
-            Add-Type -LiteralPath (Get-ChildItem -LiteralPath ((Join-Path -Path ($env:SystemRoot) -ChildPath 'assembly\GAC_MSIL\Microsoft.Office.Interop.Word')) -Filter 'Microsoft.Office.Interop.Word.dll' -Recurse | Select-Object -ExpandProperty FullName -Last 1)
         } catch {
             Write-Host ($error[0] | Format-List * | Out-String)
             Write-Host '  Word not installed or not working correctly. Install or repair Word and the registry information about Word, or consider using HTM templates instead of DOCX templates. Exit.' -ForegroundColor Red
+            Write-Host '  Set-OutlookSignatures cannot bypass this core Windows/Office/COM/registry ecosystem error.' -ForegroundColor Red
+            Write-Host '  Run an "Online Repair" of Office (see resolved issues at https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues).' -ForegroundColor Red
 
             # Restore original Word AlertIfNotDefault setting
             Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value $script:WordAlertIfNotDefaultOriginal -ErrorAction SilentlyContinue | Out-Null
@@ -3711,6 +3746,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     for ($AccountNumberRunning = 0; $AccountNumberRunning -lt $MailAddresses.count; $AccountNumberRunning++) {
         try { global:WatchCatchableExitSignal } catch {}
+
+        $script:SignatureFilesDonePriorMailboxes = $script:SignatureFilesDone
 
         if (($AccountNumberRunning -eq $MailAddresses.IndexOf($MailAddresses[$AccountNumberRunning])) -and ($($MailAddresses[$AccountNumberRunning]) -like '*@*')) {
             Write-Host
@@ -4846,12 +4883,23 @@ function SetSignatures {
 
             $SignatureFileAlreadyDone = $false
         } else {
-            $SignatureFileAlreadyDone = ($script:SignatureFilesDone -contains $TemplateIniSettingsIndex)
+            $SignatureFileAlreadyDone = $false
 
-            if ($SignatureFileAlreadyDone) {
+            if ($script:SignatureFilesDonePriorMailboxes -icontains $Signature.value) {
+                $SignatureFileAlreadyDone = $true
+
+                Write-Host "$Indent      Signature name already used before by higher priority mailbox"
+                Write-Host "$Indent        Not overwriting signature. Consider using parameter MailboxSpecificSignatureNames."
+            }
+
+            if ($script:SignatureFilesDone -contains $TemplateIniSettingsIndex) {
+                $SignatureFileAlreadyDone = $true
+
                 Write-Host "$Indent      $($SigOrOOF) INI index #$($TemplateIniSettingsIndex) already processed before with higher priority mailbox"
                 Write-Host "$Indent        Not overwriting signature. Consider using parameter MailboxSpecificSignatureNames."
-            } else {
+            }
+
+            if ($SignatureFileAlreadyDone -eq $false) {
                 $script:SignatureFilesDone += $TemplateIniSettingsIndex
             }
         }
@@ -4888,6 +4936,12 @@ function SetSignatures {
                     )
                 } else {
                     Copy-Item -LiteralPath $Signature.name -Destination $path -Force
+
+                }
+
+                Get-ChildItem -LiteralPath $path -Recurse -Force | ForEach-Object {
+                    $_.Attributes = 'Normal'
+                    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
                 }
 
                 try { global:WatchCatchableExitSignal } catch {}
@@ -4968,6 +5022,11 @@ function SetSignatures {
                             Copy-Item -LiteralPath $tempX -Destination $tempY -Force
                         }
 
+                        Get-ChildItem -LiteralPath (Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath "$($pathGUID).files") -Recurse -Force | ForEach-Object {
+                            $_.Attributes = 'Normal'
+                            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+                        }
+
                         break
                     }
                 }
@@ -4990,6 +5049,11 @@ function SetSignatures {
                 } else {
                     Copy-Item -LiteralPath $Signature.name -Destination $path -Force
                 }
+
+                Get-ChildItem -LiteralPath $path -Recurse -Force | ForEach-Object {
+                    $_.Attributes = 'Normal'
+                    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+                }
             } catch {
                 Write-Host "$Indent        Error copying file. Skip template." -ForegroundColor Red
                 continue
@@ -4999,19 +5063,17 @@ function SetSignatures {
         try { global:WatchCatchableExitSignal } catch {}
 
 
-        @(
-            @(Get-ChildItem -LiteralPath $path -Force) +
-            @(Get-ChildItem -LiteralPath (Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath "$($pathGUID).files") -Recurse -Force -ErrorAction SilentlyContinue)
-        ) | ForEach-Object {
-            if (-not $_.PSIsContainer) {
-                Set-ItemProperty -LiteralPath $_.FullName -Name IsReadOnly -Value $false
-
-                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
-                    Unblock-File -LiteralPath $_.FullName
-                }
-            }
+        Get-ChildItem -LiteralPath $path -Recurse -Force | ForEach-Object {
+            $_.Attributes = 'Normal'
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
         }
 
+        if (Test-Path -LiteralPath (Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath "$($pathGUID).files")) {
+            Get-ChildItem -LiteralPath (Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath "$($pathGUID).files") -Recurse -Force | ForEach-Object {
+                $_.Attributes = 'Normal'
+                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+            }
+        }
 
         try { global:WatchCatchableExitSignal } catch {}
 
@@ -5022,7 +5084,7 @@ function SetSignatures {
             if ($MailboxSpecificSignatureNames) {
                 $Signature.value = ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
             } elseif ($DisableRoamingSignatures) {
-                # Mark for later deleteion as this filename can only be a leftover from roaming signatures having been enabled earlier
+                # Mark for later deletion as this filename can only be a leftover from roaming signatures having been enabled earlier
                 $script:SignatureFilesDone += ($Signature.Value -ireplace '\.htm$', " ($($MailAddresses[$AccountNumberRunning])).htm")
             }
 
@@ -5781,8 +5843,6 @@ function SetSignatures {
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
             $tempFileContent = ConvertEncoding -InFile $path
 
-            # Use a separate runspace for PreMailer.Net, as there are DLL conflicts in PowerShell 5.x with Invoke-RestMethod
-            # Do not use jobs, as they fall back to Constrained Language Mode in secured environments, which makes Import-Module fail
             try {
                 $PreMailer = [PreMailer.Net.PreMailer]::New(
                     $tempFileContent, # string html
@@ -7723,8 +7783,10 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
 
         try {
             Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
-            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
-                Unblock-File -LiteralPath $script:WebServicesDllPath
+
+            Get-ChildItem -LiteralPath $script:WebServicesDllPath -Recurse -Force | ForEach-Object {
+                $_.Attributes = 'Normal'
+                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
             }
         } catch {
             if (-not $silent) {
@@ -7734,7 +7796,7 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
     }
 
     if ($OnlyLoadDLL) {
-        Import-Module -Name $script:WebServicesDllPath -Force -ErrorAction Stop
+        Add-Type -LiteralPath $script:WebServicesDllPath -ErrorAction Stop
 
         return
     }
@@ -7791,7 +7853,7 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
         $script:exchService = $null
 
         try {
-            Import-Module -Name $script:WebServicesDllPath -Force -ErrorAction Stop
+            Add-Type -LiteralPath $script:WebServicesDllPath -ErrorAction Stop
 
             try { global:WatchCatchableExitSignal } catch {}
 
@@ -8153,8 +8215,9 @@ function GraphGetToken {
                 }
             }
 
-            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
-                Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse | Unblock-File
+            Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse -Force | ForEach-Object {
+                $_.Attributes = 'Normal'
+                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
             }
 
             try { global:WatchCatchableExitSignal } catch {}
@@ -10891,6 +10954,13 @@ try {
     $script:tempDir = (New-Item -Path ([System.IO.Path]::GetTempPath()) -Name (New-Guid).Guid -ItemType Directory).FullName
     $script:ScriptRunGuid = Split-Path -Path $script:tempDir -Leaf
 
+    $script:CommonDepsPath = (Join-Path -Path $script:tempDir -ChildPath 'commonDeps')
+    Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\_common')) -Destination $script:CommonDepsPath -Recurse
+    Get-ChildItem -LiteralPath $script:CommonDepsPath -Recurse -Force | ForEach-Object {
+        $_.Attributes = 'Normal'
+        if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+    }
+
 
     $BridgeCode = @'
 using System;
@@ -10981,24 +11051,18 @@ namespace SetOutlookSignatures.AssemblyResolver {
     # [SetOutlookSignatures.AssemblyResolver.SmartBridge]::Disable()
 
 
-    $script:CommonDepsPath = (Join-Path -Path $script:tempDir -ChildPath 'commonDeps')
-    Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\_common')) -Destination $script:CommonDepsPath -Recurse
-    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
-        Unblock-File -LiteralPath $script:CommonDepsPath
-    }
-
-
     try { global:WatchCatchableExitSignal } catch {}
 
 
     $script:SetOutlookSignaturesCommonDllFilePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid) + '.dll'))
     Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\Set-OutlookSignatures.Common\Set-OutlookSignatures.Common.dll')) -Destination $script:SetOutlookSignaturesCommonDllFilePath
-    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
-        Unblock-File -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath
+    Get-ChildItem -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath -Recurse -Force | ForEach-Object {
+        $_.Attributes = 'Normal'
+        if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
     }
 
     try {
-        Import-Module -Name $script:SetOutlookSignaturesCommonDllFilePath -Force -ErrorAction Stop
+        Add-Type -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath -ErrorAction Stop
     } catch {
         Write-Host ($error[0] | Format-List * | Out-String)
         Write-Host '    Problem importing Set-OutlookSignatures.Common.dll. Exit.' -ForegroundColor Red

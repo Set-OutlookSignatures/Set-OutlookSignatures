@@ -137,8 +137,9 @@ try {
 
             Remove-Item -LiteralPath $tempFile -Force
 
-            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) {
-                Get-ChildItem -LiteralPath $SoftwarePath -Recurse | Unblock-File
+            Get-ChildItem -LiteralPath $SoftwarePath -Recurse -Force | ForEach-Object {
+                $_.Attributes = 'Normal'
+                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
             }
         }
     }

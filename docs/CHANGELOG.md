@@ -54,6 +54,62 @@ _**Breaking:** <Present tense verb> XXX_
 #### Fixes
 -->
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.29.0" target="_blank">v4.29.0</a> - 2026-06-11
+
+_**Code signing certificate updated, annual rotation enabled:**_
+
+- _Our partner [ExplicIT Consulting](https://explicitconsulting.at) has renewed the enterprise validated (EV) certificate being used to digitally sign the code of Set-OutlookSignatures and the Benefactor Circle add-on. Thanks for this donation!_
+- _You may need to update the configuration of your endpoint security software (AppLocker, Defender, CrowdStrike…) if it is locked to the old certificate._
+- _To comply with new industry-wide Certificate Authority (CA) guidelines, this certificate will now be rotated every year moving forward._
+
+### Set-OutlookSignatures
+
+#### Security
+
+- Append ExplicIT's code signing certificate instead of replacing existing certificates. This way, original code signing certificates from Microsoft, the .NET Foundation, and others are kept intact.
+
+#### Additions
+
+- Add a [Security questionnaire](https://set-outlooksignatures.com/details#security-questionnaire) section to the documentation, with a basic set of questions and answers for security reviews.
+- Add blog articles:
+  - [Goodbye Rollout Panic: How to Test Outlook Signatures & Out-of-Office Notes Without Accessing Live Mailboxes](https://set-outlooksignatures.com/blog/2026/05/19/simulation-mode)
+  - [Hot Tips for Cool Signatures: How to Make Your Summer Campaigns Shine](https://set-outlooksignatures.com/blog/2026/06/02/hot-tips)
+
+#### Changes
+
+- Refactor registry checks so that the transcript does not log a try/catch error when the key (folder) of a value exists, but not the value itself.
+- Update libphonenumber-csharp to v9.0.32.
+- Update MSAL.Net to v4.84.2.
+- Use an updated code signing certificate to sign PowerShell and DLL files.
+  - You may need to update the configuration of your endpoint security software (AppLocker, Defender, CrowdStrike…) if it is locked to the old certificate.
+  - To comply with new industry-wide Certificate Authority (CA) guidelines, this certificate will now be rotated every year moving forward.
+- Change the behavior of the INI file parameter [OutlookSignatureName](https://set-outlooksignatures.com/details#signature-and-oof-template-file-format) so that it does not overwrite signature names already used for higher priority mailboxes.
+
+#### Fixes
+
+- Make assembly resolver work with DLL files that have not been unblocked, therefore still have the "mark of the web" and can not be loaded. (<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/discussions/155" target="_blank">#155</a>)
+- Make sure the heading pane right of the divider of `sample code\IniEditor.html` and [https://set-outlooksignatures.com/inieditor](https://set-outlooksignatures.com/inieditor) is visible even when scrolling.
+- Load Word Interop DLL before actually starting Word and running automation tasks. This early-being avoids possible errors due to late-binding.
+
+### Benefactor Circle add-on
+
+#### Additions
+
+- Add a [Security questionnaire](https://set-outlooksignatures.com/details#security-questionnaire) section to the documentation, with a basic set of questions and answers for security reviews.
+
+#### Changes
+
+- Use an updated code signing certificate to sign PowerShell and DLL files.
+  - You may need to update the configuration of your endpoint security software (AppLocker, Defender, CrowdStrike…) if it is locked to the old certificate.
+  - To comply with new industry-wide Certificate Authority (CA) guidelines, this certificate will now be rotated every year moving forward.
+
+### Outlook add-in (part of the Benefactor Circle add-on)
+
+#### Changes
+
+- Update @azure/msal-browser to v5.13.0.
+- Update the [Logging and troubleshooting](https://set-outlooksignatures.com/outlookaddin#logging-and-troubleshooting) section in the documentation.
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.28.0" target="_blank">v4.28.0</a> - 2026-05-18
 
 ### Set-OutlookSignatures
@@ -74,7 +130,7 @@ _**Breaking:** <Present tense verb> XXX_
 #### Fixes
 
 - Fix console color handling on Non-Windows systems.
-- Show root cause error code and description in console output when the initializatino routine fails, instead of just the generic error 5 ("Common initialization routine failed.").
+- Show root cause error code and description in console output when the initialization routine fails, instead of just the generic error 5 ("Common initialization routine failed.").
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
 

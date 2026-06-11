@@ -20,7 +20,7 @@
 
 **Trusted worldwide and proven in high-security environments:** The free and open-source Set-OutlookSignatures and the [**Benefactor Circle add-on**](https://set-outlooksignatures.com/benefactorcircle) turn email signatures and out-of-office replies into a centrally managed business asset — without external data transfer.
 
-By leveraging **Microsoft Roaming Signatures** and our own direct-to-mailbox technology, we provide the world’s only sovereign, native-sync experience that works across all Outlook editions and platforms — including **Exchange Online, Hybrid, and On-Premises** — silently in the background.
+By leveraging Microsoft Roaming Signatures and our own direct-to-mailbox technology, we provide the world's only sovereign, native-sync experience that works across all Outlook editions and platforms — **Windows, Mac, iOS, Android, Web, Classic and New Outlook, cloud and on-prem in perfect harmony.**
 
 <table>
   <tr>
@@ -40,7 +40,7 @@ By leveraging **Microsoft Roaming Signatures** and our own direct-to-mailbox tec
 </table>
 
 <p align="center">
-  Used by security‑conscious and brand-aware organizations worldwide. See how we <a href="https://set-outlooksignatures.com/features#feature-comparison">compare to alternatives</a> and review our <a href="https://set-outlooksignatures.com/benefactorcircle#price">transparent, non-renewing pricing</a>.
+  Used by security‑conscious and brand-aware organizations worldwide. See how we <a href="https://set-outlooksignatures.com/features#feature-comparison"><strong>compare to alternatives</strong></a> and review our <a href="https://set-outlooksignatures.com/benefactorcircle#price"><strong>transparent, non-renewing pricing</strong></a>.
 </p>
 
 ## Experience it **in action**
@@ -70,13 +70,13 @@ Our modular architecture delivers capabilities no cloud relay solution can match
 
 <table>
   <tr>
-    <td valign="top" width="33%">✨ <b>Frictionless Adoption</b><br>Invisible to end users, silent background sync. Intuitive for Marketing and IT.</td>
+    <td valign="top" width="33%">✨ <b>Frictionless Adoption</b><br>Invisible to end users, seamless background sync. Intuitive for Marketing and IT.</td>
     <td valign="top" width="33%">🧬 <b>Dynamic Content</b><br>Time-based campaigns, collapse empty lines, rule-based banners.</td>
     <td valign="top" width="33%">🔍 <b>Simulation Mode</b><br>Dry-run your deployment logic centrally or locally before going live.</td>
   </tr>
   <tr>
-    <td valign="top" width="33%">🏝️ <b>Centralized OOF Control</b><br>Standardize and reset out-of-office replies centrally, for internal and external recipients.</td>
-    <td valign="top" width="33%">📱 <b>Signatures Everywhere</b><br>Windows, Mac, iOS, Android, OWA, New and Classic Outlook in perfect sync.</td>
+    <td valign="top" width="33%">🏝️ <b>Out-Of-Office Replies</b><br>Manage and distribute OOF messages consistently and centrally from one location.</td>
+    <td valign="top" width="33%">📱 <b>Signatures Everywhere</b><br>Windows, Mac, iOS, Android, Web, Classic and New Outlook, cloud and on-prem in perfect harmony.</td>
     <td valign="top" width="33%">🏢 <b>Enterprise Versatility</b><br>Supports shared mailboxes, delegates, and custom logic.</td>
   </tr>
   <tr>

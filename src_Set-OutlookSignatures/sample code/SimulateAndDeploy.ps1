@@ -900,7 +900,10 @@ try {
 		$script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath 'MSAL.PS')
 
 		Copy-Item -LiteralPath $([System.Io.Path]::GetFullPath($((Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath) -ChildPath 'deps\MSAL.PS')))) -Destination $script:MsalModulePath -Recurse
-		if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse | Unblock-File }
+		Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse -Force | ForEach-Object {
+			$_.Attributes = 'Normal'
+			if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+		}
 		Import-Module $script:MsalModulePath -Force
 
 		$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
