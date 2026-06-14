@@ -54,6 +54,38 @@ _**Breaking:** <Present tense verb> XXX_
 #### Fixes
 -->
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.30.0" target="_blank">v4.30.0</a> - 2026-06-14
+
+### Set-OutlookSignatures
+
+#### Changes
+
+- Update FAQ [Keep users from adding, editing and removing signatures](https://set-outlooksignatures.com/faq#keep-users-from-adding-editing-and-removing-signatures).
+
+#### Fixes
+
+- Correct the code of the assembly resolver in `sample code\SimulateAndDeploy.ps1` so that it works in all PowerShell 5.1 environments.
+
+### Outlook add-in (part of the Benefactor Circle add-on)
+
+#### Additions
+
+- Add support for additional launch events:
+  - `OnMessageSend` and `OnAppointmentSend`: Enforces a specific signature after the user clicks send, overriding any manual changes. The signature is applied client-side, and the final result is visible to the sender in their Sent Items folder.
+  - `OnMessageCompose` and `OnAppointmentOrganizer`: Similar to `OnNewMessageCompose`/`OnNewAppointmentOrganizer`, but also fires when editing drafts or existing appointments. Due to feature overlap, use `OnMessageCompose` or `OnNewMessageCompose` per host/platform combination, but not both. The same rule applies to `OnAppointmentOrganizer`/`OnNewAppointmentOrganizer`.
+  - `OnSensitivityLabelChanged`: Enables signature assignment based on the item's sensitivity label via `CUSTOM_RULES_CODE` (requires a mailbox with at least an E5 license).
+  - All new launch events are disabled by default and must be manually enabled in `run_before_deployment.ps1`.
+- Add new features to `run_before_deployment.ps1`:
+  - Display configuration differences between the new local `manifest.xml` and the existing online version.
+  - Warn if the new local `manifest.xml` has a lower version number than the online version.
+- Add new properties to `customRulesProperties` for use with `CUSTOM_RULES_CODE`:
+  - `triggeredByLaunchEventName`: Contains the name of the triggering launch event (returns an empty string if started manually).
+  - `sensitivityLabelGuid` and `sensitivityLabelName`: Contains the GUID and name of the current item's sensitivity label.
+
+#### Changes
+
+- Optimize `manifest.xml` generation to automatically exclude launch events not defined in `run_before_deployment.ps1`. This reduces Outlook load and prevents unnecessary UI messages when launch events like `OnMessageSend` and `OnAppointmentSend` are not used.
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.29.0" target="_blank">v4.29.0</a> - 2026-06-11
 
 _**Code signing certificate updated, annual rotation enabled:**_

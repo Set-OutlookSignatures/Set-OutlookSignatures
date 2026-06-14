@@ -862,6 +862,104 @@ try {
 		Set-Variable -Name $VariableName -Value $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath((Get-Variable -Name $VariableName).Value).trimend('\')
 	}
 
+	$script:CommonDepsPath = (Join-Path -Path $script:tempDir -ChildPath 'commonDeps')
+	Copy-Item -LiteralPath $([System.Io.Path]::GetFullPath($((Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath) -ChildPath 'deps\_common')))) -Destination $script:CommonDepsPath -Recurse
+	Get-ChildItem -LiteralPath $script:CommonDepsPath -Recurse -Force | ForEach-Object {
+		$_.Attributes = 'Normal'
+		if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+	}
+
+
+	$BridgeCode = @'
+using System;
+using System.Reflection;
+using System.IO;
+using System.Diagnostics;
+using System.Collections.Generic;
+
+namespace SetOutlookSignatures.AssemblyResolver {
+    public static class SmartBridge {
+        private static string _rootPath;
+        private static bool _isEnabled = false;
+        private static readonly ResolveEventHandler _handler = new ResolveEventHandler(HandleResolve);
+
+        // Cache to store already resolved assemblies for this session
+        private static readonly Dictionary<string, Assembly> _cache = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
+
+        public static void Initialize(string rootPath) {
+            _rootPath = rootPath;
+            AppDomain.CurrentDomain.AssemblyResolve -= _handler;
+            AppDomain.CurrentDomain.AssemblyResolve += _handler;
+        }
+
+        public static void Enable() { _isEnabled = true; }
+        public static void Disable() { _isEnabled = false; }
+
+        private static Assembly HandleResolve(object sender, ResolveEventArgs args) {
+            if (!_isEnabled || string.IsNullOrEmpty(args.Name) || !Directory.Exists(_rootPath)) return null;
+
+            string requestedName = new AssemblyName(args.Name).Name;
+
+            lock (_cache) {
+                if (_cache.ContainsKey(requestedName)) {
+                    return _cache[requestedName];
+                }
+            }
+
+            string bestPath = null;
+            Version bestVersion = new Version(0, 0, 0, 0);
+
+            string[] files = Directory.GetFiles(_rootPath, "*.dll", SearchOption.AllDirectories);
+
+            foreach (string file in files) {
+                // Uncomment if you want to restrict to netstandard2.0
+                // if (file.IndexOf("netstandard2.0", StringComparison.OrdinalIgnoreCase) == -1) continue;
+
+                if (Path.GetFileNameWithoutExtension(file).Equals(requestedName, StringComparison.OrdinalIgnoreCase)) {
+                    try {
+                        FileVersionInfo info = FileVersionInfo.GetVersionInfo(file);
+                        Version currentVersion = new Version(info.FileVersion ?? "0.0.0.0");
+
+                        if (currentVersion > bestVersion) {
+                            bestVersion = currentVersion;
+                            bestPath = file;
+                        }
+                    } catch { }
+                }
+            }
+
+            if (bestPath != null) {
+                try {
+                    Assembly loadedAssembly = Assembly.LoadFrom(bestPath);
+                    lock (_cache) {
+                        _cache[requestedName] = loadedAssembly;
+                    }
+                    return loadedAssembly;
+                } catch { }
+            }
+
+            return null;
+        }
+    }
+}
+'@
+
+	# Compile
+	if (-not ([System.Type]::GetType('SetOutlookSignatures.AssemblyResolver.SmartBridge'))) {
+		Add-Type -TypeDefinition $BridgeCode
+	}
+
+	# Initialize
+	[SetOutlookSignatures.AssemblyResolver.SmartBridge]::Initialize($script:tempdir)
+
+	# Toggle on
+	[SetOutlookSignatures.AssemblyResolver.SmartBridge]::Enable()
+
+	# Disable assembly resolver C# bridge
+	# [SetOutlookSignatures.AssemblyResolver.SmartBridge]::Disable()
+
+	try { global:WatchCatchableExitSignal } catch {}
+
 	if (-not (Test-Path -LiteralPath $SimulateResultPath)) {
 		New-Item -ItemType Directory $SimulateResultPath | Out-Null
 	} else {
@@ -1217,6 +1315,9 @@ try {
 		Write-Host 'Log file'
 		Write-Host "  '$TranscriptFullName'"
 	}
+
+	# Disable assembly resolver C# bridge
+	[SetOutlookSignatures.AssemblyResolver.SmartBridge]::Disable()
 
 	Write-Host
 	Write-Host "End script @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"

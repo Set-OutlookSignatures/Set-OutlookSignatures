@@ -178,7 +178,7 @@ pwsh -File '$(Join-Path -Path $pathSetOutlookSignatures -ChildPath 'Set-OutlookS
         try {
             $tempFile = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "fileicon_$((New-Guid).Guid)"
 
-            Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/mklement0/fileicon/stable/bin/fileicon' -OutFile $tempFile
+            Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/mklement0/fileicon/stable/bin/fileicon' -UseBasicParsing -OutFile $tempFile
 
             chmod a+x $tempFile
         } catch {
