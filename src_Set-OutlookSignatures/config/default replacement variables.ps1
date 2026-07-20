@@ -421,3 +421,137 @@ foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'Current
         $ReplaceHash["`$$($x)PostalAddress`$"] = (Format-PostalAddress @FormatPostAddressOptions) -replace '\r?\n', "`n" # Converts paragraphs to line breaks
     }
 }
+
+# Company name and address only
+foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager')) {
+    $FormatPostAddressOptions = @{
+        # Address components as described in https://github.com/OpenCageData/address-formatting/blob/master/conf/components.yaml
+        Components      = @{
+            attention = $ReplaceHash["`$$($x)Company`$"]
+            road      = $ReplaceHash["`$$($x)StreetAddress`$"]
+            city      = $ReplaceHash["`$$($x)Location`$"]
+            postcode  = $ReplaceHash["`$$($x)Postalcode`$"]
+            state     = $ReplaceHash["`$$($x)State`$"]
+            country   = $ReplaceHash["`$$($x)Country`$"]
+        }
+
+        # Country as two-letter ISO country code (e.g., "AT", "US") or full English country name (e.g., "Austria", "United States")
+        #   Needed to choose correct address format rules
+        Country         = $(
+            $tempSearchString = "$($ReplaceHash["`$$($x)Country`$"])".Trim()
+
+            if ([string]::IsNullOrWhiteSpace($tempSearchString)) {
+                $null
+            } else {
+                (
+                    @(
+                        foreach ($tempSpecificCulture in [System.Globalization.CultureInfo]::GetCultures('SpecificCultures')) {
+                            $tempRegionInfo = New-Object System.Globalization.RegionInfo($tempSpecificCulture)
+
+                            if (
+                                [System.Globalization.CultureInfo]::InvariantCulture.CompareInfo.IndexOf(
+                                    ('|' + $(
+                                        @(
+                                            foreach ($attribute in @('Name', 'EnglishName', 'DisplayName', 'NativeName', 'TwoLetterISORegionName', 'ThreeLetterISORegionName', 'ThreeLetterWindowsRegionName')) {
+                                                if (-not [string]::IsNullOrWhiteSpace($tempRegionInfo.$attribute)) {
+                                                    (($tempRegionInfo.$attribute).Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower()
+                                                }
+                                            }
+                                        ) -join '|'
+                                    ) + '|'),
+                                    ('|' + ($tempSearchString.Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower() + '|'),
+                                    [System.Globalization.CompareOptions]::IgnoreCase -bor [System.Globalization.CompareOptions]::IgnoreNonSpace -bor [System.Globalization.CompareOptions]::IgnoreKanaType -bor [System.Globalization.CompareOptions]::IgnoreWidth
+                                ) -ge 0
+                            ) {
+                                $tempRegionInfo
+                            }
+                        }
+                    ) | Select-Object -First 1
+                ).TwoLetterISORegionName
+            }
+        )
+        # Shorten address components ("St." instead of "Street", "Rd." instead of "Road", etc.)
+        Abbreviate      = $false
+
+        # Only return known parts of the address, omit unknown parts
+        #   When disabled, unknown parts are added the the "attention" component
+        OnlyAddress     = $true
+
+        # Use a custom address template instead of the predefined ones
+        #   Predefined templates: https://github.com/OpenCageData/address-formatting/blob/master/conf/countries/worldwide.yaml
+        AddressTemplate = $null
+    }
+
+    if ($UseHtmTemplates) {
+        $ReplaceHash["`$$($x)PostalAddressCompany`$"] = [System.Net.WebUtility]::HtmlEncode((Format-PostalAddress @FormatPostAddressOptions)) -replace '\r?\n', '<br />' # Converts paragraphs to line breaks
+    } else {
+        $ReplaceHash["`$$($x)PostalAddressCompany`$"] = (Format-PostalAddress @FormatPostAddressOptions) -replace '\r?\n', "`n" # Converts paragraphs to line breaks
+    }
+}
+
+# Address only
+foreach ($x in @('CurrentUser', 'CurrentUserManager', 'CurrentMailbox', 'CurrentMailboxManager')) {
+    $FormatPostAddressOptions = @{
+        # Address components as described in https://github.com/OpenCageData/address-formatting/blob/master/conf/components.yaml
+        Components      = @{
+            attention = ''
+            road      = $ReplaceHash["`$$($x)StreetAddress`$"]
+            city      = $ReplaceHash["`$$($x)Location`$"]
+            postcode  = $ReplaceHash["`$$($x)Postalcode`$"]
+            state     = $ReplaceHash["`$$($x)State`$"]
+            country   = $ReplaceHash["`$$($x)Country`$"]
+        }
+
+        # Country as two-letter ISO country code (e.g., "AT", "US") or full English country name (e.g., "Austria", "United States")
+        #   Needed to choose correct address format rules
+        Country         = $(
+            $tempSearchString = "$($ReplaceHash["`$$($x)Country`$"])".Trim()
+
+            if ([string]::IsNullOrWhiteSpace($tempSearchString)) {
+                $null
+            } else {
+                (
+                    @(
+                        foreach ($tempSpecificCulture in [System.Globalization.CultureInfo]::GetCultures('SpecificCultures')) {
+                            $tempRegionInfo = New-Object System.Globalization.RegionInfo($tempSpecificCulture)
+
+                            if (
+                                [System.Globalization.CultureInfo]::InvariantCulture.CompareInfo.IndexOf(
+                                    ('|' + $(
+                                        @(
+                                            foreach ($attribute in @('Name', 'EnglishName', 'DisplayName', 'NativeName', 'TwoLetterISORegionName', 'ThreeLetterISORegionName', 'ThreeLetterWindowsRegionName')) {
+                                                if (-not [string]::IsNullOrWhiteSpace($tempRegionInfo.$attribute)) {
+                                                    (($tempRegionInfo.$attribute).Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower()
+                                                }
+                                            }
+                                        ) -join '|'
+                                    ) + '|'),
+                                    ('|' + ($tempSearchString.Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower() + '|'),
+                                    [System.Globalization.CompareOptions]::IgnoreCase -bor [System.Globalization.CompareOptions]::IgnoreNonSpace -bor [System.Globalization.CompareOptions]::IgnoreKanaType -bor [System.Globalization.CompareOptions]::IgnoreWidth
+                                ) -ge 0
+                            ) {
+                                $tempRegionInfo
+                            }
+                        }
+                    ) | Select-Object -First 1
+                ).TwoLetterISORegionName
+            }
+        )
+        # Shorten address components ("St." instead of "Street", "Rd." instead of "Road", etc.)
+        Abbreviate      = $false
+
+        # Only return known parts of the address, omit unknown parts
+        #   When disabled, unknown parts are added the the "attention" component
+        OnlyAddress     = $true
+
+        # Use a custom address template instead of the predefined ones
+        #   Predefined templates: https://github.com/OpenCageData/address-formatting/blob/master/conf/countries/worldwide.yaml
+        AddressTemplate = $null
+    }
+
+    if ($UseHtmTemplates) {
+        $ReplaceHash["`$$($x)PostalAddressNoCompany`$"] = [System.Net.WebUtility]::HtmlEncode((Format-PostalAddress @FormatPostAddressOptions)) -replace '\r?\n', '<br />' # Converts paragraphs to line breaks
+    } else {
+        $ReplaceHash["`$$($x)PostalAddressNoCompany`$"] = (Format-PostalAddress @FormatPostAddressOptions) -replace '\r?\n', "`n" # Converts paragraphs to line breaks
+    }
+}

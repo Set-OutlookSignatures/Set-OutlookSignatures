@@ -27,7 +27,7 @@
 	font-size:11.0pt;
 	font-family:"Calibri",sans-serif;}
 h1
-	{mso-style-link:"Heading 1 Char";
+	{mso-style-link:"Überschrift 1 Zchn";
 	margin-top:12.0pt;
 	margin-right:0cm;
 	margin-bottom:0cm;
@@ -39,25 +39,25 @@ h1
 	color:#2F5496;
 	font-weight:normal;}
 p.MsoTitle, li.MsoTitle, div.MsoTitle
-	{mso-style-link:"Title Char";
+	{mso-style-link:"Titel Zchn";
 	margin:0cm;
 	font-size:20.0pt;
 	font-family:"Aptos",sans-serif;
 	letter-spacing:-.5pt;}
 p.MsoTitleCxSpFirst, li.MsoTitleCxSpFirst, div.MsoTitleCxSpFirst
-	{mso-style-link:"Title Char";
+	{mso-style-link:"Titel Zchn";
 	margin:0cm;
 	font-size:20.0pt;
 	font-family:"Aptos",sans-serif;
 	letter-spacing:-.5pt;}
 p.MsoTitleCxSpMiddle, li.MsoTitleCxSpMiddle, div.MsoTitleCxSpMiddle
-	{mso-style-link:"Title Char";
+	{mso-style-link:"Titel Zchn";
 	margin:0cm;
 	font-size:20.0pt;
 	font-family:"Aptos",sans-serif;
 	letter-spacing:-.5pt;}
 p.MsoTitleCxSpLast, li.MsoTitleCxSpLast, div.MsoTitleCxSpLast
-	{mso-style-link:"Title Char";
+	{mso-style-link:"Titel Zchn";
 	margin:0cm;
 	font-size:20.0pt;
 	font-family:"Aptos",sans-serif;
@@ -102,7 +102,7 @@ p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxS
 	font-size:11.0pt;
 	font-family:"Calibri",sans-serif;}
 p.MsoQuote, li.MsoQuote, div.MsoQuote
-	{mso-style-link:"Quote Char";
+	{mso-style-link:"Zitat Zchn";
 	margin-top:10.0pt;
 	margin-right:43.2pt;
 	margin-bottom:8.0pt;
@@ -113,19 +113,19 @@ p.MsoQuote, li.MsoQuote, div.MsoQuote
 	font-family:"Calibri",sans-serif;
 	color:#404040;
 	font-style:italic;}
-span.Heading1Char
-	{mso-style-name:"Heading 1 Char";
-	mso-style-link:"Heading 1";
+span.berschrift1Zchn
+	{mso-style-name:"Überschrift 1 Zchn";
+	mso-style-link:"Überschrift 1";
 	font-family:"Aptos",sans-serif;
 	color:#2F5496;}
-span.TitleChar
-	{mso-style-name:"Title Char";
-	mso-style-link:Title;
+span.TitelZchn
+	{mso-style-name:"Titel Zchn";
+	mso-style-link:Titel;
 	font-family:"Aptos",sans-serif;
 	letter-spacing:-.5pt;}
-span.QuoteChar
-	{mso-style-name:"Quote Char";
-	mso-style-link:Quote;
+span.ZitatZchn
+	{mso-style-name:"Zitat Zchn";
+	mso-style-link:Zitat;
 	color:#404040;
 	font-style:italic;}
 .MsoChpDefault
@@ -240,7 +240,7 @@ to add a starting and a trailing $ character in your template. See
   <p class=MsoNormal style='margin-bottom:0cm'><b><span style='font-size:12.0pt;
   line-height:106%;font-family:"Aptos",sans-serif;color:black'>Currently
   logged-on user<br>
-  $CurrentUser…</span></b></p>
+  $CurrentUser… / $U…</span></b></p>
   </td>
   <td valign=top style='border-top:solid white 1.0pt;border-left:none;
   border-bottom:solid white 1.0pt;border-right:none;background:#70AD47;
@@ -248,21 +248,21 @@ to add a starting and a trailing $ character in your template. See
   <p class=MsoNormal style='margin-bottom:0cm'><b><span style='font-size:12.0pt;
   line-height:106%;font-family:"Aptos",sans-serif;color:black'>Manager of
   currently logged-on user<br>
-  $CurrentUserManager…</span></b></p>
+  $CurrentUserManager… / $UM…</span></b></p>
   </td>
   <td valign=top style='border-top:solid white 1.0pt;border-left:none;
   border-bottom:solid white 1.0pt;border-right:none;background:#70AD47;
   padding:0cm 5.4pt 5.65pt 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm'><b><span style='font-size:12.0pt;
   line-height:106%;font-family:"Aptos",sans-serif;color:black'>Current mailbox<br>
-  $CurrentMailbox…</span></b></p>
+  $CurrentMailbox… / $M…</span></b></p>
   </td>
   <td valign=top style='border:solid white 1.0pt;border-left:none;background:
   #70AD47;padding:0cm 5.4pt 5.65pt 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm'><b><span style='font-size:12.0pt;
   line-height:106%;font-family:"Aptos",sans-serif;color:black'>Manager of
   current mailbox<br>
-  $CurrentMailboxManager…</span></b></p>
+  $CurrentMailboxManager… / $MM…</span></b></p>
   </td>
  </tr>
  <tr>
@@ -1350,6 +1350,60 @@ to add a starting and a trailing $ character in your template. See
   <td valign=top style='border:solid white 1.0pt;border-top:none;background:
   #70AD47;padding:0cm 5.4pt 5.65pt 5.4pt'>
   <p class=MsoNormal align=right style='margin-bottom:0cm;text-align:right'><b><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif;
+  color:black'>…PostalAddressNoCompany$</span></b></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid white 1.0pt;
+  border-right:solid white 1.0pt;background:#E2EFD9;padding:0cm 5.4pt 5.65pt 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0cm'><span style='font-size:12.0pt;
+  line-height:106%;font-family:"Aptos",sans-serif;color:black'>$UPostalAddressNoCompany$</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid white 1.0pt;
+  border-right:solid white 1.0pt;background:#E2EFD9;padding:0cm 5.4pt 5.65pt 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0cm'><span style='font-size:12.0pt;
+  line-height:106%;font-family:"Aptos",sans-serif;color:black'>$UMPostalAddressNoCompany$</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid white 1.0pt;
+  border-right:solid white 1.0pt;background:#E2EFD9;padding:0cm 5.4pt 5.65pt 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0cm'><span style='font-size:12.0pt;
+  line-height:106%;font-family:"Aptos",sans-serif;color:black'>$MPostalAddressNoCompany$</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid white 1.0pt;
+  border-right:solid white 1.0pt;background:#E2EFD9;padding:0cm 5.4pt 5.65pt 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0cm'><span style='font-size:12.0pt;
+  line-height:106%;font-family:"Aptos",sans-serif;color:black'>$MMPostalAddressNoCompany$</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid white 1.0pt;border-top:none;background:
+  #70AD47;padding:0cm 5.4pt 5.65pt 5.4pt'>
+  <p class=MsoNormal align=right style='margin-bottom:0cm;text-align:right'><b><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif;
+  color:black'>…PostalAddressCompany$</span></b></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid white 1.0pt;
+  border-right:solid white 1.0pt;background:#E2EFD9;padding:0cm 5.4pt 5.65pt 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0cm'><span style='font-size:12.0pt;
+  line-height:106%;font-family:"Aptos",sans-serif;color:black'>$UPostalAddressCompany$</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid white 1.0pt;
+  border-right:solid white 1.0pt;background:#E2EFD9;padding:0cm 5.4pt 5.65pt 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0cm'><span style='font-size:12.0pt;
+  line-height:106%;font-family:"Aptos",sans-serif;color:black'>$UMPostalAddressCompany$</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid white 1.0pt;
+  border-right:solid white 1.0pt;background:#E2EFD9;padding:0cm 5.4pt 5.65pt 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0cm'><span style='font-size:12.0pt;
+  line-height:106%;font-family:"Aptos",sans-serif;color:black'>$MPostalAddressCompany$</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid white 1.0pt;
+  border-right:solid white 1.0pt;background:#E2EFD9;padding:0cm 5.4pt 5.65pt 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0cm'><span style='font-size:12.0pt;
+  line-height:106%;font-family:"Aptos",sans-serif;color:black'>$MMPostalAddressCompany$</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid white 1.0pt;border-top:none;background:
+  #70AD47;padding:0cm 5.4pt 5.65pt 5.4pt'>
+  <p class=MsoNormal align=right style='margin-bottom:0cm;text-align:right'><b><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif;
   color:black'>…PostalAddress$</span></b></p>
   </td>
   <td valign=top style='border-top:none;border-left:none;border-bottom:solid white 1.0pt;
@@ -1580,19 +1634,19 @@ automatically available via replacement variables.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentUserPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image001.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image001.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentUserPhotoDeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image002.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.$CurrentUserPhotoDeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image002.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.$CurrentUserPhotoDeleteEmpty$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentUserPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=135 height=135 id="Picture 14" src="Test%20all%20default%20replacement%20variables_files/image003.png" alt="This is a placeholder image for the photo of the current user, with some fancy formatting that can only be used with DOCX templates. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=135 height=135 id="Picture 14" src="Test%20all%20default%20replacement%20variables-Dateien/image003.png" alt="This is a placeholder image for the photo of the current user, with some fancy formatting that can only be used with DOCX templates. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"></span></p>
   </td>
  </tr>
  <tr>
@@ -1605,19 +1659,19 @@ automatically available via replacement variables.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentUserManagerPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image004.png" alt="This is a placeholder image for the photo of the current user manager. If the current user manager has no photo, this placeholder is still shown.$CurrentUserManagerPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image004.png" alt="This is a placeholder image for the photo of the current user manager. If the current user manager has no photo, this placeholder is still shown.$CurrentUserManagerPhoto$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentUserManagerPhotoDeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image005.png" alt="This is a placeholder image for the photo of the current user manager. If the current user manager has no photo, this placeholder is deleted.$CurrentUserManagerPhotoDeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image005.png" alt="This is a placeholder image for the photo of the current user manager. If the current user manager has no photo, this placeholder is deleted.$CurrentUserManagerPhotoDeleteEmpty$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentUserManagerPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=155 id="Picture 11" src="Test%20all%20default%20replacement%20variables_files/image006.png" alt="This is a placeholder image for the photo of the current user manager, with some fancy formatting that can only be used with DOCX templates. If the current user manager has no photo, this placeholder is still shown.&#10;$CurrentUserManagerPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=155 id="Picture 11" src="Test%20all%20default%20replacement%20variables-Dateien/image006.png" alt="This is a placeholder image for the photo of the current user manager, with some fancy formatting that can only be used with DOCX templates. If the current user manager has no photo, this placeholder is still shown.&#10;$CurrentUserManagerPhoto$"></span></p>
   </td>
  </tr>
  <tr>
@@ -1630,19 +1684,19 @@ automatically available via replacement variables.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentMailboxPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image007.png" alt="This is a placeholder image for the photo of the current mailbox. If the current mailbox has no photo, this placeholder is still shown.&#10;$CurrentMailboxPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image007.png" alt="This is a placeholder image for the photo of the current mailbox. If the current mailbox has no photo, this placeholder is still shown.&#10;$CurrentMailboxPhoto$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentMailboxPhotoDeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image005.png" alt="This is a placeholder image for the photo of the current mailbox. If the current mailbox has no photo, this placeholder is deleted.&#10;$CurrentMailboxPhotoDeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image008.png" alt="This is a placeholder image for the photo of the current mailbox. If the current mailbox has no photo, this placeholder is deleted.&#10;$CurrentMailboxPhotoDeleteEmpty$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentMailboxPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=168 height=154 id="Picture 8" src="Test%20all%20default%20replacement%20variables_files/image008.png" alt="This is a placeholder image for the photo of the current mailbox, with some fancy formatting that can only be used with DOCX templates. If the current mailbox has no photo, this placeholder is still shown.&#10;$CurrentMailboxPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=168 height=154 id="Picture 8" src="Test%20all%20default%20replacement%20variables-Dateien/image009.png" alt="This is a placeholder image for the photo of the current mailbox, with some fancy formatting that can only be used with DOCX templates. If the current mailbox has no photo, this placeholder is still shown.&#10;$CurrentMailboxPhoto$"></span></p>
   </td>
  </tr>
  <tr>
@@ -1655,19 +1709,19 @@ automatically available via replacement variables.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentMailboxManagerPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image009.png" alt="This is a placeholder image for the photo of the current mailbox manager. If the current mailbox manager has no photo, this placeholder is still shown.$CurrentMailboxManagerPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image001.png" alt="This is a placeholder image for the photo of the current mailbox manager. If the current mailbox manager has no photo, this placeholder is still shown.$CurrentMailboxManagerPhoto$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentMailboxManagerPhotoDeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image010.png" alt="This is a placeholder image for the photo of the current mailbox manager. If the current mailbox manager has no photo, this placeholder is deleted.&#10;$CurrentMailboxManagerPhotoDeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image005.png" alt="This is a placeholder image for the photo of the current mailbox manager. If the current mailbox manager has no photo, this placeholder is deleted.&#10;$CurrentMailboxManagerPhotoDeleteEmpty$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentMailboxManagerPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 id="Picture 5" src="Test%20all%20default%20replacement%20variables_files/image011.png" alt="This is a placeholder image for the photo of the current mailbox manager, with some fancy formatting that can only be used with DOCX templates. If the current mailbox manager has no photo, this placeholder is still shown.&#10;$CurrentMailboxManagerPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 id="Picture 5" src="Test%20all%20default%20replacement%20variables-Dateien/image010.png" alt="This is a placeholder image for the photo of the current mailbox manager, with some fancy formatting that can only be used with DOCX templates. If the current mailbox manager has no photo, this placeholder is still shown.&#10;$CurrentMailboxManagerPhoto$"></span></p>
   </td>
  </tr>
 </table>
@@ -1760,19 +1814,19 @@ of the currently logged-on user.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentUserPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=60 height=60 src="Test%20all%20default%20replacement%20variables_files/image012.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=58 height=58 src="Test%20all%20default%20replacement%20variables_files/image013.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=60 height=59 src="Test%20all%20default%20replacement%20variables_files/image014.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=58 height=58 src="Test%20all%20default%20replacement%20variables_files/image015.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=60 height=60 src="Test%20all%20default%20replacement%20variables-Dateien/image011.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=58 height=58 src="Test%20all%20default%20replacement%20variables-Dateien/image012.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=60 height=59 src="Test%20all%20default%20replacement%20variables-Dateien/image013.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=58 height=58 src="Test%20all%20default%20replacement%20variables-Dateien/image014.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"></span></p>
   </td>
   <td width=338 valign=top style='width:253.8pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentUserPhotoDeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=60 height=60 src="Test%20all%20default%20replacement%20variables_files/image012.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.&#10;$CurrentUserPhotoDeleteEmpty$"><img border=0 width=58 height=58 src="Test%20all%20default%20replacement%20variables_files/image013.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.&#10;$CurrentUserPhotoDeleteEmpty$"><img border=0 width=60 height=59 src="Test%20all%20default%20replacement%20variables_files/image014.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.&#10;$CurrentUserPhotoDeleteEmpty$"><img border=0 width=58 height=58 src="Test%20all%20default%20replacement%20variables_files/image015.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.&#10;$CurrentUserPhotoDeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=60 height=60 src="Test%20all%20default%20replacement%20variables-Dateien/image011.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.&#10;$CurrentUserPhotoDeleteEmpty$"><img border=0 width=58 height=58 src="Test%20all%20default%20replacement%20variables-Dateien/image012.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.&#10;$CurrentUserPhotoDeleteEmpty$"><img border=0 width=60 height=59 src="Test%20all%20default%20replacement%20variables-Dateien/image013.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.&#10;$CurrentUserPhotoDeleteEmpty$"><img border=0 width=58 height=58 src="Test%20all%20default%20replacement%20variables-Dateien/image014.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is deleted.&#10;$CurrentUserPhotoDeleteEmpty$"></span></p>
   </td>
   <td width=324 valign=top style='width:243.0pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentUserPhoto$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=67 height=67 id="Arrow: Right 8" src="Test%20all%20default%20replacement%20variables_files/image016.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=57 height=66 id="Rectangle: Rounded Corners 4" src="Test%20all%20default%20replacement%20variables_files/image017.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=80 height=79 id="Heart 3" src="Test%20all%20default%20replacement%20variables_files/image018.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=60 height=80 id="Cloud 1" src="Test%20all%20default%20replacement%20variables_files/image019.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=67 height=67 id="Arrow: Right 8" src="Test%20all%20default%20replacement%20variables-Dateien/image015.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=57 height=66 id="Rectangle: Rounded Corners 4" src="Test%20all%20default%20replacement%20variables-Dateien/image016.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=80 height=79 id="Heart 3" src="Test%20all%20default%20replacement%20variables-Dateien/image017.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"><img border=0 width=60 height=80 id="Cloud 1" src="Test%20all%20default%20replacement%20variables-Dateien/image018.png" alt="This is a placeholder image for the photo of the current user. If the current user has no photo, this placeholder is still shown.&#10;$CurrentUserPhoto$"></span></p>
   </td>
  </tr>
 </table>
@@ -1866,13 +1920,13 @@ empty, but CustomImage1 is a QR code containing a vCard.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentUserCustomImage1$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image020.png" alt="This is a placeholder image for CustomImage1 of the current user. If the current user has no CustomImage1, this placeholder is still shown.&#10;$CurrentUserCustomImage1$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image019.png" alt="This is a placeholder image for CustomImage1 of the current user. If the current user has no CustomImage1, this placeholder is still shown.&#10;$CurrentUserCustomImage1$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentUserCustomImage1DeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image021.png" alt="This is a placeholder image for CustomImage1 of the current user. If the current user has no CustomImage1, this placeholder is deleted.&#10;$CurrentUserCustomImage1DeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image020.png" alt="This is a placeholder image for CustomImage1 of the current user. If the current user has no CustomImage1, this placeholder is deleted.&#10;$CurrentUserCustomImage1DeleteEmpty$"></span></p>
   </td>
  </tr>
  <tr>
@@ -1885,13 +1939,13 @@ empty, but CustomImage1 is a QR code containing a vCard.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentUserManagerCustomImage1$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image022.png" alt="This is a placeholder image for CustomImage1 of the current user manager. If the current user manager has no CustomImage1, this placeholder is still shown.&#10;$CurrentUserManagerCustomImage1$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image021.png" alt="This is a placeholder image for CustomImage1 of the current user manager. If the current user manager has no CustomImage1, this placeholder is still shown.&#10;$CurrentUserManagerCustomImage1$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentUserManagerCustomImage1DeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image023.png" alt="This is a placeholder image for CustomImage1 of the current user manager. If the current user manager has no CustomImage1, this placeholder is deleted.&#10;$CurrentUserManagerCustomImage1DeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image022.png" alt="This is a placeholder image for CustomImage1 of the current user manager. If the current user manager has no CustomImage1, this placeholder is deleted.&#10;$CurrentUserManagerCustomImage1DeleteEmpty$"></span></p>
   </td>
  </tr>
  <tr>
@@ -1904,13 +1958,13 @@ empty, but CustomImage1 is a QR code containing a vCard.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentMailboxCustomImage1$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image024.png" alt="This is a placeholder image for CustomImage1 of the current mailbox. If the current mailbox has no CustomImage1, this placeholder is still shown.&#10;$CurrentMailboxCustomImage1$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image019.png" alt="This is a placeholder image for CustomImage1 of the current mailbox. If the current mailbox has no CustomImage1, this placeholder is still shown.&#10;$CurrentMailboxCustomImage1$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif'>$CurrentMailboxCustomImage1DeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image025.png" alt="This is a placeholder image for CustomImage1 of the current mailbox. If the current mailbox has no CustomImage1, this placeholder is deleted.&#10;$CurrentMailboxCustomImage1DeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image023.png" alt="This is a placeholder image for CustomImage1 of the current mailbox. If the current mailbox has no CustomImage1, this placeholder is deleted.&#10;$CurrentMailboxCustomImage1DeleteEmpty$"></span></p>
   </td>
  </tr>
  <tr>
@@ -1923,13 +1977,13 @@ empty, but CustomImage1 is a QR code containing a vCard.</span></p>
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentMailboxManagerCustomImage1$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image022.png" alt="This is a placeholder image for CustomImage1 of the current mailbox manager. If the current mailbox manager has no CustomImage1, this placeholder is still shown.&#10;$CurrentMailboxManagerCustomImage1$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image024.png" alt="This is a placeholder image for CustomImage1 of the current mailbox manager. If the current mailbox manager has no CustomImage1, this placeholder is still shown.&#10;$CurrentMailboxManagerCustomImage1$"></span></p>
   </td>
   <td width=340 valign=top style='width:255.1pt;border-top:none;border-left:
   none;border-bottom:solid #A8D08D 1.0pt;border-right:solid #A8D08D 1.0pt;
   background:#E2EFD9;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=EN-GB style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'>$CurrentMailboxManagerCustomImage1DeleteEmpty$</span></p>
-  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables_files/image025.png" alt="This is a placeholder image for CustomImage1 of the current mailbox manager. If the current mailbox manager has no CustomImage1, this placeholder is deleted.&#10;$CurrentMailboxManagerCustomImage1DeleteEmpty$"></span></p>
+  <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span lang=DE-AT style='font-size:12.0pt;font-family:"Aptos",sans-serif;color:black'><img border=0 width=113 height=113 src="Test%20all%20default%20replacement%20variables-Dateien/image023.png" alt="This is a placeholder image for CustomImage1 of the current mailbox manager. If the current mailbox manager has no CustomImage1, this placeholder is deleted.&#10;$CurrentMailboxManagerCustomImage1DeleteEmpty$"></span></p>
   </td>
  </tr>
 </table>
@@ -1941,7 +1995,7 @@ empty, but CustomImage1 is a QR code containing a vCard.</span></p>
 rectangles, each with a different color: Blue, red, yellow, and green.</span></p>
 
 <p class=MsoNormal><span style='font-size:12.0pt;line-height:106%;font-family:
-"Aptos",sans-serif'><img border=0 width=42 height=42 id="Picture 4" src="Test%20all%20default%20replacement%20variables_files/image026.png" alt="The blue rectangle is always shown."><img border=0 width=42 height=42 id="Picture 3" src="Test%20all%20default%20replacement%20variables_files/image027.png" alt="The red rectangle is only shown when the CurrentUserTelephone replacement variable has a value.&#10;$CurrentUserTelephoneDeleteEmpty$"><img border=0 width=42 height=42 id="Picture 2" src="Test%20all%20default%20replacement%20variables_files/image028.png" alt="The yellow rectangle is only shown when the CurrentMailboxExtAttr10 replacement variable has a value.&#10;$CurrentMailboxExtattr10DeleteEmpty$"><img border=0 width=42 height=42 id="Picture 1" src="Test%20all%20default%20replacement%20variables_files/image029.png" alt="The green rectangle is only shown when the CurrentMailboxManagerMail replacement variable has a value.&#10;$CurrentMailboxManagerMailDeleteEmpty$"></span></p>
+"Aptos",sans-serif'><img border=0 width=42 height=42 id="Picture 4" src="Test%20all%20default%20replacement%20variables-Dateien/image025.png" alt="The blue rectangle is always shown."><img border=0 width=42 height=42 id="Picture 3" src="Test%20all%20default%20replacement%20variables-Dateien/image026.png" alt="The red rectangle is only shown when the CurrentUserTelephone replacement variable has a value.&#10;$CurrentUserTelephoneDeleteEmpty$"><img border=0 width=42 height=42 id="Picture 2" src="Test%20all%20default%20replacement%20variables-Dateien/image027.png" alt="The yellow rectangle is only shown when the CurrentMailboxExtAttr10 replacement variable has a value.&#10;$CurrentMailboxExtattr10DeleteEmpty$"><img border=0 width=42 height=42 id="Picture 1" src="Test%20all%20default%20replacement%20variables-Dateien/image028.png" alt="The green rectangle is only shown when the CurrentMailboxManagerMail replacement variable has a value.&#10;$CurrentMailboxManagerMailDeleteEmpty$"></span></p>
 
 <p class=MsoNormal><span style='font-size:12.0pt;line-height:106%;font-family:
 "Aptos",sans-serif'>In the resulting signature file, not all these rectangles
@@ -2013,8 +2067,8 @@ paragraph and treat them as inline shapes, or not display them at all, or show
 an error.</span></p>
 
 <p class=MsoNormal><span style='position:absolute;z-index:251659264;margin-left:
-276px;margin-top:76px;width:76px;height:76px'><img width=76 height=76 src="Test%20all%20default%20replacement%20variables_files/image030.png" alt="This is a non-inline shape placed before the text."></span><span style='position:absolute;z-index:-1895823360;margin-left:103px;margin-top:76px;
-width:76px;height:76px'><img width=76 height=76 src="Test%20all%20default%20replacement%20variables_files/image031.png" alt="This is a non-inline shape placed behind the text."></span><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>Set-OutlookSignatures
+276px;margin-top:75px;width:76px;height:76px'><img width=76 height=76 src="Test%20all%20default%20replacement%20variables-Dateien/image029.png" alt="This is a non-inline shape placed before the text."></span><span style='position:absolute;z-index:-1895823360;margin-left:103px;margin-top:75px;
+width:76px;height:76px'><img width=76 height=76 src="Test%20all%20default%20replacement%20variables-Dateien/image030.png" alt="This is a non-inline shape placed behind the text."></span><span style='font-size:12.0pt;line-height:106%;font-family:"Aptos",sans-serif'>Set-OutlookSignatures
 shows a warning when non-inline shapes are found in a template.</span></p>
 
 <p class=MsoQuote><span style='font-size:12.0pt;line-height:106%;font-family:

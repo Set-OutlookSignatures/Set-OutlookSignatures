@@ -3609,14 +3609,50 @@ end tell
     if (($UseHtmTemplates -eq $true) -and (($CreateRtfSignatures -eq $false))) {
         Write-Host '  Not required: UseHtmTemplates = $true, CreateRtfSignatures = $false'
     } else {
-        # Load Word interop, Start Word dummy object, set process priority, start real Word object, set process priority, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the software
+        # Load Word, Start Word dummy object, set process priority, start real Word object, set process priority, close dummy object - this seems to avoid a rare problem where a manually started Word instance connects to the Word process created by the software
         try {
             try { global:WatchCatchableExitSignal } catch {}
 
-            if (
-                -not [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.Office.Interop.Word')
-            ) {
-                Write-Host '  Word Interop assembly could not be found or loaded. Word automation may not work properly.' -ForegroundColor Yellow
+            $script:Microsoft_Office_Interop_Word_WdViewType = @{
+                wdNormalView   = 1 # Normal view
+                wdOutlineView  = 2 # Outline view
+                wdPrintView    = 3 # Print view
+                wdPrintPreview = 4 # Print preview view
+                wdMasterView   = 5 # Master view
+                wdWebView      = 6 # Web view
+                wdReadingView  = 7 # Reading view
+                wdConflictView = 8 # Conflict view
+            }
+
+            $script:Microsoft_Office_Interop_Word_WdSaveFormat = @{
+                wdFormatDocument                    = 0 #  Microsoft Word format.
+                wdFormatDocument97                  = 0 # Microsoft Word 97 document format.
+                wdFormatTemplate                    = 1 # Microsoft Word template format.
+                wdFormatTemplate97                  = 1 # Word 97 template format.
+                wdFormatText                        = 2 # Microsoft Windows text format.
+                wdFormatTextLineBreaks              = 3 # Microsoft Windows text format with line breaks preserved.
+                wdFormatDOSText                     = 4 # Microsoft DOS text format.
+                wdFormatDOSTextLineBreaks           = 5 # Microsoft DOS text with line breaks preserved.
+                wdFormatRTF                         = 6 # Rich text format (RTF).
+                wdFormatEncodedText                 = 7 # Encoded text format.
+                wdFormatUnicodeText                 = 7 # Unicode text format.
+                wdFormatHTML                        = 8 # Standard HTML format.
+                wdFormatWebArchive                  = 9 # Web archive format.
+                wdFormatFilteredHTML                = 10 # Filtered HTML format.
+                wdFormatXML                         = 11 # Extensible Markup Language (XML) format.
+                wdFormatXMLDocument                 = 12 # XML document format.
+                wdFormatXMLDocumentMacroEnabled     = 13 # XML template format with macros enabled.
+                wdFormatXMLTemplate                 = 14 # XML template format.
+                wdFormatXMLTemplateMacroEnabled     = 15 # XML template format with macros enabled.
+                wdFormatDocumentDefault             = 16 # Word default document file format. For Microsoft Office Word 2007, this is the DOCX format.
+                wdFormatPDF                         = 17 # PDF format.
+                wdFormatXPS                         = 18 # XPS format.
+                wdFormatFlatXML                     = 19 # Reserved for internal use.
+                wdFormatFlatXMLMacroEnabled         = 20 # Reserved for internal use.
+                wdFormatFlatXMLTemplate             = 21 # Reserved for internal use.
+                wdFormatFlatXMLTemplateMacroEnabled = 22 # Reserved for internal use.
+                wdFormatOpenDocumentText            = 23
+                wdFormatStrictOpenXMLDocument       = 24 # Strict Open XML document format.
             }
 
             Add-Type -TypeDefinition @'
@@ -5260,7 +5296,7 @@ function SetSignatures {
                         $($srcValue -ilike '*$*DELETEEMPTY$*') -or
                         $($altValue -ilike '*$*DELETEEMPTY$*')
                     ) {
-                        foreach ($VariableName in @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$CurrentMailboxManagerPhoto$', '$CurrentUserPhoto$', '$CurrentUserManagerPhoto$') } | Sort-Object -Culture 127)) {
+                        foreach ($VariableName in @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$MPhoto$', '$CurrentMailboxManagerPhoto$', '$MMPhoto$', '$CurrentUserPhoto$', '$UPhoto$', '$CurrentUserManagerPhoto$', 'UMPhoto') } | Sort-Object -Culture 127)) {
                             try { global:WatchCatchableExitSignal } catch {}
 
                             $tempImageVariableString = $VariableName -ireplace '\$$', 'DELETEEMPTY$'
@@ -5303,7 +5339,7 @@ function SetSignatures {
             [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $htmlDoc.DocumentNode.OuterHtml)
         } else {
             $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
-            $script:COMWord.ActiveDocument.ActiveWindow.View.Type = [Microsoft.Office.Interop.Word.WdViewType]::wdWebView
+            $script:COMWord.ActiveDocument.ActiveWindow.View.Type = $script:Microsoft_Office_Interop_Word_WdViewType.wdWebView
 
             $script:ComWordScreenUpdatingOriginal = $script:COMWord.ScreenUpdating
             $script:ComWordOptionsCheckSpellingAsYouTypeOriginal = $script:COMWord.Options.CheckSpellingAsYouType
@@ -5463,7 +5499,7 @@ function SetSignatures {
                         $(if ($tempImageSourceFullName) { ((Split-Path -Path $tempImageSourceFullName -Leaf) -ilike '*$*DELETEEMPTY$*') }) -or
                         $(if ($tempImageAlternativeText) { ($tempImageAlternativeText -ilike '*$*DELETEEMPTY$*') })
                     ) {
-                        foreach ($Variablename in @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$CurrentMailboxManagerPhoto$', '$CurrentUserPhoto$', '$CurrentUserManagerPhoto$') } | Sort-Object -Culture 127)) {
+                        foreach ($Variablename in @(@($ReplaceHash.Keys) | Where-Object { $_ -inotin @('$CurrentMailboxPhoto$', '$MPhoto$', '$CurrentMailboxManagerPhoto$', '$MMPhoto$', '$CurrentUserPhoto$', '$UPhoto$', '$CurrentUserManagerPhoto$', '$UMPhoto$') } | Sort-Object -Culture 127)) {
                             $tempImageVariableString = $Variablename -ireplace '\$$', 'DELETEEMPTY$'
 
                             if (
@@ -5568,7 +5604,7 @@ function SetSignatures {
             try { global:WatchCatchableExitSignal } catch {}
 
             # Save changed document, it's later used for export to .htm, .rtf and .txt
-            $saveFormat = [Microsoft.Office.Interop.Word.WdSaveFormat]::wdFormatDocumentDefault
+            $saveFormat = $script:Microsoft_Office_Interop_Word_WdSaveFormat.wdFormatDocumentDefault
 
             try { global:WatchCatchableExitSignal } catch {}
 
@@ -5644,11 +5680,11 @@ function SetSignatures {
             try { global:WatchCatchableExitSignal } catch {}
 
             $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
-            $script:COMWord.ActiveDocument.ActiveWindow.View.Type = [Microsoft.Office.Interop.Word.WdViewType]::wdWebView
+            $script:COMWord.ActiveDocument.ActiveWindow.View.Type = $script:Microsoft_Office_Interop_Word_WdViewType.wdWebView
 
             try { global:WatchCatchableExitSignal } catch {}
 
-            $saveFormat = [Microsoft.Office.Interop.Word.WdSaveFormat]::wdFormatFilteredHTML
+            $saveFormat = $script:Microsoft_Office_Interop_Word_WdSaveFormat.wdFormatFilteredHTML
             $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
             $script:WordWebOptions = $script:COMWord.ActiveDocument.WebOptions
@@ -6100,11 +6136,11 @@ function SetSignatures {
                 # If possible, use .docx file to avoid problems with MS Information Protection
                 $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
                 $script:COMWord.Documents.Open($path, $false, $false, $false, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, [Type]::Missing, 65001) | Out-Null
-                $script:COMWord.ActiveDocument.ActiveWindow.View.Type = [Microsoft.Office.Interop.Word.WdViewType]::wdWebView
+                $script:COMWord.ActiveDocument.ActiveWindow.View.Type = $script:Microsoft_Office_Interop_Word_WdViewType.wdWebView
 
                 try { global:WatchCatchableExitSignal } catch {}
 
-                $saveFormat = [Microsoft.Office.Interop.Word.WdSaveFormat]::wdFormatRTF
+                $saveFormat = $script:Microsoft_Office_Interop_Word_WdSaveFormat.wdFormatRTF
                 $path = $([System.IO.Path]::ChangeExtension($path, '.rtf'))
 
                 try {
@@ -7772,19 +7808,19 @@ $CheckPathScriptblock = {
 
 
 function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = '', [switch]$silent, [switch]$OnlyLoadDLL) {
-    if (-not $script:WebServicesDllPath) {
+    if (-not $script:EwsModulePath) {
         if (-not $silent) {
             Write-Host "$Indent  Set up environment for connection to Outlook for the web"
         }
 
         try { global:WatchCatchableExitSignal } catch {}
 
-        $script:WebServicesDllPath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid) + '.dll'))
+        $script:EwsModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
         try {
-            Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\EWS\netstandard2.0\Microsoft.Exchange.WebServices.Data.dll')) -Destination $script:WebServicesDllPath -Force
+            Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\EWS\netstandard2.0')) -Destination $script:EwsModulePath -Recurse
 
-            Get-ChildItem -LiteralPath $script:WebServicesDllPath -Recurse -Force | ForEach-Object {
+            Get-ChildItem -LiteralPath $script:EwsModulePath -Recurse -Force | ForEach-Object {
                 $_.Attributes = 'Normal'
                 if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
             }
@@ -7796,7 +7832,7 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
     }
 
     if ($OnlyLoadDLL) {
-        Add-Type -LiteralPath $script:WebServicesDllPath -ErrorAction Stop
+        Import-Module (Join-Path $script:EwsModulePath 'Microsoft.Exchange.WebServices.dll') -ErrorAction Stop
 
         return
     }
@@ -7853,7 +7889,7 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
         $script:exchService = $null
 
         try {
-            Add-Type -LiteralPath $script:WebServicesDllPath -ErrorAction Stop
+            Import-Module (Join-Path $script:EwsModulePath 'Microsoft.Exchange.WebServices.dll') -ErrorAction Stop
 
             try { global:WatchCatchableExitSignal } catch {}
 
@@ -7897,7 +7933,7 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
 }
 '@
 
-                Add-Type -TypeDefinition $sourceCode -Language CSharp -ReferencedAssemblies $script:WebServicesDllPath, System.Management.Automation, System.Text.RegularExpressions
+                Add-Type -TypeDefinition $sourceCode -Language CSharp -ReferencedAssemblies (Join-Path $script:EwsModulePath 'Microsoft.Exchange.WebServices.dll'), System.Management.Automation, System.Text.RegularExpressions
                 $ExchServiceEwsTraceListener = New-Object ExchServiceEwsTraceListener
                 return $ExchServiceEwsTraceListener
             }
@@ -10894,7 +10930,7 @@ try {
         Write-Host "    Ignore log lines starting with 'PS>TerminatingError' or '>> TerminatingError' unless instructed otherwise."
 
         try {
-            Get-ChildItem -LiteralPath $(Split-Path -LiteralPath $TranscriptFullName) -File -Force | Where-Object { $_.CreationTime -lt (Get-Date).AddDays(-14) } | ForEach-Object {
+            Get-ChildItem -LiteralPath $(Split-Path -LiteralPath $TranscriptFullName) -File -Force | Where-Object { ($_.CreationTime -lt (Get-Date).AddDays(-14)) -and ($_.Name -ine '_README.txt') } | ForEach-Object {
                 Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue
             }
         } catch {
@@ -11196,9 +11232,9 @@ namespace SetOutlookSignatures.AssemblyResolver {
         Remove-Item -LiteralPath $script:BenefactorCircleLicenseFilePath -Force -ErrorAction SilentlyContinue
     }
 
-    if ($script:WebServicesDllPath) {
-        Remove-Module -Name $([System.IO.Path]::GetFileNameWithoutExtension($script:WebServicesDllPath)) -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath $script:WebServicesDllPath -Force -ErrorAction SilentlyContinue
+    if ($script:EwsModulePath) {
+        Remove-Module -Name Microsoft.Exchange.WebServices -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $script:EwsModulePath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     if ($script:MsalModulePath) {

@@ -1,4 +1,5 @@
 # AddressFormatter
+
 Address formatting for PowerShell using the templates from https://github.com/OpenCageData/address-formatting.
 
 Works cross-platform: PowerShell 5.1 on Windows, PowerShell (pwsh) 7+ on Windows, Linux, and macOS
@@ -6,9 +7,11 @@ Works cross-platform: PowerShell 5.1 on Windows, PowerShell (pwsh) 7+ on Windows
 Based on Perl implementation https://metacpan.org/dist/Geo-Address-Formatter.
 
 # Usage
+
 1. Import module  
    `Import-Module 'c:\your_modules_path\AddressFormatter\AddressFormatter.psd1'`
 2. Format address using `Format-PostalAddress`
+
    ```powershell
    $FormatPostAddressOptions = @{
        # Address components as described in https://github.com/OpenCageData/address-formatting/blob/master/conf/components.yaml
@@ -41,9 +44,11 @@ Based on Perl implementation https://metacpan.org/dist/Geo-Address-Formatter.
    ```
 
 # Usage examples
+
 Note the subtle country specific formatting differences in the following examples, such as where the house number and the postcode is placed.
 
 ## Austrian Presidential Office
+
 ```powershell
 $FormatPostAddressOptions = @{
     # Address components as described in https://github.com/OpenCageData/address-formatting/blob/master/conf/components.yaml
@@ -67,6 +72,7 @@ Format-PostalAddress @FormatPostAddressOptions
 ```
 
 The PowerShell commands above give the following result:
+
 ```
 Bürger:innenservice
 Österreichische Präsidentschaftskanzlei
@@ -75,7 +81,9 @@ Ballhausplatz 1
 1010 Wien
 Austria
 ```
+
 ## USA White House
+
 ```powershell
 $FormatPostAddressOptions = @{
     # Address components as described in https://github.com/OpenCageData/address-formatting/blob/master/conf/components.yaml
@@ -95,6 +103,7 @@ Format-PostalAddress @FormatPostAddressOptions
 ```
 
 The PowerShell commands above give the following result:
+
 ```
 The White House
 1600 Pennsylvania Avenue, N.W.
@@ -105,15 +114,46 @@ United States of America
 Note that the country name 'USA' has been automatically corrected to 'United States of America'.
 
 # Admin tasks
-## Update address templates and test cases
-Address templates and test cases are stored in the folder '`subModules\OpenCageData\address-formatting`'. This folder is a git submodule, which is basically a clone of the repository '`https://github.com/OpenCageData/address-formatting`'.
 
-To update the templates and test cases, run '`git submodule update`'.
+## Update address templates and test cases
+
+Address templates and test cases are stored in the folder `subModules\OpenCageData\address-formatting`. This folder is a git submodule, which is basically a clone of the repository `https://github.com/OpenCageData/address-formatting`.
+
+To update the templates and test cases, run:
+
+```powershell
+do {
+    $root = git rev-parse --show-superproject-working-tree 2>$null
+
+    if ($root) {
+        Set-Location $root
+    }
+} while ($root)
+
+$root = git rev-parse --show-toplevel 2>$null
+
+if (-not $root) {
+    Write-Warning 'The current directory is not inside a Git repository.'
+    return
+}
+
+Set-Location $root
+
+if (Test-Path -LiteralPath '.gitmodules') {
+    git submodule sync --recursive
+    git submodule update --init --recursive --remote --merge
+}
+else {
+    Write-Warning 'The top-level repository does not contain a .gitmodules file.'
+}
+```
 
 ## Run tests
+
 Run `.\tests\tests.ps1` to run the tests. Only errors and a summary will be logged.
 
 Example output:
+
 ```
 Start script @2026-03-06T15:17:40+01:00@
 

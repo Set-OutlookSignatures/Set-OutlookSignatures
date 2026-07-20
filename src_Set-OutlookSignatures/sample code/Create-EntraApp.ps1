@@ -187,10 +187,14 @@ try {
     @('Microsoft.Graph.Authentication', 'Microsoft.Graph.Applications', 'Microsoft.Graph.Identity.SignIns') | ForEach-Object {
         Write-Host "  $($_)"
 
-        if (Get-Module -ListAvailable -Name $_) {
-            Find-Module -Name $_ -Repository PSGallery | Update-Module -Force -WarningAction SilentlyContinue -ErrorAction Stop
+        $gallery = Find-Module -Name $_ -Repository PSGallery
+
+        if ($installed = Get-InstalledModule -Name $_ -ErrorAction SilentlyContinue) {
+            if ($gallery.Version -gt $installed.Version) {
+                Update-Module -Name $_ -Force -WarningAction SilentlyContinue -ErrorAction Stop
+            }
         } else {
-            Find-Module -Name $_ -Repository PSGallery | Install-Module -Force -AllowClobber -WarningAction SilentlyContinue -ErrorAction Stop
+            Install-Module -Name $_ -Repository PSGallery -Force -AllowClobber -WarningAction SilentlyContinue -ErrorAction Stop
         }
 
         Import-Module -Name $_ -Force -WarningAction SilentlyContinue -ErrorAction Stop

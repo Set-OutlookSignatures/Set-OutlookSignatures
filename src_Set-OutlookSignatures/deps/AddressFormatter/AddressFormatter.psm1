@@ -48,23 +48,28 @@ function Format-PostalAddressInternal {
     # Merge options (shallow clone is sufficient — options are flat scalar values)
     $opt = @{}
     if ($Options) { $opt = $Options.Clone() }
-    if ($PSBoundParameters.ContainsKey('Country')) { $opt['country'] = $Country }
-    if ($PSBoundParameters.ContainsKey('Abbreviate')) { $opt['abbreviate'] = [int][bool]$Abbreviate }
-    if ($PSBoundParameters.ContainsKey('AddressTemplate')) { $opt['address_template'] = $AddressTemplate }
-    if ($PSBoundParameters.ContainsKey('OnlyAddress')) { $opt['only_address'] = $OnlyAddress }
+    # The public wrapper always forwards every named parameter. Consequently,
+    # $PSBoundParameters cannot tell whether the caller supplied an optional
+    # individual option. Merge only meaningful individual values so that an
+    # omitted wrapper parameter does not erase the corresponding -Options value.
+    if (-not [string]::IsNullOrEmpty($Country)) { $opt['country'] = $Country }
+    if ($Abbreviate.IsPresent) { $opt['abbreviate'] = 1 }
+    if ($null -ne $AddressTemplate) { $opt['address_template'] = $AddressTemplate }
+    if ($null -ne $OnlyAddress) { $opt['only_address'] = [bool]$OnlyAddress }
 
-    # Determine country code
+    # Determine country code. Formatter.pm canonicalizes component-derived
+    # country_code with uc(), and uses uc($cc) for template lookup. Normalize
+    # option-derived codes too so YAML dictionaries can be case-sensitive.
     $cc = $null
     if ($opt.ContainsKey('country') -and $opt['country']) {
-        $cc = $opt['country']
-        $rh_components['country_code'] = $cc
-        Set-DistrictAlias -CountryCode $cc
+        $cc = [string]$opt['country']
     } else {
         $cc = Determine-CountryCode -Components $rh_components
-        if ($cc) {
-            $rh_components['country_code'] = $cc
-            Set-DistrictAlias -CountryCode $cc
-        }
+    }
+    if ($cc) {
+        $cc = $cc.ToUpperInvariant()
+        $rh_components['country_code'] = $cc
+        Set-DistrictAlias -CountryCode $cc
     }
 
     # Abbreviate flag
@@ -175,12 +180,18 @@ function Format-PostalAddressInternal {
         if ($tmp) { $rh_components = $tmp }
     }
 
-    # 9) Prepare template (replace lambda) and compile to AST (cached)
-    $templateText = Replace-TemplateLambdas -TemplateText $templateText
-    $compiledTpl = Compile-MustacheTemplate -Template $templateText
 
-    # 10) Render
-    $rendered = Render-CompiledMustache -Nodes $compiledTpl -Context $rh_components
+    # 9) Replace the custom {{#first}} lambda with sentinel text. The sentinel
+    # is evaluated only after all component variables have been rendered, as in
+    # Geo::Address::Formatter::_replace_template_lambdas/_render_template.
+    $templateText = Replace-TemplateLambdas -TemplateText $templateText
+
+    # 10) Render the complete template text directly. Do not pass the transformed
+    # template through the experimental AST compiler: that compiler can lose
+    # root-level nodes following a FIRSTSTART/FIRSTEND lambda. In HK this dropped
+    # the selected region and the later country line. Render-Mustache preserves
+    # every root-level variable and section in source order.
+    $rendered = Render-Mustache -Template $templateText -Context $rh_components
     $rendered = Evaluate-TemplateLambdas -Rendered $rendered
 
     # 11) Postformat replacements and duplicate removal (use pre-compiled rules if available)
@@ -942,9 +953,9 @@ function New-AddressFormatter {
     }
 
     # Some forks wrap under 'countries:' or similar. Normalize to a flat map of countryCode -> config.
-    if ($templatesMap.ContainsKey('countries') -and ($templatesMap['countries'] -is [hashtable])) {
+    if ($templatesMap.ContainsKey('countries') -and ($templatesMap['countries'] -is [System.Collections.IDictionary])) {
         $templatesMap = $templatesMap['countries']
-    } elseif ($templatesMap.ContainsKey('worldwide') -and ($templatesMap['worldwide'] -is [hashtable])) {
+    } elseif ($templatesMap.ContainsKey('worldwide') -and ($templatesMap['worldwide'] -is [System.Collections.IDictionary])) {
         # Just in case a wrapper key is 'worldwide' instead of being the file name.
         $templatesMap = $templatesMap['worldwide']
     }
@@ -1364,29 +1375,34 @@ function Test-MinimalComponents {
 function Resolve-PrimaryAliases {
     param([hashtable]$Components)
 
-    # Collect primary types whose alias(es) exist but primary not set
-    $p2aliases = @{}  # primary -> set of alias keys present in Components
-    foreach ($c in @($Components.Keys)) {
-        if ($Script:AddrFmt.ComponentAliases.ContainsKey($c)) { continue } # it's a primary type
-        if ($Script:AddrFmt.Component2Type.ContainsKey($c)) {
-            $ptype = $Script:AddrFmt.Component2Type[$c]
-            if (-not $Components.ContainsKey($ptype)) {
-                if (-not $p2aliases.ContainsKey($ptype)) { $p2aliases[$ptype] = @{} }
-                $p2aliases[$ptype][$c] = 1
-            }
-        }
-    }
+    # Exact port of Formatter.pm alias resolution:
+    # collect only aliases whose primary key is not already defined, then use
+    # component_aliases order when several aliases compete for one primary.
+    $pending = @{}
+    foreach ($name in @($Components.Keys)) {
+        # Primary component names are keys in ComponentAliases and must never
+        # be treated as aliases. In particular, region is a primary component.
+        if ($Script:AddrFmt.ComponentAliases.ContainsKey($name)) { continue }
+        if (-not $Script:AddrFmt.Component2Type.ContainsKey($name)) { continue }
 
-    foreach ($ptype in $p2aliases.Keys) {
-        $aliases = @($p2aliases[$ptype].Keys)
-        if ($aliases.Count -eq 1) {
-            $Components[$ptype] = $Components[$aliases[0]]
+        $primary = [string]$Script:AddrFmt.Component2Type[$name]
+        if ($Components.ContainsKey($primary) -and $null -ne $Components[$primary]) {
             continue
         }
-        # multiple aliases => follow configured alias order for the primary
-        foreach ($a in $Script:AddrFmt.ComponentAliases[$ptype]) {
-            if ($Components.ContainsKey($a)) {
-                $Components[$ptype] = $Components[$a]
+        if (-not $pending.ContainsKey($primary)) { $pending[$primary] = @{} }
+        $pending[$primary][$name] = $true
+    }
+
+    foreach ($primary in @($pending.Keys)) {
+        $aliasesPresent = @($pending[$primary].Keys)
+        if ($aliasesPresent.Count -eq 1) {
+            $Components[$primary] = $Components[$aliasesPresent[0]]
+            continue
+        }
+
+        foreach ($alias in @($Script:AddrFmt.ComponentAliases[$primary])) {
+            if ($Components.ContainsKey($alias) -and $null -ne $Components[$alias]) {
+                $Components[$primary] = $Components[$alias]
                 break
             }
         }
@@ -1402,6 +1418,7 @@ function Determine-CountryCode {
     if ([string]::IsNullOrWhiteSpace($cc)) { return $null }
     if ($cc.Length -ne 2) { return $null }
     if ($cc -ieq 'uk') { return 'GB' }
+    $cc = $cc.ToUpperInvariant()
 
     # Dependent territory: use another country's configuration
     if ($Script:AddrFmt.Templates.ContainsKey($cc) -and
@@ -1740,9 +1757,15 @@ function Find-UnknownComponents {
 
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-# $PSScriptRoot is the path to the current module script (.psm1 file)
-$confPath = Join-Path $PSScriptRoot 'subModules\OpenCageData\address-formatting\conf'
+# Resolve the OpenCage configuration relative to this module. Build the path
+# one segment at a time for portability.
+$confPath = Join-Path -Path $PSScriptRoot -ChildPath 'subModules'
+$confPath = Join-Path -Path $confPath -ChildPath 'OpenCageData'
+$confPath = Join-Path -Path $confPath -ChildPath 'address-formatting'
+$confPath = Join-Path -Path $confPath -ChildPath 'conf'
 
-# The path to your configuration data must be relative to the module root.
-# Assuming 'conf' folder is a peer to the .psm1 file.
+# Dynamically load and analyze components.yaml and the remaining configuration
+# once when the module is imported.
 New-AddressFormatter -ConfPath $confPath
+
+Export-ModuleMember -Function Format-PostalAddress, Get-FinalComponents

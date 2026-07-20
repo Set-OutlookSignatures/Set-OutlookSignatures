@@ -50,17 +50,18 @@ Organizations use our ecosystem to enforce 📣 dynamic branding, 🏛️ admini
 <table>
   <tr>
     <td valign="top" width="50%">
+      <h3>Self-Service Quickstart</h3>
+      <p>Follow our 3-step process to deploy your first signatures in minutes. Peer-reviewable and production-ready.</p>
+      <a href="https://set-outlooksignatures.com/quickstart"><img src="https://img.shields.io/badge/Try%20It%20Yourself-4169E1?style=for-the-badge" alt="Try It Yourself"></a><br>
+      <small>Ideal for IT Administrators and Evaluators. No Signup Required.</small>
+    </td>
+    <td valign="top" width="50%">
       <h3>Guided Walkthrough</h3>
       <p>Schedule a session with our team to see how the solution adapts to your specific organizational structure, technical setup, and compliance requirements.</p>
       <a href="https://set-outlooksignatures.com/scheduledemo"><img src="https://img.shields.io/badge/Schedule%20Interactive%20Demo-DAA520?style=for-the-badge" alt="Schedule Interactive Demo"></a><br>
-      <small>Ideal for Security, IT, and Marketing leadership</small>
+      <small>Ideal for Executives and Decision-Makers from Security, IT, and Marketing.</small>
     </td>
-    <td valign="top" width="50%">
-      <h3>Self-Service Quickstart</h3>
-      <p>Follow our 3-step process to deploy your first signatures in minutes. Peer-reviewable and production-ready.</p>
-      <a href="https://set-outlooksignatures.com/quickstart"><img src="https://img.shields.io/badge/Try%20it%20Yourself-4169E1?style=for-the-badge" alt="Try it Yourself"></a><br>
-      <small>100% Free & Open Source Core</small>
-    </td>
+
   </tr>
 </table>
 

@@ -1,6 +1,6 @@
-Exchange Web Services Managed API port to .Net Standard
-(Microsoft.Exchange.WebServices.Data.dll)
-See https://github.com/ststeiger/RedmineMailService for details
+Exchange Web Services Managed API port to .Net Standard 2.0
+(Microsoft.Exchange.WebServices.dll)
+See https://www.nuget.org/packages/Exchange.WebServices.Managed.NetStandard20 for details
 ------------------------------------------------------------------------------------------
 
 Copyright (c) Microsoft Corporation

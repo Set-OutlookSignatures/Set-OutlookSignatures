@@ -54,6 +54,75 @@ _**Breaking:** <Present tense verb> XXX_
 #### Fixes
 -->
 
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.31.0" target="_blank">v4.31.0</a> - 2026-07-20
+
+**_Important:_** The Outlook add-in feature `CUSTOM_RULES_CODE` now also runs when a user manually selects a signature in the task pane, not just when triggered via launch events. You may want to check your existing code.
+
+- This allows for scenarios such as prepending, appending, or modifying signature content based on sensitivity labels or other properties.
+
+### Set-OutlookSignatures
+
+#### Additions
+
+- Add architecture diagram to the [Architecture considerations](https://set-outlooksignatures.com/details#architecture-considerations) documentation.
+- Add security diagram to the [Security considerations](https://set-outlooksignatures.com/details#security-considerations) documentation.
+- Add architecture and security requirements section to the [Implementation approach](https://set-outlooksignatures.com/implementationapproach) document.
+- Add blog articles:
+  - [Flexible Permissions Management: Mastering Email Signatures for Delegates and Cover Configurations](https://set-outlooksignatures.com/blog/2026/06/23/signatures-for-delegates)
+  - [Manual email signatures cost more than you think](https://set-outlooksignatures.com/blog/2026/07/03/financial-benefits)
+  - [SMTP Alias Signatures in Outlook](https://set-outlooksignatures.com/blog/2026/07/08/smtp-alias-signatures)
+- Add FAQ [How to apply signatures for alias or secondary SMTP addresses?](https://set-outlooksignatures.com/faq#how-to-apply-signatures-for-alias-or-secondary-smtp-addresses).
+
+#### Changes
+
+- Update address-formatter to commit 7eb7a5b.
+- Update address-formatting database to commit 836de3e.
+- Update Microsoft.Exchange.WebServices to v2.2.1.0.
+- Update libphonenumber-csharp to v9.0.35.
+- Update MSAL.Net to v4.86.1.
+- Update PreMailer.Net to v2.7.3.
+- Switch to late binding for the Word Interop assembly so the Windows COM interface loads the DLL via Office registry entries instead of the script loading it directly. This ensures Windows automatically selects the correct DLL version when multiple versions of Office are installed in parallel.
+- Refactor the [Implementation approach](https://set-outlooksignatures.com/implementationapproach) document to separate neutral requirements from product-specific recommendation, and align recommendation section with the defined architecture and security requirements.
+- Update sample templates to a new layout and to use `$MPostalAddressCompany$` instead of a fixed fictious address.
+
+### Outlook add-in (part of the Benefactor Circle add-on)
+
+**_Important:_** `CUSTOM_RULES_CODE` now also runs when a user manually selects a signature in the task pane, not just when triggered via launch events. You may want to check your existing code.
+
+- This allows for scenarios such as prepending, appending, or modifying signature content based on sensitivity labels or other properties.
+
+#### Additions
+
+- Add troubleshooting tips and deployment diagram to the [Configuration and deployment](https://set-outlooksignatures.com/outlookaddin#configuration-and-deployment) documentation.
+- Add workflow diagrams with configuration references for launch event and task pane usage to the [Configuration](https://set-outlooksignatures.com/outlookaddin#configuration) documentation.
+- Add workflow diagram describing possibilities to the [Custom Rules Code](https://set-outlooksignatures.com/outlookaddin#custom-rules-code) documentation.
+- Add a new feature to `run_before_deployment.ps1`: Not only display `manifest.xml` configuration differences, but for all configuration values including `CUSTOM_RULES_CODE`. This feature requires a `set-outlooksignatures.config.json` file on the web server, which is automatically created with the first add-in deployment using this release.
+- Enhance the task pane signature preview:
+  - Show the automatically selected signature when "Choose automatically" is selected.
+  - Run `CUSTOM_RULES_CODE` before rendering the preview.
+  - Show the final signature resulting from `customRulesResultSignatureName` or `customRulesResultSignatureBody`, matching the signature that will be applied.
+- Add new features to `customRulesProperties` for use with `CUSTOM_RULES_CODE`:
+  - `outlookDisplayLanguage` property: Display language as returned by Office.context.displayLanguage, usually in the format "en-GB" or "de-AT".
+  - `taskpaneDisplayLanguage` property: Display language as set in the task pane ("en-GB", "de-AT", …), empty string when not triggered by taskpane. Different from `outlookDisplayLanguage` when a user has chosen a task pane display language manually.
+  - `taskpaneSelectedSignatureName` property: Contains the name of the signature a user manually selected in the task pane. Empty string when set to "Choose automatically".
+  - `signatureBodyBeforeCustomRules`: Contains the body (HTML or plain text) of the signature before `CUSTOM_RULES_CODE` runs. This allows for modification of the signature directly via `CUSTOM_RULES_CODE`.
+  - `getSignautureBody` function: Get the actual content of a certain signature.
+- Add sample code to `.\sample code\CustomRulesCode.js`:
+  - Set signature for an alias or secondary SMTP address
+  - Prepend a notice to a signature for sensitive messages
+- Make the task pane of the add-in automatically adapt to the display language of Outlook.
+  - Supports 379 locales, spanning 101 regional and script variations across 86 base languages.
+  - Add bidirectional (LTR/RTL) support to the task pane, enabling the UI to auto-adjust based on language direction.
+- Add an advanced option to the task pane that allows to disable `CUSTOM_RULES_CODE` for manual operations. Can be deactivated via `CUSTOM_RULES_CODE_DEACTIVATABLE` in `run_before_deployment.ps1`.
+
+#### Changes
+
+- **_Important:_** `CUSTOM_RULES_CODE` now also runs when a user manually selects a signature in the task pane, not just when triggered via launch events. You may want to check your existing code.
+  - This allows for scenarios such as prepending, appending, or modifying signature content based on sensitivity labels or other properties.
+- Update @azure/msal-browser to v5.17.1.
+- Add a signature gallery with overlay buttons to the task pane. This allows users to visually select the signature to apply, in addition to the existing name-based selection.
+- Add a timestamp to each add-in log output, making it easier to identify long-running code (which is very helpful when `CUSTOM_RULES_CODE` is used).
+
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.30.0" target="_blank">v4.30.0</a> - 2026-06-14
 
 ### Set-OutlookSignatures
@@ -234,7 +303,7 @@ _**[Microsoft starts turning off EWS for Exchange Online in October 2026](https:
 #### Fixes
 
 - Fix the problem that `run_before_deployment.ps1` on Linux and macOS adds .js files from the `sample code` folder of the Outlook add-in to the `.well-known/microsoft-officeaddins-allowed.json` file due to non cross-platform compatible path comparison code.
-- Do not write log messages to taskpane elements before they exist.
+- Do not write log messages to task pane elements before they exist.
 - Decode UTF8 characters correcty when logging Graph token metadata.
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.26.1" target="_blank">v4.26.1</a> - 2026-03-17
@@ -344,7 +413,7 @@ _**[Microsoft starts turning off EWS for Exchange Online in October 2026](https:
 
 - Add support for sovereign clouds: Bleu (France), Delos (Germany), and GovSG (Singapore).
 - Add support for all future cloud environments via the '`$CustomCloudEnvironments`' parameters. This makes the Outlook add-in usable in any M365 cloud, even when the endpoints have not been published, which is not unusual when the environment is still in its soft-launch phase, for example. See the file '.\run_before_deployment.ps1' for an example.
-- Add the 'HTML as plain text' option to the signature 'Copy' button in the taskpane.
+- Add the 'HTML as plain text' option to the signature 'Copy' button in the task pane.
 
 #### Changes
 
@@ -380,7 +449,7 @@ _**Benefactor Circle add-on users with mailboxes in Exchange Online should updat
 #### Benefactor Circle add-on
 
 - Make the parameter '`DeleteScriptCreatedSignaturesWithoutTemplate`' remove old signatures which can only be leftovers of switching from '`DisableRoamingSignatures false`' to '`DisableRoamingSignatures true`', even when these leftovers have not been created by Set-OutlookSignatures.
-- Show a warning when a signature has more than 30,000 characters (excluding images) and will therefore probably not work in Outlook add-in launch events and the taskpane.
+- Show a warning when a signature has more than 30,000 characters (excluding images) and will therefore probably not work in Outlook add-in launch events and the task pane.
 - Add additional code to '`.\sample code\Create-EntraApp.ps1`' ensuring that default configuration parameters, package providers, and package repositories are available. Force the use of PowerShell Gallery when searching for required packages.
 
 #### Fixes
@@ -405,10 +474,10 @@ _**Benefactor Circle add-on users with mailboxes in Exchange Online should updat
 
 #### Additions
 
-- Show a warning in the taskpane of the Outlook add-in when the signature shown in the preview has more than 30,000 characters (excluding images) and will therefore probably not work in Outlook add-in launch events and the taskpane.
-- Add to the taskpane a "Copy to clipboard" button for the currently previewed signature. This makes it easy to copy a signature to another email client and to overcome the 30,000 character limit.
-- Add to the taskpane a "Copy to clipboard" button for the log output.
-- Add to the taskpane a "Reload add-in" button for iOS and a link to instructions how to clear the add-in cache on all platforms.
+- Show a warning in the task pane of the Outlook add-in when the signature shown in the preview has more than 30,000 characters (excluding images) and will therefore probably not work in Outlook add-in launch events and the task pane.
+- Add to the task pane a "Copy to clipboard" button for the currently previewed signature. This makes it easy to copy a signature to another email client and to overcome the 30,000 character limit.
+- Add to the task pane a "Copy to clipboard" button for the log output.
+- Add to the task pane a "Reload add-in" button for iOS and a link to instructions how to clear the add-in cache on all platforms.
 - Add to the online documentation instructions how to '[Clear the Outlook add-in cache](https://set-outlooksignatures.com/outlookaddin#clear-the-outlook-add-in-cache)'.
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.24.0" target="_blank">v4.24.0</a> - 2025-11-26
@@ -477,7 +546,7 @@ _**Benefactor Circle add-on users with mailboxes in Exchange Online should updat
 #### Changes
 
 - Update @azure/msal-browser to v4.25.1.
-- Reduce output of Outlook add-in taskpane when not being viewed in Outlook.
+- Reduce output of Outlook add-in task pane when not being viewed in Outlook.
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.22.0" target="_blank">v4.22.0</a> - 2025-09-05
 
@@ -530,7 +599,7 @@ _**Benefactor Circle add-on users with mailboxes in Exchange Online should updat
 #### Fixes
 
 - Make sure the Outlook add-in correctly reports '`customRulesProperties.itemIsNew`' and '`customRulesProperties.itemIsReplyForward`' on all platforms and for all item save and sync states when using custom rules code.
-- Make sure the Outlook add-in does not re-use '`customRulesPropertiesResult`' between runs, no matter if triggered manually via the taskpane or automatically via a launch event.
+- Make sure the Outlook add-in does not re-use '`customRulesPropertiesResult`' between runs, no matter if triggered manually via the task pane or automatically via a launch event.
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.21.0" target="_blank">v4.21.0</a> - 2025-08-15
 
@@ -711,7 +780,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 
 #### Fixes
 
-- Make sure that leading whitespace in signature lines is correctly represented in the email draft containing all signatures (parameter '`SignatureCollectionInDrafts`' and signature preview in the taskpane of the Outlook add-in).
+- Make sure that leading whitespace in signature lines is correctly represented in the email draft containing all signatures (parameter '`SignatureCollectionInDrafts`' and signature preview in the task pane of the Outlook add-in).
 
 ### Outlook add-in (part of the Benefactor Circle add-on)
 
@@ -739,7 +808,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 ### Added
 
 - Add Option '`CurrentUserOnly`' to parameter '`MirrorCloudSignatures`'. With this setting, only roaming signatures from the mailbox of the current user are downloaded, not from other mailboxes the user has full acccess to. This option does not have any effect on uploading roaming signatures.
-- Add support for the taskpane of the Outlook add-in to be shown in read mode for messages. This makes it easier to check if the add-in is deployed correctly, and if it can access signatures. This is especially useful on mobile devices, in situations where enabling the debug mode is not wanted, and for basic tests when launch events are not triggered by Outlook.
+- Add support for the task pane of the Outlook add-in to be shown in read mode for messages. This makes it easier to check if the add-in is deployed correctly, and if it can access signatures. This is especially useful on mobile devices, in situations where enabling the debug mode is not wanted, and for basic tests when launch events are not triggered by Outlook.
 - Add support for parameters to '`run_before_deployment.ps1`' of the Outlook add-in. This makes updates easier as you no longer have to modify the script itself, but can call it with parameters to set options specific for your environment.
 - Check for missing dependencies before using authentication broker authentication on Linux.
 - Add an option to '`.\sample code\Create-EntraApp.ps1`' that allows to create the Entra ID app required for the Outlook add-in that comes with the Benefactor Circle add-on.
@@ -773,7 +842,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 
 ### Fixed
 
-- Include line breaks when showing the signature preview for non-HTML signatures in the taskpane of the Outlook add-in.
+- Include line breaks when showing the signature preview for non-HTML signatures in the task pane of the Outlook add-in.
 - Do not detect the default console color, as this fails on many Linux terminals.
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.2" target="_blank">v4.18.2</a> - 2025-03-19
@@ -811,7 +880,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 
 - Fix handling of existing signature files in Classic Outlook for Windows when they are write protected or hidden.
 - Make the code deciding if a SharePoint Online element is a file or a folder work correctly even when the Graph API erronously returns the contentType in a non-English language.
-- Fix a race condition in the Outlook add-in that may lead to an empty signature list in the taskpane when legacy Exchange Online tokens have been disabled (see [here](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/faq-nested-app-auth-outlook-legacy-tokens) for details).
+- Fix a race condition in the Outlook add-in that may lead to an empty signature list in the task pane when legacy Exchange Online tokens have been disabled (see [here](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/faq-nested-app-auth-outlook-legacy-tokens) for details).
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.18.0" target="_blank">v4.18.0</a> - 2025-03-06
 
@@ -861,7 +930,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 
 ### Changed
 
-- Enable '`Ignore host and platform`' per default when using the taskpane of the Outlook add-in.
+- Enable '`Ignore host and platform`' per default when using the task pane of the Outlook add-in.
 - Update dependency MSAL.Net to v4.68.0.
 - Update Outlook add-in dependency @azure/msal-browser to v4.2.1.
 
@@ -872,7 +941,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 - Add virtual mailboxes and dynamically create signature and out-of-office INI lines through code
   - Add parameter '`VirtualMailboxConfigFile`'. Virtual mailboxes are mailboxes that are not available in Outlook but are treated by Set-OutlookSignatures as if they were. This is an option for scenarios where you want to deploy signatures and out-of-office replies with not only the '`$CurrentUser...$`' but also '`$CurrentMailbox...$`' replacement variables for mailboxes that have not been added to Outlook, such as in Send As or Send On Behalf scenarios, where users often only change the from address but do not add the mailbox to Outlook. See the [parameters documentation](https://set-outlooksignatures.com/parameters) for details about the new parameter and sample code. This feature requires a Benefactor Circle license. It is best used together with [Export-RecipientPermissions](https://github.com/Export-RecipientPermissions).
   - Add a way to dynamically define signature INI and out-of-office INI file entries via the '`VirtualMailboxConfigFile`' parameter. This enables multiple scenarios for advanced usage - for example you can automate INI file entries for delegate scenarios in combination with [Export-RecipientPermissions](https://github.com/Export-RecipientPermissions). See the [parameters documentation](https://set-outlooksignatures.com/parameters) for details about the new parameter and sample code.
-- Add a signature preview to the taskpane of the Outlook add-in.
+- Add a signature preview to the task pane of the Outlook add-in.
 - Add info to '`Authentication`' chapter in the [technical details documentation](https://set-outlooksignatures.com/details):
   - Integrated Windows Authentication only works for federated users in domains with an authentication type of "federated".
   - Description of 'Silent via Authentication Broker without login hint'.
@@ -924,8 +993,8 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
   - On Windows, not only Set-OutlookSignatures uses the default MSAL.Net/MSAL.PS cache file path. This is a good idea but most software handles the cache as if it was application specific, replacing all other tokens with their own instead of sharing them.
   - On Linux (and macOS), MSAL.Net does not rely on .Net to determine the path for LocalApplicationData but uses own logic, which leads to inconsistent results on different Linux distributions and does not always match XDG specifications.
   - On macOS, .Net 8 returns a different path for LocalApplicationData than earlier versions, requiring a change anyhow.
-- Simplify the taskpane user interface of the Outlook add-in
-  - Show only default actions when opening the taskpane: A big button to set the signature, and a dropdown list to override the automatically chosen signature with a manual selection.
+- Simplify the task pane user interface of the Outlook add-in
+  - Show only default actions when opening the task pane: A big button to set the signature, and a dropdown list to override the automatically chosen signature with a manual selection.
   - Show advanced options when scrolling down: Choosing a debug mode, an option to ignore host and platform, and a new textbox containing the log output of the add-in.
 - Format plain text signatures in the system's monospace font when the '`-SignatureCollectionInDrafts true`' parameter is used.
 - Speed up connecting to SharePoint Online paths by directly trying to access them via Graph when GraphClientID is available, instead of waiting for the Test-Path timeout.
@@ -984,7 +1053,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 
 ### Added
 
-- Allow to select signature in the taskpane of the Outlook add-in. This is like having roaming signatures on-prem.
+- Allow to select signature in the task pane of the Outlook add-in. This is like having roaming signatures on-prem.
 - Make data preparation for Outlook add-in compatible with on-prem mailboxes. This does not (yet) remove the limitation that the add-in only works with cloud mailboxes on Outlook for Android and Outlook for iOS.
 - Add Outlook add-in support for images in signatures in Outlook for the web on premises (will start working as soon as Microsoft fixes a bug in their office.js framework)
 - Connect to Graph if only one Benefactor Circle license group is defined and this license group is an Entra ID group, and show a warning when the Benefactor Circle license group for a mailbox is an Entra ID group but there is no connection to Graph.

@@ -1,3 +1,4 @@
 [submodule "subModules/OpenCageData/address-formatting"]
 	path = subModules/OpenCageData/address-formatting
 	url = https://github.com/OpenCageData/address-formatting
+	branch = master
