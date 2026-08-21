@@ -83,19 +83,17 @@ From dynamic branding to enterprise governance, our ecosystem delivers capabilit
   </tr>
 </table>
 
-## `Examples` from production environments
-
 <p><strong>Security-conscious and brand-aware organizations worldwide trust</strong> our solution — for <strong>Microsoft 365 Commercial</strong> as well as <strong>national and sovereign cloud environments</strong> like GCC, GCC High, DoD, China, Bleu, and Delos.</p>
 
 <table border="0">
   <tr>
     <td width="75%" valign="top">
       <a href="https://set-outlooksignatures.com">
-        <img src="https://set-outlooksignatures.com/assets/images/signature-banner.gif" alt="Signature Showcase Banner"/>
+        <img src="https://set-outlooksignatures.com/assets/images/customer-banner.gif" alt="Customer Showcase Banner"/>
       </a>
       <br /><br />
       <a href="https://set-outlooksignatures.com">
-        <img src="https://set-outlooksignatures.com/assets/images/customer-banner.gif" alt="Customer Showcase Banner"/>
+        <img src="https://set-outlooksignatures.com/assets/images/signature-banner.gif" alt="Signature Showcase Banner"/>
       </a>
     </td>
     <td width="15%" align="center" valign="top">
