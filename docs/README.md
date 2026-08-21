@@ -61,7 +61,7 @@ By leveraging Microsoft Roaming Signatures and our own direct-to-mailbox technol
   </a>
 </p>
 
-## The **power** of the ecosystem
+## The `power` of the ecosystem
 
 From dynamic branding to enterprise governance, our ecosystem delivers capabilities that conventional cloud relay solutions simply cannot match. Connect any data source, apply unlimited business logic, and synchronize natively across Outlook platforms without rerouting email or exposing data externally.
 
@@ -83,9 +83,30 @@ From dynamic branding to enterprise governance, our ecosystem delivers capabilit
   </tr>
 </table>
 
-**Security-conscious and brand-aware organizations worldwide trust** our solution — for **Microsoft 365 Commercial** as well as **national and sovereign cloud environments** like GCC, GCC High, DoD, China, Bleu, and Delos.
+## `Examples` from production environments
 
-## See it **in action**
+<p><strong>Security-conscious and brand-aware organizations worldwide trust</strong> our solution — for <strong>Microsoft 365 Commercial</strong> as well as <strong>national and sovereign cloud environments</strong> like GCC, GCC High, DoD, China, Bleu, and Delos.</p>
+
+<table border="0">
+  <tr>
+    <td width="75%" valign="top">
+      <a href="https://set-outlooksignatures.com">
+        <img src="https://set-outlooksignatures.com/assets/images/signature-banner.gif" alt="Signature Showcase Banner"/>
+      </a>
+      <br /><br />
+      <a href="https://set-outlooksignatures.com">
+        <img src="https://set-outlooksignatures.com/assets/images/customer-banner.gif" alt="Customer Showcase Banner"/>
+      </a>
+    </td>
+    <td width="15%" align="center" valign="top">
+      <a href="https://set-outlooksignatures.com">
+        <img src="https://set-outlooksignatures.com/assets/gif/outlookaddin%20usage/outlookaddin%20usage.gif" alt="Outlook Add-in Usage Demo"/>
+      </a>
+    </td>
+  </tr>
+</table>
+
+## See it `in Action`
 
 Organizations use our ecosystem to enforce **dynamic branding, administrative governance, and cross-platform data sovereignty** — all without changing how users work.
 
