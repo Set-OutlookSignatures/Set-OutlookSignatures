@@ -97,7 +97,7 @@ From dynamic branding to enterprise governance, our ecosystem delivers capabilit
       </a>
     </td>
     <td width="15%" align="center" valign="top">
-      <a href="https://set-outlooksignatures.com">
+      <a href="https://set-outlooksignatures.com/outlookaddin">
         <img src="https://set-outlooksignatures.com/assets/gif/outlookaddin%20usage/outlookaddin%20usage.gif" alt="Outlook Add-in Usage Demo"/>
       </a>
     </td>
