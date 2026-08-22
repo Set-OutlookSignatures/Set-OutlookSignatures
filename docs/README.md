@@ -1,4 +1,4 @@
-<h1 align="center">Data Sovereign Email&nbsp;Signatures and Out&#8209;of&#8209;Office&nbsp;Replies</h1>
+<h1 align="center">Data Sovereign Email Signatures and Out-of-Office Replies</h1>
 
 <h2 align="center">Unified Outlook branding everywhere – with zero external data exposure</h2>
 
@@ -89,11 +89,11 @@ From dynamic branding to enterprise governance, our ecosystem delivers capabilit
   <tr>
     <td width="75%" valign="top">
       <a href="https://set-outlooksignatures.com">
-        <img src="https://set-outlooksignatures.com/assets/images/customer-banner.gif" alt="Customer Showcase Banner"/>
+        <img src="https://set-outlooksignatures.com/assets/images/signature-banner.gif" alt="Signature Showcase Banner"/>
       </a>
       <br /><br />
       <a href="https://set-outlooksignatures.com">
-        <img src="https://set-outlooksignatures.com/assets/images/signature-banner.gif" alt="Signature Showcase Banner"/>
+        <img src="https://set-outlooksignatures.com/assets/images/customer-banner.gif" alt="Customer Showcase Banner"/>
       </a>
     </td>
     <td width="15%" align="center" valign="top">
