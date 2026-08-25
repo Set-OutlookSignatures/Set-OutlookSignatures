@@ -88,11 +88,11 @@ From dynamic branding to enterprise governance, our ecosystem delivers capabilit
 <table border="0">
   <tr>
     <td width="75%" valign="top">
-      <a href="https://set-outlooksignatures.com">
+      <a href="https://set-outlooksignatures.com/quickstart">
         <img src="https://set-outlooksignatures.com/assets/images/signature-banner.gif" alt="Signature Showcase Banner"/>
       </a>
       <br /><br />
-      <a href="https://set-outlooksignatures.com">
+      <a href="https://set-outlooksignatures.com/quickstart">
         <img src="https://set-outlooksignatures.com/assets/images/customer-banner.gif" alt="Customer Showcase Banner"/>
       </a>
     </td>
