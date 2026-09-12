@@ -22,23 +22,25 @@
   <br><br>
 </p>
 
-With the free and open-source Set-OutlookSignatures and the [Benefactor Circle add-on](https://set-outlooksignatures.com/benefactorcircle), you **turn email signatures and out-of-office replies into a centrally managed business asset — without external data transfer.**
-
-By leveraging Microsoft Roaming Signatures and our own direct-to-mailbox technology, we provide the world's only sovereign, native-sync experience that works across all Outlook editions and platforms — **Windows, Mac, iOS, Android, Web, Classic and New Outlook, cloud and on-prem in perfect harmony.**
+## `Put an end` to manually managing signatures and out-of-office replies
+<p>Every signature and every away message represents your brand, supports ongoing campaigns, and ensures compliance with legal requirements.</p>
+<p>Manual maintenance ties up resources, slows down updates, and increases the risk of errors and inconsistencies.</p>
+<p>With Set-OutlookSignatures, <strong>IT</strong> handles the initial setup and <strong>Marketing</strong> manages the templates themselves. <strong>Staff</strong> don’t have to worry about a thing, and corporate data stays within systems that <strong>Security</strong> already trusts.</p>
+<p>The <strong>free, open-source core</strong> and the <a href="https://set-outlooksignatures.com/benefactorcircle"><span style="font-weight: bold; color: var(--benefactor-circle-color);">Benefactor Circle add-on</span></a> keep signatures and out-of-office replies always up to date at all times – <strong>from a central source across all Outlook editions and platforms</strong>: Windows, Mac, iOS, Android, Web, Classic Outlook, and New Outlook.</p>
 
 <table>
   <tr>
+    <td valign="top" width="33%">
+      🛠️ <b>IT: Full Automation</b><br>
+      Centralized and decentralized architectures: Combine as required.<br><br>
+      Native synchronization for Exchange Online, Hybrid, and On-Premises.<br><br>
+      Supports commercial, national, sovereign, and local Microsoft 365 clouds.
+    </td>
     <td valign="top" width="33%">
       📣 <b>Marketing: Design Autonomy</b><br>
       Design in Word, save, done.<br><br>
       Use familiar placeholders and logic to drive consistent branding without waiting for IT tickets.<br><br>
       Test-drive using simulation mode.
-    </td>
-    <td valign="top" width="33%">
-      🛠️ <b>IT: Full Automation</b><br>
-      Centralized and decentralized architectures: Combine as required.<br><br>
-      Native synchronization for Exchange Online, Hybrid, and On-Premises.<br><br>
-      Supports commercial, national, and sovereign Microsoft 365 clouds.
     </td>
     <td valign="top" width="33%">
       🛡️ <b>Security: Total Sovereignty</b><br>
@@ -61,7 +63,7 @@ By leveraging Microsoft Roaming Signatures and our own direct-to-mailbox technol
   </a>
 </p>
 
-## The `power` of the ecosystem
+## The `strengths` of the ecosystem
 
 From dynamic branding to enterprise governance, our ecosystem delivers capabilities that conventional cloud relay solutions simply cannot match. Connect any data source, apply unlimited business logic, and synchronize natively across Outlook platforms without rerouting email or exposing data externally.
 
