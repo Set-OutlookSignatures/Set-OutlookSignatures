@@ -22,7 +22,7 @@
   <br><br>
 </p>
 
-## `Put an end` to manually managing signatures and out-of-office replies
+## `Put an End` to Manually Managing Signatures and Out-of-Office Replies
 <p>Every signature and every away message represents your brand, supports ongoing campaigns, and ensures compliance with legal requirements.</p>
 <p>Manual maintenance ties up resources, slows down updates, and increases the risk of errors and inconsistencies.</p>
 <p>With Set-OutlookSignatures, <strong>IT</strong> handles the initial setup and <strong>Marketing</strong> manages the templates themselves. <strong>Staff</strong> don’t have to worry about a thing, and corporate data stays within systems that <strong>Security</strong> already trusts.</p>
@@ -63,7 +63,7 @@
   </a>
 </p>
 
-## The `strengths` of the ecosystem
+## The `Strengths` of the Ecosystem
 
 From dynamic branding to enterprise governance, our ecosystem delivers capabilities that conventional cloud relay solutions simply cannot match. Connect any data source, apply unlimited business logic, and synchronize natively across Outlook platforms without rerouting email or exposing data externally.
 
