@@ -135,7 +135,7 @@ From dynamic branding to governance, our ecosystem delivers capabilities that co
 <p align="center">
   <br>
   <a
-    href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Features-What%20Our%20Solution%20Does-blue?labelColor=black" alt="Features: What Our Solution Does">
+    href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Features-What%20Our%20Solution%20Does-blue?labelColor=black" alt="Features: What Our Solution Delivers">
   </a>
   <a
     href="https://set-outlooksignatures.com/features#feature-comparison" target="_blank"><img src="https://img.shields.io/badge/Feature%20Comparison-with%20Competitors-blue?labelColor=black" alt="Feature Comparison with Competitors">
