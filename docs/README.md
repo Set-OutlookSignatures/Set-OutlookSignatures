@@ -1,6 +1,6 @@
-<h1 align="center">Data Sovereign Email Signatures and Out-of-Office Replies</h1>
+<h1 align="center">Data-Sovereign Email Signatures and Out-of-Office Replies</h1>
 
-<h2 align="center">Unified Outlook branding everywhere – with zero external data exposure</h2>
+<h2 align="center">Your branding across every Outlook platform, with zero external data exposure</h2>
 
 <p align="center">
   <code>Peer-Reviewable Core</code> &nbsp; <code>Agentless Sync</code> &nbsp; <code>No Mail Rerouting</code> &nbsp; <code>Sovereign Cloud Ready</code>
@@ -23,10 +23,29 @@
 </p>
 
 ## `Put an End` to Manually Managing Signatures and Out-of-Office Replies
-<p>Every signature and every away message represents your brand, supports ongoing campaigns, and ensures compliance with legal requirements.</p>
-<p>Manual maintenance ties up resources, slows down updates, and increases the risk of errors and inconsistencies.</p>
-<p>With Set-OutlookSignatures, <strong>IT</strong> handles the initial setup and <strong>Marketing</strong> manages the templates themselves. <strong>Staff</strong> don’t have to worry about a thing, and corporate data stays within systems that <strong>Security</strong> already trusts.</p>
-<p>The <strong>free, open-source core</strong> and the <a href="https://set-outlooksignatures.com/benefactorcircle"><span style="font-weight: bold; color: var(--benefactor-circle-color);">Benefactor Circle add-on</span></a> keep signatures and out-of-office replies always up to date at all times – <strong>from a central source across all Outlook editions and platforms</strong>: Windows, Mac, iOS, Android, Web, Classic Outlook, and New Outlook.</p>
+<p>Every signature and every away message represents your brand, supports ongoing campaigns, and helps meet legal and organizational requirements. Manual maintenance ties up resources, delays updates, and increases the risk of errors and inconsistencies.</p>
+<p>Many provider-hosted signature management solutions regularly copy Entra ID or Active Directory data to the provider’s infrastructure and reroute or process email there, including internal messages. This requires broad permissions and adds cost, complexity, dependencies, and data exposure.</p>
+<p>The free and open-source <strong>Set-OutlookSignatures is different by design.</strong> It is built around data protection, digital sovereignty, and effective signature management rather than another cloud dependency. Your data is processed only within your existing, trusted environments, with <strong>no phone home, no telemetry, no mail rerouting, and no additional infrastructure required.</strong></p>
+
+<p><strong>IT</strong> performs the initial setup and retains control of template management or delegates template management to another team, such as <strong>Marketing</strong>. Either way, <strong>staff</strong> receive current, centrally governed signatures without having to manage them themselves.</p>
+
+<p>For organizations needing cross-platform deployment and advanced centralized management, the commercial <a href="https://set-outlooksignatures.com/benefactorcircle"><span style="font-weight: bold; color: var(--benefactor-circle-color);">Benefactor Circle add-on</span></a> extends Set-OutlookSignatures across Classic and New Outlook on Windows, Mac, iOS, Android, and the web. It adds out-of-office management, time-based campaigns, shared mailbox support, and other <a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">advanced features</a>.</p>
+
+<p><strong>This expanded functionality does not compromise the sovereignty-first design: no external mail processing, no telemetry, and no additional cloud dependency.</strong> Licensed annually, without a subscription or automatic renewal, the add-on offers <a href="https://set-outlooksignatures.com/features" target="_blank">capabilities</a> conventional provider-hosted solutions cannot readily match, at a <a href="https://set-outlooksignatures.com/benefactorcircle#price" target="_blank">lower cost</a> than traditional signature management platforms.</p>
+
+<table>
+  <tr>
+    <td valign="top" width="50%" align="center">
+      <a href="https://set-outlooksignatures.com/quickstart"><img src="https://img.shields.io/badge/3--Step%20Quickstart-4169E1?style=for-the-badge" alt="3-Step Quickstart"></a><br>
+      <small>For IT Administrators and Technical Evaluation. No Signup Required.</small>
+    </td>
+    <td valign="top" width="50%" align="center">
+      <a href="https://set-outlooksignatures.com/scheduledemo"><img src="https://img.shields.io/badge/Book%20an%20Interactive%20Demo-DAA520?style=for-the-badge" alt="Book an Interactive Demo"></a><br>
+      <small>For Executives and Decision-Makers from IT, Marketing, and Security.</small>
+    </td>
+  </tr>
+</table>
+
 
 <table>
   <tr>
@@ -34,7 +53,7 @@
       🛠️ <b>IT: Full Automation</b><br>
       Centralized and decentralized architectures: Combine as required.<br><br>
       Native synchronization for Exchange Online, Hybrid, and On-Premises.<br><br>
-      Supports commercial, national, sovereign, and local Microsoft 365 clouds.
+      Supports public, national, sovereign, and local Microsoft 365 clouds.
     </td>
     <td valign="top" width="33%">
       📣 <b>Marketing: Design Autonomy</b><br>
@@ -65,13 +84,13 @@
 
 ## The `Strengths` of the Ecosystem
 
-From dynamic branding to enterprise governance, our ecosystem delivers capabilities that conventional cloud relay solutions simply cannot match. Connect any data source, apply unlimited business logic, and synchronize natively across Outlook platforms without rerouting email or exposing data externally.
+From dynamic branding to governance, our ecosystem delivers capabilities that conventional provider-hosted solutions simply cannot match. Connect any data source, apply unlimited business logic, and synchronize natively across Outlook platforms without rerouting email or exposing data externally.
 
 <table>
   <tr>
     <td valign="top" width="33%">✨ <b>Frictionless Adoption</b><br>Invisible to end users, seamless background sync. Intuitive for Marketing and IT.</td>
     <td valign="top" width="33%">🧬 <b>Dynamic Content</b><br>Time-based campaigns, collapse empty lines, rule-based banners.</td>
-    <td valign="top" width="33%">🔍 <b>Simulation Mode</b><br>Dry-run your deployment logic centrally or locally before going live.</td>
+    <td valign="top" width="33%">🔍 <b>Simulation Mode</b><br>Dry-run your deployment logic before going live.</td>
   </tr>
   <tr>
     <td valign="top" width="33%">🏝️ <b>Out-Of-Office Replies</b><br>Manage and distribute OOF messages consistently and centrally from one location.</td>
@@ -80,12 +99,12 @@ From dynamic branding to enterprise governance, our ecosystem delivers capabilit
   </tr>
   <tr>
     <td valign="top" width="33%">🧩 <b>Native Integration</b><br>Direct-to-mailbox synchronization, no mail flow changes required.</td>
-    <td valign="top" width="33%">🔒 <b>Sovereign by Design</b><br>No subscription, no auto-renewal, no external data transfer.</td>
-    <td valign="top" width="33%">🚀 <b>Marketing Impact</b><br>Design in Word, test-drive from your desk, deploy brand-safe campaigns globally.</td>
+    <td valign="top" width="33%">🔒 <b>Sovereign by Design</b><br>No external data transfer, no phone home, no telemetry.</td>
+    <td valign="top" width="33%">🚀 <b>Marketing Impact</b><br>Design in Word, test-drive from your desk, deploy brand-safe campaigns company-wide.</td>
   </tr>
 </table>
 
-<p><strong>Security-conscious and brand-aware organizations worldwide trust</strong> our solution — for <strong>Microsoft 365 Commercial</strong> as well as <strong>national and sovereign cloud environments</strong> like GCC, GCC High, DoD, China, Bleu, and Delos.</p>
+<p><strong>Security-conscious and brand-aware organizations worldwide trust</strong> our solution, in <strong>Microsoft 365 public</strong> as well as in <strong>national, sovereign and local cloud environments</strong> such as GCC, GCC High, DoD, China, Bleu, and Delos.</p>
 
 <table border="0">
   <tr>
@@ -108,7 +127,7 @@ From dynamic branding to enterprise governance, our ecosystem delivers capabilit
 
 ## See it `in Action`
 
-Organizations use our ecosystem to enforce **dynamic branding, administrative governance, and cross-platform data sovereignty** — all without changing how users work.
+Organizations use our ecosystem to enforce **dynamic branding, administrative governance, and cross-platform data sovereignty**, all without changing the way users work.
 
 <table>
   <tr>
@@ -123,14 +142,13 @@ Organizations use our ecosystem to enforce **dynamic branding, administrative go
   </tr>
   <tr>
     <td valign="top" width="50%">
-      <a href="https://set-outlooksignatures.com/quickstart"><img src="https://img.shields.io/badge/Try%20It%20Yourself-4169E1?style=for-the-badge" alt="Try It Yourself"></a><br>
-      <small>Ideal for IT Administrators and Evaluators. No Signup Required.</small>
+      <a href="https://set-outlooksignatures.com/quickstart"><img src="https://img.shields.io/badge/3--Step%20Quickstart-4169E1?style=for-the-badge" alt="3-Step Quickstart"></a><br>
+      <small>For IT Administrators and Technical Evaluation. No Signup Required.</small>
     </td>
     <td valign="top" width="50%">
-      <a href="https://set-outlooksignatures.com/scheduledemo"><img src="https://img.shields.io/badge/Schedule%20Interactive%20Demo-DAA520?style=for-the-badge" alt="Schedule Interactive Demo"></a><br>
-      <small>Ideal for Executives and Decision-Makers from Security, IT, and Marketing.</small>
+      <a href="https://set-outlooksignatures.com/scheduledemo"><img src="https://img.shields.io/badge/Book%20an%20Interactive%20Demo-DAA520?style=for-the-badge" alt="Book an Interactive Demo"></a><br>
+      <small>For Executives and Decision-Makers from IT, Marketing, and Security.</small>
     </td>
-
   </tr>
 </table>
 
