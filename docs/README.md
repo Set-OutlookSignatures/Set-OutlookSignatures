@@ -23,15 +23,33 @@
 </p>
 
 ## `Put an End` to Manually Managing Signatures and Out-of-Office Replies
-<p>Every signature and every away message represents your brand, supports ongoing campaigns, and helps meet legal and organizational requirements. Manual maintenance ties up resources, delays updates, and increases the risk of errors and inconsistencies.</p>
-<p>Many provider-hosted signature management solutions regularly copy Entra ID or Active Directory data to the provider’s infrastructure and reroute or process email there, including internal messages. This requires broad permissions and adds cost, complexity, dependencies, and data exposure.</p>
-<p>The free and open-source <strong>Set-OutlookSignatures is different by design.</strong> It is built around data protection, digital sovereignty, and effective signature management rather than another cloud dependency. Your data is processed only within your existing, trusted environments, with <strong>no phone home, no telemetry, no mail rerouting, and no additional infrastructure required.</strong></p>
 
-<p><strong>IT</strong> performs the initial setup and retains control of template management or delegates template management to another team, such as <strong>Marketing</strong>. Either way, <strong>staff</strong> receive current, centrally governed signatures without having to manage them themselves.</p>
+Every signature and out-of-office reply represents your organization. Keeping them accurate, consistent, and up to date should not depend on individual users or recurring IT effort.
 
-<p>For organizations needing cross-platform deployment and advanced centralized management, the commercial <a href="https://set-outlooksignatures.com/benefactorcircle"><span style="font-weight: bold; color: var(--benefactor-circle-color);">Benefactor Circle add-on</span></a> extends Set-OutlookSignatures across Classic and New Outlook on Windows, Mac, iOS, Android, and the web. It adds out-of-office management, time-based campaigns, shared mailbox support, and other <a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">advanced features</a>.</p>
+Set-OutlookSignatures centralizes and automates this work without routing email through another third-party infrastructure or synchronizing directory data to an external provider. Templates, rules, and user data remain within the environments you already trust and control.
 
-<p><strong>This expanded functionality does not compromise the sovereignty-first design: no external mail processing, no telemetry, and no additional cloud dependency.</strong> Licensed annually, without a subscription or automatic renewal, the add-on offers <a href="https://set-outlooksignatures.com/features" target="_blank">capabilities</a> conventional provider-hosted solutions cannot readily match, at a <a href="https://set-outlooksignatures.com/benefactorcircle#price" target="_blank">lower cost</a> than traditional signature management platforms.</p>
+<table>
+  <tr>
+    <td valign="top" width="50%">
+      ⚡ <b>Set-OutlookSignatures</b><br>
+      Covers: Classic Outlook for Windows, simulation mode<br><br>
+      Centralized signature management<br><br>
+      Supports Exchange on-premises, hybrid, and all M365 clouds<br><br>
+      Free and open-source
+    </td>
+    <td valign="top" width="50%">
+      ⭐ <b><a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">Benefactor Circle add-on</a></b><br>
+      Outlook coverage: New Outlook, Mac, iOS, Android, Web<br><br>
+      Commercial extension to the free, open-source core<br><br>
+      Centralized out-of-office reply management<br><br>
+      Time-based campaigns, shared mailboxes, delegate support, SimulateAndDeploy, and more
+    </td>
+  </tr>
+</table>
+
+🔒 <b>Sovereign by Design:</b> Both Set-OutlookSignatures and the <a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">Benefactor Circle add-on</a> operate entirely within your existing, trusted environment. No external data processing, no phone-home communication, no telemetry, and no email rerouting.
+
+<p>&nbsp;</p>
 
 <table>
   <tr>
@@ -46,6 +64,7 @@
   </tr>
 </table>
 
+<p>&nbsp;</p>
 
 <table>
   <tr>
@@ -69,18 +88,27 @@
     </td>
   </tr>
 </table>
-<p align="center">
-  <br>
-  <a
-    href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Features-What%20Our%20Solution%20Does-blue?labelColor=black" alt="Features: What Our Solution Does">
-  </a>
-  <a
-    href="https://set-outlooksignatures.com/features#feature-comparison" target="_blank"><img src="https://img.shields.io/badge/Feature%20Comparison-with%20Competitors-blue?labelColor=black" alt="Feature Comparison with Competitors">
-  </a>
-  <a
-    href="#see-it-in-action" target="_blank"><img src="https://img.shields.io/badge/See%20it-in%20Action-DAA520?labelColor=black" alt="See it in Action">
-  </a>
-</p>
+
+<p><strong>Security-conscious and brand-aware organizations worldwide trust</strong> our solution, in <strong>Microsoft 365 public</strong> as well as in <strong>national, sovereign and local cloud environments</strong> such as GCC, GCC High, DoD, China, Bleu, and Delos.</p>
+
+<table border="0">
+  <tr>
+    <td width="75%" valign="top">
+      <a href="https://set-outlooksignatures.com/quickstart">
+        <img src="https://set-outlooksignatures.com/assets/images/signature-banner.gif" alt="Signature Showcase Banner"/>
+      </a>
+      <br /><br />
+      <a href="https://set-outlooksignatures.com/quickstart">
+        <img src="https://set-outlooksignatures.com/assets/images/customer-banner.gif" alt="Customer Showcase Banner"/>
+      </a>
+    </td>
+    <td width="15%" align="center" valign="top">
+      <a href="https://set-outlooksignatures.com/outlookaddin">
+        <img src="https://set-outlooksignatures.com/assets/gif/outlookaddin%20usage/outlookaddin%20usage.gif" alt="Outlook Add-in Usage Demo"/>
+      </a>
+    </td>
+  </tr>
+</table>
 
 ## The `Strengths` of the Ecosystem
 
@@ -104,26 +132,15 @@ From dynamic branding to governance, our ecosystem delivers capabilities that co
   </tr>
 </table>
 
-<p><strong>Security-conscious and brand-aware organizations worldwide trust</strong> our solution, in <strong>Microsoft 365 public</strong> as well as in <strong>national, sovereign and local cloud environments</strong> such as GCC, GCC High, DoD, China, Bleu, and Delos.</p>
-
-<table border="0">
-  <tr>
-    <td width="75%" valign="top">
-      <a href="https://set-outlooksignatures.com/quickstart">
-        <img src="https://set-outlooksignatures.com/assets/images/signature-banner.gif" alt="Signature Showcase Banner"/>
-      </a>
-      <br /><br />
-      <a href="https://set-outlooksignatures.com/quickstart">
-        <img src="https://set-outlooksignatures.com/assets/images/customer-banner.gif" alt="Customer Showcase Banner"/>
-      </a>
-    </td>
-    <td width="15%" align="center" valign="top">
-      <a href="https://set-outlooksignatures.com/outlookaddin">
-        <img src="https://set-outlooksignatures.com/assets/gif/outlookaddin%20usage/outlookaddin%20usage.gif" alt="Outlook Add-in Usage Demo"/>
-      </a>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <br>
+  <a
+    href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Features-What%20Our%20Solution%20Does-blue?labelColor=black" alt="Features: What Our Solution Does">
+  </a>
+  <a
+    href="https://set-outlooksignatures.com/features#feature-comparison" target="_blank"><img src="https://img.shields.io/badge/Feature%20Comparison-with%20Competitors-blue?labelColor=black" alt="Feature Comparison with Competitors">
+  </a>
+</p>
 
 ## See it `in Action`
 
