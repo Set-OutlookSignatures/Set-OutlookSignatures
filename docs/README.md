@@ -35,7 +35,7 @@ Set-OutlookSignatures centralizes and automates this work without routing email 
       <ul>
         <li>Covers: Classic Outlook for Windows, simulation mode</li>
         <li>Centralized signature management</li>
-        <li>Supports Exchange on-premises, hybrid, and all M365 clouds</li>
+        <li>Supports Exchange on-premises, hybrid, and all Microsoft 365 clouds</li>
         <li>Free and open-source</li>
       </ul>
     </td>
@@ -90,7 +90,7 @@ Set-OutlookSignatures centralizes and automates this work without routing email 
   </tr>
 </table>
 
-<p><strong>Security-conscious and brand-aware organizations worldwide trust</strong> our solution, in <strong>Microsoft 365 public</strong> as well as in <strong>national, sovereign and local cloud environments</strong> such as GCC, GCC High, DoD, China, Bleu, and Delos.</p>
+<p><strong>Security-conscious and brand-aware organizations worldwide trust</strong> our solution, in <strong>public as well as in national, sovereign and local Microsoft 365 clouds</strong> such as GCC, GCC High, DoD, China, Bleu, and Delos.</p>
 
 <table border="0">
   <tr>
