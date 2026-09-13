@@ -31,18 +31,22 @@ Set-OutlookSignatures centralizes and automates this work without routing email 
 <table>
   <tr>
     <td valign="top" width="50%">
-      ⚡ <b>Set-OutlookSignatures</b><br>
-      Covers: Classic Outlook for Windows, simulation mode<br><br>
-      Centralized signature management<br><br>
-      Supports Exchange on-premises, hybrid, and all M365 clouds<br><br>
-      Free and open-source
+      ⚡ <b>Set-OutlookSignatures</b>
+      <ul>
+        <li>Covers: Classic Outlook for Windows, simulation mode</li>
+        <li>Centralized signature management</li>
+        <li>Supports Exchange on-premises, hybrid, and all M365 clouds</li>
+        <li>Free and open-source</li>
+      </ul>
     </td>
     <td valign="top" width="50%">
-      ⭐ <b><a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">Benefactor Circle add-on</a></b><br>
-      Outlook coverage: New Outlook, Mac, iOS, Android, Web<br><br>
-      Commercial extension to the free, open-source core<br><br>
-      Centralized out-of-office reply management<br><br>
-      Time-based campaigns, shared mailboxes, delegate support, SimulateAndDeploy, and more
+      ⭐ <b><a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">Benefactor Circle add-on</a></b>
+      <ul>
+        <li>Outlook coverage: New Outlook, Mac, iOS, Android, Web</li>
+        <li>Centralized out-of-office reply management</li>
+        <li>Time-based campaigns, shared mailboxes, delegate support, SimulateAndDeploy, and more</li>
+        <li>Commercial extension to the free, open-source core</li>
+      </ul>
     </td>
   </tr>
 </table>
@@ -51,40 +55,37 @@ Set-OutlookSignatures centralizes and automates this work without routing email 
 
 <p>&nbsp;</p>
 
-<table>
-  <tr>
-    <td valign="top" width="50%" align="center">
-      <a href="https://set-outlooksignatures.com/quickstart"><img src="https://img.shields.io/badge/3--Step%20Quickstart-4169E1?style=for-the-badge" alt="3-Step Quickstart"></a><br>
-      <small>For IT Administrators and Technical Evaluation. No Signup Required.</small>
-    </td>
-    <td valign="top" width="50%" align="center">
-      <a href="https://set-outlooksignatures.com/scheduledemo"><img src="https://img.shields.io/badge/Book%20an%20Interactive%20Demo-DAA520?style=for-the-badge" alt="Book an Interactive Demo"></a><br>
-      <small>For Executives and Decision-Makers from IT, Marketing, and Security.</small>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <a href="https://set-outlooksignatures.com/quickstart"><img src="https://img.shields.io/badge/3--Step%20Quickstart-4169E1?style=for-the-badge" alt="3-Step Quickstart"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://set-outlooksignatures.com/scheduledemo"><img src="https://img.shields.io/badge/Book%20an%20Interactive%20Demo-DAA520?style=for-the-badge" alt="Book an Interactive Demo"></a><br>
+</p>
 
 <p>&nbsp;</p>
 
 <table>
   <tr>
     <td valign="top" width="33%">
-      🛠️ <b>IT: Full Automation</b><br>
-      Centralized and decentralized architectures: Combine as required.<br><br>
-      Native synchronization for Exchange Online, Hybrid, and On-Premises.<br><br>
-      Supports public, national, sovereign, and local Microsoft 365 clouds.
+      🛠️ <b>IT: Full Automation</b>
+      <ul>
+        <li>Centralized and decentralized architectures: Combine as required.</li>
+        <li>Native synchronization for Exchange Online, Hybrid, and On-Premises.</li>
+        <li>Supports public, national, sovereign, and local Microsoft 365 clouds.</li>
+      </ul>
     </td>
     <td valign="top" width="33%">
-      📣 <b>Marketing: Design Autonomy</b><br>
-      Design in Word, save, done.<br><br>
-      Use familiar placeholders and logic to drive consistent branding without waiting for IT tickets.<br><br>
-      Test-drive using simulation mode.
+      📣 <b>Marketing: Design Autonomy</b>
+      <ul>
+        <li>Design in Word, save, done.</li>
+        <li>Use familiar placeholders and logic to drive </li>consistent branding without waiting for IT tickets.</li>
+        <li>Test-drive using simulation mode.</li>
+      </ul>
     </td>
     <td valign="top" width="33%">
-      🛡️ <b>Security: Total Sovereignty</b><br>
-      Zero external data processing or mail rerouting.<br><br>
-      Runs within environments you already trust and govern.<br><br>
-      Open-source, peer-reviewable, and audit-ready core.
+      🛡️ <b>Security: Total Sovereignty</b>
+      <ul>
+        <li>Zero external data processing or mail rerouting.</li>
+        <li>Runs within environments you already trust and govern.</li>
+        <li>Open-source, peer-reviewable, and audit-ready core.</li>
+      </ul>
     </td>
   </tr>
 </table>
@@ -135,7 +136,7 @@ From dynamic branding to governance, our ecosystem delivers capabilities that co
 <p align="center">
   <br>
   <a
-    href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Features-What%20Our%20Solution%20Does-blue?labelColor=black" alt="Features: What Our Solution Delivers">
+    href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Features-What%20Our%20Solution%20Achieves-blue?labelColor=black" alt="Features: What Our Solution Achieves">
   </a>
   <a
     href="https://set-outlooksignatures.com/features#feature-comparison" target="_blank"><img src="https://img.shields.io/badge/Feature%20Comparison-with%20Competitors-blue?labelColor=black" alt="Feature Comparison with Competitors">
