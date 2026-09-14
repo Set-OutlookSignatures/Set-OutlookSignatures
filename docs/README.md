@@ -22,76 +22,40 @@
   <br><br>
 </p>
 
+
 ## `Put an End` to Manually Managing Signatures and Out-of-Office Replies
 
-Every signature and out-of-office reply represents your organization. Keeping them accurate, consistent, and up to date should not depend on individual users or recurring IT effort.
-
-Set-OutlookSignatures centralizes and automates this work without routing email through another third-party infrastructure or synchronizing directory data to an external provider. Templates, rules, and user data remain within the environments you already trust and control.
-
+<p>Every signature and out-of-office reply represents your organization. Keeping them accurate, consistent, and up to date should not depend on individual users or recurring IT effort.</p>
+<p><strong>Set-OutlookSignatures centralizes and automates signature management.</strong> IT performs the initial setup and retains control of template management or delegates template management to another team, such as Marketing. <strong>Staff automatically receive current, centrally governed signatures without having to manage them individually.</strong></p>
+<p>Sovereign by design, the solution achieves this without synchronizing directory data with an external provider, rerouting emails, phoning home, collecting telemetry, or requiring new infrastructure. <strong>This architecture enables capabilities that other solutions cannot readily offer.</strong></p>
 <table>
   <tr>
     <td valign="top" width="50%">
-      ⚡ <b>Set-OutlookSignatures</b>
+      ⚡ <b>Set-OutlookSignatures</b><br>
+      Free and open-source
       <ul>
-        <li>Covers: Classic Outlook for Windows, simulation mode</li>
         <li>Centralized signature management</li>
-        <li>Supports Exchange on-premises, hybrid, and all Microsoft 365 clouds</li>
-        <li>Free and open-source</li>
+        <li>Classic Outlook for Windows and simulation mode</li>
+        <li>Exchange on-premises, hybrid, and all Microsoft 365 clouds</li>
       </ul>
     </td>
     <td valign="top" width="50%">
-      ⭐ <b><a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">Benefactor Circle add-on</a></b>
+      ⭐ <b><a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">Benefactor Circle add-on</a></b><br>
+      Commercial extension preserving the core’s sovereign architecture
       <ul>
-        <li>Outlook coverage: New Outlook, Mac, iOS, Android, Web</li>
+        <li>All Outlook editions and platforms: Classic and New, Mac, iOS, Android, Web</li>
         <li>Centralized out-of-office reply management</li>
-        <li>Time-based campaigns, shared mailboxes, delegate support, SimulateAndDeploy, and more</li>
-        <li>Commercial extension to the free, open-source core</li>
-      </ul>
+        <li>Time-based campaigns, shared mailboxes, delegate support, SimulateAndDeploy, and <a href="https://set-outlooksignatures.com/features" target="_blank">more advanced features</a></li>
+        <li><strong><a href="https://set-outlooksignatures.com/benefactorcircle#financial-benefits" target="_blank">See how quickly the add-on pays for itself</a></strong></li>      </ul>
     </td>
   </tr>
 </table>
-
-🔒 <b>Sovereign by Design:</b> Both Set-OutlookSignatures and the <a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">Benefactor Circle add-on</a> operate entirely within your existing, trusted environment. No external data processing, no phone-home communication, no telemetry, and no email rerouting.
-
 <p>&nbsp;</p>
-
 <p align="center">
   <a href="https://set-outlooksignatures.com/quickstart"><img src="https://img.shields.io/badge/3--Step%20Quickstart-4169E1?style=for-the-badge" alt="3-Step Quickstart"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://set-outlooksignatures.com/scheduledemo"><img src="https://img.shields.io/badge/Book%20an%20Interactive%20Demo-DAA520?style=for-the-badge" alt="Book an Interactive Demo"></a><br>
 </p>
-
 <p>&nbsp;</p>
-
-<table>
-  <tr>
-    <td valign="top" width="33%">
-      🛠️ <b>IT: Full Automation</b>
-      <ul>
-        <li>Centralized and decentralized architectures: Combine as required.</li>
-        <li>Native synchronization for Exchange Online, Hybrid, and On-Premises.</li>
-        <li>Supports public, national, sovereign, and local Microsoft 365 clouds.</li>
-      </ul>
-    </td>
-    <td valign="top" width="33%">
-      📣 <b>Marketing: Design Autonomy</b>
-      <ul>
-        <li>Design in Word, save, done.</li>
-        <li>Use familiar placeholders and logic to drive </li>consistent branding without waiting for IT tickets.</li>
-        <li>Test-drive using simulation mode.</li>
-      </ul>
-    </td>
-    <td valign="top" width="33%">
-      🛡️ <b>Security: Total Sovereignty</b>
-      <ul>
-        <li>Zero external data processing or mail rerouting.</li>
-        <li>Runs within environments you already trust and govern.</li>
-        <li>Open-source, peer-reviewable, and audit-ready core.</li>
-      </ul>
-    </td>
-  </tr>
-</table>
-
 <p><strong>Security-conscious and brand-aware organizations worldwide trust</strong> our solution, in <strong>public as well as in national, sovereign and local Microsoft 365 clouds</strong> such as GCC, GCC High, DoD, China, Bleu, and Delos.</p>
-
 <table border="0">
   <tr>
     <td width="75%" valign="top">
@@ -111,10 +75,10 @@ Set-OutlookSignatures centralizes and automates this work without routing email 
   </tr>
 </table>
 
+
 ## The `Strengths` of the Ecosystem
 
-From dynamic branding to governance, our ecosystem delivers capabilities that conventional provider-hosted solutions simply cannot match. Connect any data source, apply unlimited business logic, and synchronize natively across Outlook platforms without rerouting email or exposing data externally.
-
+<p>From dynamic branding to governance, our ecosystem delivers capabilities that conventional provider-hosted solutions simply cannot match. Connect any data source, apply unlimited business logic, and synchronize natively across Outlook platforms without rerouting email or exposing data externally.</p>
 <table>
   <tr>
     <td valign="top" width="33%">✨ <b>Frictionless Adoption</b><br>Invisible to end users, seamless background sync. Intuitive for Marketing and IT.</td>
@@ -132,9 +96,8 @@ From dynamic branding to governance, our ecosystem delivers capabilities that co
     <td valign="top" width="33%">🚀 <b>Marketing Impact</b><br>Design in Word, test-drive from your desk, deploy brand-safe campaigns company-wide.</td>
   </tr>
 </table>
-
+<p>&nbsp;</p>
 <p align="center">
-  <br>
   <a
     href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Features-What%20Our%20Solution%20Achieves-blue?labelColor=black" alt="Features: What Our Solution Achieves">
   </a>
@@ -143,33 +106,16 @@ From dynamic branding to governance, our ecosystem delivers capabilities that co
   </a>
 </p>
 
+
 ## See it `in Action`
 
-Organizations use our ecosystem to enforce **dynamic branding, administrative governance, and cross-platform data sovereignty**, all without changing the way users work.
+<p>Choose a self-guided technical evaluation or schedule an interactive walkthrough tailored to your organization.</p>
+<p align="center">
+  <a href="https://set-outlooksignatures.com/quickstart"><img src="https://img.shields.io/badge/3--Step%20Quickstart-4169E1?style=for-the-badge" alt="3-Step Quickstart"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://set-outlooksignatures.com/scheduledemo"><img src="https://img.shields.io/badge/Book%20an%20Interactive%20Demo-DAA520?style=for-the-badge" alt="Book an Interactive Demo"></a><br>
+</p>
 
-<table>
-  <tr>
-    <td valign="top" width="50%">
-      <h3>Self-Service Quickstart</h3>
-      <p>Follow our 3-step process to deploy your first signatures in minutes. Peer-reviewable and production-ready.</p>
-    </td>
-    <td valign="top" width="50%">
-      <h3>Guided Walkthrough</h3>
-      <p>Schedule a session with our team to see how the solution adapts to your specific organizational structure, technical setup, and compliance requirements.</p>
-    </td>
-  </tr>
-  <tr>
-    <td valign="top" width="50%">
-      <a href="https://set-outlooksignatures.com/quickstart"><img src="https://img.shields.io/badge/3--Step%20Quickstart-4169E1?style=for-the-badge" alt="3-Step Quickstart"></a><br>
-      <small>For IT Administrators and Technical Evaluation. No Signup Required.</small>
-    </td>
-    <td valign="top" width="50%">
-      <a href="https://set-outlooksignatures.com/scheduledemo"><img src="https://img.shields.io/badge/Book%20an%20Interactive%20Demo-DAA520?style=for-the-badge" alt="Book an Interactive Demo"></a><br>
-      <small>For Executives and Decision-Makers from IT, Marketing, and Security.</small>
-    </td>
-  </tr>
-</table>
 
+<p>&nbsp;</p>
 <p align="center">
   <i>The <a href="https://set-outlooksignatures.com/benefactorcircle">Benefactor Circle</a> license funds the open-source mission, ensuring the core engine remains free and peer-reviewable for the global community.</i>
 </p>
