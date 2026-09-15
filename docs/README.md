@@ -37,6 +37,7 @@
         <li>Centralized signature management</li>
         <li>Classic Outlook for Windows and simulation mode</li>
         <li>Exchange on-premises, hybrid, and all Microsoft 365 clouds</li>
+        <li>Proven and innovative, with a <a href="https://set-outlooksignatures.com/features" target="_blank">rich feature set</a> and plenty to <a href="https://set-outlooksignatures.com/faq#what-can-i-learn-from-the-code-of-set-outlooksignatures" target="_blank">learn from the code</a></li>
       </ul>
     </td>
     <td valign="top" width="50%">
@@ -45,8 +46,9 @@
       <ul>
         <li>All Outlook editions and platforms: Classic and New, Mac, iOS, Android, Web</li>
         <li>Centralized out-of-office reply management</li>
-        <li>Time-based campaigns, shared mailboxes, delegate support, SimulateAndDeploy, and <a href="https://set-outlooksignatures.com/features" target="_blank">more advanced features</a></li>
-        <li><strong><a href="https://set-outlooksignatures.com/benefactorcircle#financial-benefits" target="_blank">See how quickly the add-on pays for itself</a></strong></li>      </ul>
+        <li>Time-based campaigns, shared mailboxes, delegate support, SimulateAndDeploy, and additional <a href="https://set-outlooksignatures.com/features" target="_blank">enterprise features</a></li>
+        <li>Quickly becomes <a href="https://set-outlooksignatures.com/benefactorcircle#financial-benefits" target="_blank">more cost-effective than manual updates</a></li>
+      </ul>
     </td>
   </tr>
 </table>
@@ -99,7 +101,7 @@
 <p>&nbsp;</p>
 <p align="center">
   <a
-    href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Features-What%20Our%20Solution%20Achieves-blue?labelColor=black" alt="Features: What Our Solution Achieves">
+    href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Features-What%20Our%20Solution%20Delivers-blue?labelColor=black" alt="Features: What Our Solution Delivers">
   </a>
   <a
     href="https://set-outlooksignatures.com/features#feature-comparison" target="_blank"><img src="https://img.shields.io/badge/Feature%20Comparison-with%20Competitors-blue?labelColor=black" alt="Feature Comparison with Competitors">
