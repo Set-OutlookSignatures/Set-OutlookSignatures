@@ -25,14 +25,15 @@
 
 ## `Put an End` to Manually Managing Signatures and Out-of-Office Replies
 
-<p>Every signature and out-of-office reply represents your organization. Keeping them accurate, consistent, and up to date should not depend on individual users or recurring IT effort.</p>
-<p><strong>Set-OutlookSignatures centralizes and automates signature management.</strong> IT performs the initial setup and retains control of template management or delegates template management to another team, such as Marketing. <strong>Staff automatically receive current, centrally governed signatures without having to manage them individually.</strong></p>
-<p>Sovereign by design, the solution achieves this without synchronizing directory data with an external provider, rerouting emails, phoning home, collecting telemetry, or requiring new infrastructure. <strong>This architecture enables capabilities that other solutions cannot readily offer.</strong></p>
+<p>Every signature and out-of-office reply represents your organization. <strong>Keep them accurate, consistent, and up to date</strong> without relying on individual users or recurring IT effort.</p>
+<p><strong>Turn every email into a powerful marketing channel</strong> by automating signature management. IT handles the initial implementation and governance, while Marketing independently creates and manages signature content, campaign banners, event promotions, and brand messaging.</p>
+<p>Every employee and mailbox automatically receives current, centrally governed signatures, delivering <strong>consistent branding, organization-wide campaign visibility, and effortless compliance</strong>.</p>
+<p>Retain control of your data and email flow without synchronizing directory data with an external provider, rerouting emails, phoning home, transferring telemetry data, or requring new infrastructure. <strong>The sovereign architecture of Set-OutlookSignatures enables capabilities that other solutions cannot readily offer.</strong></p>
 <table>
   <tr>
     <td valign="top" width="50%">
-      ⚡ <b>Set-OutlookSignatures</b><br>
-      Free and open-source
+      ⚡ <strong>Set-OutlookSignatures</strong><br>
+      <strong>Free and open-source</strong>
       <ul>
         <li>Centralized signature management</li>
         <li>Classic Outlook for Windows and simulation mode</li>
@@ -41,13 +42,13 @@
       </ul>
     </td>
     <td valign="top" width="50%">
-      ⭐ <b><a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">Benefactor Circle add-on</a></b><br>
-      Commercial extension preserving the core’s sovereign architecture
-      <ul>
+      ⭐ <strong><a href="https://set-outlooksignatures.com/benefactorcircle" target="_blank">Benefactor Circle add-on</a></strong><br>
+      <strong>Commercial extension preserving the core’s sovereign architecture</strong>
+      <ul class="ml-4">
         <li>All Outlook editions and platforms: Classic and New, Mac, iOS, Android, Web</li>
         <li>Centralized out-of-office reply management</li>
-        <li>Time-based campaigns, shared mailboxes, delegate support, SimulateAndDeploy, and additional <a href="https://set-outlooksignatures.com/features" target="_blank">enterprise features</a></li>
-        <li>Quickly becomes <a href="https://set-outlooksignatures.com/benefactorcircle#financial-benefits" target="_blank">more cost-effective than manual updates</a></li>
+        <li>Time-based campaigns, shared mailboxes, delegate support, SimulateAndDeploy, and additional <a href="https://set-outlooksignatures.com/features" class="no-external-link-icon">enterprise features</a></li>
+        <li><strong>More capabilities at a <a href="https://set-outlooksignatures.com/features#feature-comparison" class="no-external-link-icon">lower cost than competitors and even manual updates</a></strong></li>
       </ul>
     </td>
   </tr>
