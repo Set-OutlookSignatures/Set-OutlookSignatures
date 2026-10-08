@@ -142,8 +142,7 @@ Set-Location $root
 if (Test-Path -LiteralPath '.gitmodules') {
     git submodule sync --recursive
     git submodule update --init --recursive --remote --merge
-}
-else {
+} else {
     Write-Warning 'The top-level repository does not contain a .gitmodules file.'
 }
 ```
@@ -155,21 +154,21 @@ Run `.\tests\tests.ps1` to run the tests. Only errors and a summary will be logg
 Example output:
 
 ```
-Start script @2026-03-06T15:17:40+01:00@
+Start script @2026-10-08T06:59:11+02:00@
 
 Import modules
   AddressFormatter
   powershell-yaml
 
 Submodule OpenCageData/address-formatting
-  Commit 064d82b, dated 2026-02-03T17:32:05+01:00
+  Commit ed1411e, dated 2026-10-08T06:57:31+02:00
 
 Running test cases
-  465 test cases from 256 files
+  469 test cases from 256 files
 
 Test results
-  Passed: 465/465 (100,00 %)
-  Failed: 0/465 (0,00 %)
+  Passed: 469/469 (100,00 %)
+  Failed: 0/469 (0,00 %)
 
-End script @2026-03-06T15:17:50+01:00@
+End script @2026-10-08T06:59:21+02:00@
 ```

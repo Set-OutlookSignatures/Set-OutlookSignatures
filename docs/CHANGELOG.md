@@ -1,6 +1,26 @@
-# Data Sovereign Email Signatures and Out-of-Office Replies<br><sub>Unified Outlook branding everywhere – with zero external data exposure</sub>
+<h1 align="center">Data-Sovereign Email Signatures and Out-of-Office Replies</h1>
 
-<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/blob/main/LICENSE.txt" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?label=License&labelColor=black&color=informational" alt="License: EUPL 1.2"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=Latest%20release&color=informational&labelColor=black" alt="Latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/set-outlooksignatures/set-outlooksignatures/total?label=Downloads&labelColor=black" alt="Downloads" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?label=Issues&labelColor=black" alt="Issues" data-external="1"></a> <a href="https://set-outlooksignatures.com/faq#what-can-i-learn-from-the-code-of-set-outlooksignatures" target="_blank"><img src="https://img.shields.io/badge/Behind%20the%20scenes-Learn%20from%20the%20code-lawngreen?labelColor=black" alt="Behind the scenes: Learn from the code"></a>
+<h2 align="center">Your branding across every Outlook platform, with zero external data exposure</h2>
+
+<p align="center">
+  <code>Peer-Reviewable Core</code> &nbsp; <code>Agentless Sync</code> &nbsp; <code>No Mail Rerouting</code> &nbsp; <code>Sovereign Cloud Ready</code>
+</p>
+
+<p align="center">
+  <br>
+  <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/blob/main/license.txt" target="_blank"><img src="https://img.shields.io/github/license/Set-OutlookSignatures/Set-OutlookSignatures?label=License&labelColor=black&color=informational" alt="License: EUPL 1.2"></a><!--XXXRemoveWhenBuildingXXX<a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/badge/this%20release-XXXVersionStringXXX-informational?labelColor=black" alt="this release"></a> XXXRemoveWhenBuildingXXX--> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/v/tag/Set-OutlookSignatures/Set-OutlookSignatures?display_name=tag&include_prereleases&sort=semver&label=Latest%20release&color=informational&labelColor=black" alt="Latest release" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases" target="_blank"><img src="https://img.shields.io/github/downloads/set-outlooksignatures/set-outlooksignatures/total?label=Downloads&labelColor=black" alt="Downloads" data-external="1"></a> <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues" target="_blank"><img src="https://img.shields.io/github/issues/Set-OutlookSignatures/Set-OutlookSignatures?label=Issues&labelColor=black" alt="Issues" data-external="1"></a> <a href="https://set-outlooksignatures.com/faq#what-can-i-learn-from-the-code-of-set-outlooksignatures" target="_blank"><img src="https://img.shields.io/badge/Behind%20the%20Scenes-Learn%20from%20the%20Code-lawngreen?labelColor=black" alt="Behind the Scenes: Learn from the Code"></a>
+  <br><br>
+  <a
+    href="https://set-outlooksignatures.com/quickstart" target="_blank"><img src="https://img.shields.io/badge/Quickstart-Signatures%20in%20Minutes-lawngreen?labelColor=black" alt="Quickstart: Signatures in Minutes">
+  </a>
+  <a
+    href="https://set-outlooksignatures.com/features" target="_blank"><img src="https://img.shields.io/badge/Features-and%20Competitor%20Comparison-lawngreen?labelColor=black" alt="Features and Competitor Comparison">
+  </a>
+  <a
+    href="https://set-outlooksignatures.com/blog" target="_blank"><img src="https://img.shields.io/badge/Blog-Master%20Outlook%20Signatures-lawngreen?labelColor=black" alt="Blog: Master Outlook Signatures">
+  </a>
+  <br><br>
+</p>
 
 # Changelog
 
@@ -53,6 +73,111 @@ _**Breaking:** <Present tense verb> XXX_
 
 #### Fixes
 -->
+
+## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.32.0" target="_blank">v4.32.0</a> - 2026-10-08
+
+### Set-OutlookSignatures
+
+#### Security
+
+- Redact sensitive information from the `GraphClientID` parameter in "Check parameters" output for improved security.
+
+#### Additions
+
+- Add the [ResolveCountry](https://github.com/GruberMarkus/ResolveCountry) PowerShell module for easier and faster country name resolution.
+  - This makes the function `FormatPhoneNumber` and the code in the file `.\config\default replacement variables.ps1` much smaller, easier to read, and independent from CLDR metadata exposed by the .Net version and Operating System. Search is also more forgiving because ResolveCountry includes a fuzzy component.
+- Add support for Exchange resource forest (linked mailbox) scenarios where the mailbox has been migrated to Exchange Online but `GraphOnly` is not enabled. This is realized by searching the linked mailbox and determining its hosting environment as soon as possible, so that a Graph connection can be enforced when the mailbox is hosted in the cloud.
+- Make sure every paragraph has an HTML `margin-top`, `margin-bottom`, and `line-height` value to enhance paragraph spacing compatibility across email clients.
+- Improve barrier-free access by automatically syncing `alt` and `title` attributes while respecting parent link tooltips and decorative images.
+- Add low-priority INI tags `defaultNewLowPrio` and `defaultReplyFwdLowPrio`.
+  - A low-priority tag only sets the signature as default if a standard tag (`defaultNew` or `defaultReplyFwd`) hasn't already claimed it.
+  - Use case: Setting default signatures for secondary SMTP addresses (aliases) when using the [Outlook add-in](https://set-outlooksignatures.com/outlookaddin).
+
+  Example: For a mailbox with primary address `primary@example.com` and secondary address `secondary@example.com`:
+  - Outlook sees both signatures ("primary" and "secondary") and uses "primary" as the standard default.
+  - The Outlook add-in detects the low-priority fallback and automatically selects "secondary" whenever sending from `secondary@example.com`.
+
+  ```ini
+  [primary.docx]
+  defaultNew
+  defaultReplyFwd
+
+  [secondary.docx]
+  secondary@example.com
+  defaultNewLowPrio
+  defaultReplyFwdLowPrio
+  ```
+
+- Prefix warning and error messages with `[Warning]` and `[Error]`, and display final counts with corresponding line numbers at the end of the script.
+- Add and update blog posts:
+  - [Cross-Tenant Outlook Signatures](https://set-outlooksignatures.com/blog/2026/07/22/cross-tenant-signatures)
+  - [Delegate Out-of-Office Management with Exchange RBAC](https://set-outlooksignatures.com/blog/2026/07/29/delegate-oof)
+  - [How to Prevent Outlook Signature Changes](https://set-outlooksignatures.com/blog/2026/08/12/restrict-signature-changes)
+  - [Signatures for Send As Permissions](https://set-outlooksignatures.com/blog/2026/08/19/sendas-signatures)
+  - [Roaming Signatures for Outlook on macOS](https://set-outlooksignatures.com/blog/2026/09/08/signatures-macos)
+  - [HTML or DOCX templates?](https://set-outlooksignatures.com/blog/2026/09/15/html-or-docx)
+  - [From Halloween to the Holidays: Automate Seasonal Email Signatures 🎃🍂🎄](https://set-outlooksignatures.com/blog/2026/09/23/halloween-email-signature-campaigns)
+  - [Self-service email signature attributes with data sovereignty](https://set-outlooksignatures.com/blog/2026/09/30/self-service-signature-attributes)
+  - [Deploy Outlook signatures for users who do not log on to managed devices](https://set-outlooksignatures.com/blog/2026/10/07/deploy-outlook-signatures-without-managed-user-devices)
+- Add FAQ: [Cloud-only mailboxes in hybrid environments](https://set-outlooksignatures.com/faq#cloud-only-mailboxes-in-hybrid-environments)
+
+#### Changes
+
+- Update HtmlAgilityPack to v1.13.0.
+- Update libphonenumber-csharp to v9.0.40.
+- Update MSAL.Net to v4.90.1.
+- Update PreMailer.Net to v2.7.4.
+- Update UTF.Unknown to v2.7.0.
+- Update sample templates to use the new virtual demo company [VistaVox](https://vistavox.cc).
+- Refactor ".\config\default replacement variables.ps1" to make the code more readable, easier to understand, and easier to maintain.
+- Simplify [Quickstart Guide](https://set-outlooksignatures.com/quickstart).
+- Update FAQ:
+  - [Folder Structure Recommendation](https://set-outlooksignatures.com/faq#folder-structure-recommendation) with better visual clues and sample code.
+  - [How to apply signatures for alias or secondary SMTP addresses?](https://set-outlooksignatures.com/faq#how-to-apply-signatures-for-alias-or-secondary-smtp-addresses)
+
+#### Fixes
+
+- Fix slow file copying for dependencies by further minimizing the number SMB/CIFS network requests, switch to native C#/.Net function calls, and parallelization. (Thanks <a href="https://www.ulman.de/unternehmen/ansprechpartner/" target="_blank">Daniel Selle</a>!)
+
+### Benefactor Circle add-on
+
+#### Additions
+
+- Display warning and error counts for each completed SimulateAndDeploy job, and write jobs with warnings to `_log_warning.txt`.
+
+#### Fixes
+
+- Make sure `SimulateUser` is always converted to a user principal name before comparing it with other UPNs. This solves roaming signature upload in SimulateAndDeploy when the `SimulateUser` parameter does not match the UPN of the user to simulate. (Thanks Hunter Harris!)
+
+### Outlook add-in (part of the Benefactor Circle add-on)
+
+#### Additions
+
+- Add a manual refresh button to the task pane.
+- Make the add-in task pane auto-refresh when from/to/cc/bcc/subject (basically everything available in the `customRulesProperties` object for `CUSTOM_RULES_CODE`) are changed.
+- Add local persistence for a manually selected task pane language, as well as a language reset button.
+- Add `TREAT_FIRST_REPLY_AS_NEW_MAIL` configuration option to use the default new signature rather than Outlook's default reply signature when the current from address writes the first reply in a thread branch (disabled by default to mimic native Outlook behavior).
+  - Example: You reply to a new message from a customer. As it is a reply, Outlook selects the signature defined as default for replies and forwards, although the signature defined as default for new messages would be more appropriate for the first reply.
+  - See `.\run_before_deployment.ps1` for details and requirements.
+- Add `TREAT_FORWARD_AS_NEW_MAIL` configuration option to use the default new signature rather than Outlook's default reply signature when forwarding an email (disabled by default to mimic native Outlook behavior).
+  - See `.\run_before_deployment.ps1` for details and requirements.
+- Add properties to the `customRulesProperties` object for use in `CUSTOM_RULES_CODE`:
+  - `itemIsFirstBranchReply`: Boolean value indicating if the current item is a reply to the first branch of a conversation thread.
+  - `addInConfig`: Object containing all configuration options of the Outlook add-in that are available via `run_before_deployment.ps1`.
+- Add sample code to `.\sample code\CustomRulesCode.js`:
+  - No signature for self-addressed emails
+
+#### Changes
+
+- Update @azure/msal-browser to v5.25.0.
+- Add a fallback to the primary SMTP adress when sending from an alias or secondary SMTP address for which no specific signature has been defined.
+- Show full before and after configuration array values in `run_before_deployment.ps1`, instead of just the removed or added elements with a misleading "Removed" hint.
+- Update translations.
+
+#### Fixes
+
+- Make images work when inserting signature in Outlook Web (Exchange Online) appointments.
+- Avoid a possible endless logging loop when the `DEBUG` parameter is enabled.
 
 ## <a href="https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/releases/tag/v4.31.0" target="_blank">v4.31.0</a> - 2026-07-20
 
@@ -989,7 +1114,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 ### Changed
 
 - **Prefer an authentication broker over browser-based authentication (browser auth is still used as fallback and on non-supported systems). This helps overcome issues with Entra ID MFA re-authentication as well as browser authentication problems such as being denied access to http://localhost. Make sure to add the Redirect URI '`ms-appx-web://microsoft.aad.brokerplugin/<Application ID of your app>`' to your Set-OutlookSignatures Entra ID app.** Make sure to use the Application ID and not the Object ID. The Entra ID app provided by the developers already has the additional Redirect URI set ('`ms-appx-web://microsoft.aad.brokerplugin/beea8249-8c98-4c76-92f6-ce3c468a61e6`').
-- Change the path of the Graph token cache file to '`$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\MSAL.PS\MSAL.PS.msalcache.bin3')`' on all platforms. This change requires one-time re-authentication towards Graph on Windows, Linux and macOS when Integrated Windows Authentication does not work. The change is introduced to fix the following problems and to anticipate upcoming changes across all supported platforms:
+- Change the path of the Graph token cache file to '`$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures/MSAL.PS/MSAL.PS.msalcache.bin3')`' on all platforms. This change requires one-time re-authentication towards Graph on Windows, Linux and macOS when Integrated Windows Authentication does not work. The change is introduced to fix the following problems and to anticipate upcoming changes across all supported platforms:
   - On Windows, not only Set-OutlookSignatures uses the default MSAL.Net/MSAL.PS cache file path. This is a good idea but most software handles the cache as if it was application specific, replacing all other tokens with their own instead of sharing them.
   - On Linux (and macOS), MSAL.Net does not rely on .Net to determine the path for LocalApplicationData but uses own logic, which leads to inconsistent results on different Linux distributions and does not always match XDG specifications.
   - On macOS, .Net 8 returns a different path for LocalApplicationData than earlier versions, requiring a change anyhow.
@@ -1008,7 +1133,7 @@ _See ['`Benefactor Circle add-on`'](https://set-outlooksignatures.com/benefactor
 
 ### Added
 
-- Log every run of Set-OutlookSignatures. Logs are saved in the folder '`$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs')`', the files follow the naming scheme '`$("Set-OutlookSignatures_Log_yyyyMMddTHHmmssffff.txt")`', and files older than 14 days are deleted with every run.
+- Log every run of Set-OutlookSignatures. Logs are saved in the folder '`$(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures/Logs')`', the files follow the naming scheme '`$("Set-OutlookSignatures_Log_yyyyMMddTHHmmssffff.txt")`', and files older than 14 days are deleted with every run.
 - Check connectivity to the Graph authentication endpoint before trying to access Graph. This not only catches connection errors as early as possible, but also avoids prompting users with authentication pop-ups in scenarios where they are offline or access to Graph is blocked at the firewall or proxy level.
 - Allow using Active Directory DNS domain names when assigning templates to groups in INI files. As Microsoft Graph started exposing the corresponding attributes for groups, the DNS domain name format now not only works on-prem but also in hybrid environments. This means that there is no longer anything in Set-OutlookSignatures for which a NetBIOS domain name is mandatory.
 - Allow assignment of templates to Entra ID groups by their Object ID and their securityIdentifier, in addition to existing properties such as email address, mailNickname and displayName.

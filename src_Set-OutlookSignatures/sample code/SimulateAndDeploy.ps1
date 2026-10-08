@@ -155,6 +155,15 @@ param (
 	), # Use Get-Credential for interactive mode or (Get-Content -LiteralPath '.\Config\password.secret') to retrieve info from a separate file (MFA is not supported in any case)
 	$GraphClientID = '<The application (client) ID of the Entra ID app for SimulateAndDeploy>', # not the same ID as defined in 'default graph config.ps1' or a custom Graph config file
 	$GraphClientSecret = '<The client secret of the Entra ID app for SimulateAndDeploy>', # to load the secret from a file, use (Get-Content -LiteralPath '.\Config\app.secret')
+
+	# As soon as $GraphData is not just an empty array, it takes priority over $GraphUserCredential, $GraphClientID, and $GraphClientSecret
+	# Format:
+	# $GraphData = @(
+	#     , @('Tenant A ID', 'Tenant A SimulateAndDeployUser UPN', 'Tenant A SimulateAndDeployUserPassword', 'Tenant A SimulateAndDeploy app ID', 'Tenant A SimulateAndDeploy app client secret')
+	#     , @('Tenant B ID', 'Tenant B SimulateAndDeployUser UPN', 'Tenant B SimulateAndDeployUserPassword', 'Tenant B SimulateAndDeploy app ID', 'Tenant B SimulateAndDeploy app client secret')
+	# )
+	$GraphData = @(),
+
 	[ValidateNotNullOrEmpty()]
 	[string]$CloudEnvironment = 'Public',
 
@@ -173,14 +182,6 @@ param (
 		#   ...
 		# }
 	),
-
-	# As soon as $GraphData is not just an empty array, it takes priority over $GraphUserCredential, $GraphClientID, and $GraphClientSecret
-	# Format:
-	# $GraphData = @(
-	#     , @('Tenant A ID', 'Tenant A SimulateAndDeployUser', 'Tenant A SimulateAndDeployUserPassword', 'Tenant A GraphClientID', 'Tenant A GraphClientSecret')
-	#     , @('Tenant B ID', 'Tenant B SimulateAndDeployUser', 'Tenant B SimulateAndDeployUserPassword', 'Tenant B GraphClientID', 'Tenant B GraphClientSecret')
-	# )
-	$GraphData = @(),
 
 	$SetOutlookSignaturesScriptPath = '..\Set-OutlookSignatures.ps1',
 	$SetOutlookSignaturesScriptParameters = @{
@@ -645,7 +646,7 @@ function GraphSwitchContext {
 			$script:CloudEnvironmentsRawDataDuplicateAliases = $script:CloudEnvironmentsRawData.Aliases | Group-Object | Where-Object { $_.Count -gt 1 }
 
 			if ($script:CloudEnvironmentsRawDataDuplicateAliases) {
-				Write-Host "Duplicate cloud environment aliases found: $($script:CloudEnvironmentsRawDataDuplicateAliases.Name -join ', ')" -ForegroundColor Red
+				Write-Host "[Error] Duplicate cloud environment aliases found: $($script:CloudEnvironmentsRawDataDuplicateAliases.Name -join ', ')" -ForegroundColor Red
 				$script:ExitCode = 42
 				$script:ExitCodeDescription = 'Cloud environments not configured correctly.'
 				exit
@@ -655,7 +656,7 @@ function GraphSwitchContext {
 				if ($null -eq $script:CloudEnvironmentsRawDataEntry.Aliases -or
 					$script:CloudEnvironmentsRawDataEntry.Aliases.Count -eq 0 -or
 					$null -in $script:CloudEnvironmentsRawDataEntry.Aliases) {
-					Write-Host "Validation Failed: 'Aliases' must not be null or contain null values." -ForegroundColor Red
+					Write-Host "[Error] Validation Failed: 'Aliases' must not be null or contain null values." -ForegroundColor Red
 					$script:ExitCode = 42
 					$script:ExitCodeDescription = 'Cloud environments not configured correctly.'
 					exit
@@ -678,7 +679,7 @@ function GraphSwitchContext {
 							throw 'Validation Failed'
 						}
 					} catch {
-						Write-Host "Invalid URL format in '$($script:CloudEnvironmentsRawDataEntry.Aliases[0])','$($script:CloudEnvironmentsRawDataEntry.$_)': Is not https, or is file." -ForegroundColor Red
+						Write-Host "[Error] Invalid URL format in '$($script:CloudEnvironmentsRawDataEntry.Aliases[0])','$($script:CloudEnvironmentsRawDataEntry.$_)': Is not https, or is file." -ForegroundColor Red
 						$script:ExitCode = 42
 						$script:ExitCodeDescription = 'Cloud environments not configured correctly.'
 						exit
@@ -737,7 +738,7 @@ function GraphSwitchContext {
 		}
 
 		if ($CloudEnvironment -inotin $script:CloudEnvironmentsData.Aliases) {
-			Write-Host "Cloud environment '$($CloudEnvironment)' is not defined." -ForegroundColor Red
+			Write-Host "[Error] Cloud environment '$($CloudEnvironment)' is not defined." -ForegroundColor Red
 			$script:ExitCode = 42
 			$script:ExitCodeDescription = 'Cloud environments not configured correctly.'
 			exit
@@ -817,14 +818,14 @@ try {
 	Remove-TypeData System.Array -ErrorAction SilentlyContinue
 
 	if ($psISE) {
-		Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
-		Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
+		Write-Host '  [Error] PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+		Write-Host '    Required features are not available in ISE. Exit.' -ForegroundColor Red
 		exit 1
 	}
 
 	if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-		Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
-		Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+		Write-Host "  [Error] This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+		Write-Host '    Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
 		exit 1
 	}
 
@@ -835,9 +836,9 @@ try {
 	if ($PSScriptRoot) {
 		Set-Location -LiteralPath $PSScriptRoot
 	} else {
-		Write-Host '  Could not determine the script path, which is essential for this script to work.' -ForegroundColor Red
-		Write-Host '  Make sure to run this script as a file from a PowerShell console, and not just as a text selection in a code editor.' -ForegroundColor Red
-		Write-Host '  Exit.' -ForegroundColor Red
+		Write-Host '  [Error] Could not determine the script path, which is essential for this script to work.' -ForegroundColor Red
+		Write-Host '    Make sure to run this script as a file from a PowerShell console, and not just as a text selection in a code editor.' -ForegroundColor Red
+		Write-Host '    Exit.' -ForegroundColor Red
 		exit 1
 	}
 
@@ -863,10 +864,12 @@ try {
 	}
 
 	$script:CommonDepsPath = (Join-Path -Path $script:tempDir -ChildPath 'commonDeps')
-	Copy-Item -LiteralPath $([System.Io.Path]::GetFullPath($((Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath) -ChildPath 'deps\_common')))) -Destination $script:CommonDepsPath -Recurse
-	Get-ChildItem -LiteralPath $script:CommonDepsPath -Recurse -Force | ForEach-Object {
-		$_.Attributes = 'Normal'
-		if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+
+	Copy-Item -LiteralPath $([System.Io.Path]::GetFullPath($((Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath) -ChildPath 'deps/_common')))) -Destination $script:CommonDepsPath -Recurse
+
+	foreach ($item in @(Get-ChildItem -LiteralPath $script:CommonDepsPath -Recurse -Force)) {
+		$item.Attributes = 'Normal'
+		if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
 	}
 
 
@@ -969,6 +972,7 @@ namespace SetOutlookSignatures.AssemblyResolver {
 	@(
 		(Join-Path -Path $SimulateResultPath -ChildPath '_log_started.txt'),
 		(Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt'),
+		(Join-Path -Path $SimulateResultPath -ChildPath '_log_warning.txt'),
 		(Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt')
 	) | ForEach-Object {
 		New-Item -ItemType File $_ | Out-Null
@@ -997,11 +1001,13 @@ namespace SetOutlookSignatures.AssemblyResolver {
 
 		$script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath 'MSAL.PS')
 
-		Copy-Item -LiteralPath $([System.Io.Path]::GetFullPath($((Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath) -ChildPath 'deps\MSAL.PS')))) -Destination $script:MsalModulePath -Recurse
-		Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse -Force | ForEach-Object {
-			$_.Attributes = 'Normal'
-			if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+		Copy-Item -LiteralPath $([System.Io.Path]::GetFullPath($((Join-Path -Path (Split-Path $SetOutlookSignaturesScriptPath) -ChildPath 'deps/MSAL.PS')))) -Destination $script:MsalModulePath -Recurse
+
+		foreach ($item in @(Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse -Force)) {
+			$item.Attributes = 'Normal'
+			if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
 		}
+
 		Import-Module $script:MsalModulePath -Force
 
 		$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
@@ -1012,8 +1018,8 @@ namespace SetOutlookSignatures.AssemblyResolver {
 			$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
 			if (($GraphConnectResult | Where-Object { $_.error -ne $false }).Count -gt 0) {
-				Write-Host '    Exiting because of repeated Graph connection error' -ForegroundColor Red
-				Write-Host "    $($GraphConnectResult.error)" -ForegroundColor Red
+				Write-Host '    [Error] Exiting because of repeated Graph connection error' -ForegroundColor Red
+				Write-Host "      $($GraphConnectResult.error)" -ForegroundColor Red
 				exit 1
 			}
 		}
@@ -1032,7 +1038,7 @@ namespace SetOutlookSignatures.AssemblyResolver {
 	if ($SimulateListUserDuplicate) {
 		$SimulateListCheckPositive = $false
 
-		Write-Host '  Duplicate SimulateUser entries:' -ForegroundColor Red
+		Write-Host '  [Error] Duplicate SimulateUser entries:' -ForegroundColor Red
 
 		$SimulateListUserDuplicate | ForEach-Object {
 			Write-Host "   $($_)" -ForegroundColor Red
@@ -1042,7 +1048,7 @@ namespace SetOutlookSignatures.AssemblyResolver {
 	foreach ($SimulateEntry in $SimulateList) {
 		if ($SimulateEntry.SimulateUser -inotmatch '^\S+@\S+$|^\S+\\\S+$') {
 			$SimulateListCheckPositive = $false
-			Write-Host "  Wrong format for SimulateUser: $($SimulateEntry.SimulateUser)" -ForegroundColor Red
+			Write-Host "  [Error] Wrong format for SimulateUser: $($SimulateEntry.SimulateUser)" -ForegroundColor Red
 		}
 
 		if ($SimulateEntry.SimulateMailboxes) {
@@ -1051,7 +1057,7 @@ namespace SetOutlookSignatures.AssemblyResolver {
 				$SimulateEntry.SimulateMailboxes = "$($tempSimulateMailboxes -join ', ')"
 			} catch {
 				$SimulateListCheckPositive = $false
-				Write-Host "  Wrong format for SimulateMailboxes: $($SimulateEntry.SimulateMailboxes)"
+				Write-Host "  [Warning] Wrong format for SimulateMailboxes: $($SimulateEntry.SimulateMailboxes)" -ForegroundColor Yellow
 			}
 		} else {
 			$SimulateEntry.SimulateMailboxes = $null
@@ -1060,7 +1066,7 @@ namespace SetOutlookSignatures.AssemblyResolver {
 
 	if (-not $SimulateListCheckPositive) {
 		Write-Host
-		Write-Host 'Errors found, see details above. Exiting.' -ForegroundColor Red
+		Write-Host '[Error] Errors found, see details above. Exiting.' -ForegroundColor Red
 		exit 1
 	}
 
@@ -1073,7 +1079,7 @@ namespace SetOutlookSignatures.AssemblyResolver {
 		Write-Host "Memorize Word security setting and disable it @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 		$script:WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty -LiteralPath 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
 		if ($script:WordRegistryVersion.major -gt 16) {
-			Write-Host "  Word version $($script:WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+			Write-Host "  [Error] Word version $($script:WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
 			exit 1
 		} elseif ($script:WordRegistryVersion.major -eq 16) {
 			$script:WordRegistryVersion = '16.0'
@@ -1082,7 +1088,7 @@ namespace SetOutlookSignatures.AssemblyResolver {
 		} elseif ($script:WordRegistryVersion.major -eq 14) {
 			$script:WordRegistryVersion = '14.0'
 		} elseif ($script:WordRegistryVersion.major -lt 14) {
-			Write-Host "    Word version $($script:WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+			Write-Host "    [Error] Word version $($script:WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
 			exit 1
 		}
 
@@ -1180,8 +1186,8 @@ namespace SetOutlookSignatures.AssemblyResolver {
 							$GraphConnectResult = CreateUpdateSimulateAndDeployGraphCredentialFile
 
 							if (($GraphConnectResult | Where-Object { $_.error -ne $false }).Count -gt 0) {
-								Write-Host '    Exiting because of repeated Graph connection error' -ForegroundColor Red
-								Write-Host "    $($GraphConnectResult.error)" -ForegroundColor Red
+								Write-Host '    [Error] Exiting because of repeated Graph connection error' -ForegroundColor Red
+								Write-Host "      $($GraphConnectResult.error)" -ForegroundColor Red
 								exit 1
 							}
 						}
@@ -1240,7 +1246,7 @@ namespace SetOutlookSignatures.AssemblyResolver {
 		}
 
 		foreach ($x in (Get-Job | Where-Object { (-not $_.PSEndTime) -and (((Get-Date) - $_.PSBeginTime) -gt $JobTimeout) })) {
-			"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) canceled due to timeout @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
+			"    [Error] User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) canceled due to timeout @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
 				Write-Host $($_) -ForegroundColor Red
 				Add-Content -Value $($_.TrimStart()) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
 			}
@@ -1254,15 +1260,49 @@ namespace SetOutlookSignatures.AssemblyResolver {
 
 		foreach ($x in (Get-Job | Where-Object { $_.PSEndTime })) {
 			$LogFilePath = Join-Path -Path (Join-Path -Path $SimulateResultPath -ChildPath $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser)) -ChildPath '_log.txt'
+			$LogFileLinesSplit = (Get-Content -Path $LogFilePath -Raw) -split '\r?\n'
+			$LogFileWarningLineNumbers = for ($i = 0; $i -lt $LogFileLinesSplit.Count; $i++) { if ($LogFileLinesSplit[$i] -match '^\s*\[Warning\]') { $i + 1 } }
+			$LogFileErrorLineNumbers = for ($i = 0; $i -lt $LogFileLinesSplit.Count; $i++) { if ($LogFileLinesSplit[$i] -match '^\s*\[Error\]') { $i + 1 } }
 
-			if ((Get-Content -LiteralPath $LogFilePath -Encoding UTF8 -Raw).trim().Contains('xxxSimulateAndDeployExitCode0xxx')) {
-				"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with no errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
-					Write-Host $($_) -ForegroundColor Green
+			if (
+				(@($LogFileErrorLineNumbers).Count -gt 0) -or
+				(-not $LogFileLinesSplit.trim().Contains('xxxSimulateAndDeployExitCode0xxx'))
+			) {
+				$LogFileConsoleColor = 'Red'
+			} elseif (
+				@($LogFileWarningLineNumbers).Count -gt 0) {
+				$LogFileConsoleColor = 'Yellow'
+			} else {
+				$LogFileConsoleColor = 'Green'
+			}
+
+			"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with: $(@($LogFileErrorLineNumbers).Count) errors, $(@($LogFileWarningLineNumbers).Count) warnings @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
+				Write-Host $($_) -ForegroundColor $LogFileConsoleColor
+
+				if (@($LogFileWarningLineNumbers).Count -gt 0) {
+					Write-Host "      Log file contains $(@($LogFileWarningLineNumbers).Count) '[Warning]' entries (lines $($LogFileWarningLineNumbers -join ', '))" -ForegroundColor Yellow
+				}
+	
+				if (@($LogFileErrorLineNumbers).Count -gt 0) {
+					Write-Host "      Log file contains $(@($LogFileErrorLineNumbers).Count) '[Error]' entries (lines $($LogFileErrorLineNumbers -join ', '))" -ForegroundColor Red
+				}
+
+				if (-not (
+						(@($LogFileErrorLineNumbers).Count -gt 0) -or
+						(-not $LogFileLinesSplit.trim().Contains('xxxSimulateAndDeployExitCode0xxx'))
+					)
+				) {
 					Add-Content -Value $($_.TrimStart()) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_success.txt') -Force -Encoding UTF8
 				}
-			} else {
-				"    User $($SimulateList[$($x.name.trimend('_Job'))].SimulateUser) ended with errors @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@" | ForEach-Object {
-					Write-Host $($_) -ForegroundColor Red
+
+				if (@($LogFileWarningLineNumbers).Count -gt 0) {
+					Add-Content -Value $($_.TrimStart()) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_warning.txt') -Force -Encoding UTF8
+				}
+
+				if (
+					(@($LogFileErrorLineNumbers).Count -gt 0) -or
+					(-not $LogFileLinesSplit.trim().Contains('xxxSimulateAndDeployExitCode0xxx'))
+				) {
 					Add-Content -Value $($_.TrimStart()) -LiteralPath (Join-Path -Path $SimulateResultPath -ChildPath '_log_error.txt') -Force -Encoding UTF8
 				}
 			}
@@ -1285,7 +1325,7 @@ namespace SetOutlookSignatures.AssemblyResolver {
 	Write-Host
 	Write-Host ($error[0] | Format-List * | Out-String) -ForegroundColor Red
 	Write-Host
-	Write-Host 'Unexpected error. Exit.' -ForegroundColor red
+	Write-Host '[Error] Unexpected error. Exit.' -ForegroundColor red
 } finally {
 	Write-Host
 	Write-Host "Clean-up @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"

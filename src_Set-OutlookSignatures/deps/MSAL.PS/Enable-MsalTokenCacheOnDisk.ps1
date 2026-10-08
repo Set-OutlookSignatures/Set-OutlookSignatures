@@ -46,7 +46,7 @@ function Enable-MsalTokenCacheOnDisk {
 
         $ClientApplication | Add-Member -MemberType NoteProperty -Name 'cacheInfo' -Value "Encrypted file '$([TokenCacheHelper]::CacheFilePath)'"
     } else {
-        $cacheFilePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\MSAL.PS\MSAL.PS.msalcache.bin3')
+        $cacheFilePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures/MSAL.PS/MSAL.PS.msalcache.bin3')
         $cacheFileName = [System.IO.Path]::GetFileName($cacheFilePath)
         $cacheDir = [System.IO.Path]::GetDirectoryName($cacheFilePath)
 

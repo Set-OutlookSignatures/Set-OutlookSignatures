@@ -55,14 +55,14 @@ Clear-Host
 Remove-TypeData System.Array -ErrorAction SilentlyContinue
 
 if ($psISE) {
-    Write-Host 'PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
-    Write-Host 'Required features are not available in ISE. Exit.' -ForegroundColor Red
+    Write-Host '[Error] PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+    Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
     exit 1
 }
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-    Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
-    Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+    Write-Host "[Error] This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+    Write-Host '  Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
     exit 1
 }
 
@@ -79,7 +79,7 @@ $ParameterCheckSuccess = $true
 if ([string]::IsNullOrWhiteSpace($AppType)) {
     $ParameterCheckSuccess = $false
 
-    Write-Host '  App type not defined, exiting.' -ForegroundColor Red
+    Write-Host '  [Error] App type not defined, exiting.' -ForegroundColor Red
     Write-Host "    Add parameter '-AppType' with one of the following values: $(($PSCmdlet.MyInvocation.MyCommand.Parameters['AppType'].Attributes |
     Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }).ValidValues -join ', ') " -ForegroundColor Red
 }
@@ -87,25 +87,25 @@ if ([string]::IsNullOrWhiteSpace($AppType)) {
 if ([string]::IsNullOrWhiteSpace($AppName)) {
     $ParameterCheckSuccess = $false
 
-    Write-Host '  App name not defined, exiting.' -ForegroundColor Red
+    Write-Host '  [Error] App name not defined, exiting.' -ForegroundColor Red
     Write-Host "    Add parameter '-AppName' with a name for the Entra ID app to be created." -ForegroundColor Red
 }
 
 if ($AppType -ieq 'OutlookAddIn' -and $OutlookAddInUrl -eq $null) {
     $ParameterCheckSuccess = $false
 
-    Write-Host '  Outlook Add-In URI not defined, exiting.' -ForegroundColor Red
+    Write-Host '  [Error] Outlook Add-In URI not defined, exiting.' -ForegroundColor Red
     Write-Host "    Add parameter '-OutlookAddInUrl' with a URI for the Outlook add-in to be created." -ForegroundColor Red
 }
 
 if (($AppType -iin @('Set-OutlookSignatures', 'SimulateAndDeploy')) -and ($OutlookAddInUrl -ne $null)) {
-    Write-Host "  Outlook Add-In URI not allowed for app type $($AppType), exiting." -ForegroundColor Red
+    Write-Host "  [Error] Outlook Add-In URI not allowed for app type $($AppType), exiting." -ForegroundColor Red
     Write-Host "    Remove parameter '-OutlookAddInUrl'." -ForegroundColor Red
     exit 1
 }
 
 if (-not $ParameterCheckSuccess) {
-    Write-Host '  All apps require the AppType and AppName parameters, app type OutlookAddIn additionally the OutlookAddInUrl parameter.' -ForegroundColor Red
+    Write-Host '  [Error] All apps require the AppType and AppName parameters, app type OutlookAddIn additionally the OutlookAddInUrl parameter.' -ForegroundColor Red
 
     exit 1
 } else {
@@ -200,10 +200,9 @@ try {
         Import-Module -Name $_ -Force -WarningAction SilentlyContinue -ErrorAction Stop
     }
 } catch {
-    Write-Host "Error installing PowerShell modules: $($_)" -ForegroundColor Red
-    Write-Host
-    Write-Host 'This is a severe error. It is not related to this script, but to the basic PowerShell setup on this system.' -ForegroundColor Red
-    Write-Host 'Please fix these issues with PowerShell package management, package providers and modules first.' -ForegroundColor Red
+    Write-Host "[Error] Error installing PowerShell modules: $($_)" -ForegroundColor Red
+    Write-Host '  This is a severe error. It is not related to this script, but to the basic PowerShell setup on this system.' -ForegroundColor Red
+    Write-Host '  Please fix these issues with PowerShell package management, package providers and modules first.' -ForegroundColor Red
 
     exit 1
 }
@@ -214,7 +213,7 @@ if ((Get-MgEnvironment).Name -inotcontains $MgGraphEnvironment) {
     Write-Host "Adding custom cloud environment '$($MgGraphEnvironment)'"
 
     if ([String]::IsNullOrEmpty($MgGraphAzureADEndpoint) -or [String]::IsNullOrEmpty($MgGraphGraphEndpoint)) {
-        Write-Host "  '$($MgGraphEnvironment)' is a custom environment, so `$MgGraphAzureADEndpoint and `$MgGraphGraphEndpoint must be set." -ForegroundColor Red
+        Write-Host "  [Error] '$($MgGraphEnvironment)' is a custom environment, so `$MgGraphAzureADEndpoint and `$MgGraphGraphEndpoint must be set." -ForegroundColor Red
         exit 1
     }
 
@@ -250,9 +249,8 @@ try {
         }
     }
 } catch {
-    Write-Host "Error connecting to Microsoft Graph: $($_)" -ForegroundColor Red
-    Write-Host
-    Write-Host 'Please ensure that you can connect to Microsoft Graph and that your user has sufficient permissions.' -ForegroundColor Red
+    Write-Host "[Error] Error connecting to Microsoft Graph: $($_)" -ForegroundColor Red
+    Write-Host '  Please ensure that you can connect to Microsoft Graph and that your user has sufficient permissions.' -ForegroundColor Red
 
     exit 1
 }
@@ -265,7 +263,7 @@ $ExistingApp = @(Get-MgApplication -Filter "DisplayName eq '$($AppName)'" -Error
 
 if ($ExistingApp.Count -gt 0) {
     $ExistingApp | ForEach-Object {
-        Write-Host "  App with name '$($AppName)' already exists. ID: $($_.Id)" -ForegroundColor Red
+        Write-Host "  [Error] App with name '$($AppName)' already exists. ID: $($_.Id)" -ForegroundColor Red
     }
 
     Write-Host '  Exiting.' -ForegroundColor Red
@@ -274,8 +272,8 @@ if ($ExistingApp.Count -gt 0) {
 
 $params = @{
     DisplayName    = $AppName
-    Description    = "$($AppType) app for Set-OutlookSignatures: Data Sovereign Email Signatures and Out-of-Office Replies"
-    Notes          = "$($AppType) app for Set-OutlookSignatures: Data Sovereign Email Signatures and Out-of-Office Replies"
+    Description    = "$($AppType) app for Set-OutlookSignatures: Data-Sovereign Email Signatures and Out-of-Office Replies"
+    Notes          = "$($AppType) app for Set-OutlookSignatures: Data-Sovereign Email Signatures and Out-of-Office Replies"
     SignInAudience = 'AzureADMyOrg'
 }
 
@@ -556,8 +554,13 @@ if ($AppType -ieq 'Set-OutlookSignatures') {
 Update-MgApplication -ApplicationId $app.Id -BodyParameter $permissionParams
 
 if ($AppType -iin @('Set-OutlookSignatures', 'SimulateAndDeploy')) {
-    Write-Host '  Consider restricting file access by switching from Files.Read.All to Files.SelectedOperations.Selected.'
-    Write-Host '    This enhances security but requires granting specific permissions in SharePoint Online.'
+    Write-Host '  Consider restricting file access by switching from Files.Read.All to Files.SelectedOperations.Selected.' -ForegroundColor Yellow
+    Write-Host '    This enhances security but requires granting specific permissions in SharePoint Online.' -ForegroundColor Yellow
+}
+
+if ($AppType -iin @('OutlookAddIn')) {
+    Write-Host '  If you use the Outlook add-in with TREAT_FIRST_REPLY_AS_NEW_MAIL enabled:' -ForegroundColor Yellow
+    Write-Host '    Add the delegated permission Mail.Read.Shared to the app registration to make it work with shared and delegate mailboxes.' -ForegroundColor Yellow
 }
 
 

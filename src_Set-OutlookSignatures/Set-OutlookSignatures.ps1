@@ -39,10 +39,13 @@ License : See '.\LICENSE.txt' for details and copyright
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'OOFInternalValueBasename')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'pathHtmlFolderSuffix')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'PrimaryMailboxAddress')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'PrimaryMailboxEnvironment')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'ScriptInvocation')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'ScriptVersion')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesDefaultNew')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesDefaultReplyFwd')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesDefaultNewLowPrio')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesDefaultReplyFwdLowPrio')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'SignatureFilesWriteProtect')]
 
 
@@ -573,6 +576,8 @@ function main {
         [SetOutlookSignatures.Common]::Init()
 
         if (-not $SetOutlookSignaturesCommonInitDone) {
+            Write-Host '[Error] Error initializing Set-OutlookSignatures. Exiting.' -ForegroundColor Red
+
             if ($script:ExitCode -ne 255) {
                 $script:ExitCodeDescription = 'Common initialization routine failed.'
             } else {
@@ -582,7 +587,7 @@ function main {
             exit
         }
     } else {
-        Write-Host 'Error initializing Set-OutlookSignatures. Exiting.' -ForegroundColor Red
+        Write-Host '[Error] Error initializing Set-OutlookSignatures. Exiting.' -ForegroundColor Red
         $script:ExitCode = 6
         $script:ExitCodeDescription = 'Common initialization routine not available.'
         exit
@@ -673,14 +678,32 @@ public struct SystemPowerStatus {
     Write-Host "Loading and initializing dependencies @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
     try {
+        Write-Host '  ResolveCountry'
+        $script:ResolveCountryModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
+
+        CopyDirectoryParallel -Source ((Join-Path -Path $script:ScriptRoot -ChildPath 'deps/ResolveCountry')) -Destination $script:ResolveCountryModulePath
+
+        foreach ($item in @(Get-ChildItem -LiteralPath $script:ResolveCountryModulePath -Recurse -Force)) {
+            $item.Attributes = 'Normal'
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
+        }
+
+        Import-Module (Join-Path -Path $script:ResolveCountryModulePath -ChildPath 'ResolveCountry.psm1') -ErrorAction Stop
+
+
+        try { global:WatchCatchableExitSignal } catch {}
+
+
         Write-Host '  QRCoder'
         $script:QRCoderModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
-        Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\QRCoder\netstandard2.0')) -Destination $script:QRCoderModulePath -Recurse
-        Get-ChildItem -LiteralPath $script:QRCoderModulePath -Recurse -Force | ForEach-Object {
-            $_.Attributes = 'Normal'
-            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+        CopyDirectoryParallel -Source ((Join-Path -Path $script:ScriptRoot -ChildPath 'deps/QRCoder/netstandard2.0')) -Destination $script:QRCoderModulePath
+
+        foreach ($item in @(Get-ChildItem -LiteralPath $script:QRCoderModulePath -Recurse -Force)) {
+            $item.Attributes = 'Normal'
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
         }
+
         Add-Type -LiteralPath (Join-Path -Path $script:QRCoderModulePath -ChildPath 'QRCoder.dll') -ErrorAction Stop
 
 
@@ -690,11 +713,13 @@ public struct SystemPowerStatus {
         Write-Host '  libphonenumber-csharp'
         $script:LibPhoneNumberModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
-        Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\libphonenumber\netstandard2.0')) -Destination $script:LibPhoneNumberModulePath -Recurse
-        Get-ChildItem -LiteralPath $script:LibPhoneNumberModulePath -Recurse -Force | ForEach-Object {
-            $_.Attributes = 'Normal'
-            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+        CopyDirectoryParallel -Source ((Join-Path -Path $script:ScriptRoot -ChildPath 'deps/libphonenumber/netstandard2.0')) -Destination $script:LibPhoneNumberModulePath
+
+        foreach ($item in @(Get-ChildItem -LiteralPath $script:LibPhoneNumberModulePath -Recurse -Force)) {
+            $item.Attributes = 'Normal'
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
         }
+
         Add-Type -LiteralPath (Join-Path -Path $script:LibPhoneNumberModulePath -ChildPath 'PhoneNumbers.dll') -ErrorAction Stop
 
         # Sample code: Format phone number in different formats
@@ -758,42 +783,8 @@ public struct SystemPowerStatus {
 
             try {
                 if ($Country.Length -ne 2) {
-                    $Country = $(
-                        $tempSearchString = "$($Country)".Trim()
-
-                        if ([string]::IsNullOrWhiteSpace($tempSearchString)) {
-                            $null
-                        } else {
-                            (
-                                @(
-                                    foreach ($tempSpecificCulture in [System.Globalization.CultureInfo]::GetCultures('SpecificCultures')) {
-                                        $tempRegionInfo = New-Object System.Globalization.RegionInfo($tempSpecificCulture)
-
-                                        if (
-                                            [System.Globalization.CultureInfo]::InvariantCulture.CompareInfo.IndexOf(
-                                                ('|' + $(
-                                                    @(
-                                                        foreach ($attribute in @('Name', 'EnglishName', 'DisplayName', 'NativeName', 'TwoLetterISORegionName', 'ThreeLetterISORegionName', 'ThreeLetterWindowsRegionName')) {
-                                                            if (-not [string]::IsNullOrWhiteSpace($tempRegionInfo.$attribute)) {
-                                                                (($tempRegionInfo.$attribute).Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower()
-                                                            }
-                                                        }
-                                                    ) -join '|'
-                                                ) + '|'),
-                                                ('|' + ($tempSearchString.Normalize('FormKD') -replace '[\p{M}\p{P}\p{S}\p{C}\p{Z}\s]').ToLower() + '|'),
-                                                [System.Globalization.CompareOptions]::IgnoreCase -bor [System.Globalization.CompareOptions]::IgnoreNonSpace -bor [System.Globalization.CompareOptions]::IgnoreKanaType -bor [System.Globalization.CompareOptions]::IgnoreWidth
-                                            ) -ge 0
-                                        ) {
-                                            $tempRegionInfo
-                                        }
-                                    }
-                                ) | Select-Object -First 1
-                            ).TwoLetterISORegionName
-                        }
-                    )
+                    $Country = (Resolve-Country -InputString $Country -ReturnType 'cca2' -FallbackValue 'AT').ToUpper()
                 }
-
-                $Country = $Country.ToUpper()
 
                 # Get PhoneNumberUtil instance
                 $phoneUtil = [PhoneNumbers.PhoneNumberUtil]::GetInstance()
@@ -832,7 +823,7 @@ public struct SystemPowerStatus {
                     }
                 }
             } catch {
-                Write-Host "FormatPhoneNumber error: $($_)" -ForegroundColor Red
+                Write-Host "[Error] FormatPhoneNumber error: $($_)" -ForegroundColor Red
 
                 if ($Format -ieq 'CUSTOM') {
                     return [PSCustomObject]@{
@@ -853,45 +844,30 @@ public struct SystemPowerStatus {
         try { global:WatchCatchableExitSignal } catch {}
 
         Write-Host '  AddressFormatter'
-        $script:AddressFormatterModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
+        $script:AddressFormatterModulePath = Join-Path -Path $script:tempDir -ChildPath (New-Guid).Guid
+        $AddressFormatterSrcDir = Join-Path -Path $script:ScriptRoot -ChildPath 'deps/AddressFormatter'
 
-        Push-Location ((Join-Path -Path $PSScriptRoot -ChildPath 'deps\AddressFormatter'))
+        # Copy main source directory, excluding 'subModules'
+        CopyDirectoryParallel -Source $AddressFormatterSrcDir -Destination $script:AddressFormatterModulePath -ExcludeFolderPattern 'subModules'
 
-        # Copy each item to the destination
-        foreach ($item in @(Get-ChildItem -LiteralPath ((Join-Path -Path $PSScriptRoot -ChildPath 'deps\AddressFormatter')) -Recurse)) {
-            $tempRelativePath = Resolve-Path -LiteralPath $item.FullName -Relative
+        # Copy specific 'conf' submodule contents
+        $AddressFormatterConfRelativePath = Join-Path -Path 'subModules' -ChildPath 'OpenCageData/address-formatting/conf'
+        $AddressFormatterConfSrc = Join-Path -Path $AddressFormatterSrcDir -ChildPath $AddressFormatterConfRelativePath
+        $AddressFormatterConfDst = Join-Path -Path $script:AddressFormatterModulePath -ChildPath $AddressFormatterConfRelativePath
 
-            if (
-                ($tempRelativePath -ilike (@('.', 'subModules', 'OpenCageData', 'address-formatting', '*') -join [IO.Path]::DirectorySeparatorChar)) -and
-                -not (
-                    ($tempRelativePath -ilike (@('.', 'subModules', 'OpenCageData', 'address-formatting', 'conf', '*') -join [IO.Path]::DirectorySeparatorChar)) -or
-                    ($tempRelativePath -ieq (@('.', 'subModules', 'OpenCageData', 'address-formatting', 'conf') -join [IO.Path]::DirectorySeparatorChar))
-                )
-            ) {
-                continue
-            }
-
-            $destinationPath = $item.FullName -replace [regex]::escape($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath '\deps\AddressFormatter')))), $script:AddressFormatterModulePath
-
-            if ($item.PSIsContainer) {
-                # Create the directory if it doesn't exist
-                if (-not (Test-Path -LiteralPath $destinationPath)) {
-                    $null = New-Item -ItemType Directory -Path $destinationPath -Force
-                }
-            } else {
-                # Copy the file
-                Copy-Item -LiteralPath $item.FullName -Destination $destinationPath
-            }
+        if (Test-Path -LiteralPath $AddressFormatterConfSrc) {
+            CopyDirectoryParallel -Source $AddressFormatterConfSrc -Destination $AddressFormatterConfDst
         }
 
-        Pop-Location
-
-        Get-ChildItem -LiteralPath $script:AddressFormatterModulePath -Recurse -Force | ForEach-Object {
-            $_.Attributes = 'Normal'
-            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+        # Unblock files and set normal attributes
+        foreach ($item in @(Get-ChildItem -LiteralPath $script:AddressFormatterModulePath -Recurse -Force)) {
+            $item.Attributes = 'Normal'
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
         }
+
         Import-Module (Join-Path -Path $script:AddressFormatterModulePath -ChildPath 'AddressFormatter.psd1') -ErrorAction Stop
     } catch {
+        Write-Host '[Error] Dependencies could not be loaded and initialized.' -ForegroundColor Red
         Write-Host ($error[0] | Format-List * | Out-String) -ForegroundColor Red
 
         $script:ExitCode = 43
@@ -965,9 +941,9 @@ public struct SystemPowerStatus {
             }
 
             if ($OutlookRegistryVersion.Major -ne $OutlookFileVersion.Major) {
-                Write-Host "    Major parts of Outlook version from registry ('$OutlookRegistryVersion') and from outlook.exe ('$OutlookFileVersion') do not match." -ForegroundColor Yellow
-                Write-Host '    Assuming that Outlook is not installed.' -ForegroundColor Yellow
-                Write-Host '    To resolve this, repair the Outlook installation and/or the registry information about Outlook.' -ForegroundColor Yellow
+                Write-Host "    [Warning] Major parts of Outlook version from registry ('$OutlookRegistryVersion') and from outlook.exe ('$OutlookFileVersion') do not match." -ForegroundColor Yellow
+                Write-Host '      Assuming that Outlook is not installed.' -ForegroundColor Yellow
+                Write-Host '      To resolve this, repair the Outlook installation and/or the registry information about Outlook.' -ForegroundColor Yellow
 
                 $OutlookRegistryVersion = $null
                 $OutlookFilePath = $null
@@ -977,7 +953,7 @@ public struct SystemPowerStatus {
 
             if ($null -ne $OutlookRegistryVersion) {
                 if ($OutlookRegistryVersion.major -gt 16) {
-                    Write-Host "    Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+                    Write-Host "    [Error] Outlook version $OutlookRegistryVersion is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
                     $script:ExitCode = 7
                     $script:ExitCodeDescription = 'Outlook version newer than 16 is not yet known.'
                     exit
@@ -988,7 +964,7 @@ public struct SystemPowerStatus {
                 } elseif ($OutlookRegistryVersion.major -eq 14) {
                     $OutlookRegistryVersion = '14.0'
                 } elseif ($OutlookRegistryVersion.major -lt 14) {
-                    Write-Host "    Outlook version $OutlookRegistryVersion is older than Outlook 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+                    Write-Host "    [Error] Outlook version $OutlookRegistryVersion is older than Outlook 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
                     $script:ExitCode = 8
                     $script:ExitCodeDescription = 'Outlook version older than 2010 is not supported.'
                     exit
@@ -1029,7 +1005,7 @@ public struct SystemPowerStatus {
                         }
                     }
                 ) | Where-Object { $_ } | ForEach-Object {
-                    Write-Host "      Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
+                    Write-Host "      [Warning] Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
                 }
             }
 
@@ -1069,7 +1045,7 @@ public struct SystemPowerStatus {
                         }
                     }
                 ) | Where-Object { $_ } | ForEach-Object {
-                    Write-Host "      Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
+                    Write-Host "      [Warning] Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
                 }
             }
 
@@ -1153,18 +1129,18 @@ public struct SystemPowerStatus {
             Write-Host "    Registry version: $OutlookRegistryVersion"
             Write-Host "    File version: $OutlookFileVersion"
             if (($OutlookFileVersion -lt '16.0.0.0') -and ($EmbedImagesInHtml -eq $true)) {
-                Write-Host '      Outlook 2013 or earlier detected.' -ForegroundColor Yellow
-                Write-Host '      Consider parameter ''-EmbedImagesInHtml false'' to avoid problems with images in templates.' -ForegroundColor Yellow
-                Write-Host '      Microsoft supports Outlook 2013 until April 2023, older versions are already out of support.' -ForegroundColor Yellow
+                Write-Host '      [Warning] Outlook 2013 or earlier detected.' -ForegroundColor Yellow
+                Write-Host '        Consider parameter ''-EmbedImagesInHtml false'' to avoid problems with images in templates.' -ForegroundColor Yellow
+                Write-Host '        Microsoft supports Outlook 2013 until April 2023, older versions are already out of support.' -ForegroundColor Yellow
             }
             Write-Host "    Bitness: $OutlookBitness"
             Write-Host "    Default profile: $OutlookDefaultProfile"
             Write-Host "    Is C2R Beta: $OutlookIsBetaversion"
             Write-Host "    DisableRoamingSignatures: $OutlookDisableRoamingSignatures"
             if (($OutlookDisableRoamingSignatures -eq 0) -and ($OutlookFileVersion -ge '16.0.0.0')) {
-                Write-Host '      Outlook syncs signatures itself, so it may overwrite signatures created by this software.' -ForegroundColor Yellow
-                Write-Host '      Consider setting parameters DisableRoamingSignatures and MirrorCloudSignatures to true instead.' -ForegroundColor Yellow
-                Write-Host '      Also consider using the MailboxSpecificSignaturesNames parameter.' -ForegroundColor Yellow
+                Write-Host '      [Warning] Outlook syncs signatures itself, so it may overwrite signatures created by this software.' -ForegroundColor Yellow
+                Write-Host '        Consider setting parameters DisableRoamingSignatures and MirrorCloudSignatures to true instead.' -ForegroundColor Yellow
+                Write-Host '        Also consider using the MailboxSpecificSignaturesNames parameter.' -ForegroundColor Yellow
             }
 
             Write-Host "    UseNewOutlook: $OutlookUseNewOutlook"
@@ -1286,12 +1262,12 @@ end tell
                                 Write-Host '        3. Start Outlook and run Set-OutlookSignatures'
                             }
                         } else {
-                            Write-Host "      Failed. '~/Library/Group Containers/UBF8T346G9.Office/Outlook/Outlook 15 Profiles/Main Profile/ProfilePreferences.plist' not found." -ForegroundColor Yellow
+                            Write-Host "      [Warning] Failed. '~/Library/Group Containers/UBF8T346G9.Office/Outlook/Outlook 15 Profiles/Main Profile/ProfilePreferences.plist' not found." -ForegroundColor Yellow
                         }
                     }
 
                     if (-not ($macOSOutlookMailboxes.count -gt 0)) {
-                        Write-Host '    Outlook does not have accounts configured, or accounts cannot be scripted. Continuing with Outlook for the web only.' -ForegroundColor Yellow
+                        Write-Host '    [Warning] Outlook does not have accounts configured, or accounts cannot be scripted. Continuing with Outlook for the web only.' -ForegroundColor Yellow
                         Write-Host "      Consider using 'sample code/SwitchTo-ClassicOutlookForMac.ps1' to temporarily switch from New Outlook to Classic Outlook." -ForegroundColor Yellow
 
                         $OutlookUseNewOutlook = $true
@@ -1299,7 +1275,7 @@ end tell
                     }
                 }
             } else {
-                Write-Host '    Outlook for Mac not installed, or signatures cannot be scripted. Continuing with Outlook for the web only.' -ForegroundColor Yellow
+                Write-Host '    [Warning] Outlook for Mac not installed, or signatures cannot be scripted. Continuing with Outlook for the web only.' -ForegroundColor Yellow
 
                 $OutlookUseNewOutlook = $true
                 $macOSOutlookMailboxes = @()
@@ -1329,7 +1305,7 @@ end tell
         $script:WordRegistryVersion = [System.Version]::Parse(((((((Get-ItemProperty -LiteralPath 'Registry::HKEY_CLASSES_ROOT\Word.Application\CurVer' -ErrorAction SilentlyContinue).'(default)' -ireplace [Regex]::Escape('Word.Application.'), '') + '.0.0.0.0')) -ireplace '^\.', '' -split '\.')[0..3] -join '.'))
 
         if ($script:WordRegistryVersion.major -gt 16) {
-            Write-Host "    Word version $($script:WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
+            Write-Host "    [Error] Word version $($script:WordRegistryVersion) is newer than 16 and not yet known. Please inform your administrator. Exit." -ForegroundColor Red
             $script:ExitCode = 9
             $script:ExitCodeDescription = 'Word version newer than 16 is not yet known.'
             exit
@@ -1340,7 +1316,7 @@ end tell
         } elseif ($script:WordRegistryVersion.major -eq 14) {
             $script:WordRegistryVersion = '14.0'
         } elseif ($script:WordRegistryVersion.major -lt 14) {
-            Write-Host "    Word version $($script:WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
+            Write-Host "    [Error] Word version $($script:WordRegistryVersion) is older than Word 2010 and not supported. Please inform your administrator. Exit." -ForegroundColor Red
             $script:ExitCode = 10
             $script:ExitCodeDescription = 'Word version older than 2010 is not supported.'
             exit
@@ -1401,7 +1377,7 @@ end tell
                     }
                 }
             ) | Where-Object { $_ } | ForEach-Object {
-                Write-Host "    Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
+                Write-Host "    [Warning] Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
             }
 
             try {
@@ -1454,7 +1430,7 @@ end tell
                 }
             }
         ) | Where-Object { $_ } | ForEach-Object {
-            Write-Host "    Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
+            Write-Host "    [Warning] Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
         }
 
         @(
@@ -1487,7 +1463,7 @@ end tell
                 }
             }
         ) | Where-Object { $_ } | ForEach-Object {
-            Write-Host "    Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
+            Write-Host "    [Warning] Differing GPO setting takes precedence. $($_)" -ForegroundColor Yellow
         }
     }
 
@@ -1706,12 +1682,12 @@ end tell
                     }
 
                     if (($a -ne 0) -and ($x[$a] -ieq '*')) {
-                        Write-Host '    Entry * is only allowed at first position in list. Skip entry.' -ForegroundColor Red
+                        Write-Host '    [Error] Entry * is only allowed at first position in list. Skip entry.' -ForegroundColor Red
                         continue
                     }
 
                     if ($y -imatch '[^a-zA-Z0-9.-]') {
-                        Write-Host '    Allowed characters are a-z, A-Z, ., -. Skip entry.' -ForegroundColor Red
+                        Write-Host '    [Error] Allowed characters are a-z, A-Z, ., -. Skip entry.' -ForegroundColor Red
                         continue
                     }
 
@@ -1774,7 +1750,7 @@ end tell
                                     }
                                 }
                             } else {
-                                Write-Host '    No trust to this domain/forest found.' -ForegroundColor Yellow
+                                Write-Host '    [Warning] No trust to this domain/forest found.' -ForegroundColor Yellow
                             }
                         }
                     } else {
@@ -1806,15 +1782,15 @@ end tell
                 Write-Host "Check trusts for open Global Catalog port and connectivity @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
                 CheckADConnectivity $TrustsToCheckForGroups 'GC' '  ' | Out-Null
             } else {
-                Write-Host '  Problem connecting to logged-in user''s Active Directory (no error message, but forest root domain name is empty).' -ForegroundColor Yellow
-                Write-Host '  Assuming Graph/Entra ID from now on.' -ForegroundColor Yellow
+                Write-Host '  [Warning] Problem connecting to logged-in user''s Active Directory (no error message, but forest root domain name is empty).' -ForegroundColor Yellow
+                Write-Host '    Assuming Graph/Entra ID from now on.' -ForegroundColor Yellow
                 $GraphOnly = $true
             }
         } catch {
             Write-Verbose "  $($error[0])"
             $y = ''
-            Write-Host "  Problem connecting to logged-in user's Active Directory, see verbose output for details." -ForegroundColor Yellow
-            Write-Host '  Assuming Graph/Entra ID from now on.' -ForegroundColor Yellow
+            Write-Host "  [Warning] Problem connecting to logged-in user's Active Directory, see verbose output for details." -ForegroundColor Yellow
+            Write-Host '    Assuming Graph/Entra ID from now on.' -ForegroundColor Yellow
             $GraphOnly = $true
         }
     } else {
@@ -1832,6 +1808,8 @@ end tell
     } else {
         Write-Host "  Simulate '$SimulateUser' as currently logged-in user"
     }
+
+    $PrimaryMailboxEnvironment = ''
 
     if ($GraphOnly -eq $false) {
         if ($null -ne $TrustsToCheckForGroups[0]) {
@@ -1915,8 +1893,8 @@ end tell
                             }
                         }
                     } catch {
-                        Write-Host "    $($error[0])"
-                        Write-Host "    Simulation user '$($SimulateUser)' not found. Exit." -ForegroundColor REd
+                        Write-Host "    [Error] Simulation user '$($SimulateUser)' not found. Exit." -ForegroundColor Red
+                        Write-Host "      $($error[0])"
                         $script:ExitCode = 11
                         $script:ExitCodeDescription = 'Simulation user not found.'
                         exit
@@ -1924,10 +1902,169 @@ end tell
                 }
 
                 $ADPropsCurrentUser = ConvertToPSCustomObject -item $ADPropsCurrentUser
+
+                $PrimaryMailboxEnvironment = GetMailboxEnvironment $ADPropsCurrentUser
+
+                if ([string]::IsNullOrWhiteSpace($PrimaryMailboxEnvironment)) {
+                    # Hosting environment is not determinable, assuming Exchange Resource Forest scenario (linked mailbox), searching for linked mailbox
+                    $CurrentUserSIDs = @()
+                    $tempADPropsCurrentUserMailbox = $null
+
+                    if (($ADPropsCurrentUser.objectsid -ne '') -and ($null -ne $ADPropsCurrentUser.objectsid)) {
+                        if ($ADPropsCurrentUser.objectsid.tostring().startswith('S-', [System.StringComparison]::OrdinalIgnoreCase)) {
+                            $CurrentUserSids += $ADPropsCurrentUser.objectsid.tostring()
+                        } else {
+                            $CurrentUserSids += (New-Object system.security.principal.securityidentifier($ADPropsCurrentUser.objectsid, 0)).value
+                        }
+                    }
+
+                    foreach ($SidHistorySid in @($ADPropsCurrentUser.sidhistory | Where-Object { $_ })) {
+                        try { global:WatchCatchableExitSignal } catch {}
+
+                        if ($SidHistorySid.tostring().startswith('S-', [System.StringComparison]::OrdinalIgnoreCase)) {
+                            $CurrentUserSids += $SidHistorySid.tostring()
+                        } else {
+                            $CurrentUserSids += (New-Object system.security.principal.securityidentifier($SidHistorySid, 0)).value
+                        }
+                    }
+
+                    if ($CurrentUserSids.count -gt 0) {
+                        $CurrentUserSids = @($CurrentUserSids | Select-Object -Unique)
+                        $LdapFilterSIDs = ''
+
+                        foreach ($CurrentUserSid in $CurrentUserSids) {
+                            try { global:WatchCatchableExitSignal } catch {}
+
+                            try {
+                                $SidHex = @()
+                                $ot = New-Object System.Security.Principal.SecurityIdentifier($CurrentUserSid)
+                                $c = New-Object 'byte[]' $ot.BinaryLength
+                                $ot.GetBinaryForm($c, 0)
+                                foreach ($char in $c) {
+                                    $SidHex += $('\{0:x2}' -f $char)
+                                }
+
+                                $LdapFilterSIDs += ('(msExchMasterAccountSid=' + $($SidHex -join '') + ')')
+                            } catch {
+                                Write-Host ($error[0] | Format-List * | Out-String)
+                                Write-Host '        [Error] Error creating LDAP filter for search across trusts.' -ForegroundColor Red
+                            }
+                        }
+                    } else {
+                        $LdapFilterSIDs = ''
+                    }
+
+
+                    if ($null -ne $TrustsToCheckForGroups[0]) {
+                        # Loop through domains until the first one knows the msExchMasterAccountSid or the proxy address
+                        for ($DomainNumber = 0; $DomainNumber -lt $TrustsToCheckForGroups.count; $DomainNumber++) {
+                            try { global:WatchCatchableExitSignal } catch {}
+
+                            if (($TrustsToCheckForGroups[$DomainNumber] -ne '')) {
+                                Write-Host "    Search for mailbox user object in domain/forest '$($TrustsToCheckForGroups[$DomainNumber])'"
+
+                                $Search.searchroot = New-Object System.DirectoryServices.DirectoryEntry("GC://$($TrustsToCheckForGroups[$DomainNumber])")
+
+                                if (-not [string]::IsNullOrWhiteSpace($ADPropsCurrentUser.mail)) {
+                                    $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(legacyExchangeDN=*)(proxyaddresses=smtp:$($ADPropsCurrentUser.mail)))"
+                                } elseif (($($MailAddresses[$AccountNumberRunning]) -ne '')) {
+                                    $Search.filter = "(&(ObjectCategory=person)(objectclass=user)(|(msexchrecipienttypedetails<=32)(msexchrecipienttypedetails>=2147483648))(msExchMailboxGuid=*)(legacyExchangeDN=*)(|$($LdapFilterSIDs)))"
+                                }
+
+                                try { global:WatchCatchableExitSignal } catch {}
+
+                                $u = $Search.FindAll()
+
+                                try { global:WatchCatchableExitSignal } catch {}
+
+                                if ($u.count -eq 0) {
+                                    Write-Host '      Not found'
+                                } elseif ($u.count -gt 1) {
+                                    Write-Host '      [Warning] Multiple matches found' -ForegroundColor Yellow
+
+                                    foreach ($SingleU in $u) {
+                                        Write-Host "      $($SingleU.path)" -ForegroundColor Yellow
+                                    }
+
+                                    Write-Host '        [Warning] Check why your Active Directory returns multiple results for the following query:' -ForegroundColor Yellow
+                                    Write-Host "          $($Search.SearchRoot)" -ForegroundColor Yellow
+                                    Write-Host "          $($Search.Filter)" -ForegroundColor Yellow
+
+                                    break
+                                } else {
+                                    $Search.SearchRoot = "GC://$(($(([adsi]"$($u[0].path)").distinguishedname) -split ',DC=')[1..999] -join '.')"
+                                    $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
+
+                                    try { global:WatchCatchableExitSignal } catch {}
+
+                                    $tempADPropsCurrentUserMailbox = $Search.FindOne().Properties
+
+                                    try { global:WatchCatchableExitSignal } catch {}
+
+                                    $tempADPropsCurrentUserMailbox = [hashtable]::new($tempADPropsCurrentUserMailbox, [StringComparer]::OrdinalIgnoreCase)
+
+                                    $Search.SearchRoot = "LDAP://$(($(([adsi]"$($u[0].path)").distinguishedname) -split ',DC=')[1..999] -join '.')"
+                                    $Search.Filter = "((distinguishedname=$(([adsi]"$($u[0].path)").distinguishedname)))"
+
+                                    try { global:WatchCatchableExitSignal } catch {}
+
+                                    $tempLdap = $Search.FindOne().Properties
+
+                                    try { global:WatchCatchableExitSignal } catch {}
+
+                                    $tempLdap = [hashtable]::new($tempLdap, [StringComparer]::OrdinalIgnoreCase)
+
+                                    foreach ($keyName in @($tempLdap.Keys)) {
+                                        if (
+                                            ($keyName -inotin $tempADPropsCurrentUserMailbox.Keys) -or
+                                            (-not ($tempADPropsCurrentUserMailbox[$keyName]) -and ($tempLdap[$keyName]))
+                                        ) {
+                                            $tempADPropsCurrentUserMailbox[$keyName] = $tempLdap[$keyName]
+                                        }
+                                    }
+
+                                    $tempADPropsCurrentUserMailbox = ConvertToPSCustomObject -item $tempADPropsCurrentUserMailbox
+
+                                    Write-Host "      DistinguishedName: $($tempADPropsCurrentUserMailbox.distinguishedname)"
+                                    Write-Host "      UserPrincipalName: $($tempADPropsCurrentUserMailbox.userprincipalname)"
+                                    Write-Host "      Mail: $($tempADPropsCurrentUserMailbox.mail)"
+
+
+                                    if (-not $tempADPropsCurrentUserMailbox.mail) {
+                                        Write-Host '        [Warning] The mail attribute is not set, this will lead to errors in Set-OutlookSignatures and other applications.' -ForegroundColor Yellow
+                                    }
+                                    if ($tempADPropsCurrentUserMailbox.mail -ine (@($tempADPropsCurrentUserMailbox.proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')) {
+                                        Write-Host "        [Warning] The mail attribute does not match the primary SMTP address ('$(@($tempADPropsCurrentUserMailbox.proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')'), this will lead to errors in Set-OutlookSignatures and other applications." -ForegroundColor Yellow
+                                    }
+
+                                    break
+                                }
+                            }
+                        }
+
+                        if ($u.count -eq 0) {
+                            Write-Host '      [Warning] No matching mailbox object found in any Active Directory. See verbose output for details.' -ForegroundColor Yellow
+                            Write-Host '        This message can be ignored if the mailbox in question is not part of your environment.' -ForegroundColor Yellow
+                            Write-Verbose "          You may have restricted the accessible environment with the 'TrustsToCheckForGroups' parameter."
+                            Write-Verbose '          Else, check why the following Active Directory query did not return a result:'
+                            Write-Verbose "            $($Search.Filter)"
+                            Write-Verbose '          Usual root causes: Mailbox added in Outlook no longer exists or is not in your tenant, Exchange data in Active Directory is not complete, firewall rules, DNS.'
+                            Write-Verbose '          Check if all required attributes are available in your on-prem Active Directory and have values:'
+                            Write-Verbose '            legacyExchangeDN, msexchrecipienttypedetails, msExchMailboxGuid, proxyaddresses, mail (set to the mailbox''s primary SMTP address)'
+                            Write-Verbose '          For hybrid environments:'
+                            Write-Verbose '            Add missing msExchMailboxGuid for cloud mailboxes to on-prem AD: https://learn.microsoft.com/en-US/exchange/troubleshoot/move-mailboxes/migrationpermanentexception-when-moving-mailboxes.'
+                            Write-Verbose "            Consider using the '-GraphOnly true' parameter to not query on-prem Active Directory at all."
+                        }
+                    }
+
+                    $PrimaryMailboxEnvironment = GetMailboxEnvironment $tempADPropsCurrentUserMailbox
+
+                    Remove-Variable -Name 'tempADPropsCurrentUserMailbox'
+                }
             } catch {
+                Write-Host '    [Error] Problem connecting to Active Directory, or user is a local user. Exit.' -ForegroundColor Red
                 Write-Host ($error[0] | Format-List * | Out-String)
                 $ADPropsCurrentUser = $null
-                Write-Host '    Problem connecting to Active Directory, or user is a local user. Exit.' -ForegroundColor Red
                 $script:ExitCode = 12
                 $script:ExitCodeDescription = 'Problem connecting to Active Directory, or user is a local user.'
                 exit
@@ -1937,9 +2074,10 @@ end tell
 
     if (
         ($GraphOnly -eq $true) -or
-        (($GraphOnly -eq $false) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true))) -or
+        (($GraphOnly -eq $false) -and ($PrimaryMailboxEnvironment -ine 'On-prem') -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true))) -or
         (($GraphOnly -eq $false) -and ($null -eq $ADPropsCurrentUser)) -or
         ($OutlookUseNewOutlook -eq $true) -or
+        ($PrimaryMailboxEnvironment -ine 'On-prem') -or
         $(
             if (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('LicenseGroupRequiresGraph'))) {
                 $result = [SetOutlookSignatures.BenefactorCircle]::LicenseGroupRequiresGraph()
@@ -1956,9 +2094,10 @@ end tell
     ) {
         Write-Host "    Enforcing Graph$(if ($null -ne $TrustsToCheckForGroups[0]) { ' instead of Active Directory' }) because at least one condition is true:"
         Write-Host "      GraphOnly is true: $($GraphOnly -eq $true)"
-        Write-Host "      GraphOnly is false, mailbox is in cloud, SetCurrentUserOOFMessage and/or SetCurrentUserOutlookWebSignature is true: $(($GraphOnly -eq $false) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)))"
+        Write-Host "      GraphOnly is false, user's mailbox is not on-prem is true, SetCurrentUserOOFMessage and/or SetCurrentUserOutlookWebSignature is true: $(($GraphOnly -eq $false) -and ($PrimaryMailboxEnvironment -ine 'On-prem') -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true)))"
         Write-Host "      GraphOnly is false and on-prem AD properties of current user are empty: $(($GraphOnly -eq $false) -and ($null -eq $ADPropsCurrentUser))"
         Write-Host "      New Outlook is used: $($OutlookUseNewOutlook -eq $true)"
+        Write-Host "      User's mailbox is not on-prem is true: $($PrimaryMailboxEnvironment -ine 'On-prem')"
         Write-Host "      The only Benefactor Circle license group is in Entra ID: $(
             if (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('LicenseGroupRequiresGraph'))) {
                 $result = [SetOutlookSignatures.BenefactorCircle]::LicenseGroupRequiresGraph()
@@ -1995,7 +2134,7 @@ end tell
                 Write-Verbose "      App Graph Token EXO metadata: $((ParseJwtToken $script:GraphToken.AppAccessTokenExo) | ConvertTo-Json)"
             }
         } else {
-            Write-Host '      Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
+            Write-Host '      [Error] Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
             Write-Host $script:GraphToken.error -ForegroundColor Red
             $script:ExitCode = 14
             $script:ExitCodeDescription = 'Problem connecting to Microsoft Graph.'
@@ -2031,7 +2170,7 @@ end tell
                 $ADPropsCurrentUser | Add-Member -MemberType NoteProperty -Name 'manager' -Value $null -Force
             }
         } else {
-            Write-Host "      Problem getting data for '$($script:GraphUser)' from Microsoft Graph. Exit." -ForegroundColor Red
+            Write-Host "      [Error] Problem getting data for '$($script:GraphUser)' from Microsoft Graph. Exit." -ForegroundColor Red
             Write-Host $x.error -ForegroundColor Red
             $script:ExitCode = 15
             $script:ExitCodeDescription = "Problem getting data for '$($script:GraphUser)' from Microsoft Graph."
@@ -2046,7 +2185,6 @@ end tell
     } else {
         Write-Host '    User not found'
     }
-
 
     try { global:WatchCatchableExitSignal } catch {}
 
@@ -2230,8 +2368,8 @@ end tell
                 $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SignaturesForAutomappedAndAdditionalMailboxes()
 
                 if ($FeatureResult -ne 'true') {
-                    Write-Host '    Error finding automapped and additional mailboxes.' -ForegroundColor Yellow
-                    Write-Host "    $FeatureResult" -ForegroundColor Yellow
+                    Write-Host '    [Warning] Problem finding automapped and additional mailboxes.' -ForegroundColor Yellow
+                    Write-Host "      $FeatureResult" -ForegroundColor Yellow
                 }
             }
         } else {
@@ -2262,7 +2400,7 @@ end tell
         $script:GraphUserDummyMailbox = $true
 
         if (((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) -and $OutlookUseNewOutlook -eq $true) {
-            $NewOutlookUserSettingsFilePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Microsoft\Olk\UserSettings.json')
+            $NewOutlookUserSettingsFilePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Microsoft/Olk/UserSettings.json')
 
             $NewOutlookUserSettingsFileContent = ConvertEncoding -InFile $NewOutlookUserSettingsFilePath -InIsHtml $false
 
@@ -2288,7 +2426,7 @@ end tell
                 $x = @(@($ADPropsCurrentUser.mail.tolower()) + @($x))
             }
         } else {
-            Write-Host '    User does not have mail attribute configured' -ForegroundColor Yellow
+            Write-Host '    [Warning] User does not have mail attribute configured' -ForegroundColor Yellow
             $script:GraphUserDummyMailbox = $false
         }
 
@@ -2300,10 +2438,6 @@ end tell
             Write-Host "    $($MailAddresses[-1])"
             Write-Verbose "      Registry: $($RegistryFolder.PSPath -ireplace [regex]::escape('Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER'), $RegistryFolder.PSDrive)"
             Write-Verbose "      LegacyExchangeDN: $($LegacyExchangeDNs[-1])"
-
-            if ($ADPropsCurrentUser.mail -and ($_ -ieq $ADPropsCurrentUser.mail)) {
-                $PrimaryMailboxAddress = $ADPropsCurrentUser.mail
-            }
         }
 
         if ($SignaturesForAutomappedAndAdditionalMailboxes) {
@@ -2315,13 +2449,19 @@ end tell
                 $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SignaturesForAutomappedAndAdditionalMailboxes()
 
                 if ($FeatureResult -ne 'true') {
-                    Write-Host '    Error finding automapped and additional mailboxes.' -ForegroundColor Yellow
-                    Write-Host "    $FeatureResult" -ForegroundColor Yellow
+                    Write-Host '    [Warning] Problem finding automapped and additional mailboxes.' -ForegroundColor Yellow
+                    Write-Host "      $FeatureResult" -ForegroundColor Yellow
                 }
             }
         } else {
             Write-Host "    Parameter 'SignaturesForAutomappedAndAdditionalMailboxes' is not enabled, skipping task."
         }
+    }
+
+    
+    if ($ADPropsCurrentUser.mail -and ($ADPropsCurrentUser.mail -iin $MailAddresses)) {
+        $PrimaryMailboxAddress = $ADPropsCurrentUser.mail
+        $PrimaryMailboxEnvironment = GetMailboxEnvironment $ADPropsCurrentUser
     }
 
     try { global:WatchCatchableExitSignal } catch {}
@@ -2330,7 +2470,7 @@ end tell
         # OOF and/or Outlook for the web signature must be set, but user does not seem to have a mailbox in Outlook
         # Maybe this is a pure Outlook for the web user, so we will add a helper entry
         # This entry fakes the users mailbox in his default Outlook profile, so it gets the highest priority later
-        Write-Host "  User's mailbox not found in email address list, but Outlook for the web signature and/or OOF message should be set. Adding dummy mailbox entry." -ForegroundColor Yellow
+        Write-Host "  [Warning] User's mailbox not found in email address list, but Outlook for the web signature and/or OOF message should be set. Adding dummy mailbox entry." -ForegroundColor Yellow
 
         if ($ADPropsCurrentUser.mail) {
             $script:GraphUserDummyMailbox = $true
@@ -2341,7 +2481,7 @@ end tell
             $RegistryPaths = @('') + $RegistryPaths
             $LegacyExchangeDNs = @('') + $LegacyExchangeDNs
         } else {
-            Write-Host '      User does not have mail attribute configured.' -ForegroundColor Yellow
+            Write-Host '      [Warning] User does not have mail attribute configured.' -ForegroundColor Yellow
             $script:GraphUserDummyMailbox = $false
         }
     } else {
@@ -2352,8 +2492,8 @@ end tell
 
     if ($MailAddresses.count -eq 0) {
         Write-Host
-        Write-Host 'No email addresses found, exiting.'
-        Write-Host '  In simulation mode, this might be a permission problem.'
+        Write-Host '[Error] No email addresses found, exiting.' -ForegroundColor Red
+        Write-Host '  In simulation mode, this might be a permission problem.' -ForegroundColor Red
         $script:ExitCode = 16
         $script:ExitCodeDescription = 'No email addresses found.'
         exit
@@ -2418,13 +2558,13 @@ end tell
                             if ($u.count -eq 0) {
                                 Write-Host '      Not found'
                             } elseif ($u.count -gt 1) {
-                                Write-Host '      Multiple matches found' -ForegroundColor Yellow
+                                Write-Host '      [Warning] Multiple matches found' -ForegroundColor Yellow
 
                                 foreach ($SingleU in $u) {
                                     Write-Host "      $($SingleU.path)" -ForegroundColor Yellow
                                 }
 
-                                Write-Host '        Check why your Active Directory returns multiple results for the following query:' -ForegroundColor Yellow
+                                Write-Host '        [Warning] Check why your Active Directory returns multiple results for the following query:' -ForegroundColor Yellow
                                 Write-Host "          $($Search.SearchRoot)" -ForegroundColor Yellow
                                 Write-Host "          $($Search.Filter)" -ForegroundColor Yellow
 
@@ -2479,28 +2619,29 @@ end tell
                                 Write-Host "      UserPrincipalName: $($ADPropsMailboxes[$AccountNumberRunning].userprincipalname)"
                                 Write-Host "      Mail: $($ADPropsMailboxes[$AccountNumberRunning].mail)"
                                 if (-not $ADPropsMailboxes[$AccountNumberRunning].mail) {
-                                    Write-Host '        The mail attribute is not set, this will lead to errors in Set-OutlookSignatures and other applications.' -ForegroundColor Yellow
+                                    Write-Host '        [Warning] The mail attribute is not set, this will lead to errors in Set-OutlookSignatures and other applications.' -ForegroundColor Yellow
                                 }
                                 if ($ADPropsMailboxes[$AccountNumberRunning].mail -ine (@($ADPropsMailboxes[$AccountNumberRunning].proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')) {
-                                    Write-Host "        The mail attribute does not match the primary SMTP address ('$(@($ADPropsMailboxes[$AccountNumberRunning].proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')'), this will lead to errors in Set-OutlookSignatures and other applications." -ForegroundColor Yellow
+                                    Write-Host "        [Warning] The mail attribute does not match the primary SMTP address ('$(@($ADPropsMailboxes[$AccountNumberRunning].proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')'), this will lead to errors in Set-OutlookSignatures and other applications." -ForegroundColor Yellow
                                 }
+
                                 Write-Host "      Manager: $($ADPropsMailboxes[$AccountNumberRunning].manager)"
                             }
                         }
                     }
 
                     if ($u.count -eq 0) {
-                        Write-Host '      No matching mailbox object found in any Active Directory. See verbose output for details.' -ForegroundColor Yellow
-                        Write-Host '      This message can be ignored if the mailbox in question is not part of your environment.' -ForegroundColor Yellow
-                        Write-Verbose "        You may have restricted the accessible environment with the 'TrustsToCheckForGroups' parameter."
-                        Write-Verbose '        Else, check why the following Active Directory query did not return a result:'
-                        Write-Verbose "          $($Search.Filter)"
-                        Write-Verbose '        Usual root causes: Mailbox added in Outlook no longer exists or is not in your tenant, Exchange data in Active Directory is not complete, firewall rules, DNS.'
-                        Write-Verbose '        Check if all required attributes are available in your on-prem Active Directory and have values:'
-                        Write-Verbose '          https://set-outlooksignatures.com/details#hybrid-and-cloud-only-support'
-                        Write-Verbose '        For hybrid environments:'
-                        Write-Verbose '          Add missing msExchMailboxGuid for cloud mailboxes to on-prem AD: https://learn.microsoft.com/en-US/exchange/troubleshoot/move-mailboxes/migrationpermanentexception-when-moving-mailboxes.'
-                        Write-Verbose "          Consider using the '-GraphOnly true' parameter to not query on-prem Active Directory at all."
+                        Write-Host '      [Warning] No matching mailbox object found in any Active Directory. See verbose output for details.' -ForegroundColor Yellow
+                        Write-Host '        This message can be ignored if the mailbox in question is not part of your environment.' -ForegroundColor Yellow
+                        Write-Verbose "          You may have restricted the accessible environment with the 'TrustsToCheckForGroups' parameter."
+                        Write-Verbose '          Else, check why the following Active Directory query did not return a result:'
+                        Write-Verbose "            $($Search.Filter)"
+                        Write-Verbose '          Usual root causes: Mailbox added in Outlook no longer exists or is not in your tenant, Exchange data in Active Directory is not complete, firewall rules, DNS.'
+                        Write-Verbose '          Check if all required attributes are available in your on-prem Active Directory and have values:'
+                        Write-Verbose '            legacyExchangeDN, msexchrecipienttypedetails, msExchMailboxGuid, proxyaddresses, mail (set to the mailbox''s primary SMTP address)'
+                        Write-Verbose '          For hybrid environments:'
+                        Write-Verbose '            Add missing msExchMailboxGuid for cloud mailboxes to on-prem AD: https://learn.microsoft.com/en-US/exchange/troubleshoot/move-mailboxes/migrationpermanentexception-when-moving-mailboxes.'
+                        Write-Verbose "            Consider using the '-GraphOnly true' parameter to not query on-prem Active Directory at all."
                     }
 
                     if (-not $ADPropsMailboxes[$AccountNumberRunning]) {
@@ -2595,11 +2736,13 @@ end tell
                         Write-Host "      UserPrincipalName: $($ADPropsMailboxes[$AccountNumberRunning].userprincipalname)"
                         Write-Host "      Mail: $($ADPropsMailboxes[$AccountNumberRunning].mail)"
                         if (-not $ADPropsMailboxes[$AccountNumberRunning].mail) {
-                            Write-Host '        The mail attribute is not set, this will lead to errors in Set-OutlookSignatures and other applications.' -ForegroundColor Yellow
+                            Write-Host '        [Warning] The mail attribute is not set, this will lead to errors in Set-OutlookSignatures and other applications.' -ForegroundColor Yellow
                         }
                         if ($ADPropsMailboxes[$AccountNumberRunning].mail -ine (@($ADPropsMailboxes[$AccountNumberRunning].proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')) {
-                            Write-Host "        The mail attribute does not match the primary SMTP address ('$(@($ADPropsMailboxes[$AccountNumberRunning].proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')'), this will lead to errors in Set-OutlookSignatures and other applications." -ForegroundColor Yellow
+                            Write-Host "        [Warning] The mail attribute does not match the primary SMTP address ('$(@($ADPropsMailboxes[$AccountNumberRunning].proxyaddresses | Where-Object { $_ -cmatch '^SMTP:' } | ForEach-Object { $_.Substring(5) }) -join ', ')'), this will lead to errors in Set-OutlookSignatures and other applications." -ForegroundColor Yellow
                         }
+
+
                         Write-Host "      Manager: $($ADPropsMailboxes[$AccountNumberRunning].manager)"
 
                         if ($ADPropsMailboxes[$AccountNumberRunning].manager) {
@@ -2645,16 +2788,16 @@ end tell
                                 try { global:WatchCatchableExitSignal } catch {}
                             } catch {
                                 $ADPropsMailboxManagers[$AccountNumberRunning] = @()
-                                Write-Host '        Skipping, mailbox manager not in Microsoft Graph.' -ForegroundColor yellow
+                                Write-Host '        [Warning] Skipping, mailbox manager not in Microsoft Graph.' -ForegroundColor yellow
                             }
                         }
                     } else {
-                        Write-Host '      No matching mailbox object found via Graph/Entra ID. See verbose output for details.' -ForegroundColor Yellow
-                        Write-Host '      This message can be ignored if the mailbox in question is not part of your environment.' -ForegroundColor Yellow
-                        Write-Verbose '        Check why the following Graph queries return zero or more than 1 results, or do not contain any properties:'
-                        Write-Verbose "          UserPrincipalName from: $("$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$filter=proxyAddresses/any(x:x eq 'smtp:$($MailAddresses[$AccountNumberRunning])')")"
-                        Write-Verbose "          Replace XXX with UPN from query above: $("$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/XXX?`$select=" + [System.Net.WebUtility]::UrlEncode($(@($GraphUserProperties | Select-Object -Unique) -join ',')))"
-                        Write-Verbose '        Usual root causes: Mailbox added in Outlook no longer exists or is not in your tenant, firewall rules, DNS.'
+                        Write-Host '      [Warning] No matching mailbox object found via Graph/Entra ID. See verbose output for details.' -ForegroundColor Yellow
+                        Write-Host '        This message can be ignored if the mailbox in question is not part of your environment.' -ForegroundColor Yellow
+                        Write-Verbose '          Check why the following Graph queries return zero or more than 1 results, or do not contain any properties:'
+                        Write-Verbose "            UserPrincipalName from: $("$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$filter=proxyAddresses/any(x:x eq 'smtp:$($MailAddresses[$AccountNumberRunning])')")"
+                        Write-Verbose "            Replace XXX with UPN from query above: $("$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users/XXX?`$select=" + [System.Net.WebUtility]::UrlEncode($(@($GraphUserProperties | Select-Object -Unique) -join ',')))"
+                        Write-Verbose '          Usual root causes: Mailbox added in Outlook no longer exists or is not in your tenant, firewall rules, DNS.'
 
                         $LegacyExchangeDNs[$AccountNumberRunning] = ''
                         $UserDomain = $null
@@ -2762,7 +2905,7 @@ end tell
                             }
                         } catch {
                             Write-Host ($error[0] | Format-List * | Out-String)
-                            Write-Host "            Error getting group information from $((($ADPropsMailboxes[$AccountNumberRunning].distinguishedname) -split ',DC=')[1..999] -join '.'), check firewalls, DNS and AD trust" -ForegroundColor Red
+                            Write-Host "            [Error] Error getting group information from $((($ADPropsMailboxes[$AccountNumberRunning].distinguishedname) -split ',DC=')[1..999] -join '.'), check firewalls, DNS and AD trust" -ForegroundColor Red
                         }
 
                         try { global:WatchCatchableExitSignal } catch {}
@@ -2794,7 +2937,7 @@ end tell
                                     $LdapFilterSIDs += ('(objectsid=' + $($SidHex -join '') + ')')
                                 } catch {
                                     Write-Host ($error[0] | Format-List * | Out-String)
-                                    Write-Host '        Error creating LDAP filter for search across trusts.' -ForegroundColor Red
+                                    Write-Host '        [Error] Error creating LDAP filter for search across trusts.' -ForegroundColor Red
                                 }
                             }
                             $LdapFilterSIDs += ')'
@@ -2854,7 +2997,7 @@ end tell
                                                         Write-Verbose '          FSP is not member of any group'
                                                     }
                                                 } catch {
-                                                    Write-Host "          Error: $($error[0].exception)" -ForegroundColor red
+                                                    Write-Host "          [Error] $($error[0].exception)" -ForegroundColor red
                                                 }
                                             } else {
                                                 Write-Verbose "          Ignoring, because '$($fsp.path)' is not part of a trust in TrustsToCheckForGroups."
@@ -2888,17 +3031,22 @@ end tell
 
                             $tempX = $null
                         } catch {
-                            Write-Host '        Skipping, mailbox not found in Microsoft Graph.' -ForegroundColor yellow
+                            Write-Host '        [Warning] Skipping, mailbox not found in Microsoft Graph.' -ForegroundColor yellow
                         }
                     }
                 } else {
-                    Write-Host '        Skipping, as mailbox could not be found in your environment in an earlier step.' -ForegroundColor yellow
+                    Write-Host '        [Warning] Skipping, as mailbox could not be found in your environment in an earlier step.' -ForegroundColor yellow
                 }
 
-                $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'GroupsSIDs' -Value $GroupsSIDs -Force
+                if ($ADPropsMailboxes[$AccountNumberRunning]) {
+                    $ADPropsMailboxes[$AccountNumberRunning] | Add-Member -MemberType NoteProperty -Name 'GroupsSIDs' -Value $GroupsSIDs -Force
 
-                if ($ADPropsCurrentUser.proxyaddresses -icontains "smtp:$($MailAddresses[$AccountNumberRunning])") {
-                    $ADPropsCurrentUser = $ADPropsMailboxes[$AccountNumberRunning]
+                    if ($ADPropsCurrentUser.proxyaddresses -icontains "smtp:$($MailAddresses[$AccountNumberRunning])") {
+                        $ADPropsCurrentUser = $ADPropsMailboxes[$AccountNumberRunning]
+                    }
+                } else {
+                    $ADPropsMailboxes[$AccountNumberRunning] = $null
+                    $ADPropsMailboxManagers[$AccountNumberRunning] = $null
                 }
             } else {
                 $ADPropsMailboxes[$AccountNumberRunning] = $null
@@ -2921,8 +3069,8 @@ end tell
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::DefineAndAddVirtualMailboxes()
 
                     if ($FeatureResult -ne 'true') {
-                        Write-Host '  Error defining and adding virtual mailboxes.' -ForegroundColor Yellow
-                        Write-Host "  $FeatureResult" -ForegroundColor Yellow
+                        Write-Host '  [Warning] Problem defining and adding virtual mailboxes.' -ForegroundColor Yellow
+                        Write-Host "    $FeatureResult" -ForegroundColor Yellow
                     }
                 }
             } else {
@@ -2956,7 +3104,7 @@ end tell
         if ($p -ge 0) {
             Write-Host '    Matching mailbox found'
         } else {
-            Write-Host '    No matching mailbox found, see prior warning messages for details' -ForegroundColor Yellow
+            Write-Host '    [Warning] No matching mailbox found, see prior warning messages for details' -ForegroundColor Yellow
         }
     } else {
         Write-Host '  AD mail attribute of currently logged-in user is empty'
@@ -2982,9 +3130,9 @@ end tell
             if ($p -ge 0) {
                 Write-Host "    One matching primary mailbox found: $MailAddresses[$i]"
             } elseif ($null -eq $p) {
-                Write-Host '    No matching primary mailbox found' -ForegroundColor Yellow
+                Write-Host '    [Warning] No matching primary mailbox found' -ForegroundColor Yellow
             } else {
-                Write-Host '    Multiple matching primary mailboxes found, no prioritization possible' -ForegroundColor Yellow
+                Write-Host '    [Warning] Multiple matching primary mailboxes found, no prioritization possible' -ForegroundColor Yellow
             }
         } else {
             Write-Host
@@ -3092,7 +3240,10 @@ end tell
         }
     }
 
+    $PrimaryMailboxEnvironment = GetMailboxEnvironment ($ADPropsMailboxes[$([array]::FindIndex($ADPropsMailboxes, [Predicate[object]] { $args[0].proxyaddresses -icontains "smtp:$($PrimaryMailboxAddress)" }))])
+
     try { global:WatchCatchableExitSignal } catch {}
+
 
     $TemplateFilesGroupSIDsOverall = @{}
 
@@ -3115,6 +3266,8 @@ end tell
         $TemplateFilesReplacementvariableFilePart = @{}
         $TemplateFilesDefaultnewOrInternal = @{}
         $TemplateFilesDefaultreplyfwdOrExternal = @{}
+        $TemplateFilesDefaultnewOrInternalLowPrio = @{}
+        $TemplateFilesDefaultreplyfwdOrExternalLowPrio = @{}
         $TemplateFilesWriteProtect = @{}
 
         $TemplateTemplatePath = Get-Variable -Name "$($SigOrOOF)TemplatePath" -ValueOnly
@@ -3133,11 +3286,11 @@ end tell
 
                 if ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>']) {
                     if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotin $TemplateFiles.name)) {
-                        Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) INI index #$($Enumerator)) found in INI but not in signature template path." -ForegroundColor Yellow
+                        Write-Host "    [Warning] '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) INI index #$($Enumerator)) found in INI but not in signature template path." -ForegroundColor Yellow
                     }
 
                     if (($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -ine '<Set-OutlookSignatures configuration>') -and ($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'] -inotlike "*.$(if($UseHtmTemplates){'htm'} else {'docx'})")) {
-                        Write-Host "    '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) INI index #$($Enumerator)) has the wrong file extension ('-UseHtmTemplates true' allows .htm, else .docx)" -ForegroundColor Yellow
+                        Write-Host "    [Warning] '$($TemplateIniSettings[$Enumerator]['<Set-OutlookSignatures template>'])' ($($SigOrOOF) INI index #$($Enumerator)) has the wrong file extension ('-UseHtmTemplates true' allows .htm, else .docx)" -ForegroundColor Yellow
                     }
                 }
             }
@@ -3146,7 +3299,7 @@ end tell
 
             foreach ($TemplateFile in $TemplateFiles) {
                 if ($TemplateFile.name -inotin $x) {
-                    Write-Host "    '$($TemplateFile.name)' found in $($SigOrOOF) template path but not in INI file." -ForegroundColor Yellow
+                    Write-Host "    [Warning] '$($TemplateFile.name)' found in $($SigOrOOF) template path but not in INI file." -ForegroundColor Yellow
                 }
             }
 
@@ -3246,7 +3399,7 @@ end tell
                             $tempOutlookSignatureName = $tempOutlookSignatureName -ireplace [regex]::Escape($_), $(if ($_ -eq '@') { '_at_' } else { '_' })
                         }
 
-                        Write-Host "          '$($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'])' -> '$($tempOutlookSignatureName)'" -ForegroundColor Yellow
+                        Write-Host "          [Warning] '$($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'])' -> '$($tempOutlookSignatureName)'" -ForegroundColor Yellow
 
                         $TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'] = $tempOutlookSignatureName
                     }
@@ -3254,10 +3407,10 @@ end tell
                     $TemplateFileTargetName = ($TemplateIniSettings[$TemplateIniSettingsIndex]['OutlookSignatureName'] + $(if ($UseHtmTemplates) { '.htm' } else { '.docx' }))
                 } else {
                     if ((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name)) {
-                        # Write-Host "      Ignore INI entry, signature name is invalid: $((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name))" -ForegroundColor Yellow
+                        # Write-Host "      [Warning] Ignore INI entry, signature name is invalid: $((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name))" -ForegroundColor Yellow
                         # continue
 
-                        Write-Host "        Signature name has invalid characters. Replacing: $((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name))" -ForegroundColor Yellow
+                        Write-Host "        [Warning] Signature name has invalid characters. Replacing: $((CheckFilenamePossiblyInvalid -Filename $TemplateFile.Name))" -ForegroundColor Yellow
 
                         $tempOutlookSignatureName = $TemplateFile.Name
 
@@ -3267,7 +3420,7 @@ end tell
                             $tempOutlookSignatureName = $tempOutlookSignatureName -ireplace [regex]::Escape($_), $(if ($_ -eq '@') { '_at_' } else { '_' })
                         }
 
-                        Write-Host "          '$($TemplateFile.Name)' -> '$($tempOutlookSignatureName)'" -ForegroundColor Yellow
+                        Write-Host "          [Warning] '$($TemplateFile.Name)' -> '$($tempOutlookSignatureName)'" -ForegroundColor Yellow
 
                         $TemplateFileTargetName = $tempOutlookSignatureName
                     } else {
@@ -3289,12 +3442,16 @@ end tell
             $TemplateFilePartRegexReplacementvariableDeny = '(?i)\[(-:)\$.*\$\]'
 
             if ($SigOrOOF -ieq 'signature') {
-                $TemplateFilePartRegexDefaultneworinternal = '(?i)\[DefaultNew\]'
-                $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[DefaultReplyFwd\]'
+                $TemplateFilePartRegexDefaultneworinternal = '(?i)\[DefaultNew(?:LowPrio)?\]'
+                $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[DefaultReplyFwd(?:LowPrio)?\]'
+                $TemplateFilePartRegexDefaultneworinternalLowprio = '(?i)\[DefaultNewLowPrio\]'
+                $TemplateFilePartRegexDefaultreplyfwdorexternalLowprio = '(?i)\[DefaultReplyFwdLowPrio\]'
                 $TemplateFilePartRegexWriteprotect = '(?i)\[WriteProtect\]'
             } else {
-                $TemplateFilePartRegexDefaultneworinternal = '(?i)\[internal\]'
-                $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[external\]'
+                $TemplateFilePartRegexDefaultneworinternal = '(?i)\[internal(?:LowPrio)?\]'
+                $TemplateFilePartRegexDefaultreplyfwdorexternal = '(?i)\[external(?:LowPrio)?\]'
+                $TemplateFilePartRegexDefaultneworinternalLowprio = '(?i)\[internalLowPrio\]'
+                $TemplateFilePartRegexDefaultreplyfwdorexternalLowprio = '(?i)\[externalLowPrio\]'
                 $TemplateFilePartRegexWriteprotect = ''
             }
 
@@ -3313,8 +3470,8 @@ end tell
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::TimeBasedTemplate()
 
                     if ($FeatureResult -ne 'true') {
-                        Write-Host '        Error evaluating time based templates.' -ForegroundColor Yellow
-                        Write-Host "        $FeatureResult" -ForegroundColor Yellow
+                        Write-Host '        [Warning] Problem evaluating time based templates.' -ForegroundColor Yellow
+                        Write-Host "          $FeatureResult" -ForegroundColor Yellow
                     }
                 }
             }
@@ -3390,10 +3547,10 @@ end tell
                                     Write-Host "          $($TemplateFileGroupSIDs[$TemplateFilePartTag] -ireplace '(?i)^(-:|-CURRENTUSER:|CURRENTUSER:|)', '')"
                                     $TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] = ($TemplateFilesGroupFilePart[$TemplateIniSettingsIndex] + '[' + $TemplateFileGroupSIDs[$TemplateFilePartTag] + ']')
                                 } else {
-                                    Write-Host '          Not found' -ForegroundColor Yellow
+                                    Write-Host '          [Warning] Not found' -ForegroundColor Yellow
                                 }
                             } else {
-                                Write-Host '          Not found' -ForegroundColor Yellow
+                                Write-Host '          [Warning] Not found' -ForegroundColor Yellow
                                 $TemplateFilesGroupSIDsOverall.add($($TemplateFilePartTag -ireplace '(?i)^(\[)(-:|-CURRENTUSER:|CURRENTUSER:|)(.*)', '${1}${3}'), $null)
                             }
                         }
@@ -3463,7 +3620,7 @@ end tell
             if ($TemplateFilePart -imatch $TemplateFilePartRegexDefaultneworinternal) {
                 foreach ($TemplateFilePartTag in @(@([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultneworinternal).captures.value) | Where-Object { $_ })) {
                     if ($SigOrOOF -ieq 'signature') {
-                        Write-Host '      Default signature for new emails'
+                        Write-Host "      Default signature for new emails$(if ($TemplateFilePartTag -imatch $TemplateFilePartRegexDefaultneworinternalLowprio) { ' (low priority)' })"
                     } else {
                         Write-Host '      Default internal OOF message'
                     }
@@ -3475,12 +3632,19 @@ end tell
                     $TemplateFilesDefaultnewOrInternal.add($TemplateIniSettingsIndex, @{})
                     $TemplateFilesDefaultnewOrInternal[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
                 }
+
+                if ($TemplateFilePart -imatch $TemplateFilePartRegexDefaultneworinternalLowprio) {
+                    if (-not $TemplateFilesDefaultnewOrInternalLowPrio.containskey($TemplateIniSettingsIndex)) {
+                        $TemplateFilesDefaultnewOrInternalLowPrio.add($TemplateIniSettingsIndex, @{})
+                        $TemplateFilesDefaultnewOrInternalLowPrio[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
+                    }
+                }
             }
 
             if ($TemplateFilePart -imatch $TemplateFilePartRegexDefaultreplyfwdorexternal) {
                 foreach ($TemplateFilePartTag in @(@([regex]::Matches($TemplateFilePart, $TemplateFilePartRegexDefaultreplyfwdorexternal).captures.value) | Where-Object { $_ })) {
                     if ($SigOrOOF -ieq 'signature') {
-                        Write-Host '      Default signature for replies and forwards'
+                        Write-Host "      Default signature for replies and forwards$(if ($TemplateFilePartTag -imatch $TemplateFilePartRegexDefaultreplyfwdorexternalLowprio) { ' (low priority)' })"
                     } else {
                         Write-Host '      Default external OOF message'
                     }
@@ -3491,6 +3655,13 @@ end tell
                 if (-not $TemplateFilesDefaultreplyfwdOrExternal.containskey($TemplateIniSettingsIndex)) {
                     $TemplateFilesDefaultreplyfwdOrExternal.add($TemplateIniSettingsIndex, @{})
                     $TemplateFilesDefaultreplyfwdOrExternal[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
+                }
+
+                if ($TemplateFilePart -imatch $TemplateFilePartRegexDefaultreplyfwdorexternalLowprio) {
+                    if (-not $TemplateFilesDefaultreplyfwdOrExternalLowPrio.containskey($TemplateIniSettingsIndex)) {
+                        $TemplateFilesDefaultreplyfwdOrExternalLowPrio.add($TemplateIniSettingsIndex, @{})
+                        $TemplateFilesDefaultreplyfwdOrExternalLowPrio[$TemplateIniSettingsIndex].add($TemplateFile.fullname, $TemplateFileTargetName)
+                    }
                 }
             }
 
@@ -3527,7 +3698,7 @@ end tell
             # unknown tags
             $x = ($TemplateFilePart -ireplace $TemplateFilePartRegexKnown, '').trim()
             if ($x) {
-                Write-Host '      Unknown tags' -ForegroundColor yellow
+                Write-Host '      [Warning] Unknown tags' -ForegroundColor yellow
                 Write-Host "        $(($x -ireplace '^\[', '') -ireplace '\]$', '')"
             }
 
@@ -3543,6 +3714,8 @@ end tell
             if ($SigOrOOF -ieq 'signature') {
                 $SignatureFilesDefaultNew = $TemplateFilesDefaultnewOrInternal
                 $SignatureFilesDefaultReplyFwd = $TemplateFilesDefaultreplyfwdOrExternal
+                $SignatureFilesDefaultNewLowPrio = $TemplateFilesDefaultnewOrInternalLowPrio
+                $SignatureFilesDefaultReplyFwdLowPrio = $TemplateFilesDefaultreplyfwdOrExternalLowPrio
                 $SignatureFilesWriteProtect = $TemplateFilesWriteProtect
             } else {
                 $OOFFilesInternal = $TemplateFilesDefaultnewOrInternal
@@ -3702,7 +3875,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         throw "No error, but Word dummy process priority set to '$((Get-Process -PID $script:COMWordDummyPid).PriorityClass.ToString())' ('$((Get-Process -PID $script:COMWordDummyPid).PriorityClass.value__)') instead of '$($WordProcessPriorityText)' ('$($WordProcessPriority)')."
                     }
                 } catch {
-                    Write-Host "    Error setting Word dummy process priority: $($_)" -ForegroundColor Yellow
+                    Write-Host "    [Warning] Problem setting Word dummy process priority: $($_)" -ForegroundColor Yellow
                 }
             }
 
@@ -3737,7 +3910,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         throw "No error, but Word process priority set to '$((Get-Process -PID $script:COMWordPid).PriorityClass.ToString())' ('$((Get-Process -PID $script:COMWordPid).PriorityClass.value__)') instead of '$($WordProcessPriorityText)' ('$($WordProcessPriority)')."
                     }
                 } catch {
-                    Write-Host "    Error setting Word process priority: $($_)" -ForegroundColor Yellow
+                    Write-Host "    [Warning] Problem setting Word process priority: $($_)" -ForegroundColor Yellow
                 }
 
                 # Open blank document and get the default view value
@@ -3753,9 +3926,9 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             }
         } catch {
             Write-Host ($error[0] | Format-List * | Out-String)
-            Write-Host '  Word not installed or not working correctly. Install or repair Word and the registry information about Word, or consider using HTM templates instead of DOCX templates. Exit.' -ForegroundColor Red
-            Write-Host '  Set-OutlookSignatures cannot bypass this core Windows/Office/COM/registry ecosystem error.' -ForegroundColor Red
-            Write-Host '  Run an "Online Repair" of Office (see resolved issues at https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues).' -ForegroundColor Red
+            Write-Host '  [Error] Word not installed or not working correctly. Install or repair Word and the registry information about Word, or consider using HTM templates instead of DOCX templates. Exit.' -ForegroundColor Red
+            Write-Host '    Set-OutlookSignatures cannot bypass this core Windows/Office/COM/registry ecosystem error.' -ForegroundColor Red
+            Write-Host '    Run an "Online Repair" of Office (see resolved issues at https://github.com/Set-OutlookSignatures/Set-OutlookSignatures/issues).' -ForegroundColor Red
 
             # Restore original Word AlertIfNotDefault setting
             Set-ItemProperty -LiteralPath "HKCU:\Software\Microsoft\Office\$($script:WordRegistryVersion)\Word\Options" -Name 'AlertIfNotDefault' -Value $script:WordAlertIfNotDefaultOriginal -ErrorAction SilentlyContinue | Out-Null
@@ -3800,7 +3973,6 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $GroupsSIDs = $ADPropsMailboxes[$AccountNumberRunning].GroupsSIDs
             }
 
-
             if (-not (($BenefactorCircleLicenseFile) -and ($null -ne [SetOutlookSignatures.BenefactorCircle].GetMethod('CLCGM')))) {
                 Write-Host '  Mailbox is member of license group: False (no valid Benefactor Circle license file found)'
                 Write-Host "    The subtle `"Free and open-source Set-OutlookSignatures`" tagline will be appended after some time of use."
@@ -3832,8 +4004,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 }
             } else {
                 $CurrentMailboxSmtpaddresses += $($MailAddresses[$AccountNumberRunning])
-                Write-Host '    Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox.' -ForegroundColor Yellow
-                Write-Host "    Using '$($MailAddresses[$AccountNumberRunning])' as single known SMTP address." -ForegroundColor Yellow
+                Write-Host '    [Warning] Skipping, as mailbox has no legacyExchangeDN and is assumed not to be an Exchange mailbox.' -ForegroundColor Yellow
+                Write-Host "      Using '$($MailAddresses[$AccountNumberRunning])' as single known SMTP address." -ForegroundColor Yellow
             }
 
             try { global:WatchCatchableExitSignal } catch {}
@@ -3847,13 +4019,13 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                     . ([System.Management.Automation.ScriptBlock]::Create((ConvertEncoding -InFile $ReplacementVariableConfigFile -InIsHtml $false)))
                 } catch {
                     Write-Host ($error[0] | Format-List * | Out-String)
-                    Write-Host "    Problem executing content of '$ReplacementVariableConfigFile'. Exit." -ForegroundColor Red
+                    Write-Host "    [Error] Problem executing content of '$ReplacementVariableConfigFile'. Exit." -ForegroundColor Red
                     $script:ExitCode = 18
                     $script:ExitCodeDescription = 'Problem executing content of ReplacementVariableConfigFile.'
                     exit
                 }
             } else {
-                Write-Host "    Problem connecting or reading '$ReplacementVariableConfigFile'. Exit." -ForegroundColor Red
+                Write-Host "    [Error] Problem connecting or reading '$ReplacementVariableConfigFile'. Exit." -ForegroundColor Red
                 $script:ExitCode = 19
                 $script:ExitCodeDescription = 'Problem connecting or reading ReplacementVariableConfigFile.'
                 exit
@@ -3954,8 +4126,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::RoamingSignaturesDownload()
 
                     if ($FeatureResult -ne 'true') {
-                        Write-Host '    Error downloading roaming signatures from the cloud.' -ForegroundColor Yellow
-                        Write-Host "    $FeatureResult" -ForegroundColor Yellow
+                        Write-Host '    [Warning] Problem downloading roaming signatures from the cloud.' -ForegroundColor Yellow
+                        Write-Host "      $FeatureResult" -ForegroundColor Yellow
                     }
                 }
             } else {
@@ -3989,7 +4161,7 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
                 if ($SetCurrentUserOutlookWebSignature) {
                     if ($SimulateUser -and (-not $SimulateAndDeploy)) {
-                        Write-Host '      Simulation mode enabled, skipping task.' -ForegroundColor Yellow
+                        Write-Host '      Simulation mode enabled, skipping task.'
                     } else {
                         Write-Host "    Set default classic (not roaming) Outlook for the web signature @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
 
@@ -4001,8 +4173,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SetCurrentUserOutlookWebSignature()
 
                             if ($FeatureResult -ne 'true') {
-                                Write-Host '      Error setting current user Outlook for the web signature.' -ForegroundColor Yellow
-                                Write-Host "      $FeatureResult" -ForegroundColor Yellow
+                                Write-Host '      [Warning] Problem setting current user Outlook for the web signature.' -ForegroundColor Yellow
+                                Write-Host "        $FeatureResult" -ForegroundColor Yellow
                             }
                         }
 
@@ -4017,8 +4189,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                                 $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::RoamingSignaturesSetDefaults()
 
                                 if ($FeatureResult -ne 'true') {
-                                    Write-Host '      Error setting default roaming signatures in the cloud.' -ForegroundColor Yellow
-                                    Write-Host "      $FeatureResult" -ForegroundColor Yellow
+                                    Write-Host '      [Warning] Problem setting default roaming signatures in the cloud.' -ForegroundColor Yellow
+                                    Write-Host "        $FeatureResult" -ForegroundColor Yellow
                                 }
                             }
                         } else {
@@ -4040,8 +4212,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                         $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SetCurrentUserOOFMessage()
 
                         if ($FeatureResult -ne 'true') {
-                            Write-Host '    Error setting current user out-of-office message.' -ForegroundColor Yellow
-                            Write-Host "    $FeatureResult" -ForegroundColor Yellow
+                            Write-Host '    [Warning] Problem setting current user out-of-office message.' -ForegroundColor Yellow
+                            Write-Host "      $FeatureResult" -ForegroundColor Yellow
                         }
                     }
                 } else {
@@ -4082,8 +4254,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::DeleteScriptCreatedSignaturesWithoutTemplate()
 
             if ($FeatureResult -ne 'true') {
-                Write-Host '  Error deleting script created signature which no longer have a corresponding template.' -ForegroundColor Yellow
-                Write-Host "  $FeatureResult" -ForegroundColor Yellow
+                Write-Host '  [Warning] Problem deleting script created signature which no longer have a corresponding template.' -ForegroundColor Yellow
+                Write-Host "    $FeatureResult" -ForegroundColor Yellow
             }
         }
     } else {
@@ -4107,8 +4279,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::DeleteUserCreatedSignatures()
 
             if ($FeatureResult -ne 'true') {
-                Write-Host '  Error removing user-created signatures.' -ForegroundColor Yellow
-                Write-Host "  $FeatureResult" -ForegroundColor Yellow
+                Write-Host '  [Warning] Problem removing user-created signatures.' -ForegroundColor Yellow
+                Write-Host "    $FeatureResult" -ForegroundColor Yellow
             }
         }
     } else {
@@ -4130,8 +4302,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::RoamingSignaturesUpload()
 
             if ($FeatureResult -ne 'true') {
-                Write-Host '  Error uploading roaming signatures to the cloud.' -ForegroundColor Yellow
-                Write-Host "  $FeatureResult" -ForegroundColor Yellow
+                Write-Host '  [Warning] Problem uploading roaming signatures to the cloud.' -ForegroundColor Yellow
+                Write-Host "    $FeatureResult" -ForegroundColor Yellow
             }
         }
     } else {
@@ -4166,8 +4338,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
             $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::SignatureCollectionInDrafts()
 
             if ($FeatureResult -ne 'true') {
-                Write-Host '  Error creating ''My signatures, powered by Set-OutlookSignatures Benefactor Circle'' email draft.' -ForegroundColor Yellow
-                Write-Host "  $FeatureResult" -ForegroundColor Yellow
+                Write-Host '  [Warning] Problem creating ''My signatures, powered by Set-OutlookSignatures Benefactor Circle'' email draft.' -ForegroundColor Yellow
+                Write-Host "    $FeatureResult" -ForegroundColor Yellow
             }
         }
     } else {
@@ -4196,8 +4368,8 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
                 $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::AdditionalSignaturePath()
 
                 if ($FeatureResult -ne 'true') {
-                    Write-Host '    Error copying signatures to additional signature path.' -ForegroundColor Yellow
-                    Write-Host "    $FeatureResult" -ForegroundColor Yellow
+                    Write-Host '    [Warning] Problem copying signatures to additional signature path.' -ForegroundColor Yellow
+                    Write-Host "      $FeatureResult" -ForegroundColor Yellow
                 }
             }
         }
@@ -4215,6 +4387,87 @@ public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
     }
 }
 
+
+function CopyDirectoryParallel {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Source,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Destination,
+
+        [string]$ExcludeFolderPattern = $null,
+
+        [int]$ThrottleLimit = [Math]::Min(32, [Math]::Max(8, [System.Environment]::ProcessorCount * 2))
+    )
+
+    if (-not ([System.Management.Automation.PSTypeName]'FastDirectoryCopy').Type) {
+        Add-Type -TypeDefinition @'
+        using System;
+        using System.IO;
+        using System.Text.RegularExpressions;
+        using System.Threading.Tasks;
+
+        public static class FastDirectoryCopy {
+            public static void CopyParallel(string source, string destination, string excludePattern, int throttleLimit) {
+                string srcPath = Path.GetFullPath(source);
+                string dstPath = Path.GetFullPath(destination);
+
+                if (!Directory.Exists(srcPath)) {
+                    throw new DirectoryNotFoundException("Source directory does not exist: " + srcPath);
+                }
+
+                Directory.CreateDirectory(dstPath);
+
+                // Compile Regex for maximum matching speed across files and folders
+                Regex excludeRx = null;
+                if (!string.IsNullOrWhiteSpace(excludePattern)) {
+                    excludeRx = new Regex(excludePattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                }
+
+                // Pre-create directories
+                foreach (string dir in Directory.EnumerateDirectories(srcPath, "*", SearchOption.AllDirectories)) {
+                    if (excludeRx != null && excludeRx.IsMatch(dir)) {
+                        continue;
+                    }
+                    string rel = dir.Substring(srcPath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                    Directory.CreateDirectory(Path.Combine(dstPath, rel));
+                }
+
+                // Copy files in parallel using work-stealing thread pool
+                var options = new ParallelOptions { MaxDegreeOfParallelism = throttleLimit };
+                var files = Directory.EnumerateFiles(srcPath, "*", SearchOption.AllDirectories);
+
+                Parallel.ForEach(files, options, file => {
+                    if (excludeRx != null && excludeRx.IsMatch(file)) {
+                        return;
+                    }
+                    string rel = file.Substring(srcPath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                    string targetFile = Path.Combine(dstPath, rel);
+                    File.Copy(file, targetFile, true);
+                });
+            }
+        }
+'@
+    }
+
+    [FastDirectoryCopy]::CopyParallel($Source, $Destination, $ExcludeFolderPattern, $ThrottleLimit)
+}
+
+
+function GetMailboxEnvironment ($UserProps) {
+    if (-not $UserProps) { return '' }
+
+    if ((-not [string]::IsNullOrWhiteSpace($UserProps.mailboxsettings)) -or ($UserProps.msExchRecipientTypeDetails -ge 2147483648)) {
+        return 'EXO'
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($UserProps.msExchRecipientTypeDetails)) {
+        return 'On-prem'
+    }
+
+    return ''
+}
 
 function ResolveToSid($string) {
     try { global:WatchCatchableExitSignal } catch {}
@@ -4975,9 +5228,9 @@ function SetSignatures {
 
                 }
 
-                Get-ChildItem -LiteralPath $path -Recurse -Force | ForEach-Object {
-                    $_.Attributes = 'Normal'
-                    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+                foreach ($item in @(Get-ChildItem -LiteralPath $path -Recurse -Force)) {
+                    $item.Attributes = 'Normal'
+                    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
                 }
 
                 try { global:WatchCatchableExitSignal } catch {}
@@ -5058,16 +5311,16 @@ function SetSignatures {
                             Copy-Item -LiteralPath $tempX -Destination $tempY -Force
                         }
 
-                        Get-ChildItem -LiteralPath (Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath "$($pathGUID).files") -Recurse -Force | ForEach-Object {
-                            $_.Attributes = 'Normal'
-                            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+                        foreach ($item in @(Get-ChildItem -LiteralPath (Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath "$($pathGUID).files") -Recurse -Force)) {
+                            $item.Attributes = 'Normal'
+                            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
                         }
 
                         break
                     }
                 }
             } catch {
-                Write-Host "$Indent        Error copying file. Skip template." -ForegroundColor Red
+                Write-Host "$Indent        [Error] Error copying file. Skip template." -ForegroundColor Red
                 Write-Host ($error[0] | Format-List * | Out-String)
                 continue
             }
@@ -5086,12 +5339,12 @@ function SetSignatures {
                     Copy-Item -LiteralPath $Signature.name -Destination $path -Force
                 }
 
-                Get-ChildItem -LiteralPath $path -Recurse -Force | ForEach-Object {
-                    $_.Attributes = 'Normal'
-                    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+                foreach ($item in @(Get-ChildItem -LiteralPath $path -Recurse -Force)) {
+                    $item.Attributes = 'Normal'
+                    if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
                 }
             } catch {
-                Write-Host "$Indent        Error copying file. Skip template." -ForegroundColor Red
+                Write-Host "$Indent        [Error] Error copying file. Skip template." -ForegroundColor Red
                 continue
             }
         }
@@ -5099,15 +5352,15 @@ function SetSignatures {
         try { global:WatchCatchableExitSignal } catch {}
 
 
-        Get-ChildItem -LiteralPath $path -Recurse -Force | ForEach-Object {
-            $_.Attributes = 'Normal'
-            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+        foreach ($item in @(Get-ChildItem -LiteralPath $path -Recurse -Force)) {
+            $item.Attributes = 'Normal'
+            if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
         }
 
         if (Test-Path -LiteralPath (Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath "$($pathGUID).files")) {
-            Get-ChildItem -LiteralPath (Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath "$($pathGUID).files") -Recurse -Force | ForEach-Object {
-                $_.Attributes = 'Normal'
-                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+            foreach ($item in @(Get-ChildItem -LiteralPath (Join-Path -Path (Split-Path -LiteralPath $path) -ChildPath "$($pathGUID).files") -Recurse -Force)) {
+                $item.Attributes = 'Normal'
+                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
             }
         }
 
@@ -5335,7 +5588,7 @@ function SetSignatures {
 
             try { global:WatchCatchableExitSignal } catch {}
 
-            Write-Host "$Indent      Export to HTM format"
+            Write-Host "$Indent      Export to HTML format"
             [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $htmlDoc.DocumentNode.OuterHtml)
         } else {
             $script:COMWord.Documents.Open($path, $false, $false, $false) | Out-Null
@@ -5418,8 +5671,8 @@ function SetSignatures {
                 }
             } catch {
                 Write-Host ($error[0] | Format-List * | Out-String)
-                Write-Host "$Indent        Error replacing non-picture variables in Word. Exit." -ForegroundColor Red
-                Write-Host "$Indent        If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
+                Write-Host "$Indent        [Error] Error replacing non-picture variables in Word. Exit." -ForegroundColor Red
+                Write-Host "$Indent          If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
                 $script:ExitCode = 21
                 $script:ExitCodeDescription = 'Error replacing non-picture variables in Word.'
                 exit
@@ -5431,7 +5684,7 @@ function SetSignatures {
 
             Write-Host "$Indent      Replace picture variables"
             if (@(@($script:COMWord.ActiveDocument.Shapes) | Where-Object { $_.WrapFormat.Type -ne 7 }).Count -gt 0) {
-                Write-Host "$Indent        Warning: Template contains images or shapes configured as non-inline." -ForegroundColor Yellow
+                Write-Host "$Indent        [Warning] Template contains images or shapes configured as non-inline." -ForegroundColor Yellow
                 Write-Host "$Indent          Set the text wrapping to 'inline with text' to avoid email incompatibilities, such as incorrect positioning." -ForegroundColor Yellow
             }
 
@@ -5594,8 +5847,8 @@ function SetSignatures {
                 }
             } catch {
                 Write-Host ($error[0] | Format-List * | Out-String)
-                Write-Host "$Indent        Error replacing picture variables in Word. Exit." -ForegroundColor Red
-                Write-Host "$Indent        If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
+                Write-Host "$Indent        [Error] Error replacing picture variables in Word. Exit." -ForegroundColor Red
+                Write-Host "$Indent          If the error says 'Access denied', your environment may require to assign a Microsoft Purview Information Protection sensitivity label to your DOCX templates." -ForegroundColor Red
                 $script:ExitCode = 20
                 $script:ExitCodeDescription = 'Error replacing picture variables in Word.'
                 exit
@@ -5674,7 +5927,7 @@ function SetSignatures {
             try { global:WatchCatchableExitSignal } catch {}
 
             # Export to .htm
-            Write-Host "$Indent      Export to HTM format"
+            Write-Host "$Indent      Export to HTML format"
             $path = $([System.IO.Path]::ChangeExtension($path, '.docx'))
 
             try { global:WatchCatchableExitSignal } catch {}
@@ -5794,8 +6047,8 @@ function SetSignatures {
                             $script:COMWord.ActiveDocument.Close($false, [Type]::Missing, $false)
                         } catch {
                         }
-                        Write-Host "$Indent          Error converting high resolution images from DOCX template." -ForegroundColor Yellow
-                        Write-Host "$Indent          $FeatureResult" -ForegroundColor Yellow
+                        Write-Host "$Indent          [Warning] Problem converting high resolution images from DOCX template." -ForegroundColor Yellow
+                        Write-Host "$Indent            $FeatureResult" -ForegroundColor Yellow
                     }
                 }
             } else {
@@ -5811,9 +6064,44 @@ function SetSignatures {
             $script:COMWord.Options.CheckGrammarAsYouType = $script:ComWordOptionsCheckGrammarAsYouTypeOriginal
         }
 
+
         try { global:WatchCatchableExitSignal } catch {}
 
-        Write-Host "$Indent        Copy HTM image width and height attributes to style attribute"
+
+        if ($MoveCSSInline) {
+            Write-Host "$Indent        Move CSS inline"
+
+            $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+            $tempFileContent = ConvertEncoding -InFile $path
+
+            try {
+                $PreMailer = [PreMailer.Net.PreMailer]::New(
+                    $tempFileContent, # string html
+                    $null # uri baseUri
+                )
+
+                $MoveCSSInlineResult = $PreMailer.MoveCssInline(
+                    $true, # bool removeStyleElements = False
+                    $null, # string ignoreElements = null
+                    $null, # string css = null
+                    $true, # bool stripIdAndClassAttributes = False
+                    $false, # bool removeComments = False
+                    $null, # AngleSharp.IMarkupFormatter customFormatter = null
+                    $false, # bool preserveMediaQueries = False
+                    $false # bool useEmailFormatter = False # Messes up Outlook formatting!
+                ).html
+
+                [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $MoveCSSInlineResult)
+            } catch {
+                Write-Host "$($Indent)          [Warning] $($MoveCSSInlineResult)" -ForegroundColor Yellow
+            }
+        }
+
+
+        try { global:WatchCatchableExitSignal } catch {}
+
+
+        Write-Host "$Indent        Copy HTML image width and height attributes to style attribute"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
         $htmlDoc = [HtmlAgilityPack.HtmlDocument]::new()
@@ -5873,36 +6161,184 @@ function SetSignatures {
         try { global:WatchCatchableExitSignal } catch {}
 
 
-        if ($MoveCSSInline) {
-            Write-Host "$Indent        Move CSS inline"
+        Write-Host "$Indent        Sync alt and title attributes across HTML elements"
+        $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
 
-            $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
-            $tempFileContent = ConvertEncoding -InFile $path
+        $htmlDoc = [HtmlAgilityPack.HtmlDocument]::new()
+        $htmlDoc.DisableImplicitEnd = $true
+        $htmlDoc.OptionAutoCloseOnEnd = $true
+        $htmlDoc.OptionCheckSyntax = $true
+        $htmlDoc.OptionEmptyCollection = $true
+        $htmlDoc.OptionFixNestedTags = $true
 
-            try {
-                $PreMailer = [PreMailer.Net.PreMailer]::New(
-                    $tempFileContent, # string html
-                    $null # uri baseUri
-                )
+        $htmlDoc.LoadHtml((ConvertEncoding -InFile $path))
 
-                $MoveCSSInlineResult = $PreMailer.MoveCssInline(
-                    $true, # bool removeStyleElements = False
-                    $null, # string ignoreElements = null
-                    $null, # string css = null
-                    $true, # bool stripIdAndClassAttributes = False
-                    $false, # bool removeComments = False
-                    $null, # AngleSharp.IMarkupFormatter customFormatter = null
-                    $false, # bool preserveMediaQueries = False
-                    $false # bool useEmailFormatter = False # Messes up Outlook formatting!
-                ).html
+        # Target elements with alt or title attributes
+        $nodes = $htmlDoc.DocumentNode.SelectNodes('//*[@alt or @title]')
 
-                [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $MoveCSSInlineResult)
-            } catch {
-                Write-Host "$Indent          $MoveCSSInlineResult" -ForegroundColor Yellow
+        if ($nodes) {
+            foreach ($node in $nodes) {
+                $altAttr = $node.Attributes['alt']
+                $titleAttr = $node.Attributes['title']
+
+                $hasAltAttr = $null -ne $altAttr
+                $altVal = if ($hasAltAttr) { $altAttr.Value.Trim() } else { '' }
+
+                $hasTitleAttr = $null -ne $titleAttr
+                $titleVal = if ($hasTitleAttr) { $titleAttr.Value.Trim() } else { '' }
+
+                $hasMeaningfulAlt = -not [string]::IsNullOrWhiteSpace($altVal)
+                $hasMeaningfulTitle = -not [string]::IsNullOrWhiteSpace($titleVal)
+
+                # Check if alt is explicitly empty (alt="") -> Decorative image
+                if ($hasAltAttr -and -not $hasMeaningfulAlt) {
+                    continue
+                }
+
+                # Check if this image is inside an <a> tag that ALREADY has a title tooltip
+                $parentHasTitle = $false
+                if ($node.Name -eq 'img') {
+                    $parentAnchor = $node.SelectSingleNode('./ancestor::a[@title]')
+                    if ($null -ne $parentAnchor -and -not [string]::IsNullOrWhiteSpace($parentAnchor.GetAttributeValue('title', ''))) {
+                        $parentHasTitle = $true
+                    }
+                }
+
+                # Case 1: Has alt, missing/empty title -> copy alt to title ONLY if parent <a> doesn't already have a title
+                if ($hasMeaningfulAlt -and -not $hasMeaningfulTitle -and -not $parentHasTitle) {
+                    $null = $node.SetAttributeValue('title', $altVal)
+                }
+                # Case 2: Has title, alt is missing entirely -> copy title to alt
+                elseif ($hasMeaningfulTitle -and -not $hasAltAttr) {
+                    $null = $node.SetAttributeValue('alt', $titleVal)
+                }
             }
         }
 
+        [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $htmlDoc.DocumentNode.OuterHtml)
+
+
         try { global:WatchCatchableExitSignal } catch {}
+
+
+        Write-Host "$Indent        Set missing or invalid top/bottom margins to 0 for <p> tags in HTML"
+        $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+
+        $htmlDoc = [HtmlAgilityPack.HtmlDocument]::new()
+        $htmlDoc.DisableImplicitEnd = $true
+        $htmlDoc.OptionAutoCloseOnEnd = $true
+        $htmlDoc.OptionCheckSyntax = $true
+        $htmlDoc.OptionEmptyCollection = $true
+        $htmlDoc.OptionFixNestedTags = $true
+
+        $htmlDoc.LoadHtml((ConvertEncoding -InFile $path))
+
+        $htmlDocSelectNodeResult = $htmlDoc.DocumentNode.SelectNodes('//p')
+
+        if ($htmlDocSelectNodeResult) {
+            foreach ($p in $htmlDocSelectNodeResult) {
+                $currentStyle = $p.GetAttributeValue('style', '')
+
+                if ([string]::IsNullOrWhiteSpace($currentStyle)) {
+                    $null = $p.SetAttributeValue('style', 'margin-top: 0; margin-bottom: 0;')
+                    continue
+                }
+
+                $margins = GetMarginsFromStyle -Style $currentStyle
+                $addStyles = @()
+
+                $marginRegex = if ($UseHtmTemplates) {
+                    '^(auto|inherit|initial|revert|revert-layer|unset)$|^-?\d*\.?\d+(px|em|rem|%|pt|pc|cm|mm|in|vh|vw|vmin|vmax|ch|ex|q)?$|^(calc|var|min|max|clamp)\('
+                } else {
+                    '^-?(\d|\.\d)'
+                }
+
+                if ([string]::IsNullOrWhiteSpace($margins.MarginTop) -or ($margins.MarginTop -notmatch $marginRegex)) {
+                    $addStyles += 'margin-top: 0'
+                }
+
+                if ([string]::IsNullOrWhiteSpace($margins.MarginBottom) -or ($margins.MarginBottom -notmatch $marginRegex)) {
+                    $addStyles += 'margin-bottom: 0'
+                }
+
+                if ($addStyles.Count -gt 0) {
+                    $appendStyle = $addStyles -join '; '
+                    $cleanStyle = $currentStyle.Trim().TrimEnd(';')
+                    $updatedStyle = "$($cleanStyle); $($appendStyle);"
+
+                    $null = $p.SetAttributeValue('style', $updatedStyle)
+                }
+            }
+        }
+
+        [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $htmlDoc.DocumentNode.OuterHtml)
+
+
+        try { global:WatchCatchableExitSignal } catch {}
+
+        Write-Host "$Indent        Set missing or invalid line-height to normal for <[p|div|th|td]> tags in HTML"
+        $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
+
+        $htmlDoc = [HtmlAgilityPack.HtmlDocument]::new()
+        $htmlDoc.DisableImplicitEnd = $true
+        $htmlDoc.OptionAutoCloseOnEnd = $true
+        $htmlDoc.OptionCheckSyntax = $true
+        $htmlDoc.OptionEmptyCollection = $true
+        $htmlDoc.OptionFixNestedTags = $true
+
+        $htmlDoc.LoadHtml((ConvertEncoding -InFile $path))
+
+        $htmlDocSelectNodeResult = $htmlDoc.DocumentNode.SelectNodes('//p | //div | //th | //td')
+
+        if ($htmlDocSelectNodeResult) {
+            foreach ($p in $htmlDocSelectNodeResult) {
+                $currentStyle = $p.GetAttributeValue('style', '')
+
+                if ([string]::IsNullOrWhiteSpace($currentStyle)) {
+                    $null = $p.SetAttributeValue('style', 'line-height: normal;')
+                    continue
+                }
+
+                $parsedStyles = ParseHtmlStyleAttribute -StyleString $currentStyle
+                $allLineHeights = $parsedStyles | Where-Object { $_.Property -eq 'line-height' }
+                $importantHeight = $allLineHeights | Where-Object { $_.Value -match '!important' } | Select-Object -Last 1
+                $lineHeightItem = if ($importantHeight) { $importantHeight } else { $allLineHeights | Select-Object -Last 1 }
+
+                # Regex validation for valid line-height values
+                $lineHeightRegex = if ($UseHtmTemplates) {
+                    '^(normal|inherit|initial|revert|revert-layer|unset)$|^\d*\.?\d+(px|em|rem|%|pt|pc|cm|mm|in|vh|vw|vmin|vmax|ch|ex|q)?$|^(calc|var|min|max|clamp)\('
+                } else {
+                    '^-?(\d|\.\d)'
+                }
+
+                # Decode the value for regex evaluation (since ParseHtmlStyleAttribute encodes values)
+                if ($lineHeightItem) {
+                    # Decode and strip !important for pattern validation
+                    $rawVal = [System.Net.WebUtility]::HtmlDecode($lineHeightItem.Value)
+                    $lineHeightVal = ($rawVal -replace '\s*!important\s*$', '').Trim()
+                } else {
+                    $lineHeightVal = $null
+                }
+
+                if ([string]::IsNullOrWhiteSpace($lineHeightVal) -or ($lineHeightVal -notmatch $lineHeightRegex)) {
+                    # Filter out any pre-existing or invalid line-height property
+                    $otherStyles = $parsedStyles | Where-Object { $_.Property -ne 'line-height' }
+
+                    # Reconstruct style list maintaining existing CSS rules and appending updated line-height
+                    $styleEntries = @($otherStyles | ForEach-Object { "$($_.Property): $($_.Value)" })
+                    $styleEntries += 'line-height: normal'
+
+                    $updatedStyle = ($styleEntries -join '; ') + ';'
+                    $null = $p.SetAttributeValue('style', $updatedStyle)
+                }
+            }
+        }
+
+        [SetOutlookSignatures.Common]::WriteAllTextWithEncodingCorrections($path, $htmlDoc.DocumentNode.OuterHtml)
+
+
+        try { global:WatchCatchableExitSignal } catch {}
+
 
         Write-Host "$Indent        Remove empty CSS properties from style attributes"
         $path = $([System.IO.Path]::ChangeExtension($path, '.htm'))
@@ -5925,10 +6361,14 @@ function SetSignatures {
                         'style',
                         $(
                             @(
-                                ParseHtmlStyleAttribute ($node.GetAttributeValue('style', '')) | Where-Object { $_.Property } | ForEach-Object {
-                                    "$($_.Property): $($_.Value)"
+                                ParseHtmlStyleAttribute ($node.GetAttributeValue('style', '')) | Where-Object {
+                                    (-not [string]::IsNullOrWhiteSpace($_.Property)) -and
+                                    $(if ($UseHtmTemplates) { $true } else { ($_.Property -inotlike 'mso-*') }) -and
+                                    (-not [string]::IsNullOrWhiteSpace($_.Value))
+                                } | ForEach-Object {
+                                    "$($_.Property): $($_.Value);"
                                 }
-                            ) -join '; '
+                            ) -join ' '
                         )
                     )
                 }
@@ -6077,7 +6517,7 @@ function SetSignatures {
                         }
                     ) -inotin @('jpeg', 'jpg', 'png', 'gif')
                 ) {
-                    Write-Host "$Indent          '$($src)' is not a typical image format for emails (JPG, JPEG, PNG, GIF). Expect problems on most clients." -ForegroundColor Yellow
+                    Write-Host "$($Indent)          [Warning] '$($src)' is not a typical image format for emails (JPG, JPEG, PNG, GIF). Expect problems on most clients." -ForegroundColor Yellow
                 }
             }
 
@@ -6243,8 +6683,8 @@ function SetSignatures {
                     $FeatureResult = [SetOutlookSignatures.BenefactorCircle]::RoamingSignaturesUpload()
 
                     if ($FeatureResult -ne 'true') {
-                        Write-Host "$Indent        Error uploading roaming signatures to the cloud." -ForegroundColor Yellow
-                        Write-Host "$Indent        $FeatureResult" -ForegroundColor Yellow
+                        Write-Host "$($Indent)        [Warning] Problem uploading roaming signatures to the cloud." -ForegroundColor Yellow
+                        Write-Host "$($Indent)          $($FeatureResult)" -ForegroundColor Yellow
                     }
                 }
             } else {
@@ -6381,33 +6821,56 @@ end tell
                 try { global:WatchCatchableExitSignal } catch {}
 
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
-                    if ($CurrentTemplateIsForAliasSmtp) {
+                    if (
+                        $CurrentTemplateIsForAliasSmtp -and
+                        (
+                            !$SignatureFilesDefaultNewLowPrio.containskey($TemplateIniSettingsIndex) -or
+                            (
+                                $SignatureFilesDefaultNewLowPrio.containskey($TemplateIniSettingsIndex) -and
+                                !(
+                                    $script:NewSigExpected.ContainsKey("$($CurrentTemplateIsForAliasSmtp.ToLower())") -and
+                                    ![string]::IsNullOrWhiteSpace($script:NewSigExpected."$($CurrentTemplateIsForAliasSmtp.ToLower())")
+                                )
+                            )
+                        )
+                    ) {
                         $script:NewSigExpected."$($CurrentTemplateIsForAliasSmtp.ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                     }
 
-                    $script:NewSigExpected."$(($MailAddresses[$AccountNumberRunning]).ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                    if (
+                        !$SignatureFilesDefaultNewLowPrio.containskey($TemplateIniSettingsIndex) -or
+                        (
+                            $SignatureFilesDefaultNewLowPrio.containskey($TemplateIniSettingsIndex) -and
+                            !(
+                                $script:NewSigExpected.ContainsKey("$(($MailAddresses[$AccountNumberRunning]).ToLower())") -and
+                                ![string]::IsNullOrWhiteSpace($script:NewSigExpected."$(($MailAddresses[$AccountNumberRunning]).ToLower())")
+                            )
+                        )
+                    ) {
+                        $script:NewSigExpected."$(($MailAddresses[$AccountNumberRunning]).ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
 
-                    if (-not $SimulateUser) {
-                        if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
-                            Write-Host "$Indent      Set signature as default for new messages (Outlook profile '$(($RegistryPaths[$j] -split '\\')[8])')"
+                        if (-not $SimulateUser) {
+                            if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
+                                Write-Host "$Indent      Set signature as default for new messages (Outlook profile '$(($RegistryPaths[$j] -split '\\')[8])')"
 
-                            if ($OutlookFileVersion -ge '16.0.0.0') {
-                                New-ItemProperty -LiteralPath $RegistryPaths[$j] -Name 'New Signature' -PropertyType String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force | Out-Null
+                                if ($OutlookFileVersion -ge '16.0.0.0') {
+                                    New-ItemProperty -LiteralPath $RegistryPaths[$j] -Name 'New Signature' -PropertyType String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force | Out-Null
+                                } else {
+                                    New-ItemProperty -LiteralPath $RegistryPaths[$j] -Name 'New Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
+                                }
                             } else {
-                                New-ItemProperty -LiteralPath $RegistryPaths[$j] -Name 'New Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
+                                $script:GraphUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                             }
                         } else {
-                            $script:GraphUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
-                        }
-                    } else {
-                        @('htm', 'rtf', 'txt') | ForEach-Object {
-                            if (Test-Path -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)"))) {
-                                $script:GraphUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                            @('htm', 'rtf', 'txt') | ForEach-Object {
+                                if (Test-Path -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)"))) {
+                                    $script:GraphUserDummyMailboxDefaultSigNew = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
 
-                                if ($_ -ieq 'htm') {
-                                    [SetOutlookSignatures.Common]::ConvertToSingleFileHtml($(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")), $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath "DefaultNew.$($_)")))
-                                } else {
-                                    Copy-Item -LiteralPath $(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")) -Destination $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath "DefaultNew.$($_)")) -Force
+                                    if ($_ -ieq 'htm') {
+                                        [SetOutlookSignatures.Common]::ConvertToSingleFileHtml($(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")), $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])") -Force).fullname) -ChildPath "DefaultNew.$($_)")))
+                                    } else {
+                                        Copy-Item -LiteralPath $(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")) -Destination $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])") -Force).fullname) -ChildPath "DefaultNew.$($_)")) -Force
+                                    }
                                 }
                             }
                         }
@@ -6426,33 +6889,56 @@ end tell
                 try { global:WatchCatchableExitSignal } catch {}
 
                 if ($MailAddresses[$j] -ieq $MailAddresses[$AccountNumberRunning]) {
-                    if ($CurrentTemplateIsForAliasSmtp) {
+                    if (
+                        $CurrentTemplateIsForAliasSmtp -and
+                        (
+                            !$SignatureFilesDefaultReplyFwdLowPrio.containskey($TemplateIniSettingsIndex) -or
+                            (
+                                $SignatureFilesDefaultReplyFwdLowPrio.containskey($TemplateIniSettingsIndex) -and
+                                !(
+                                    $script:ReplySigExpected.ContainsKey("$($CurrentTemplateIsForAliasSmtp.ToLower())") -and
+                                    ![string]::IsNullOrWhiteSpace($script:ReplySigExpected."$($CurrentTemplateIsForAliasSmtp.ToLower())")
+                                )
+                            )
+                        )
+                    ) {
                         $script:ReplySigExpected."$($CurrentTemplateIsForAliasSmtp.ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                     }
 
-                    $script:ReplySigExpected."$(($MailAddresses[$AccountNumberRunning]).ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                    if (
+                        !$SignatureFilesDefaultReplyFwdLowPrio.containskey($TemplateIniSettingsIndex) -or
+                        (
+                            $SignatureFilesDefaultReplyFwdLowPrio.containskey($TemplateIniSettingsIndex) -and
+                            !(
+                                $script:ReplySigExpected.ContainsKey("$(($MailAddresses[$AccountNumberRunning]).ToLower())") -and
+                                ![string]::IsNullOrWhiteSpace($script:ReplySigExpected."$(($MailAddresses[$AccountNumberRunning]).ToLower())")
+                            )
+                        )
+                    ) {
+                        $script:ReplySigExpected."$(($MailAddresses[$AccountNumberRunning]).ToLower())" = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
 
-                    if (-not $SimulateUser) {
-                        if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
-                            Write-Host "$Indent      Set signature as default for reply/forward messages (Outlook profile '$(($RegistryPaths[$j] -split '\\')[8])')"
+                        if (-not $SimulateUser) {
+                            if ($RegistryPaths[$j] -ilike '*\9375CFF0413111d3B88A00104B2A6676\*') {
+                                Write-Host "$Indent      Set signature as default for reply/forward messages (Outlook profile '$(($RegistryPaths[$j] -split '\\')[8])')"
 
-                            if ($OutlookFileVersion -ge '16.0.0.0') {
-                                New-ItemProperty -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force | Out-Null
+                                if ($OutlookFileVersion -ge '16.0.0.0') {
+                                    New-ItemProperty -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType String -Value (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') -Force | Out-Null
+                                } else {
+                                    New-ItemProperty -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
+                                }
                             } else {
-                                New-ItemProperty -LiteralPath $RegistryPaths[$j] -Name 'Reply-Forward Signature' -PropertyType Binary -Value ([byte[]](([System.Text.Encoding]::Unicode.GetBytes(((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')) + "`0")))) -Force | Out-Null
+                                $script:GraphUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
                             }
                         } else {
-                            $script:GraphUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
-                        }
-                    } else {
-                        @('htm', 'rtf', 'txt') | ForEach-Object {
-                            if (Test-Path -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)"))) {
-                                $script:GraphUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
+                            @('htm', 'rtf', 'txt') | ForEach-Object {
+                                if (Test-Path -LiteralPath (Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)"))) {
+                                    $script:GraphUserDummyMailboxDefaultSigReply = (($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.')
 
-                                if ($_ -ieq 'htm') {
-                                    [SetOutlookSignatures.Common]::ConvertToSingleFileHtml($(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")), $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath "DefaultReplyFwd.$($_)")))
-                                } else {
-                                    Copy-Item -LiteralPath $(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")) -Destination $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])\") -Force).fullname) -ChildPath "DefaultReplyFwd.$($_)")) -Force
+                                    if ($_ -ieq 'htm') {
+                                        [SetOutlookSignatures.Common]::ConvertToSingleFileHtml($(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")), $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])") -Force).fullname) -ChildPath "DefaultReplyFwd.$($_)")))
+                                    } else {
+                                        Copy-Item -LiteralPath $(Join-Path -Path ($SignaturePaths[0]) -ChildPath ((($Signature.value -split '\.' | Select-Object -SkipLast 1) -join '.') + ".$($_)")) -Destination $((Join-Path -Path ((New-Item -ItemType Directory -Path (Join-Path -Path ($SignaturePaths[0]) -ChildPath "___Mailbox $($MailAddresses[$AccountNumberRunning])") -Force).fullname) -ChildPath "DefaultReplyFwd.$($_)")) -Force
+                                    }
                                 }
                             }
                         }
@@ -6543,8 +7029,8 @@ function CheckADConnectivity {
                         Write-Host "$Indent  $CheckProtocolText query successful"
                         $returnvalue = $true
                     } else {
-                        Write-Host "$Indent  $CheckProtocolText query failed, remove domain from list." -ForegroundColor Red
-                        Write-Host "$Indent  If this error is permanent, check firewalls, DNS and AD trust. Consider parameter 'TrustsToCheckForGroups' to not use this domain." -ForegroundColor Red
+                        Write-Host "$($Indent)  [Error] $($CheckProtocolText) query failed, remove domain from list." -ForegroundColor Red
+                        Write-Host "$($Indent)    If this error is permanent, check firewalls, DNS and AD trust. Consider parameter 'TrustsToCheckForGroups' to not use this domain." -ForegroundColor Red
 
                         if ($TrustsToCheckForGroups -icontains $data[0]) {
                             $TrustsToCheckForGroups.remove($data[0])
@@ -6932,7 +7418,6 @@ function ConvertEncoding {
 
         # Update or insert <meta http-equiv="Content-Type">
         $metaHttpEquiv = $htmlDoc.DocumentNode.SelectSingleNode("//meta[@http-equiv='Content-Type']")
-
         if ($metaHttpEquiv) {
             $null = $metaHttpEquiv.SetAttributeValue('content', "text/html; charset=$newCharset")
         } else {
@@ -7203,30 +7688,30 @@ function ConvertHtmlToPlainText {
 function ParseHtmlStyleAttribute {
     param (
         [Parameter(Mandatory = $true)]
+        [AllowNull()]
+        [AllowEmptyString()]
         [string]$StyleString
     )
 
-    # Initialize result array
-    $properties = @()
+    if ([string]::IsNullOrWhiteSpace($StyleString)) {
+        return @()
+    }
 
-    # Decode HTML entities if present
+    $properties = @()
     $decodedStyle = [System.Net.WebUtility]::HtmlDecode($StyleString)
 
-    # State variables
     $currentProperty = ''
     $currentValue = ''
     $inValue = $false
     $inQuote = $false
     $quoteChar = ''
-    $parenCount = 0
+    $parentCount = 0
 
-    # Process character by character
     $chars = $decodedStyle.ToCharArray()
 
     for ($i = 0; $i -lt $chars.Length; $i++) {
         $char = $chars[$i]
 
-        # Handle quotes
         if (($char -eq '"' -or $char -eq "'") -and $chars[$i - 1] -ne '\') {
             if ($inQuote) {
                 if ($char -eq $quoteChar) {
@@ -7242,26 +7727,23 @@ function ParseHtmlStyleAttribute {
             }
         }
 
-        # Handle parentheses
         if ($char -eq '(' -and -not $inQuote) {
-            $parenCount++
+            $parentCount++
             $currentValue += $char
             continue
         }
         if ($char -eq ')' -and -not $inQuote) {
-            $parenCount--
+            $parentCount--
             $currentValue += $char
             continue
         }
 
-        # Property-value separator
-        if ($char -eq ':' -and -not $inQuote -and $parenCount -eq 0 -and -not $inValue) {
+        if ($char -eq ':' -and -not $inQuote -and $parentCount -eq 0 -and -not $inValue) {
             $inValue = $true
             continue
         }
 
-        # Property separator
-        if ($char -eq ';' -and -not $inQuote -and $parenCount -eq 0) {
+        if ($char -eq ';' -and -not $inQuote -and $parentCount -eq 0) {
             if ($currentProperty -and $currentValue) {
                 $properties += [PSCustomObject]@{
                     Property = $currentProperty.Trim().ToLower()
@@ -7274,7 +7756,6 @@ function ParseHtmlStyleAttribute {
             continue
         }
 
-        # Add character to current property or value
         if ($inValue) {
             $currentValue += $char
         } else {
@@ -7282,7 +7763,6 @@ function ParseHtmlStyleAttribute {
         }
     }
 
-    # Add final property if exists
     if ($currentProperty -and $currentValue) {
         $properties += [PSCustomObject]@{
             Property = $currentProperty.Trim().ToLower()
@@ -7291,6 +7771,92 @@ function ParseHtmlStyleAttribute {
     }
 
     return $properties
+}
+
+
+function GetMarginsFromStyle {
+    param(
+        [string]$Style
+    )
+
+    $margins = @{
+        top    = @{ Value = $null; Important = $false }
+        right  = @{ Value = $null; Important = $false }
+        bottom = @{ Value = $null; Important = $false }
+        left   = @{ Value = $null; Important = $false }
+    }
+
+    $setMargin = {
+        param($side, $newValue, $newImportant)
+        $target = $margins[$side]
+
+        if ($newImportant) {
+            $target.Value = $newValue
+            $target.Important = $true
+        } elseif (-not $target.Important) {
+            $target.Value = $newValue
+        }
+    }
+
+    $declarations = @()
+    if (-not [string]::IsNullOrWhiteSpace($Style)) {
+        $declarations = ParseHtmlStyleAttribute -StyleString $Style
+    }
+
+    foreach ($decl in $declarations) {
+        $property = $decl.Property
+        $value = [System.Net.WebUtility]::HtmlDecode($decl.Value).Trim()
+
+        $important = $false
+        if ($value -match '!\s*important\s*$') {
+            $important = $true
+            $value = ($value -replace '\s*!\s*important\s*$', '').Trim()
+        }
+
+        switch ($property) {
+            'margin' {
+                $values = [regex]::Split($value, '\s+(?![^(]*\))') | Where-Object { $_ -ne '' }
+
+                switch ($values.Count) {
+                    1 {
+                        & $setMargin 'top' $values[0] $important
+                        & $setMargin 'right' $values[0] $important
+                        & $setMargin 'bottom' $values[0] $important
+                        & $setMargin 'left' $values[0] $important
+                    }
+                    2 {
+                        & $setMargin 'top' $values[0] $important
+                        & $setMargin 'bottom' $values[0] $important
+                        & $setMargin 'right' $values[1] $important
+                        & $setMargin 'left' $values[1] $important
+                    }
+                    3 {
+                        & $setMargin 'top' $values[0] $important
+                        & $setMargin 'right' $values[1] $important
+                        & $setMargin 'left' $values[1] $important
+                        & $setMargin 'bottom' $values[2] $important
+                    }
+                    4 {
+                        & $setMargin 'top' $values[0] $important
+                        & $setMargin 'right' $values[1] $important
+                        & $setMargin 'bottom' $values[2] $important
+                        & $setMargin 'left' $values[3] $important
+                    }
+                }
+            }
+            'margin-top' { & $setMargin 'top' $value $important }
+            'margin-right' { & $setMargin 'right' $value $important }
+            'margin-bottom' { & $setMargin 'bottom' $value $important }
+            'margin-left' { & $setMargin 'left' $value $important }
+        }
+    }
+
+    [PSCustomObject]@{
+        MarginTop    = $margins.top.Value
+        MarginRight  = $margins.right.Value
+        MarginBottom = $margins.bottom.Value
+        MarginLeft   = $margins.left.Value
+    }
 }
 
 
@@ -7361,9 +7927,9 @@ $CheckPathScriptblock = {
 
         if (Test-Path -LiteralPath $GraphConfigFile -PathType Leaf) {
             . ([System.Management.Automation.ScriptBlock]::Create((ConvertEncoding -InFile $GraphConfigFile -InIsHtml $false)))
-        } elseif (Test-Path -LiteralPath $(Join-Path -Path $PSScriptRoot -ChildPath '.\config\default graph config.ps1') -PathType Leaf) {
+        } elseif (Test-Path -LiteralPath $(Join-Path -Path $script:ScriptRoot -ChildPath 'config/default graph config.ps1') -PathType Leaf) {
             Write-Verbose '        Not accessible, use default Graph config file'
-            . ([System.Management.Automation.ScriptBlock]::Create((ConvertEncoding -InFile $(Join-Path -Path $PSScriptRoot -ChildPath '.\config\default graph config.ps1') -InIsHtml $false)))
+            . ([System.Management.Automation.ScriptBlock]::Create((ConvertEncoding -InFile $(Join-Path -Path $script:ScriptRoot -ChildPath 'config/default graph config.ps1') -InIsHtml $false)))
         } else {
             Write-Verbose '        Not accessible, and default Graph config file not found'
         }
@@ -7399,6 +7965,8 @@ $CheckPathScriptblock = {
             }
         }
 
+        $GraphUserProperties = @($GraphUserProperties | Group-Object | ForEach-Object { $_.Group[0] }) # Case insensitive, first entry wins
+
         if (-not $GraphUserAttributeMapping) {
             $GraphUserAttributeMapping = @{}
         }
@@ -7413,7 +7981,7 @@ $CheckPathScriptblock = {
         $GraphUserAttributeMapping['userprincipalname'] = 'userPrincipalName'
     } catch {
         Write-Host ($error[0] | Format-List * | Out-String)
-        Write-Host "        Problem executing content of '$GraphConfigFile'. Exit." -ForegroundColor Red
+        Write-Host "        [Error] Problem executing content of '$GraphConfigFile'. Exit." -ForegroundColor Red
         $script:ExitCode = 22
         $script:ExitCodeDescription = 'Problem executing content of GraphConfigFile';
         exit
@@ -7472,7 +8040,7 @@ $CheckPathScriptblock = {
                         Write-Verbose "        Graph Token App metadata: $((ParseJwtToken $script:GraphToken.AppAccessToken) | ConvertTo-Json)"
                     }
                 } else {
-                    Write-Host '      Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
+                    Write-Host '      [Error] Problem connecting to Microsoft Graph. Exit.' -ForegroundColor Red
                     Write-Host $script:GraphToken.error -ForegroundColor Red
                     $script:ExitCode = 23
                     $script:ExitCodeDescription = 'Problem connecting to Microsoft Graph.';
@@ -7558,13 +8126,13 @@ $CheckPathScriptblock = {
                                 }
                             }
                         } else {
-                            Write-Host "    Error getting driveItem content: $($UrlToDriveItemRecursiveContent.error)" -ForegroundColor Yellow
+                            Write-Host "    [Warning] Problem getting driveItem content: $($UrlToDriveItemRecursiveContent.error)" -ForegroundColor Yellow
                         }
                     } else {
-                        Write-Host '    Could resolve URL to driveItem, but its IDs are missing.' -ForegroundColor Yellow
+                        Write-Host '    [Warning] Could resolve URL to driveItem, but its IDs are missing.' -ForegroundColor Yellow
                     }
                 } else {
-                    Write-Host "    Could not resolve URL to driveItem. Wrong path, missing Entra ID app or SharePoint permission? Error: $($UrlToDriveItem.error)" -ForegroundColor Yellow
+                    Write-Host "    [Warning] Could not resolve URL to driveItem. Wrong path, missing Entra ID app or SharePoint permission? Error: $($UrlToDriveItem.error)" -ForegroundColor Yellow
                 }
             }
 
@@ -7580,7 +8148,7 @@ $CheckPathScriptblock = {
                     # Windows. Use old way with "net use", Internet-Explorer-Cookie.
 
                     if (($CheckPathPath.StartsWith('https://', [System.StringComparison]::OrdinalIgnoreCase)) -or ($CheckPathPath -ilike '*@SSL\*')) {
-                        Write-Host '    SharePoint via WebDAV, may be slow and path length problems may occur (fully qualified file names must be less than 260 characters).' -ForegroundColor Yellow
+                        Write-Host '    [Warning] SharePoint via WebDAV, may be slow and path length problems may occur (fully qualified file names must be less than 260 characters).' -ForegroundColor Yellow
                         $CheckPathPath = $CheckPathPath -ireplace '@SSL\\', '\'
                         $CheckPathPath = ([uri]::UnescapeDataString($CheckPathPath) -ireplace ('https://', '\\'))
                         $CheckPathPath = ([System.URI]$CheckPathPath).AbsoluteURI -ireplace 'file:\/\/(.*?)\/(.*)', '\\${1}@SSL\${2}' -ireplace '/', '\'
@@ -7592,7 +8160,7 @@ $CheckPathScriptblock = {
                             $CheckPathPath = [uri]::UnescapeDataString($CheckPathPath)
                         } catch {
                             if ($CheckPathSilent -eq $false) {
-                                Write-Host "Problem connecting or reading '$CheckPathPath'. Exit." -ForegroundColor Red
+                                Write-Host "[Error] Problem connecting or reading '$CheckPathPath'. Exit." -ForegroundColor Red
                                 $script:ExitCode = 25
                                 $script:ExitCodeDescription = "Problem connecting or reading '$CheckPathPath'.";
                                 exit
@@ -7636,7 +8204,7 @@ $CheckPathScriptblock = {
                             if ((Get-Service -ServiceName 'WebClient' -ErrorAction SilentlyContinue -WarningAction SilentlyContinue).Status -ine 'Running') {
                                 if (-not $CheckPathSilent) {
                                     Write-Host
-                                    Write-Host 'WebClient service not running.' -ForegroundColor Red
+                                    Write-Host '[Error] WebClient service not running.' -ForegroundColor Red
                                 }
                             } else {
                                 try {
@@ -7661,7 +8229,7 @@ $CheckPathScriptblock = {
                                                 $window.Close()
 
                                                 Write-Host
-                                                Write-Host 'Authentication cancelled by user. Exiting.' -ForegroundColor Red
+                                                Write-Host '[Error] Authentication cancelled by user. Exiting.' -ForegroundColor Red
 
                                                 $script:ExitCode = 26
                                                 $script:ExitCodeDescription = 'Authentication cancelled by user.';
@@ -7724,7 +8292,7 @@ $CheckPathScriptblock = {
                     }
                 } else {
                     if (($CheckPathPath.StartsWith('https://', [System.StringComparison]::OrdinalIgnoreCase)) -or ($CheckPathPath -ilike '*@SSL\*')) {
-                        Write-Host '    SharePoint via WebDAV is only supported on Windows platforms.' -ForegroundColor Yellow
+                        Write-Host '    [Warning] SharePoint via WebDAV is only supported on Windows platforms.' -ForegroundColor Yellow
                     }
                 }
             }
@@ -7734,7 +8302,7 @@ $CheckPathScriptblock = {
 
         if ((Test-Path -LiteralPath $CheckPathPath -PathType $ExpectedPathType) -eq $false) {
             if ($CheckPathSilent -eq $false) {
-                Write-Host "Problem connecting or reading $($ExpectedPathType) '$($CheckPathPath)'. Exit." -ForegroundColor Red
+                Write-Host "[Error] Problem connecting or reading $($ExpectedPathType) '$($CheckPathPath)'. Exit." -ForegroundColor Red
                 $script:ExitCode = 27
                 $script:ExitCodeDescription = "Problem connecting or reading $($ExpectedPathType) '$($CheckPathPath)'.";
                 exit
@@ -7771,7 +8339,7 @@ $CheckPathScriptblock = {
 
             if ((. $CheckPathScriptblock ([ref]$CheckPathPathTemp) -CheckPathSilent) -eq $true) {
                 if (-not (Test-Path -LiteralPath $CheckPathPathTemp -PathType Container -ErrorAction SilentlyContinue)) {
-                    Write-Host "'$CheckPathPathTemp' is a file, '$CheckPathPathTarget' is not valid. Exit." -ForegroundColor Red
+                    Write-Host "[Error] '$CheckPathPathTemp' is a file, '$CheckPathPathTarget' is not valid. Exit." -ForegroundColor Red
                     $script:ExitCode = 28
                     $script:ExitCodeDescription = "'$CheckPathPathTemp' is a file, '$CheckPathPathTarget' is not valid.";
                     exit
@@ -7794,7 +8362,7 @@ $CheckPathScriptblock = {
         }
 
         if ((. $CheckPathScriptblock ([ref]$CheckPathPathTarget) -CheckPathSilent) -ne $true) {
-            Write-Host "Problem connecting or reading '$CheckPathPathTarget'. Exit." -ForegroundColor Red
+            Write-Host "[Error] Problem connecting or reading '$CheckPathPathTarget'. Exit." -ForegroundColor Red
             $script:ExitCode = 29
             $script:ExitCodeDescription = "Problem connecting or reading '$CheckPathPathTarget'.";
             exit
@@ -7810,7 +8378,7 @@ $CheckPathScriptblock = {
 function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = '', [switch]$silent, [switch]$OnlyLoadDLL) {
     if (-not $script:EwsModulePath) {
         if (-not $silent) {
-            Write-Host "$Indent  Set up environment for connection to Outlook for the web"
+            Write-Host "$($Indent)Set up environment for connection to Outlook for the web"
         }
 
         try { global:WatchCatchableExitSignal } catch {}
@@ -7818,15 +8386,15 @@ function ConnectEWS([string]$MailAddress = $MailAddresses[0], [string]$Indent = 
         $script:EwsModulePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid)))
 
         try {
-            Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\EWS\netstandard2.0')) -Destination $script:EwsModulePath -Recurse
+            CopyDirectoryParallel -Source ((Join-Path -Path $script:ScriptRoot -ChildPath 'deps/EWS/netstandard2.0')) -Destination $script:EwsModulePath
 
-            Get-ChildItem -LiteralPath $script:EwsModulePath -Recurse -Force | ForEach-Object {
-                $_.Attributes = 'Normal'
-                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+            foreach ($item in @(Get-ChildItem -LiteralPath $script:EwsModulePath -Recurse -Force)) {
+                $item.Attributes = 'Normal'
+                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
             }
         } catch {
             if (-not $silent) {
-                Write-Verbose "$Indent    $($_)"
+                Write-Verbose "$($Indent)  $($_)"
             }
         }
     }
@@ -7955,14 +8523,14 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
 
                 if (
                     $($null -ne $CurrentMailboxAlreadyFoundFirstIndex) -and
-                    $((($null -ne $ADPropsMailboxes[$CurrentMailboxAlreadyFoundFirstIndex].msexchrecipienttypedetails) -and ($ADPropsMailboxes[$CurrentMailboxAlreadyFoundFirstIndex].msexchrecipienttypedetails -ge 2147483648)) -or ($null -ne $ADPropsMailboxes[$CurrentMailboxAlreadyFoundFirstIndex].mailboxsettings)) -and
+                    $((GetMailboxEnvironment $ADPropsMailboxes[$CurrentMailboxAlreadyFoundFirstIndex]) -ieq 'EXO') -and
                     ($script:GraphToken -and ($script:GraphToken.error -eq $false))
                 ) {
                     throw 'Mailbox is in cloud, using fixed URL.'
                 }
 
                 if (
-                    $((($null -ne $ADPropsCurrentUser.msexchrecipienttypedetails) -and ($ADPropsCurrentUser.msexchrecipienttypedetails -ge 2147483648)) -or ($null -ne $ADPropsCurrentUser.mailboxsettings)) -and
+                    $($PrimaryMailboxEnvironment -ieq 'EXO') -and
                     ($script:GraphToken -and ($script:GraphToken.error -eq $false))
                 ) {
                     throw 'Mailbox is in cloud, using fixed URL.'
@@ -8028,7 +8596,7 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
 
                     if (
                         $($null -ne $CurrentMailboxAlreadyFoundFirstIndex) -and
-                        $((($null -ne $ADPropsMailboxes[$CurrentMailboxAlreadyFoundFirstIndex].msexchrecipienttypedetails) -and ($ADPropsMailboxes[$CurrentMailboxAlreadyFoundFirstIndex].msexchrecipienttypedetails -ge 2147483648)) -or ($null -ne $ADPropsMailboxes[$CurrentMailboxAlreadyFoundFirstIndex].mailboxsettings)) -and
+                        $((GetMailboxEnvironment $ADPropsMailboxes[$CurrentMailboxAlreadyFoundFirstIndex]) -ieq 'EXO') -and
                         ($script:GraphToken -and ($script:GraphToken.error -eq $false))
                     ) {
                         throw 'Mailbox is in cloud, using fixed URL.'
@@ -8093,8 +8661,8 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
                     }
 
                     if (-not $silent) {
-                        Write-Host "$($Indent)      Success"
                         Write-Host "$($Indent)      Fixed URL: '$($script:exchService.Url)'"
+                        Write-Host "$($Indent)      Success"
                     }
                 }
             }
@@ -8106,8 +8674,8 @@ public class ExchServiceEwsTraceListener : Microsoft.Exchange.WebServices.Data.I
             }
         } catch {
             if (-not $silent) {
-                Write-Host "$($Indent)    Error connecting to Outlook for the web: $($_)" -ForegroundColor Red
-                Write-Host "$($Indent)    Check verbose output for details and solution hints." -ForegroundColor Red
+                Write-Host "$($Indent)    [Error] Error connecting to Outlook for the web: $($_)" -ForegroundColor Red
+                Write-Host "$($Indent)      Check verbose output for details and solution hints." -ForegroundColor Red
             }
 
             $script:exchService = $null
@@ -8133,8 +8701,8 @@ function GraphGetToken {
             Write-Host "$($indent)  Application (client) ID of the Entra ID app: $($GraphClientID)"
 
             if ($GraphClientID -ieq 'beea8249-8c98-4c76-92f6-ce3c468a61e6') {
-                Write-Host "$($indent)    You use the Entra ID app provided by the developers. Add security by using your own Entra ID app." -ForegroundColor Yellow
-                Write-Host "$($indent)    The Quickstart Guide shows how to do this: https://set-outlooksignatures.com/quickstart" -ForegroundColor Yellow
+                Write-Host "$($indent)    [Warning] You use the Entra ID app provided by the developers. Add security by using your own Entra ID app." -ForegroundColor Yellow
+                Write-Host "$($indent)      The Quickstart Guide shows how to do this: https://set-outlooksignatures.com/quickstart" -ForegroundColor Yellow
             }
         }
 
@@ -8184,8 +8752,8 @@ function GraphGetToken {
             Write-Host "$($indent)  Application (client) ID of the Entra ID app: $((ParseJwtToken $script:AuthorizationToken).payload.appid)"
 
             if ((ParseJwtToken $script:AuthorizationToken).payload.appid -ieq 'beea8249-8c98-4c76-92f6-ce3c468a61e6') {
-                Write-Host "$($indent)    You use the Entra ID app provided by the developers. Add security by using your own Entra ID app." -ForegroundColor Yellow
-                Write-Host "$($indent)    The Quickstart Guide shows how to do this: https://set-outlooksignatures.com/quickstart" -ForegroundColor Yellow
+                Write-Host "$($indent)    [Warning] You use the Entra ID app provided by the developers. Add security by using your own Entra ID app." -ForegroundColor Yellow
+                Write-Host "$($indent)      The Quickstart Guide shows how to do this: https://set-outlooksignatures.com/quickstart" -ForegroundColor Yellow
             }
 
             return @{
@@ -8218,42 +8786,11 @@ function GraphGetToken {
 
             $script:MsalModulePath = (Join-Path -Path $script:tempDir -ChildPath 'MSAL.PS')
 
-            # Copy each item to the destination
-            foreach ($item in @(Get-ChildItem -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\MSAL.PS')) -Recurse)) {
-                if ($item.BaseName -like '*msalruntime*') {
-                    if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
-                        if ($item.Name -inotlike 'msalruntime*.dll') {
-                            continue
-                        }
-                    } elseif ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux) {
-                        if ($item.Name -inotlike 'libmsalruntime.so') {
-                            continue
-                        }
-                    } elseif ((Test-Path -LiteralPath 'variable:IsMacOS') -and $IsMacOS) {
-                        if ($item.Name -inotlike 'msalruntime*.dylib') {
-                            continue
-                        }
-                    } else {
-                        continue
-                    }
-                }
+            CopyDirectoryParallel -Source (Join-Path -Path $script:ScriptRoot -ChildPath 'deps/MSAL.PS') -Destination $script:MsalModulePath
 
-                $destinationPath = $item.FullName -replace [regex]::escape($([System.IO.Path]::GetFullPath($(Join-Path -Path $PSScriptRoot -ChildPath '\deps\MSAL.PS')))), $script:MsalModulePath
-
-                if ($item.PSIsContainer) {
-                    # Create the directory if it doesn't exist
-                    if (-not (Test-Path -LiteralPath $destinationPath)) {
-                        $null = New-Item -ItemType Directory -Path $destinationPath -Force
-                    }
-                } else {
-                    # Copy the file
-                    Copy-Item -LiteralPath $item.FullName -Destination $destinationPath
-                }
-            }
-
-            Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse -Force | ForEach-Object {
-                $_.Attributes = 'Normal'
-                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+            foreach ($item in @(Get-ChildItem -LiteralPath $script:MsalModulePath -Recurse -Force)) {
+                $item.Attributes = 'Normal'
+                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
             }
 
             try { global:WatchCatchableExitSignal } catch {}
@@ -8262,7 +8799,7 @@ function GraphGetToken {
                 Import-Module $script:MsalModulePath -Force -ErrorAction Stop
             } catch {
                 Write-Host ($error[0] | Format-List * | Out-String)
-                Write-Host "$($indent)    Problem importing MSAL.PS module. Exit." -ForegroundColor Red
+                Write-Host "$($indent)    [Error] Problem importing MSAL.PS module. Exit." -ForegroundColor Red
                 $script:ExitCode = 30
                 $script:ExitCodeDescription = 'Problem importing MSAL.PS module.';
                 exit
@@ -8976,7 +9513,7 @@ function GraphSwitchContext {
             $script:CloudEnvironmentsRawDataDuplicateAliases = $script:CloudEnvironmentsRawData.Aliases | Group-Object | Where-Object { $_.Count -gt 1 }
 
             if ($script:CloudEnvironmentsRawDataDuplicateAliases) {
-                Write-Host "Duplicate cloud environment aliases found: $($script:CloudEnvironmentsRawDataDuplicateAliases.Name -join ', ')" -ForegroundColor Red
+                Write-Host "[Error] Duplicate cloud environment aliases found: $($script:CloudEnvironmentsRawDataDuplicateAliases.Name -join ', ')" -ForegroundColor Red
                 $script:ExitCode = 42
                 $script:ExitCodeDescription = 'Cloud environments not configured correctly.'
                 exit
@@ -8986,7 +9523,7 @@ function GraphSwitchContext {
                 if ($null -eq $script:CloudEnvironmentsRawDataEntry.Aliases -or
                     $script:CloudEnvironmentsRawDataEntry.Aliases.Count -eq 0 -or
                     $null -in $script:CloudEnvironmentsRawDataEntry.Aliases) {
-                    Write-Host "Validation Failed: 'Aliases' must not be null or contain null values." -ForegroundColor Red
+                    Write-Host "[Error] Validation Failed: 'Aliases' must not be null or contain null values." -ForegroundColor Red
                     $script:ExitCode = 42
                     $script:ExitCodeDescription = 'Cloud environments not configured correctly.'
                     exit
@@ -9009,7 +9546,7 @@ function GraphSwitchContext {
                             throw 'Validation Failed'
                         }
                     } catch {
-                        Write-Host "Invalid URL format in '$($script:CloudEnvironmentsRawDataEntry.Aliases[0])','$($script:CloudEnvironmentsRawDataEntry.$_)': Is not https, or is file." -ForegroundColor Red
+                        Write-Host "[Error] Invalid URL format in '$($script:CloudEnvironmentsRawDataEntry.Aliases[0])','$($script:CloudEnvironmentsRawDataEntry.$_)': Is not https, or is file." -ForegroundColor Red
                         $script:ExitCode = 42
                         $script:ExitCodeDescription = 'Cloud environments not configured correctly.'
                         exit
@@ -9068,7 +9605,7 @@ function GraphSwitchContext {
         }
 
         if ($CloudEnvironment -inotin $script:CloudEnvironmentsData.Aliases) {
-            Write-Host "Cloud environment '$($CloudEnvironment)' is not defined." -ForegroundColor Red
+            Write-Host "[Error] Cloud environment '$($CloudEnvironment)' is not defined." -ForegroundColor Red
             $script:ExitCode = 42
             $script:ExitCodeDescription = 'Cloud environments not configured correctly.'
             exit
@@ -9310,10 +9847,10 @@ function GraphGetTokenWrapper {
 
         if ($local:results.Count -gt 0) {
             if ($local:results -ilike 'Error:*') {
-                Write-Host "$($indent)  The permissions of the Entra ID app are not configured ideally." -ForegroundColor Red
+                Write-Host "$($indent)  [Error] The permissions of the Entra ID app are not configured ideally." -ForegroundColor Red
                 Write-Host "$($indent)    Details: https://set-outlooksignatures.com/details#security-considerations" -ForegroundColor Red
             } elseif ($local:results -ilike 'Warning:*') {
-                Write-Host "$($indent)  The permissions of the Entra ID app are not configured ideally." -ForegroundColor Yellow
+                Write-Host "$($indent)  [Warning] The permissions of the Entra ID app are not configured ideally." -ForegroundColor Yellow
                 Write-Host "$($indent)    Details: https://set-outlooksignatures.com/details#security-considerations" -ForegroundColor Yellow
 
             } else {
@@ -9334,7 +9871,7 @@ function GraphGetTokenWrapper {
             }
 
             if ($local:results -ilike 'Error:*') {
-                Write-Host 'The Entra ID app misses required permissions:' -ForegroundColor Red
+                Write-Host '[Error] The Entra ID app misses required permissions:' -ForegroundColor Red
 
                 @($local:results | Where-Object { $_ -ilike 'Error:*' }) | ForEach-Object {
                     foreach ($line in @($_ -split '\r?\n')) {
@@ -9542,7 +10079,7 @@ function GraphGetMe {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Net.WebUtility]::UrlEncode(($GraphUserProperties -join ',')) + '&$expand=manager($select=id)'
+            Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/me?`$select=" + [System.Net.WebUtility]::UrlEncode((@($GraphUserProperties | Select-Object -Unique) -join ',')) + '&$expand=manager($select=id)'
             Headers     = $script:AuthorizationHeader
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -9650,7 +10187,7 @@ function GraphGetUpnFromSmtp($user, $authHeader) {
     try {
         $requestBody = @{
             Method      = 'Get'
-            Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$filter=proxyAddresses/any(x:x eq 'smtp:$($user)')"
+            Uri         = "$($script:CloudEnvironmentGraphApiEndpoint)/$($GraphEndpointVersion)/users?`$filter=proxyAddresses/any(x:x eq 'smtp:$($user)') or userPrincipalName eq '$($user)'"
             Headers     = $(if ($authHeader) { $authHeader } else { @{} })
             ContentType = 'Application/Json; charset=utf-8'
         }
@@ -9839,8 +10376,21 @@ function GraphGetUserProperties($user, $authHeader) {
                 }
             } until (!($local:uri))
 
-
-            if (($user.properties.value.userprincipalname -ieq $script:GraphUser) -and ((-not $SimulateUser) -or ($SimulateUser -and $SimulateAndDeployGraphCredentialFile)) -and (($SetCurrentUserOOFMessage -eq $true) -or ($SetCurrentUserOutlookWebSignature -eq $true) -or ($MirrorCloudSignatures -ne $false))) {
+            if (
+                (
+                    ($user.properties.value.userprincipalname -ieq $script:GraphUser) -or
+                    ($user.properties.value.userprincipalname -ieq (GraphGetUpnFromSmtp -user $script:GraphUser -authHeader $authHeader).properties.value.userprincipalname)
+                ) -and
+                (
+                    (-not $SimulateUser) -or
+                    ($SimulateUser -and $SimulateAndDeployGraphCredentialFile)
+                ) -and
+                (
+                    ($SetCurrentUserOOFMessage -eq $true) -or
+                    ($SetCurrentUserOutlookWebSignature -eq $true) -or
+                    ($MirrorCloudSignatures -ne $false)
+                )
+            ) {
                 try {
                     $requestBody = @{
                         Method      = 'Get'
@@ -9921,9 +10471,9 @@ function GraphGetUserProperties($user, $authHeader) {
                     $local:x | Add-Member -MemberType NoteProperty -Name 'mailboxSettings' -Value $local:y.mailboxSettings -Force
                 } catch {
                     Write-Host ($error[0] | Format-List * | Out-String)
-                    Write-Host "      Problem getting mailboxSettings for '$($script:GraphUser)' from Microsoft Graph." -ForegroundColor Yellow
-                    Write-Host '      This is a Microsoft Graph API problem, which can only be solved by Microsoft itself.' -ForegroundColor Yellow
-                    Write-Host '      Disabling SetCurrentUserOutlookWebSignature and SetCurrentUserOOFMessage to be able to continue.' -ForegroundColor Yellow
+                    Write-Host "      [Warning] Problem getting mailboxSettings for '$($script:GraphUser)' from Microsoft Graph." -ForegroundColor Yellow
+                    Write-Host '        This is a Microsoft Graph API problem, which can only be solved by Microsoft itself.' -ForegroundColor Yellow
+                    Write-Host '        Disabling SetCurrentUserOutlookWebSignature and SetCurrentUserOOFMessage to be able to continue.' -ForegroundColor Yellow
 
                     $SetCurrentUserOutlookWebSignature = $false
                     $SetCurrentUserOOFMessage = $false
@@ -9940,12 +10490,17 @@ function GraphGetUserProperties($user, $authHeader) {
 
         try { global:WatchCatchableExitSignal } catch {}
 
-        if (($user.properties.value.userprincipalname -ieq $script:GraphUser) -and ($SimulateUser -and $SimulateAndDeployGraphCredentialFile -and ($authHeader -eq $script:AuthorizationHeader))) {
+        if (
+            (
+                ($user.properties.value.userprincipalname -ieq $script:GraphUser) -or
+                ($user.properties.value.userprincipalname -ieq (GraphGetUpnFromSmtp -user $script:GraphUser -authHeader $authHeader).properties.value.userprincipalname)
+            ) -and
+            ($SimulateUser -and $SimulateAndDeployGraphCredentialFile -and ($authHeader -eq $script:AuthorizationHeader))
+        ) {
             $temp = GraphGetUserProperties -user $($user.properties.value.userprincipalname) -authHeader $script:AppAuthorizationHeader
 
             if ($temp.error -eq $false) {
                 $local:x = $temp.properties
-            } else {
             }
         }
 
@@ -10511,7 +11066,7 @@ function GetIniContent ($filePath, $additionalLines) {
             }
         } catch {
             Write-Host ($error[0] | Format-List * | Out-String)
-            Write-Host "Error accessing '$FilePath'. Exit." -ForegroundColor red
+            Write-Host "[Error] Error accessing '$FilePath'. Exit." -ForegroundColor red
             $script:ExitCode = 31
             $script:ExitCodeDescription = "Error accessing '$FilePath'."
             exit
@@ -10850,35 +11405,26 @@ function global:WatchCatchableExitSignal {
         [switch]$CleanupDone
     )
 
+    $status = $global:WatchCatchableExitSignalStatus[0]
+
     if ($CleanupDone) {
-        if ($WatchCatchableExitSignalForm) {
-            try {
-                $WatchCatchableExitSignalForm.Close()
-            } catch {
-                # Do nothing
-            }
+        if ($null -ne $WatchCatchableExitSignalForm) {
+            try { $WatchCatchableExitSignalForm.Close() } catch {}
         }
 
         $global:WatchCatchableExitSignalStatus[0] = 'Clean-up done'
-    } elseif (
-        $global:WatchCatchableExitSignalStatus[0].StartsWith('Detected ''') -and
-        $global:WatchCatchableExitSignalStatus[0].EndsWith(''', initiate clean-up and exit')
-    ) {
+    } elseif ($status -like "Detected '*, initiate clean-up and exit") {
         Write-Host
-        Write-Host "WatchCatchableExitSignal: $($global:WatchCatchableExitSignalStatus[0])" -ForegroundColor Yellow
+        Write-Host "[Error] WatchCatchableExitSignal: $status" -ForegroundColor Yellow
 
-        if ($WatchCatchableExitSignalForm) {
-            try {
-                $WatchCatchableExitSignalForm.Close()
-            } catch {
-                # Do nothing
-            }
+        if ($null -ne $WatchCatchableExitSignalForm) {
+            try { $WatchCatchableExitSignalForm.Close() } catch {}
         }
 
         $script:ExitCode = 1
         $script:ExitCodeDescription = 'Detected catchable exit signal.'
         exit
-    } else {
+    } elseif ($NonExitScriptBlock) {
         . $NonExitScriptBlock
     }
 }
@@ -10910,10 +11456,12 @@ $ScriptVersion = 'XXXVersionStringXXX'
 $script:ExitCode = 255
 $script:ExitCodeDescription = 'Generic exit code, no details available. Could be because of Ctrl+C.'
 
+$script:ScriptRoot = @($PSScriptRoot, (Get-Location).ProviderPath) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1
+Set-Location -LiteralPath $script:ScriptRoot
 
 try {
     try {
-        $TranscriptFullName = Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs') -ChildPath $("Set-OutlookSignatures_Log_$(Get-Date $([DateTime]::UtcNow) -Format FileDateTimeUniversal).txt")
+        $TranscriptFullName = Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures/Logs') -ChildPath $("Set-OutlookSignatures_Log_$(Get-Date $([DateTime]::UtcNow) -Format FileDateTimeUniversal).txt")
         $TranscriptFullName = (Start-Transcript -LiteralPath $TranscriptFullName -Force).Path
 
         "This folder contains log files generated by Set-OutlookSignatures.$([Environment]::NewLine)$([Environment]::NewLine)Each file is named according to the pattern 'Set-OutlookSignatures_Log_yyyyMMddTHHmmssffffZ.txt'.$([Environment]::NewLine)$([Environment]::NewLine)Files older than 14 days are automatically deleted with each execution of Set-OutlookSignatures.$([Environment]::NewLine)$([Environment]::NewLine)Ignore log lines starting with 'PS>TerminatingError' or '>> TerminatingError' unless instructed otherwise." | Out-File -LiteralPath $(Join-Path -Path (Split-Path -LiteralPath $TranscriptFullName) -ChildPath '_README.txt') -Encoding utf8 -Force
@@ -10941,24 +11489,24 @@ try {
     Remove-TypeData System.Array -ErrorAction SilentlyContinue
 
     if ($psISE) {
-        Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
-        Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
+        Write-Host '  [Error] PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+        Write-Host '    Required features are not available in ISE. Exit.' -ForegroundColor Red
         $script:ExitCode = 2
         $script:ExitCodeDescription = 'PowerShell ISE detected.'
         exit
     }
 
     if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-        Write-Host "  This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
-        Write-Host '  Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+        Write-Host "  [Error] This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+        Write-Host '    Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
         $script:ExitCode = 32
         $script:ExitCodeDescription = 'Not running in FullLanguage mode.'
         exit
     }
 
     if ($global:SetOutlookSignaturesLastRunMarker -and $($global:SetOutlookSignaturesLastRunMarker -inotlike "$($ScriptVersion) *")) {
-        Write-Host '  Set-OutlookSignatures has already been run in another version in this PowerShell session.' -ForegroundColor Yellow
-        Write-Host '    This is not allowed as it creates problems caused by .Net caching DLL files in memory.' -ForegroundColor Yellow
+        Write-Host '  [Error] Set-OutlookSignatures has already been run in another version in this PowerShell session.' -ForegroundColor Red
+        Write-Host '    This is not allowed as it creates problems caused by .Net caching DLL files in memory.' -ForegroundColor Red
 
         $script:ExitCode = 3
         $script:ExitCodeDescription = 'Set-OutlookSignatures has already been run in another version in this PowerShell session but is only supported once to avoid problems caused by .Net caching DLL files in memory.'
@@ -10973,12 +11521,12 @@ try {
 
     $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-    if ($PSScriptRoot) {
-        Set-Location -LiteralPath $PSScriptRoot
+    if ($script:ScriptRoot) {
+        Set-Location -LiteralPath $script:ScriptRoot
     } else {
-        Write-Host 'Could not determine the script path, which is essential for this script to work.' -ForegroundColor Red
-        Write-Host 'Make sure to run this script as a file from a PowerShell console, and not just as a text selection in a code editor.' -ForegroundColor Red
-        Write-Host 'Exit.' -ForegroundColor Red
+        Write-Host '[Error] Could not determine the script path, which is essential for this script to work.' -ForegroundColor Red
+        Write-Host '  Make sure to run this script as a file from a PowerShell console, and not just as a text selection in a code editor.' -ForegroundColor Red
+        Write-Host '  Exit.' -ForegroundColor Red
 
         $script:ExitCode = 41
         $script:ExitCodeDescription = 'Set-OutlookSignatures needs to be run as a file from a PowerShell console, and not just as a text selection in a code editor.'
@@ -10991,10 +11539,12 @@ try {
     $script:ScriptRunGuid = Split-Path -Path $script:tempDir -Leaf
 
     $script:CommonDepsPath = (Join-Path -Path $script:tempDir -ChildPath 'commonDeps')
-    Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\_common')) -Destination $script:CommonDepsPath -Recurse
-    Get-ChildItem -LiteralPath $script:CommonDepsPath -Recurse -Force | ForEach-Object {
-        $_.Attributes = 'Normal'
-        if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+
+    CopyDirectoryParallel -Source ((Join-Path -Path $script:ScriptRoot -ChildPath 'deps/_common')) -Destination $script:CommonDepsPath
+
+    foreach ($item in @(Get-ChildItem -LiteralPath $script:CommonDepsPath -Recurse -Force)) {
+        $item.Attributes = 'Normal'
+        if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
     }
 
 
@@ -11091,17 +11641,18 @@ namespace SetOutlookSignatures.AssemblyResolver {
 
 
     $script:SetOutlookSignaturesCommonDllFilePath = (Join-Path -Path $script:tempDir -ChildPath (((New-Guid).Guid) + '.dll'))
-    Copy-Item -LiteralPath ((Join-Path -Path '.' -ChildPath 'deps\Set-OutlookSignatures.Common\Set-OutlookSignatures.Common.dll')) -Destination $script:SetOutlookSignaturesCommonDllFilePath
-    Get-ChildItem -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath -Recurse -Force | ForEach-Object {
-        $_.Attributes = 'Normal'
-        if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+    Copy-Item -LiteralPath ((Join-Path -Path $script:ScriptRoot -ChildPath 'deps/Set-OutlookSignatures.Common/Set-OutlookSignatures.Common.dll')) -Destination $script:SetOutlookSignaturesCommonDllFilePath
+
+    foreach ($item in @(Get-ChildItem -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath -Recurse -Force)) {
+        $item.Attributes = 'Normal'
+        if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
     }
 
     try {
         Add-Type -LiteralPath $script:SetOutlookSignaturesCommonDllFilePath -ErrorAction Stop
     } catch {
         Write-Host ($error[0] | Format-List * | Out-String)
-        Write-Host '    Problem importing Set-OutlookSignatures.Common.dll. Exit.' -ForegroundColor Red
+        Write-Host '    [Error] Problem importing Set-OutlookSignatures.Common.dll. Exit.' -ForegroundColor Red
         $script:ExitCode = 4
         $script:ExitCodeDescription = 'Problem importing Set-OutlookSignatures.Common.dll.'
         exit
@@ -11116,7 +11667,7 @@ namespace SetOutlookSignatures.AssemblyResolver {
 } catch {
     Write-Host ($error[0] | Format-List * | Out-String)
     Write-Host
-    Write-Host 'Unexpected error. Exit.' -ForegroundColor red
+    Write-Host '[Error] Unexpected error. Exit.' -ForegroundColor red
 } finally {
     Write-Host
     Write-Host "Clean-up @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"
@@ -11271,6 +11822,11 @@ namespace SetOutlookSignatures.AssemblyResolver {
         Remove-Item -LiteralPath $script:AddressFormatterModulePath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
+    if ($script:ResolveCountryModulePath) {
+        Remove-Module -Name ResolveCountry -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $script:ResolveCountryModulePath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
     if ($script:ScriptProcessPriorityOriginal) {
         try {
             $((Get-Process -PID $PID).PriorityClass = $script:ScriptProcessPriorityOriginal)
@@ -11290,11 +11846,6 @@ namespace SetOutlookSignatures.AssemblyResolver {
         $PSDefaultParameterValues = $PSDefaultParameterValuesOriginal.Clone()
     }
 
-    if ($TranscriptFullName) {
-        Write-Host
-        Write-Host 'Log file'
-        Write-Host "  '$TranscriptFullName'"
-    }
 
     Write-Host
 
@@ -11313,6 +11864,26 @@ namespace SetOutlookSignatures.AssemblyResolver {
 
     # Disable assembly resolver C# bridge
     [SetOutlookSignatures.AssemblyResolver.SmartBridge]::Disable()
+
+
+    if ($TranscriptFullName) {
+        Write-Host
+        Write-Host 'Log file'
+        Write-Host "  '$TranscriptFullName'"
+
+        $TranscriptLines = (Get-Content -Path $TranscriptFullName -Raw) -split '\r?\n'
+        $TranscriptWarningLineNumbers = for ($i = 0; $i -lt $TranscriptLines.Count; $i++) { if ($TranscriptLines[$i] -match '^\s*\[Warning\]') { $i + 1 } }
+        $TranscriptErrorLineNumbers = for ($i = 0; $i -lt $TranscriptLines.Count; $i++) { if ($TranscriptLines[$i] -match '^\s*\[Error\]') { $i + 1 } }
+
+        if (@($TranscriptWarningLineNumbers).Count -gt 0) {
+            Write-Host "  Log file contains $(@($TranscriptWarningLineNumbers).Count) '[Warning]' entries (lines $($TranscriptWarningLineNumbers -join ', '))" -ForegroundColor Yellow
+        }
+
+        if (@($TranscriptErrorLineNumbers).Count -gt 0) {
+            Write-Host "  Log file contains $(@($TranscriptErrorLineNumbers).Count) '[Error]' entries (lines $($TranscriptErrorLineNumbers -join ', '))" -ForegroundColor Red
+        }
+    }
+
 
     Write-Host
     Write-Host "End Set-OutlookSignatures @$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK')@"

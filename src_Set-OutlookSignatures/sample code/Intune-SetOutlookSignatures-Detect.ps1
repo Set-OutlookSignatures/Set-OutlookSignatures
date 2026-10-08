@@ -31,21 +31,21 @@ $maximumAgeHours = 2
 Remove-TypeData System.Array -ErrorAction SilentlyContinue
 
 if ($psISE) {
-    Write-Host 'PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
-    Write-Host 'Required features are not available in ISE. Exit.' -ForegroundColor Red
+    Write-Host '[Error] PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+    Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
     exit 1
 }
 
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-    Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
-    Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+    Write-Host "[Error] This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+    Write-Host '  Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
     exit 1
 }
 
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-$logFile = (Get-ChildItem $(Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath '\Set-OutlookSignatures\Logs') -ChildPath $('Set-OutlookSignatures_Log_*.txt')) -File -Force -ErrorAction SilentlyContinue | Sort-Object -Culture 127 -Property $_.CreationTime | Select-Object -Last 1).FullName
+$logFile = (Get-ChildItem $(Join-Path -Path $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures/Logs') -ChildPath $('Set-OutlookSignatures_Log_*.txt')) -File -Force -ErrorAction SilentlyContinue | Sort-Object -Culture 127 -Property $_.CreationTime | Select-Object -Last 1).FullName
 
 if ((-not $logFile) -or (-not (Test-Path -LiteralPath $logFile))) {
     Write-Host 'Log file not found, Set-OutlookSignatures has not yet run.'

@@ -53,14 +53,14 @@ try {
     Remove-TypeData System.Array -ErrorAction SilentlyContinue
 
     if ($psISE) {
-        Write-Host '  PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
-        Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
+        Write-Host '  [Error] PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+        Write-Host '    Required features are not available in ISE. Exit.' -ForegroundColor Red
         exit 1
     }
 
     if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-        Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
-        Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+        Write-Host "  [Error] This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+        Write-Host '    Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
         exit 1
     }
 
@@ -81,13 +81,12 @@ try {
 
     if ((-not (Test-Path -LiteralPath 'variable:IsWindows')) -or $IsWindows) {
     } else {
-        Write-Host "  Your OS: $($PSVersionTable.OS)" -ForegroundColor Red
-        Write-Host '  This script is supported on Windows only. Exit.' -ForegroundColor Red
+        Write-Host '  [Error] This script is supported on Windows only. Your OS: $($PSVersionTable.OS). Exit.' -ForegroundColor Red
     }
 
     if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-        Write-Host "  This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
-        Write-Host '  Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+        Write-Host "  [Error] This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+        Write-Host '    Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
         exit 1
     }
 

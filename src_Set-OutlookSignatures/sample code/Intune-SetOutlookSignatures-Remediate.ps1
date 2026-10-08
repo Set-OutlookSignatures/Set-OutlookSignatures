@@ -33,7 +33,7 @@ $ForceDownload = $true
 #   The path is created if it does not exist
 #   You can use local paths or network shares, including SMB file shares in Azure Files
 #     SharePoint is not supported
-$SoftwarePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures\Set-OutlookSignatures')
+$SoftwarePath = $(Join-Path -Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) -ChildPath 'Set-OutlookSignatures/Set-OutlookSignatures')
 
 # Parameters for the execution of Set-OutlookSignatures
 $SetOutlookSignaturesParameters = @{
@@ -54,15 +54,15 @@ $SetOutlookSignaturesParameters = @{
 Remove-TypeData System.Array -ErrorAction SilentlyContinue
 
 if ($psISE) {
-    Write-Host 'PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
-    Write-Host 'Required features are not available in ISE. Exit.' -ForegroundColor Red
+    Write-Host '[Error] PowerShell ISE detected. Use PowerShell in console or terminal instead.' -ForegroundColor Red
+    Write-Host '  Required features are not available in ISE. Exit.' -ForegroundColor Red
     exit 1
 }
 
 
 if (($ExecutionContext.SessionState.LanguageMode) -ine 'FullLanguage') {
-    Write-Host "This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
-    Write-Host 'Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
+    Write-Host "[Error] This PowerShell session runs in $($ExecutionContext.SessionState.LanguageMode) mode, not FullLanguage mode." -ForegroundColor Red
+    Write-Host '  Required features are only available in FullLanguage mode. Exit.' -ForegroundColor Red
     exit 1
 }
 
@@ -77,9 +77,9 @@ try {
         if (-not (Test-Path -LiteralPath $SoftwarePath)) {
             New-Item -Path $SoftwarePath -ItemType Directory
         } else {
-            if ((Test-Path -LiteralPath (Join-Path -Path $SoftwarePath -ChildPath 'docs\releases.txt'))) {
+            if ((Test-Path -LiteralPath (Join-Path -Path $SoftwarePath -ChildPath 'docs/releases.txt'))) {
                 try {
-                    $currentVersion = @(Get-Content -LiteralPath (Join-Path -Path $SoftwarePath -ChildPath 'docs\releases.txt') | Where-Object { $_ })[-1]
+                    $currentVersion = @(Get-Content -LiteralPath (Join-Path -Path $SoftwarePath -ChildPath 'docs/releases.txt') | Where-Object { $_ })[-1]
                 } catch {
                     $currentVersion = $null
                 }
@@ -137,9 +137,9 @@ try {
 
             Remove-Item -LiteralPath $tempFile -Force
 
-            Get-ChildItem -LiteralPath $SoftwarePath -Recurse -Force | ForEach-Object {
-                $_.Attributes = 'Normal'
-                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $_.FullName }
+            foreach ($item in @(Get-ChildItem -LiteralPath $SoftwarePath -Recurse -Force)) {
+                $item.Attributes = 'Normal'
+                if (-not ((Test-Path -LiteralPath 'variable:IsLinux') -and $IsLinux)) { Unblock-File -LiteralPath $item.FullName }
             }
         }
     }

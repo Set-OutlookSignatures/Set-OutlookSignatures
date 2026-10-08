@@ -1,6 +1,6 @@
 Set-OutlookSignatures and the Benefactor Circle add-on
-Data Sovereign Email Signatures and Out-of-Office Replies
-Unified Outlook branding everywhere – with zero external data exposure
+Data-Sovereign Email Signatures and Out-of-Office Replies
+Your branding across every Outlook platform, with zero external data exposure
 
 
 [!] USE OFFICIAL RELEASES

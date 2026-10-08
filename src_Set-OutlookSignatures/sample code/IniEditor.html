@@ -979,6 +979,8 @@
     var SIGNATURE_SYSTEM_TAGS = new Set([
       "defaultnew",
       "defaultreplyfwd",
+      "defaultnewlowprio",
+      "defaultreplyfwdlowprio",
       "writeprotect",
     ]);
 
@@ -989,6 +991,8 @@
     var SYSTEM_TAGS = new Set([
       "defaultnew",
       "defaultreplyfwd",
+      "defaultnewlowprio",
+      "defaultreplyfwdlowprio",
       "writeprotect", // signature
       "internal",
       "external", // OOF
@@ -1025,42 +1029,141 @@
       "email-deny",    // mailboxes (deny)
       "variable-deny", // replacement variables (deny)
       "defaultNew",    // defaultNew / internal
+      "defaultNewLowPrio",    // defaultNewLowPrio
       "defaultReply",  // defaultReplyFwd / external
+      "defaultReplyLowPrio",  // defaultReplyFwdLowPrio
       "writeProtect",
       "other",
     ];
 
-    // The sample INI loaded by "Load sample data" or by visiting the page with ?demo=1.
-    var SAMPLE_INI =
-      "# Sample Set-OutlookSignatures INI\n" +
-      "\n" +
-      "[<Set-OutlookSignatures configuration>]\n" +
-      "SortOrder = AsInThisFile\n" +
-      "SortCulture = 127\n" +
-      "\n" +
-      "# Informal signatures\n" +
-      "[Informal.docx]\n" +
-      "defaultReplyFwd\n" +
-      "\n" +
-      "[Informal Delegate.docx]\n" +
-      "alex.alien@galactic.experiences\n" +
-      "-CURRENTUSER:alex.alien@galactic.experiences\n" +
-      "OutlookSignatureName = Informal Delegate alex.alien\n" +
-      "defaultReplyFwd\n" +
-      "\n" +
-      "# Formal signatures\n" +
-      "[Formal.docx]\n" +
-      "defaultNew\n" +
-      "\n" +
-      "[Formal HR Christmas.docx]\n" +
-      "202412100000-202501062359\n" +
-      "202512100000-202601062359\n" +
-      "OutlookSignatureName = Formal\n" +
-      "defaultNew\n" +
-      "EntraID Name-of-HR-Group@galactic.experiences\n" +
-      "\n" +
-      "[Test all default replacement variables.docx]\n" +
-      "-:alex.alien@galactic.experiences\n";
+    // The sample INI loaded by "Load sample data" or by visiting the page with ?sample=1.
+    var SAMPLE_INI = String.raw`# This file defines which templates are to be used, which mailboxes receive a specific template, and which additional settings shall be applied
+# See the 'Signature and OOF template file format' chapter at https://set-outlooksignatures.com/details for more details and enhanced usage examples
+
+# Do not modify this file directly, but a copy of it.
+# Place the copy in a separate folder structure recommended in our folder structure recommendation
+#   (https://set-outlooksignatures.com/faq#folder-structure-recommendation)
+# and use the 'SignatureIniFile' parameter (https://set-outlooksignatures.com/parameters#signatureinifile).
+
+# Set-OutlookSignatures comes with an INI editor, which is also a validator and explainer:
+# Run it locally via '.\sample code\IniEditor.html' or online via https://set-outlooksignatures.com/inieditor.
+
+# Consider using the 'VirtualMailboxConfigFile' parameter to add virtual mailboxes and dynamically create signature and out-of-office INI lines through code.
+#   A sample scenario: Dynamically assign signatures for delegated mailboxes (such as for vacation replacements) by
+#     1. Getting the permissions regularly through Export-RecipientPermissions (https://github.com/GruberMarkus/Export-RecipientPermissions)
+#     2. Using 'VirtualMailboxConfigFile' to read these permissions and to assign signatures even if a user does not add the mailbox to Outlook.
+
+# The following is a special section, using an identifier that is not valid as a file name.
+# SortOrder
+#   Define the application order of templates within each template group (common, group specific, mailbox specific, replacement variabe specific)
+#   The templates are applied from the first to the last entry of the sorted list
+#   Default: AsInThisFile
+#   Possible values: Ascending, asc, up, Descending, desc, down, AsInThisFile
+# SortCulture
+#   Define the culture used to sort the file list
+#   Default: 127 (invariant)
+#   Possible values: 127, de-AT, en-US, …
+[<Set-OutlookSignatures configuration>]
+SortOrder = AsInThisFile
+SortCulture = 127
+
+# Informal signature, common
+[Informal.docx]
+defaultReplyFwd
+
+# Formal signature, common
+[Formal.docx]
+defaultNew
+
+# Test signature showing all default replacement variables
+[Test all default replacement variables.docx]
+-:alex.alien@vistavox.cc
+-:$CurrentMailboxIsNotVistaVoxFenixFish$
+
+# Formal signature, for HR department, default around the year
+# Group could also be: EntraID Name-of-HR-Group@vistavox.cc
+[Formal HR.docx]
+OutlookSignatureName = Formal
+activedirectory.vistavox.cc Name-of-HR-Group
+defaultNew
+
+# Formal signature, for HR department, Christmas season
+# Group could also be: <DNS or NetBIOS name of AD domainName> Name-of-HR-Group
+[Formal HR Christmas.docx]
+OutlookSignatureName = Formal
+202412100000-202501062359
+202512100000-202601062359
+202612100000-202701062359
+202712100000-202801062359
+202812100000-202901062359
+202912100000-203001062359
+203012100000-203101062359
+EntraID_vistavox.cc Name-of-HR-Group@vistavox.cc
+defaultNew
+
+# Informal signature, delegate mailbox alex.alien@vistavox.cc
+[Informal Delegate.docx]
+OutlookSignatureName = Informal Delegate alex.alien
+alex.alien@vistavox.cc
+-CURRENTUSER:alex.alien@vistavox.cc
+defaultReplyFwd
+
+# Informal signature, delegate mailbox fenix.fish@vistavox.cc
+[Informal Delegate.docx]
+OutlookSignatureName = Informal Delegate fenix.fish
+fenix.fish@vistavox.cc
+-CURRENTUSER:fenix.fish@vistavox.cc
+defaultReplyFwd
+
+# Informal signature, delegate mailbox nat.nuts@vistavox.cc
+[Informal Delegate.docx]
+OutlookSignatureName = Informal Delegate nat.nuts
+nat.nuts@vistavox.cc
+-CURRENTUSER:nat.nuts@vistavox.cc
+defaultReplyFwd
+
+# Informal signature, shared mailbox executiveboard.office@vistavox.cc
+[Informal Shared.docx]
+OutlookSignatureName = Informal executiveboard.office
+executiveboard.office@vistavox.cc
+-CurrentUser:executiveboard.office@vistavox.cc
+defaultReplyFwd
+
+# Informal signature, secondary SMTP address bobby@vistavox.cc
+[informal.docx]
+OutlookSignatureName = Informal bobby
+bobby@vistavox.cc
+defaultNewLowPrio
+defaultReplyFwdLowPrio
+
+# Formal signature, shared mailbox executiveboard.office@vistavox.cc
+[Formal Shared.docx]
+OutlookSignatureName = Formal executiveboard.office
+executiveboard.office@vistavox.cc
+-CurrentUser:executiveboard.office@vistavox.cc
+defaultNew
+
+# Formal signature, delegate mailbox alex.alien@vistavox.cc
+[Formal Delegate.docx]
+OutlookSignatureName = Formal Delegate alex.alien
+alex.alien@vistavox.cc
+-CURRENTUSER:alex.alien@vistavox.cc
+defaultNew
+
+# Formal signature, delegate mailbox fenix.fish@vistavox.cc
+[Formal Delegate.docx]
+OutlookSignatureName = Formal Delegate fenix.fish
+fenix.fish@vistavox.cc
+-CURRENTUSER:fenix.fish@vistavox.cc
+defaultNew
+
+# Formal signature, delegate mailbox nat.nuts@vistavox.cc
+[Formal Delegate.docx]
+OutlookSignatureName = Formal Delegate nat.nuts
+nat.nuts@vistavox.cc
+-CURRENTUSER:nat.nuts@vistavox.cc
+defaultNew
+`;
 
     // Snippets shown in the topbar's "Insert…" dropdown. The Section snippet is
     // built dynamically so it follows the currently-selected template type.
@@ -1182,8 +1285,16 @@
               text: "defaultNew",
             },
             {
+              label: "Mark as default signature for new emails (low priority - if not claimed by defaultNew)",
+              text: "defaultNewLowPrio",
+            },
+            {
               label: "Mark as default signature for replies and forwards",
               text: "defaultReplyFwd",
+            },
+            {
+              label: "Mark as default signature for replies and forwards (low priority - if not claimed by defaultReplyFwd)",
+              text: "defaultReplyFwdLowPrio",
             },
           ],
         },
@@ -1599,7 +1710,7 @@
       if (/^-:\$.*\$$/i.test(v))
         return {
           kind: "var-deny",
-          label: "Do not use this template for mailboxes wit a value in the replacement variable '" + v + "'",
+          label: "Do not use this template for mailboxes with a value in the replacement variable '" + v + "'",
         };
 
 
@@ -1609,12 +1720,23 @@
           label: "Set this signature as default for new emails",
         };
 
-      if (v.toLowerCase() === "defaultreplyfwd")
+      if (v.toLowerCase() === "defaultnewlowprio")
+        return {
+          kind: "system",
+          label: "Set this signature as default for new emails (low priority - if not claimed by defaultNew)",
+        };
+
+        if (v.toLowerCase() === "defaultreplyfwd")
         return {
           kind: "system",
           label: "Set this signature as default for replies and forwards",
         };
 
+        if (v.toLowerCase() === "defaultreplyfwdlowprio")
+        return {
+          kind: "system",
+          label: "Set this signature as default for replies and forwards (low priority - if not claimed by defaultReplyFwd)",
+        };
 
       if (v.toLowerCase() === "writeprotect")
         return {
@@ -2352,8 +2474,8 @@
       if (ln.kind === "kv") {
         var k = (ln.key || "").toLowerCase();
         if (k === "outlooksignaturename") return "name";
-        if (k === "defaultnew" || k === "internal") return "defaultNew";
-        if (k === "defaultreplyfwd" || k === "external")
+        if (k === "defaultnew" || k === "defaultnewlowprio" || k === "internal") return "defaultNew";
+        if (k === "defaultreplyfwd" || k === "defaultreplyfwdlowprio" || k === "external")
           return "defaultReply";
         if (k === "writeprotect") return "writeProtect";
         return "kv";
@@ -2376,9 +2498,9 @@
           if (v.charAt(0) === "[" && v.charAt(v.length - 1) === "]")
             v = v.slice(1, -1).trim();
           var stripped = v.replace(/^(-:|-currentuser:)/, "");
-          if (stripped === "defaultnew" || stripped === "internal")
+          if (stripped === "defaultnew" || stripped === "defaultnewlowprio" || stripped === "internal")
             return "defaultNew";
-          if (stripped === "defaultreplyfwd" || stripped === "external")
+          if (stripped === "defaultreplyfwd" || stripped === "defaultreplyfwdlowprio" || stripped === "external")
             return "defaultReply";
           if (stripped === "writeprotect") return "writeProtect";
           return "other";
@@ -2441,7 +2563,9 @@
         "email-deny": [],
         "variable-deny": [],
         defaultNew: [],
+        defaultNewLowPrio: [],
         defaultReply: [],
+        defaultReplyLowPrio: [],
         writeProtect: [],
         other: [],
       };
@@ -2800,7 +2924,6 @@
           class: "credit-inline",
           href: "https://explicitconsulting.at/",
           target: "_blank",
-          rel: "noopener noreferrer",
           title:
             "Donated to Set-OutlookSignatures by ExplicIT Consulting — providers of the Benefactor Circle add-on",
         },
@@ -2878,9 +3001,20 @@
               /\r?\n/g,
               "\n",
             );
-            document.getElementById("editor").value = state.text;
+            var ed = document.getElementById("editor");
+            if (ed) {
+              ed.value = state.text;
+              // Move cursor to start
+              ed.selectionStart = 0;
+              ed.selectionEnd = 0;
+              ed.focus();
+            }
             captureNow();
             refreshAll();
+
+            // Reset scroll to top
+            var layout = document.getElementById("layout");
+            if (layout) layout.scrollTop = 0;
           };
           textReader.readAsText(f, encoding);
         };
@@ -3547,13 +3681,19 @@
     function loadSample() {
       flushCapture();
       state.text = SAMPLE_INI;
-      // state.fileName = "Signatures-sample.ini";
-      state.iniType = "signature";
-      state.templateType = "docx";
-      document.getElementById("editor").value = state.text;
+      var ed = document.getElementById("editor");
+      if (ed) {
+        ed.value = state.text;
+        ed.selectionStart = 0;
+        ed.selectionEnd = 0;
+        ed.focus();
+      }
       captureNow();
-      renderTopbar();
       refreshAll();
+
+      // Reset the layout scroll position to top
+      var layout = document.getElementById("layout");
+      if (layout) layout.scrollTop = 0;
     }
 
     /* ============================================================
@@ -3660,7 +3800,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
       var params = new URLSearchParams(location.search);
-      if (params.get("demo") === "1") state.text = SAMPLE_INI;
+      if (params.get("sample") === "1") state.text = SAMPLE_INI;
 
       editHistory = [state.text];
       historyIndex = 0;
